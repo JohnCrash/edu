@@ -5,7 +5,7 @@
 #include "extensions/cocos-ext.h"
 #include "ui/CocosGUI.h"
 
-class Console:public cocos2d::Scene
+class Console:public cocos2d::Layer
 {
 public:
 	Console();

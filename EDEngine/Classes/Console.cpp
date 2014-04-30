@@ -22,15 +22,33 @@ Console* Console::create()
 
 bool Console::init()
 {
-	if(Scene::init())
+	if(Layer::init())
 	{
-        // Add the alert
-     //   auto *alert = cocos2d::ui::Text::create("RichText", "fonts/Marker Felt.ttf", 30);
-     //   alert->setColor(cocos2d::Color3B(159, 168, 176));
-     //   alert->setPosition(cocos2d::Point(100 / 2.0f, 100 / 2.0f - alert->getSize().height * 3.125));
-
 		_richText = cocos2d::ui::RichText::create();
-		_richText->setSize(cocos2d::Size(100,100));
+		_richText->setSize(cocos2d::Size(300,300));
+        
+        cocos2d::ui::RichElementText* re1 = cocos2d::ui::RichElementText::create(1, cocos2d::Color3B::WHITE, 255, "This color is white. ", "Helvetica", 20);
+        cocos2d::ui::RichElementText* re2 = cocos2d::ui::RichElementText::create(2, cocos2d::Color3B::YELLOW, 255, "And this is yellow. ", "Helvetica", 20);
+        cocos2d::ui::RichElementText* re3 = cocos2d::ui::RichElementText::create(3, cocos2d::Color3B::BLUE, 255, "This one is blue. ", "Helvetica", 10);
+        cocos2d::ui::RichElementText* re4 = cocos2d::ui::RichElementText::create(4, cocos2d::Color3B::GREEN, 255, "And green. ", "Helvetica", 10);
+        cocos2d::ui::RichElementText* re5 = cocos2d::ui::RichElementText::create(5, cocos2d::Color3B::RED, 255, "Last one is red ", "Helvetica", 10);
+        
+     //   cocos2d::ui::RichElementImage* reimg = cocos2d::ui::RichElementImage::create(6, cocos2d::Color3B::WHITE, 255, "cocosui/sliderballnormal.png");
+        
+     //   cocos2d::ui::RichElementCustomNode* recustom = cocos2d::ui::RichElementCustomNode::create(1, cocos2d::Color3B::WHITE, 255, pAr);
+        cocos2d::ui::RichElementText* re6 = cocos2d::ui::RichElementText::create(7, cocos2d::Color3B::ORANGE, 255, "Have fun!! ", "Helvetica", 10);
+        _richText->pushBackElement(re1);
+        _richText->insertElement(re2, 1);
+        _richText->pushBackElement(re3);
+        _richText->pushBackElement(re4);
+        _richText->pushBackElement(re5);
+      //  _richText->insertElement(reimg, 2);
+     //   _richText->pushBackElement(recustom);
+        _richText->pushBackElement(re6);
+        
+        _richText->setPosition(cocos2d::Point(100,100));
+        _richText->setLocalZOrder(10);
+		this->addChild(_richText);
 	}
 	return true;
 }

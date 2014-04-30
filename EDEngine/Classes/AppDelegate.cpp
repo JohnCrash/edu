@@ -27,11 +27,24 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
 	
+	_console = ::Console::create();
+
+	if(!_console)
+	{
+		CCLOGERROR("%s","Fails:can't create console!");
+		return false;
+	}
+
 	initInternalLuaEngine();
+
 	// register lua engine
     LuaEngine* pEngine = LuaEngine::getInstance();
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
 
+	auto helloworld = HelloWorld::createScene(); 
+	cocos2d::Director::getInstance()->runWithScene(helloworld);
+	helloworld->addChild(_console);
+	//cocos2d::Director::getInstance()->runWithScene(_console);
     return true;
 }
 

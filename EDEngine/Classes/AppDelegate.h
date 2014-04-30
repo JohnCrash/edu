@@ -2,6 +2,7 @@
 #define  _APP_DELEGATE_H_
 
 #include "cocos2d.h"
+#include "Console.h"
 #include "CCScriptSupport.h"
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
@@ -41,6 +42,7 @@ private:
 	void releaseInternalLuaEngine();
 	cocos2d::LuaStack *_core;
 	cocos2d::LuaStack *_debuger;
+	::Console *_console;
 };
 
 #endif // _APP_DELEGATE_H_
