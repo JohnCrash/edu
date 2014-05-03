@@ -45,6 +45,7 @@ public:
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode,cocos2d::Event *);
 private:
 	void registerHotkey();
+	void initLuaEngine();
 	/*
 	bool initInternalLuaEngine();
 	void releaseInternalLuaEngine();

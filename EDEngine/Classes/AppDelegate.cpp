@@ -30,6 +30,9 @@ bool AppDelegate::applicationDidFinishLaunching()
 #ifdef USE_WIN32_CONSOLE
 	registerHotkey();
 #endif
+
+	initLuaEngine();
+
 /*	_console = ::Console::create();
 
 	if(!_console)
@@ -52,6 +55,81 @@ bool AppDelegate::applicationDidFinishLaunching()
 	printf(FileUtils::getInstance()->getWritablePath().c_str());
 	*/
     return true;
+}
+
+void AppDelegate::initLuaEngine()
+{
+	auto director = Director::getInstance();
+	auto glview = director->getOpenGLView();
+    auto screenSize = glview->getFrameSize();
+    
+    auto designSize = Size(480, 320);
+    
+    auto pFileUtils = FileUtils::getInstance();
+    
+    if (screenSize.height > 320)
+    {
+        auto resourceSize = Size(960, 640);
+        std::vector<std::string> searchPaths;
+        searchPaths.push_back("hd");
+        pFileUtils->setSearchPaths(searchPaths);
+        director->setContentScaleFactor(resourceSize.height/designSize.height);
+    }
+    
+    glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::FIXED_HEIGHT);
+ 
+    LuaEngine* pEngine = LuaEngine::getInstance();
+    ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
+    
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+    LuaStack* stack = pEngine->getLuaStack();
+    //register_assetsmanager_test_sample(stack->getLuaState());
+#endif
+    
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+    std::string resPrefix("");
+#else
+    std::string resPrefix("res/");
+#endif
+    
+    std::vector<std::string> searchPaths = pFileUtils->getSearchPaths();
+    searchPaths.insert(searchPaths.begin(), resPrefix);
+
+    searchPaths.insert(searchPaths.begin(), resPrefix + "cocosbuilderRes");
+    if (screenSize.height > 320)
+    {
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/Images");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/ArmatureComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/AttributeComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/BackgroundComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/EffectComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/LoadSceneEdtiorFileTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/ParticleComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/SpriteComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/TmxMapComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/UIComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "hd/scenetest/TriggerTest");
+    }
+    else
+    {
+        searchPaths.insert(searchPaths.begin(), resPrefix + "Images");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/ArmatureComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/AttributeComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/BackgroundComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/EffectComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/LoadSceneEdtiorFileTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/ParticleComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/SpriteComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/TmxMapComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/UIComponentTest");
+        searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/TriggerTest");
+    }
+
+
+    FileUtils::getInstance()->setSearchPaths(searchPaths);
+
+    pEngine->executeScriptFile("src/controller.lua");
 }
 
 void AppDelegate::registerHotkey()
