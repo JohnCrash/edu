@@ -24,8 +24,11 @@ bool Console::init()
 {
 	if(Layer::init())
 	{
+		cocos2d::Size size;
+
+		size = cocos2d::Director::getInstance()->getVisibleSize();
 		_richText = cocos2d::ui::RichText::create();
-		_richText->setSize(cocos2d::Size(300,300));
+		_richText->setSize(size);
         
         cocos2d::ui::RichElementText* re1 = cocos2d::ui::RichElementText::create(1, cocos2d::Color3B::WHITE, 255, "This color is white. ", "Helvetica", 20);
         cocos2d::ui::RichElementText* re2 = cocos2d::ui::RichElementText::create(2, cocos2d::Color3B::YELLOW, 255, "And this is yellow. ", "Helvetica", 20);
@@ -45,9 +48,9 @@ bool Console::init()
       //  _richText->insertElement(reimg, 2);
      //   _richText->pushBackElement(recustom);
         _richText->pushBackElement(re6);
-        
-        _richText->setPosition(cocos2d::Point(100,100));
-        _richText->setLocalZOrder(10);
+		//_richText->setAnchorPoint(cocos2d::Point(0,0));
+		_richText->setPosition(cocos2d::Point(size.width/2,size.height/2));
+//        _richText->setLocalZOrder(10);
 		this->addChild(_richText);
 	}
 	return true;

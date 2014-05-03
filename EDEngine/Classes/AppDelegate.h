@@ -7,6 +7,10 @@
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
 
+USING_NS_CC;
+
+extern bool g_Quit;
+
 /**
 @brief    The cocos2d Application.
 
@@ -37,12 +41,17 @@ public:
     */
     virtual void applicationWillEnterForeground();
 
+	void onKeyPressed(cocos2d::EventKeyboard::KeyCode,cocos2d::Event *);
+	void onKeyReleased(cocos2d::EventKeyboard::KeyCode,cocos2d::Event *);
 private:
+	void registerHotkey();
+	/*
 	bool initInternalLuaEngine();
 	void releaseInternalLuaEngine();
 	cocos2d::LuaStack *_core;
 	cocos2d::LuaStack *_debuger;
 	::Console *_console;
+	*/
 };
 
 #endif // _APP_DELEGATE_H_
