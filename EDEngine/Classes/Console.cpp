@@ -23,7 +23,7 @@ Console* Console::create()
 bool Console::init()
 {
 	if(Layer::init())
-	{
+	{/*
 		cocos2d::Size size;
 
 		size = cocos2d::Director::getInstance()->getVisibleSize();
@@ -52,6 +52,7 @@ bool Console::init()
 		_richText->setPosition(cocos2d::Point(size.width/2,size.height/2));
 //        _richText->setLocalZOrder(10);
 		this->addChild(_richText);
+		*/
 	}
 	return true;
 }

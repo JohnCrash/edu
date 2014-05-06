@@ -3,8 +3,9 @@
 #include "AppDelegate.h"
 
 USING_NS_CC;
-
+#ifdef USE_WIN32_CONSOLE
 bool g_Quit = true;
+#endif
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
@@ -25,11 +26,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     AppDelegate app;
     int ret;
 
+#ifdef USE_WIN32_CONSOLE
 	while(g_Quit)
 	{
 		CCLOG("EDEngine is launch...");
 		ret = Application::getInstance()->run();
+
+		//reload lua engine
+		LuaEngine * pEngine = LuaEngine::getInstance();
+		ScriptEngineManager::getInstance()->setScriptEngine(nullptr);
+		pEngine = LuaEngine::getInstance();
+		ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
 	}
+#else
+	ret = Application::getInstance()->run();
+#endif
 
 #ifdef USE_WIN32_CONSOLE
     FreeConsole();

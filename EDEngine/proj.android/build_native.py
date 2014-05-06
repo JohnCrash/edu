@@ -48,6 +48,13 @@ def check_environment_variables():
         sys.exit(1)
 
     return NDK_ROOT
+    
+def get_environment_variables( var ):
+    try:
+        return os.environ[var]
+    except Exception:
+        print "%s not defined!" % var
+        sys.exit(1)
 
 def select_toolchain_version():
     '''Because ndk-r8e uses gcc4.6 as default. gcc4.6 doesn't support c++11. So we should select gcc4.7 when
@@ -75,19 +82,27 @@ def do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,and
     # windows should use ";" to seperate module paths
     platform = sys.platform
     if platform == 'win32':
-        ndk_module_path = 'NDK_MODULE_PATH=%s;%s/external;%s/cocos' % (cocos_root, cocos_root, cocos_root)
+        ndk_module_path = 'NDK_MODULE_PATH=%s;%s/external;%s/cocos;%s/cocos/scripting/lua-bindings' % (cocos_root, cocos_root, cocos_root,cocos_root)
     else:
         ndk_module_path = 'NDK_MODULE_PATH=%s:%s/external:%s/cocos' % (cocos_root, cocos_root, cocos_root)
-	
+    
     num_of_cpu = get_num_of_cpu()
+
+    print 'ndk_module_path= %s' % ndk_module_path
+    print 'cocos_root= %s' % cocos_root
+    print 'ndk_path= %s' % ndk_path
+    print 'num_of_cpu= %s' % num_of_cpu
+    print 'app_android_root= %s' % app_android_root
 	
     if ndk_build_param == None:
         command = '%s -j%d -C %s %s' % (ndk_path, num_of_cpu, app_android_root, ndk_module_path)
     else:
         command = '%s -j%d -C %s %s %s' % (ndk_path, num_of_cpu, app_android_root, ''.join(str(e) for e in ndk_build_param), ndk_module_path)
+    print 'command=: %s' % command
     if os.system(command) != 0:
         raise Exception("Build dynamic library for project [ " + app_android_root + " ] fails!")
     elif android_platform is not None:
+          print 'command=: %s' % command
     	  sdk_tool_path = os.path.join(sdk_root, "tools/android")
     	  cocoslib_path = os.path.join(cocos_root, "cocos/2d/platform/android/java")
     	  command = '%s update lib-project -t %s -p %s' % (sdk_tool_path,android_platform,cocoslib_path) 
@@ -116,12 +131,16 @@ def copy_resources(app_android_root):
 
     # remove app_android_root/assets if it exists
     assets_dir = os.path.join(app_android_root, "assets")
+    print 'copy_resources...'
+    print 'assets_dir = %s' % assets_dir
     if os.path.isdir(assets_dir):
         shutil.rmtree(assets_dir)
-
+    
     # copy resources
+    print 'mkdir %s' % assets_dir
     os.mkdir(assets_dir)
     resources_dir = os.path.join(app_android_root, "../Resources")
+   # print 'copy resources from %s to %s' % resources_dir , assets_dir
     if os.path.isdir(resources_dir):
         copy_files(resources_dir, assets_dir)
 
@@ -132,11 +151,13 @@ def build(ndk_build_param,android_platform,build_mode):
     select_toolchain_version()
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    cocos_root = os.path.join(current_dir, "../cocos2d")
-
+    #cocos_root = os.path.join(current_dir, "../cocos2d")
+    cocos_root = get_environment_variables('COCOS_ROOT')
+    print 'cocos_root = %s' % cocos_root
     app_android_root = current_dir
+    print 'app_android_root = %s' % app_android_root
     copy_resources(app_android_root)
-    
+    print 'build...'
     if android_platform is not None:
 				sdk_root = check_environment_variables_sdk()
 				if android_platform.isdigit():
@@ -149,7 +170,7 @@ def build(ndk_build_param,android_platform,build_mode):
     	  build_mode = 'debug'
     elif build_mode != 'release':
         build_mode = 'debug'
-    
+    print 'do_building...'
     do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,android_platform,build_mode)
 
 # -------------- main --------------
@@ -162,5 +183,5 @@ if __name__ == '__main__':
     parser.add_option("-b", "--build", dest="build_mode", 
     help='the build mode for java project,debug[default] or release.Get more information,please refer to http://developer.android.com/tools/building/building-cmdline.html')
     (opts, args) = parser.parse_args()
-    
+    print 'build launch...'
     build(opts.ndk_build_param,opts.android_platform,opts.build_mode)

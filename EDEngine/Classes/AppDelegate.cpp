@@ -78,7 +78,7 @@ void AppDelegate::initLuaEngine()
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::FIXED_HEIGHT);
  
-    LuaEngine* pEngine = LuaEngine::getInstance();
+    auto pEngine = LuaEngine::getInstance();
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
@@ -126,7 +126,6 @@ void AppDelegate::initLuaEngine()
         searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/TriggerTest");
     }
 
-
     FileUtils::getInstance()->setSearchPaths(searchPaths);
 
     pEngine->executeScriptFile("src/controller.lua");
@@ -145,6 +144,7 @@ void AppDelegate::registerHotkey()
 
 void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
 {
+#ifdef USE_WIN32_CONSOLE
 	if(code==EventKeyboard::KeyCode::KEY_F9) //reset
 	{
 		auto director = Director::getInstance();
@@ -156,6 +156,7 @@ void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Eve
 		g_Quit = false;
 		director->end();
 	}
+#endif
 }
 
 void AppDelegate::onKeyReleased(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
