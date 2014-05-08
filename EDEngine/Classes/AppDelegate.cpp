@@ -33,27 +33,6 @@ bool AppDelegate::applicationDidFinishLaunching()
 
 	initLuaEngine();
 
-/*	_console = ::Console::create();
-
-	if(!_console)
-	{
-		CCLOGERROR("%s","Fails:can't create console!");
-		return false;
-	}
-*/
-	/*
-	initInternalLuaEngine();
-
-	// register lua engine
-    LuaEngine* pEngine = LuaEngine::getInstance();
-    ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
-
-	auto helloworld = HelloWorld::createScene(); 
-	cocos2d::Director::getInstance()->runWithScene(helloworld);
-	helloworld->addChild(_console);
-	//cocos2d::Director::getInstance()->runWithScene(_console);
-	printf(FileUtils::getInstance()->getWritablePath().c_str());
-	*/
     return true;
 }
 
@@ -63,9 +42,9 @@ void AppDelegate::initLuaEngine()
 	auto glview = director->getOpenGLView();
     auto screenSize = glview->getFrameSize();
     
+	auto pFileUtils = FileUtils::getInstance();
+
     auto designSize = Size(480, 320);
-    
-    auto pFileUtils = FileUtils::getInstance();
     
     if (screenSize.height > 320)
     {
@@ -85,7 +64,6 @@ void AppDelegate::initLuaEngine()
     LuaStack* stack = pEngine->getLuaStack();
     //register_assetsmanager_test_sample(stack->getLuaState());
 #endif
-    
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
     std::string resPrefix("");
 #else
@@ -128,7 +106,8 @@ void AppDelegate::initLuaEngine()
 
     FileUtils::getInstance()->setSearchPaths(searchPaths);
 
-    pEngine->executeScriptFile("src/controller.lua");
+    pEngine->executeScriptFile("bootstrap.lua");
+	//pEngine->executeScriptFile("src/controller.lua");
 }
 
 void AppDelegate::registerHotkey()
