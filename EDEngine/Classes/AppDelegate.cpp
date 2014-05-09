@@ -64,6 +64,7 @@ void AppDelegate::initLuaEngine()
     LuaStack* stack = pEngine->getLuaStack();
     //register_assetsmanager_test_sample(stack->getLuaState());
 #endif
+	/*
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
     std::string resPrefix("");
 #else
@@ -105,7 +106,16 @@ void AppDelegate::initLuaEngine()
     }
 
     FileUtils::getInstance()->setSearchPaths(searchPaths);
-
+	*/
+	auto path = FileUtils::getInstance()->getWritablePath();
+	if( path.length() > 0 )
+		if( path.back() == '/'||
+			path.back() == '\\' )
+		{
+			path.pop_back();
+		}
+	pEngine->addSearchPath(path.c_str());
+	FileUtils::getInstance()->addSearchPath("res/");
     pEngine->executeScriptFile("bootstrap.lua");
 	//pEngine->executeScriptFile("src/controller.lua");
 }

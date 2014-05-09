@@ -145,7 +145,13 @@ end
 
 local function download_file(file)
   local fbuf = read_network_file(file)
-  write_local_file(file,fbuf)
+  if fbuf then
+	write_local_file(file,fbuf)
+  elseif file then
+	cclog('Can not download file '..file)
+  else
+    cclog('download_file param invalid!(nil)')
+  end
 end
 
 local function operate_by_table(filelist)
@@ -154,6 +160,16 @@ local function operate_by_table(filelist)
 			download_file(v.download)
 		elseif v.mkdir then
 			make_local_directory(v.mkdir)
+		end
+	end
+end
+
+local function operate_one_by_one(t)
+	if t then
+		if t.download then
+			download_file(t.download)
+		elseif t.mkdir then
+			make_local_directory(t.mkdir)
 		end
 	end
 end
@@ -211,6 +227,22 @@ local function is_need_download(t,file,md5)
 	return true
 end
 
+local function g_fast_tt(t)
+  local tt = {}
+  for i,v in ipairs(t) do
+	if v.download then
+		tt[v.download] = v.md5
+  elseif v.mkdir then
+    tt[v.mkdir] = 1
+	end
+  end
+  return tt
+end
+
+local function is_need_download2(t,file,md5)
+  return t[file] ~= md5
+end
+
 local function filelist_compare_table(source,target)
 	local source_t = lxp.parse(source)
 	local target_t = lxp.parse(target)
@@ -218,12 +250,13 @@ local function filelist_compare_table(source,target)
 	if source_t and target_t then
 		local st = filelist_by_table(source_t,'')
 		local tt = filelist_by_table(target_t,'')
+    local fast_tt = g_fast_tt(tt)
 		--add operate
-		if st and tt then
+		if st and fast_tt then
 			for i,v in ipairs(st) do
-				if v.download and is_need_download(tt,v.download,v.md5) then
+				if v.download and is_need_download2(fast_tt,v.download,v.md5) then
 					filelist[#filelist+1] = v
-				elseif v.mkdir then
+				elseif v.mkdir and is_need_download2(fast_tt,v.mkdir,1) then
 					filelist[#filelist+1] = v
 				end
 			end
@@ -236,24 +269,26 @@ end
 
 local function download_compare_filelist(source,target)
 	local filelist = filelist_compare_table(source,target)
-	operate_by_table(filelist)
+	return filelist
 end
 
 local function download_file_by_table(tb,ups)
 	local filelist = filelist_by_table(tb,ups)
-	operate_by_table(filelist)
+	return filelist
 end
 
 local function download_all_filelist(filelist)
   local flt = lxp.parse(filelist)
   if flt then
-    download_file_by_table(flt,'')
+    return download_file_by_table(flt,'')
   else
   --filelist file parse error?
     cclog('Cant parse xml:\n'..filelist)
+    return nil
   end
 end
 
+--return result,oplist
 local function doSync()
   if isNeedSync() then
     --download version.xml and filelist.xml
@@ -261,26 +296,113 @@ local function doSync()
     local version_xml = 'version.xml'
     local local_filelist = read_local_file(filelist_xml)
     local host_filelist = read_network_file(filelist_xml)
+	local filelist
     if local_filelist and host_filelist then
       --compare
-      download_compare_filelist(host_filelist,local_filelist)
-      download_file(filelist_xml)
-      download_file(version_xml)      
+      filelist = download_compare_filelist(host_filelist,local_filelist)
+	  return true,filelist
     elseif local_filelist then
       --host down?
-      cclog('Can not connect synchronous server!\nPlease check your network!')
+	  return false,'Can not connect synchronous server!\nPlease check your network!'
     elseif host_filelist then
       --first sync?
-      download_all_filelist(host_filelist)
-      download_file(filelist_xml)
-      download_file(version_xml)
+      filelist = download_all_filelist(host_filelist)
+	  return true,filelist
     else
-      cclog('Can not connect synchronous server!')
+	  return false,'Can not connect synchronous server!'
     end
+  else
+		return true,'ok'
   end
 end
 
-doSync()
+local function CreateSyncLayer()
+	local layer = cc.Layer:create()
+	local loadingBar = ccui.LoadingBar:create()
+	local widgetSize = cc.Director:getInstance():getVisibleSize()
+	local first = 0
+	local maxcount,count
+	local filelist
+	loadingBar:setTag(0)
+	loadingBar:setName("LoadingBar")
+	loadingBar:loadTexture("loading/sliderProgress.png")
+	loadingBar:setPercent(0)
+	loadingBar:setPosition(cc.p(widgetSize.width / 2.0, widgetSize.height / 2.0 + loadingBar:getSize().height / 4.0))
+	layer:addChild(loadingBar)
+  
+	local function exit_loading()
+		loadingBar:setPercent(100)
+		layer:unscheduleUpdate()
+		--do script
+    package.path = package.path..';'..local_dir..'?.lua'
+		require ('src/helloworld')
+	end
+	
+	local function update(delta)
+		if first==0 then
+      first = 1
+			err,filelist = doSync()
+			if err and filelist and type(filelist)=='table' then
+				maxcount = #filelist
+				count = 0
+			elseif filelist == 'ok' then
+        first = 0
+				cclog('all ready!')
+        exit_loading()
+        return
+			else
+        first = 0
+				cclog('error :update filelist is nil')
+        exit_loading()
+        return
+			end
+		end
+		
+    if not filelist then
+      cclog('empty update..')
+      return
+    end
+    
+		count = count + 1
+		if loadingBar ~= nil and count and maxcount then
+			loadingBar:setPercent(100*count/maxcount)
+		end
+		if count > maxcount then
+			download_file('version.xml')
+			download_file('filelist.xml')		
+			exit_loading()
+			cclog('finiched..')
+		elseif filelist and filelist[count] then
+			operate_one_by_one(filelist[count])
+		else
+			exit_loading()
+			cclog('download error!')
+		end		
+	end
+	
+	layer:scheduleUpdateWithPriorityLua(update,0)
+	
+	local function onNodeEvent(tag)
+        if tag == "exit" then
+			cclog('Exit loading...')
+            layer:unscheduleUpdate()
+			first = 0
+        end
+    end
+	
+	layer:registerScriptHandler(onNodeEvent)
+	
+	return layer
+end
+
+--doSync()
+local function doSyncScene()
+  local scene = cc.Scene:create()
+  scene:addChild(CreateSyncLayer())
+  cc.Director:getInstance():runWithScene(scene)
+end
+
+doSyncScene()
 
 --[[
 s = download_http_by_socket(host[1],'/lgh/filelist.xml',81)
