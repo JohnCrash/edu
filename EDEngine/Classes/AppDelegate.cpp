@@ -116,10 +116,10 @@ void AppDelegate::initLuaEngine()
 		}
 	pEngine->addSearchPath(path.c_str());
 	FileUtils::getInstance()->addSearchPath("res/");
-	FileUtils::getInstance()->addSearchPath(path+"/");
-	FileUtils::getInstance()->addSearchPath(path+"/res");
-    //pEngine->executeScriptFile("bootstrap.lua");
-	pEngine->executeScriptFile("src/controller.lua");
+//	FileUtils::getInstance()->addSearchPath(path+"/");
+//	FileUtils::getInstance()->addSearchPath(path+"/res");
+    pEngine->executeScriptFile("bootstrap.lua");
+	//pEngine->executeScriptFile("src/controller.lua");
 }
 
 void AppDelegate::registerHotkey()
