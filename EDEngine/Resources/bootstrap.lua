@@ -5,7 +5,8 @@ local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
 
-local host = {"192.168.2.211","www.cocos2d-x.org"}
+local host = {{"192.168.0.182",80,"/"}}
+local use_idx = 1
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 
 local cclog = function(...)
@@ -54,11 +55,15 @@ local function download_http_by_curl(url)
         return #buf
     end)
     curl_obj:setopt(curl.OPT_PROGRESSFUNCTION, function(param, dltotal, dlnow)
-        print('%', url, dltotal, dlnow) -- do your fancy reporting here
+       -- print('%', url, dltotal, dlnow) -- do your fancy reporting here
     end)
     curl_obj:setopt(curl.OPT_NOPROGRESS, false) -- use this to activate progress
-    assert(curl_obj:perform())
-    return table.concat(t) -- return the whole data as a string  
+    if curl_obj:perform() then
+		return table.concat(t) -- return the whole data as a string  
+	else
+		print( 'can\'t connect to '..url )
+		return nil
+	end 
 end
 
 local function local_exists( file )
@@ -82,7 +87,7 @@ local function read_local_file( name )
 end
 
 local function read_network_file( name )
-  local url = 'http://'..host[1]..':81/lgh/'..name
+  local url = 'http://'..host[use_idx][1]..':'..host[use_idx][2]..host[use_idx][3]..name
   return download_http_by_curl(url)
 end
 
@@ -322,7 +327,8 @@ local function CreateSyncLayer()
 	local widgetSize = cc.Director:getInstance():getVisibleSize()
 	local first = 0
 	local maxcount,count
-	local filelist
+  local err,filelist
+  
 	loadingBar:setTag(0)
 	loadingBar:setName("LoadingBar")
 	loadingBar:loadTexture("loading/sliderProgress.png")
@@ -334,27 +340,27 @@ local function CreateSyncLayer()
 		loadingBar:setPercent(100)
 		layer:unscheduleUpdate()
 		--do script
-    package.path = package.path..';'..local_dir..'?.lua'
+		package.path = package.path..';'..local_dir..'?.lua'
 		require ('src/helloworld')
 	end
 	
 	local function update(delta)
 		if first==0 then
-      first = 1
+			first = 1
 			err,filelist = doSync()
 			if err and filelist and type(filelist)=='table' then
 				maxcount = #filelist
 				count = 0
 			elseif filelist == 'ok' then
-        first = 0
+				first = 0
 				cclog('all ready!')
-        exit_loading()
-        return
+				exit_loading()
+				return
 			else
-        first = 0
+				first = 0
 				cclog('error :update filelist is nil')
-        exit_loading()
-        return
+				exit_loading()
+				return
 			end
 		end
 		
