@@ -33,27 +33,6 @@ bool AppDelegate::applicationDidFinishLaunching()
 
 	initLuaEngine();
 
-/*	_console = ::Console::create();
-
-	if(!_console)
-	{
-		CCLOGERROR("%s","Fails:can't create console!");
-		return false;
-	}
-*/
-	/*
-	initInternalLuaEngine();
-
-	// register lua engine
-    LuaEngine* pEngine = LuaEngine::getInstance();
-    ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
-
-	auto helloworld = HelloWorld::createScene(); 
-	cocos2d::Director::getInstance()->runWithScene(helloworld);
-	helloworld->addChild(_console);
-	//cocos2d::Director::getInstance()->runWithScene(_console);
-	printf(FileUtils::getInstance()->getWritablePath().c_str());
-	*/
     return true;
 }
 
@@ -63,9 +42,9 @@ void AppDelegate::initLuaEngine()
 	auto glview = director->getOpenGLView();
     auto screenSize = glview->getFrameSize();
     
+	auto pFileUtils = FileUtils::getInstance();
+
     auto designSize = Size(480, 320);
-    
-    auto pFileUtils = FileUtils::getInstance();
     
     if (screenSize.height > 320)
     {
@@ -78,14 +57,14 @@ void AppDelegate::initLuaEngine()
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::FIXED_HEIGHT);
  
-    LuaEngine* pEngine = LuaEngine::getInstance();
+    auto pEngine = LuaEngine::getInstance();
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
     LuaStack* stack = pEngine->getLuaStack();
     //register_assetsmanager_test_sample(stack->getLuaState());
 #endif
-    
+	/*
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
     std::string resPrefix("");
 #else
@@ -126,10 +105,21 @@ void AppDelegate::initLuaEngine()
         searchPaths.insert(searchPaths.begin(), resPrefix + "scenetest/TriggerTest");
     }
 
-
     FileUtils::getInstance()->setSearchPaths(searchPaths);
-
-    pEngine->executeScriptFile("src/controller.lua");
+	*/
+	auto path = FileUtils::getInstance()->getWritablePath();
+	if( path.length() > 0 )
+		if( path.back() == '/'||
+			path.back() == '\\' )
+		{
+			path.pop_back();
+		}
+	pEngine->addSearchPath(path.c_str());
+	FileUtils::getInstance()->addSearchPath("res/");
+//	FileUtils::getInstance()->addSearchPath(path+"/");
+//	FileUtils::getInstance()->addSearchPath(path+"/res");
+    pEngine->executeScriptFile("bootstrap.lua");
+	//pEngine->executeScriptFile("src/controller.lua");
 }
 
 void AppDelegate::registerHotkey()
@@ -145,6 +135,7 @@ void AppDelegate::registerHotkey()
 
 void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
 {
+#ifdef USE_WIN32_CONSOLE
 	if(code==EventKeyboard::KeyCode::KEY_F9) //reset
 	{
 		auto director = Director::getInstance();
@@ -156,6 +147,7 @@ void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Eve
 		g_Quit = false;
 		director->end();
 	}
+#endif
 }
 
 void AppDelegate::onKeyReleased(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
