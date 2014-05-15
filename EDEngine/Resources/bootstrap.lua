@@ -5,7 +5,7 @@ local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
 
-local host = {{"192.168.0.182",80,"/"}}
+local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 
@@ -14,7 +14,7 @@ local cclog = function(...)
 end
 
 --for debuger
-require("mobdebug").start()
+--require("mobdebug").start("192.168.2.182")
 
 local curl_obj = curl.new()
 
@@ -119,9 +119,16 @@ local function make_local_directory( name )
 end
 
 local function del_local_directory( name )
+	--no imp?
 end
 
 local function del_local_file( name )
+	local filename = local_dir..name
+  if os.remove then
+    os.remove(filename)
+  else
+    print('not found os.remove function')
+  end
 end
 
 local function isNeedSync()
@@ -175,6 +182,12 @@ local function operate_one_by_one(t)
 			download_file(t.download)
 		elseif t.mkdir then
 			make_local_directory(t.mkdir)
+		elseif t.remove then
+			--delete file
+			del_local_file(t.remove)
+		elseif t.remove_dir then
+			--delete directory
+			del_local_directory(t.remove_dir)
 		end
 	end
 end
@@ -255,19 +268,26 @@ local function filelist_compare_table(source,target)
 	if source_t and target_t then
 		local st = filelist_by_table(source_t,'')
 		local tt = filelist_by_table(target_t,'')
-    local fast_tt = g_fast_tt(tt)
-		--add operate
-		if st and fast_tt then
+		local fast_tt = g_fast_tt(tt)
+		local fast_st = g_fast_tt(st)
+		if st and fast_tt and fast_st then
+			--sub operate
+			for i,v in ipairs(tt) do
+				if v.download and not fast_st[v.download] then
+					filelist[#filelist+1] = {remove=v.download}
+				elseif v.mkdir and not fast_st[v.mkdir] then
+					filelist[#filelist+1] = {remove_dir=v.mkdir}
+				end
+			end
+			--add operate
 			for i,v in ipairs(st) do
 				if v.download and is_need_download2(fast_tt,v.download,v.md5) then
 					filelist[#filelist+1] = v
 				elseif v.mkdir and is_need_download2(fast_tt,v.mkdir,1) then
 					filelist[#filelist+1] = v
 				end
-			end
+			end			
 		end
-		--sub operate
-		--no implement yet
 	end
 	return filelist
 end
