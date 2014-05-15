@@ -16,3 +16,12 @@ Path = D:\1Source\cocos2d-x-3.0\tools\cocos2d-console\bin;;C:\Program Files\IDM 
 
 运行cocos2d设置setup.py
 
+================================================================================
+cocos2d-x修改
+增加curl lua接口 luacurl
+增加luafilesystem
+增加luaexpat-1.3.0
+================================================================================
+anroid 下编译需要修改cocos2d-x的一系列编译文件
+vc2012 直接在工程文件中增加文件
+\cocos\scripting\lua-bindings\Android.mk
