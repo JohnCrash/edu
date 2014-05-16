@@ -1,26 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<problem time_limit="60" >
-<item name="翘（ ）引（ ）" answer="首领,手另"/>
-<item name="亲密（ ）（ ）" answer="无间,五见"/>
-<item name="左（ ）（ ）舍" answer="邻右,林有"/>
-<item name="（ ）同（ ）足" answer="情手,请受"/>
-<item name="鹦（ ）（ ）舌" answer="鹉学,无雪"/>
-<item name="（ ）井（ ）乡" answer="背离,被里"/>
-<item name="（ ）杰（ ）灵" answer="人地,任第"/>
-<item name="（ ）各有（ ）" answer="人志,任只"/>
-<item name="（ ）（ ）负重" answer="忍辱,人如"/>
-<item name="如（ ）（ ）醒" answer="梦初,猛出"/>
-<item name="（ ）（ ）以偿" answer="如愿,入远"/>
-<item name="山（ ）（ ）裂" answer="崩地,蹦第"/>
-<item name="才（ ）（ ）斗" answer="高八,搞把"/>
-<item name="身经（ ）（ ）" answer="百战,白站"/>
-<item name="（ ）阴似（ ）" answer="光箭,广见"/>
-<item name="（ ）（ ）并茂" answer="声情,省请"/>
-<item name="声色（ ）（ ）" answer="俱厉,句里"/>
-<item name="（ ）（ ）连天" answer="叫苦,脚哭"/>
-<item name="（ ）味深（ ）" answer="意长,一唱"/>
-<item name="（ ）聪（ ）明" answer="耳目,而木"/>
-<item name="与时（ ）（ ）" answer="偕行,写性"/>
+<problem>
 <item name="（ ）山（ ）海" answer="人,任忍认"/>
 <item name="（ ）心（ ）意" answer="一,以已亿"/>
 <item name="自（ ）自语" answer="言,眼烟沿"/>
@@ -174,6 +153,27 @@
 <item name="千奇（ ）怪" answer="百,白摆败"/>
 <item name="敲（ ）打鼓" answer="锣,落罗裸"/>
 <item name="（ ）夺天工" answer="巧,桥瞧敲"/>
+<item name="翘（ ）引（ ）" answer="首领,手另"/>
+<item name="亲密（ ）（ ）" answer="无间,五见"/>
+<item name="左（ ）（ ）舍" answer="邻右,林有"/>
+<item name="（ ）同（ ）足" answer="情手,请受"/>
+<item name="鹦（ ）（ ）舌" answer="鹉学,无雪"/>
+<item name="（ ）井（ ）乡" answer="背离,被里"/>
+<item name="（ ）杰（ ）灵" answer="人地,任第"/>
+<item name="（ ）各有（ ）" answer="人志,任只"/>
+<item name="（ ）（ ）负重" answer="忍辱,人如"/>
+<item name="如（ ）（ ）醒" answer="梦初,猛出"/>
+<item name="（ ）（ ）以偿" answer="如愿,入远"/>
+<item name="山（ ）（ ）裂" answer="崩地,蹦第"/>
+<item name="才（ ）（ ）斗" answer="高八,搞把"/>
+<item name="身经（ ）（ ）" answer="百战,白站"/>
+<item name="（ ）阴似（ ）" answer="光箭,广见"/>
+<item name="（ ）（ ）并茂" answer="声情,省请"/>
+<item name="声色（ ）（ ）" answer="俱厉,句里"/>
+<item name="（ ）（ ）连天" answer="叫苦,脚哭"/>
+<item name="（ ）味深（ ）" answer="意长,一唱"/>
+<item name="（ ）聪（ ）明" answer="耳目,而木"/>
+<item name="与时（ ）（ ）" answer="偕行,写性"/>
 <item name="鱼贯而入" answer=",关二"/>
 <item name="约法三章" answer=",月发"/>
 <item name="斩钉截铁" answer=",站顶"/>
