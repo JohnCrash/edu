@@ -41,18 +41,20 @@ local function download_http_by_http(url)
   return http.require(url)
 end
 
-local function download_http_by_curl(url)
-    curl_obj:setopt(curl.OPT_URL, url)
-    local t = {} -- this will collect resulting chunks
-    curl_obj:setopt(curl.OPT_WRITEFUNCTION, function (param, buf)
+local function download_http_by_curl(url,time_out)
+   curl_obj:setopt(curl.OPT_URL, url)
+   time_out = time_out or 2
+	curl_obj:setopt(curl.OPT_TIMEOUT,time_out)
+   local t = {} -- this will collect resulting chunks
+   curl_obj:setopt(curl.OPT_WRITEFUNCTION, function (param, buf)
         table.insert(t, buf) -- store a chunk of data received
         return #buf
     end)
-    curl_obj:setopt(curl.OPT_PROGRESSFUNCTION, function(param, dltotal, dlnow)
+   curl_obj:setopt(curl.OPT_PROGRESSFUNCTION, function(param, dltotal, dlnow)
        -- print('%', url, dltotal, dlnow) -- do your fancy reporting here
-    end)
-    curl_obj:setopt(curl.OPT_NOPROGRESS, false) -- use this to activate progress
-    if curl_obj:perform() then
+   end)
+   curl_obj:setopt(curl.OPT_NOPROGRESS, false) -- use this to activate progress
+   if curl_obj:perform() then
 		return table.concat(t) -- return the whole data as a string  
 	else
 		print( 'can\'t connect to '..url )

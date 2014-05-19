@@ -11,6 +11,7 @@ local SND_RIGHT = 4
 local SND_FAIL = 5
 local SND_NEXT_PROM = 6
 
+--产生一个xml文档报告游戏体验结果
 local function get_errors_xml(do_num,err_num,err_table)
 	local xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 	xml = xml.."<errors do_num=\""..do_num.."\" err_num=\""..err_num.."\" >\n"
@@ -39,18 +40,13 @@ local function play_sound( idx )
 	end
 	AudioEngine.playEffect(name)
 end
-					
-local function read_local_file( name )
-  local file = local_dir..name
-  local alls
-  for line in io.lines(file) do
-    if not alls then
-      alls = line
-    else
-      alls = alls..line
-    end
-  end
-  return alls
+
+--返回主菜单					
+local function backMain()
+	local scene = cc.Scene:create()
+    scene:addChild(CreateTestMenu())
+
+    cc.Director:getInstance():replaceScene(scene)
 end
 
 local function AMouseMainLayer()
@@ -92,7 +88,7 @@ local function AMouseMainLayer()
 	end
 	
 	local function init_words()
-		local promble_xml = read_local_file('amouse/data.xml')
+		local promble_xml = kits.read_local_file('amouse/data.xml')
 		words = {}
 		math.randomseed(os.time())
 		if promble_xml then
@@ -148,6 +144,10 @@ local function __G__TRACKBACK__(msg)
 		init_words()
 		local hummer = ccs.Armature:create("NewAnimation")
 		
+		--将鼠标遮挡标语，将鼠标放到左上角
+		local function hummer_home()
+			hummer:setPosition( cc.p(ss.width/5,ss.height*4.6/7) )
+		end
 		--local function onFrameEvent(bone,evt,originFrameIndex,currentFrameIndex)
 		--	print("FrameEvent")
 		--end
@@ -186,6 +186,7 @@ local function __G__TRACKBACK__(msg)
 			if errors[#errors] ~= word_index-1 then
 				errors[#errors+1] = word_index-1
 			end
+			hummer_home()
 			for i,v in ipairs(rand_idx) do
 				if v == 1 then
 					amouse[i]:getAnimation():playWithIndex(6)
@@ -285,10 +286,17 @@ local function __G__TRACKBACK__(msg)
 		local function onMouseMoved(event)
 			hummer:setPosition(cc.p(event:getCursorX(),event:getCursorY()))
 		end
-		
+
 		local function onTouchMoved(touches, event)
 			local p = touches[1]:getLocation()
 			hummer:setPosition(p)
+		end
+
+		local function onKeyRelease(key,event)
+			if key == cc.KeyCode.KEY_BACKSPACE then
+				--Android return key
+				backMain()
+			end
 		end
 		
 		hummer:setPosition(VisibleRect:center())
@@ -396,6 +404,7 @@ local function __G__TRACKBACK__(msg)
 		
 		local function next_select()
 			answer_num = 1
+			hummer_home()
 			select_word(word_index)
 			word_index = word_index + 1
 			ideal_pause = false
@@ -413,12 +422,15 @@ local function __G__TRACKBACK__(msg)
 		listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCHES_MOVED )
 		local listener_mouse = cc.EventListenerMouse:create()
 		listener_mouse:registerScriptHandler(onMouseMoved,cc.Handler.EVENT_MOUSE_MOVE )
+		local listener_keyboard = cc.EventListenerKeyboard:create()
+		listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )
 		
 		---layer:setTouchEnabled(true)
 		local eventDispatcher = layer:getEventDispatcher()
 		
 		eventDispatcher:addEventListenerWithSceneGraphPriority(listener, layer)
 		eventDispatcher:addEventListenerWithSceneGraphPriority(listener_mouse, layer)
+		eventDispatcher:addEventListenerWithSceneGraphPriority(listener_keyboard, layer)
 		local count_time = 1
 
 		local function timer_update(time)

@@ -74,7 +74,7 @@ function CreateTestMenu()
             testMenuItem:setEnabled(false)
         end
         testMenuItem:registerScriptTapHandler(menuCallback)
-        testMenuItem:setPosition(cc.p(s.width / 2, (s.height - (index+2) * LINE_SPACE)))
+        testMenuItem:setPosition(cc.p(s.width / 2, (s.height - (index+3) * LINE_SPACE)))
         MainMenu:addChild(testMenuItem, index + 10000, index + 10000)
     end
 
