@@ -3,7 +3,9 @@ kits = require "kits"
 
 require "AudioEngine"
 
+--本地支援缓冲区
 local local_dir = cc.FileUtils:getInstance():getWritablePath()..'res/'
+
 local SND_CLICK = 1
 local SND_MISS = 2
 local SND_HIT = 3
@@ -22,6 +24,7 @@ local function get_errors_xml(do_num,err_num,err_table)
 	return xml
 end
 
+--修改游戏声效
 local function play_sound( idx )
 	local name
 
@@ -49,12 +52,12 @@ local function backMain()
     cc.Director:getInstance():replaceScene(scene)
 end
 
+--[[
+	打地鼠主程序
+	返回一个游戏层
+]]--
 local function AMouseMainLayer()
-
-    local function title()
-      return "AccelerometerTest"
-    end
-    local layer = cc.Layer:create()
+   local layer = cc.Layer:create()
 	local amouse = {}
 	local choose_text = {}
 	local ss = cc.Director:getInstance():getVisibleSize()
@@ -88,7 +91,7 @@ local function AMouseMainLayer()
 	end
 	
 	local function init_words()
-		local promble_xml = kits.read_local_file('amouse/data.xml')
+		local promble_xml = kits.read_local_file('res/amouse/data.xml')
 		words = {}
 		math.randomseed(os.time())
 		if promble_xml then
@@ -130,7 +133,7 @@ local function AMouseMainLayer()
 		
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
 -- for CCLuaEngine traceback
-local function __G__TRACKBACK__(msg)
+	local function __G__TRACKBACK__(msg)
     cclog("----------------------------------------")
     cclog("LUA ERROR: " .. tostring(msg) .. "\n")
     cclog(debug.traceback())

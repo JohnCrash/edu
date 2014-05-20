@@ -1,0 +1,11 @@
+物理引擎bullet (GitHub)
+http://bulletphysics.org/
+
+vdrift-ogre (StuntRally) Ogre开源赛车游戏
+https://code.google.com/p/vdrift-ogre/
+
+2D 3D游戏引擎Godot(MIT协议 GitHub)
+
+Scut服务器端游戏平台(C#,Python)
+
+FireFly服务器端平台(Python)
