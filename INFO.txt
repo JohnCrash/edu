@@ -9,3 +9,6 @@ https://code.google.com/p/vdrift-ogre/
 Scut服务器端游戏平台(C#,Python)
 
 FireFly服务器端平台(Python)
+
+Mangos开源的wow privat server
+
