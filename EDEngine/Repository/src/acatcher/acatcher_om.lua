@@ -675,6 +675,11 @@ function ACatcherScene:init_dog_timer()
 		if not self._dog then return end
 		if head >= 1 then
 			--通关
+			if self._thief then
+				self._dog:setVisible(false)
+				self._thief:getAnimation():playWithIndex(7)
+			end
+			--动画播放结束，进入结束对话
 			print( 'stage pass' )
 		end
 		if head > tail then
