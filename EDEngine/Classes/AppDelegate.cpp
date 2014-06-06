@@ -46,6 +46,10 @@ void AppDelegate::initLuaEngine()
     
 	auto pFileUtils = FileUtils::getInstance();
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	InitForDebugMode();
+#endif
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 	Director::getInstance()->getConsole()->listenOnTCP(5678);
 #endif
@@ -87,6 +91,21 @@ void AppDelegate::initLuaEngine()
 	FileUtils::getInstance()->addSearchPath("res/");
     pEngine->executeScriptFile("bootstrap.lua");
 }
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+void AppDelegate::InitForDebugMode()
+{
+	auto path = FileUtils::getInstance()->getWritablePath();
+	
+	TCHAR cur[256];
+	GetCurrentDirectory(255,cur);
+	wcscat(cur,L"\\luacore");
+	SetCurrentDirectory( cur );
+//	GetCurrentDirectory(255,cur);
+//	printf("write dir = %s\n",path.c_str());
+//	printf("current dir= %s\n",cur);
+}
+#endif
 
 void AppDelegate::registerHotkey()
 {

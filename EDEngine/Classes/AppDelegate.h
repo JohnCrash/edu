@@ -46,6 +46,9 @@ public:
 private:
 	void registerHotkey();
 	void initLuaEngine();
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	void InitForDebugMode();
+#endif
 	/*
 	bool initInternalLuaEngine();
 	void releaseInternalLuaEngine();
