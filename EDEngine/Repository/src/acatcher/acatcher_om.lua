@@ -576,7 +576,7 @@ function ACatcherScene:game_end_Dialog()
 	if self._uiLayer then return end
 	--60分过关
 	local fen100 = self:getIntegration()
-	local b = fen100 > 60
+	local b = fen100 > self._pass_fen
 	print("分数:"..self:getIntegration())
 	local function exitGame(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
@@ -620,12 +620,6 @@ function ACatcherScene:game_end_Dialog()
 			--本地保存
 			self:save_player_data()
 		end
-		--关闭通关星星
-		if self._xing then
-			self._xing:setVisible(false)
-		end
-		--提交到网络
-		self:upload_rank( self._player_data.stage,self._fen )
 	else
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("acatcher/jie_mian_2/jie_mian_2.json")
 	end
@@ -650,21 +644,90 @@ function ACatcherScene:game_end_Dialog()
 		root:getChildByTag(399):getChildByTag(400):addTouchEventListener(exitGame) --exit
 		root:getChildByTag(364):getChildByTag(365):addTouchEventListener(tryaginStage) --next
 	end
+	
+	if b then
+		--关闭通关星星
+		if self._xing then
+			self._xing:setVisible(false)
+		end
+		--提交到网络
+		self:upload_rank( self._player_data.stage,self._fen )		
+	end
 end
 
 function ACatcherScene:hummer_home()
 	self._hummer:setPosition( cc.p(self._ss.width/5,self._ss.height*4.6/7) )
 end
 
+function ACatcherScene:init_dog_timer()
+	if self._schedulerEntry3 then
+		self._scheduler:unscheduleScriptEntry(self._schedulerEntry3)
+		self._schedulerEntry3 = nil
+	end
+	--狗和贼之间的距离差值差值函数,0-1
+	local function difference_dog( d )
+		local D = self._ss.width*3/8
+		self._dog:setPosition(cc.p(D*d+200,self._ground))
+	end
+	local head = 0
+	local tail = 0
+	local function timer_update(dt)
+		if not self._dog then return end
+		if head >= 1 then
+			--通关
+			print( 'stage pass' )
+		end
+		if head > tail then
+			local dd = head - tail
+			if dd > 0.01 then
+				tail = tail + dd*0.2
+			else
+				tail = tail + dd
+			end
+			difference_dog( tail )
+		end
+		head = self:getIntegration()/self._pass_fen
+	end
+	self._schedulerEntry3 = self._scheduler:scheduleScriptFunc(timer_update,0.05,false) --20 FPS
+end
+
+function ACatcherScene:init_catcher()
+	--acatcher
+	loadArmature("acatcher/chang_jing/chang_jing.ExportJson")
+	loadArmature("acatcher/001.ExportJson")
+	--地平线
+	self._ground = self._ss.height/4
+--角色
+	self._mm = ccs.Armature:create("001")
+	self._mm:setAnchorPoint(cc.p(0,0))
+	self._mm:setPosition(cc.p(0,self._ground))
+	self._mm:getAnimation():playWithIndex(0)
+	self:addChild(self._mm)
+--Dog
+	self._dog = ccs.Armature:create("001")
+	self._dog:setAnchorPoint(cc.p(0,0))
+	self._dog:setPosition(cc.p(200,self._ground))
+	self._dog:getAnimation():playWithIndex(1)
+	self:addChild(self._dog)
+--Thief
+	self._thief = ccs.Armature:create("001")
+	self._thief:setAnchorPoint(cc.p(0,0))
+	self._thief:setPosition(cc.p(self._ss.width*5/6,self._ground))
+	self._thief:getAnimation():playWithIndex(2)
+	self:addChild(self._thief)	
+	
+	self:init_dog_timer()
+end
+
 --初始化角色
 function ACatcherScene:init_role()
+	--amouse
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/NewAnimation.ExportJson")
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/xing/xing.ExportJson")
-
 	--时间小虫
 	--self._worm = ccs.Armature:create("chong_zi")
 	--self._worm:getAnimation():playWithIndex(0)
@@ -975,7 +1038,7 @@ function ACatcherScene:show_right_word( n,b )
 		self._fen_adding = self._fen_adding + 100 + 10*self._fen_mul
 		self._fen_mul = self._fen_mul + 1
 		--提示已经过关
-		if self._pass or self:getIntegration() > 60 then
+		if self._pass or self:getIntegration() > self._pass_fen then
 			self:play_sound(SND_PASS)
 			self._xing:setVisible(true)
 			self._xing_time = self._game_time
@@ -1067,6 +1130,7 @@ function ACatcherScene:init_data( i )
 	self._words = {} --全部词语
 	self._time_limit = 60 --时限
 	self._word_num = 40 --词数
+	self._pass_fen = 60 --60%过关
 	math.randomseed(os.time())
 	if promble_xml then
 		local items = lxp.parse(promble_xml)
@@ -1117,6 +1181,7 @@ end
 
 --小虫子
 function ACatcherScene:update_time_bar()
+	--时间进度条
 	if self._time_bar and self._time_limit and self._game_time 
 		and self._time_limit >= 1 and  self._game_time<=self._time_limit then
 		--设置进度条
@@ -1311,6 +1376,7 @@ function ACatcherScene:init()
 	--游戏基本变量初始化
 	self._ss = cc.Director:getInstance():getVisibleSize()
 	local radio = self._ss.width/self._ss.height
+	self._pass_fen = 60
 	print("radio = "..radio )
 	if radio <= 15/9 and radio >= 4/3 then
 		self._screen = 1
@@ -1330,6 +1396,7 @@ function ACatcherScene:init()
 	--初始化背景和ui
 	self:init_bg_and_ui()
 	self:init_role()
+	self:init_catcher()
 	
 	--初始化事件
 	self:init_event()

@@ -624,12 +624,6 @@ function AMouseScene:game_end_Dialog()
 			--本地保存
 			self:save_player_data()
 		end
-		--关闭通关星星
-		if self._xing then
-			self._xing:setVisible(false)
-		end
-		--提交到网络
-		self:upload_rank( self._player_data.stage,self._fen )
 	else
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_2/jie_mian_2.json")
 	end
@@ -653,6 +647,15 @@ function AMouseScene:game_end_Dialog()
 		local root = self._uiLayer:getChildByTag(3)
 		root:getChildByTag(7):getChildByTag(8):addTouchEventListener(exitGame) --exit
 		root:getChildByTag(11):getChildByTag(12):addTouchEventListener(tryaginStage) --next
+	end
+	
+	if b then
+		--关闭通关星星
+		if self._xing then
+			self._xing:setVisible(false)
+		end
+		--提交到网络
+		self:upload_rank( self._player_data.stage,self._fen )
 	end
 end
 
