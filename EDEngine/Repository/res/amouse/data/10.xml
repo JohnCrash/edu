@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<problem time_limit="120"  word_num="80">
+<item name="(　)复一(　)" answer="日,囸氜釰"/>
+<item name="杀(　)腾腾" answer="气,起其七"/>
+<item name="(　)乎其(　)" answer="神,身伸深"/>
+<item name="威(　)凛凛" answer="风,封逢缝"/>
+<item name="微(　)其微" answer="乎,湖户呼"/>
+<item name="温(　)脉脉" answer="情,请轻清"/>
+<item name="(　)(　)有辞" answer="振,真阵镇"/>
+<item name="(　)心耿耿" answer="忠,中重种"/>
+<item name="含(　)脉脉" answer="情,请轻清"/>
+<item name="(　)身之祸" answer="杀,沙啥纱"/>
+<item name="(　)(　)其谈" answer="夸,跨垮挎"/>
+<item name="(　)(　)大方" answer="落,罗锣裸"/>
+<item name="(　)舍(　)分" answer="难,南男赧"/>
+<item name="念念(　)忘" answer="不,步补布"/>
+<item name="(　)恩负义" answer="忘,望王往"/>
+<item name="(　)声(　)色" answer="绘,回会灰"/>
+<item name="(　)仁(　)义" answer="假,家加价"/>
+<item name="(　)(　)计较" answer="斤,进近今"/>
+<item name="(　)不下咽" answer="食,是使十"/>
+<item name="不(　)下问" answer="耻,吃尺迟"/>
+<item name="惨(　)人道" answer="无,五屋物"/>
+<item name="乘(　)而入" answer="虚,许须需"/>
+<item name="洋洋(　)观" answer="大,答达打"/>
+<item name="行(　)匆匆" answer="色,涩瑟塞"/>
+<item name="(　)(　)色色" answer="形,性行型"/>
+<item name="当(　)不(　)" answer="断,段短端"/>
+<item name="(　)(　)祟祟" answer="鬼,归贵跪"/>
+<item name="(　)(　)烈烈" answer="轰,红哄虹"/>
+<item name="(　)头(　)脑" answer="虎,湖户呼"/>
+<item name="(　)(　)乐道" answer="津,进近今"/>
+<item name="(　)(　)有神" answer="炯,窘扃迥"/>
+<item name="(　)无可(　)" answer="忍,人任认"/>
+<item name="(　)意忘形" answer="得,的地德"/>
+<item name="独具(　)心" answer="匠,将讲江"/>
+<item name="(　)雨同舟" answer="风,封逢缝"/>
+<item name="(　)头换面" answer="改,该盖概"/>
+<item name="(　)山流水" answer="高,搞告稿"/>
+<item name="和(　)可亲" answer="蔼,爱矮挨"/>
+<item name="(　)死关头" answer="生,声省剩"/>
+<item name="势如(　)竹" answer="破,坡颇婆"/>
+<item name="(　)疾眼快" answer="手,受收首"/>
+<item name="(　)象更新" answer="万,完晚碗"/>
+<item name="原(　)不(　)" answer="封动,风东"/>
+<item name="(　)转(　)侧" answer="辗反,站饭"/>
+<item name="(　)锋相(　)" answer="针对,真队"/>
+<item name="以一(　)(　)" answer="当十,党是"/>
+<item name="(　)言善(　)" answer="能辩,竜边"/>
+<item name="年事(　)(　)" answer="已高,一搞"/>
+<item name="(　)光(　)彩" answer="奇异,起一"/>
+<item name="(　)人心(　)" answer="沁脾,亲批"/>
+<item name="人(　)世(　)" answer="情故,请古"/>
+<item name="雨后(　)(　)" answer="春笋,唇孙"/>
+<item name="(　)所(　)能" answer="无不,五步"/>
+<item name="物是(　)(　)" answer="人非,任飞"/>
+<item name="笑容(　)(　)" answer="可掬,克句"/>
+<item name="(　)(　)覆地" answer="翻天,反田"/>
+<item name="(　)调雨(　)" answer="风顺,封吮"/>
+<item name="各抒(　)(　)" answer="己见,几件"/>
+<item name="(　)冬腊(　)" answer="寒月,喊越"/>
+<item name="铺(　)盖(　)" answer="天地,田第"/>
+<item name="(　)(　)甘来" answer="苦尽,哭进"/>
+<item name="明(　)(　)毫" answer="察秋,查求"/>
+<item name="你死(　)(　)" answer="我活,握或"/>
+<item name="(　)(　)五载" answer="三年,散念"/>
+<item name="(　)滴(　)穿" answer="水石,谁是"/>
+<item name="(　)(　)八面" answer="威风,为封"/>
+<item name="至高(　)(　)" answer="无上,五伤"/>
+<item name="(　)园春(　)" answer="满色,慢涩"/>
+<item name="(　)消云(　)" answer="烟散,眼三"/>
+<item name="众(　)(　)纭" answer="说纷,数分"/>
+<item name="(　)瞬之(　)" answer="转间,专见"/>
+<item name="自(　)(　)明" answer="作聪,做从"/>
+<item name="(　)衣(　)食" answer="节缩,接所"/>
+<item name="拍(　)(　)快" answer="手称,受成"/>
+<item name="(　)慨激(　)" answer="慷昂,抗肮"/>
+<item name="总(　)(　)之" answer="而言,二眼"/>
+<item name="(　)火(　)天" answer="炮连,跑联"/>
+<item name="别具(　)(　)" answer="一格,以个"/>
+<item name="不(　)(　)破" answer="攻自,工字"/>
+<item name="(　)华正(　)" answer="风茂,封毛"/>
+<item name="风(　)变(　)" answer="云幻,运换"/>
+<item name="(　)往(　)来" answer="古今,股进"/>
+<item name="和(　)(　)色" answer="颜悦,眼月"/>
+<item name="(　)(　)索然" answer="兴致,性只"/>
+<item name="(　)子可教" answer="孺,如入汝"/>
+<item name="舍(　)逐末" answer="本,奔苯笨"/>
+<item name="舐(　)之爱" answer="犊,读度毒"/>
+<item name="乌(　)私情" answer="鸟,尿袅茑"/>
+<item name="断(　)取义" answer="章,张长帐"/>
+<item name="黄(　)美梦" answer="粱,两亮辆"/>
+<item name="(　)兔三窟" answer="狡,叫脚交"/>
+<item name="救(　)图存" answer="亡,望忘王"/>
+<item name="狼奔(　)突" answer="豕,是使十"/>
+<item name="(　)马识途" answer="老,捞牢劳"/>
+<item name="夜郎(　)大" answer="自,字子紫"/>
+<item name="(　)驴技穷" answer="黔,前钱千"/>
+<item name="(　)广人稀" answer="地,第底低"/>
+<item name="鹬(　)相争" answer="蚌,帮棒绑"/>
+<item name="(　)(　)扬扬" answer="沸,非飞肥"/>
+<item name="(　)(　)噩噩" answer="浑,混昏荤"/>
+<item name="将(　)就(　)" answer="计,几及急"/>
+<item name="(　)益求(　)" answer="精,竟静井"/>
+<item name="(　)离失所" answer="流,六留刘"/>
+<item name="(　)刀霍霍" answer="磨,摸抹末"/>
+<item name="(　)屈(　)伸" answer="能,竜而耐"/>
+<item name="(　)复一(　)" answer="年,念捻撵"/>
+<item name="(　)马找马" answer="骑,起其七"/>
+<item name="(　)(　)业业" answer="兢,竟静井"/>
+<item name="(　)(　)兢兢" answer="战,站占盏"/>
+<item name="(　)胜于无" answer="聊,了料撩"/>
+<item name="(　)鸿遍野" answer="哀,爱矮挨"/>
+<item name="按图(　)骥" answer="索,所缩锁"/>
+<item name="超(　)物外" answer="然,染燃冉"/>
+<item name="(　)施效颦" answer="东,动懂洞"/>
+<item name="(　)蛾投火" answer="飞,非肥费"/>
+<item name="邯郸(　)步" answer="学,雪血靴"/>
+<item name="(　)冠楚楚" answer="衣,一以已"/>
+<item name="口(　)腹剑" answer="蜜,米密迷"/>
+<item name="(　)柯一梦" answer="南,难男赧"/>
+<item name="小家(　)玉" answer="碧,比笔闭"/>
+<item name="(　)朋引类" answer="呼,湖户虎"/>
+<item name="(　)中取栗" answer="火,或活伙"/>
+<item name="望(　)止渴" answer="梅,没每煤"/>
+<item name="江郎(　)尽" answer="才,菜采材"/>
+<item name="著(　)等身" answer="作,做坐左"/>
+<item name="(　)誓旦旦" answer="信,新心欣"/>
+<item name="(　)蝉(　)壳" answer="金脱,进拖"/>
+<item name="凶相(　)(　)" answer="毕露,比路"/>
+<item name="(　)然(　)波" answer="轩大,选答"/>
+<item name="(　)(　)失笑" answer="哑然,呀染"/>
+<item name="(　)成(　)变" answer="一不,以步"/>
+<item name="依草(　)(　)" answer="附木,副母"/>
+<item name="(　)然自(　)" answer="怡得,一的"/>
+<item name="指(　)(　)槐" answer="桑骂,丧吗"/>
+<item name="(　)力(　)瘁" answer="心交,新叫"/>
+<item name="(　)有(　)悸" answer="心余,新与"/>
+<item name="旁(　)无(　)" answer="若人,弱任"/>
+<item name="(　)(　)为笑" answer="破涕,坡提"/>
+<item name="(　)朔(　)离" answer="扑迷,铺米"/>
+<item name="(　)(　)未有" answer="前所,钱缩"/>
+<item name="(　)无古(　)" answer="前人,钱任"/>
+<item name="(　)于(　)毛" answer="轻鸿,请红"/>
+<item name="燃(　)之(　)" answer="眉急,没几"/>
+<item name="(　)发(　)颜" answer="鹤童,和同"/>
+<item name="挥(　)(　)如" answer="洒自,撒字"/>
+<item name="(　)头(　)颈" answer="伸缩,身所"/>
+<item name="(　)死之(　)" answer="生交,声叫"/>
+<item name="(　)会(　)通" answer="融贯,容关"/>
+<item name="饥(　)择(　)" answer="不食,步是"/>
+<item name="鸡犬(　)(　)" answer="升天,声田"/>
+<item name="(　)(　)不服" answer="水土,谁图"/>
+<item name="岁(　)如(　)" answer="月流,越六"/>
+<item name="索(　)(　)味" answer="然无,染五"/>
+<item name="(　)衣无(　)" answer="天缝,田风"/>
+<item name="(　)(　)地设" answer="天造,田早"/>
+<item name="投笔(　)(　)" answer="从戎,丛容"/>
+<item name="完(　)(　)赵" answer="璧归,比贵"/>
+<item name="信口(　)(　)" answer="开河,揩和"/>
+<item name="雅(　)共(　)" answer="俗赏,素上"/>
+<item name="一(　)无(　)" answer="览余,蓝与"/>
+<item name="公(　)(　)私" answer="正无,整五"/>
+<item name="(　)元(　)始" answer="一复,以副"/>
+<item name="(　)冠(　)兽" answer="衣禽,一亲"/>
+<item name="仪(　)(　)方" answer="态万,太完"/>
+<item name="义愤(　)(　)" answer="填膺,天应"/>
+<item name="(　)(　)辞严" answer="义正,一整"/>
+<item name="(　)祸(　)福" answer="因得,引的"/>
+<item name="音(　)笑(　)" answer="容貌,绒毛"/>
+<item name="引以(　)(　)" answer="为荣,位容"/>
+<item name="(　)(　)如神" answer="用兵,涌并"/>
+<item name="(　)(　)好闲" answer="游手,有受"/>
+<item name="语重(　)(　)" answer="心长,新唱"/>
+<item name="非(　)即(　)" answer="此彼,次比"/>
+<item name="(　)激(　)零" answer="感涕,赶提"/>
+<item name="晏然(　)(　)" answer="自若,字弱"/>
+<item name="转(　)(　)喜" answer="悲为,被位"/>
+<item name="卓尔(　)(　)" answer="不群,步裙"/>
+<item name="(　)缺(　)全" answer="残不,蚕步"/>
+<item name="(　)眉(　)脸" answer="愁苦,抽哭"/>
+<item name="(　)躇(　)志" answer="踌满,抽慢"/>
+<item name="出(　)头(　)" answer="人地,任第"/>
+<item name="荡气(　)(　)" answer="回肠,会长"/>
+<item name="荡(　)无(　)" answer="然存,染村"/>
+<item name="得(　)应(　)" answer="心手,新受"/>
+<item name="得(　)门(　)" answer="意生,一声"/>
+<item name="德(　)望(　)" answer="高重,搞中"/>
+<item name="(　)吟浅(　)" answer="低唱,地长"/>
+<item name="敌(　)(　)寡" answer="众我,中握"/>
+</problem>
