@@ -659,6 +659,25 @@ function ACatcherScene:hummer_home()
 	self._hummer:setPosition( cc.p(self._ss.width/5,self._ss.height*4.6/7) )
 end
 
+--通关失败
+function ACatcherScene:stage_over()
+end
+
+--通关
+function ACatcherScene:stage_pass()
+	print( 'stage pass' )
+	if self._thief  then
+		self._dog:setVisible(false)
+		self._thief:getAnimation():playWithIndex(7) --or 6
+		self._mm:getAnimation():playWithIndex(8) --or 9
+		self:delay_call( self.game_end_Dialog,true,3 )
+		--暂时关闭老鼠
+		for i=1,4 do
+			self._amouse[i]:setVisible(false)
+		end
+	end
+end
+
 function ACatcherScene:init_dog_timer()
 	if self._schedulerEntry3 then
 		self._scheduler:unscheduleScriptEntry(self._schedulerEntry3)
@@ -671,16 +690,15 @@ function ACatcherScene:init_dog_timer()
 	end
 	local head = 0
 	local tail = 0
+	local sp = false
 	local function timer_update(dt)
 		if not self._dog then return end
 		if head >= 1 then
 			--通关
-			if self._thief then
-				self._dog:setVisible(false)
-				self._thief:getAnimation():playWithIndex(7)
+			if  not sp then
+				self:stage_pass()
+				sp = true
 			end
-			--动画播放结束，进入结束对话
-			print( 'stage pass' )
 		end
 		if head > tail then
 			local dd = head - tail
@@ -721,6 +739,30 @@ function ACatcherScene:init_catcher()
 	self._thief:getAnimation():playWithIndex(2)
 	self:addChild(self._thief)	
 	
+	self:init_dog_timer()
+end
+
+--重新放置角色位置
+function ACatcherScene:repos()
+	if self._dog then
+		self._dog:setPosition(cc.p(200,self._ground))
+		self._dog:setVisible(true)
+		self._dog:getAnimation():playWithIndex(1)	
+	end
+	if self._thief then
+		self._thief:setPosition(cc.p(self._ss.width*5/6,self._ground))
+		self._thief:getAnimation():playWithIndex(2)	
+	end
+	if self._mm then
+		self._mm:setPosition(cc.p(0,self._ground))
+		self._mm:getAnimation():playWithIndex(0)	
+	end
+	--暂时关闭老鼠
+	for i=1,4 do
+		self._amouse[i]:setVisible(true)
+	end	
+	
+	--启动
 	self:init_dog_timer()
 end
 
@@ -1363,9 +1405,11 @@ end
 function ACatcherScene:startStage()
 	self._pause = false
 	--初始化游戏数据
-	self:init_data(self._stage)
+	self:init_data(self._stage-1)
 	--开雪花
 	print("New game...")
+	--重新放置场景元素
+	self:repos()
 	--新的音乐
 	self:play_music()
 	--self:LavaFlow(3)
@@ -1425,7 +1469,7 @@ end
 
 function ACatcherMain()
 	cclog("A catcher hello!")
-	require("mobdebug").start("192.168.2.182")
+	--require("mobdebug").start("192.168.2.182")
 	local scene = ACatcherScene.create()
 	scene:addChild(CreateBackMenuItem())
 	return scene
