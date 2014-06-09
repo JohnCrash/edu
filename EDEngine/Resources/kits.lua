@@ -52,7 +52,7 @@ local function download_http_by_curl(url,tout)
    local time_out = tout or 60
 	
 	cobj:setopt(curl.OPT_TIMEOUT,time_out)
-	cobj:setopt(curl.OPT_CONNECTTIMEOUT,5)
+	cobj:setopt(curl.OPT_CONNECTTIMEOUT,2)
    local t = {} -- this will collect resulting chunks
    cobj:setopt(curl.OPT_WRITEFUNCTION, function (param, buf)
         table.insert(t, buf) -- store a chunk of data received
