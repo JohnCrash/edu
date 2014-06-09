@@ -7,6 +7,36 @@
       "name": "an_niu",
       "bone_data": [
         {
+          "name": "Layer3",
+          "parent": "",
+          "x": 0.0,
+          "y": 0.0,
+          "z": 3,
+          "cX": 1.0,
+          "cY": 1.0,
+          "kX": 0.0,
+          "kY": 0.0,
+          "arrow_x": 0.0,
+          "arrow_y": 0.0,
+          "effectbyskeleton": false,
+          "display_data": [
+            {
+              "name": "da_suan.png",
+              "displayType": 0,
+              "skin_data": [
+                {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "cX": 1.0,
+                  "cY": 1.0,
+                  "kX": 0.0,
+                  "kY": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
           "name": "Layer2",
           "parent": "",
           "x": 0.0,
@@ -279,6 +309,31 @@
           "sc": 1.0,
           "mov_bone_data": [
             {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
+            {
               "name": "Layer2",
               "dl": 0.0,
               "frame_data": [
@@ -333,13 +388,38 @@
         },
         {
           "name": "hu_luo_bo",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -403,6 +483,31 @@
           "sc": 1.0,
           "mov_bone_data": [
             {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
+            {
               "name": "Layer2",
               "dl": 0.0,
               "frame_data": [
@@ -457,13 +562,38 @@
         },
         {
           "name": "ji_zi",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 1.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -527,6 +657,31 @@
           "sc": 1.0,
           "mov_bone_data": [
             {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
+            {
               "name": "Layer2",
               "dl": 0.0,
               "frame_data": [
@@ -581,13 +736,38 @@
         },
         {
           "name": "nan_gua",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -651,6 +831,31 @@
           "sc": 1.0,
           "mov_bone_data": [
             {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
+            {
               "name": "Layer2",
               "dl": 0.0,
               "frame_data": [
@@ -705,13 +910,38 @@
         },
         {
           "name": "pu_tao",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -767,13 +997,38 @@
         },
         {
           "name": "sun",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -829,13 +1084,38 @@
         },
         {
           "name": "tao",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -891,13 +1171,38 @@
         },
         {
           "name": "xi_gua",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -953,13 +1258,38 @@
         },
         {
           "name": "xi_hong_shi",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -1015,13 +1345,38 @@
         },
         {
           "name": "xi_lan_hua",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -1077,13 +1432,38 @@
         },
         {
           "name": "xiang_jiao",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,
@@ -1139,13 +1519,38 @@
         },
         {
           "name": "ying_tao",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
           "sc": 1.0,
           "mov_bone_data": [
+            {
+              "name": "Layer3",
+              "dl": 0.0,
+              "frame_data": [
+                {
+                  "dI": 0,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 0.1,
+                  "cY": 0.1,
+                  "kX": 0.0,
+                  "kY": 0.0,
+                  "fi": 0,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  }
+                }
+              ]
+            },
             {
               "name": "Layer2",
               "dl": 0.0,

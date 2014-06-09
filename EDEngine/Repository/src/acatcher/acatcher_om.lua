@@ -112,8 +112,8 @@ function ACatcherScene:play_music()
 		self._music_idx = idx
 	end
 	if self._player_data and self._player_data.music then
-		if idx <=3 and idx >= 1 then
-			name = 'amouse/snd/beijing'..idx..'.mp3'
+		if idx <=2 and idx >= 1 then
+			name = 'acatcher/snd/BackgroundMusic0'..idx..'.mp3'
 		else
 			return
 		end
@@ -134,11 +134,11 @@ function ACatcherScene:play_sound( idx )
 		elseif idx == SND_MISS then
 			name = 'amouse/snd/shibai.MP3'
 		elseif idx == SND_HIT then
-			name = 'amouse/snd/beida.MP3'
+			name = 'acatcher/snd/dog.MP3'
 		elseif idx == SND_RIGHT then
-			name = 'amouse/snd/zhengque.MP3'
+			name = 'acatcher/snd/right.MP3'
 		elseif idx == SND_FAIL then
-			name = 'amouse/snd/shibai.mp3'
+			name = 'acatcher/snd/lose.mp3'
 		elseif idx == SND_NEXT_PROM then
 			name = 'amouse/snd/guoguan.MP3'
 		elseif idx == SND_PASS then
@@ -196,12 +196,12 @@ function ACatcherScene:init_bg_and_ui()
 	self._bg:getAnimation():playWithIndex(0)
 	self:addChild(self._bg)	
 	--题目背景
-	--self._sprite_bg = cc.Sprite:create("amouse/NewUI01.png")
-	--self._sprite_bg:setAnchorPoint(cc.p(0.5,0.5))
-	--self._sprite_bg:setPosition(cc.p(self._ss.width/2,self._ss.height*4.6/7*ratio))
-	--self._sprite_bg:setScaleY(0.8)
-	--self._sprite_bg:setScaleX(0.8)
-	--self:addChild(self._sprite_bg)
+	self._sprite_bg = cc.Sprite:create("acatcher/prob_bg.png")
+	self._sprite_bg:setAnchorPoint(cc.p(0.5,0.5))
+	self._sprite_bg:setPosition(cc.p(self._ss.width/2,self._ss.height*4.6/7*ratio))
+	self._sprite_bg:setScaleY(0.4)
+	self._sprite_bg:setScaleX(0.8)
+	self:addChild(self._sprite_bg)
 	--时间条
 	local widget = ccs.GUIReader:getInstance():widgetFromJsonFile("acatcher/jie_mian_3/jie_mian_3.json")
 	if widget then
@@ -576,7 +576,7 @@ function ACatcherScene:game_end_Dialog()
 	if self._uiLayer then return end
 	--60分过关
 	local fen100 = self:getIntegration()
-	local b = fen100 > self._pass_fen
+	local b = fen100 >= self._pass_fen
 	print("分数:"..self:getIntegration())
 	local function exitGame(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
@@ -691,6 +691,7 @@ function ACatcherScene:init_dog_timer()
 	local head = 0
 	local tail = 0
 	local sp = false
+	local fh = false
 	local function timer_update(dt)
 		if not self._dog then return end
 		if head >= 1 then
@@ -698,6 +699,16 @@ function ACatcherScene:init_dog_timer()
 			if  not sp then
 				self:stage_pass()
 				sp = true
+			end
+		elseif head >= 0.6 then
+			if not fh then
+				self._thief:getAnimation():playWithIndex(3) --汗
+				fh = true
+			end
+		elseif head < 0.6 then
+			if fh then
+				self._thief:getAnimation():playWithIndex(2)
+				fh = false
 			end
 		end
 		if head > tail then
@@ -775,6 +786,9 @@ function ACatcherScene:init_role()
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/xing/xing.ExportJson")
+	--题板
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("acatcher/an_niu/an_niu.ExportJson")
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("acatcher/an_niu/an_niu.ExportJson")
 	--时间小虫
 	--self._worm = ccs.Armature:create("chong_zi")
 	--self._worm:getAnimation():playWithIndex(0)
@@ -806,6 +820,7 @@ function ACatcherScene:init_role()
 	--4个地鼠
 	self._amouse = {}
 	self._choose_text = {}
+	--[[
 	for i=1,4 do
 		self._amouse[i] = ccs.Armature:create("NewAnimation")
 		self._choose_text[i] = ccui.Text:create()
@@ -828,6 +843,32 @@ function ACatcherScene:init_role()
 		self:addChild(self._amouse[i])
 		self._choose_text[i]:setFontSize(50)
 		self._choose_text[i]:setColor(cc.c3b(0,0,0))
+	end
+	--]]
+	for i = 1,4 do
+		self._amouse[i] = ccs.Armature:create("an_niu")
+		self._choose_text[i] = ccui.Text:create()
+		local box = self._amouse[i]:getBoundingBox()
+		self._amouse[i]:setScaleX(2)
+		self._amouse[i]:setScaleY(2)
+		self._amouse[i]:getAnimation():playWithIndex(0)
+		
+		local b = (self._ss.width-4*box.width)/5
+		self._amouse[i]:setAnchorPoint(cc.p(0,0))
+		if self._screen == 1 then
+			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),box.height/2))
+		else
+			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),1.0*box.height))
+		end
+		self._choose_text[i]:setAnchorPoint(cc.p(0.5,0.5))
+		local bone = self._amouse[i]:getBone("Layer3")
+		if bone then
+			bone:addDisplay(self._choose_text[i],0)
+			bone:changeDisplayWithIndex(0,true)
+		end
+		self:addChild(self._amouse[i])
+		self._choose_text[i]:setFontSize(20)
+		self._choose_text[i]:setColor(cc.c3b(0,0,0))		
 	end
 	--锤子
 	self._hummer = ccs.Armature:create("NewAnimation")
@@ -865,10 +906,10 @@ function ACatcherScene:show_right(i)
 	self:hummer_home()
 	for i,v in ipairs(self._rand_idx) do
 		if v == 1 then
-			self._amouse[i]:getAnimation():playWithIndex(6)
+--			self._amouse[i]:getAnimation():playWithIndex(6)
 			self:delay_call(self.reload_scene,true,3)
 		elseif v == 2 and self._yes_num==2 then
-			self._amouse[i]:getAnimation():playWithIndex(6)
+--			self._amouse[i]:getAnimation():playWithIndex(6)
 		end
 	end
 	self:show_right_word(1,false)
@@ -878,7 +919,7 @@ end
 --开始下一个词
 function ACatcherScene:reload_scene(b)
 	for i=1,4 do
-		self._amouse[i]:getAnimation():playWithIndex(0)
+		self._amouse[i]:getAnimation():playWithIndex(self._stage)
 	end
 	self:next_select()
 end
@@ -911,14 +952,14 @@ function ACatcherScene:judge(i)
 		end
 		if self._rand_idx[i] <= self._yes_num then
 			self._ideal_pause = true
-			self._amouse[i]:getAnimation():playWithIndex(3)
+			--self._amouse[i]:getAnimation():playWithIndex(3)
 			self:delay_call(self.reload_scene,true,1.5) --延迟调用
 			self:play_sound(SND_RIGHT)
 			self._right_num = self._right_num + 1
 			self:show_right_word(1,true)
 		else
 			self._ideal_pause = true
-			self._amouse[i]:getAnimation():playWithIndex(2)
+			--self._amouse[i]:getAnimation():playWithIndex(2)
 			self:delay_call(self.show_right,i,1.5)
 			self:play_sound(SND_FAIL)
 		end
@@ -927,7 +968,7 @@ function ACatcherScene:judge(i)
 		if self._answer_num == 1 and self._rand_idx[i] == 1 then
 			--第一个打对
 			self._ideal_pause = true
-			self._amouse[i]:getAnimation():playWithIndex(3)
+			--self._amouse[i]:getAnimation():playWithIndex(3)
 			self:play_sound(SND_RIGHT)
 			self._answer_num = self._answer_num + 1
 			--答对,一题的前一个字答对
@@ -936,7 +977,7 @@ function ACatcherScene:judge(i)
 		elseif self._answer_num == 2 and self._rand_idx[i] == 2 then
 			--第二个打对
 			self._ideal_pause = true
-			self._amouse[i]:getAnimation():playWithIndex(3)
+			--self._amouse[i]:getAnimation():playWithIndex(3)
 			self:delay_call(self.reload_scene,true,1.5)
 			self:play_sound(SND_RIGHT)
 			--答对
@@ -946,7 +987,7 @@ function ACatcherScene:judge(i)
 			--打错
 			self._ideal_pause = true
 			self._judge_num = 1 --丢弃后续打击
-			self._amouse[i]:getAnimation():playWithIndex(2)
+			--self._amouse[i]:getAnimation():playWithIndex(2)
 			self:delay_call(self.show_right,i,1.5)
 			self:play_sound(SND_FAIL)
 		end
@@ -1155,6 +1196,10 @@ function ACatcherScene:next_select()
 	
 	self._ideal_pause = false
 	
+	for i=1,4 do
+		self._amouse[i]:getAnimation():playWithIndex(self._stage)
+	end
+	
 	if self._word_index > #self._words then
 		self:game_over()
 		return
@@ -1286,6 +1331,7 @@ function ACatcherScene:init_timer()
 				self:update_time_bar()
 			end
 			if not self._ideal_pause then
+				--[[
 				if self._game_time % 3 == 0 then
 					self._amouse[math.random(1,2)]:getAnimation():playWithIndex(math.random(4,5))
 					self._amouse[math.random(3,4)]:getAnimation():playWithIndex(math.random(4,5))
@@ -1293,7 +1339,7 @@ function ACatcherScene:init_timer()
 					self._amouse[math.random(1,2)]:getAnimation():playWithIndex(math.random(4,5))
 					self._amouse[math.random(3,4)]:getAnimation():playWithIndex(math.random(4,5))
 				end
-
+				--]]
 				if self._game_time > self._time_limit then
 					--time over
 					self._scheduler:unscheduleScriptEntry(self._schedulerEntry)
@@ -1399,7 +1445,13 @@ end
 --游戏结束
 function ACatcherScene:game_over()
 	--self:Snow( false )
-	self:game_end_Dialog()
+	--结束动画
+	if self._thief then
+			self._thief:getAnimation():playWithIndex(math.random(4,5)) --嘲笑
+			self:delay_call(self.game_end_Dialog,true,3)
+	else
+		self:game_end_Dialog()
+	end
 end
 
 function ACatcherScene:startStage()
