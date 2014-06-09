@@ -1,203 +1,203 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <problem time_limit="60" word_num="13">
-    <item name="7 x 11 =" answer="77,83,70,91"/>
-    <item name="11 x 7 =" answer="77,85,75,91"/>
-    <item name="20 x 3 =" answer="60,64,58,66"/>
-    <item name="3 x 18 =" answer="54,56,47,60"/>
-    <item name="12 x 9 =" answer="108,117,104,126"/>
-    <item name="12 x 7 =" answer="84,88,79,98"/>
-    <item name="12 x 1 =" answer="12,19,4,14"/>
-    <item name="17 x 9 =" answer="153,162,145,162"/>
-    <item name="5 x 15 =" answer="75,78,69,85"/>
-    <item name="13 x 1 =" answer="13,16,4,15"/>
-    <item name="2 x 18 =" answer="36,44,27,40"/>
-    <item name="15 x 5 =" answer="75,83,71,85"/>
-    <item name="3 x 19 =" answer="57,58,54,63"/>
-    <item name="2 x 14 =" answer="28,31,27,30"/>
-    <item name="2 x 12 =" answer="24,31,19,26"/>
-    <item name="19 x 3 =" answer="57,58,55,63"/>
-    <item name="18 x 9 =" answer="162,164,154,171"/>
-    <item name="4 x 12 =" answer="48,54,42,52"/>
-    <item name="19 x 8 =" answer="152,155,145,168"/>
-    <item name="4 x 14 =" answer="56,59,53,60"/>
-    <item name="18 x 2 =" answer="36,39,34,40"/>
-    <item name="16 x 2 =" answer="32,37,23,36"/>
-    <item name="17 x 6 =" answer="102,108,96,108"/>
-    <item name="12 x 5 =" answer="60,67,51,65"/>
-    <item name="6 x 10 =" answer="60,69,52,72"/>
-    <item name="8 x 14 =" answer="112,117,107,128"/>
-    <item name="11 x 4 =" answer="44,50,41,52"/>
-    <item name="8 x 18 =" answer="144,150,136,160"/>
-    <item name="8 x 13 =" answer="104,109,100,112"/>
-    <item name="16 x 8 =" answer="128,132,122,144"/>
-    <item name="16 x 2 =" answer="32,40,23,34"/>
-    <item name="7 x 17 =" answer="119,127,113,126"/>
-    <item name="12 x 8 =" answer="96,101,94,104"/>
-    <item name="13 x 3 =" answer="39,40,34,45"/>
-    <item name="13 x 7 =" answer="91,99,85,98"/>
-    <item name="16 x 8 =" answer="128,132,127,144"/>
-    <item name="20 x 2 =" answer="40,48,36,42"/>
-    <item name="9 x 16 =" answer="144,148,143,153"/>
-    <item name="13 x 1 =" answer="13,22,9,15"/>
-    <item name="13 x 6 =" answer="78,87,73,84"/>
-    <item name="11 x 1 =" answer="11,12,10,12"/>
-    <item name="2 x 14 =" answer="28,29,19,30"/>
-    <item name="16 x 8 =" answer="128,134,121,136"/>
-    <item name="1 x 12 =" answer="12,20,7,14"/>
-    <item name="10 x 3 =" answer="30,37,25,33"/>
-    <item name="4 x 18 =" answer="72,78,64,76"/>
-    <item name="8 x 18 =" answer="144,149,136,152"/>
-    <item name="13 x 7 =" answer="91,94,87,105"/>
-    <item name="4 x 18 =" answer="72,80,69,76"/>
-    <item name="7 x 10 =" answer="70,75,65,84"/>
-    <item name="19 x 6 =" answer="114,121,113,120"/>
-    <item name="7 x 12 =" answer="84,88,80,91"/>
-    <item name="14 x 2 =" answer="28,32,26,30"/>
-    <item name="12 x 9 =" answer="108,114,101,126"/>
-    <item name="19 x 2 =" answer="38,44,34,42"/>
-    <item name="6 x 19 =" answer="114,117,110,126"/>
-    <item name="6 x 10 =" answer="60,64,54,66"/>
-    <item name="19 x 8 =" answer="152,157,144,168"/>
-    <item name="11 x 6 =" answer="66,68,65,72"/>
-    <item name="17 x 4 =" answer="68,77,66,72"/>
-    <item name="17 x 7 =" answer="119,126,111,126"/>
-    <item name="10 x 2 =" answer="20,25,15,22"/>
-    <item name="17 x 8 =" answer="136,145,129,144"/>
-    <item name="16 x 1 =" answer="16,18,12,18"/>
-    <item name="19 x 4 =" answer="76,82,67,84"/>
-    <item name="17 x 9 =" answer="153,162,145,171"/>
-    <item name="16 x 8 =" answer="128,129,127,136"/>
-    <item name="7 x 13 =" answer="91,95,90,105"/>
-    <item name="10 x 4 =" answer="40,43,33,48"/>
-    <item name="4 x 16 =" answer="64,72,55,72"/>
-    <item name="19 x 3 =" answer="57,61,56,63"/>
-    <item name="14 x 9 =" answer="126,130,121,144"/>
-    <item name="17 x 1 =" answer="17,24,12,18"/>
-    <item name="1 x 17 =" answer="17,20,16,19"/>
-    <item name="3 x 10 =" answer="30,34,21,33"/>
-    <item name="12 x 6 =" answer="72,75,63,78"/>
-    <item name="8 x 12 =" answer="96,104,91,112"/>
-    <item name="18 x 6 =" answer="108,111,103,114"/>
-    <item name="20 x 2 =" answer="40,42,37,44"/>
-    <item name="4 x 12 =" answer="48,55,39,56"/>
-    <item name="5 x 12 =" answer="60,66,52,65"/>
-    <item name="15 x 8 =" answer="120,128,117,136"/>
-    <item name="9 x 20 =" answer="180,186,172,198"/>
-    <item name="9 x 16 =" answer="144,148,141,162"/>
-    <item name="11 x 5 =" answer="55,58,49,60"/>
-    <item name="18 x 4 =" answer="72,79,63,76"/>
-    <item name="13 x 1 =" answer="13,19,9,15"/>
-    <item name="12 x 7 =" answer="84,93,79,98"/>
-    <item name="7 x 11 =" answer="77,83,75,91"/>
-    <item name="19 x 9 =" answer="171,176,168,180"/>
-    <item name="15 x 5 =" answer="75,80,72,80"/>
-    <item name="9 x 17 =" answer="153,157,148,162"/>
-    <item name="20 x 5 =" answer="100,101,95,105"/>
-    <item name="4 x 15 =" answer="60,68,55,64"/>
-    <item name="18 x 4 =" answer="72,76,67,80"/>
-    <item name="15 x 1 =" answer="15,22,10,16"/>
-    <item name="19 x 7 =" answer="133,140,132,140"/>
-    <item name="14 x 9 =" answer="126,134,124,144"/>
-    <item name="10 x 2 =" answer="20,23,19,24"/>
-    <item name="17 x 3 =" answer="51,58,45,54"/>
-    <item name="6 x 17 =" answer="102,103,97,108"/>
-    <item name="6 x 18 =" answer="108,112,107,120"/>
-    <item name="11 x 3 =" answer="33,36,24,39"/>
-    <item name="19 x 9 =" answer="171,173,164,189"/>
-    <item name="1 x 16 =" answer="16,20,14,17"/>
-    <item name="17 x 4 =" answer="68,72,62,76"/>
-    <item name="6 x 12 =" answer="72,78,68,78"/>
-    <item name="10 x 9 =" answer="90,93,89,99"/>
-    <item name="3 x 14 =" answer="42,45,35,48"/>
-    <item name="11 x 9 =" answer="99,106,97,108"/>
-    <item name="3 x 19 =" answer="57,66,48,60"/>
-    <item name="1 x 18 =" answer="18,25,12,19"/>
-    <item name="2 x 14 =" answer="28,34,20,30"/>
-    <item name="15 x 3 =" answer="45,53,42,48"/>
-    <item name="20 x 4 =" answer="80,87,76,88"/>
-    <item name="8 x 16 =" answer="128,135,123,144"/>
-    <item name="18 x 5 =" answer="90,91,89,100"/>
-    <item name="5 x 19 =" answer="95,98,90,100"/>
-    <item name="8 x 10 =" answer="80,86,71,88"/>
-    <item name="9 x 10 =" answer="90,95,81,108"/>
-    <item name="16 x 7 =" answer="112,120,104,126"/>
-    <item name="19 x 2 =" answer="38,47,32,40"/>
-    <item name="8 x 20 =" answer="160,161,151,176"/>
-    <item name="7 x 17 =" answer="119,127,117,133"/>
-    <item name="5 x 11 =" answer="55,60,48,65"/>
-    <item name="13 x 6 =" answer="78,79,69,90"/>
-    <item name="10 x 5 =" answer="50,54,48,60"/>
-    <item name="14 x 3 =" answer="42,47,37,48"/>
-    <item name="6 x 14 =" answer="84,93,80,96"/>
-    <item name="13 x 3 =" answer="39,41,34,42"/>
-    <item name="15 x 1 =" answer="15,19,9,16"/>
-    <item name="1 x 15 =" answer="15,19,11,17"/>
-    <item name="11 x 2 =" answer="22,24,17,24"/>
-    <item name="6 x 12 =" answer="72,75,71,78"/>
-    <item name="6 x 10 =" answer="60,64,58,72"/>
-    <item name="14 x 7 =" answer="98,106,93,112"/>
-    <item name="14 x 6 =" answer="84,90,77,90"/>
-    <item name="5 x 20 =" answer="100,102,91,110"/>
-    <item name="10 x 5 =" answer="50,58,43,60"/>
-    <item name="20 x 3 =" answer="60,69,55,63"/>
-    <item name="16 x 3 =" answer="48,57,45,54"/>
-    <item name="13 x 2 =" answer="26,30,22,28"/>
-    <item name="4 x 14 =" answer="56,65,50,64"/>
-    <item name="9 x 11 =" answer="99,106,91,117"/>
-    <item name="7 x 15 =" answer="105,109,100,119"/>
-    <item name="20 x 6 =" answer="120,126,112,126"/>
-    <item name="8 x 19 =" answer="152,154,151,168"/>
-    <item name="10 x 5 =" answer="50,53,44,60"/>
-    <item name="7 x 11 =" answer="77,78,69,91"/>
-    <item name="9 x 20 =" answer="180,183,174,189"/>
-    <item name="13 x 6 =" answer="78,81,71,84"/>
-    <item name="10 x 3 =" answer="30,36,21,36"/>
-    <item name="13 x 9 =" answer="117,122,108,126"/>
-    <item name="8 x 19 =" answer="152,157,146,160"/>
-    <item name="12 x 9 =" answer="108,114,107,117"/>
-    <item name="3 x 16 =" answer="48,56,45,54"/>
-    <item name="14 x 9 =" answer="126,127,120,135"/>
-    <item name="11 x 7 =" answer="77,84,75,91"/>
-    <item name="20 x 4 =" answer="80,84,74,84"/>
-    <item name="16 x 6 =" answer="96,97,89,102"/>
-    <item name="18 x 5 =" answer="90,91,81,95"/>
-    <item name="12 x 2 =" answer="24,25,19,26"/>
-    <item name="14 x 1 =" answer="14,21,13,15"/>
-    <item name="3 x 11 =" answer="33,38,31,36"/>
-    <item name="17 x 6 =" answer="102,111,100,114"/>
-    <item name="9 x 19 =" answer="171,178,170,189"/>
-    <item name="14 x 6 =" answer="84,86,83,90"/>
-    <item name="4 x 10 =" answer="40,43,34,44"/>
-    <item name="7 x 15 =" answer="105,111,104,119"/>
-    <item name="12 x 3 =" answer="36,40,28,42"/>
-    <item name="3 x 13 =" answer="39,43,38,45"/>
-    <item name="7 x 19 =" answer="133,138,128,147"/>
-    <item name="15 x 5 =" answer="75,77,68,80"/>
-    <item name="18 x 3 =" answer="54,55,49,60"/>
-    <item name="4 x 18 =" answer="72,74,64,76"/>
-    <item name="4 x 20 =" answer="80,88,71,84"/>
-    <item name="11 x 6 =" answer="66,75,59,78"/>
-    <item name="8 x 11 =" answer="88,91,80,104"/>
-    <item name="11 x 7 =" answer="77,78,68,91"/>
-    <item name="13 x 3 =" answer="39,47,34,45"/>
-    <item name="20 x 4 =" answer="80,81,79,84"/>
-    <item name="9 x 13 =" answer="117,124,112,135"/>
-    <item name="16 x 7 =" answer="112,114,108,126"/>
-    <item name="4 x 19 =" answer="76,78,71,84"/>
-    <item name="16 x 6 =" answer="96,99,95,102"/>
-    <item name="20 x 7 =" answer="140,141,139,147"/>
-    <item name="4 x 11 =" answer="44,46,39,52"/>
-    <item name="19 x 9 =" answer="171,177,164,189"/>
-    <item name="4 x 16 =" answer="64,70,59,68"/>
-    <item name="6 x 16 =" answer="96,104,90,108"/>
-    <item name="6 x 15 =" answer="90,91,83,96"/>
-    <item name="4 x 14 =" answer="56,57,49,60"/>
-    <item name="17 x 3 =" answer="51,57,46,54"/>
-    <item name="1 x 11 =" answer="11,19,2,13"/>
-    <item name="13 x 9 =" answer="117,121,114,135"/>
-    <item name="15 x 9 =" answer="135,140,133,153"/>
-    <item name="4 x 17 =" answer="68,73,67,76"/>
-    <item name="18 x 8 =" answer="144,151,142,152"/>
-    <item name="2 x 14 =" answer="28,30,27,32"/>
-    <item name="9 x 14 =" answer="126,130,117,135"/>
+    <item name="7 x 11 = 　" answer="77,83,70,91"/>
+    <item name="11 x 7 = 　" answer="77,85,75,91"/>
+    <item name="20 x 3 = 　" answer="60,64,58,66"/>
+    <item name="3 x 18 = 　" answer="54,56,47,60"/>
+    <item name="12 x 9 = 　" answer="108,117,104,126"/>
+    <item name="12 x 7 = 　" answer="84,88,79,98"/>
+    <item name="12 x 1 = 　" answer="12,19,4,14"/>
+    <item name="17 x 9 = 　" answer="153,162,145,162"/>
+    <item name="5 x 15 = 　" answer="75,78,69,85"/>
+    <item name="13 x 1 = 　" answer="13,16,4,15"/>
+    <item name="2 x 18 = 　" answer="36,44,27,40"/>
+    <item name="15 x 5 = 　" answer="75,83,71,85"/>
+    <item name="3 x 19 = 　" answer="57,58,54,63"/>
+    <item name="2 x 14 = 　" answer="28,31,27,30"/>
+    <item name="2 x 12 = 　" answer="24,31,19,26"/>
+    <item name="19 x 3 = 　" answer="57,58,55,63"/>
+    <item name="18 x 9 = 　" answer="162,164,154,171"/>
+    <item name="4 x 12 = 　" answer="48,54,42,52"/>
+    <item name="19 x 8 = 　" answer="152,155,145,168"/>
+    <item name="4 x 14 = 　" answer="56,59,53,60"/>
+    <item name="18 x 2 = 　" answer="36,39,34,40"/>
+    <item name="16 x 2 = 　" answer="32,37,23,36"/>
+    <item name="17 x 6 = 　" answer="102,108,96,108"/>
+    <item name="12 x 5 = 　" answer="60,67,51,65"/>
+    <item name="6 x 10 = 　" answer="60,69,52,72"/>
+    <item name="8 x 14 = 　" answer="112,117,107,128"/>
+    <item name="11 x 4 = 　" answer="44,50,41,52"/>
+    <item name="8 x 18 = 　" answer="144,150,136,160"/>
+    <item name="8 x 13 = 　" answer="104,109,100,112"/>
+    <item name="16 x 8 = 　" answer="128,132,122,144"/>
+    <item name="16 x 2 = 　" answer="32,40,23,34"/>
+    <item name="7 x 17 = 　" answer="119,127,113,126"/>
+    <item name="12 x 8 = 　" answer="96,101,94,104"/>
+    <item name="13 x 3 = 　" answer="39,40,34,45"/>
+    <item name="13 x 7 = 　" answer="91,99,85,98"/>
+    <item name="16 x 8 = 　" answer="128,132,127,144"/>
+    <item name="20 x 2 = 　" answer="40,48,36,42"/>
+    <item name="9 x 16 = 　" answer="144,148,143,153"/>
+    <item name="13 x 1 = 　" answer="13,22,9,15"/>
+    <item name="13 x 6 = 　" answer="78,87,73,84"/>
+    <item name="11 x 1 = 　" answer="11,12,10,12"/>
+    <item name="2 x 14 = 　" answer="28,29,19,30"/>
+    <item name="16 x 8 = 　" answer="128,134,121,136"/>
+    <item name="1 x 12 = 　" answer="12,20,7,14"/>
+    <item name="10 x 3 = 　" answer="30,37,25,33"/>
+    <item name="4 x 18 = 　" answer="72,78,64,76"/>
+    <item name="8 x 18 = 　" answer="144,149,136,152"/>
+    <item name="13 x 7 = 　" answer="91,94,87,105"/>
+    <item name="4 x 18 = 　" answer="72,80,69,76"/>
+    <item name="7 x 10 = 　" answer="70,75,65,84"/>
+    <item name="19 x 6 = 　" answer="114,121,113,120"/>
+    <item name="7 x 12 = 　" answer="84,88,80,91"/>
+    <item name="14 x 2 = 　" answer="28,32,26,30"/>
+    <item name="12 x 9 = 　" answer="108,114,101,126"/>
+    <item name="19 x 2 = 　" answer="38,44,34,42"/>
+    <item name="6 x 19 = 　" answer="114,117,110,126"/>
+    <item name="6 x 10 = 　" answer="60,64,54,66"/>
+    <item name="19 x 8 = 　" answer="152,157,144,168"/>
+    <item name="11 x 6 = 　" answer="66,68,65,72"/>
+    <item name="17 x 4 = 　" answer="68,77,66,72"/>
+    <item name="17 x 7 = 　" answer="119,126,111,126"/>
+    <item name="10 x 2 = 　" answer="20,25,15,22"/>
+    <item name="17 x 8 = 　" answer="136,145,129,144"/>
+    <item name="16 x 1 = 　" answer="16,18,12,18"/>
+    <item name="19 x 4 = 　" answer="76,82,67,84"/>
+    <item name="17 x 9 = 　" answer="153,162,145,171"/>
+    <item name="16 x 8 = 　" answer="128,129,127,136"/>
+    <item name="7 x 13 = 　" answer="91,95,90,105"/>
+    <item name="10 x 4 = 　" answer="40,43,33,48"/>
+    <item name="4 x 16 = 　" answer="64,72,55,72"/>
+    <item name="19 x 3 = 　" answer="57,61,56,63"/>
+    <item name="14 x 9 = 　" answer="126,130,121,144"/>
+    <item name="17 x 1 = 　" answer="17,24,12,18"/>
+    <item name="1 x 17 = 　" answer="17,20,16,19"/>
+    <item name="3 x 10 = 　" answer="30,34,21,33"/>
+    <item name="12 x 6 = 　" answer="72,75,63,78"/>
+    <item name="8 x 12 = 　" answer="96,104,91,112"/>
+    <item name="18 x 6 = 　" answer="108,111,103,114"/>
+    <item name="20 x 2 = 　" answer="40,42,37,44"/>
+    <item name="4 x 12 = 　" answer="48,55,39,56"/>
+    <item name="5 x 12 = 　" answer="60,66,52,65"/>
+    <item name="15 x 8 = 　" answer="120,128,117,136"/>
+    <item name="9 x 20 = 　" answer="180,186,172,198"/>
+    <item name="9 x 16 = 　" answer="144,148,141,162"/>
+    <item name="11 x 5 = 　" answer="55,58,49,60"/>
+    <item name="18 x 4 = 　" answer="72,79,63,76"/>
+    <item name="13 x 1 = 　" answer="13,19,9,15"/>
+    <item name="12 x 7 = 　" answer="84,93,79,98"/>
+    <item name="7 x 11 = 　" answer="77,83,75,91"/>
+    <item name="19 x 9 = 　" answer="171,176,168,180"/>
+    <item name="15 x 5 = 　" answer="75,80,72,80"/>
+    <item name="9 x 17 = 　" answer="153,157,148,162"/>
+    <item name="20 x 5 = 　" answer="100,101,95,105"/>
+    <item name="4 x 15 = 　" answer="60,68,55,64"/>
+    <item name="18 x 4 = 　" answer="72,76,67,80"/>
+    <item name="15 x 1 = 　" answer="15,22,10,16"/>
+    <item name="19 x 7 = 　" answer="133,140,132,140"/>
+    <item name="14 x 9 = 　" answer="126,134,124,144"/>
+    <item name="10 x 2 = 　" answer="20,23,19,24"/>
+    <item name="17 x 3 = 　" answer="51,58,45,54"/>
+    <item name="6 x 17 = 　" answer="102,103,97,108"/>
+    <item name="6 x 18 = 　" answer="108,112,107,120"/>
+    <item name="11 x 3 = 　" answer="33,36,24,39"/>
+    <item name="19 x 9 = 　" answer="171,173,164,189"/>
+    <item name="1 x 16 = 　" answer="16,20,14,17"/>
+    <item name="17 x 4 = 　" answer="68,72,62,76"/>
+    <item name="6 x 12 = 　" answer="72,78,68,78"/>
+    <item name="10 x 9 = 　" answer="90,93,89,99"/>
+    <item name="3 x 14 = 　" answer="42,45,35,48"/>
+    <item name="11 x 9 = 　" answer="99,106,97,108"/>
+    <item name="3 x 19 = 　" answer="57,66,48,60"/>
+    <item name="1 x 18 = 　" answer="18,25,12,19"/>
+    <item name="2 x 14 = 　" answer="28,34,20,30"/>
+    <item name="15 x 3 = 　" answer="45,53,42,48"/>
+    <item name="20 x 4 = 　" answer="80,87,76,88"/>
+    <item name="8 x 16 = 　" answer="128,135,123,144"/>
+    <item name="18 x 5 = 　" answer="90,91,89,100"/>
+    <item name="5 x 19 = 　" answer="95,98,90,100"/>
+    <item name="8 x 10 = 　" answer="80,86,71,88"/>
+    <item name="9 x 10 = 　" answer="90,95,81,108"/>
+    <item name="16 x 7 = 　" answer="112,120,104,126"/>
+    <item name="19 x 2 = 　" answer="38,47,32,40"/>
+    <item name="8 x 20 = 　" answer="160,161,151,176"/>
+    <item name="7 x 17 = 　" answer="119,127,117,133"/>
+    <item name="5 x 11 = 　" answer="55,60,48,65"/>
+    <item name="13 x 6 = 　" answer="78,79,69,90"/>
+    <item name="10 x 5 = 　" answer="50,54,48,60"/>
+    <item name="14 x 3 = 　" answer="42,47,37,48"/>
+    <item name="6 x 14 = 　" answer="84,93,80,96"/>
+    <item name="13 x 3 = 　" answer="39,41,34,42"/>
+    <item name="15 x 1 = 　" answer="15,19,9,16"/>
+    <item name="1 x 15 = 　" answer="15,19,11,17"/>
+    <item name="11 x 2 = 　" answer="22,24,17,24"/>
+    <item name="6 x 12 = 　" answer="72,75,71,78"/>
+    <item name="6 x 10 = 　" answer="60,64,58,72"/>
+    <item name="14 x 7 = 　" answer="98,106,93,112"/>
+    <item name="14 x 6 = 　" answer="84,90,77,90"/>
+    <item name="5 x 20 = 　" answer="100,102,91,110"/>
+    <item name="10 x 5 = 　" answer="50,58,43,60"/>
+    <item name="20 x 3 = 　" answer="60,69,55,63"/>
+    <item name="16 x 3 = 　" answer="48,57,45,54"/>
+    <item name="13 x 2 = 　" answer="26,30,22,28"/>
+    <item name="4 x 14 = 　" answer="56,65,50,64"/>
+    <item name="9 x 11 = 　" answer="99,106,91,117"/>
+    <item name="7 x 15 = 　" answer="105,109,100,119"/>
+    <item name="20 x 6 = 　" answer="120,126,112,126"/>
+    <item name="8 x 19 = 　" answer="152,154,151,168"/>
+    <item name="10 x 5 = 　" answer="50,53,44,60"/>
+    <item name="7 x 11 = 　" answer="77,78,69,91"/>
+    <item name="9 x 20 = 　" answer="180,183,174,189"/>
+    <item name="13 x 6 = 　" answer="78,81,71,84"/>
+    <item name="10 x 3 = 　" answer="30,36,21,36"/>
+    <item name="13 x 9 = 　" answer="117,122,108,126"/>
+    <item name="8 x 19 = 　" answer="152,157,146,160"/>
+    <item name="12 x 9 = 　" answer="108,114,107,117"/>
+    <item name="3 x 16 = 　" answer="48,56,45,54"/>
+    <item name="14 x 9 = 　" answer="126,127,120,135"/>
+    <item name="11 x 7 = 　" answer="77,84,75,91"/>
+    <item name="20 x 4 = 　" answer="80,84,74,84"/>
+    <item name="16 x 6 = 　" answer="96,97,89,102"/>
+    <item name="18 x 5 = 　" answer="90,91,81,95"/>
+    <item name="12 x 2 = 　" answer="24,25,19,26"/>
+    <item name="14 x 1 = 　" answer="14,21,13,15"/>
+    <item name="3 x 11 = 　" answer="33,38,31,36"/>
+    <item name="17 x 6 = 　" answer="102,111,100,114"/>
+    <item name="9 x 19 = 　" answer="171,178,170,189"/>
+    <item name="14 x 6 = 　" answer="84,86,83,90"/>
+    <item name="4 x 10 = 　" answer="40,43,34,44"/>
+    <item name="7 x 15 = 　" answer="105,111,104,119"/>
+    <item name="12 x 3 = 　" answer="36,40,28,42"/>
+    <item name="3 x 13 = 　" answer="39,43,38,45"/>
+    <item name="7 x 19 = 　" answer="133,138,128,147"/>
+    <item name="15 x 5 = 　" answer="75,77,68,80"/>
+    <item name="18 x 3 = 　" answer="54,55,49,60"/>
+    <item name="4 x 18 = 　" answer="72,74,64,76"/>
+    <item name="4 x 20 = 　" answer="80,88,71,84"/>
+    <item name="11 x 6 = 　" answer="66,75,59,78"/>
+    <item name="8 x 11 = 　" answer="88,91,80,104"/>
+    <item name="11 x 7 = 　" answer="77,78,68,91"/>
+    <item name="13 x 3 = 　" answer="39,47,34,45"/>
+    <item name="20 x 4 = 　" answer="80,81,79,84"/>
+    <item name="9 x 13 = 　" answer="117,124,112,135"/>
+    <item name="16 x 7 = 　" answer="112,114,108,126"/>
+    <item name="4 x 19 = 　" answer="76,78,71,84"/>
+    <item name="16 x 6 = 　" answer="96,99,95,102"/>
+    <item name="20 x 7 = 　" answer="140,141,139,147"/>
+    <item name="4 x 11 = 　" answer="44,46,39,52"/>
+    <item name="19 x 9 = 　" answer="171,177,164,189"/>
+    <item name="4 x 16 = 　" answer="64,70,59,68"/>
+    <item name="6 x 16 = 　" answer="96,104,90,108"/>
+    <item name="6 x 15 = 　" answer="90,91,83,96"/>
+    <item name="4 x 14 = 　" answer="56,57,49,60"/>
+    <item name="17 x 3 = 　" answer="51,57,46,54"/>
+    <item name="1 x 11 = 　" answer="11,19,2,13"/>
+    <item name="13 x 9 = 　" answer="117,121,114,135"/>
+    <item name="15 x 9 = 　" answer="135,140,133,153"/>
+    <item name="4 x 17 = 　" answer="68,73,67,76"/>
+    <item name="18 x 8 = 　" answer="144,151,142,152"/>
+    <item name="2 x 14 = 　" answer="28,30,27,32"/>
+    <item name="9 x 14 = 　" answer="126,130,117,135"/>
 </problem>

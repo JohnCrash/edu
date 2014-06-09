@@ -777,6 +777,16 @@ function ACatcherScene:repos()
 	self:init_dog_timer()
 end
 
+--对第几个选项大圈
+function ACatcherScene:show_right_n( N )
+	if N >= 1 and N <= 4 then
+		local x,y = self._amouse[N]:getPosition()
+		self._error_flag:setPosition(cc.p(x,y))
+		self._error_flag:setVisible(true)
+		self._error_flag:getAnimation():playWithIndex(0)
+	end
+end
+
 --初始化角色
 function ACatcherScene:init_role()
 	--amouse
@@ -789,6 +799,17 @@ function ACatcherScene:init_role()
 	--题板
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("acatcher/an_niu/an_niu.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("acatcher/an_niu/an_niu.ExportJson")
+	--错误提示
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("acatcher/zheng_que_biao_ji/zheng_que_biao_ji.ExportJson")
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("acatcher/zheng_que_biao_ji/zheng_que_biao_ji.ExportJson")	
+	self._error_flag = ccs.Armature:create("zheng_que_biao_ji")
+	self._error_flag:setAnchorPoint(cc.p(-0.15,-0.2))
+	self._error_flag:setPosition(cc.p(self._ss.width/2,self._ss.height/2))
+	self._error_flag:setScaleX(0.8)
+	self._error_flag:setScaleY(0.8)
+	self._error_flag:setVisible(false)
+	--self._error_flag:getAnimation():playWithIndex(0)
+	self:addChild(self._error_flag,1000)
 	--时间小虫
 	--self._worm = ccs.Armature:create("chong_zi")
 	--self._worm:getAnimation():playWithIndex(0)
@@ -852,13 +873,14 @@ function ACatcherScene:init_role()
 		self._amouse[i]:setScaleX(2)
 		self._amouse[i]:setScaleY(2)
 		self._amouse[i]:getAnimation():playWithIndex(0)
-		
-		local b = (self._ss.width-4*box.width)/5
+		local screen_width = self._ss.width
+		screen_width = screen_width*3/4
+		local b = (screen_width-4*box.width)/5
 		self._amouse[i]:setAnchorPoint(cc.p(0,0))
 		if self._screen == 1 then
-			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),box.height/2))
+			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b)+screen_width/8,box.height/2))
 		else
-			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),1.0*box.height))
+			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b)+screen_width/8,1.0*box.height))
 		end
 		self._choose_text[i]:setAnchorPoint(cc.p(0.5,0.5))
 		local bone = self._amouse[i]:getBone("Layer3")
@@ -907,9 +929,11 @@ function ACatcherScene:show_right(i)
 	for i,v in ipairs(self._rand_idx) do
 		if v == 1 then
 --			self._amouse[i]:getAnimation():playWithIndex(6)
+			self:show_right_n( i )
 			self:delay_call(self.reload_scene,true,3)
 		elseif v == 2 and self._yes_num==2 then
 --			self._amouse[i]:getAnimation():playWithIndex(6)
+			self:show_right_n( i )
 		end
 	end
 	self:show_right_word(1,false)
@@ -919,7 +943,16 @@ end
 --开始下一个词
 function ACatcherScene:reload_scene(b)
 	for i=1,4 do
-		self._amouse[i]:getAnimation():playWithIndex(self._stage)
+		local idx = self._stage-1
+		if idx < 0 then
+			idx = 0
+		elseif idx > 14 then
+			idx = 14
+		end
+		self._amouse[i]:getAnimation():playWithIndex(idx)
+	end
+	if self._error_flag then
+		self._error_flag:setVisible(false)
 	end
 	self:next_select()
 end
@@ -1197,7 +1230,13 @@ function ACatcherScene:next_select()
 	self._ideal_pause = false
 	
 	for i=1,4 do
-		self._amouse[i]:getAnimation():playWithIndex(self._stage)
+		local idx = self._stage-1
+		if idx < 0 then
+			idx = 0
+		elseif idx > 14 then
+			idx = 14
+		end
+		self._amouse[i]:getAnimation():playWithIndex(idx)	
 	end
 	
 	if self._word_index > #self._words then
@@ -1447,8 +1486,9 @@ function ACatcherScene:game_over()
 	--self:Snow( false )
 	--结束动画
 	if self._thief then
+			math.randomseed(os.time())
 			self._thief:getAnimation():playWithIndex(math.random(4,5)) --嘲笑
-			self:delay_call(self.game_end_Dialog,true,3)
+			self:delay_call(self.game_end_Dialog,true,2)
 	else
 		self:game_end_Dialog()
 	end

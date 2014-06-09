@@ -1,203 +1,203 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <problem time_limit="6" word_num="1">
-    <item name="88 + 15 =" answer="103,110,100,123"/>
-    <item name="16 + 33 =" answer="49,53,48,59"/>
-    <item name="62 + 19 =" answer="81,88,73,91"/>
-    <item name="10 + 42 =" answer="52,55,51,72"/>
-    <item name="6 + 30 =" answer="36,41,31,46"/>
-    <item name="71 + 11 =" answer="82,83,79,102"/>
-    <item name="16 + 45 =" answer="61,69,60,81"/>
-    <item name="12 + 43 =" answer="55,64,48,75"/>
-    <item name="24 + 2 =" answer="26,31,19,46"/>
-    <item name="18 + 40 =" answer="58,60,53,78"/>
-    <item name="8 + 42 =" answer="50,53,43,70"/>
-    <item name="3 + 81 =" answer="84,88,76,94"/>
-    <item name="56 + 1 =" answer="57,60,53,77"/>
-    <item name="80 + 14 =" answer="94,98,92,114"/>
-    <item name="86 + 20 =" answer="106,111,98,116"/>
-    <item name="20 + 21 =" answer="41,46,40,61"/>
-    <item name="35 + 13 =" answer="48,49,46,58"/>
-    <item name="15 + 55 =" answer="70,74,69,90"/>
-    <item name="74 + 4 =" answer="78,79,73,88"/>
-    <item name="50 + 17 =" answer="67,71,62,87"/>
-    <item name="17 + 56 =" answer="73,82,67,83"/>
-    <item name="15 + 80 =" answer="95,97,88,115"/>
-    <item name="36 + 15 =" answer="51,52,50,71"/>
-    <item name="36 + 15 =" answer="51,58,49,61"/>
-    <item name="48 + 18 =" answer="66,74,62,86"/>
-    <item name="46 + 13 =" answer="59,64,54,69"/>
-    <item name="96 + 17 =" answer="113,121,104,123"/>
-    <item name="57 + 7 =" answer="64,72,63,84"/>
-    <item name="19 + 21 =" answer="40,47,34,60"/>
-    <item name="92 + 11 =" answer="103,105,95,113"/>
-    <item name="89 + 2 =" answer="91,97,86,101"/>
-    <item name="60 + 16 =" answer="76,77,67,96"/>
-    <item name="16 + 8 =" answer="24,32,23,44"/>
-    <item name="19 + 15 =" answer="34,35,31,54"/>
-    <item name="31 + 19 =" answer="50,59,45,60"/>
-    <item name="82 + 17 =" answer="99,105,95,119"/>
-    <item name="8 + 78 =" answer="86,90,85,106"/>
-    <item name="18 + 42 =" answer="60,69,58,70"/>
-    <item name="68 + 5 =" answer="73,75,68,83"/>
-    <item name="57 + 10 =" answer="67,68,66,87"/>
-    <item name="14 + 89 =" answer="103,111,101,113"/>
-    <item name="14 + 22 =" answer="36,41,32,46"/>
-    <item name="29 + 1 =" answer="30,38,25,50"/>
-    <item name="17 + 56 =" answer="73,76,66,83"/>
-    <item name="10 + 74 =" answer="84,91,79,104"/>
-    <item name="10 + 97 =" answer="107,112,99,117"/>
-    <item name="85 + 7 =" answer="92,98,91,102"/>
-    <item name="3 + 86 =" answer="89,91,85,99"/>
-    <item name="32 + 8 =" answer="40,43,32,60"/>
-    <item name="13 + 14 =" answer="27,31,21,47"/>
-    <item name="93 + 18 =" answer="111,115,107,131"/>
-    <item name="15 + 7 =" answer="22,29,18,32"/>
-    <item name="81 + 14 =" answer="95,100,87,115"/>
-    <item name="69 + 5 =" answer="74,79,73,84"/>
-    <item name="45 + 20 =" answer="65,73,61,85"/>
-    <item name="36 + 13 =" answer="49,55,43,59"/>
-    <item name="36 + 3 =" answer="39,46,31,59"/>
-    <item name="1 + 88 =" answer="89,96,87,99"/>
-    <item name="57 + 5 =" answer="62,67,54,82"/>
-    <item name="20 + 41 =" answer="61,66,58,81"/>
-    <item name="1 + 82 =" answer="83,89,79,93"/>
-    <item name="8 + 89 =" answer="97,104,91,107"/>
-    <item name="8 + 85 =" answer="93,94,90,103"/>
-    <item name="34 + 3 =" answer="37,43,31,57"/>
-    <item name="95 + 8 =" answer="103,109,101,123"/>
-    <item name="12 + 77 =" answer="89,91,83,99"/>
-    <item name="62 + 12 =" answer="74,77,66,94"/>
-    <item name="13 + 77 =" answer="90,92,81,100"/>
-    <item name="71 + 4 =" answer="75,83,68,85"/>
-    <item name="10 + 97 =" answer="107,116,102,117"/>
-    <item name="12 + 72 =" answer="84,92,78,94"/>
-    <item name="13 + 24 =" answer="37,44,31,57"/>
-    <item name="4 + 17 =" answer="21,26,15,31"/>
-    <item name="12 + 90 =" answer="102,109,96,112"/>
-    <item name="16 + 7 =" answer="23,26,16,43"/>
-    <item name="7 + 29 =" answer="36,41,32,46"/>
-    <item name="3 + 90 =" answer="93,96,90,113"/>
-    <item name="27 + 2 =" answer="29,30,28,39"/>
-    <item name="51 + 16 =" answer="67,74,62,87"/>
-    <item name="13 + 46 =" answer="59,64,52,69"/>
-    <item name="68 + 12 =" answer="80,84,71,90"/>
-    <item name="20 + 71 =" answer="91,95,84,101"/>
-    <item name="14 + 27 =" answer="41,45,38,61"/>
-    <item name="45 + 8 =" answer="53,62,45,73"/>
-    <item name="14 + 10 =" answer="24,31,22,34"/>
-    <item name="13 + 59 =" answer="72,78,66,82"/>
-    <item name="4 + 10 =" answer="14,19,8,24"/>
-    <item name="16 + 4 =" answer="20,26,17,40"/>
-    <item name="76 + 2 =" answer="78,80,73,98"/>
-    <item name="53 + 4 =" answer="57,62,49,77"/>
-    <item name="60 + 11 =" answer="71,74,63,91"/>
-    <item name="9 + 90 =" answer="99,105,98,109"/>
-    <item name="16 + 80 =" answer="96,105,88,116"/>
-    <item name="1 + 11 =" answer="12,13,10,22"/>
-    <item name="5 + 11 =" answer="16,22,10,26"/>
-    <item name="2 + 47 =" answer="49,50,47,59"/>
-    <item name="85 + 1 =" answer="86,89,77,106"/>
-    <item name="24 + 18 =" answer="42,48,41,52"/>
-    <item name="4 + 61 =" answer="65,72,59,85"/>
-    <item name="4 + 52 =" answer="56,63,51,76"/>
-    <item name="5 + 97 =" answer="102,105,101,112"/>
-    <item name="9 + 95 =" answer="104,112,95,114"/>
-    <item name="50 + 20 =" answer="70,75,64,80"/>
-    <item name="17 + 18 =" answer="35,41,33,55"/>
-    <item name="19 + 36 =" answer="55,57,49,75"/>
-    <item name="13 + 59 =" answer="72,80,66,92"/>
-    <item name="15 + 47 =" answer="62,70,58,72"/>
-    <item name="4 + 28 =" answer="32,36,25,42"/>
-    <item name="23 + 4 =" answer="27,34,24,37"/>
-    <item name="42 + 5 =" answer="47,52,38,57"/>
-    <item name="62 + 13 =" answer="75,84,72,95"/>
-    <item name="18 + 67 =" answer="85,87,80,95"/>
-    <item name="56 + 6 =" answer="62,64,53,82"/>
-    <item name="17 + 1 =" answer="18,27,9,38"/>
-    <item name="44 + 5 =" answer="49,50,43,69"/>
-    <item name="10 + 54 =" answer="64,73,60,84"/>
-    <item name="4 + 66 =" answer="70,73,63,90"/>
-    <item name="93 + 12 =" answer="105,114,99,115"/>
-    <item name="55 + 20 =" answer="75,81,74,85"/>
-    <item name="32 + 1 =" answer="33,34,28,43"/>
-    <item name="6 + 20 =" answer="26,34,24,46"/>
-    <item name="43 + 11 =" answer="54,55,52,64"/>
-    <item name="60 + 5 =" answer="65,68,63,85"/>
-    <item name="16 + 38 =" answer="54,56,51,64"/>
-    <item name="5 + 95 =" answer="100,108,97,110"/>
-    <item name="15 + 97 =" answer="112,119,107,122"/>
-    <item name="92 + 10 =" answer="102,107,93,122"/>
-    <item name="2 + 28 =" answer="30,35,29,50"/>
-    <item name="4 + 96 =" answer="100,108,97,120"/>
-    <item name="64 + 11 =" answer="75,76,72,85"/>
-    <item name="17 + 33 =" answer="50,51,42,60"/>
-    <item name="14 + 91 =" answer="105,111,96,125"/>
-    <item name="86 + 16 =" answer="102,103,101,112"/>
-    <item name="28 + 10 =" answer="38,39,34,58"/>
-    <item name="1 + 93 =" answer="94,96,93,104"/>
-    <item name="31 + 4 =" answer="35,36,31,55"/>
-    <item name="46 + 12 =" answer="58,63,49,78"/>
-    <item name="40 + 7 =" answer="47,51,40,57"/>
-    <item name="19 + 56 =" answer="75,81,72,85"/>
-    <item name="8 + 82 =" answer="90,98,88,100"/>
-    <item name="1 + 86 =" answer="87,92,85,107"/>
-    <item name="15 + 56 =" answer="71,72,68,81"/>
-    <item name="37 + 5 =" answer="42,47,39,52"/>
-    <item name="5 + 56 =" answer="61,62,59,71"/>
-    <item name="17 + 76 =" answer="93,98,90,113"/>
-    <item name="79 + 20 =" answer="99,103,94,119"/>
-    <item name="22 + 4 =" answer="26,28,21,36"/>
-    <item name="28 + 4 =" answer="32,40,28,42"/>
-    <item name="50 + 16 =" answer="66,72,64,76"/>
-    <item name="81 + 1 =" answer="82,90,80,102"/>
-    <item name="6 + 96 =" answer="102,111,96,122"/>
-    <item name="20 + 9 =" answer="29,34,28,39"/>
-    <item name="20 + 8 =" answer="28,31,19,48"/>
-    <item name="4 + 90 =" answer="94,101,89,104"/>
-    <item name="15 + 6 =" answer="21,27,13,41"/>
-    <item name="33 + 4 =" answer="37,42,30,57"/>
-    <item name="86 + 20 =" answer="106,109,102,126"/>
-    <item name="7 + 64 =" answer="71,75,65,81"/>
-    <item name="12 + 23 =" answer="35,36,26,55"/>
-    <item name="88 + 6 =" answer="94,99,91,114"/>
-    <item name="20 + 7 =" answer="27,33,20,47"/>
-    <item name="10 + 4 =" answer="14,22,11,24"/>
-    <item name="36 + 10 =" answer="46,49,41,56"/>
-    <item name="51 + 18 =" answer="69,74,64,89"/>
-    <item name="10 + 84 =" answer="94,100,86,104"/>
-    <item name="24 + 18 =" answer="42,45,34,52"/>
-    <item name="15 + 86 =" answer="101,109,92,121"/>
-    <item name="57 + 10 =" answer="67,68,60,77"/>
-    <item name="23 + 14 =" answer="37,43,33,57"/>
-    <item name="6 + 55 =" answer="61,69,58,71"/>
-    <item name="64 + 7 =" answer="71,75,62,91"/>
-    <item name="28 + 7 =" answer="35,37,33,45"/>
-    <item name="15 + 30 =" answer="45,54,40,55"/>
-    <item name="19 + 96 =" answer="115,118,108,125"/>
-    <item name="55 + 17 =" answer="72,76,67,92"/>
-    <item name="17 + 95 =" answer="112,117,104,122"/>
-    <item name="7 + 54 =" answer="61,69,53,81"/>
-    <item name="11 + 9 =" answer="20,25,13,30"/>
-    <item name="75 + 6 =" answer="81,89,77,91"/>
-    <item name="50 + 2 =" answer="52,56,45,62"/>
-    <item name="42 + 5 =" answer="47,50,42,67"/>
-    <item name="97 + 13 =" answer="110,112,108,120"/>
-    <item name="80 + 9 =" answer="89,91,88,99"/>
-    <item name="57 + 1 =" answer="58,62,52,68"/>
-    <item name="7 + 39 =" answer="46,48,40,56"/>
-    <item name="11 + 87 =" answer="98,106,92,118"/>
-    <item name="1 + 72 =" answer="73,75,68,93"/>
-    <item name="26 + 7 =" answer="33,38,27,43"/>
-    <item name="12 + 18 =" answer="30,32,21,50"/>
-    <item name="10 + 31 =" answer="41,49,35,51"/>
-    <item name="16 + 89 =" answer="105,110,102,125"/>
-    <item name="10 + 54 =" answer="64,72,60,74"/>
-    <item name="14 + 28 =" answer="42,45,40,62"/>
-    <item name="3 + 94 =" answer="97,98,93,117"/>
-    <item name="11 + 88 =" answer="99,105,97,109"/>
-    <item name="15 + 5 =" answer="20,28,17,40"/>
-    <item name="15 + 66 =" answer="81,87,78,91"/>
-    <item name="45 + 6 =" answer="51,59,49,71"/>
-    <item name="37 + 16 =" answer="53,56,50,63"/>
-    <item name="12 + 47 =" answer="59,65,55,69"/>
+    <item name="88 + 15 = 　" answer="103,110,100,123"/>
+    <item name="16 + 33 = 　" answer="49,53,48,59"/>
+    <item name="62 + 19 = 　" answer="81,88,73,91"/>
+    <item name="10 + 42 = 　" answer="52,55,51,72"/>
+    <item name="6 + 30 = 　" answer="36,41,31,46"/>
+    <item name="71 + 11 = 　" answer="82,83,79,102"/>
+    <item name="16 + 45 = 　" answer="61,69,60,81"/>
+    <item name="12 + 43 = 　" answer="55,64,48,75"/>
+    <item name="24 + 2 = 　" answer="26,31,19,46"/>
+    <item name="18 + 40 = 　" answer="58,60,53,78"/>
+    <item name="8 + 42 = 　" answer="50,53,43,70"/>
+    <item name="3 + 81 = 　" answer="84,88,76,94"/>
+    <item name="56 + 1 = 　" answer="57,60,53,77"/>
+    <item name="80 + 14 = 　" answer="94,98,92,114"/>
+    <item name="86 + 20 = 　" answer="106,111,98,116"/>
+    <item name="20 + 21 = 　" answer="41,46,40,61"/>
+    <item name="35 + 13 = 　" answer="48,49,46,58"/>
+    <item name="15 + 55 = 　" answer="70,74,69,90"/>
+    <item name="74 + 4 = 　" answer="78,79,73,88"/>
+    <item name="50 + 17 = 　" answer="67,71,62,87"/>
+    <item name="17 + 56 = 　" answer="73,82,67,83"/>
+    <item name="15 + 80 = 　" answer="95,97,88,115"/>
+    <item name="36 + 15 = 　" answer="51,52,50,71"/>
+    <item name="36 + 15 = 　" answer="51,58,49,61"/>
+    <item name="48 + 18 = 　" answer="66,74,62,86"/>
+    <item name="46 + 13 = 　" answer="59,64,54,69"/>
+    <item name="96 + 17 = 　" answer="113,121,104,123"/>
+    <item name="57 + 7 = 　" answer="64,72,63,84"/>
+    <item name="19 + 21 = 　" answer="40,47,34,60"/>
+    <item name="92 + 11 = 　" answer="103,105,95,113"/>
+    <item name="89 + 2 = 　" answer="91,97,86,101"/>
+    <item name="60 + 16 = 　" answer="76,77,67,96"/>
+    <item name="16 + 8 = 　" answer="24,32,23,44"/>
+    <item name="19 + 15 = 　" answer="34,35,31,54"/>
+    <item name="31 + 19 = 　" answer="50,59,45,60"/>
+    <item name="82 + 17 = 　" answer="99,105,95,119"/>
+    <item name="8 + 78 = 　" answer="86,90,85,106"/>
+    <item name="18 + 42 = 　" answer="60,69,58,70"/>
+    <item name="68 + 5 = 　" answer="73,75,68,83"/>
+    <item name="57 + 10 = 　" answer="67,68,66,87"/>
+    <item name="14 + 89 = 　" answer="103,111,101,113"/>
+    <item name="14 + 22 = 　" answer="36,41,32,46"/>
+    <item name="29 + 1 = 　" answer="30,38,25,50"/>
+    <item name="17 + 56 = 　" answer="73,76,66,83"/>
+    <item name="10 + 74 = 　" answer="84,91,79,104"/>
+    <item name="10 + 97 = 　" answer="107,112,99,117"/>
+    <item name="85 + 7 = 　" answer="92,98,91,102"/>
+    <item name="3 + 86 = 　" answer="89,91,85,99"/>
+    <item name="32 + 8 = 　" answer="40,43,32,60"/>
+    <item name="13 + 14 = 　" answer="27,31,21,47"/>
+    <item name="93 + 18 = 　" answer="111,115,107,131"/>
+    <item name="15 + 7 = 　" answer="22,29,18,32"/>
+    <item name="81 + 14 = 　" answer="95,100,87,115"/>
+    <item name="69 + 5 = 　" answer="74,79,73,84"/>
+    <item name="45 + 20 = 　" answer="65,73,61,85"/>
+    <item name="36 + 13 = 　" answer="49,55,43,59"/>
+    <item name="36 + 3 = 　" answer="39,46,31,59"/>
+    <item name="1 + 88 = 　" answer="89,96,87,99"/>
+    <item name="57 + 5 = 　" answer="62,67,54,82"/>
+    <item name="20 + 41 = 　" answer="61,66,58,81"/>
+    <item name="1 + 82 = 　" answer="83,89,79,93"/>
+    <item name="8 + 89 = 　" answer="97,104,91,107"/>
+    <item name="8 + 85 = 　" answer="93,94,90,103"/>
+    <item name="34 + 3 = 　" answer="37,43,31,57"/>
+    <item name="95 + 8 = 　" answer="103,109,101,123"/>
+    <item name="12 + 77 = 　" answer="89,91,83,99"/>
+    <item name="62 + 12 = 　" answer="74,77,66,94"/>
+    <item name="13 + 77 = 　" answer="90,92,81,100"/>
+    <item name="71 + 4 = 　" answer="75,83,68,85"/>
+    <item name="10 + 97 = 　" answer="107,116,102,117"/>
+    <item name="12 + 72 = 　" answer="84,92,78,94"/>
+    <item name="13 + 24 = 　" answer="37,44,31,57"/>
+    <item name="4 + 17 = 　" answer="21,26,15,31"/>
+    <item name="12 + 90 = 　" answer="102,109,96,112"/>
+    <item name="16 + 7 = 　" answer="23,26,16,43"/>
+    <item name="7 + 29 = 　" answer="36,41,32,46"/>
+    <item name="3 + 90 = 　" answer="93,96,90,113"/>
+    <item name="27 + 2 = 　" answer="29,30,28,39"/>
+    <item name="51 + 16 = 　" answer="67,74,62,87"/>
+    <item name="13 + 46 = 　" answer="59,64,52,69"/>
+    <item name="68 + 12 = 　" answer="80,84,71,90"/>
+    <item name="20 + 71 = 　" answer="91,95,84,101"/>
+    <item name="14 + 27 = 　" answer="41,45,38,61"/>
+    <item name="45 + 8 = 　" answer="53,62,45,73"/>
+    <item name="14 + 10 = 　" answer="24,31,22,34"/>
+    <item name="13 + 59 = 　" answer="72,78,66,82"/>
+    <item name="4 + 10 = 　" answer="14,19,8,24"/>
+    <item name="16 + 4 = 　" answer="20,26,17,40"/>
+    <item name="76 + 2 = 　" answer="78,80,73,98"/>
+    <item name="53 + 4 = 　" answer="57,62,49,77"/>
+    <item name="60 + 11 = 　" answer="71,74,63,91"/>
+    <item name="9 + 90 = 　" answer="99,105,98,109"/>
+    <item name="16 + 80 = 　" answer="96,105,88,116"/>
+    <item name="1 + 11 = 　" answer="12,13,10,22"/>
+    <item name="5 + 11 = 　" answer="16,22,10,26"/>
+    <item name="2 + 47 = 　" answer="49,50,47,59"/>
+    <item name="85 + 1 = 　" answer="86,89,77,106"/>
+    <item name="24 + 18 = 　" answer="42,48,41,52"/>
+    <item name="4 + 61 = 　" answer="65,72,59,85"/>
+    <item name="4 + 52 = 　" answer="56,63,51,76"/>
+    <item name="5 + 97 = 　" answer="102,105,101,112"/>
+    <item name="9 + 95 = 　" answer="104,112,95,114"/>
+    <item name="50 + 20 = 　" answer="70,75,64,80"/>
+    <item name="17 + 18 = 　" answer="35,41,33,55"/>
+    <item name="19 + 36 = 　" answer="55,57,49,75"/>
+    <item name="13 + 59 = 　" answer="72,80,66,92"/>
+    <item name="15 + 47 = 　" answer="62,70,58,72"/>
+    <item name="4 + 28 = 　" answer="32,36,25,42"/>
+    <item name="23 + 4 = 　" answer="27,34,24,37"/>
+    <item name="42 + 5 = 　" answer="47,52,38,57"/>
+    <item name="62 + 13 = 　" answer="75,84,72,95"/>
+    <item name="18 + 67 = 　" answer="85,87,80,95"/>
+    <item name="56 + 6 = 　" answer="62,64,53,82"/>
+    <item name="17 + 1 = 　" answer="18,27,9,38"/>
+    <item name="44 + 5 = 　" answer="49,50,43,69"/>
+    <item name="10 + 54 = 　" answer="64,73,60,84"/>
+    <item name="4 + 66 = 　" answer="70,73,63,90"/>
+    <item name="93 + 12 = 　" answer="105,114,99,115"/>
+    <item name="55 + 20 = 　" answer="75,81,74,85"/>
+    <item name="32 + 1 = 　" answer="33,34,28,43"/>
+    <item name="6 + 20 = 　" answer="26,34,24,46"/>
+    <item name="43 + 11 = 　" answer="54,55,52,64"/>
+    <item name="60 + 5 = 　" answer="65,68,63,85"/>
+    <item name="16 + 38 = 　" answer="54,56,51,64"/>
+    <item name="5 + 95 = 　" answer="100,108,97,110"/>
+    <item name="15 + 97 = 　" answer="112,119,107,122"/>
+    <item name="92 + 10 = 　" answer="102,107,93,122"/>
+    <item name="2 + 28 = 　" answer="30,35,29,50"/>
+    <item name="4 + 96 = 　" answer="100,108,97,120"/>
+    <item name="64 + 11 = 　" answer="75,76,72,85"/>
+    <item name="17 + 33 = 　" answer="50,51,42,60"/>
+    <item name="14 + 91 = 　" answer="105,111,96,125"/>
+    <item name="86 + 16 = 　" answer="102,103,101,112"/>
+    <item name="28 + 10 = 　" answer="38,39,34,58"/>
+    <item name="1 + 93 = 　" answer="94,96,93,104"/>
+    <item name="31 + 4 = 　" answer="35,36,31,55"/>
+    <item name="46 + 12 = 　" answer="58,63,49,78"/>
+    <item name="40 + 7 = 　" answer="47,51,40,57"/>
+    <item name="19 + 56 = 　" answer="75,81,72,85"/>
+    <item name="8 + 82 = 　" answer="90,98,88,100"/>
+    <item name="1 + 86 = 　" answer="87,92,85,107"/>
+    <item name="15 + 56 = 　" answer="71,72,68,81"/>
+    <item name="37 + 5 = 　" answer="42,47,39,52"/>
+    <item name="5 + 56 = 　" answer="61,62,59,71"/>
+    <item name="17 + 76 = 　" answer="93,98,90,113"/>
+    <item name="79 + 20 = 　" answer="99,103,94,119"/>
+    <item name="22 + 4 = 　" answer="26,28,21,36"/>
+    <item name="28 + 4 = 　" answer="32,40,28,42"/>
+    <item name="50 + 16 = 　" answer="66,72,64,76"/>
+    <item name="81 + 1 = 　" answer="82,90,80,102"/>
+    <item name="6 + 96 = 　" answer="102,111,96,122"/>
+    <item name="20 + 9 = 　" answer="29,34,28,39"/>
+    <item name="20 + 8 = 　" answer="28,31,19,48"/>
+    <item name="4 + 90 = 　" answer="94,101,89,104"/>
+    <item name="15 + 6 = 　" answer="21,27,13,41"/>
+    <item name="33 + 4 = 　" answer="37,42,30,57"/>
+    <item name="86 + 20 = 　" answer="106,109,102,126"/>
+    <item name="7 + 64 = 　" answer="71,75,65,81"/>
+    <item name="12 + 23 = 　" answer="35,36,26,55"/>
+    <item name="88 + 6 = 　" answer="94,99,91,114"/>
+    <item name="20 + 7 = 　" answer="27,33,20,47"/>
+    <item name="10 + 4 = 　" answer="14,22,11,24"/>
+    <item name="36 + 10 = 　" answer="46,49,41,56"/>
+    <item name="51 + 18 = 　" answer="69,74,64,89"/>
+    <item name="10 + 84 = 　" answer="94,100,86,104"/>
+    <item name="24 + 18 = 　" answer="42,45,34,52"/>
+    <item name="15 + 86 = 　" answer="101,109,92,121"/>
+    <item name="57 + 10 = 　" answer="67,68,60,77"/>
+    <item name="23 + 14 = 　" answer="37,43,33,57"/>
+    <item name="6 + 55 = 　" answer="61,69,58,71"/>
+    <item name="64 + 7 = 　" answer="71,75,62,91"/>
+    <item name="28 + 7 = 　" answer="35,37,33,45"/>
+    <item name="15 + 30 = 　" answer="45,54,40,55"/>
+    <item name="19 + 96 = 　" answer="115,118,108,125"/>
+    <item name="55 + 17 = 　" answer="72,76,67,92"/>
+    <item name="17 + 95 = 　" answer="112,117,104,122"/>
+    <item name="7 + 54 = 　" answer="61,69,53,81"/>
+    <item name="11 + 9 = 　" answer="20,25,13,30"/>
+    <item name="75 + 6 = 　" answer="81,89,77,91"/>
+    <item name="50 + 2 = 　" answer="52,56,45,62"/>
+    <item name="42 + 5 = 　" answer="47,50,42,67"/>
+    <item name="97 + 13 = 　" answer="110,112,108,120"/>
+    <item name="80 + 9 = 　" answer="89,91,88,99"/>
+    <item name="57 + 1 = 　" answer="58,62,52,68"/>
+    <item name="7 + 39 = 　" answer="46,48,40,56"/>
+    <item name="11 + 87 = 　" answer="98,106,92,118"/>
+    <item name="1 + 72 = 　" answer="73,75,68,93"/>
+    <item name="26 + 7 = 　" answer="33,38,27,43"/>
+    <item name="12 + 18 = 　" answer="30,32,21,50"/>
+    <item name="10 + 31 = 　" answer="41,49,35,51"/>
+    <item name="16 + 89 = 　" answer="105,110,102,125"/>
+    <item name="10 + 54 = 　" answer="64,72,60,74"/>
+    <item name="14 + 28 = 　" answer="42,45,40,62"/>
+    <item name="3 + 94 = 　" answer="97,98,93,117"/>
+    <item name="11 + 88 = 　" answer="99,105,97,109"/>
+    <item name="15 + 5 = 　" answer="20,28,17,40"/>
+    <item name="15 + 66 = 　" answer="81,87,78,91"/>
+    <item name="45 + 6 = 　" answer="51,59,49,71"/>
+    <item name="37 + 16 = 　" answer="53,56,50,63"/>
+    <item name="12 + 47 = 　" answer="59,65,55,69"/>
 </problem>

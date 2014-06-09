@@ -9,8 +9,8 @@
         {
           "name": "Layer3",
           "parent": "",
-          "x": 0.0,
-          "y": 0.0,
+          "x": 2.5,
+          "y": -0.32666015625,
           "z": 3,
           "cX": 1.0,
           "cY": 1.0,
@@ -21,7 +21,21 @@
           "effectbyskeleton": false,
           "display_data": [
             {
-              "name": "da_suan.png",
+              "name": "bai_cai.png",
+              "displayType": 0,
+              "skin_data": [
+                {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "cX": 1.0,
+                  "cY": 1.0,
+                  "kX": 0.0,
+                  "kY": 0.0
+                }
+              ]
+            },
+            {
+              "name": "wei_zhi.png",
               "displayType": 0,
               "skin_data": [
                 {
@@ -313,23 +327,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -400,23 +408,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -475,7 +477,7 @@
         },
         {
           "name": "bai_cai",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
@@ -487,23 +489,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -574,23 +570,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
-                  "y": 1.0,
+                  "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -649,7 +639,7 @@
         },
         {
           "name": "mo_gu",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
@@ -661,23 +651,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -748,23 +732,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -823,7 +801,7 @@
         },
         {
           "name": "ning_meng",
-          "dr": 2,
+          "dr": 1,
           "lp": false,
           "to": 0,
           "drTW": 0,
@@ -835,23 +813,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -922,23 +894,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1009,23 +975,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1096,23 +1056,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1183,23 +1137,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1270,23 +1218,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1357,23 +1299,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1444,23 +1380,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1531,23 +1461,17 @@
               "dl": 0.0,
               "frame_data": [
                 {
-                  "dI": 0,
+                  "dI": 1,
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0,
-                  "cX": 0.1,
-                  "cY": 0.1,
+                  "cX": 1.0,
+                  "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
                   "fi": 0,
                   "twE": 0,
-                  "tweenFrame": true,
-                  "color": {
-                    "a": 0,
-                    "r": 255,
-                    "g": 255,
-                    "b": 255
-                  }
+                  "tweenFrame": true
                 }
               ]
             },
@@ -1730,6 +1654,14 @@
     },
     {
       "name": "yt",
+      "width": 0.0,
+      "height": 0.0,
+      "pX": 0.5,
+      "pY": 0.5,
+      "plistFile": ""
+    },
+    {
+      "name": "wei_zhi",
       "width": 0.0,
       "height": 0.0,
       "pX": 0.5,
