@@ -802,6 +802,10 @@ function ACatcherScene:init_role()
 	--错误提示
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("acatcher/zheng_que_biao_ji/zheng_que_biao_ji.ExportJson")
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("acatcher/zheng_que_biao_ji/zheng_que_biao_ji.ExportJson")	
+	--棒子
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("acatcher/bang_zi/bang_zi.ExportJson")
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("acatcher/bang_zi/bang_zi.ExportJson")	
+
 	self._error_flag = ccs.Armature:create("zheng_que_biao_ji")
 	self._error_flag:setAnchorPoint(cc.p(-0.15,-0.2))
 	self._error_flag:setPosition(cc.p(self._ss.width/2,self._ss.height/2))
@@ -893,9 +897,9 @@ function ACatcherScene:init_role()
 		self._choose_text[i]:setColor(cc.c3b(0,0,0))		
 	end
 	--锤子
-	self._hummer = ccs.Armature:create("NewAnimation")
+	self._hummer = ccs.Armature:create("bang_zi")
 	self:hummer_home()
-	self._hummer:getAnimation():playWithIndex(1)
+	self._hummer:getAnimation():playWithIndex(0)
 	self:addChild(self._hummer)
 end
 
@@ -1032,7 +1036,7 @@ function ACatcherScene:init_event()
 	--多点触摸
 	local function onTouchBegan(touches,event)
 		local p = touches[1]:getLocation()
-		self._hummer:getAnimation():playWithIndex(1)
+		self._hummer:getAnimation():playWithIndex(0)
 		self._hummer:setPosition(p)
 		
 		self:play_sound(SND_CLICK)
