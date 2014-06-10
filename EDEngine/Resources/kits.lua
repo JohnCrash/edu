@@ -62,10 +62,14 @@ local function download_http_by_curl(url,tout)
        -- print('%', url, dltotal, dlnow) -- do your fancy reporting here
    end)
    cobj:setopt(curl.OPT_NOPROGRESS, false) -- use this to activate progress
-   if cobj:perform() then
+   local result,err_msg,err_code = cobj:perform()
+   if result then
 		return table.concat(t) -- return the whole data as a string  
 	else
+		print( '-----------download_http_by_curl---------------' )
 		print( 'can\'t connect to '..url )
+		print( 'Error message : '..err_msg )
+		print( 'Error code : '..err_code )
 		return nil
 	end 
 end
@@ -102,11 +106,15 @@ local function http_post(url,text,cookie,to)
         table.insert(t, buf) -- store a chunk of data received
         return #buf 
 		end)
-	
-	if cobj:perform() then
-		return table.concat(t)
+		
+	local result,err_msg,err_code = cobj:perform()
+   if result then
+		return table.concat(t) -- return the whole data as a string  
 	else
-		print('http_json_post error :'..url)
+		print( '-----------http_post---------------' )
+		print( 'can\'t connect to '..url )
+		print( 'Error message : '..err_msg )
+		print( 'Error code : '..err_code )
 		return nil
 	end
 end
@@ -132,10 +140,15 @@ local function http_get(url,cookie,to)
        -- print('%', url, dltotal, dlnow) -- do your fancy reporting here
    end)
    cobj:setopt(curl.OPT_NOPROGRESS, false) -- use this to activate progress
-   if cobj:perform() then
+   
+   local result,err_msg,err_code = cobj:perform()
+   if result then
 		return table.concat(t) -- return the whole data as a string  
 	else
+		print( '-----------http_get---------------' )
 		print( 'can\'t connect to '..url )
+		print( 'Error message : '..err_msg )
+		print( 'Error code : '..err_code )
 		return nil
 	end
 end
