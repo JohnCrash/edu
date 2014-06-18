@@ -11,9 +11,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/HelloWorldScene.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
-					$(LOCAL_PATH)/../../../../cocos2d-x-3.0/cocos/scripting/lua-bindings/manual \
-					$(LOCAL_PATH)/../../../../cocos2d-x-3.0/external/lua/lua \
-					$(LOCAL_PATH)/../../../../cocos2d-x-3.0/external/lua/tolua \
+					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
+					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/lua \
+					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/tolua \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := cocos_lua_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
@@ -23,7 +23,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES += box2d_static
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(call import-module,2d)
+#$(call import-module,cocos)
 $(call import-module,audio/android)
 $(call import-module,Box2D)
 $(call import-module,scripting/lua-bindings)

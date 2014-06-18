@@ -1338,15 +1338,27 @@ end
 
 --释放
 function AMouseScene:release()
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
 	self:stop_music()
 end
 
 function AMouseScene.create()
-    local scene = cc.Scene:create()
-    local layer = AMouseScene.extend(cc.Layer:create())
-    layer:init()
-    scene:addChild(layer)
-    return scene 
+	local scene = cc.Scene:create()
+	local layer = AMouseScene.extend(cc.Layer:create())
+	
+	scene:addChild(layer)
+	
+	local function onNodeEvent(event)
+		if "enter" == event then
+			layer:init()
+		elseif "exit" == event then
+			layer:release()
+		end
+	end	
+	layer:registerScriptHandler(onNodeEvent)
+	return scene 
 end
 
 function AMouseMain()

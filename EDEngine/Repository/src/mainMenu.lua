@@ -34,6 +34,9 @@ end
 
 -- create menu
 function CreateTestMenu()
+	print("==================================")
+	print("CreateTestMenu")
+	print("==================================")
     local menuLayer = cc.Layer:create()
 
     local function closeCallback()
