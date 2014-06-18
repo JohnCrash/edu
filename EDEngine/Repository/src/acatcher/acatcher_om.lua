@@ -352,11 +352,11 @@ function ACatcherScene:set_top_list( url )
 					for n,s in pairs(v) do
 						print( "	"..n..":"..s )
 						if n == 'uname' and type(s)=='string' then
-							self._top_lists[i]:getChildByName('Label_name'):setText(s)
+							self._top_lists[i]:getChildByName('Label_name'):setString(s)
 						elseif n == 'score' and type(s)=='number' then
-							self._top_lists[i]:getChildByName('Label_fen'):setText(tostring(s))
+							self._top_lists[i]:getChildByName('Label_fen'):setString(tostring(s))
 						elseif n == 'school' and type(s)=='string' then
-							self._top_lists[i]:getChildByName('Label_school'):setText(s)
+							self._top_lists[i]:getChildByName('Label_school'):setString(s)
 						end
 					end
 					--v = { uname='user name',user_id=1220423,score=1223}
@@ -379,9 +379,9 @@ end
 function ACatcherScene:clean_top_list()
 	if self._top_lists and type(self._top_lists) == 'table' then
 		for i = 1,#self._top_lists do
-			self._top_lists[i]:getChildByName('Label_fen'):setText(' ')
-			self._top_lists[i]:getChildByName('Label_school'):setText(' ')
-			self._top_lists[i]:getChildByName('Label_name'):setText(' ')
+			self._top_lists[i]:getChildByName('Label_fen'):setString(' ')
+			self._top_lists[i]:getChildByName('Label_school'):setString(' ')
+			self._top_lists[i]:getChildByName('Label_name'):setString(' ')
 		end
 	end
 end
@@ -453,7 +453,7 @@ function ACatcherScene:game_top10_Dialog( where )
 	--初始化积分表
 	for i = 1,5 do
 		self._top_lists[i] = root:getChildByName('Label_t'..i)
-		self._top_lists[i]:setText( i )
+		self._top_lists[i]:setString( i )
 	end
 	self:clean_top_list()
 	--默认进入的时候设置本周
@@ -629,10 +629,10 @@ function ACatcherScene:game_end_Dialog()
 	if b then
 		local root = self._uiLayer:getChildByTag(3)
 		local parent = root:getChildByName('ImageView_38')
-		parent:getChildByTag(207):setText(tostring(self._xing_time)) --通关用时
-		parent:getChildByTag(210):setText(tostring(math.floor(self:getIntegration()))..'%') --正确数
-		parent:getChildByTag(211):setText(tostring(self._fen)) --成绩
-		parent:getChildByTag(212):setText(tostring(self._fen)) --历史最好成绩	
+		parent:getChildByTag(207):setString(tostring(self._xing_time)) --通关用时
+		parent:getChildByTag(210):setString(tostring(math.floor(self:getIntegration()))..'%') --正确数
+		parent:getChildByTag(211):setString(tostring(self._fen)) --成绩
+		parent:getChildByTag(212):setString(tostring(self._fen)) --历史最好成绩	
 	end
 	--self._widget:setPosition(cc.p(0,-self._ss.height/10))	
 	if b then
@@ -1140,7 +1140,7 @@ function ACatcherScene:set_word( yp,np )
 	self._yes = yp
 	if self._yes_num > 0 and #p == 4 then
 		for i,v in ipairs(self._rand_idx) do
-			self._choose_text[i]:setText(p[v])
+			self._choose_text[i]:setString(p[v])
 		end
 	else
 		print("Error word")
@@ -1369,7 +1369,7 @@ function ACatcherScene:init_timer()
 		if self._time_bar then
 			--不要显示大于时限的
 			if self._game_time <= self._time_limit then
-				--self._time_label:setText(self._game_time.."/"..self._time_limit)
+				--self._time_label:setString(self._game_time.."/"..self._time_limit)
 				self._game_time = self._game_time + 1
 				self:update_time_bar()
 			end
