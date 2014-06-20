@@ -18,6 +18,7 @@ enum CURL_STATE
 	INIT,
 	FAILED,
 	LOADING,
+	CANCEL,
 	OK
 };
 

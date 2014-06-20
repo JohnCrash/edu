@@ -119,7 +119,19 @@ static int do_curl(lua_State *L)
 }
 static int lua_curl_index(lua_State *L)
 {
-	return 0;
+	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
+	if( c && c->ptc )
+	{
+		curl_t *ptc = (curl_t *)c->ptc;
+		if( lua_isstring(L,1) )
+		{
+			const char *key = lua_tostring(L,1);
+			lua_pushstring(L,ket);
+			return 1;
+		}
+	}
+	lua_pushnil(L);
+	return 1;
 }
 static int lua_curl_gc(lua_State *L)
 {

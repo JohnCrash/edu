@@ -13,6 +13,9 @@ local function progress( mh )
 end
 local mh,msg = mt.new('GET','http://www.guancha.cn','',progress)
 mhh = mh
+if mh then
+	print( "State:"..mh.state )
+end
 print("=====================")
 print( mh )
 print( msg )

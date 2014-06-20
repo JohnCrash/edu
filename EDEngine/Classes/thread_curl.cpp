@@ -67,7 +67,10 @@ namespace kits
 		if( ptc && ptc->progressFunc )
 		{
 			if( ptc->bfastEnd )
+			{
+				ptc->state = CANCEL;
 				return -1; //close
+			}
 			ptc->progressFunc(ptc);
 		}
 		return 0;
@@ -145,7 +148,8 @@ namespace kits
 				pair_t result = vector_t_merge( bufs );
 				pct->size = result.first;
 				pct->data = result.second;
-				pct->state = OK;
+				if( pct->state == LOADING ) //maybe CANCEL?
+					pct->state = OK;
 			}
 			else
 			{ //fails
