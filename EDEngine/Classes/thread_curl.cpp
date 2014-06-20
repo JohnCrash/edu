@@ -1,6 +1,5 @@
 #include "thread_curl.h"
 
-#include <thread>
 #include <vector>
 #include "cocos2d.h"
 
@@ -64,8 +63,13 @@ namespace kits
 
 	static int progressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 	{
-		//do something
-		CCLOG("kits::progressCallback %d\n",dlnow*100/dltotal );
+		curl_t *ptc = (curl_t *)clientp;
+		if( ptc && ptc->progressFunc )
+		{
+			if( ptc->bfastEnd )
+				return -1; //close
+			ptc->progressFunc(ptc);
+		}
 		return 0;
 	}
 	static size_t writerCallback(void *ptr, size_t size, size_t nmemb, void *stream)
@@ -99,13 +103,14 @@ namespace kits
 		return 0;
 	}
 	//thread function
-	void curl_thread_method(CURL_METHOD mothed,
-		const std::string url,const std::string )
+	void curl_thread_method( curl_t *pct )
 	{
 		//do something
 		CURL *curl;
 		CURLcode res;
 		vector_t bufs;
+
+		if( !pct ){ return ; }
 
 		curl = curl_easy_init();
 		if( curl )
@@ -114,18 +119,18 @@ namespace kits
 			curl_easy_setopt(curl,CURLOPT_TIMEOUT,60);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
 			//set url
-			curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
+			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
 			//?
 			curl_easy_setopt(curl,CURLOPT_FOLLOWLOCATION,1L);
 			//progress enable
 			curl_easy_setopt(curl,CURLOPT_NOPROGRESS, 0L);
-			curl_easy_setopt(curl,CURLOPT_PROGRESSDATA,0); //?
+			curl_easy_setopt(curl,CURLOPT_PROGRESSDATA,pct);
 			curl_easy_setopt(curl,CURLOPT_PROGRESSFUNCTION, progressCallback);
 			//write data
 			curl_easy_setopt(curl,CURLOPT_WRITEDATA,&bufs);
 			curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION, writerCallback);
 
-			switch( mothed )
+			switch( pct->method )
 			{
 			case GET:
 				
@@ -134,18 +139,19 @@ namespace kits
 				break;
 			default:;
 			}
+			pct->state = LOADING;
 			res = curl_easy_perform(curl);
-			if(res != CURLE_OK)
-			{
+			if(res == CURLE_OK){
 				pair_t result = vector_t_merge( bufs );
-				if( result.second )
-				{
-					//
-					delete [] result.second;
-				}
+				pct->size = result.first;
+				pct->data = result.second;
+				pct->state = OK;
 			}
 			else
 			{ //fails
+				pct->err = curl_easy_strerror(res);
+				pct->errcode = (int)res;
+				pct->state = FAILED;
 			}
 			clean_vector_t( bufs );
 		}
@@ -154,9 +160,7 @@ namespace kits
 
 	static bool g_bCurlInit = false;
 
-	void do_thread_curl( CURL_METHOD method,
-						const std::string url,
-						const std::string cookie )
+	void do_thread_curl( curl_t *pct )
 	{
 		if( !g_bCurlInit )
 		{
@@ -164,7 +168,6 @@ namespace kits
 			//curl_global_cleanup(); --?
 			g_bCurlInit = true;
 		}
-		std::thread t(curl_thread_method,method,url,cookie);
-		t.join();
+		pct->pthread = new std::thread(curl_thread_method,pct);
 	}
 }

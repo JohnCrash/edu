@@ -3,8 +3,20 @@ require "Cocos2d"
 local lxp = require "lom"
 local kits = require "kits"
 local md5 = require "md5"
+local mt = require "mt"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
+
+--local result = mt.do_curl("GET","http://www.google.com","")
+local function progress( mh )
+	print('.........................................')
+end
+local mh,msg = mt.new('GET','http://www.guancha.cn','',progress)
+mhh = mh
+print("=====================")
+print( mh )
+print( msg )
+print("=====================")
 
 local cclog = function(...)
     print(string.format(...))
@@ -211,7 +223,7 @@ end
 
 --return result,oplist
 local function doSync()
-check_all_md5()
+	--check_all_md5()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if platform == kTargetWindows then
 		print("本地版本不进行跟新.")

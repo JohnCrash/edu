@@ -8,7 +8,11 @@ LOCAL_MODULE_FILENAME := libcocos2dcpp
 
 LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/AppDelegate.cpp \
-                   ../../Classes/HelloWorldScene.cpp
+                   ../../Classes/HelloWorldScene.cpp \
+				   ../../Classes/lua_ext.cpp \
+				   ../../Classes/lua_thread_curl.cpp \
+				   ../../Classes/thread_curl.cpp \
+				   ../../Classes/Console.cpp 
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
