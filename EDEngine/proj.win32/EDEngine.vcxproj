@@ -136,6 +136,8 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Console.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\lua_ext.cpp" />
+    <ClCompile Include="..\Classes\lua_thread_curl.cpp" />
     <ClCompile Include="..\Classes\thread_curl.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FileOp.cpp" />
@@ -144,6 +146,8 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Console.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\lua_ext.h" />
+    <ClInclude Include="..\Classes\lua_thread_curl.h" />
     <ClInclude Include="..\Classes\thread_curl.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="FileOp.h" />
