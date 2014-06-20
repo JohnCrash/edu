@@ -163,6 +163,11 @@ local function read_local_file( name )
   local file = local_dir..name
   if not local_exists(file) then return false end
   local alls
+  
+  file = io.open(file,"rb")
+  alls = file:read("*a")
+  file:close()
+  --[[
   for line in io.lines(file) do
     if not alls then
       alls = line
@@ -170,6 +175,7 @@ local function read_local_file( name )
       alls = alls..line
     end
   end
+  --]]
   return alls
 end
 

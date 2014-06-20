@@ -1,6 +1,8 @@
 require "Cocos2d"
+
 local lxp = require "lom"
 local kits = require "kits"
+local md5 = require "md5"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 
@@ -78,7 +80,8 @@ local function get_ups_string(ups,name)
 	end
 	return lups
 end
-			
+		
+--return filelist table		
 local function filelist_by_table(tb,ups)
   local filelist = {}
   if tb and tb.tag then
@@ -182,13 +185,39 @@ local function download_all_filelist(filelist)
   end
 end
 
+--right return true
+local function check_all_md5()
+	local filelist = kits.read_local_file('filelist.xml')
+	if filelist then
+		local file_t = filelist_by_table( lxp.parse(filelist),'' )
+		if file_t then
+			for k,v in pairs( file_t ) do
+				if v.download and v.md5 then
+					local file = kits.read_local_file(v.download)
+					if file then
+						if md5.sumhexa(file) == v.md5 then
+							print( v.download.."	( passed )" )
+						else
+							print( v.download.."	( fail! )" )
+						end
+					else
+						print("Can't open "..v.download)
+					end
+				end
+			end
+		end
+	end
+end
+
 --return result,oplist
 local function doSync()
+check_all_md5()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if platform == kTargetWindows then
 		print("本地版本不进行跟新.")
 		return "ok"
 	end
+	
   if isNeedSync() then
     --download version.xml and filelist.xml
     local filelist_xml = 'filelist.xml'
