@@ -64,14 +64,17 @@ namespace kits
 	static int progressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 	{
 		curl_t *ptc = (curl_t *)clientp;
-		if( ptc && ptc->progressFunc )
+		if( ptc  )
 		{
 			if( ptc->bfastEnd )
 			{
 				ptc->state = CANCEL;
 				return -1; //close
 			}
-			ptc->progressFunc(ptc);
+			if( dltotal  != 0 )
+				ptc->progress = dlnow/dltotal;
+			if( ptc->progressFunc )
+				ptc->progressFunc(ptc);
 		}
 		return 0;
 	}
@@ -155,8 +158,12 @@ namespace kits
 			{ //fails
 				pct->err = curl_easy_strerror(res);
 				pct->errcode = (int)res;
-				pct->state = FAILED;
+				if( pct->state == LOADING ) //maybe CANCEL?
+					pct->state = FAILED;
 			}
+			//end
+			if( pct->progressFunc )
+				pct->progressFunc( pct );
 			clean_vector_t( bufs );
 		}
 		curl_easy_cleanup(curl);

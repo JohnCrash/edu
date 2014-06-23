@@ -8,13 +8,23 @@ local mt = require "mt"
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 
 --local result = mt.do_curl("GET","http://www.google.com","")
-local function progress( mh )
-	print('.........................................')
+local function progress( obj )
+	print( obj.state.."	"..obj.progress )
+	if obj.progress > 0.2 then
+		obj:cancel()
+	end
+	if obj.state == "CANCEL" then
+		print( "err code : "..obj.errcode )
+		print( "err string : "..obj.errmsg )
+	elseif obj.state == "FAILED" then
+		print( "err code : "..obj.errcode )
+		print( "err string : "..obj.errmsg )		
+	end
 end
-local mh,msg = mt.new('GET','http://www.guancha.cn','',progress)
-mhh = mh
+local mh,msg = mt.new('GET','http://tech.cryptzone.com/download/MindTerm-4.1.5/mindterm_4.1.5-doc.zip','',progress)
+
 if mh then
-	print( "State:"..mh.state )
+	print( "State:"..mh.state  )
 end
 print("=====================")
 print( mh )
