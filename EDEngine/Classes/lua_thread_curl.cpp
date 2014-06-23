@@ -154,6 +154,7 @@ static int lua_pushState(lua_State *L,kits::curl_t *ptc)
 	return 1;
 }
 
+//中断下载
 static int lua_curl_cancel(lua_State *L)
 {
 	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
@@ -162,6 +163,30 @@ static int lua_curl_cancel(lua_State *L)
 		c->ptc->bfastEnd = true;
 	}
 	return 0;
+}
+//继续下载
+static int lua_curl_restart(lua_State *L)
+{
+	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
+	if( c && c->ptc )
+	{
+		if( c->ptc->state != kits::LOADING &&
+			c->ptc->bfastEnd == true && 
+			c->ptc->size < c->ptc->usize &&
+			c->ptc->usize > 0 )
+		{
+			c->ptc->pthread->join();
+			delete c->ptc->pthread;
+			c->ptc->pthread = nullptr;
+			c->ptc->bfastEnd = false;
+			c->ptc->state = kits::INIT;
+			kits::do_thread_curl( c->ptc );
+			lua_pushboolean(L,true);
+			return 1;
+		}
+	}
+	lua_pushboolean(L,false);
+	return 1;
 }
 
 static int lua_curl_index(lua_State *L)
@@ -230,6 +255,10 @@ static int lua_curl_index(lua_State *L)
 					else if(strcmp(key,"cancel")==0)
 					{
 						lua_pushcfunction(L,lua_curl_cancel);
+					}
+					else if(strcmp(key,"restart")==0)
+					{
+						lua_pushcfunction(L,lua_curl_restart);
 					}
 				}
 				return 1;

@@ -38,7 +38,6 @@ namespace kits
 				return bs;
 			}
 		}
-		CCLOG("kits::vector_t_merge alloc error! %d\n",len );
 		return pair_t(0,nullptr);
 	}
 	//清理碎片内存
@@ -85,16 +84,19 @@ namespace kits
 		if( vecs )
 		{
 			len = size*nmemb;
-			byte *bs = new byte[len];
-			if( bs )
+			if( len > 0 )
 			{
-				vecs->push_back( std::pair<size_t,byte *>(len,bs) );
-				memcpy( bs,ptr,len );
-			}
-			else
-			{
-				CCLOG("kits::writerCallback alloc error! %d\n",size*nmemb);
-				return 0; //?
+				byte *bs = new byte[len];
+				if( bs )
+				{
+					vecs->push_back( std::pair<size_t,byte *>(len,bs) );
+					memcpy( bs,ptr,len );
+				}
+				else
+				{
+					CCLOG("kits::writerCallback alloc error! %d\n",size*nmemb);
+					return 0; //?
+				}
 			}
 			if( vecs->size() > 128 )rebuild_vector_t( *vecs );
 		}
@@ -122,7 +124,7 @@ namespace kits
 		if( curl )
 		{
 			//set timeout
-			curl_easy_setopt(curl,CURLOPT_TIMEOUT,60);
+			curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
 			//set url
 			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
@@ -135,11 +137,17 @@ namespace kits
 			//write data
 			curl_easy_setopt(curl,CURLOPT_WRITEDATA,&bufs);
 			curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION, writerCallback);
-
+			//续传
+			if( pct->size > 0 )
+			{
+				//char s[64];
+				//sprintf( s,"%d-%d",pct->size,(long long)pct->usize );
+				//curl_easy_setopt(curl, CURLOPT_RANGE,s );
+				curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, pct->size);
+			}
 			switch( pct->method )
 			{
 			case GET:
-				
 				break;
 			case POST:
 				break;
@@ -147,10 +155,24 @@ namespace kits
 			}
 			pct->state = LOADING;
 			res = curl_easy_perform(curl);
-			if(res == CURLE_OK){
-				pair_t result = vector_t_merge( bufs );
+			pair_t result = vector_t_merge( bufs );
+			if( pct->size > 0 && pct->data && 
+				result.first > 0 && result.second )
+			{
+				//续传数据
+				byte * p = new byte[pct->size + result.first];
+				memcpy( p,pct->data,pct->size );
+				memcpy( p+pct->size,result.second,result.first );
+				delete [] pct->data;
+				pct->data = p;
+				pct->size = pct->size + result.first;
+			}
+			else if( pct->size == 0 && pct->data == nullptr )
+			{
 				pct->size = result.first;
 				pct->data = result.second;
+			}
+			if(res == CURLE_OK){
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = OK;
 			}
@@ -161,9 +183,16 @@ namespace kits
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = FAILED;
 			}
+			long retcode = 0;
+			res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &retcode); 
+		//	if( res == CURLE_OK && retcode == 200 )
+		//	{
+				curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
+		//	}
 			//end
 			if( pct->progressFunc )
 				pct->progressFunc( pct );
+			pct->bfastEnd = true;
 			clean_vector_t( bufs );
 		}
 		curl_easy_cleanup(curl);
