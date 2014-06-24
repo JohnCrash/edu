@@ -11,6 +11,7 @@ require "src/VisibleRect"
 
 require "src/amouse/amouse_om"
 require "src/acatcher/acatcher_om"
+require "src/homework/homework"
 
 local LINE_SPACE = 40
 
@@ -20,7 +21,8 @@ local BeginPos = {x = 0, y = 0}
 
 local _allTests = {
 	{ isSupported = true,  name = "A Mouse"          , create_func=             AMouseMain  },
-	{ isSupported = true,  name = "A Catcher"          , create_func=             ACatcherMain  }
+	{ isSupported = true,  name = "A Catcher"          , create_func=             ACatcherMain  },
+	{ isSupported = true,  name = "Home work"          , create_func=  HomeWorkMain  }
 }
 
 local TESTS_COUNT = table.getn(_allTests)
