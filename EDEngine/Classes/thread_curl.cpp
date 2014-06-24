@@ -124,7 +124,7 @@ namespace kits
 		if( curl )
 		{
 			//set timeout
-			curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
+			//curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
 			//set url
 			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
@@ -143,7 +143,7 @@ namespace kits
 				//char s[64];
 				//sprintf( s,"%d-%d",pct->size,(long long)pct->usize );
 				//curl_easy_setopt(curl, CURLOPT_RANGE,s );
-				curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, pct->size);
+				curl_easy_setopt(curl, CURLOPT_RESUME_FROM, (long)pct->size);
 			}
 			switch( pct->method )
 			{
@@ -183,12 +183,10 @@ namespace kits
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = FAILED;
 			}
-			long retcode = 0;
-			res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &retcode); 
-		//	if( res == CURLE_OK && retcode == 200 )
-		//	{
-				curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
-		//	}
+
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 
+			curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
+
 			//end
 			if( pct->progressFunc )
 				pct->progressFunc( pct );

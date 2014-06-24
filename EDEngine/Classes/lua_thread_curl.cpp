@@ -252,6 +252,14 @@ static int lua_curl_index(lua_State *L)
 							;
 						}
 					}
+					else if(strcmp(key,"code")==0 )
+					{
+						lua_pushinteger(L,ptc->retcode);
+					}
+					else if(strcmp(key,"usize")==0)
+					{
+						lua_pushnumber(L,ptc->usize);
+					}
 					else if(strcmp(key,"cancel")==0)
 					{
 						lua_pushcfunction(L,lua_curl_cancel);

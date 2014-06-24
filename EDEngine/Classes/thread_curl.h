@@ -45,13 +45,15 @@ struct curl_t
 	bool bfastEnd;
 	int this_ref;
 	double usize;
+	long retcode;
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
 		err(),errcode(0),progress(0),
 		progressFunc(nullptr),pthread(nullptr),
 		size(0),data(nullptr),ref(0),user_data(nullptr),
-		refcount(0),bfastEnd(false),this_ref(0),usize(0)
+		refcount(0),bfastEnd(false),this_ref(0),usize(0),
+		retcode(0)
 	{
 	}
 	void retain()
