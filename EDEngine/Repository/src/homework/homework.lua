@@ -36,7 +36,8 @@ function HomeWork.create()
 end
 
 function HomeWork:init()
-	uikits.test( self )
+	--uikits.test( self )
+	uikits.test_page( self )
 end
 
 function HomeWork:release()

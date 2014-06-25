@@ -1,4 +1,4 @@
-﻿require "Cocos2d"
+require "Cocos2d"
 require "Cocos2dConstants"
 require "Opengl"
 require "OpenglConstants"
@@ -7,6 +7,29 @@ require "GuiConstants"
 
 local defaultFont = "fonts/Marker Felt.ttf"
 local defaultFontSize = 16
+
+local function init_layout( s,t )
+	local ss = s:getSize()
+	s:setSize{width=t.width or ss.width,height=t.height or ss.height}
+	if t.bgcolor and t.bgcolor2 then
+		s:setBackGroundColorType(LAYOUT_COLOR_GRADIENT)
+		s:setBackGroundColor(t.bgcolor,t.bgcolor2)
+	elseif t.bgcolor then
+		s:setBackGroundColorType(LAYOUT_COLOR_SOLID)
+		s:setBackGroundColor(t.bgcolor)
+	end
+	if t.bgscale9 then
+		s:setBackGroundImageScale9Enabled(t.bgscale9)
+	end
+	if t.bgimage then
+		s:setBackGroundImage(t.bgimage,UI_TEX_TYPE_LOCAL)
+	end
+end
+
+local function init_node( s,t )
+	s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
+	s:setPosition{x=t.x or 0,y= t.y or 0}	
+end
 
 function InitDesignResolutionMode()
 	local director = cc.Director:getInstance()
@@ -28,8 +51,7 @@ local function text( t )
 	if t and type(t)=='table' then
 		tx = ccui.Text:create( t.caption or '',t.font or defaultFont,t.fontSize or defaultFontSize )
 		if tx then
-			tx:setAnchorPoint{x=t.anchorX or 0,y=t.anchorY or 0}
-			tx:setPosition{x=t.x or 0,y=t.y or 0}
+			init_node(tx,t)
 		else
 			print('uikits.text create ccui.Text failed return nil')
 		end
@@ -47,8 +69,7 @@ local function checkbox( t )
 								   t.active or "cocosui/check_box_active.png",
 								   t.disable or "cocosui/check_box_normal_disable.png",
 								   t.active_disable or "cocosui/check_box_active_disable.png")
-		cb:setAnchorPoint{x=t.anchorX or 0,y=t.anchorY or 0}
-		cb:setPosition{x=t.x or 0,y=t.y or 0}
+		init_node(cb,t)
 		if t.check then
 			cb:setSelectedState( t.check )
 		end
@@ -86,8 +107,7 @@ local function button( t )
 		cb:loadTextures(t.normal or "cocosui/button.png", 
 					t.press or "cocosui/buttonHighlighted.png", 
 					t.disable or "")
-		cb:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		cb:setPosition{x=t.x or 0,y= t.y or 0}
+		init_node(cb,t)
 		cb:setSize{width = t.width or 64,height = t.height or 32}
 		cb:setTitleFontSize( t.fontSize or defaultFontSize )
 		cb:setTitleFontName( t.font or defaultFont)
@@ -120,9 +140,8 @@ local function slider( t )
 		s = ccui.Slider:create()
 		s:loadBarTexture( t.loadBar or "cocosui/sliderTrack.png")
 		s:loadSlidBallTextures( t.slidBall or "cocosui/sliderThumb.png", "cocosui/sliderThumb.png", "")
-		s:loadProgressBarTexture(t.progressBar or "cocosui/sliderProgress.png")				
-		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		s:setPosition{x=t.x or 0,y= t.y or 0}
+		s:loadProgressBarTexture(t.progressBar or "cocosui/sliderProgress.png")
+		init_node(s,t)
 		s:setSize{width=t.width or 160,height=t.height or 32 }
 		s:setPercent( t.percent or 0 )
 		if t.event and type(t.event)=='function' then
@@ -144,8 +163,7 @@ local function progress( t )
 	if t and type(t)=='table' then
 		s = ccui.LoadingBar:create()
 		s:loadTexture(t.progress or "cocosui/sliderProgress.png")
-		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		s:setPosition{x=t.x or 0,y= t.y or 0}		
+		init_node(s,t)
 		s:setPercent(t.percent or 0)
 	end
 	return s
@@ -155,8 +173,7 @@ local function scrollview( t )
 	local s
 	if t and type(t)=='table' then
 		s = ccui.ScrollView:create()
-		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		s:setPosition{x=t.x or 0,y= t.y or 0}	
+		init_node(s,t)
 		s:setSize{width=t.width or 320,height=t.height or 200 }
 		if t.event and type(t.event)=='function' then
 			s:addEventListenerScrollView(t.event)
@@ -167,6 +184,7 @@ local function scrollview( t )
 				end			
 			--]]			
 		end
+		init_layout(s,t)
 	end
 	return s
 end
@@ -176,8 +194,7 @@ local function editbox( t )
 	if t and type(t)=='table' then
 		s = ccui.TextField:create()
 		s:setTouchEnabled(true)
-		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		s:setPosition{x=t.x or 0,y= t.y or 0}	
+		init_node(s,t)
 		s:setSize{width=t.width or 160,height=t.height or 32 }
 		s:setFontSize( t.fontSize or defaultFontSize )
 		s:setFontName( t.font or defaultFont)
@@ -202,18 +219,69 @@ local function imageview( t )
 	local s
 	if t and type(t)=='table' then
 		s = ccui.ImageView:create()
-		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
-		s:setPosition{x=t.x or 0,y= t.y or 0}	
+		init_node( s,t )
 		if t.image then
 			s:loadTexture(t.image)
 		end
+		local ss = s:getSize()
+		s:setSize{width=t.width or ss.width,height=t.height or ss.height}		
 		s:setScale9Enabled( t.scale9 or false )
 		s:setTouchEnabled( t.touch or false )
-		if t.width and t.height then
-			s:setSize{width=t.width,height=t.height}
+	end
+	return s
+end
+
+local function layout( t )
+	local s
+	if t and type(t)=='table' then
+		s = ccui.Layout:create()
+		init_node( s,t )
+		init_layout( s,t )
+	end
+	return s
+end
+
+local function pageview( t )
+	local s
+	if t and type(t)=='table' then
+		s = ccui.PageView:create()
+		init_node(s,t)
+		init_layout(s,t)
+		s:setTouchEnabled(true)
+		if t.event then
+			s:addEventListenerPageView(t.event)
+			--[[ Event function prototype
+			local function pageViewEvent(sender, eventType)
+				if eventType == ccui.PageViewEventType.turning then
+				end
+			end 			
+			]]--
 		end
 	end
 	return s
+end
+
+local function test_( layer )
+end
+
+local function test_page( layer )
+	local ss = screenSize()
+	InitDesignResolutionMode()
+	local sp = pageview{bgcolor=cc.c3b(128,128,128),
+									x = 32,y=32,width=ss.width-64,height=ss.height-64,
+									event=function(sender,eventType)
+										if eventType == ccui.PageViewEventType.turning then
+											print( 'page '..sender:getCurPageIndex() + 1 )
+										end
+									end}
+	math.randomseed(os.time())
+	for i = 1,32 do
+		local lay1 = layout{bgcolor=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255)),
+		bgcolor2=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255))}
+		lay1:addChild(text{caption='Page '..i,fontSize=32})
+		sp:addPage(lay1)
+	end
+	layer:addChild(sp)
 end
 
 local function test( layer )
@@ -231,30 +299,24 @@ local function test( layer )
 		end
 	end
 	}
-	--sv:setBackGroundColorType(LAYOUT_COLOR_SOLID)
-	--sv:setBackGroundColor{r=0,g=255,b=0}
-	sv:setBackGroundColor({r=255,g=0,b=0},{r=255,g=255,b=0})
-	sv:setBackGroundColorType(LAYOUT_COLOR_GRADIENT)
-	--sv:setBackGroundColorOpacity (0)
-	--sv:setBackGroundImageScale9Enabled(true)
-	--sv:setBackGroundImage('amouse/NewUI01.png',UI_TEX_TYPE_LOCAL)
 	layer:addChild(sv)
 	
 	local h = 0
 	for i = 1,32 do
-		local t = text{caption="ccui.Text [ "..i.." ]",fontSize=30}
-		local y =  (i-1)*t:getSize().height
+		local ox,oy = 32,32
+		local t = text{caption="Text"..i,fontSize=30}
+		local y = oy + (i-1)*t:getSize().height
 		h = h + t:getSize().height
-		t:setPosition{x=0,y=y}
+		t:setPosition{x=ox,y=y}
 		sv:addChild(t)
 		--checkbox
-		local c = checkbox{x=t:getSize().width,y=y,check=i%2==1 and true or false,
+		local c = checkbox{x=ox+t:getSize().width,y=y,check=i%2==1 and true or false,
 						eventSelect=function (sender,b) print(b) end}
 		sv:addChild(c)
 		--button
-		local b = button{x=t:getSize().width+c:getSize().width,y=y,
+		local b = button{x=ox+t:getSize().width+c:getSize().width,y=y,
 											fontSize=32,width=320,height=c:getSize().height,
-											caption="ccui.Button 中文"..i,
+											caption="Button 中文"..i,
 											eventClick=function (sender) print('click') end}
 		sv:addChild(b)
 		--slider
@@ -273,7 +335,7 @@ local function test( layer )
 		scale9=true,width=64,height=32,touch=true}
 		sv:addChild(img2)
 	end
-	sv:setInnerContainerSize{width=ss.width,height=h}
+	sv:setInnerContainerSize{width=ss.width+64,height=h+64}
 end
 
 return {
@@ -286,5 +348,6 @@ return {
 	editbox = editbox,
 	image = imageview,
 	test = test,
+	test_page = test_page,
 	screenSize = screenSize
 }

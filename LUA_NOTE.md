@@ -2,10 +2,10 @@
 
 C++									lua
 --------------------------------------------------------------
-cocos2d::Size()				{width,height}
-cocos2d::Rect()				{x,y,width,height}
-cocos2d::Color4b()		{r,g,b,a}
-cocos2d::Vec2()			{x,y}
+cocos2d::Size()				{width,height}				cc.size()
+cocos2d::Rect()				{x,y,width,height}		cc.rect()
+cocos2d::Color4b()		{r,g,b,a}						cc.c4b()
+cocos2d::Vec2()			{x,y}								
 cocos2d::Vec3()			{x,y,z}
 cocos2d::Vec4()			{x,y,z,w}
 FontDefinition *				{fontName,fontSize,fontAlignmentH,fontAlignmentV,fontFillColor,fontDimensions,
