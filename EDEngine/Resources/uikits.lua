@@ -158,6 +158,15 @@ local function scrollview( t )
 		s:setAnchorPoint{x= t.anchorX or 0,y= t.anchorY or 0}
 		s:setPosition{x=t.x or 0,y= t.y or 0}	
 		s:setSize{width=t.width or 320,height=t.height or 200 }
+		if t.event and type(t.event)=='function' then
+			s:addEventListenerScrollView(t.event)
+			--[[ Event function prototype
+				local function scrollEvent(sender, eventType)
+					if eventType == SCROLLVIEW_EVENT_SCROLLING  then
+					end
+				end			
+			--]]			
+		end
 	end
 	return s
 end
@@ -174,7 +183,7 @@ local function editbox( t )
 		s:setFontName( t.font or defaultFont)
 		s:setPlaceHolder( t.caption or '' )
 		if t.event and type(t.event)=='function' then
-			slider:addEventListenerTextField(t.event)
+			s:addEventListenerTextField(t.event)
 			--[[ Event function prototype
 					local function textFieldEvent(sender, eventType)
 						if eventType == ccui.TextFiledEventType.attach_with_ime then
@@ -211,7 +220,24 @@ local function test( layer )
 	local ss = screenSize()
 	InitDesignResolutionMode()
 	
-	local sv = scrollview{width=ss.width,height=ss.height}
+	local sv = scrollview{width=ss.width,height=ss.height,
+	event=function(sender,type)
+		if type == SCROLLVIEW_EVENT_SCROLLING then
+			print( "SCROLLVIEW_EVENT_SCROLLING")
+		elseif type == SCROLLVIEW_EVENT_SCROLL_TO_TOP then
+			print('SCROLLVIEW_EVENT_SCROLL_TO_TOP')
+		elseif type == SCROLLVIEW_EVENT_SCROLL_TO_BOTTOM then
+			print('SCROLLVIEW_EVENT_SCROLL_TO_BOTTOM')
+		end
+	end
+	}
+	--sv:setBackGroundColorType(LAYOUT_COLOR_SOLID)
+	--sv:setBackGroundColor{r=0,g=255,b=0}
+	sv:setBackGroundColor({r=255,g=0,b=0},{r=255,g=255,b=0})
+	sv:setBackGroundColorType(LAYOUT_COLOR_GRADIENT)
+	--sv:setBackGroundColorOpacity (0)
+	--sv:setBackGroundImageScale9Enabled(true)
+	--sv:setBackGroundImage('amouse/NewUI01.png',UI_TEX_TYPE_LOCAL)
 	layer:addChild(sv)
 	
 	local h = 0
