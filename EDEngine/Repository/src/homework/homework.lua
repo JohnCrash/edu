@@ -37,7 +37,7 @@ end
 
 function HomeWork:init()
 	--uikits.test( self )
-	uikits.test_page( self )
+	uikits.test_menu( self )
 end
 
 function HomeWork:release()

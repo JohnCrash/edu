@@ -55,6 +55,24 @@ local function text( t )
 		else
 			print('uikits.text create ccui.Text failed return nil')
 		end
+		if t.event then
+			tx:addTouchEventListener(t.event)
+			--[[ Event function prototype
+				local function touchEvent(sender, eventType)
+					if eventType == ccui.TouchEventType.began then
+					elseif eventType == ccui.TouchEventType.ended then
+					end
+				end			
+			--]]
+		end	
+		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
+			tx:addTouchEventListener(
+				function (sender,eventType) 
+					if eventType == ccui.TouchEventType.ended then
+						t.eventClick( sender )
+					end
+				end)
+		end		
 	end
 	return tx
 end
@@ -261,7 +279,64 @@ local function pageview( t )
 	return s
 end
 
-local function test_( layer )
+local function menu( t )
+	local s
+	if t and type(t)=='table' then
+		s = cc.Menu:create()
+		init_node(s,t)
+		if t.alignV then
+			s:alignItemsVertically()
+		end
+		if t.items and type(t.items)=='table' then
+			for k,v in pairs( t.items ) do
+				print( k )
+				s:addChild( v )
+			end
+		end
+	end
+	return s
+end
+
+local function init_menuitem( s,t )
+	if t.event then
+		s:registerScriptTapHandler(t.event)
+		--[[ Event function prototype
+			local function (tag, sender)
+			end
+		--]]
+	end
+end
+
+local function menuItemLabel( t )
+	local s
+	if t and type(t)=='table' then
+		s = cc.MenuItemLabel:create(t.caption or '')
+		init_node(s,t)
+		init_menuitem(s,t)
+	end
+	return s
+end
+
+local function menuItemFont( t )
+	local s
+	if t and type(t)=='table' then
+		s = cc.MenuItemFont:create(t.caption or '')
+		init_node(s,t)
+		--s:setFontName(t.font or defaultFont)
+		--s:setFontSize(t.fontSize or defaultFontSize)
+		init_menuitem(s,t)
+	end
+	return s
+end
+
+local function test_menu( layer )
+	local item1 = menuItemFont{caption='Quit',fontSize=32}
+	local item2 = menuItemFont{caption='Test pushScene',fontSize=32}
+	local item2 = menuItemFont{caption='Test pushScene w/transition',fontSize=32}
+	local m = cc.Menu:create( item1,item2,item3)
+	m:alignItemsVertically()
+	--local m = menu{items={item1,item2,item3},alignV=true}
+	layer:addChild( m )
 end
 
 local function test_page( layer )
@@ -304,7 +379,7 @@ local function test( layer )
 	local h = 0
 	for i = 1,32 do
 		local ox,oy = 32,32
-		local t = text{caption="Text"..i,fontSize=30}
+		local t = text{caption="Text"..i,fontSize=30,eventClick=function(sender) print("text click")end}
 		local y = oy + (i-1)*t:getSize().height
 		h = h + t:getSize().height
 		t:setPosition{x=ox,y=y}
@@ -347,7 +422,11 @@ return {
 	scrollview = scrollview,
 	editbox = editbox,
 	image = imageview,
+	menu = menu,
+	menuItemFont = menuItemFont,
+	menuItemLabel = menuItemLabel,
 	test = test,
 	test_page = test_page,
+	test_menu = test_menu,
 	screenSize = screenSize
 }
