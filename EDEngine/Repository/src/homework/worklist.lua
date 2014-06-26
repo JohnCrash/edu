@@ -1,5 +1,11 @@
 ﻿local uikits = require "uikits"
 
+local ui = {
+	FILE = 'homework/studenthomework_1/studenthomework_1.json',
+	BACK = 'white/back',
+	LISTVIEW = 'newview/subject1',
+}
+
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
 
@@ -21,12 +27,12 @@ function WorkList.create()
 end
 
 function WorkList:init()
-	self._root = uikits.fromJson{file='homework/studenthomework_1/studenthomework_1.json'}
+	self._root = uikits.fromJson{file=ui.FILE}
 	if self._root then
 		self:addChild(self._root)
-		local back = uikits.child(self._root,'white/back')
+		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,function(sender)cc.Director:getInstance():popScene()end)
-		local v = uikits.child(self._root,'newview/subject1')
+		local v = uikits.child(self._root,ui.LISTVIEW)
 		print( '---------->'..cc_type(v) )
 	end
 end
