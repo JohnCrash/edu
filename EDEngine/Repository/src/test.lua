@@ -88,7 +88,7 @@ local transitions = {
 }
 local LINE_SPACE = 0
 local function test_menu( layer )
-	InitDesignResolutionMode()
+	uikits.initDR{}
 	local lay = cc.Layer:create()
 
 	local items = {}
@@ -116,7 +116,7 @@ end
 
 local function test_page( layer )
 	local ss = uikits.screenSize()
-	InitDesignResolutionMode()
+	uikits.initDR{}
 	local sp = uikits.pageview{bgcolor=cc.c3b(128,128,128),
 									x = 32,y=32,width=ss.width-64,height=ss.height-64,
 									event=function(sender,eventType)
@@ -136,7 +136,7 @@ end
 
 local function test( layer )
 	local ss = uikits.screenSize()
-	InitDesignResolutionMode()
+	uikits.initDR{}
 	
 	local sv = uikits.scrollview{width=ss.width,height=ss.height,
 	event=function(sender,type)

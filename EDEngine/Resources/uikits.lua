@@ -31,13 +31,26 @@ local function init_node( s,t )
 	s:setPosition{x=t.x or 0,y= t.y or 0}	
 end
 
-function InitDesignResolutionMode()
+local function InitDesignResolutionMode(t)
 	local director = cc.Director:getInstance()
 	local glview = director:getOpenGLView()
 	local ss = glview:getFrameSize()
-	--print( "GLView FrameSize :"..ss.width.." , "..ss.height )
-	director:setContentScaleFactor(1)
-	glview:setDesignResolutionSize(ss.width,ss.height,cc.ResolutionPolicy.SHOW_ALL)
+
+	if t and type(t)=='table' then
+		director:setContentScaleFactor( t.scale or 1 )
+		--[[
+				cc.ResolutionPolicy = 
+				{
+					EXACT_FIT = 0,
+					NO_BORDER = 1,
+					SHOW_ALL  = 2,
+					FIXED_HEIGHT  = 3,
+					FIXED_WIDTH  = 4,
+					UNKNOWN  = 5,
+				}		
+		--]]
+		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
+	end
 end
 
 local function screenSize()
@@ -328,6 +341,63 @@ local function menuItemFont( t )
 	return s
 end
 
+local function extend(target,_class)
+    local t = tolua.getpeer(target)
+    if not t then
+        t = {}
+        tolua.setpeer(target, t)
+    end
+    setmetatable(t, _class)
+    return target
+end
+
+local function fromJson( t )
+	local s
+	if t and type(t)=='table' then
+		if t.file and type(t.file)=='string' then
+			s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file)
+		end
+	end
+	return s
+end
+
+--root is ui.Widget
+--path 'root/brach/child'
+local function child( root,path )
+	local c={}
+	local i = 1
+	local j
+	while true do
+		j = string.find(path,'/',i)
+		if j then
+			c[#c+1] = string.sub(path,i,j-1)
+		else
+			c[#c+1] = string.sub(path,i)
+			break
+		end
+		i = j + 1
+	end
+	local w = root
+	for i,v in ipairs(c) do
+		if w then
+			w = w:getChildByName( v )
+		end
+	end
+	if w == root then
+		return nil
+	else
+		return w
+	end
+end
+
+local function event( obj,func )
+	if obj and func then
+	end
+end
+
+local function event_native( obj,func )
+end
+
 return {
 	text = text,
 	checkbox = checkbox,
@@ -342,5 +412,11 @@ return {
 	menu = menu,
 	menuItemFont = menuItemFont,
 	menuItemLabel = menuItemLabel,
-	screenSize = screenSize
+	fromJson = fromJson,
+	extend = extend,
+	child = child,
+	event = event,
+	event_native = event_native,
+	screenSize = screenSize,
+	initDR = InitDesignResolutionMode
 }

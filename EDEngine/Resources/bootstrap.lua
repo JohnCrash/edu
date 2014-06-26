@@ -266,6 +266,7 @@ local function CreateSyncLayer()
 		layer:unscheduleUpdate()
 		--do script
 		package.path = package.path..';'..local_dir..'?.lua'
+		package.path = package.path..';'..local_dir..'src/?.lua'
 		require ('src/helloworld')
 	end
 	

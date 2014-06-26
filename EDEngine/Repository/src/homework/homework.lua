@@ -1,5 +1,6 @@
 ﻿local uikits = require "uikits"
 local kits = require "kits"
+local WorkList = require "homework/worklist"
 
 print("------------------HomeWork----------------------")
 local HomeWork = class("HomeWork")
@@ -37,7 +38,14 @@ end
 
 function HomeWork:init()
 	--uikits.test( self )
-	require('src/test').scroll( self )
+	--require('src/test').scroll( self )
+	uikits.initDR{width=1920,height=1080}
+	--simple ui
+	self:addChild( uikits.button{caption='作业列表',width=240,height=64,fontSize=32,
+				eventClick=function(sender)
+					cc.Director:getInstance():pushScene( cc.TransitionSlideInL:create(0.2,WorkList.create()) )
+				end} )
+	print(get_cocos2d_type(self))
 end
 
 function HomeWork:release()
@@ -46,6 +54,6 @@ end
 function HomeWorkMain()
 	cclog("HomeWork launch!")
 	--require("mobdebug").start("192.168.2.182")
-	local scene = HomeWork.create()
+	local scene =HomeWork.create()
 	return scene
 end
