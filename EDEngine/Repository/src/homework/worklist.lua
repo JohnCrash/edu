@@ -25,13 +25,9 @@ function WorkList:init()
 	if self._root then
 		self:addChild(self._root)
 		local back = uikits.child(self._root,'white/back')
-		back:addTouchEventListener(
-				function(sender,eventType)
-					if eventType == ccui.TouchEventType.ended then
-						cc.Director:getInstance():popScene()
-					end
-				end)
-		local news = uikits.child(self._root,'white/new2')
+		uikits.event(back,function(sender)cc.Director:getInstance():popScene()end)
+		local v = uikits.child(self._root,'newview/subject1')
+		print( '---------->'..cc_type(v) )
 	end
 end
 

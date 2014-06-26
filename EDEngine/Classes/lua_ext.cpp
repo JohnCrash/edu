@@ -27,7 +27,11 @@ static int cc_istype(lua_State *L)
 	if( lua_isuserdata(L,1) && lua_isstring(L,2))
 	{ 
 		tolua_Error tolua_err;
-		lua_pushboolean(L,tolua_isusertable(L,1,lua_tostring(L,2),0,&tolua_err));
+		const char * typeName = lua_tostring(L,2); 
+		if( tolua_isusertable(L,1,typeName,0,&tolua_err) )
+			lua_pushboolean(L,true);
+		else
+			lua_pushboolean(L,false);
 		return 1;
 	}
 	lua_pushnil(L);

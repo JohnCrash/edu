@@ -45,7 +45,6 @@ function HomeWork:init()
 				eventClick=function(sender)
 					cc.Director:getInstance():pushScene( cc.TransitionSlideInL:create(0.2,WorkList.create()) )
 				end} )
-	print(get_cocos2d_type(self))
 end
 
 function HomeWork:release()

@@ -380,7 +380,10 @@ local function child( root,path )
 	local w = root
 	for i,v in ipairs(c) do
 		if w then
-			w = w:getChildByName( v )
+			local wt
+			wt = w:getChildByName( v )
+			if not wt then wt = w:getChildByTag( v ) end
+			w = wt
 		end
 	end
 	if w == root then
@@ -390,12 +393,42 @@ local function child( root,path )
 	end
 end
 
+local isTouchEvent = {
+	['ccui.Button'] = true,
+	['ccui.Text'] = true
+}
 local function event( obj,func )
 	if obj and func then
+		if isTouchEvent[cc_type(obj)] then
+			obj:addTouchEventListener( 
+				function(sender,eventType) 
+					if eventType == ccui.TouchEventType.ended then
+						func( sender )
+					end
+				end)
+		elseif cc_type(obj) == 'ccui.CheckBox' then
+			obj:addEventListenerCheckBox(
+				function(sender,eventType)
+					if eventType == ccui.CheckBoxEventType.selected then
+						func(sender,true)
+					elseif eventType == ccui.CheckBoxEventType.unselected then
+						func(sender,false)
+					end
+				end)
+		elseif cc_type(obj)=='ccui.Slider' then
+			obj:addEventListenerSlider(func)
+		elseif cc_type(obj)=='ccui.ScrollView' then
+			obj:addEventListenerScrollView(func)
+		elseif cc_type(obj)=='ccui.PageView' then
+			obj:addEventListenerPageView(func)
+		elseif cc_type(obj)=='ccui.TextField' then
+			obj:addEventListenerTextField(func)
+		elseif cc_type(obj)=='cc.MenuItemFont' then
+			obj:registerScriptTapHandler(func)
+		else
+			error('uikits.event not support type:'..cc_type(obj))
+		end
 	end
-end
-
-local function event_native( obj,func )
 end
 
 return {
@@ -416,7 +449,6 @@ return {
 	extend = extend,
 	child = child,
 	event = event,
-	event_native = event_native,
 	screenSize = screenSize,
 	initDR = InitDesignResolutionMode
 }
