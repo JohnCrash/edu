@@ -37,7 +37,7 @@ end
 
 function HomeWork:init()
 	--uikits.test( self )
-	uikits.test_menu( self )
+	require('src/test').scroll( self )
 end
 
 function HomeWork:release()

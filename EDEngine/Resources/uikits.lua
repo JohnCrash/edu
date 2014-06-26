@@ -282,16 +282,14 @@ end
 local function menu( t )
 	local s
 	if t and type(t)=='table' then
-		s = cc.Menu:create()
-		init_node(s,t)
+		if t.items and type(t.items)=='table' then
+			s = cc.Menu:create( unpack(t.items) )
+		else
+			s = cc.Menu:create()
+		end
+		--init_node(s,t)
 		if t.alignV then
 			s:alignItemsVertically()
-		end
-		if t.items and type(t.items)=='table' then
-			for k,v in pairs( t.items ) do
-				print( k )
-				s:addChild( v )
-			end
 		end
 	end
 	return s
@@ -322,95 +320,12 @@ local function menuItemFont( t )
 	if t and type(t)=='table' then
 		s = cc.MenuItemFont:create(t.caption or '')
 		init_node(s,t)
+		--cocos2d lua BUG
 		--s:setFontName(t.font or defaultFont)
 		--s:setFontSize(t.fontSize or defaultFontSize)
 		init_menuitem(s,t)
 	end
 	return s
-end
-
-local function test_menu( layer )
-	local item1 = menuItemFont{caption='Quit',fontSize=32}
-	local item2 = menuItemFont{caption='Test pushScene',fontSize=32}
-	local item2 = menuItemFont{caption='Test pushScene w/transition',fontSize=32}
-	local m = cc.Menu:create( item1,item2,item3)
-	m:alignItemsVertically()
-	--local m = menu{items={item1,item2,item3},alignV=true}
-	layer:addChild( m )
-end
-
-local function test_page( layer )
-	local ss = screenSize()
-	InitDesignResolutionMode()
-	local sp = pageview{bgcolor=cc.c3b(128,128,128),
-									x = 32,y=32,width=ss.width-64,height=ss.height-64,
-									event=function(sender,eventType)
-										if eventType == ccui.PageViewEventType.turning then
-											print( 'page '..sender:getCurPageIndex() + 1 )
-										end
-									end}
-	math.randomseed(os.time())
-	for i = 1,32 do
-		local lay1 = layout{bgcolor=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255)),
-		bgcolor2=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255))}
-		lay1:addChild(text{caption='Page '..i,fontSize=32})
-		sp:addPage(lay1)
-	end
-	layer:addChild(sp)
-end
-
-local function test( layer )
-	local ss = screenSize()
-	InitDesignResolutionMode()
-	
-	local sv = scrollview{width=ss.width,height=ss.height,
-	event=function(sender,type)
-		if type == SCROLLVIEW_EVENT_SCROLLING then
-			print( "SCROLLVIEW_EVENT_SCROLLING")
-		elseif type == SCROLLVIEW_EVENT_SCROLL_TO_TOP then
-			print('SCROLLVIEW_EVENT_SCROLL_TO_TOP')
-		elseif type == SCROLLVIEW_EVENT_SCROLL_TO_BOTTOM then
-			print('SCROLLVIEW_EVENT_SCROLL_TO_BOTTOM')
-		end
-	end
-	}
-	layer:addChild(sv)
-	
-	local h = 0
-	for i = 1,32 do
-		local ox,oy = 32,32
-		local t = text{caption="Text"..i,fontSize=30,eventClick=function(sender) print("text click")end}
-		local y = oy + (i-1)*t:getSize().height
-		h = h + t:getSize().height
-		t:setPosition{x=ox,y=y}
-		sv:addChild(t)
-		--checkbox
-		local c = checkbox{x=ox+t:getSize().width,y=y,check=i%2==1 and true or false,
-						eventSelect=function (sender,b) print(b) end}
-		sv:addChild(c)
-		--button
-		local b = button{x=ox+t:getSize().width+c:getSize().width,y=y,
-											fontSize=32,width=320,height=c:getSize().height,
-											caption="Button 中文"..i,
-											eventClick=function (sender) print('click') end}
-		sv:addChild(b)
-		--slider
-		local s = slider{width=320,height=c:getSize().height,
-										x=b:getPosition()+b:getSize().width,y= y,percent=i*100/32,
-										eventPercent=function (sender,percent) print(percent) end}
-		sv:addChild(s)
-		--edit
-		local e = editbox{caption='Input here:',
-			x=s:getPosition()+s:getSize().width,y= y}
-		sv:addChild(e)
-		--image
-		local img = imageview{image='cocosui/sliderballnormal.png',x=e:getPosition()+e:getSize().width,y=y}
-		sv:addChild(img)
-		local img2 = imageview{image='cocosui/button.png',x=img:getPosition()+img:getSize().width,y=y,
-		scale9=true,width=64,height=32,touch=true}
-		sv:addChild(img2)
-	end
-	sv:setInnerContainerSize{width=ss.width+64,height=h+64}
 end
 
 return {
@@ -420,13 +335,12 @@ return {
 	slider = slider,
 	progress = progress,
 	scrollview = scrollview,
+	pageview = pageview,
+	layout = layout,
 	editbox = editbox,
 	image = imageview,
 	menu = menu,
 	menuItemFont = menuItemFont,
 	menuItemLabel = menuItemLabel,
-	test = test,
-	test_page = test_page,
-	test_menu = test_menu,
 	screenSize = screenSize
 }
