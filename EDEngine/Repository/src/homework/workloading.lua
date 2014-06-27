@@ -1,10 +1,8 @@
 ﻿local uikits = require "uikits"
+local WorkList = require "homework/worklist"
 
 local ui = {
 	FILE = 'homework/studentloading_1/studentloading_1.json',
-	BACK = 'white/back',
-	LIST = 'newview',
-	ITEM = 'newview/subject1',
 }
 
 local WorkLoading = class("WorkLoading")
@@ -28,7 +26,15 @@ function WorkLoading.create()
 end
 
 function WorkLoading:init()
-	self._root = uikits.fromJson{file=ui.FILE}
+	if not self._root then
+		self._root = uikits.fromJson{file=ui.FILE}
+		self:addChild(self._root)	
+	end
+	--test
+	uikits.delay_call( self,
+		function(self)
+			uikits.pushScene( WorkList,cc.TransitionFlipX )
+		end,1)
 end
 
 function WorkLoading:release()

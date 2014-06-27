@@ -31,17 +31,20 @@ function WorkCommit.create()
 end
 
 function WorkCommit:init()
-	self._root = uikits.fromJson{file=ui.FILE}
-	if self._root then
+	if not self._root then
+		self._root = uikits.fromJson{file=ui.FILE}
 		local back = uikits.child(self._root,ui.BACK)
-		uikits.event(back,function(sender)cc.Director:getInstance():popScene()end)
+		uikits.event(back,
+			function(sender)
+				uikits.popScene()
+			end)
 		uikits.event(uikits.child(self._root,ui.WORKFLOW),
 						function(sender)
-							cc.Director:getInstance():pushScene(cc.TransitionSlideInL:create(1,WorkFlow.create()))
+							uikits.pushScene(WorkFlow)
 						end,'click')
 		uikits.event(uikits.child(self._root,ui.WORKFLOW2),
 						function(sender)
-							cc.Director:getInstance():pushScene(cc.TransitionSlideInL:create(1,WorkFlow.create()))
+							uikits.pushScene(WorkFlow)
 						end,'click')						
 		self:addChild(self._root)
 	end

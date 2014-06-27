@@ -26,10 +26,12 @@ function WorkFlow.create()
 end
 
 function WorkFlow:init()
-	self._root = uikits.fromJson{file=ui.FILE}
-	if self._root then
+	if not self._root then
+		self._root = uikits.fromJson{file=ui.FILE}
 		self:addChild(self._root)
-		uikits.event(uikits.child(self._root,ui.BACK),function(sender)cc.Director:getInstance():popScene()end)	
+		uikits.event(uikits.child(self._root,ui.BACK),function(sender)
+			uikits.popScene()
+			end)	
 	end
 end
 

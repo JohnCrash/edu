@@ -1,8 +1,8 @@
 ﻿local uikits = require "uikits"
 local kits = require "kits"
 local WorkList = require "homework/worklist"
+local WorkLoading = require "homework/workloading"
 
-print("------------------HomeWork----------------------")
 local HomeWork = class("HomeWork")
 HomeWork.__index = HomeWork
 HomeWork._uiLayer= nil
@@ -42,10 +42,13 @@ function HomeWork:init()
 	uikits.initDR{width=1920,height=1080}
 	--simple ui
 
+	uikits.pushScene( WorkLoading )
+	--[[
 	self:addChild( uikits.button{caption='作业列表',width=240,height=64,fontSize=32,
 				eventClick=function(sender)
-					cc.Director:getInstance():pushScene( cc.TransitionSlideInL:create(1,WorkList.create()) )
+					uikits.pushScene( WorkList,cc.TransitionSlideInT )
 				end} )
+	--]]
 end
 
 function HomeWork:release()

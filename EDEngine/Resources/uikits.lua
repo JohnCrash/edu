@@ -5,6 +5,7 @@ require "OpenglConstants"
 require "StudioConstants"
 require "GuiConstants"
 
+local Director = cc.Director:getInstance()
 local defaultFont = "fonts/Marker Felt.ttf"
 local defaultFontSize = 16
 
@@ -34,12 +35,11 @@ end
 local design = {width=1024,height=768}
 
 local function InitDesignResolutionMode(t)
-	local director = cc.Director:getInstance()
-	local glview = director:getOpenGLView()
+	local glview = Director:getOpenGLView()
 	local ss = glview:getFrameSize()
 
 	if t and type(t)=='table' then
-		director:setContentScaleFactor( t.scale or 1 )
+		Director:setContentScaleFactor( t.scale or 1 )
 		--[[
 				cc.ResolutionPolicy = 
 				{
@@ -58,8 +58,7 @@ local function InitDesignResolutionMode(t)
 end
 
 local function screenSize()
-	local director = cc.Director:getInstance()
-	local glview = director:getOpenGLView()
+	local glview = Director:getOpenGLView()
 	return glview:getFrameSize()
 end
 
@@ -448,6 +447,31 @@ local function event( obj,func,eventType )
 	end
 end
 
+local function delay_call( obj,func,delay,param)
+	if obj and func and delay then
+		 local scheduler = obj:getScheduler()
+		 local schedulerID
+		 local function delay_call_func()
+			scheduler:unscheduleScriptEntry(schedulerID)
+			schedulerID = nil		
+			func(obj,param)
+		end
+		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)		 
+	end
+end
+
+local function pushScene( scene,transition,t )
+	if transition then
+		Director:pushScene( transition:create(t or 1,scene.create()) )
+	else
+		Director:pushScene( scene.create() )
+	end
+end
+
+local function popScene()
+	Director:popScene()
+end
+
 return {
 	text = text,
 	checkbox = checkbox,
@@ -468,5 +492,8 @@ return {
 	event = event,
 	screenSize = screenSize,
 	pixelWidth = pixelWidth,
+	delay_call = delay_call,
+	pushScene = pushScene,
+	popScene = popScene,
 	initDR = InitDesignResolutionMode
 }

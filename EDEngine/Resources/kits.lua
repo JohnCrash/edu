@@ -5,6 +5,7 @@ local http = require "socket.http"
 local json = require "json"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local cache_dir = local_dir
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
@@ -244,6 +245,40 @@ local function download_file(file)
   end
 end
 
+local function read_cache( name )
+  local file = cache_dir..name
+  if not local_exists(file) then return false end
+  local alls
+  
+  file = io.open(file,"rb")
+  alls = file:read("*a")
+  file:close()
+  --[[
+  for line in io.lines(file) do
+    if not alls then
+      alls = line
+    else
+      alls = alls..line
+    end
+  end
+  --]]
+  return alls
+end
+
+local function write_cache( name,buf )
+  local filename = local_dir..name
+  local file = io.open(filename,'wb')
+  if file then
+    file:write(buf)
+    file:close()
+	return true
+  else
+     --local file error?
+     cclog('Can not write cache '..filename)
+	 return false
+  end
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -259,7 +294,9 @@ local exports = {
 	write_local_file = write_local_file,
 	http_post = http_post,
 	http_get = http_get,
-	encode_url = encode_url
+	encode_url = encode_url,
+	read_cache = read_cache,
+	write_cache = write_cache,
 }
 
 return exports

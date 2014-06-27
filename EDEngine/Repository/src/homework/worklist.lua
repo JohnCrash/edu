@@ -1,13 +1,21 @@
-﻿local uikits = require "uikits"
+﻿local json = require "json"
+local kits = require "kits"
+local uikits = require "uikits"
 local WorkCommit = require "homework/commit"
 
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',
 	BACK = 'white/back',
 	LIST = 'newview',
-	ITEM = 'newview/subject1',
+	ITEM = 'newview/subject_1',
+	ITEM_TITLE = 'textname',
+	ITEM_CURSE = 'subjectbox/subjecttext',
+	ITEM_BAR = 'finish2',
+	ITEM_PERCENT_TEXT = 'finishtext',
 }
-
+--[[ home_work_cache json
+	{"uri","title","class","data","num","num2","num3","homework"}
+--]]
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
 
@@ -30,51 +38,79 @@ end
 
 function WorkList:init_data()
 	self._list = {}
-end
-
-function WorkList:init()
-	self:init_data()
-	
-	self._root = uikits.fromJson{file=ui.FILE}
-	if self._root then
-		self:addChild(self._root)
-		self._scrollview = uikits.child(self._root,ui.LIST)
-		self._item = uikits.child(self._root,ui.ITEM)
-		local back = uikits.child(self._root,ui.BACK)
-		uikits.event(back,function(sender)cc.Director:getInstance():popScene()end)
-		self._item:setVisible(false)
-		for i = 1,16 do
-			self:add_item()
-		end
+	local reslut = kits.read_cache("homework.json")
+	if reslut then
+		self._data = json.decode(reslut)
 	end
 end
 
-function WorkList:add_item()
-	local x,w,h,item
+function WorkList:init()
+	if not self._root then
+		self:init_data()
+		self:init_gui()
+	end
+end
+
+function WorkList:init_gui()
+	self._root = uikits.fromJson{file=ui.FILE}
+	self:addChild(self._root)
+	self._scrollview = uikits.child(self._root,ui.LIST)
+	self._item = uikits.child(self._root,ui.ITEM)
+	local back = uikits.child(self._root,ui.BACK)
+	uikits.event(back,function(sender)uikits.popScene()end)
+	self._item:setVisible(false)
+	local size = self._item:getSize()
+	self._item_width = size.width
+	self._item_height = size.height
+	self._item_ox,self._item_oy = self._item:getPosition()
+	
+	if self._data and self._data.esi then
+		for i,v in pairs(self._data.esi) do
+			self:add_item(v)
+		end
+	end
+	self:relayout()
+end
+
+function WorkList:relayout()
+	self._scrollview:setInnerContainerSize(cc.size(self_item_width,self._item_height*(#self._list)))
+	for i = 1,#self._list do
+		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)))
+	end
+end
+
+function WorkList:add_item( t )
+	local item
 	if #self._list == 0 then
 		item = self._item
 		item:setVisible(true)
 		item:setAnchorPoint(cc.p(0,0))
 		self._list[#self._list+1] = item
-		x = item:getPosition()
-		h = item:getSize().height
 	else
 		item = self._item:clone()
-		x = item:getPosition()
-		w = item:getSize().width
-		h = item:getSize().height
 		self._list[#self._list+1] = item
 		self._scrollview:addChild(item)
-		self._scrollview:setInnerContainerSize(cc.size(w,h*(#self._list)))
+	end
+	if t.exam_name then --作业名称
+		uikits.child( item,ui.ITEM_TITLE):setString( t.exam_name )
+	end
+	if t.course_name then --科目名称
+		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
+	end
+	if t.cnt_item then --数量
+		--
+	end
+	if t.cnt_item and t.cnt_item_finish then --数量
+		local p = t.cnt_item_finish*100/t.cnt_item
+		uikits.child( item,ui.ITEM_PERCENT_TEXT):setString( tostring(math.floor(p))..'%' )
+		uikits.child( item,ui.ITEM_BAR):setPercent( p )
 	end
 	
 	uikits.event(item,
 			function(sender)
-				cc.Director:getInstance():pushScene(cc.TransitionSlideInL:create(1,WorkCommit.create()))
+				uikits.pushScene(WorkCommit)
 			end,'click')
-	for i = 1,#self._list do
-		self._list[#self._list-i+1]:setPosition(cc.p(x,h*(i-1)))
-	end
+	return item
 end
 
 function WorkList:release()
