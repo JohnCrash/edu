@@ -1,10 +1,8 @@
 ﻿local uikits = require "uikits"
 
 local ui = {
-	FILE = 'homework/studenthomework_1/studenthomework_1.json',
-	BACK = 'white/back',
-	LIST = 'newview',
-	ITEM = 'newview/subject1',
+	FILE = 'homework/z21_1/z21_1.json',
+	BACK = 'milk_write/back',
 }
 
 local WorkFlow = class("WorkFlow")
@@ -28,6 +26,11 @@ function WorkFlow.create()
 end
 
 function WorkFlow:init()
+	self._root = uikits.fromJson{file=ui.FILE}
+	if self._root then
+		self:addChild(self._root)
+		uikits.event(uikits.child(self._root,ui.BACK),function(sender)cc.Director:getInstance():popScene()end)	
+	end
 end
 
 function WorkFlow:release()

@@ -405,9 +405,18 @@ local isTouchEvent = {
 	['ccui.Button'] = true,
 	['ccui.Text'] = true
 }
-local function event( obj,func )
+local function event( obj,func,eventType )
 	if obj and func then
-		if isTouchEvent[cc_type(obj)] then
+		if eventType then
+			if eventType == 'click' then
+				obj:addTouchEventListener( 
+				function(sender,eventType) 
+					if eventType == ccui.TouchEventType.ended then
+						func( sender )
+					end
+				end)				
+			end
+		elseif isTouchEvent[cc_type(obj)] then
 			obj:addTouchEventListener( 
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then

@@ -1,7 +1,7 @@
 ﻿local uikits = require "uikits"
 
 local ui = {
-	FILE = 'homework/studenthomework_1/studenthomework_1.json',
+	FILE = 'homework/studentloading_1/studentloading_1.json',
 	BACK = 'white/back',
 	LIST = 'newview',
 	ITEM = 'newview/subject1',
@@ -28,6 +28,7 @@ function WorkLoading.create()
 end
 
 function WorkLoading:init()
+	self._root = uikits.fromJson{file=ui.FILE}
 end
 
 function WorkLoading:release()

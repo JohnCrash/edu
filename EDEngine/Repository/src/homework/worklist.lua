@@ -1,4 +1,5 @@
 ﻿local uikits = require "uikits"
+local WorkCommit = require "homework/commit"
 
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',
@@ -49,15 +50,16 @@ function WorkList:init()
 end
 
 function WorkList:add_item()
-	local x,w,h
+	local x,w,h,item
 	if #self._list == 0 then
-		self._item:setVisible(true)
-		self._item:setAnchorPoint(cc.p(0,0))
-		self._list[#self._list+1] = self._item
-		x = self._item:getPosition()
-		h = self._item:getSize().height
+		item = self._item
+		item:setVisible(true)
+		item:setAnchorPoint(cc.p(0,0))
+		self._list[#self._list+1] = item
+		x = item:getPosition()
+		h = item:getSize().height
 	else
-		local item = self._item:clone()
+		item = self._item:clone()
 		x = item:getPosition()
 		w = item:getSize().width
 		h = item:getSize().height
@@ -66,6 +68,10 @@ function WorkList:add_item()
 		self._scrollview:setInnerContainerSize(cc.size(w,h*(#self._list)))
 	end
 	
+	uikits.event(item,
+			function(sender)
+				cc.Director:getInstance():pushScene(cc.TransitionSlideInL:create(1,WorkCommit.create()))
+			end,'click')
 	for i = 1,#self._list do
 		self._list[#self._list-i+1]:setPosition(cc.p(x,h*(i-1)))
 	end
