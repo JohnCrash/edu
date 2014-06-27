@@ -7,12 +7,12 @@ local ui = {
 	ITEM = 'newview/subject1',
 }
 
-local WorkCommit = class("WorkCommit")
-WorkCommit.__index = WorkCommit
+local WorkFlow = class("WorkFlow")
+WorkFlow.__index = WorkFlow
 
-function WorkCommit.create()
+function WorkFlow.create()
 	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),WorkCommit)
+	local layer = uikits.extend(cc.Layer:create(),WorkFlow)
 	
 	scene:addChild(layer)
 	
@@ -27,10 +27,10 @@ function WorkCommit.create()
 	return scene
 end
 
-function WorkCommit:init()
+function WorkFlow:init()
 end
 
-function WorkCommit:release()
+function WorkFlow:release()
 end
 
-return WorkCommit
+return WorkFlow
