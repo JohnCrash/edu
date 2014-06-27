@@ -41,6 +41,7 @@ function HomeWork:init()
 	--require('src/test').scroll( self )
 	uikits.initDR{width=1920,height=1080}
 	--simple ui
+
 	self:addChild( uikits.button{caption='作业列表',width=240,height=64,fontSize=32,
 				eventClick=function(sender)
 					cc.Director:getInstance():pushScene( cc.TransitionSlideInL:create(0.2,WorkList.create()) )

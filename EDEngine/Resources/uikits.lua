@@ -31,6 +31,8 @@ local function init_node( s,t )
 	s:setPosition{x=t.x or 0,y= t.y or 0}	
 end
 
+local design = {width=1024,height=768}
+
 local function InitDesignResolutionMode(t)
 	local director = cc.Director:getInstance()
 	local glview = director:getOpenGLView()
@@ -49,6 +51,8 @@ local function InitDesignResolutionMode(t)
 					UNKNOWN  = 5,
 				}		
 		--]]
+		design.width = t.width or design.width
+		design.height = t.height or design.height
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
 	end
 end
@@ -57,6 +61,10 @@ local function screenSize()
 	local director = cc.Director:getInstance()
 	local glview = director:getOpenGLView()
 	return glview:getFrameSize()
+end
+
+local function pixelWidth()
+	return design.width/screenSize().width
 end
 
 local function text( t )
@@ -450,5 +458,6 @@ return {
 	child = child,
 	event = event,
 	screenSize = screenSize,
+	pixelWidth = pixelWidth,
 	initDR = InitDesignResolutionMode
 }
