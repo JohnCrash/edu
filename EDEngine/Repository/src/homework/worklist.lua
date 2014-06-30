@@ -12,6 +12,8 @@ local ui = {
 	ITEM_CURSE = 'subjectbox/subjecttext',
 	ITEM_BAR = 'finish2',
 	ITEM_PERCENT_TEXT = 'finishtext',
+	ITEM_FINISH = 'questionsnumber',
+	ITEM_COUNT = 'questionsnumbe'
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -37,7 +39,6 @@ function WorkList.create()
 end
 
 function WorkList:init_data()
-	self._list = {}
 	local reslut = kits.read_cache("homework.json")
 	if reslut then
 		self._data = json.decode(reslut)
@@ -64,6 +65,7 @@ function WorkList:init_gui()
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
 	
+	self._list = {}
 	if self._data and self._data.esi then
 		for i,v in pairs(self._data.esi) do
 			self:add_item(v)
@@ -73,7 +75,7 @@ function WorkList:init_gui()
 end
 
 function WorkList:relayout()
-	self._scrollview:setInnerContainerSize(cc.size(self_item_width,self._item_height*(#self._list)))
+	self._scrollview:setInnerContainerSize(cc.size(self._item_width,self._item_height*(#self._list)))
 	for i = 1,#self._list do
 		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)))
 	end
@@ -97,9 +99,14 @@ function WorkList:add_item( t )
 	if t.course_name then --科目名称
 		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
 	end
-	if t.cnt_item then --数量
-		--
+	if t.cnt_item and t.cnt_item_finish then --数量
+		local text = uikits.child( item,ui.ITEM_COUNT)
+		local b = text and text:setString( t.cnt_item )
 	end
+	if t.cnt_item_finish then --完成数量
+		local text = uikits.child( item,ui.ITEM_FINISH)
+		local b = text and text:setString( t.cnt_item_finish )
+	end	
 	if t.cnt_item and t.cnt_item_finish then --数量
 		local p = t.cnt_item_finish*100/t.cnt_item
 		uikits.child( item,ui.ITEM_PERCENT_TEXT):setString( tostring(math.floor(p))..'%' )

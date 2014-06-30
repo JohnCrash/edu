@@ -2,6 +2,8 @@
 local kits = require "kits"
 local WorkList = require "homework/worklist"
 local WorkLoading = require "homework/workloading"
+local WorkCommit = require "homework/commit"
+local WorkFlow = require "homework/workflow"
 
 local HomeWork = class("HomeWork")
 HomeWork.__index = HomeWork
@@ -42,13 +44,20 @@ function HomeWork:init()
 	uikits.initDR{width=1920,height=1080}
 	--simple ui
 
-	uikits.pushScene( WorkLoading )
-	--[[
-	self:addChild( uikits.button{caption='作业列表',width=240,height=64,fontSize=32,
-				eventClick=function(sender)
-					uikits.pushScene( WorkList,cc.TransitionSlideInT )
-				end} )
-	--]]
+	--uikits.pushScene( WorkLoading )
+	local wk = {
+		{text = '装载',scene=WorkLoading},
+		{text = '作业列表',scene=WorkList},
+		{text = '提交',scene=WorkCommit},
+		{text = '做作业',scene=WorkFlow},
+	}
+	for i,v in pairs(wk) do
+		self:addChild( uikits.button{caption=v.text,width = 240,height=48,fontSize=32,
+					y = 48*i,
+					eventClick=function(sender)
+						uikits.pushScene( v.scene )
+					end} )
+	end
 end
 
 function HomeWork:release()
