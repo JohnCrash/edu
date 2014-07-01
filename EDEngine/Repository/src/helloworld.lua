@@ -34,6 +34,7 @@ local function init_test_resource()
     pfu:addSearchPath(res..'scenetest/TriggerTest')    
   end
   pfu:addSearchPath(res)
+  pfu:addSearchPath(local_dir..'cache/')
 end
 
 

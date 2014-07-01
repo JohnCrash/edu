@@ -5,7 +5,7 @@ local http = require "socket.http"
 local json = require "json"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
-local cache_dir = local_dir
+local cache_dir = local_dir.."/cache/"
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
