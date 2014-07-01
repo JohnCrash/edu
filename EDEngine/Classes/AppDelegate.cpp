@@ -2,6 +2,7 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 #include "lua_ext.h"
+#include "luaDebug.h"
 
 AppDelegate::AppDelegate()
 {
@@ -74,8 +75,12 @@ void AppDelegate::initLuaEngine()
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 )
+	// || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
     LuaStack* stack = pEngine->getLuaStack();
+	#ifdef _DEBUG
+	startRuntime();
+	#endif
     //register_assetsmanager_test_sample(stack->getLuaState());
 #endif
 //#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
