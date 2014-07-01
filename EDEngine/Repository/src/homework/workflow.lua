@@ -1,7 +1,8 @@
 ﻿local uikits = require "uikits"
 
+local res_root = 'homework/z21_1/'
 local ui = {
-	FILE = 'homework/z21_1/z21_1.json',
+	FILE = res_root..'z21_1.json',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	PAGE_VIEW = 'questions_view',
@@ -178,6 +179,7 @@ function WorkFlow:set_current( i )
 		if ps ~= i then
 			self._pageview:scrollToPage(i-1)
 		end
+		self:set_anwser_field(i)
 	end
 end
 
@@ -218,26 +220,42 @@ function WorkFlow:init_anser_gui()
 	local a = uikits.child(self._root,ui.ANSWER_FIELD)
 	self._answer_field = a
 	self._answer_type = uikits.child(a,ui.TYPE_IMG)
-	print("_answer_type = "..cc_type(self._answer_type))
 end
 
-local anwser_type = {
-	[1] = {name='判断',img='true_or_false_item.png'},
-	[2] = {name='单选',img='single_item.png'},
-	[3] = {name='多选',img='multiple_item.png'},
-	[4] = {name='连线',img='connection_item.png'},
-	[11] = {name='单拖放',img='drag_item.png'},
-	[12] = {name='多拖放',img='drag_item.png'},
+local answer_type = {
+	[1] = {name='判断',img='true_or_false_item.png',
+				init=function(self)
+				end},
+	[2] = {name='单选',img='single_item.png',
+				init=function(self,op)
+					
+				end},
+	[3] = {name='多选',img='multiple_item.png',
+				init=function(self)
+				end},
+	[4] = {name='连线',img='connection_item.png',
+				init=function(self)
+				end},
+	[11] = {name='单拖放',img='drag_item.png',
+				init=function(self)
+				end},
+	[12] = {name='多拖放',img='drag_item.png',
+				init=function(self)
+				end},
 }
-function WorkFlow:set_anwser_type( t )
-	if anwser_type[t] then
-		self._answer_type:loadTexture(anwser_type[t].img)
-	end
-end
 
 function WorkFlow:set_anwser_field( i )
 	if self._data[i] then
-		set_anwser_type( self._data[i].item_type )
+		if self._answer_items then
+			for i,v in pairs(self._answer_items) do
+				v:removeFromParent()
+			end
+		end
+		local t = self._data[i].item_type
+		if answer_type[t] then
+			self._answer_type:loadTexture(res_root..answer_type[t].img)
+			answer_type[t].init(self,self._data[i].options)
+		end
 	end
 end
 
