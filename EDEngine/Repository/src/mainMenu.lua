@@ -12,6 +12,7 @@ require "src/VisibleRect"
 require "src/amouse/amouse_om"
 require "src/acatcher/acatcher_om"
 require "src/homework/homework"
+--require "src/hello/hello"
 
 local LINE_SPACE = 40
 
@@ -23,6 +24,7 @@ local _allTests = {
 	{ isSupported = true,  name = "A Mouse"          , create_func=             AMouseMain  },
 	{ isSupported = true,  name = "A Catcher"          , create_func=             ACatcherMain  },
 	{ isSupported = true,  name = "Home work"          , create_func=  HomeWorkMain  }
+	--{ isSupported = true,  name = "Hello World"          , create_func=  HelloWorldMain  }
 }
 
 local TESTS_COUNT = table.getn(_allTests)

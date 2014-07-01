@@ -7,12 +7,12 @@ local ui = {
 	ITEM = 'newview/subject1',
 }
 
-local WorkLoading = class("WorkLoading")
-WorkLoading.__index = WorkLoading
+local HelloWorld = class("HelloWorld")
+HelloWorld.__index = HelloWorld
 
-function WorkLoading.create()
+function HelloWorld.create()
 	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),WorkLoading)
+	local layer = uikits.extend(cc.Layer:create(),HelloWorld)
 	
 	scene:addChild(layer)
 	
@@ -27,12 +27,17 @@ function WorkLoading.create()
 	return scene
 end
 
-function WorkLoading:init()
+function HelloWorld:init()
+	print( "HelloWorld")
+end
+
+function HelloWorld:release()
 	
 end
 
-function WorkLoading:release()
-	
+function HelloWorldMain()
+	cclog("HomeWork launch!")
+	--require("mobdebug").start("192.168.2.182")
+	local scene =HelloWorld.create()
+	return scene
 end
-
-return WorkLoading

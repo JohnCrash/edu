@@ -1364,7 +1364,7 @@ end
 
 function AMouseMain()
 	cclog("A mouse hello!")
-	--require("mobdebug").start("192.168.2.182")
+	require("mobdebug").start("192.168.2.182")
 	local scene = AMouseScene.create()
 	scene:addChild(CreateBackMenuItem())
 	return scene
