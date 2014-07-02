@@ -348,6 +348,11 @@ local answer_type = {
 				init=function(self,frame,data,op)
 					self._option_link:setVisible(true)
 				end},
+	[5] = {name='填空'},
+	[7] = {name='横排序'},
+	[8] = {name='竖排序'},
+	[9] = {name='点图单选'},
+	[10] = {name='点图多选'},
 	[11] = {name='单拖放',img='drag_item.png',
 				init=function(self,frame,data,op)
 					self._option_drag:setVisible(true)
