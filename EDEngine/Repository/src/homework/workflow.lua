@@ -79,6 +79,14 @@ function WorkFlow:init_data()
 			if not v.isload then
 				v.isload = true
 			end
+			if v.options then
+				local b,re = pcall( json.decode,v.options )
+				if b then
+					v.options = re
+				else
+					print( 'JSON.DECODE ERROR: '..re )
+				end
+			end
 		end
 	end
 end
@@ -150,7 +158,7 @@ function WorkFlow:set_item_state( i,ste )
 		self._list[i] = item
 		self._scrollview:addChild(item)	
 		local index = i
-		uikits.event(item,function(sender) self:set_current( index ) end,'click')		
+		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 	end
 end
 
@@ -219,34 +227,134 @@ function WorkFlow:add_item( t )
 end
 
 function WorkFlow:init_anser_gui()
+	self._option_img = {}
+	self._answer_items = {}
+	
 	local a = uikits.child(self._root,ui.ANSWER_FIELD)
 	self._answer_field = a
 	self._answer_type = uikits.child(a,ui.TYPE_IMG)
-	self._answer_items = {}
+	--选择
+	self._option_img[1] = uikits.child(a,ui.OPTION_A)
+	self._option_img[2] = uikits.child(a,ui.OPTION_B)
+	self._option_img[3] = uikits.child(a,ui.OPTION_C)
+	self._option_img[4] = uikits.child(a,ui.OPTION_D)
+	self._option_img[5] = uikits.child(a,ui.OPTION_E)
+	self._option_img[6] = uikits.child(a,ui.OPTION_F)
+	self._option_img[7] = uikits.child(a,ui.OPTION_G)
+	self._option_img[8] = uikits.child(a,ui.OPTION_H)
+	
+	self._option_link = uikits.child(a,ui.LINK_TEXT)
+	self._option_drag = uikits.child(a,ui.DRAG_TEXT)
+	self._option_yes = uikits.child(a,ui.OPTION_YES)
+	self._option_no = uikits.child(a,ui.OPTION_NO)
+end
+
+function WorkFlow:clear_all_option_check()
+	for i = 1,#self._option_img do
+		self._option_img[i]:setSelectedState(false)
+	end
 end
 
 local answer_type = {
 	[1] = {name='判断',img='true_or_false_item.png',
-				init=function(self,frame,op)
+				init=function(self,frame,data,op)
+					print("判断")
+					self._option_yes:setVisible(true)
+					self._option_no:setVisible(true)
+					if data.answer == 1 then
+						self._option_yes:setSelectedState(true)
+						self._option_no:setSelectedState(false)
+					elseif data.answer == 2 then
+						self._option_yes:setSelectedState(false)
+						self._option_no:setSelectedState(true)	
+					else
+						self._option_yes:setSelectedState(false)
+						self._option_no:setSelectedState(false)
+					end
+					uikits.event(self._option_yes,
+						function (sender,b)
+							if b then
+								if data.answer == 2 then
+									self._option_no:setSelectedState(false)
+								end
+								data.answer = 1	
+								data.state = ui.STATE_FINISHED
+							end
+						end)
+					uikits.event(self._option_no,
+						function (sender,b)
+							if b then
+								if data.answer == 1 then
+									self._option_yes:setSelectedState(false)
+								end
+								data.answer = 2
+								data.state = ui.STATE_FINISHED
+							end						
+						end)
 				end},
 	[2] = {name='单选',img='single_item.png',
-				init=function(self,frame,op)
-					for i,v in pairs(op.options) do
-						local item = uikits.image{image=res_root..ui.OPTION_A}
-						frame:addChild(item)
+				init=function(self,frame,data,op)
+					local i = 1
+					for k,v in pairs(op.options) do
+						self._option_img[i]:setVisible(true)
+						if i == data.answer then
+							self._option_img[i]:setSelectedState(true)
+						else
+							self._option_img[i]:setSelectedState(false)
+						end
+						local m = i
+						uikits.event(self._option_img[i],
+							function(sender,b)
+								if b then
+									data.answer = m
+									self:clear_all_option_check()
+									sender:setSelectedState(true)
+									data.state = ui.STATE_FINISHED
+								else
+									data.answer = nil
+									data.state = ui.STATE_UNFINISHED
+								end
+							end)
+						i = i + 1
 					end
 				end},
 	[3] = {name='多选',img='multiple_item.png',
-				init=function(self,frame,op)
+				init=function(self,frame,data,op)
+					local i = 1
+					for k,v in pairs(op.options) do
+						self._option_img[i]:setVisible(true)
+						if data.answer and type(data.answer)=='table' and data.answer[i] then
+							self._option_img[i]:setSelectedState(true)
+						else
+							self._option_img[i]:setSelectedState(false)
+						end
+						local m = i
+						uikits.event(self._option_img[i],
+							function(sender,b)
+								data.answer = data.answer or {}
+								
+								if data.answer[m] then
+									data.answer[m] = nil
+									data.state = ui.STATE_UNFINISHED
+								else
+									data.answer[m] = 1
+									data.state = ui.STATE_FINISHED
+								end
+							end)
+						i = i + 1
+					end
 				end},
 	[4] = {name='连线',img='connection_item.png',
-				init=function(self,frame,op)
+				init=function(self,frame,data,op)
+					self._option_link:setVisible(true)
 				end},
 	[11] = {name='单拖放',img='drag_item.png',
-				init=function(self,frame,op)
+				init=function(self,frame,data,op)
+					self._option_drag:setVisible(true)
 				end},
 	[12] = {name='多拖放',img='drag_item.png',
-				init=function(self,frame,op)
+				init=function(self,frame,data,op)
+					self._option_drag:setVisible(true)
 				end},
 }
 
@@ -257,11 +365,18 @@ function WorkFlow:set_anwser_field( i )
 				v:removeFromParent()
 			end
 			self._answer_items = {}
+			for i=1,8 do
+				self._option_img[i]:setVisible(false)
+			end
+			self._option_link:setVisible(false)
+			self._option_yes:setVisible(false)
+			self._option_no:setVisible(false)			
+			self._option_drag:setVisible(false)
 		end
 		local t = self._data[i].item_type
 		if answer_type[t] then
 			self._answer_type:loadTexture(res_root..answer_type[t].img)
-			answer_type[t].init(self,self._answer_field,self._data[i].options)
+			answer_type[t].init(self,self._answer_field,self._data[i],self._data[i].options)
 		end
 	end
 end
