@@ -28,6 +28,7 @@ local ui = {
 	OPTION_H = 'option_h',
 	OPTION_YES = 'option_right',
 	OPTION_NO = 'option_wrong',
+	OPTION_NO_SUPPORT = 'option_not',
 	EDIT_1 = 'option_write_1',
 	EDIT_2 = 'option_write_2',
 	EDIT_3 = 'option_write_3',
@@ -36,6 +37,7 @@ local ui = {
 	DRAG_TEXT = 'option_drag',
 	POSITION_TEXT = 'option_position',
 	POSITION_SORT = 'option_sort',
+	ANSWER_TEXT = 'answer_text',
 }
 
 --[[
@@ -70,22 +72,21 @@ end
 function WorkFlow:init_data()
 	local reslut = kits.read_cache("job1.json")
 	if reslut then
-		self._data = json.decode(reslut)
-		for i,v in ipairs(self._data) do
-			--test
-			if not v.state then
-				v.state = ui.STATE_UNFINISHED
-			end
-			if not v.isload then
-				v.isload = true
-			end
-			if v.options then
-				local b,re = pcall( json.decode,v.options )
-				if b then
-					v.options = re
-				else
-					print( 'JSON.DECODE ERROR: '..re )
+		self._data = kits.decode_json(reslut)
+		if self._data then
+			for i,v in ipairs(self._data) do
+				--test
+				if not v.state then
+					v.state = ui.STATE_UNFINISHED
 				end
+				if not v.isload then
+					v.isload = true
+				end
+				v.options = kits.decode_json( v.options )
+				if v.item_type == 11 or v.item_type == 12 then
+					print( v.options )
+				end
+				v.correct_answer = kits.decode_json( v.correct_answer )
 			end
 		end
 	end
@@ -245,8 +246,16 @@ function WorkFlow:init_anser_gui()
 	
 	self._option_link = uikits.child(a,ui.LINK_TEXT)
 	self._option_drag = uikits.child(a,ui.DRAG_TEXT)
+	self._option_sort = uikits.child(a,ui.POSITION_SORT)
 	self._option_yes = uikits.child(a,ui.OPTION_YES)
 	self._option_no = uikits.child(a,ui.OPTION_NO)
+	self._option_not_support = uikits.child(a,ui.OPTION_NO_SUPPORT)
+	
+	self._option_edit = {}
+	self._option_edit[1] = uikits.child(a,ui.EDIT_1)
+	self._option_edit[2] = uikits.child(a,ui.EDIT_2)
+	self._option_edit[3] = uikits.child(a,ui.EDIT_3)
+	self._option_edit[4] = uikits.child(a,ui.EDIT_4)
 end
 
 function WorkFlow:clear_all_option_check()
@@ -258,7 +267,6 @@ end
 local answer_type = {
 	[1] = {name='判断',img='true_or_false_item.png',
 				init=function(self,frame,data,op)
-					print("判断")
 					self._option_yes:setVisible(true)
 					self._option_no:setVisible(true)
 					if data.answer == 1 then
@@ -279,6 +287,9 @@ local answer_type = {
 								end
 								data.answer = 1	
 								data.state = ui.STATE_FINISHED
+							else
+								data.answer = nil
+								data.state = ui.STATE_UNFINISHED
 							end
 						end)
 					uikits.event(self._option_no,
@@ -289,6 +300,9 @@ local answer_type = {
 								end
 								data.answer = 2
 								data.state = ui.STATE_FINISHED
+							else
+								data.answer = nil
+								data.state = ui.STATE_UNFINISHED
 							end						
 						end)
 				end},
@@ -348,11 +362,46 @@ local answer_type = {
 				init=function(self,frame,data,op)
 					self._option_link:setVisible(true)
 				end},
-	[5] = {name='填空'},
-	[7] = {name='横排序'},
-	[8] = {name='竖排序'},
-	[9] = {name='点图单选'},
-	[10] = {name='点图多选'},
+	[5] = {name='填空',img='write_item.png',
+				init=function(self,frame,data,op)
+					if data.correct_answer and data.correct_answer.answers then
+						local c = #data.correct_answer.answers
+						data.answer = data.answer or {}
+						for i = 1,c do
+							self._option_edit[i]:setVisible(true)
+							local e = uikits.child(self._option_edit[i],ui.ANSWER_TEXT)
+							if data.answer and data.answer[i] then
+								e:setText(data.answer[i])
+							else
+								e:setText('')
+							end
+							uikits.event(e,
+									function(sender,eventType)
+										if eventType == ccui.TextFiledEventType.insert_text then
+											data.state = ui.STATE_FINISHED
+											data.answer[i] = sender:getStringValue()
+										elseif eventType == ccui.TextFiledEventType.delete_backward then
+											data.state = ui.STATE_FINISHED
+											data.answer[i] = sender:getStringValue()
+										end
+									end)							
+						end
+					end
+				end},
+	[7] = {name='横排序',img='sort_item.png',
+				init=function(self,frame,data,op)
+					self._option_sort:setVisible(true)
+				end},
+	[8] = {name='竖排序',img='sort_item.png',
+				init=function(self,frame,data,op)
+					self._option_sort:setVisible(true)
+				end},
+	[9] = {name='点图单选',
+				init=function(self,frame,data,op)
+				end},
+	[10] = {name='点图多选',
+				init=function(self,frame,data,op)
+				end},
 	[11] = {name='单拖放',img='drag_item.png',
 				init=function(self,frame,data,op)
 					self._option_drag:setVisible(true)
@@ -373,16 +422,39 @@ function WorkFlow:set_anwser_field( i )
 			for i=1,8 do
 				self._option_img[i]:setVisible(false)
 			end
+			for i=1,4 do
+				self._option_edit[i]:setVisible(false)
+			end
 			self._option_link:setVisible(false)
 			self._option_yes:setVisible(false)
 			self._option_no:setVisible(false)			
 			self._option_drag:setVisible(false)
+			self._option_sort:setVisible(false)
+			self._option_not_support:setVisible(false)
 		end
 		local t = self._data[i].item_type
-		if answer_type[t] then
+		
+		if answer_type[t] and answer_type[t].img and answer_type[t].init then
 			self._answer_type:loadTexture(res_root..answer_type[t].img)
+			
+			if self._prev_option_index then
+				local prev_t = self._data[self._prev_option_index].item_type
+				if answer_type[prev_t] and answer_type[prev_t].release then
+					--上一个的释放
+					answer_type[prev_t].release( self,self._answer_field,self._data[self._prev_option_index],self._data[self._prev_option_index].options)
+				end
+			end
 			answer_type[t].init(self,self._answer_field,self._data[i],self._data[i].options)
+		else
+			--不支持的类型
+			if  answer_type[t] and  answer_type[t].name then
+				print( "Can't support type "..t.."	name : "..answer_type[t].name )
+			else
+				print( "Can't support type "..t )
+			end
+			self._option_not_support:setVisible(true)
 		end
+		self._prev_option_index = i
 	end
 end
 

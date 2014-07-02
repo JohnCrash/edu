@@ -279,6 +279,16 @@ local function write_cache( name,buf )
   end
 end
 
+local function decode_json( buf )
+	local b,re = pcall( json.decode,buf )
+	if b then
+		return re
+	else
+		print('JSON.DECODE ERROR: '..re)
+	end
+	return nil
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -297,6 +307,7 @@ local exports = {
 	encode_url = encode_url,
 	read_cache = read_cache,
 	write_cache = write_cache,
+	decode_json = decode_json,
 }
 
 return exports
