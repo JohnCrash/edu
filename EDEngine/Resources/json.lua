@@ -303,9 +303,19 @@ function decode_scanString(s,startPos)
     endPos = endPos + 1
     base.assert(endPos <= stringLen+1, "String decoding failed: unterminated string at position " .. endPos)
   until bEnded
+  
   local stringValue = 'return ' .. string.sub(s, startPos, endPos-1)
   local stringEval = base.loadstring(stringValue)
-  base.assert(stringEval, 'Failed to load string [ ' .. stringValue .. '] in JSON4Lua.decode_scanString at position ' .. startPos .. ' : ' .. endPos)
+  if not stringEval then
+		--lua 不能转义字符\/,将\/简单的替换成/
+		--转义字符\\u000a
+		local ss = string.sub(s,startPos,endPos-1)
+		ss = string.gsub(ss,'\\/','/')
+		ss = string.gsub(ss,'\\u000a','\0\a')
+		stringValue = 'return '..ss
+		stringEval = base.loadstring(stringValue)
+		base.assert(stringEval, 'Failed to load string [ ' .. stringValue .. '] in JSON4Lua.decode_scanString at position ' .. startPos .. ' : ' .. endPos)
+  end
   return stringEval(), endPos  
 end
 
