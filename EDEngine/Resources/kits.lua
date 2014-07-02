@@ -280,11 +280,15 @@ local function write_cache( name,buf )
 end
 
 local function decode_json( buf )
-	local b,re = pcall( json.decode,buf )
-	if b then
-		return re
+	if buf then
+		local b,re = pcall( json.decode,buf )
+		if b then
+			return re
+		else
+			print('JSON.DECODE ERROR: '..re)
+		end
 	else
-		print('JSON.DECODE ERROR: '..re)
+		print('decode_json argument #1 is nil')
 	end
 	return nil
 end

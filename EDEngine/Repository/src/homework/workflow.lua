@@ -82,14 +82,16 @@ function WorkFlow:init_data()
 				if not v.isload then
 					v.isload = true
 				end
-			--	print( "index "..i.." type "..v.item_type )
-			--	print("-------------------------------------------")
-			--	print( v.options )
-				v.options = kits.decode_json( v.options )
+				--print( "index "..i.." type "..v.item_type )
+				--print("-------------------------------------------")
+				--print( v.options )
 				if v.item_type == 11 or v.item_type == 12 then
 					print( v.options )
-				end
-			--	print("-------------------------------------------")
+					print("-------------------------------------------")
+				end				
+				v.options = kits.decode_json( v.options )
+
+				--print("-------------------------------------------")
 				v.correct_answer = kits.decode_json( v.correct_answer )
 			end
 		end
