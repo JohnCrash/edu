@@ -70,32 +70,112 @@ function WorkFlow.create()
 end
 
 function WorkFlow:init_data()
-	local reslut = kits.read_cache("job1.json")
-	if reslut then
-		self._data = kits.decode_json(reslut)
-		if self._data then
-			for i,v in ipairs(self._data) do
-				--test
-				if not v.state then
-					v.state = ui.STATE_UNFINISHED
-				end
-				if not v.isload then
-					v.isload = true
-				end
-				--print( "index "..i.." type "..v.item_type )
-				--print("-------------------------------------------")
-				--print( v.options )
-				if v.item_type == 11 or v.item_type == 12 then
-					print( v.options )
-					print("-------------------------------------------")
-				end				
-				v.options = kits.decode_json( v.options )
+	self._data = self:load_original_data( "job1.json" )
+end
 
-				--print("-------------------------------------------")
-				v.correct_answer = kits.decode_json( v.correct_answer )
+--[[
+	将原数据转换为我定义的数据
+--]]
+WorkFlow._type_convs=
+{
+	[1] = {name='判断',
+				conv=function(s,e)
+					return true
+				end
+			},
+	[2] = {name='单选',
+				conv=function(s,e)
+					local op = kits.decode_json( s.options )
+					if op and op.options and type(op.options)=='table' then
+						e.options = #op.options --取得选择题个数
+					else
+						return false
+					end
+					return true
+				end
+			},
+	[3] = {name='多选',
+				conv=function(s,e)
+					local op = kits.decode_json( s.options )
+					if op and op.options and type(op.options)=='table' then
+						e.options = #op.options --取得选择题个数
+					else
+						return false
+					end
+					return true
+				end
+			},
+	[4] = {name='连线',
+				conv=function(s,e)
+					return true
+				end
+			},	
+	[5] = {name='填空',
+				conv=function(s,e)
+					local ca = kits.decode_json( s.correct_answer )
+					if ca and ca.answers and type(ca.answers)=='table' then
+						e.options = #ca.answers --多少个空
+					end
+					return true
+				end	
+			},
+	[7] = {name='横排序',
+				conv=function(s,e)
+					return true
+				end	
+			},
+	[8] = {name='竖排序',
+				conv=function(s,e)
+					return true
+				end		
+			},
+	[9] = {name='点图单选',
+				conv=function(s,e)
+					return true
+				end		
+			},
+	[10] = {name='点图多选',
+				conv=function(s,e)
+					return true
+				end		
+			},
+	[11] = {name='单拖放',
+				conv=function(s,e)
+					return true
+				end		
+			},
+	[12] = {name='多拖放',
+				conv=function(s,e)
+					return true
+				end		
+			}
+}
+
+function WorkFlow:load_original_data( file )
+	local reslut = kits.read_cache(file)
+	local res = {}
+	if reslut then
+		local data = kits.decode_json(reslut)
+		if data then
+			for i,v in ipairs(data) do
+				local k = {}
+				k.item_type = v.item_type
+				k.state = ui.STATE_UNFINISHED
+				k.isload = true --is downloaded?
+				k.image = v.image
+				if WorkFlow._type_convs[k.item_type] and WorkFlow._type_convs[k.item_type].conv then
+					if WorkFlow._type_convs[k.item_type].conv( v,k ) then
+						res[#res+1] = k
+					else
+						print('WorkFlow 不能转'..WorkFlow._type_convs[k.item_type].name..'题: '..tostring(v.Id))
+					end
+				else
+					print('WorkFlow 支持的题型: '..v.item_type)
+				end
 			end
 		end
 	end
+	return res
 end
 
 function WorkFlow:init_gui()
@@ -270,7 +350,8 @@ function WorkFlow:clear_all_option_check()
 	end
 end
 
-local answer_type = {
+WorkFlow._topics = {
+	--answer = 1 表示A, 2 = B ...
 	[1] = {name='判断',img='true_or_false_item.png',
 				init=function(self,frame,data,op)
 					self._option_yes:setVisible(true)
@@ -314,8 +395,7 @@ local answer_type = {
 				end},
 	[2] = {name='单选',img='single_item.png',
 				init=function(self,frame,data,op)
-					local i = 1
-					for k,v in pairs(op.options) do
+					for i = 1,op do
 						self._option_img[i]:setVisible(true)
 						if i == data.answer then
 							self._option_img[i]:setSelectedState(true)
@@ -335,13 +415,11 @@ local answer_type = {
 									data.state = ui.STATE_UNFINISHED
 								end
 							end)
-						i = i + 1
 					end
 				end},
 	[3] = {name='多选',img='multiple_item.png',
 				init=function(self,frame,data,op)
-					local i = 1
-					for k,v in pairs(op.options) do
+					for i = 1, op do
 						self._option_img[i]:setVisible(true)
 						if data.answer and type(data.answer)=='table' and data.answer[i] then
 							self._option_img[i]:setSelectedState(true)
@@ -361,7 +439,6 @@ local answer_type = {
 									data.state = ui.STATE_FINISHED
 								end
 							end)
-						i = i + 1
 					end
 				end},
 	[4] = {name='连线',img='connection_item.png',
@@ -370,10 +447,9 @@ local answer_type = {
 				end},
 	[5] = {name='填空',img='write_item.png',
 				init=function(self,frame,data,op)
-					if data.correct_answer and data.correct_answer.answers then
-						local c = #data.correct_answer.answers
+					if op then
 						data.answer = data.answer or {}
-						for i = 1,c do
+						for i = 1,op do
 							self._option_edit[i]:setVisible(true)
 							local e = uikits.child(self._option_edit[i],ui.ANSWER_TEXT)
 							if data.answer and data.answer[i] then
@@ -440,21 +516,21 @@ function WorkFlow:set_anwser_field( i )
 		end
 		local t = self._data[i].item_type
 		
-		if answer_type[t] and answer_type[t].img and answer_type[t].init then
-			self._answer_type:loadTexture(res_root..answer_type[t].img)
+		if self._topics[t] and self._topics[t].img and self._topics[t].init then
+			self._answer_type:loadTexture(res_root..self._topics[t].img)
 			
 			if self._prev_option_index then
 				local prev_t = self._data[self._prev_option_index].item_type
-				if answer_type[prev_t] and answer_type[prev_t].release then
+				if self._topics[prev_t] and self._topics[prev_t].release then
 					--上一个的释放
-					answer_type[prev_t].release( self,self._answer_field,self._data[self._prev_option_index],self._data[self._prev_option_index].options)
+					self._topics[prev_t].release( self,self._answer_field,self._data[self._prev_option_index],self._data[self._prev_option_index].options)
 				end
 			end
-			answer_type[t].init(self,self._answer_field,self._data[i],self._data[i].options)
+			self._topics[t].init(self,self._answer_field,self._data[i],self._data[i].options)
 		else
 			--不支持的类型
-			if  answer_type[t] and  answer_type[t].name then
-				print( "Can't support type "..t.."	name : "..answer_type[t].name )
+			if  self._topics[t] and  self._topics[t].name then
+				print( "Can't support type "..t.."	name : "..self._topics[t].name )
 			else
 				print( "Can't support type "..t )
 			end
