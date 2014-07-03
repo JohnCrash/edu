@@ -5,6 +5,21 @@ local WorkLoading = require "homework/workloading"
 local WorkCommit = require "homework/commit"
 local WorkFlow = require "homework/workflow"
 
+--str = "<img src=\"http://www.lexuelejiao.com/92342.png\" \\>"
+--print("============================")
+--print(str)
+--print( string.match(str,'<img%s+src="(.+)"') )
+
+--str = "A . \"219,92,938,298\""
+--print(str)
+--s1,s2,s3,s4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
+--print(s1.."-"..s2.."-"..s3.."-"..s4)
+
+--str = "<span> <p> <spanstyle='font-size: 22.0pt '> Hello World </p></span>"
+--print(str)
+--s = string.gsub(str,'<.->','')
+--print(s)
+
 local HomeWork = class("HomeWork")
 HomeWork.__index = HomeWork
 HomeWork._uiLayer= nil

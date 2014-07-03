@@ -41,6 +41,13 @@ local ui = {
 }
 
 --[[
+	test用
+--]]
+local cookie_bao = 'sc1=15FD5FCCC97D38082490F38E277704C30C6CD6BAak99MgjoBYOcgHtZIUFvvkV%2fYgutNRji5EzUh8LI5lYpG0jPwGdmMTS%2bqA%2bQqkfvEeP2mYgfxGLd03oZpHpbaewlwrbp3A%3d%3d'
+--local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
+local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
+
+--[[
 item
 {
 	image,
@@ -70,9 +77,107 @@ function WorkFlow.create()
 end
 
 function WorkFlow:init_data()
-	self._data = self:load_original_data( "job1.json" )
+	--self._data = self:load_original_data_from_file( "job2.json" )
+	local result = kits.http_get( url_topics,cookie_bao,5)
+	
+	if result then
+		if type(result) == 'string' then
+			self._data = self:load_original_data_from_string( result )
+		end
+	else
+		print('Connect faild : '..url_topics )
+	end
 end
 
+--返回一个表,type=1 文本,2图片,3 mp3 
+--fontSize
+--fontColor
+local function parse_html( str )
+	local s = string.match(str,'<img%s+src="(.-)"') --匹配<img src="
+	local t = {}
+	t.type = 0 --失败
+	if s then
+		t.type = 2
+		t.image = s
+	else
+		s = string.gsub(str,'<.->','') --删除里面的全部< >
+		if s then
+			t.type = 1
+			t.text = s
+		end
+	end
+	return t
+end
+
+local function parse_rect( str )
+	local n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
+	if n1 and n2 and n3 and n4 then
+		return {x=n1,y=n2,x2=n3,y2=n4}
+	end
+end
+
+--单,多拖拽转换
+local function drag_conv(s,e)
+	if s.attachment and type(s.attachment) == 'string' then
+		local result = kits.decode_json( s.attachment )
+		--取得背景
+		if result and type(result) == 'table' and  result.attachments and
+			result.attachments[1] then
+			e.options = {}
+			e.options.img = result.attachments[1].value --拖拽背景图
+		else
+			return false,'drag_conv "attachment" ?'
+		end
+	else
+		return false,'drag_conv "attachment" ?'
+	end
+	if s.options and type(s.options)=='string' then
+		local result = kits.decode_json( s.options )
+		--取得目标矩形
+		if result and type(result) == 'table' and result.options and type(result.options)=='table' then
+			local t = {}
+			for i,v in pairs(result.options) do
+				if v.option then
+					t[#t+1] = parse_rect( v.option )
+				end
+			end
+			e.options.drag_rects = t
+		else
+			return false,"drag_conv 'options.options' ?"
+		end
+
+		if result and type(result) == 'table'  and result.options2 and type(result.options2)=='table' then
+		--取得拖拽对象
+			local t = {}
+			for i,v in pairs(result.options2) do
+				if v.option then
+					t[#t+1] = parse_html( v.option )
+				end
+			end
+			e.options.drag_objs = t
+		else
+			return false,"drag_conv 'options.options2' ?"
+		end		
+	else
+		return false,"drag_conv 'options' ?"
+	end
+	return true
+end		
+
+--单点和多点转换
+local function click_conv(s,e)
+	return true
+end
+
+--排序题转换
+local function sort_conv(s,e)
+	return true
+end
+
+--连线题转换
+local function link_conv(s,e)
+	return true
+end
 --[[
 	将原数据转换为我定义的数据
 --]]
@@ -89,7 +194,7 @@ WorkFlow._type_convs=
 					if op and op.options and type(op.options)=='table' then
 						e.options = #op.options --取得选择题个数
 					else
-						return false
+						return false,"single select 'options'?"
 					end
 					return true
 				end
@@ -100,77 +205,86 @@ WorkFlow._type_convs=
 					if op and op.options and type(op.options)=='table' then
 						e.options = #op.options --取得选择题个数
 					else
-						return false
+						return false,"multiple select 'options'?"
 					end
 					return true
 				end
 			},
 	[4] = {name='连线',
-				conv=function(s,e)
-					return true
-				end
+				conv=link_conv
 			},	
 	[5] = {name='填空',
 				conv=function(s,e)
 					local ca = kits.decode_json( s.correct_answer )
 					if ca and ca.answers and type(ca.answers)=='table' then
 						e.options = #ca.answers --多少个空
+					else
+						return false,"edit 'answers'?"
 					end
 					return true
 				end	
 			},
 	[7] = {name='横排序',
-				conv=function(s,e)
-					return true
-				end	
+				conv=sort_conv
 			},
 	[8] = {name='竖排序',
-				conv=function(s,e)
-					return true
-				end		
+				conv=sort_conv		
 			},
 	[9] = {name='点图单选',
-				conv=function(s,e)
-					return true
-				end		
+				conv=click_conv
 			},
 	[10] = {name='点图多选',
-				conv=function(s,e)
-					return true
-				end		
+				conv=click_conv
 			},
 	[11] = {name='单拖放',
-				conv=function(s,e)
-					return true
-				end		
+				conv=drag_conv
 			},
 	[12] = {name='多拖放',
-				conv=function(s,e)
-					return true
-				end		
+				conv=drag_conv
 			}
 }
 
-function WorkFlow:load_original_data( file )
-	local reslut = kits.read_cache(file)
+function WorkFlow:load_original_data_from_file( file )
+	local result = kits.read_cache(file)
+	if result then
+		return self:load_original_data_from_string(result)
+	end
+end
+
+function WorkFlow:load_original_data_from_string( str )
 	local res = {}
-	if reslut then
-		local data = kits.decode_json(reslut)
+	if str then
+		local data = kits.decode_json(str)
 		if data then
-			for i,v in ipairs(data) do
+			local ds
+			if data.item and type(data.item)=='table' then
+				ds = data.item
+			else
+				ds = data
+			end
+			for i,v in ipairs(ds) do
 				local k = {}
 				k.item_type = v.item_type
 				k.state = ui.STATE_UNFINISHED
-				k.isload = true --is downloaded?
-				k.image = v.image
-				if WorkFlow._type_convs[k.item_type] and WorkFlow._type_convs[k.item_type].conv then
-					if WorkFlow._type_convs[k.item_type].conv( v,k ) then
+				if v.image then
+					k.isload = true --is downloaded?
+					k.image = v.image
+				else
+					k.isload = true
+					k.image = 'Pic/my/'..i..'.png'
+					print ( k.image )
+				end
+				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
+					print( self._type_convs[k.item_type].name )
+					local b,msg = self._type_convs[k.item_type].conv( v,k )
+					if b then
 						res[#res+1] = k
 					else
-						print('WorkFlow 不能转'..WorkFlow._type_convs[k.item_type].name..'题: '..tostring(v.Id))
+						print('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
+						print('	error msg: '..msg )
 					end
 				else
-					print('WorkFlow 支持的题型: '..v.item_type)
+					print('支持的题型: '..v.item_type)
 				end
 			end
 		end
@@ -214,16 +328,18 @@ function WorkFlow:init_gui()
 	
 	local x
 	x,self._item_y = self._item_current:getPosition()
-	for i,v in pairs(self._data) do
-		self:add_item( v )
+	if self._data then
+		for i,v in pairs(self._data) do
+			self:add_item( v )
+		end
+		self:set_current(1)
+		self:relayout()
 	end
-	self:set_current(1)
-	self:relayout()
 end
 
 function WorkFlow:relayout()
 	if self._scrollview and #self._list > 0 then
-		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width,self._item_size.height*(#self._list)))
+		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
 		for i,v in ipairs(self._list) do
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
 		end
