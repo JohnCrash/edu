@@ -230,7 +230,7 @@ local function drag_conv(s,e)
 	local res,msg = parse_attachment(s,1,'drag_conv')
 	if res then
 		e.img = res
-		add_resource_cache( e.resource_cache,res )
+		add_resource_cache( e.resource_cache.urls,res )
 	else
 		return res,msg
 	end
@@ -243,7 +243,7 @@ local function drag_conv(s,e)
 		function(op)
 			local item = parse_html( op ) 
 			t2[#t2+1] = item
-			add_resource_cache( e.resource_cache,item )
+			add_resource_cache( e.resource_cache.urls,item )
 		end,
 		'drag_conv' )
 	e.drag_rects = t
@@ -267,7 +267,7 @@ local function click_conv(s,e)
 	local res,msg = parse_attachment(s,1,'click_conv')
 	if res then
 		e.img = res
-		add_resource_cache( e.resource_cache,res )
+		add_resource_cache( e.resource_cache.urls,res )
 	else
 		return res,msg
 	end
@@ -300,7 +300,7 @@ local function sort_conv(s,e)
 		function(op)
 			local item = parse_html( op )
 			t[#t+1] = item
-			add_resource_cache( e.resource_cache,item )
+			add_resource_cache( e.resource_cache.urls,item )
 		end,
 		function(op)
 		end,
@@ -328,12 +328,12 @@ local function link_conv(s,e)
 		function(op)
 			local item = parse_html( op )
 			t[#t+1] = item
-			add_resource_cache( e.resource_cache,item )
+			add_resource_cache( e.resource_cache.urls,item )
 		end,
 		function(op)
 			local item = parse_html( op )
 			t2[#t2+1] = item
-			add_resource_cache( e.resource_cache,item )
+			add_resource_cache( e.resource_cache.urls,item )
 		end,
 		'drag_conv' )
 	e.link_items1 = t
@@ -446,7 +446,8 @@ function WorkFlow:load_original_data_from_string( str )
 				end
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					print( self._type_convs[k.item_type].name )
-					k.resource_cache = {} --资源缓冲表
+					k.resource_cache = {} 
+					k.resource_cache.urls = {} --资源缓冲表,
 					local b,msg = self._type_convs[k.item_type].conv( v,k )
 					if b then
 						res[#res+1] = k
@@ -647,10 +648,40 @@ function WorkFlow:clear_all_option_check()
 	end
 end
 
+function WorkFlow:cache_done( rst,efunc,layout,data,op,i )
+	if rst and type(rst)=='table' then
+		--开始请求资源
+		local n = 0
+		local r,msg = cache.request_resources( rst,
+				function(rs,i,b)
+					n = n+1
+					if n >= #rs.urls then
+						--全部下载完毕
+						if efunc and type(efunc)=='function' then
+							efunc(layout,data,op,i)
+						end
+					end
+				end )
+		if not r then print( msg ) end
+	end
+end
+
+local function relayout_link( layout,data,op,i )
+end
+
+local function relayout_sort( layout,data,op,i )
+end
+
+local function relayout_click( layout,data,op,i )
+end
+
+local function relayout_drag( layout,data,op,i )
+end
+
 WorkFlow._topics = {
 	--answer = 1 表示A, 2 = B ...
 	[1] = {name='判断',img='true_or_false_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					self._option_yes:setVisible(true)
 					self._option_no:setVisible(true)
 					if data.answer == 1 then
@@ -691,7 +722,7 @@ WorkFlow._topics = {
 						end)
 				end},
 	[2] = {name='单选',img='single_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					for i = 1,op do
 						self._option_img[i]:setVisible(true)
 						if i == data.answer then
@@ -715,7 +746,7 @@ WorkFlow._topics = {
 					end
 				end},
 	[3] = {name='多选',img='multiple_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					for i = 1, op do
 						self._option_img[i]:setVisible(true)
 						if data.answer and type(data.answer)=='table' and data.answer[i] then
@@ -739,16 +770,17 @@ WorkFlow._topics = {
 					end
 				end},
 	[4] = {name='连线',img='connection_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op,i)
 					self._option_link:setVisible(true)
 					--初始化
-					for i,v in pairs(data.link_text1) do						
-					end
-					for i,v in pairs(data.link_text2) do
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_link,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
 					end
 				end},
 	[5] = {name='填空',img='write_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					if op then
 						data.answer = data.answer or {}
 						for i = 1,op do
@@ -773,26 +805,64 @@ WorkFlow._topics = {
 					end
 				end},
 	[7] = {name='横排序',img='sort_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					self._option_sort:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end					
 				end},
 	[8] = {name='竖排序',img='sort_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					self._option_sort:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end					
 				end},
 	[9] = {name='点图单选',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
+					--self._option_drag:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end				
 				end},
 	[10] = {name='点图多选',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
+					--self._option_drag:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end				
 				end},
 	[11] = {name='单拖放',img='drag_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					self._option_drag:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end					
 				end},
 	[12] = {name='多拖放',img='drag_item.png',
-				init=function(self,frame,data,op)
+				init=function(self,frame,layout,data,op)
 					self._option_drag:setVisible(true)
+					--初始化
+					if not data._layout_ then
+						--布置界面
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i )
+						data._layout_ = true --界面已经布置好
+					end					
 				end},
 }
 
@@ -825,10 +895,12 @@ function WorkFlow:set_anwser_field( i )
 				local prev_t = self._data[self._prev_option_index].item_type
 				if self._topics[prev_t] and self._topics[prev_t].release then
 					--上一个的释放
-					self._topics[prev_t].release( self,self._answer_field,self._data[self._prev_option_index],self._data[self._prev_option_index].options)
+					local layout = self._pageview:getPage( self._prev_option_index-1 )
+					self._topics[prev_t].release( self,self._answer_field,layout,self._data[self._prev_option_index],self._data[self._prev_option_index].options,self._prev_option_index)
 				end
 			end
-			self._topics[t].init(self,self._answer_field,self._data[i],self._data[i].options)
+			local layout = self._pageview:getPage( i-1 )
+			self._topics[t].init(self,self._answer_field,layout,self._data[i],self._data[i].options,i)
 		else
 			--不支持的类型
 			if  self._topics[t] and  self._topics[t].name then

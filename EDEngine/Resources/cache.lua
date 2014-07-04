@@ -13,8 +13,8 @@ end
 
 --得到资源cache名称
 local function get_name( url )
-	if isurl( url ) then 
-		return md5.sumhexa(url)
+	if isurl( url ) then
+		return md5.sumhexa(url)..string.sub(url,-4)
 	end
 end
 
@@ -36,8 +36,9 @@ end
 --请求如果获得了全部资源,将调用函数efunc
 --该函数立刻返回,任务交给后台线程下载
 local function request_resources( rtable,efunc )
-	if rtable and type(rtable)=='table' and efunc and type(efunc)=='function' then
-		for i,v in pairs(rtable) do
+	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
+		efunc and type(efunc)=='function' then
+		for i,v in pairs(rtable.urls) do
 			if type(v)=='table' and isurl(v.url) then
 				if is_done(v.url) then
 					efunc( rtable,i,true ) --已经下载了
@@ -47,7 +48,7 @@ local function request_resources( rtable,efunc )
 							function(obj)
 								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED' then
 									if obj.state =='OK' then
-										kits.write_cache( get_name(v.url) )
+										kits.write_cache( get_name(v.url),obj.data )
 										efunc( rtable,i,true )
 									else
 										efunc( rtable,i,false )
