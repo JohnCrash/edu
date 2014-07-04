@@ -45,7 +45,8 @@ local ui = {
 --]]
 local cookie_bao = 'sc1=15FD5FCCC97D38082490F38E277704C30C6CD6BAak99MgjoBYOcgHtZIUFvvkV%2fYgutNRji5EzUh8LI5lYpG0jPwGdmMTS%2bqA%2bQqkfvEeP2mYgfxGLd03oZpHpbaewlwrbp3A%3d%3d'
 --local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
-local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
+--local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
+local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097#tc3"
 
 --[[
 item
@@ -89,6 +90,47 @@ function WorkFlow:init_data()
 	end
 end
 
+local function parse_options(s,option1_func,option2_func,msg)
+	if s.options and type(s.options)=='string' then
+		local result = kits.decode_json( s.options )
+		if result and type(result) == 'table' and result.options and type(result.options)=='table' then
+			for i,v in pairs(result.options) do
+				if v.option then
+					option1_func( v.option )
+				end
+			end
+		else
+			return false,msg.." 'options.options' ?"
+		end
+		if result and type(result) == 'table'  and result.options2 and type(result.options2)=='table' then
+			for i,v in pairs(result.options2) do
+				if v.option then
+					option2_func( v.option )
+				end
+			end
+		else
+			return false,msg.." 'options.options2' ?"
+		end		
+	else
+		return false,msg.." 'options' ?"
+	end
+	return true
+end
+
+local function parse_attachment(s,i,msg)
+	if s.attachment and type(s.attachment) == 'string' then
+		local result = kits.decode_json( s.attachment )
+		--取得背景
+		if result and type(result) == 'table' and  result.attachments and
+			result.attachments[i] then
+			return result.attachments[i].value --拖拽背景图
+		else
+			return false,msg..' "attachment" ?'
+		end
+	else
+		return false,msg..' "attachment" ?'
+	end
+end
 --返回一个表,type=1 文本,2图片,3 mp3 
 --fontSize
 --fontColor
@@ -104,6 +146,8 @@ local function parse_html( str )
 		if s then
 			t.type = 1
 			t.text = s
+		else
+			print( '		ERROR parse_html:'..tostring(str) )
 		end
 	end
 	return t
@@ -112,72 +156,172 @@ end
 local function parse_rect( str )
 	local n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
 	if n1 and n2 and n3 and n4 then
-		return {x=n1,y=n2,x2=n3,y2=n4}
+		return {x1=n1,y1=n2,x2=n3,y2=n4}
+	else
+		print( '		ERROR parse_rect : ' ..tostring(str) )
 	end
+end
+
+local function parse_text( str )
+	return string.match(str,'\"(.-)\"')
+end
+
+local function parse_answer(s)
+	if s and s.correct_answer and type(s.correct_answer)=='string' then
+		local ca = kits.decode_json( s.correct_answer )
+		if ca and ca.answers and type(ca.answers) == 'table' then
+			return ca.answers
+		else
+			print('		ERROR parse_answer: '..tostring(s) )
+		end
+	else
+		print('		ERROR parse_answer: '..tostring(s) )
+	end
+end
+
+local function print_rects( t )
+	if t and type(t) == 'table' then
+		for i,v in pairs(t) do
+			if v.x1 and v.y1 and v.x2 and v.y2 then
+				print( '		rect# '..v.x1..','..v.y1..','..v.x2..','..v.y2 )
+			else
+				print( '		nil' )
+			end
+		end	
+	end
+end
+
+local function print_items( t )
+	if t and type(t)=='table' then
+		for i,v in pairs(t) do
+			if v.type == 1 then
+				print( '		text# '..tostring(v.text) )
+			elseif v.type == 2 then
+				print( '		image# '..tostring(v.image) )
+			end
+		end
+	end
+end
+
+local function print_drag( e )
+	print( 'drag:' )
+	print( '	img = '..tostring(e.img) )
+	print( '	drag_rects:')
+	print_rects( e.drag_rects )
+	print( '	drag_objs:')
+	print_items( e.drag_objs )
 end
 
 --单,多拖拽转换
 local function drag_conv(s,e)
-	if s.attachment and type(s.attachment) == 'string' then
-		local result = kits.decode_json( s.attachment )
-		--取得背景
-		if result and type(result) == 'table' and  result.attachments and
-			result.attachments[1] then
-			e.options = {}
-			e.options.img = result.attachments[1].value --拖拽背景图
-		else
-			return false,'drag_conv "attachment" ?'
-		end
+	local res,msg = parse_attachment(s,1,'drag_conv')
+	if res then
+		e.img = res
 	else
-		return false,'drag_conv "attachment" ?'
+		return res,msg
 	end
-	if s.options and type(s.options)=='string' then
-		local result = kits.decode_json( s.options )
-		--取得目标矩形
-		if result and type(result) == 'table' and result.options and type(result.options)=='table' then
-			local t = {}
-			for i,v in pairs(result.options) do
-				if v.option then
-					t[#t+1] = parse_rect( v.option )
-				end
-			end
-			e.options.drag_rects = t
-		else
-			return false,"drag_conv 'options.options' ?"
-		end
-
-		if result and type(result) == 'table'  and result.options2 and type(result.options2)=='table' then
-		--取得拖拽对象
-			local t = {}
-			for i,v in pairs(result.options2) do
-				if v.option then
-					t[#t+1] = parse_html( v.option )
-				end
-			end
-			e.options.drag_objs = t
-		else
-			return false,"drag_conv 'options.options2' ?"
-		end		
-	else
-		return false,"drag_conv 'options' ?"
-	end
-	return true
+	local t = {}
+	local t2 = {}
+	res,msg = parse_options( s,
+		function(op)
+			t[#t+1] = parse_rect( op )
+		end,
+		function(op)
+			t2[#t2+1] = parse_html( op )
+		end,
+		'drag_conv' )
+	e.drag_rects = t
+	e.drag_objs = t2
+	e.answer = parse_answer( s )
+	
+	print_drag( e ) --for debug
+	
+	return res,msg
 end		
+
+local function print_click( e )
+	print( 'click:' )
+	print( '	img = '..tostring(e.img) )
+	print( '	click_rects:')
+	print_rects( e.click_rects )
+end
 
 --单点和多点转换
 local function click_conv(s,e)
-	return true
+	local res,msg = parse_attachment(s,1,'click_conv')
+	if res then
+		e.img = res
+	else
+		return res,msg
+	end
+	local t = {}
+	local res,msg = parse_options( s,
+		function(op)
+			t[#t+1] = parse_rect( op )
+		end,
+		function(op)
+		end,
+		'click_conv' )
+	e.click_rects = t
+	e.answer = parse_answer( s )
+	
+	print_click(e) --for debug
+	
+	return res,msg
+end
+
+local function print_sort( e )
+	print( 'sort:' )
+	print( '	sort_items:')
+	print_items( e.sort_items )
 end
 
 --排序题转换
 local function sort_conv(s,e)
-	return true
+	local t = {}
+	local res,msg = parse_options( s,
+		function(op)
+			t[#t+1] = parse_html( op )
+		end,
+		function(op)
+		end,
+		'sort_conv' )
+	e.sort_items = t
+	e.answer = parse_answer( s )
+	
+	print_sort( e ) --for debug
+	return res,msg
+end
+
+local function print_link( e )
+	print( 'sort:' )
+	print( '	link_text1:')
+	print_items( e.link_text1 )
+	print( '	link_text2:')
+	print_items( e.link_text2 )
+	
 end
 
 --连线题转换
 local function link_conv(s,e)
-	return true
+	local t = {}
+	local t2 = {}
+	local res,msg = parse_options( s,
+		function(op)
+			t[#t+1] = parse_html( op )
+		end,
+		function(op)
+			t2[#t2+1] = parse_html( op )
+		end,
+		'drag_conv' )
+	e.link_text1 = t
+	e.link_text2 = t2
+	e.answer = parse_answer( s )
+	
+	print_link( e ) --for debug
+	return res,msg
 end
+
 --[[
 	将原数据转换为我定义的数据
 --]]
@@ -185,6 +329,7 @@ WorkFlow._type_convs=
 {
 	[1] = {name='判断',
 				conv=function(s,e)
+					e.answer = parse_answer( s )
 					return true
 				end
 			},
@@ -196,6 +341,7 @@ WorkFlow._type_convs=
 					else
 						return false,"single select 'options'?"
 					end
+					e.answer = parse_answer( s )
 					return true
 				end
 			},
@@ -207,6 +353,7 @@ WorkFlow._type_convs=
 					else
 						return false,"multiple select 'options'?"
 					end
+					e.answer = parse_answer( s )
 					return true
 				end
 			},
@@ -221,6 +368,7 @@ WorkFlow._type_convs=
 					else
 						return false,"edit 'answers'?"
 					end
+					e.answer = parse_answer( s )
 					return true
 				end	
 			},
