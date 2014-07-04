@@ -245,6 +245,17 @@ local function download_file(file)
   end
 end
 
+local function exist_cache( name )
+	local filename = cache_dir..name
+	local file = io.open(filename,'r')
+	if not file then
+		return false
+	else
+		file:close()
+		return true
+	end
+end
+
 local function read_cache( name )
   local file = cache_dir..name
   if not local_exists(file) then return false end
@@ -311,6 +322,7 @@ local exports = {
 	encode_url = encode_url,
 	read_cache = read_cache,
 	write_cache = write_cache,
+	exist_cache = exist_cache,
 	decode_json = decode_json,
 }
 

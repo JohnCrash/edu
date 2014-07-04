@@ -156,6 +156,10 @@ namespace kits
 			pct->state = LOADING;
 			res = curl_easy_perform(curl);
 			pair_t result = vector_t_merge( bufs );
+
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 
+			curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
+
 			if( pct->size > 0 && pct->data && 
 				result.first > 0 && result.second )
 			{
@@ -174,7 +178,12 @@ namespace kits
 			}
 			if(res == CURLE_OK){
 				if( pct->state == LOADING ) //maybe CANCEL?
-					pct->state = OK;
+				{
+					if( pct->retcode == 200 )
+						pct->state = OK;
+					else
+						pct->state = FAILED;
+				}
 			}
 			else
 			{ //fails
@@ -183,9 +192,6 @@ namespace kits
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = FAILED;
 			}
-
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 
-			curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
 
 			//end
 			if( pct->progressFunc )

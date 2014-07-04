@@ -1,4 +1,5 @@
 ﻿local uikits = require "uikits"
+local cache = require "cache"
 
 print( "Hello World!" )
 print( "====================" )
@@ -295,10 +296,10 @@ end
 
 local function print_link( e )
 	print( 'sort:' )
-	print( '	link_text1:')
-	print_items( e.link_text1 )
-	print( '	link_text2:')
-	print_items( e.link_text2 )
+	print( '	link_items1:')
+	print_items( e.link_items1 )
+	print( '	link_items2:')
+	print_items( e.link_items2 )
 	
 end
 
@@ -314,8 +315,8 @@ local function link_conv(s,e)
 			t2[#t2+1] = parse_html( op )
 		end,
 		'drag_conv' )
-	e.link_text1 = t
-	e.link_text2 = t2
+	e.link_items1 = t
+	e.link_items2 = t2
 	e.answer = parse_answer( s )
 	
 	print_link( e ) --for debug
@@ -376,7 +377,7 @@ WorkFlow._type_convs=
 				conv=sort_conv
 			},
 	[8] = {name='竖排序',
-				conv=sort_conv		
+				conv=sort_conv
 			},
 	[9] = {name='点图单选',
 				conv=click_conv
@@ -608,6 +609,16 @@ function WorkFlow:init_anser_gui()
 	self._option_edit[4] = uikits.child(a,ui.EDIT_4)
 end
 
+local function item_ui( t )
+	if t then
+		if t.type == 1 then --text
+			return uikits.text{caption=t.text}
+		elseif t.type == 2 then --image
+			return uikits.image{image=t.image}
+		end
+	end
+end
+
 function WorkFlow:clear_all_option_check()
 	for i = 1,#self._option_img do
 		self._option_img[i]:setSelectedState(false)
@@ -708,6 +719,11 @@ WorkFlow._topics = {
 	[4] = {name='连线',img='connection_item.png',
 				init=function(self,frame,data,op)
 					self._option_link:setVisible(true)
+					--初始化
+					for i,v in pairs(data.link_text1) do						
+					end
+					for i,v in pairs(data.link_text2) do
+					end
 				end},
 	[5] = {name='填空',img='write_item.png',
 				init=function(self,frame,data,op)
