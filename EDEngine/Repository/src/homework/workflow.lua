@@ -61,6 +61,18 @@ item
 local WorkFlow = class("WorkFlow")
 WorkFlow.__index = WorkFlow
 
+local function add_resource_cache( rst,url )
+	local v = {}
+	if type(url)=='string' then
+		v.url = url
+	elseif type(url)=='table' and url.type and (url.type == 2 or url.type == 3)
+				and url.image then
+		v.url = url.image
+	end
+	v.coockie = cookie_bao
+	rst[#rst+1] = v	
+end
+
 function WorkFlow.create()
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),WorkFlow)
@@ -218,6 +230,7 @@ local function drag_conv(s,e)
 	local res,msg = parse_attachment(s,1,'drag_conv')
 	if res then
 		e.img = res
+		add_resource_cache( e.resource_cache,res )
 	else
 		return res,msg
 	end
@@ -228,7 +241,9 @@ local function drag_conv(s,e)
 			t[#t+1] = parse_rect( op )
 		end,
 		function(op)
-			t2[#t2+1] = parse_html( op )
+			local item = parse_html( op ) 
+			t2[#t2+1] = item
+			add_resource_cache( e.resource_cache,item )
 		end,
 		'drag_conv' )
 	e.drag_rects = t
@@ -252,6 +267,7 @@ local function click_conv(s,e)
 	local res,msg = parse_attachment(s,1,'click_conv')
 	if res then
 		e.img = res
+		add_resource_cache( e.resource_cache,res )
 	else
 		return res,msg
 	end
@@ -282,7 +298,9 @@ local function sort_conv(s,e)
 	local t = {}
 	local res,msg = parse_options( s,
 		function(op)
-			t[#t+1] = parse_html( op )
+			local item = parse_html( op )
+			t[#t+1] = item
+			add_resource_cache( e.resource_cache,item )
 		end,
 		function(op)
 		end,
@@ -302,17 +320,20 @@ local function print_link( e )
 	print_items( e.link_items2 )
 	
 end
-
 --连线题转换
 local function link_conv(s,e)
 	local t = {}
 	local t2 = {}
 	local res,msg = parse_options( s,
 		function(op)
-			t[#t+1] = parse_html( op )
+			local item = parse_html( op )
+			t[#t+1] = item
+			add_resource_cache( e.resource_cache,item )
 		end,
 		function(op)
-			t2[#t2+1] = parse_html( op )
+			local item = parse_html( op )
+			t2[#t2+1] = item
+			add_resource_cache( e.resource_cache,item )
 		end,
 		'drag_conv' )
 	e.link_items1 = t
@@ -425,6 +446,7 @@ function WorkFlow:load_original_data_from_string( str )
 				end
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					print( self._type_convs[k.item_type].name )
+					k.resource_cache = {} --资源缓冲表
 					local b,msg = self._type_convs[k.item_type].conv( v,k )
 					if b then
 						res[#res+1] = k
