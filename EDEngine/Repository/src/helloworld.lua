@@ -35,6 +35,7 @@ local function init_test_resource()
   end
   pfu:addSearchPath(res)
   pfu:addSearchPath(local_dir..'cache/')
+  pfu:addSearchPath(local_dir)
 end
 
 

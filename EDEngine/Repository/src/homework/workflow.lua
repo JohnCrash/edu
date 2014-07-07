@@ -1,5 +1,6 @@
 ﻿local uikits = require "uikits"
 local cache = require "cache"
+local loadingbox = require "homework/loadingbox"
 
 print( "Hello World!" )
 print( "====================" )
@@ -86,6 +87,7 @@ function WorkFlow.create()
 			layer:release()
 		end
 	end	
+	
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
@@ -465,6 +467,8 @@ function WorkFlow:load_original_data_from_string( str )
 end
 
 function WorkFlow:init_gui()
+	WorkFlow.scale = uikits.initDR{width=1920,height=1080}
+	WorkFlow.space = 16*WorkFlow.scale
 	self._root = uikits.fromJson{file=ui.FILE}
 	self:addChild(self._root)
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
@@ -573,8 +577,8 @@ function WorkFlow:set_image( i )
 		local layout = self._pageview:getPage( i-1 )
 		if layout then
 			local img = uikits.image{image=self._data[i].image,x=self._pageview_size.width/2,y=self._pageview_size.height/2,anchorX=0.5,anchorY=0.5}
-			img:setScaleX(2)
-			img:setScaleY(2)
+			img:setScaleX(WorkFlow.scale)
+			img:setScaleY(WorkFlow.scale)
 			layout:addChild(img)
 			self._data[i].isset = true
 		end
@@ -635,9 +639,10 @@ end
 local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
+			print('	#TEXT: '..t.text )
 			return uikits.text{caption=t.text}
 		elseif t.type == 2 then --image
-			return uikits.image{image=t.image}
+			return uikits.image{image=cache.get_name(t.image)}
 		end
 	end
 end
@@ -652,11 +657,16 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i )
 	if rst and type(rst)=='table' then
 		--开始请求资源
 		local n = 0
+		
+		rst.loading = loadingbox.open( layout )
+
 		local r,msg = cache.request_resources( rst,
 				function(rs,i,b)
 					n = n+1
 					if n >= #rs.urls then
 						--全部下载完毕
+						rst.loading:removeFromParent() 
+						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
 							efunc(layout,data,op,i)
 						end
@@ -667,6 +677,25 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i )
 end
 
 local function relayout_link( layout,data,op,i )
+	local ui1 = {}
+	for i,v in pairs(data.link_items1) do
+		local item = item_ui( v )
+		ui1[#ui1+1] = item
+		local s = item:getSize()
+		layout:addChild(item)
+	end
+	local ui2 = {}
+	for i,v in pairs(data.link_items2) do
+		local item = item_ui( v )
+		ui2[#ui2+1] = item
+		layout:addChild(item)
+	end
+
+	local rect1 = uikits.relayout_h( ui2,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	uikits.relayout_h( ui1,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local node = uikits.line{x1=0,y1=0,x2=90,y2=45,linewidth=9,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
+	node:setPosition(cc.p( 100,100 ) )
+	layout:addChild( node )
 end
 
 local function relayout_sort( layout,data,op,i )

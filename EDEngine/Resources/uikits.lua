@@ -51,10 +51,10 @@ local function InitDesignResolutionMode(t)
 					UNKNOWN  = 5,
 				}		
 		--]]
-		design.width = t.width or design.width
-		design.height = t.height or design.height
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
+		return t.width/ss.width
 	end
+	return 1
 end
 
 local function screenSize()
@@ -468,6 +468,115 @@ local function pushScene( scene,transition,t )
 	end
 end
 
+--横向布局,
+local function relayout_h( items,y,width,space,scale )
+	local w
+	local h
+	if space then
+		w = space
+	else
+		w = 0
+	end
+	h = w
+	if items and type(items)=='table' then
+		for i,v in pairs(items) do
+			local size = v:getSize()
+			
+			if scale then
+				size.width = size.width*scale
+				size.height = size.height*scale
+				v:setScaleX(scale)
+				v:setScaleY(scale)
+			end
+			
+			if space then
+				w = w + size.width + space
+			else
+				w = w + size.width + space
+			end
+			h = size.height > h and size.height or h
+		end
+		--居中
+		local x = (width-w)/2
+		for i,v in pairs(items) do
+			local size = v:getSize()
+			if scale then
+				size.width = size.width*scale
+				size.height = size.height*scale			
+			end
+			v:setPosition{x=x,y=y}
+			if space then
+				x = x + size.width + space
+			else
+				x = x + size.width
+			end
+		end
+	end
+	return {x=(width-w)/2,y=y,width=w,height=h}
+end
+
+--纵向布局
+local function relayout_v( items,x,space,scale )
+	for i,v in pairs(items) do
+	end
+end
+
+local function line(t)
+	if t and type(t)=='table' then
+		local glNode = gl.glNodeCreate()
+		glNode:setContentSize(cc.size(math.abs(t.x2-t.x1),math.abs(t.y2-t.y1)))
+		glNode:setAnchorPoint{x=t.anchorX or 0,y=t.anchorY or 0}
+		local function primitivesDraw(transform, transformUpdated)
+		   kmGLPushMatrix()
+         kmGLLoadMatrix(transform)
+		 
+			gl.lineWidth(t.linewidth or 1)
+			if t.color then
+				cc.DrawPrimitives.drawColor4B(t.color.r or 0,t.color.g or 0,t.color.b or 0,t.color.a or 255)
+			else
+				cc.DrawPrimitives.drawColor4B(0,0,0,255)
+			end
+			cc.DrawPrimitives.drawLine( cc.p(t.x1,t.y1),cc.p(t.x2,t.y2) )
+			
+			kmGLPopMatrix()
+		end
+		glNode:registerScriptDrawHandler(primitivesDraw)
+		return glNode
+	end
+end
+
+local function rect(t)
+	if t and type(t)=='table' then
+		local glNode = gl.glNodeCreate()
+		glNode:setContentSize(cc.size(math.abs(t.x2-t.x1),math.abs(t.y2-t.y1)))
+		glNode:setAnchorPoint{x=t.anchorX or 0,y=t.anchorY or 0}
+		local function primitivesDraw(transform, transformUpdated)
+		   kmGLPushMatrix()
+         kmGLLoadMatrix(transform)
+		 
+			gl.lineWidth(t.linewidth or 1)
+			if t.color then
+				cc.DrawPrimitives.drawColor4B(t.color.r or 0,t.color.g or 0,t.color.b or 0,t.color.a or 255)
+			else
+				cc.DrawPrimitives.drawColor4B(0,0,0,255)
+			end
+			local pts = {cc.p(t.x1,t.y1),cc.p(t.x1,t.y2),cc.p(t.x2,t.y2),cc.p(t.x2,t.y1)}
+			if t.fillColor then
+				cc.DrawPrimitives.drawSolidPoly(pts,4,t.fillColor)
+				if t.color then
+					cc.DrawPrimitives.drawPoly(pts,4,true)
+				end
+			else
+				cc.DrawPrimitives.drawPoly(pts,4,true)
+			end
+			
+			kmGLPopMatrix()
+		end
+		glNode:registerScriptDrawHandler(primitivesDraw)
+		return glNode
+	end
+end
+
 local function popScene()
 	Director:popScene()
 end
@@ -495,5 +604,9 @@ return {
 	delay_call = delay_call,
 	pushScene = pushScene,
 	popScene = popScene,
-	initDR = InitDesignResolutionMode
+	relayout_h = relayout_h,
+	relayout_v = relayout_v,
+	initDR = InitDesignResolutionMode,
+	line = line,
+	rect = rect
 }
