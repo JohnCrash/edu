@@ -678,24 +678,92 @@ end
 
 local function relayout_link( layout,data,op,i )
 	local ui1 = {}
+	local ui2 = {}
+	local up = nil
+	local down = nil
+	local up_rect = nil
+	local down_rect = nil
+	data.answer = data.answer or {}
+	data.answer_links = data.answer_links or {}
+	local function do_link()
+		if up and down then
+			data.answer[up] = down
+			if data.answer_links[up] then
+				data.answer_links[up]:removeFromParent()
+			end
+			local x,y = ui1[up]:getPosition()
+			x = x + ui1[up]:getSize().width*WorkFlow.scale/2
+			local x2,y2 = ui2[down]:getPosition()
+			x2 = x2 + ui2[down]:getSize().width*WorkFlow.scale/2
+			y2 = y2 + ui2[down]:getSize().height*WorkFlow.scale
+			local node = uikits.line{x1=x,y1=y,x2=x2,y2=y2,linewidth=2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
+			node:setPosition(cc.p( 0,0 ) )
+			layout:addChild( node )
+			data.answer_links[up] = node
+			
+			if up_rect then 
+				uikits.delay_call( layout,function() 
+							if up_rect then 
+								up_rect:removeFromParent() 
+								up_rect = nil 
+							end
+						end,0.2 )
+			end
+			if down_rect then
+				uikits.delay_call( layout,function() 
+							if down_rect then 
+								down_rect:removeFromParent() 
+								down_rect = nil 
+							end
+						end,0.2 )			
+			end
+			down = nil
+			up = nil
+		end
+	end
+	local function select_rect(item,b)
+		local x,y = item:getPosition()
+		local size = item:getSize()
+		size.width = size.width*WorkFlow.scale
+		size.height = size.height*WorkFlow.scale
+		if b then
+			if up_rect then up_rect:removeFromParent() end				
+			up_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.2)}	
+			layout:addChild(up_rect)
+		else
+			if down_rect then down_rect:removeFromParent() end				
+			down_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.2)}			
+			layout:addChild(down_rect)
+		end
+	end
 	for i,v in pairs(data.link_items1) do
 		local item = item_ui( v )
 		ui1[#ui1+1] = item
+		local k = #ui1
+		uikits.event( item,
+			function(sender)
+				up = k
+				select_rect(ui1[up],true)
+				do_link()
+			end,'click' )		
 		local s = item:getSize()
 		layout:addChild(item)
 	end
-	local ui2 = {}
 	for i,v in pairs(data.link_items2) do
 		local item = item_ui( v )
 		ui2[#ui2+1] = item
+		local k = #ui2
+		uikits.event( item,
+			function(sender)
+				down = k
+				select_rect(ui2[down],false)
+				do_link()
+			end,'click' )
 		layout:addChild(item)
 	end
 
 	local rect1 = uikits.relayout_h( ui2,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 	uikits.relayout_h( ui1,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-	local node = uikits.line{x1=0,y1=0,x2=90,y2=45,linewidth=9,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
-	node:setPosition(cc.p( 100,100 ) )
-	layout:addChild( node )
 end
 
 local function relayout_sort( layout,data,op,i )

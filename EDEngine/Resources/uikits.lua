@@ -406,6 +406,7 @@ local isTouchEvent = {
 }
 local function event( obj,func,eventType )
 	if obj and func then
+		obj:setTouchEnabled(true)
 		if eventType then
 			if eventType == 'click' then
 				obj:addTouchEventListener( 
