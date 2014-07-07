@@ -171,11 +171,11 @@ end
 local function parse_rect( str )
 	local n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
 	if n1 and n2 and n3 and n4 then
-		return {x1=n1,y1=n2,x2=n3,y2=n4}
+		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
 	else
 		print( '		ERROR parse_rect : ' ..tostring(str) )
 	end
-end
+end	
 
 local function parse_text( str )
 	return string.match(str,'\"(.-)\"')
@@ -653,7 +653,7 @@ function WorkFlow:clear_all_option_check()
 	end
 end
 
-function WorkFlow:cache_done( rst,efunc,layout,data,op,i )
+function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other )
 	if rst and type(rst)=='table' then
 		--开始请求资源
 		local n = 0
@@ -668,7 +668,7 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i )
 						rst.loading:removeFromParent() 
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
-							efunc(layout,data,op,i)
+							efunc(layout,data,op,i,other)
 						end
 					end
 				end )
@@ -769,7 +769,66 @@ end
 local function relayout_sort( layout,data,op,i )
 end
 
-local function relayout_click( layout,data,op,i )
+--正则rect
+local function normal_rect( rc )
+	if rc.x1 > rc.x2 then
+		local t = rc.x1
+		rc.x1 = rc.x2
+		rc.x2 = t	
+	end
+	if  rc.y1 > rc.y2 then
+		local t = rc.y1
+		rc.y1 = rc.y2
+		rc.y2 = t	
+	end
+end
+--夸大
+local function expand_rect( rc,s )
+	rc.x1 = rc.x1 - s
+	rc.x2 = rc.x2 + s
+	rc.y1 = rc.y1 - s
+	rc.y2 = rc.y2 + s
+end
+
+local function relayout_click( layout,data,op,i,ismulti )
+	local size = layout:getSize()
+	local bg = uikits.image{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
+	local bg_size = bg:getSize()
+	local rects = {}
+	local rect_node = {}
+	data.answer = data.answer or {}
+
+	bg:setScaleX(WorkFlow.scale)
+	bg:setScaleY(WorkFlow.scale)
+	layout:addChild( bg )
+	for i,v in pairs(data.click_rects) do
+		local rc = {x1=v.x1,y1=bg_size.height-v.y1,x2=v.x2,y2=bg_size.height-v.y2}
+		normal_rect( rc )
+		expand_rect( rc,2 )
+		rects[#rects+1] = rc
+		rc.widget = uikits.layout{x=rc.x1,y=rc.y1,width=rc.x2-rc.x1,height=rc.y2-rc.y1}
+		bg:addChild( rc.widget )
+		
+		uikits.event(rc.widget,
+			function (sender) 
+				if ismulti then --多点
+					if rect_node[i] then
+						rect_node[i]:removeFromParent()
+						rect_node[i] = nil
+					else
+						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+						bg:addChild( rect_node[i] )
+					end
+				else --单点
+					for k,s in pairs(rect_node) do
+						s:removeFromParent()
+						rect_node[k] = nil
+					end
+					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+					bg:addChild( rect_node[i] )
+				end
+			end,'click' )
+	end
 end
 
 local function relayout_drag( layout,data,op,i )
@@ -921,23 +980,23 @@ WorkFlow._topics = {
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
-	[9] = {name='点图单选',
+	[9] = {name='点图单选',img='position_item.png',
 				init=function(self,frame,layout,data,op)
 					--self._option_drag:setVisible(true)
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,false )
 						data._layout_ = true --界面已经布置好
 					end				
 				end},
-	[10] = {name='点图多选',
+	[10] = {name='点图多选',img='position_item.png',
 				init=function(self,frame,layout,data,op)
 					--self._option_drag:setVisible(true)
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,true )
 						data._layout_ = true --界面已经布置好
 					end				
 				end},

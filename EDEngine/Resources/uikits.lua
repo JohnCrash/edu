@@ -412,7 +412,8 @@ local function event( obj,func,eventType )
 				obj:addTouchEventListener( 
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then
-						func( sender )
+						
+						func( sender,x,y )
 					end
 				end)				
 			end
