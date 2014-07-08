@@ -82,9 +82,9 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;giflib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);D:\1Source\cocos2d-x-3.0\build\Debug.win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);F:\source\cocos2d-x\external\giflib\Debug;F:\source\cocos2d-x\build\Debug.win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

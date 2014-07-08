@@ -676,6 +676,27 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other )
 	end
 end
 
+--正则rect
+local function normal_rect( rc )
+	if rc.x1 > rc.x2 then
+		local t = rc.x1
+		rc.x1 = rc.x2
+		rc.x2 = t	
+	end
+	if  rc.y1 > rc.y2 then
+		local t = rc.y1
+		rc.y1 = rc.y2
+		rc.y2 = t	
+	end
+end
+
+local function expand_rect( rc,s )
+	rc.x1 = rc.x1 - s
+	rc.x2 = rc.x2 + s
+	rc.y1 = rc.y1 - s
+	rc.y2 = rc.y2 + s
+end
+
 local function relayout_link( layout,data,op,i )
 	local ui1 = {}
 	local ui2 = {}
@@ -719,6 +740,7 @@ local function relayout_link( layout,data,op,i )
 			end
 			down = nil
 			up = nil
+			data.state = ui.STATE_FINISHED
 		end
 	end
 	local function select_rect(item,b)
@@ -766,28 +788,14 @@ local function relayout_link( layout,data,op,i )
 	uikits.relayout_h( ui1,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 end
 
-local function relayout_sort( layout,data,op,i )
-end
-
---正则rect
-local function normal_rect( rc )
-	if rc.x1 > rc.x2 then
-		local t = rc.x1
-		rc.x1 = rc.x2
-		rc.x2 = t	
+local function relayout_sort( layout,data,op,i,isH )
+	local ui1 = {}
+	for k,v in pairs( data.sort_items ) do
+		local item = item_ui( v )
+		layout:addChild( item )
+		ui1[#ui1+1] = item
 	end
-	if  rc.y1 > rc.y2 then
-		local t = rc.y1
-		rc.y1 = rc.y2
-		rc.y2 = t	
-	end
-end
---夸大
-local function expand_rect( rc,s )
-	rc.x1 = rc.x1 - s
-	rc.x2 = rc.x2 + s
-	rc.y1 = rc.y1 - s
-	rc.y2 = rc.y2 + s
+	uikits.relayout_h( ui1,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 end
 
 local function relayout_click( layout,data,op,i,ismulti )
@@ -827,6 +835,7 @@ local function relayout_click( layout,data,op,i,ismulti )
 					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
 					bg:addChild( rect_node[i] )
 				end
+				data.state = ui.STATE_FINISHED
 			end,'click' )
 	end
 end
@@ -966,7 +975,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,true )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -976,7 +985,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,false )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -1006,7 +1015,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,false )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -1016,7 +1025,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i )
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,true )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
