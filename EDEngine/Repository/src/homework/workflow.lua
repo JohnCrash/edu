@@ -511,6 +511,7 @@ function WorkFlow:init_gui()
 		self:set_current(1)
 		self:relayout()
 	end
+	self._pageview:setTouchEnabled(false)
 end
 
 function WorkFlow:relayout()
@@ -599,8 +600,9 @@ function WorkFlow:add_item( t )
 		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 		--add page
 		local layout = uikits.layout{bgcolor=cc.c3b(255,255,255)}
-		layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
+		--layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
 		self._pageview:addPage( layout )
+		--layout:setTouchEnabled(false)
 		self:set_image( #self._list )
 	end
 end
@@ -653,7 +655,7 @@ function WorkFlow:clear_all_option_check()
 	end
 end
 
-function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other )
+function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other,pageview )
 	if rst and type(rst)=='table' then
 		--开始请求资源
 		local n = 0
@@ -668,7 +670,7 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other )
 						rst.loading:removeFromParent() 
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
-							efunc(layout,data,op,i,other)
+							efunc(layout,data,op,i,other,pageview)
 						end
 					end
 				end )
@@ -788,14 +790,54 @@ local function relayout_link( layout,data,op,i )
 	uikits.relayout_h( ui1,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 end
 
-local function relayout_sort( layout,data,op,i,isH )
+local function relayout_sort( layout,data,op,i,isH,pageview )
 	local ui1 = {}
+	local orgrcs = {}
+	local sp = {x=0,y=0}
+	local zorder = 1
+	
+	local function place_item()
+	end
+	
 	for k,v in pairs( data.sort_items ) do
 		local item = item_ui( v )
 		layout:addChild( item )
 		ui1[#ui1+1] = item
+		item:setTouchEnabled(true)
+		item:addTouchEventListener(
+				function(sender,eventType)
+					if eventType == ccui.TouchEventType.began then
+						local p = sender:getTouchStartPos()
+						sp = sender:convertToNodeSpace( p )
+						sp.x = sp.x * WorkFlow.scale
+						sp.y = sp.y * WorkFlow.scale
+						pageview:setEnabled(false)
+						zorder = sender:getZOrder()
+						sender:setZOrder(1000)
+					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						local p = sender:getTouchEndPos()
+						p = layout:convertToNodeSpace( p )
+						pageview:setEnabled(true)
+						sender:setZOrder(zorder)
+						--sender:setPosition( p )
+					elseif eventType == ccui.TouchEventType.moved then
+						local p = sender:getTouchMovePos()
+						p = layout:convertToNodeSpace(p)
+						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+					end
+				end)
 	end
-	uikits.relayout_h( ui1,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local result = uikits.relayout_h( ui1,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	uikits.move( ui1,0,result.height + 12 )
+	layout:addChild( uikits.rect{x1=result.x-2,y1=2,x2=result.x+result.width+2,y2=result.height + 4,color=cc.c3b(0,0,255),linewidth=2} )
+	for k,v in pairs( ui1 ) do
+		local size = v:getSize()
+		size.width = size.width * WorkFlow.scale
+		size.height = size.height * WorkFlow.scale
+		local x,y = v:getPosition()
+		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+		layout:addChild( uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,color=cc.c3b(255,0,0),linewidth=2} )
+	end
 end
 
 local function relayout_click( layout,data,op,i,ismulti )
@@ -975,7 +1017,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,true )
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,true,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -985,7 +1027,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,false )
+						self:cache_done( data.resource_cache,relayout_sort,layout,data,op,i,false,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -995,7 +1037,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,false )
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,false,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end				
 				end},
@@ -1005,7 +1047,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,true )
+						self:cache_done( data.resource_cache,relayout_click,layout,data,op,i,true,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end				
 				end},
@@ -1015,7 +1057,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,false )
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,false,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},
@@ -1025,7 +1067,7 @@ WorkFlow._topics = {
 					--初始化
 					if not data._layout_ then
 						--布置界面
-						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,true )
+						self:cache_done( data.resource_cache,relayout_drag,layout,data,op,i,true,self._pageview )
 						data._layout_ = true --界面已经布置好
 					end					
 				end},

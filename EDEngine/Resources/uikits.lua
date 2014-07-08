@@ -412,7 +412,6 @@ local function event( obj,func,eventType )
 				obj:addTouchEventListener( 
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then
-						
 						func( sender,x,y )
 					end
 				end)				
@@ -523,6 +522,17 @@ local function relayout_v( items,x,space,scale )
 	end
 end
 
+local function move( items,dx,dy )
+	if items and type(items)=='table' then
+		for i,v in pairs(items) do
+			local x,y = v:getPosition()
+			x = dx and x + dx or x
+			y = dy and y + dy or y
+			v:setPosition(cc.p(x,y))
+		end
+	end
+end
+
 local function line(t)
 	if t and type(t)=='table' then
 		local glNode = gl.glNodeCreate()
@@ -610,5 +620,6 @@ return {
 	relayout_v = relayout_v,
 	initDR = InitDesignResolutionMode,
 	line = line,
-	rect = rect
+	rect = rect,
+	move = move
 }
