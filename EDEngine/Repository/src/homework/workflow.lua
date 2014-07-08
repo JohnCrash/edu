@@ -795,10 +795,39 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	local orgrcs = {}
 	local sp = {x=0,y=0}
 	local zorder = 1
+	local orgp = {x=0,y=0}
+	local place_rect
+	local sorts = {}
 	
-	local function place_item()
+	local function isin( item )
+		for i,v in pairs(sorts) do
+			if v == item then
+				return true
+			end
+		end
 	end
-	
+	local function insert( item,x,y )
+		local rgn = {}
+		for i = 1,#sorts do
+			if i == 1 then
+				local size = sorts[i]:getSize()
+				siz
+			else
+			end
+		end	
+	end
+	local function relayout( item,x,y )
+		uikits.relayout_h( sorts,place_rect.y1,place_rect.x2-place_rect.x1,WorkFlow.space,WorkFlow.scale,item )
+	end
+	local function place_item( item,x,y )
+		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
+			if not isin( item ) then
+				insert(item,x,y)
+			end
+			relayout( item,x,y )
+			return true
+		end
+	end
 	for k,v in pairs( data.sort_items ) do
 		local item = item_ui( v )
 		layout:addChild( item )
@@ -812,31 +841,36 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
 						pageview:setEnabled(false)
-						zorder = sender:getZOrder()
-						sender:setZOrder(1000)
+						zorder = sender:getLocalZOrder()
+						sender:setLocalZOrder(1000)
+						orgp.x,orgp.y = sender:getPosition()
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPos()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
-						sender:setZOrder(zorder)
-						--sender:setPosition( p )
+						sender:setLocalZOrder(zorder)
+						if not place_item( sender ) then 
+							sender:setPosition( orgp,p.x,p.y )
+						end
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
 						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+						place_item( sender,p.x,p.y )
 					end
 				end)
 	end
 	local result = uikits.relayout_h( ui1,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-	uikits.move( ui1,0,result.height + 12 )
-	layout:addChild( uikits.rect{x1=result.x-2,y1=2,x2=result.x+result.width+2,y2=result.height + 4,color=cc.c3b(0,0,255),linewidth=2} )
+	uikits.move( ui1,0,result.height + 26 )
+	place_rect = {x1=result.x-4,y1=4,x2=result.x+result.width+4,y2=result.height + 12}
+	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
 	for k,v in pairs( ui1 ) do
 		local size = v:getSize()
 		size.width = size.width * WorkFlow.scale
 		size.height = size.height * WorkFlow.scale
 		local x,y = v:getPosition()
 		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
-		layout:addChild( uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,color=cc.c3b(255,0,0),linewidth=2} )
+		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
 	end
 end
 

@@ -470,7 +470,7 @@ local function pushScene( scene,transition,t )
 end
 
 --∫·œÚ≤ºæ÷,
-local function relayout_h( items,y,width,space,scale )
+local function relayout_h( items,y,width,space,scale,expet )
 	local w
 	local h
 	if space then
@@ -505,7 +505,9 @@ local function relayout_h( items,y,width,space,scale )
 				size.width = size.width*scale
 				size.height = size.height*scale			
 			end
-			v:setPosition{x=x,y=y}
+			if v ~= expet then
+				v:setPosition{x=x,y=y}
+			end
 			if space then
 				x = x + size.width + space
 			else
