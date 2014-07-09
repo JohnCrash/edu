@@ -890,6 +890,11 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 							remove_item( sender )
 						end
 						relayout()
+						if #sorts > 0 then
+							data.state = ui.STATE_FINISHED
+						else
+							data.state = ui.STATE_UNFINISHED
+						end
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -902,6 +907,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	uikits.move( ui1,0,result.height + 26 )
 	place_rect = {x1=result.x-4,y1=4,x2=result.x+result.width+4,y2=result.height + 12}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
+	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
 		local size = v:getSize()
 		size.width = size.width * WorkFlow.scale
@@ -955,7 +961,106 @@ local function relayout_click( layout,data,op,i,ismulti )
 	end
 end
 
-local function relayout_drag( layout,data,op,i )
+local function relayout_drag( layout,data,op,i,ismul,pageview )
+	local ui1 = {}
+	local ui2 = {}
+	local sp
+	local orgp = {}
+	local bg = uikits.image{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
+	local drags = {}
+	
+	layout:addChild(bg)
+	local bgsize = bg:getSize()
+	bg:setScaleX(WorkFlow.scale)
+	bg:setScaleY(WorkFlow.scale)
+	for k,v in pairs( data.drag_rects ) do
+		bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
+	end
+	local function get_index( item )
+		for i = 1,#ui1 do
+			if item == ui1[i] then return i end
+		end
+	end
+	local function search_drags( item )
+		for i,v in pairs(drags) do
+			if v.item == item then
+				return i
+			end
+		end
+	end
+	local function put_in( sender,x,y )
+		local xx,yy = bg:getPosition()
+		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		for i,v in pairs( data.drag_rects ) do
+			local rc = {
+				x1 = xx + v.x1 * WorkFlow.scale,
+				x2 = xx + v.x2 * WorkFlow.scale,
+				y1 = yy + (bgsize.height-v.y1)*WorkFlow.scale,
+				y2 = yy + (bgsize.height-v.y2)*WorkFlow.scale
+			}
+			normal_rect( rc )
+			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
+				local sz = sender:getSize()
+				local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
+				local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
+				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
+				sender:setPosition( cp )
+				local idx = get_index( sender )
+				if idx then
+					local it = search_drags( sender )
+					if it then
+						drags[it] = nil
+					end
+					if drags[i] then
+						drags[i].item:setPosition( orgp[drags[i].item] )
+					end
+					drags[i] = { idx = idx,item = sender }
+				end
+				return true
+			end
+		end
+		return false
+	end
+	for k,v in pairs( data.drag_objs ) do
+		local item = item_ui( v )
+		layout:addChild( item )
+		table.insert(ui1,item)
+		item:setTouchEnabled(true)
+		item:addTouchEventListener(
+				function(sender,eventType)
+					if eventType == ccui.TouchEventType.began then
+						local p = sender:getTouchStartPos()
+						sp = sender:convertToNodeSpace( p )
+						sp.x = sp.x * WorkFlow.scale
+						sp.y = sp.y * WorkFlow.scale
+						pageview:setEnabled(false)
+					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						local p = sender:getTouchEndPos()
+						p = layout:convertToNodeSpace( p )
+						pageview:setEnabled(true)
+						if not put_in( sender,p.x,p.y ) then
+							sender:setPosition( orgp[sender] )
+							for i,j in pairs(drags) do
+								if j.item == sender then
+									table.remove(drags,i)
+									break
+								end
+							end
+						end
+					elseif eventType == ccui.TouchEventType.moved then
+						local p = sender:getTouchMovePos()
+						p = layout:convertToNodeSpace(p)
+						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+					end
+				end)
+	end
+	local rc = uikits.relayout_h( ui1,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local x,y = bg:getPosition()
+	uikits.move( ui1,0,bg:getSize().height*WorkFlow.scale+y+WorkFlow.space )
+	for k,v in pairs( ui1 ) do
+		local x,y = v:getPosition()
+		orgp[v] = cc.p(x,y)
+	end
 end
 
 WorkFlow._topics = {
