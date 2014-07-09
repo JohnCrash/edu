@@ -968,6 +968,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local orgp = {}
 	local bg = uikits.image{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
 	local drags = {}
+	local draging_item
 	
 	layout:addChild(bg)
 	local bgsize = bg:getSize()
@@ -984,6 +985,13 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local function search_drags( item )
 		for i,v in pairs(drags) do
 			if v.item == item then
+				return i
+			end
+		end
+	end
+	local function search_drags_by_index( inx )
+		for i,v in pairs(drags) do
+			if v.idx == inx then
 				return i
 			end
 		end
@@ -1021,6 +1029,62 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 		end
 		return false
 	end
+	local function put_in_multi( sender,x,y )
+		local xx,yy = bg:getPosition()
+		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		for i,v in pairs( data.drag_rects ) do
+			local rc = {
+				x1 = xx + v.x1 * WorkFlow.scale,
+				x2 = xx + v.x2 * WorkFlow.scale,
+				y1 = yy + (bgsize.height-v.y1)*WorkFlow.scale,
+				y2 = yy + (bgsize.height-v.y2)*WorkFlow.scale
+			}
+			normal_rect( rc )
+			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
+				local sz = draging_item:getSize()
+				local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
+				local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
+				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
+				
+				local idx
+				if not sender.isclone then
+					idx = get_index( sender )
+				end
+				if idx then
+					draging_item:setPosition( cp )
+					if drags[i] and drags[i].item then
+						drags[i].item:removeFromParent()
+						drags[i] = nil
+					end
+					drags[i] = { idx = idx,item = draging_item }
+					draging_item = nil
+				else
+					--?
+					local j
+					for m,n in pairs(drags) do
+						if n.item == draging_item then
+							j = m
+						end
+					end
+					if j then
+						local v = data.drag_rects[j]
+						local rc = {
+							x1 = xx + v.x1 * WorkFlow.scale,
+							x2 = xx + v.x2 * WorkFlow.scale,
+							y1 = yy + (bgsize.height-v.y1)*WorkFlow.scale,
+							y2 = yy + (bgsize.height-v.y2)*WorkFlow.scale
+						}
+						local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
+						local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
+						local cp = {x = rc.x1 + offx,y = rc.y1+ offy }						
+						draging_item:setPosition( cp )
+					end
+				end
+				return true
+			end
+		end
+		return false	
+	end
 	for k,v in pairs( data.drag_objs ) do
 		local item = item_ui( v )
 		layout:addChild( item )
@@ -1034,23 +1098,60 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
 						pageview:setEnabled(false)
+						if ismul then
+							if not sender.isclone then
+								draging_item = sender:clone()
+								draging_item.isclone = true
+								layout:addChild( draging_item )
+							else
+								draging_item = sender --isclone
+							end
+						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPos()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
-						if not put_in( sender,p.x,p.y ) then
-							sender:setPosition( orgp[sender] )
-							for i,j in pairs(drags) do
-								if j.item == sender then
-									table.remove(drags,i)
-									break
+						if ismul then
+							if draging_item then
+								if not put_in_multi( sender,p.x,p.y ) then
+									if draging_item.isclone then
+										for m,n in pairs(drags) do
+											if n.item == draging_item then
+												drags[m] = nil
+												break
+											end
+										end
+									end
+									draging_item:removeFromParent()
+									draging_item = nil							
 								end
 							end
+						else
+							if not put_in( sender,p.x,p.y ) then
+								sender:setPosition( orgp[sender] )
+								for i,j in pairs(drags) do
+									if j.item == sender then
+										table.remove(drags,i)
+										break
+									end
+								end
+							end
+						end
+						if #drags > 0 then
+							data.state = ui.STATE_FINISHED
+						else
+							data.state = ui.STATE_UNFINISHED
 						end
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
-						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+						if ismul then
+							if draging_item then
+								draging_item:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+							end
+						else
+							sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+						end
 					end
 				end)
 	end
