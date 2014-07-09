@@ -470,7 +470,7 @@ local function pushScene( scene,transition,t )
 end
 
 --横向布局,
-local function relayout_h( items,y,width,space,scale,expet )
+local function relayout_h( items,xx,y,width,space,scale,expet )
 	local w
 	local h
 	if space then
@@ -498,7 +498,7 @@ local function relayout_h( items,y,width,space,scale,expet )
 			h = size.height > h and size.height or h
 		end
 		--居中
-		local x = (width-w)/2
+		local x = (width-w)/2 + xx
 		for i,v in pairs(items) do
 			local size = v:getSize()
 			if scale then

@@ -786,8 +786,14 @@ local function relayout_link( layout,data,op,i )
 		layout:addChild(item)
 	end
 
-	local rect1 = uikits.relayout_h( ui2,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-	uikits.relayout_h( ui1,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local rect1 = uikits.relayout_h( ui2,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	uikits.relayout_h( ui1,0,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+end
+
+local function get_center_pt( item )
+	local size = item:getSize()
+	local x,y = item:getPosition()
+	return size.width*WorkFlow.scale/2+x,size.height*WorkFlow.scale/2+y
 end
 
 local function relayout_sort( layout,data,op,i,isH,pageview )
@@ -795,8 +801,8 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	local orgrcs = {}
 	local sp = {x=0,y=0}
 	local zorder = 1
-	local orgp = {x=0,y=0}
-	local place_rect
+	local orgp = {}
+	local place_rect = nil
 	local sorts = {}
 	
 	local function isin( item )
@@ -806,23 +812,54 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 			end
 		end
 	end
-	local function insert( item,x,y )
-		local rgn = {}
+	local function remove_item( item )
 		for i = 1,#sorts do
-			if i == 1 then
-				local size = sorts[i]:getSize()
-				siz
-			else
+			if sorts[i] == item then
+				table.remove(sorts,i)
+				return
 			end
-		end	
+		end
+	end
+	local function insert( item,x,y )
+		for i = 1,#sorts do
+			local xx,yy = get_center_pt( sorts[i] )
+			if x < xx then
+				table.insert(sorts,i,item)
+				return
+			end
+		end
+		sorts[#sorts+1] = item
+	end
+	local function sort_index( item )
+		for i = 1,#sorts do
+			if sorts[i] == item then
+				return i
+			end
+		end
 	end
 	local function relayout( item,x,y )
-		uikits.relayout_h( sorts,place_rect.y1,place_rect.x2-place_rect.x1,WorkFlow.space,WorkFlow.scale,item )
+		uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,WorkFlow.space,WorkFlow.scale,item )
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
 			if not isin( item ) then
 				insert(item,x,y)
+			end
+			local it = sort_index( item )
+			if it then
+				local b = false
+				table.remove( sorts,it )
+				for i = 1,#sorts do
+					local xx,yy = get_center_pt( sorts[i] )
+					if x < xx then
+						table.insert(sorts,i,item)
+						b = true
+						break
+					end
+				end
+				if not b then
+					table.insert(sorts,item)
+				end
 			end
 			relayout( item,x,y )
 			return true
@@ -843,15 +880,16 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						pageview:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
-						orgp.x,orgp.y = sender:getPosition()
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPos()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
 						sender:setLocalZOrder(zorder)
-						if not place_item( sender ) then 
-							sender:setPosition( orgp,p.x,p.y )
+						if not place_item( sender,p.x,p.y ) then 
+							sender:setPosition( orgp[sender] )
+							remove_item( sender )
 						end
+						relayout()
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -860,7 +898,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 					end
 				end)
 	end
-	local result = uikits.relayout_h( ui1,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local result = uikits.relayout_h( ui1,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 	uikits.move( ui1,0,result.height + 26 )
 	place_rect = {x1=result.x-4,y1=4,x2=result.x+result.width+4,y2=result.height + 12}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
@@ -871,6 +909,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 		local x,y = v:getPosition()
 		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
 		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
+		orgp[v] = cc.p(x,y)
 	end
 end
 
