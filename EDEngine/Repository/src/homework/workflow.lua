@@ -574,21 +574,6 @@ function WorkFlow:set_current( i )
 	end
 end
 
-function WorkFlow:set_image( i )
-	if not self._data[i].isset and self._data[i].isload then
-		local layout = self._pageview:getPage( i-1 )
-		if layout then
-			local img = uikits.image{image=self._data[i].image,x=self._pageview_size.width/2,y=self._pageview_size.height/2,anchorX=0.5,anchorY=0.5}
-			img:setScaleX(WorkFlow.scale)
-			img:setScaleY(WorkFlow.scale)
-			layout:addChild(img)
-			self._data[i].isset = true
-		end
-	elseif not self._data[i].isload then
-		--download?
-	end
-end
-
 function WorkFlow:add_item( t )
 	local item = self:clone_item( t.state )
 	if item then
@@ -600,11 +585,11 @@ function WorkFlow:add_item( t )
 		local index = #self._list
 		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 		--add page
-		local layout = uikits.layout{bgcolor=cc.c3b(255,255,255)}
+		local layout = uikits.scrollview{bgcolor=cc.c3b(255,255,255)}
 		--layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
 		self._pageview:addPage( layout )
 		--layout:setTouchEnabled(false)
-		self:set_image( #self._list )
+		--self:set_image( #self._list )
 	end
 end
 
@@ -700,6 +685,17 @@ local function expand_rect( rc,s )
 	rc.y2 = rc.y2 + s
 end
 
+local function set_topics_image( layout,data,x,y )
+	if data.image then
+		local img = uikits.image{image=data.image}
+		img:setScaleX(WorkFlow.scale)
+		img:setScaleY(WorkFlow.scale)
+		layout:addChild(img)
+		uikits.relayout_h( {img},x,y+2*WorkFlow.space,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+		layout:setInnerContainerSize( cc.size(layout:getSize().width,y+img:getSize().height*WorkFlow.scale + 4 * WorkFlow.space ) )
+	end
+end
+	
 local function relayout_link( layout,data,op,i )
 	local ui1 = {}
 	local ui2 = {}
@@ -800,7 +796,7 @@ local function relayout_link( layout,data,op,i )
 	end
 
 	local rect1 = uikits.relayout_h( ui2,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-	uikits.relayout_h( ui1,0,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getSize()
@@ -813,7 +809,8 @@ local function relayout_link( layout,data,op,i )
 		size.width = size.width*WorkFlow.scale
 		size.height = size.height*WorkFlow.scale
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height ) )	
-	end	
+	end
+	set_topics_image( layout,data,0,rect2.y+rect2.height )
 end
 
 local function get_center_pt( item )
@@ -904,12 +901,14 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
 						pageview:setEnabled(false)
+						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPos()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
+						layout:setEnabled(true)
 						sender:setLocalZOrder(zorder)
 						if not place_item( sender,p.x,p.y ) then 
 							sender:setPosition( orgp[sender] )
@@ -943,6 +942,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
 		orgp[v] = cc.p(x,y)
 	end
+	set_topics_image( layout,data,0,result.height + 26 + result.height )
 end
 
 local function relayout_click( layout,data,op,i,ismulti )
@@ -985,6 +985,7 @@ local function relayout_click( layout,data,op,i,ismulti )
 				data.state = ui.STATE_FINISHED
 			end,'click' )
 	end
+	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale )
 end
 
 local function relayout_drag( layout,data,op,i,ismul,pageview )
@@ -1124,6 +1125,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
 						pageview:setEnabled(false)
+						layout:setEnabled(false)
 						if ismul then
 							if not sender.isclone then
 								draging_item = sender:clone()
@@ -1137,6 +1139,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 						local p = sender:getTouchEndPos()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
+						layout:setEnabled(true)
 						if ismul then
 							if draging_item then
 								if not put_in_multi( sender,p.x,p.y ) then
@@ -1188,6 +1191,12 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 		local x,y = v:getPosition()
 		orgp[v] = cc.p(x,y)
 	end
+
+	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale+y+WorkFlow.space+rc.height)
+end
+
+local function relayout_topics( layout,data,op,i,ismul,pageview )
+	set_topics_image( layout,data,0,WorkFlow.space)
 end
 
 WorkFlow._topics = {
@@ -1232,6 +1241,10 @@ WorkFlow._topics = {
 								data.state = ui.STATE_UNFINISHED
 							end						
 						end)
+					if not data._layout_ then
+						self:cache_done( data.resource_cache,relayout_topics,layout,data,op,i )
+						data._layout_ = true
+					end						
 				end},
 	[2] = {name='单选',img='single_item.png',
 				init=function(self,frame,layout,data,op)
@@ -1256,6 +1269,10 @@ WorkFlow._topics = {
 								end
 							end)
 					end
+					if not data._layout_ then
+						self:cache_done( data.resource_cache,relayout_topics,layout,data,op,i )
+						data._layout_ = true
+					end					
 				end},
 	[3] = {name='多选',img='multiple_item.png',
 				init=function(self,frame,layout,data,op)
@@ -1280,6 +1297,10 @@ WorkFlow._topics = {
 								end
 							end)
 					end
+					if not data._layout_ then
+						self:cache_done( data.resource_cache,relayout_topics,layout,data,op,i )
+						data._layout_ = true
+					end					
 				end},
 	[4] = {name='连线',img='connection_item.png',
 				init=function(self,frame,layout,data,op,i)
