@@ -5,7 +5,7 @@ local http = require "socket.http"
 local json = require "json"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
-local cache_dir = local_dir.."/cache/"
+local cache_dir = local_dir.."cache/"
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
@@ -247,13 +247,7 @@ end
 
 local function exist_cache( name )
 	local filename = cache_dir..name
-	local file = io.open(filename,'r')
-	if not file then
-		return false
-	else
-		file:close()
-		return true
-	end
+	return local_exists( filename )
 end
 
 local function read_cache( name )
@@ -277,7 +271,7 @@ local function read_cache( name )
 end
 
 local function write_cache( name,buf )
-  local filename = local_dir..name
+  local filename = cache_dir..name
   local file = io.open(filename,'wb')
   if file then
     file:write(buf)

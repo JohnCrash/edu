@@ -9,6 +9,7 @@ local ui = {
 	FILE = res_root..'z21_1.json',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
+	LINK_DOT = res_root..'round_dot.png',
 	PAGE_VIEW = 'questions_view',
 	NEXT_BUTTON = 'milk_write/next_problem',
 	ITEM_CURRENT = 'state_past',
@@ -702,6 +703,8 @@ end
 local function relayout_link( layout,data,op,i )
 	local ui1 = {}
 	local ui2 = {}
+	local dot1 = {}
+	local dot2 = {}
 	local up = nil
 	local down = nil
 	local up_rect = nil
@@ -772,6 +775,11 @@ local function relayout_link( layout,data,op,i )
 			end,'click' )		
 		local s = item:getSize()
 		layout:addChild(item)
+		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
+		table.insert( dot1,dot )
+		dot:setScaleX(0.5)
+		dot:setScaleY(0.5)
+		layout:addChild(dot)
 	end
 	for i,v in pairs(data.link_items2) do
 		local item = item_ui( v )
@@ -784,10 +792,28 @@ local function relayout_link( layout,data,op,i )
 				do_link()
 			end,'click' )
 		layout:addChild(item)
+		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
+		table.insert( dot2,dot )
+		dot:setScaleX(0.5)
+		dot:setScaleY(0.5)		
+		layout:addChild(dot)		
 	end
 
 	local rect1 = uikits.relayout_h( ui2,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
 	uikits.relayout_h( ui1,0,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	for i,v in pairs(ui1) do
+		local x,y = v:getPosition()
+		local size = v:getSize()
+		size.width = size.width*WorkFlow.scale
+		dot1[i]:setPosition( cc.p(x+size.width/2,y ) )
+	end
+	for i,v in pairs(ui2) do
+		local x,y = v:getPosition()
+		local size = v:getSize()
+		size.width = size.width*WorkFlow.scale
+		size.height = size.height*WorkFlow.scale
+		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height ) )	
+	end	
 end
 
 local function get_center_pt( item )
