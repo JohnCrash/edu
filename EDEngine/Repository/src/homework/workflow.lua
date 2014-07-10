@@ -10,6 +10,7 @@ local ui = {
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	LINK_DOT = res_root..'round_dot.png',
+	ARROW = 'arrow',
 	PAGE_VIEW = 'questions_view',
 	NEXT_BUTTON = 'milk_write/next_problem',
 	ITEM_CURRENT = 'state_past',
@@ -478,6 +479,9 @@ function WorkFlow:init_gui()
 	self._scrollview = uikits.child(self._root,ui.LIST)
 	self._pageview = uikits.child(self._root,ui.PAGE_VIEW)
 	self._pageview_size = self._pageview:getSize()
+	
+	self._arrow = uikits.child(self._root,ui.ARROW)
+	
 	uikits.event(self._pageview,
 			function(sender,eventType)
 				if eventType == ccui.PageViewEventType.turning then
@@ -685,6 +689,7 @@ local function expand_rect( rc,s )
 	rc.y2 = rc.y2 + s
 end
 
+--设置题干
 local function set_topics_image( layout,data,x,y )
 	if data.image then
 		local img = uikits.image{image=data.image}
@@ -692,7 +697,11 @@ local function set_topics_image( layout,data,x,y )
 		img:setScaleY(WorkFlow.scale)
 		layout:addChild(img)
 		uikits.relayout_h( {img},x,y+2*WorkFlow.space,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-		layout:setInnerContainerSize( cc.size(layout:getSize().width,y+img:getSize().height*WorkFlow.scale + 4 * WorkFlow.space ) )
+		local size = layout:getSize()
+		local width,height
+		width = size.width
+		height = y+img:getSize().height*WorkFlow.scale + 4 * WorkFlow.space
+		layout:setInnerContainerSize( cc.size(width,height) )
 	end
 end
 	
@@ -1160,7 +1169,8 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 								sender:setPosition( orgp[sender] )
 								for i,j in pairs(drags) do
 									if j.item == sender then
-										table.remove(drags,i)
+										--table.remove(drags,i)
+										drags[i] = nil
 										break
 									end
 								end
@@ -1434,6 +1444,17 @@ function WorkFlow:set_anwser_field( i )
 			end
 			local layout = self._pageview:getPage( i-1 )
 			self._topics[t].init(self,self._answer_field,layout,self._data[i],self._data[i].options,i)
+			--如果内容超出滚动区
+			local size = layout:getSize()
+			local insize = layout:getInnerContainerSize()
+			if size.height < insize.height then
+				self._arrow:setVisible(true)
+				uikits.event( self._arrow,function(sender)
+					layout:scrollToBottom(0.3,true)
+				end,'click')
+			else
+				self._arrow:setVisible(false)
+			end
 		else
 			--不支持的类型
 			if  self._topics[t] and  self._topics[t].name then

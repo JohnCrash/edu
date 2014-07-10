@@ -20,6 +20,7 @@ local function open_loadingbox( parent )
 	size = s:getSize()
 	s._circle:setPosition(cc.p(size.width/2,size.height*2/3))
 	s:addChild( s._circle )
+	s:setTouchEnabled(false)
 	return s
 end
 
