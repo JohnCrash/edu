@@ -12,6 +12,11 @@ local ui = {
 	WORKFLOW2 = 'subjective_item/completed_subjective',
 }
 
+--[[
+	作业提交
+--]]
+local url_commit = ""
+
 local WorkCommit = class("WorkCommit")
 WorkCommit.__index = WorkCommit
 

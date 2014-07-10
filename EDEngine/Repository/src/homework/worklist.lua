@@ -1,7 +1,19 @@
 ﻿local json = require "json"
 local kits = require "kits"
 local uikits = require "uikits"
+local login = require 'login'
 local WorkCommit = require "homework/commit"
+
+--[[
+argument
+status:-1
+course:-1
+timer:-1
+type:-1
+p:1
+--]]
+local cookie_student = 'sc1=5B6A71FC333621695A285AC22CEDBF378D849D96ak96OwHoBYOcj3sCd0E24kV%2fbAusZhjjsUzUhMKTulZwFkjPwGhmamK%2b8VOQqknvELD2mN0fxGHdiCYZ%2fXdbaewnwrbp3A%3d%3d'
+local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
 
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',

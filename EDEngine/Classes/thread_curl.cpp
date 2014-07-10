@@ -137,6 +137,9 @@ namespace kits
 			//write data
 			curl_easy_setopt(curl,CURLOPT_WRITEDATA,&bufs);
 			curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION, writerCallback);
+			//cookie
+			if( !pct->cookie.empty() )
+				curl_easy_setopt(curl,CURLOPT_COOKIE,pct->cookie.c_str());
 			//Ðø´«
 			if( pct->size > 0 )
 			{

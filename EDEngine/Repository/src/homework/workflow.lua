@@ -1,5 +1,6 @@
 ﻿local uikits = require "uikits"
 local cache = require "cache"
+local login = require "login"
 local loadingbox = require "homework/loadingbox"
 
 print( "Hello World!" )
@@ -47,11 +48,18 @@ local ui = {
 --[[
 	test用
 --]]
-local cookie_bao = 'sc1=15FD5FCCC97D38082490F38E277704C30C6CD6BAak99MgjoBYOcgHtZIUFvvkV%2fYgutNRji5EzUh8LI5lYpG0jPwGdmMTS%2bqA%2bQqkfvEeP2mYgfxGLd03oZpHpbaewlwrbp3A%3d%3d'
---local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
---local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
-local url_topics = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097#tc3"
+--local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
+--local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
+local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097#tc3"
 
+--[[
+	单题答案暂存
+	参数:
+	examId:16190cacb1554279a0cd8dc8004e7c83
+	itemId:004bf582a837441c81e40d3c0e43071b
+	teacherId:122097
+--]]
+local url_answer = "http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx"
 --[[
 item
 {
@@ -72,11 +80,11 @@ local function add_resource_cache( rst,url )
 				and url.image then
 		v.url = url.image
 	end
-	v.coockie = cookie_bao
+	v.cookie = login.cookie()
 	rst[#rst+1] = v	
 end
 
-function WorkFlow.create()
+function WorkFlow.create( url )
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),WorkFlow)
 	
@@ -84,7 +92,7 @@ function WorkFlow.create()
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
-			layer:init()
+			layer:init( url or url_topics_temp )
 		elseif "exit" == event then
 			layer:release()
 		end
@@ -94,15 +102,39 @@ function WorkFlow.create()
 	return scene
 end
 
-function WorkFlow:init_data()
-	--self._data = self:load_original_data_from_file( "job2.json" )
-	local result = kits.http_get( url_topics,cookie_bao,5)
-	
-	if result then
-		if type(result) == 'string' then
-			self._data = self:load_original_data_from_string( result )
-		end
-	else
+function WorkFlow:init_data( url_topics )
+	local loadbox = loadingbox.open( self )
+	--[[
+	local s = kits.http_get( url_topics,login.cookie() )
+	if s then
+		print( string.sub(s,1,255) )
+	end
+	--]]
+	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
+			function(rtb,i,isok)
+				if isok then
+					local result = cache.get_data( url_topics )
+					if result and type(result) == 'string' then
+						self._data = self:load_original_data_from_string( result )
+						local x
+						x,self._item_y = self._item_current:getPosition()
+						if self._data then
+							for i,v in pairs(self._data) do
+								self:add_item( v )
+							end
+							self:set_current(1)
+							self:relayout()
+						end		
+						loadbox:removeFromParent()
+						return
+					end
+				end
+				loadbox:removeFromParent()
+				print('cache request faild :'..url_topics)
+			end)
+
+	if not ret then
+		--加载失败
 		print('Connect faild : '..url_topics )
 	end
 end
@@ -1469,12 +1501,11 @@ function WorkFlow:set_anwser_field( i )
 	end
 end
 
-function WorkFlow:init()
+function WorkFlow:init( url )
 	if not self._root then
-		self:init_data()
-		
 		self._list = {}
 		self:init_gui()
+		self:init_data( url )
 	end
 end
 

@@ -8,7 +8,14 @@ local ui = {
 local function open_loadingbox( parent )
 	local s = uikits.fromJson{file=ui.LOADBOX}
 	s:setAnchorPoint{x=0.5,y=0.5}
-	local size = parent:getSize()
+	local size
+	if parent.getSize then
+		size = parent:getSize()
+	else
+		size = uikits.screenSize()
+		size.width = size.width * uikits.scale()
+		size.height = size.height * uikits.scale()
+	end
 	s:setPosition{x=size.width/2,y=size.height/2}
 	--居中显示
 	parent:addChild( s )

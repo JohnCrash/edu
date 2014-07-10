@@ -33,7 +33,7 @@ local function init_node( s,t )
 end
 
 local design = {width=1024,height=768}
-
+local scale = 1
 local function InitDesignResolutionMode(t)
 	local glview = Director:getOpenGLView()
 	local ss = glview:getFrameSize()
@@ -52,9 +52,14 @@ local function InitDesignResolutionMode(t)
 				}		
 		--]]
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
-		return t.width/ss.width
+		scale = t.width/ss.width
+		return scale
 	end
 	return 1
+end
+
+local function get_scale()
+	return scale
 end
 
 local function screenSize()
@@ -484,14 +489,14 @@ local function event( obj,func,eventType )
 	end
 end
 
-local function delay_call( obj,func,delay,param)
+local function delay_call( obj,func,delay,param1,param2,param3)
 	if obj and func and delay then
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
 		 local function delay_call_func()
 			scheduler:unscheduleScriptEntry(schedulerID)
 			schedulerID = nil		
-			func(obj,param)
+			func(obj,param1,param2,param3)
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)		 
 	end
@@ -660,5 +665,6 @@ return {
 	initDR = InitDesignResolutionMode,
 	line = line,
 	rect = rect,
-	move = move
+	move = move,
+	scale = get_scale,
 }
