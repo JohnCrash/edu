@@ -631,8 +631,9 @@ end
 local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
-			print('	#TEXT: '..t.text )
-			return uikits.text{caption=t.text}
+			--print('	#TEXT: '..t.text )
+			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
+			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
 			return uikits.image{image=cache.get_name(t.image)}
 		end

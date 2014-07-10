@@ -72,6 +72,42 @@ local function text( t )
 		tx = ccui.Text:create( t.caption or '',t.font or defaultFont,t.fontSize or defaultFontSize )
 		if tx then
 			init_node(tx,t)
+			tx:setColor( t.color or cc.c3b(255,255,255) )
+		else
+			print('uikits.text create ccui.Text failed return nil')
+		end
+		if t.event then
+			tx:addTouchEventListener(t.event)
+			--[[ Event function prototype
+				local function touchEvent(sender, eventType)
+					if eventType == ccui.TouchEventType.began then
+					elseif eventType == ccui.TouchEventType.ended then
+					end
+				end			
+			--]]
+		end	
+		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
+			tx:addTouchEventListener(
+				function (sender,eventType) 
+					if eventType == ccui.TouchEventType.ended then
+						t.eventClick( sender )
+					end
+				end)
+		end		
+	end
+	return tx
+end
+
+local function textbmfont( t )
+	local tx
+	if t and type(t)=='table' then
+		tx = ccui.TextBMFont:create()
+		
+		if tx then
+			init_node(tx,t)
+			tx:setString( t.caption or '' )
+			tx:setFntFile( t.font or defaultFont )
+			tx:setColor( t.color or cc.c3b(255,255,255) )
 		else
 			print('uikits.text create ccui.Text failed return nil')
 		end
@@ -597,6 +633,7 @@ end
 
 return {
 	text = text,
+	textbmfont = textbmfont,
 	checkbox = checkbox,
 	button = button,
 	slider = slider,
