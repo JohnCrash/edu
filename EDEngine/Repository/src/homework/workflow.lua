@@ -127,9 +127,7 @@ function WorkFlow:save()
 		--收集答案
 		for i,v in pairs(self.data) do
 			v.my_answer = self._data[i].my_answer
-			if v.my_answer then
-				my_print( i .. ' : '..v.my_answer )
-			end
+			v.state = self._data[i].state
 		end
 		local result = json.encode( self.data )
 		if result then
@@ -242,11 +240,16 @@ local function parse_html( str )
 end
 
 local function parse_rect( str )
-	local n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
-	if n1 and n2 and n3 and n4 then
-		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
+	local s,n1,n2,n3,n4 = string.match(str,'%u.*\"(%d+),(%d+),(%d+),(%d+)\"')
+	if s and n1 and n2 and n3 and n4 then
+		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}
 	else
-		my_print( '		ERROR parse_rect : ' ..tostring(str) )
+		n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
+		if n1 and n2 and n3 and n4 then
+			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
+		else
+			my_print( '		ERROR parse_rect : ' ..tostring(str) )
+		end
 	end
 end	
 
@@ -525,6 +528,7 @@ function WorkFlow:load_original_data_from_string( str )
 					my_print( k.image )
 				end
 				k.my_answer = v.my_answer
+				k.state = v.state
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					my_print( self._type_convs[k.item_type].name )
 					k.resource_cache = {} 
@@ -1189,6 +1193,23 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 			end
 		end
 	end
+	local function get_pt_center( item,i )
+		local xx,yy = bg:getPosition()
+		local v = data.drag_rects[i]
+		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		local rc =  {
+				x1 = xx + v.x1 * WorkFlow.scale,
+				x2 = xx + v.x2 * WorkFlow.scale,
+				y1 = yy + (bgsize.height-v.y1)*WorkFlow.scale,
+				y2 = yy + (bgsize.height-v.y2)*WorkFlow.scale
+			}
+			normal_rect( rc )
+		local sz = item:getSize()
+		local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
+		local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
+		local cp  = {x = rc.x1 + offx,y = rc.y1+ offy } 
+		return cp
+	end
 	local function put_in( sender,x,y )
 		local xx,yy = bg:getPosition()
 		xx = xx - bg:getSize().width*WorkFlow.scale/2
@@ -1338,6 +1359,16 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 						else
 							data.state = ui.STATE_UNFINISHED
 						end
+						--收集答案
+						data.my_answer = ''
+						for k=1,table.maxn(drags) do
+							if drags[k] then
+								data.my_answer = data.my_answer..answer_abc[drags[k].idx]
+							else
+								data.my_answer = data.my_answer..'0'
+							end
+						end
+						my_print( data.my_answer )
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -1360,6 +1391,25 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	end
 
 	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale+y+WorkFlow.space+rc.height)
+	--恢复答案
+	if data.my_answer then
+		for i = 1,string.len(data.my_answer) do
+			local s = string.sub(data.my_answer,i,i)
+			local k = answer_idx[s]
+			if k and ui1[k] then
+				if ismul then
+					local ts = ui1[k]:clone()
+					ts.isclone = true
+					drags[i] = { idx = k,item= ts }
+					layout:addChild( ts )
+					ts:setPosition( get_pt_center(ts,i ))
+				else
+					drags[i] = { idx = k,item=ui1[k] }
+					ui1[k]:setPosition( get_pt_center(ui1[k],i ))
+				end
+			end
+		end
+	end
 end
 
 local function relayout_topics( layout,data,op,i,ismul,pageview )
