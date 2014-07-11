@@ -240,7 +240,8 @@ local function parse_html( str )
 end
 
 local function parse_rect( str )
-	local s,n1,n2,n3,n4 = string.match(str,'%u.*\"(%d+),(%d+),(%d+),(%d+)\"')
+	local s,n1,n2,n3,n4 = string.match(str,'(%u).*\"(%d+),(%d+),(%d+),(%d+)\"')
+
 	if s and n1 and n2 and n3 and n4 then
 		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}
 	else
@@ -1106,21 +1107,26 @@ local function relayout_click( layout,data,op,i,ismulti )
 	bg:setScaleY(WorkFlow.scale)
 	layout:addChild( bg )
 	for i,v in pairs(data.click_rects) do
-		local rc = {x1=v.x1,y1=bg_size.height-v.y1,x2=v.x2,y2=bg_size.height-v.y2}
+		local rc = {x1=v.x1,y1=bg_size.height-v.y1,x2=v.x2,y2=bg_size.height-v.y2,c=v.c}
 		normal_rect( rc )
 		expand_rect( rc,2 )
 		rects[#rects+1] = rc
 		rc.widget = uikits.layout{x=rc.x1,y=rc.y1,width=rc.x2-rc.x1,height=rc.y2-rc.y1}
 		bg:addChild( rc.widget )
-		
 		uikits.event(rc.widget,
 			function (sender) 
 				if ismulti then --多点
 					if rect_node[i] then
 						rect_node[i]:removeFromParent()
 						rect_node[i] = nil
-						if string.find(data.my_answer,answer_abc[i]) then
-							data.my_answer = string.gsub(data.my_answer,answer_abc[i],'')
+						if rects[i].c then
+							if string.find(data.my_answer,rects[i].c) then
+								data.my_answer = string.gsub(data.my_answer,rects[i].c,'')
+							end
+						else
+							if string.find(data.my_answer,answer_abc[i]) then
+								data.my_answer = string.gsub(data.my_answer,answer_abc[i],'')
+							end
 						end
 					else
 						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
