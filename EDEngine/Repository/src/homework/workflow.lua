@@ -169,9 +169,9 @@ function WorkFlow:init_data( url_topics )
 				loadbox:removeFromParent()
 				my_print('cache request faild :'..url_topics)
 			end)
-
 	if not ret then
 		--加载失败
+		neterror_box.open( self )
 		my_print('Connect faild : '..url_topics )
 	end
 end
