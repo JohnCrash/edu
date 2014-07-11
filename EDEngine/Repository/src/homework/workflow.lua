@@ -3,8 +3,11 @@ local cache = require "cache"
 local login = require "login"
 local loadingbox = require "homework/loadingbox"
 
-print( "Hello World!" )
-print( "====================" )
+local function my_print( a )
+	print( a )
+end
+my_print( "Hello World!" )
+my_print( "====================" )
 local res_root = 'homework/z21_1/'
 local ui = {
 	FILE = res_root..'z21_1.json',
@@ -45,13 +48,30 @@ local ui = {
 	ANSWER_TEXT = 'answer_text',
 }
 
+local answer_abc = {}
+local answer_idx = {}
+
+local function init_answer_map()
+	for i = 1,24 do
+		answer_abc[i] = string.char( string.byte('A') + i - 1 )
+		answer_idx[answer_abc[i]] = i
+	end
+end
+
+local function string_sort( s )
+	local t = {}
+	for i = 1,string.len(s) do
+		table.insert(t,string.sub(s,i,i))
+	end
+	table.sort( t )
+	return table.concat( t )
+end
 --[[
 	test用
 --]]
 --local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
 --local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
 local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097#tc3"
-
 --[[
 	单题答案暂存
 	参数:
@@ -81,7 +101,7 @@ local function add_resource_cache( rst,url )
 		v.url = url.image
 	end
 	v.cookie = login.cookie()
-	rst[#rst+1] = v	
+	rst[#rst+1] = v
 end
 
 function WorkFlow.create( url )
@@ -102,14 +122,32 @@ function WorkFlow.create( url )
 	return scene
 end
 
+function WorkFlow:save()
+	if self._url_topics and self.data then
+		--收集答案
+		for i,v in pairs(self.data) do
+			v.my_answer = self._data[i].my_answer
+			if v.my_answer then
+				my_print( i .. ' : '..v.my_answer )
+			end
+		end
+		local result = json.encode( self.data )
+		if result then
+			kits.write_cache(cache.get_name( self._url_topics ),result)
+		end
+	end
+end
+
 function WorkFlow:init_data( url_topics )
 	local loadbox = loadingbox.open( self )
 	--[[
 	local s = kits.http_get( url_topics,login.cookie() )
 	if s then
-		print( string.sub(s,1,255) )
+		my_print( string.sub(s,1,255) )
 	end
 	--]]
+	init_answer_map()
+
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
@@ -119,6 +157,7 @@ function WorkFlow:init_data( url_topics )
 						local x
 						x,self._item_y = self._item_current:getPosition()
 						if self._data then
+							self._url_topics = url_topics
 							for i,v in pairs(self._data) do
 								self:add_item( v )
 							end
@@ -130,12 +169,12 @@ function WorkFlow:init_data( url_topics )
 					end
 				end
 				loadbox:removeFromParent()
-				print('cache request faild :'..url_topics)
+				my_print('cache request faild :'..url_topics)
 			end)
 
 	if not ret then
 		--加载失败
-		print('Connect faild : '..url_topics )
+		my_print('Connect faild : '..url_topics )
 	end
 end
 
@@ -196,7 +235,7 @@ local function parse_html( str )
 			t.type = 1
 			t.text = s
 		else
-			print( '		ERROR parse_html:'..tostring(str) )
+			my_print( '		ERROR parse_html:'..tostring(str) )
 		end
 	end
 	return t
@@ -207,7 +246,7 @@ local function parse_rect( str )
 	if n1 and n2 and n3 and n4 then
 		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
 	else
-		print( '		ERROR parse_rect : ' ..tostring(str) )
+		my_print( '		ERROR parse_rect : ' ..tostring(str) )
 	end
 end	
 
@@ -221,44 +260,47 @@ local function parse_answer(s)
 		if ca and ca.answers and type(ca.answers) == 'table' then
 			return ca.answers
 		else
-			print('		ERROR parse_answer: '..tostring(s) )
+			my_print('		ERROR parse_answer: '..tostring(s) )
 		end
 	else
-		print('		ERROR parse_answer: '..tostring(s) )
+		my_print('		ERROR parse_answer: '..tostring(s) )
 	end
 end
 
 local function print_rects( t )
+--[[
 	if t and type(t) == 'table' then
 		for i,v in pairs(t) do
 			if v.x1 and v.y1 and v.x2 and v.y2 then
-				print( '		rect# '..v.x1..','..v.y1..','..v.x2..','..v.y2 )
+				my_print( '		rect# '..v.x1..','..v.y1..','..v.x2..','..v.y2 )
 			else
-				print( '		nil' )
+				my_print( '		nil' )
 			end
 		end	
-	end
+	end --]]
 end
 
 local function print_items( t )
+--[[
 	if t and type(t)=='table' then
 		for i,v in pairs(t) do
 			if v.type == 1 then
-				print( '		text# '..tostring(v.text) )
+				my_print( '		text# '..tostring(v.text) )
 			elseif v.type == 2 then
-				print( '		image# '..tostring(v.image) )
+				my_print( '		image# '..tostring(v.image) )
 			end
 		end
-	end
+	end--]]
 end
 
 local function print_drag( e )
-	print( 'drag:' )
-	print( '	img = '..tostring(e.img) )
-	print( '	drag_rects:')
+--[[
+	my_print( 'drag:' )
+	my_print( '	img = '..tostring(e.img) )
+	my_print( '	drag_rects:')
 	print_rects( e.drag_rects )
-	print( '	drag_objs:')
-	print_items( e.drag_objs )
+	my_print( '	drag_objs:')
+	print_items( e.drag_objs )--]]
 end
 
 --单,多拖拽转换
@@ -292,9 +334,9 @@ local function drag_conv(s,e)
 end		
 
 local function print_click( e )
-	print( 'click:' )
-	print( '	img = '..tostring(e.img) )
-	print( '	click_rects:')
+	my_print( 'click:' )
+	my_print( '	img = '..tostring(e.img) )
+	my_print( '	click_rects:')
 	print_rects( e.click_rects )
 end
 
@@ -324,8 +366,8 @@ local function click_conv(s,e)
 end
 
 local function print_sort( e )
-	print( 'sort:' )
-	print( '	sort_items:')
+	my_print( 'sort:' )
+	my_print( '	sort_items:')
 	print_items( e.sort_items )
 end
 
@@ -349,10 +391,10 @@ local function sort_conv(s,e)
 end
 
 local function print_link( e )
-	print( 'sort:' )
-	print( '	link_items1:')
+	my_print( 'sort:' )
+	my_print( '	link_items1:')
 	print_items( e.link_items1 )
-	print( '	link_items2:')
+	my_print( '	link_items2:')
 	print_items( e.link_items2 )
 	
 end
@@ -461,6 +503,7 @@ function WorkFlow:load_original_data_from_string( str )
 	local res = {}
 	if str then
 		local data = kits.decode_json(str)
+
 		if data then
 			local ds
 			if data.item and type(data.item)=='table' then
@@ -468,6 +511,7 @@ function WorkFlow:load_original_data_from_string( str )
 			else
 				ds = data
 			end
+			self.data = ds --保存副本
 			for i,v in ipairs(ds) do
 				local k = {}
 				k.item_type = v.item_type
@@ -478,21 +522,22 @@ function WorkFlow:load_original_data_from_string( str )
 				else
 					k.isload = true
 					k.image = 'Pic/my/'..i..'.png'
-					print ( k.image )
+					my_print( k.image )
 				end
+				k.my_answer = v.my_answer
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
-					print( self._type_convs[k.item_type].name )
+					my_print( self._type_convs[k.item_type].name )
 					k.resource_cache = {} 
 					k.resource_cache.urls = {} --资源缓冲表,
 					local b,msg = self._type_convs[k.item_type].conv( v,k )
 					if b then
 						res[#res+1] = k
 					else
-						print('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
-						print('	error msg: '..msg )
+						my_print('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
+						my_print('	error msg: '..msg )
 					end
 				else
-					print('支持的题型: '..v.item_type)
+					my_print('不支持的题型: '..v.item_type)
 				end
 			end
 		end
@@ -506,6 +551,8 @@ function WorkFlow:init_gui()
 	self._root = uikits.fromJson{file=ui.FILE}
 	self:addChild(self._root)
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
+		--保存
+		self:save()
 		uikits.popScene()
 		end)
 	self._scrollview = uikits.child(self._root,ui.LIST)
@@ -663,7 +710,7 @@ end
 local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
-			--print('	#TEXT: '..t.text )
+			--my_print('	#TEXT: '..t.text )
 			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
@@ -697,7 +744,7 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other,pageview )
 						end
 					end
 				end )
-		if not r then print( msg ) end
+		if not r then my_print( msg ) end
 	end
 end
 
@@ -743,28 +790,31 @@ local function relayout_link( layout,data,op,i )
 	local ui2 = {}
 	local dot1 = {}
 	local dot2 = {}
-	local up = nil
-	local down = nil
+	local up = nil --选择上索引
+	local down = nil --选择下索引
 	local up_rect = nil
 	local down_rect = nil
-	data.answer = data.answer or {}
-	data.answer_links = data.answer_links or {}
+	local answer = {}
+	local answer_links = {}
+	
+	local function add_line()
+		local x,y = ui1[up]:getPosition()
+		x = x + ui1[up]:getSize().width*WorkFlow.scale/2
+		local x2,y2 = ui2[down]:getPosition()
+		x2 = x2 + ui2[down]:getSize().width*WorkFlow.scale/2
+		y2 = y2 + ui2[down]:getSize().height*WorkFlow.scale
+		local node = uikits.line{x1=x,y1=y,x2=x2,y2=y2,linewidth=2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
+		node:setPosition(cc.p( 0,0 ) )
+		layout:addChild( node )
+		answer_links[up] = node	
+	end
 	local function do_link()
 		if up and down then
-			data.answer[up] = down
-			if data.answer_links[up] then
-				data.answer_links[up]:removeFromParent()
+			answer[up] = down
+			if answer_links[up] then
+				answer_links[up]:removeFromParent()
 			end
-			local x,y = ui1[up]:getPosition()
-			x = x + ui1[up]:getSize().width*WorkFlow.scale/2
-			local x2,y2 = ui2[down]:getPosition()
-			x2 = x2 + ui2[down]:getSize().width*WorkFlow.scale/2
-			y2 = y2 + ui2[down]:getSize().height*WorkFlow.scale
-			local node = uikits.line{x1=x,y1=y,x2=x2,y2=y2,linewidth=2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
-			node:setPosition(cc.p( 0,0 ) )
-			layout:addChild( node )
-			data.answer_links[up] = node
-			
+			add_line()
 			if up_rect then 
 				uikits.delay_call( layout,function() 
 							if up_rect then 
@@ -783,6 +833,16 @@ local function relayout_link( layout,data,op,i )
 			end
 			down = nil
 			up = nil
+			--收集答案
+			data.my_answer = ''
+			for i = 1,table.maxn(answer) do
+				if answer[i] then
+					data.my_answer = data.my_answer..answer_abc[answer[i]]
+				else
+					data.my_answer = data.my_answer..'0'
+				end
+			end
+			my_print( data.my_answer )
 			data.state = ui.STATE_FINISHED
 		end
 	end
@@ -853,6 +913,25 @@ local function relayout_link( layout,data,op,i )
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height ) )	
 	end
 	set_topics_image( layout,data,0,rect2.y+rect2.height )
+	--载入答案
+	if data.my_answer and type(data.my_answer)=='string' and string.len(data.my_answer)>0 then
+		for i = 1,string.len(data.my_answer) do
+			local s = string.sub(data.my_answer,i,i)
+			if s and answer_idx[s] then
+				--加入连线
+				up = i
+				down = answer_idx[s]
+				add_line()
+			end
+		end
+		up = nil
+		down = nil
+	else
+		data.my_answer = ''
+		for i = 1,#ui1 do
+			data.my_answer	 = data.my_answer .. '0'
+		end
+	end
 end
 
 local function get_center_pt( item )
@@ -930,6 +1009,13 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 			return true
 		end
 	end
+	local function map_abc(item)
+		for i,v in pairs(ui1) do
+			if v == item then
+				return answer_abc[i]
+			end
+		end
+	end
 	for k,v in pairs( data.sort_items ) do
 		local item = item_ui( v )
 		layout:addChild( item )
@@ -962,6 +1048,12 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						else
 							data.state = ui.STATE_UNFINISHED
 						end
+						--收集答案
+						data.my_answer = ''
+						for i,v in pairs(sorts) do
+							data.my_answer = data.my_answer..map_abc(v)
+						end
+						my_print( data.my_answer )
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -985,6 +1077,18 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 		orgp[v] = cc.p(x,y)
 	end
 	set_topics_image( layout,data,0,result.height + 26 + result.height )
+	--恢复答案
+	if data.my_answer then
+		for i = 1,string.len(data.my_answer) do
+			local s = string.sub(data.my_answer,i,i)
+			if s then
+				local n = answer_idx[s]
+				table.insert(sorts,ui1[n])
+			end
+		end
+		--排布位置
+		relayout()
+	end
 end
 
 local function relayout_click( layout,data,op,i,ismulti )
@@ -993,7 +1097,6 @@ local function relayout_click( layout,data,op,i,ismulti )
 	local bg_size = bg:getSize()
 	local rects = {}
 	local rect_node = {}
-	data.answer = data.answer or {}
 
 	bg:setScaleX(WorkFlow.scale)
 	bg:setScaleY(WorkFlow.scale)
@@ -1012,8 +1115,12 @@ local function relayout_click( layout,data,op,i,ismulti )
 					if rect_node[i] then
 						rect_node[i]:removeFromParent()
 						rect_node[i] = nil
+						if string.find(data.my_answer,answer_abc[i]) then
+							data.my_answer = string.gsub(data.my_answer,answer_abc[i],'')
+						end
 					else
 						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+						data.my_answer = data.my_answer..answer_abc[i]
 						bg:addChild( rect_node[i] )
 					end
 				else --单点
@@ -1022,12 +1129,29 @@ local function relayout_click( layout,data,op,i,ismulti )
 						rect_node[k] = nil
 					end
 					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+					data.my_answer = answer_abc[i]
 					bg:addChild( rect_node[i] )
 				end
 				data.state = ui.STATE_FINISHED
+				data.my_answer = string_sort(data.my_answer)
+				my_print( data.my_answer )
 			end,'click' )
 	end
 	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale )
+	--载入答案
+	if data.my_answer and type(data.my_answer)=='string' then
+		for i = 1,string.len(data.my_answer) do
+			local s = string.sub(data.my_answer,i,i)
+			if s then
+				local k = answer_idx[s]
+				local rc = rects[k]
+				rect_node[k] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+				bg:addChild( rect_node[k] )
+			end
+		end
+	else
+		data.my_answer = ''
+	end
 end
 
 local function relayout_drag( layout,data,op,i,ismul,pageview )
@@ -1243,15 +1367,14 @@ local function relayout_topics( layout,data,op,i,ismul,pageview )
 end
 
 WorkFlow._topics = {
-	--answer = 1 表示A, 2 = B ...
 	[1] = {name='判断',img='true_or_false_item.png',
 				init=function(self,frame,layout,data,op)
 					self._option_yes:setVisible(true)
 					self._option_no:setVisible(true)
-					if data.answer == 1 then
+					if data.my_answer == 'A' then
 						self._option_yes:setSelectedState(true)
 						self._option_no:setSelectedState(false)
-					elseif data.answer == 2 then
+					elseif data.my_answer == 'B' then
 						self._option_yes:setSelectedState(false)
 						self._option_no:setSelectedState(true)	
 					else
@@ -1261,28 +1384,30 @@ WorkFlow._topics = {
 					uikits.event(self._option_yes,
 						function (sender,b)
 							if b then
-								if data.answer == 2 then
+								if data.my_answer == 'B' then
 									self._option_no:setSelectedState(false)
 								end
-								data.answer = 1	
+								data.my_answer = 'A'
 								data.state = ui.STATE_FINISHED
 							else
-								data.answer = nil
+								data.my_answer = ''
 								data.state = ui.STATE_UNFINISHED
 							end
+							my_print( data.my_answer )
 						end)
 					uikits.event(self._option_no,
 						function (sender,b)
 							if b then
-								if data.answer == 1 then
+								if data.my_answer == 'A' then
 									self._option_yes:setSelectedState(false)
 								end
-								data.answer = 2
+								data.my_answer = 'B'
 								data.state = ui.STATE_FINISHED
 							else
-								data.answer = nil
+								data.my_answer = ''
 								data.state = ui.STATE_UNFINISHED
-							end						
+							end			
+							my_print( data.my_answer )							
 						end)
 					if not data._layout_ then
 						self:cache_done( data.resource_cache,relayout_topics,layout,data,op,i )
@@ -1293,7 +1418,7 @@ WorkFlow._topics = {
 				init=function(self,frame,layout,data,op)
 					for i = 1,op do
 						self._option_img[i]:setVisible(true)
-						if i == data.answer then
+						if answer_abc[i] == data.my_answer then
 							self._option_img[i]:setSelectedState(true)
 						else
 							self._option_img[i]:setSelectedState(false)
@@ -1302,14 +1427,15 @@ WorkFlow._topics = {
 						uikits.event(self._option_img[i],
 							function(sender,b)
 								if b then
-									data.answer = m
+									data.my_answer = answer_abc[m]
 									self:clear_all_option_check()
 									sender:setSelectedState(true)
 									data.state = ui.STATE_FINISHED
 								else
-									data.answer = nil
+									data.my_answer = ''
 									data.state = ui.STATE_UNFINISHED
 								end
+								my_print( data.my_answer )
 							end)
 					end
 					if not data._layout_ then
@@ -1321,7 +1447,8 @@ WorkFlow._topics = {
 				init=function(self,frame,layout,data,op)
 					for i = 1, op do
 						self._option_img[i]:setVisible(true)
-						if data.answer and type(data.answer)=='table' and data.answer[i] then
+						if data.my_answer and type(data.my_answer)=='string' and
+							string.find(data.my_answer,answer_abc[i]) then
 							self._option_img[i]:setSelectedState(true)
 						else
 							self._option_img[i]:setSelectedState(false)
@@ -1329,15 +1456,20 @@ WorkFlow._topics = {
 						local m = i
 						uikits.event(self._option_img[i],
 							function(sender,b)
-								data.answer = data.answer or {}
-								
-								if data.answer[m] then
-									data.answer[m] = nil
-									data.state = ui.STATE_UNFINISHED
+								data.my_answer = data.my_answer or ''
+								if string.find(data.my_answer,answer_abc[m]) then
+									data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
 								else
-									data.answer[m] = 1
-									data.state = ui.STATE_FINISHED
+									data.my_answer = data.my_answer .. answer_abc[m]
 								end
+								if string.len(data.my_answer) > 0 then
+									data.state = ui.STATE_FINISHED
+								else
+									data.state = ui.STATE_UNFINISHED
+								end
+								--保持顺序CB->BC
+								data.my_answer = string_sort(data.my_answer)
+								my_print( data.my_answer )
 							end)
 					end
 					if not data._layout_ then
@@ -1491,9 +1623,9 @@ function WorkFlow:set_anwser_field( i )
 		else
 			--不支持的类型
 			if  self._topics[t] and  self._topics[t].name then
-				print( "Can't support type "..t.."	name : "..self._topics[t].name )
+				my_print( "Can't support type "..t.."	name : "..self._topics[t].name )
 			else
-				print( "Can't support type "..t )
+				my_print( "Can't support type "..t )
 			end
 			self._option_not_support:setVisible(true)
 		end
