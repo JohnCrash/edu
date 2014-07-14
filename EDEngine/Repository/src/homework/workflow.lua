@@ -68,6 +68,13 @@ local function string_sort( s )
 	return table.concat( t )
 end
 
+local this
+local function save_my_answer()
+	if this then
+		this:save_answer()
+	end
+end
+
 local url_topics_ash = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
 
 --[[
@@ -116,6 +123,7 @@ function WorkFlow.create( t )
 	return scene
 end
 
+--总得存储一遍
 function WorkFlow:save()
 	if self._url_topics and self.data then
 		--收集答案
@@ -130,6 +138,26 @@ function WorkFlow:save()
 	end
 end
 
+--每道题存一遍
+function WorkFlow:save_answer()
+	--比较下看看答案修改过没，如果修改过就保存
+	self._topics_table.answers = self._topics_table.answers or {}
+	local isc = false
+	for i,v in pairs(self._data) do
+		if v.my_answer and self._topics_table.answers[v.item_id] ~= v.my_answer then
+			if v.item_id then
+				self._topics_table.answers[v.item_id] = v.my_answer
+				isc = true
+			else
+				my_print('error : WorkFlow:save_answer v.item_id = nil' )
+			end
+		end
+	end
+	if isc then
+		topics.write( self._pid,self._topics_table )
+	end
+end
+
 function WorkFlow:init_data( )
 	if not (self._pid and self._uid) then
 		my_print('error : WorkFlow:init_data invalid arguments')
@@ -138,6 +166,8 @@ function WorkFlow:init_data( )
 	local loadbox = loadingbox.open( self )
 	local url_topics = url_topics_ash..'?pid='..self._pid..'&uid'..self._uid
 	init_answer_map()
+	this = self 
+	self._topics_table = topics.read( self._pid ) or {}
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
@@ -520,8 +550,13 @@ function WorkFlow:load_original_data_from_string( str )
 					k.image = 'Pic/my/'..i..'.png'
 					my_print( k.image )
 				end
-				k.my_answer = v.my_answer
+				if self._topics_table and self._topics_table.answers then
+					k.my_answer = self._topics_table.answers[v.item_id]
+				else
+					k.my_answer = v.my_answer
+				end
 				k.state = v.state
+				k.item_id = v.item_id
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					my_print( self._type_convs[k.item_type].name )
 					k.resource_cache = {} 
@@ -845,6 +880,7 @@ local function relayout_link( layout,data,op,i )
 				end
 			end
 			my_print( data.my_answer )
+			save_my_answer()
 			data.state = ui.STATE_FINISHED
 		end
 	end
@@ -1056,6 +1092,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 							data.my_answer = data.my_answer..map_abc(v)
 						end
 						my_print( data.my_answer )
+						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -1142,6 +1179,7 @@ local function relayout_click( layout,data,op,i,ismulti )
 				data.state = ui.STATE_FINISHED
 				data.my_answer = string_sort(data.my_answer)
 				my_print( data.my_answer )
+				save_my_answer()
 			end,'click' )
 	end
 	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale )
@@ -1372,6 +1410,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 							end
 						end
 						my_print( data.my_answer )
+						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
 						p = layout:convertToNodeSpace(p)
@@ -1447,6 +1486,7 @@ WorkFlow._topics = {
 								data.state = ui.STATE_UNFINISHED
 							end
 							my_print( data.my_answer )
+							save_my_answer()
 						end)
 					uikits.event(self._option_no,
 						function (sender,b)
@@ -1460,7 +1500,8 @@ WorkFlow._topics = {
 								data.my_answer = ''
 								data.state = ui.STATE_UNFINISHED
 							end			
-							my_print( data.my_answer )							
+							my_print( data.my_answer )				
+							save_my_answer()
 						end)
 					if not data._layout_ then
 						self:cache_done( data.resource_cache,relayout_topics,layout,data,op,i )
@@ -1489,6 +1530,7 @@ WorkFlow._topics = {
 									data.state = ui.STATE_UNFINISHED
 								end
 								my_print( data.my_answer )
+								save_my_answer()
 							end)
 					end
 					if not data._layout_ then
@@ -1523,6 +1565,7 @@ WorkFlow._topics = {
 								--保持顺序CB->BC
 								data.my_answer = string_sort(data.my_answer)
 								my_print( data.my_answer )
+								save_my_answer()
 							end)
 					end
 					if not data._layout_ then
