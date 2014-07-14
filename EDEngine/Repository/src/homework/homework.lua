@@ -63,14 +63,14 @@ function HomeWork:init()
 	local wk = {
 		{text = '装载',scene=WorkLoading},
 		{text = '作业列表',scene=WorkList},
-		{text = '提交',scene=WorkCommit},
-		{text = '做作业',scene=WorkFlow},
+		{text = '提交',scene=WorkCommit,arg={pid='93ca856727be4c09b8658935e81db8b8',uid='122097'}},
+		{text = '做作业',scene=WorkFlow,arg={pid='93ca856727be4c09b8658935e81db8b8',uid='122097'}},
 	}
 	for i,v in pairs(wk) do
 		self:addChild( uikits.button{caption=v.text,width = 240,height=48,fontSize=32,
 					y = 48*i,
 					eventClick=function(sender)
-						uikits.pushScene( v.scene )
+						uikits.pushScene( v.scene.create(v.arg) )
 					end} )
 	end
 end

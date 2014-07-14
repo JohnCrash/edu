@@ -127,7 +127,7 @@ function WorkList:add_item( t )
 	
 	uikits.event(item,
 			function(sender)
-				uikits.pushScene(WorkCommit)
+				uikits.pushScene(WorkCommit.create())
 			end,'click')
 	return item
 end

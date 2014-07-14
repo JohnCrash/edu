@@ -2,6 +2,7 @@
 local cache = require "cache"
 local login = require "login"
 local loadingbox = require "homework/loadingbox"
+local topics = require "homework/topics"
 
 local function my_print( a )
 	print( a )
@@ -66,20 +67,9 @@ local function string_sort( s )
 	table.sort( t )
 	return table.concat( t )
 end
---[[
-	test用
---]]
---local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=3544a87f110242798f024d45f1ce74f1&uid=122097"
---local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097"
-local url_topics_temp = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid=93ca856727be4c09b8658935e81db8b8&uid=122097#tc3"
---[[
-	单题答案暂存
-	参数:
-	examId:16190cacb1554279a0cd8dc8004e7c83
-	itemId:004bf582a837441c81e40d3c0e43071b
-	teacherId:122097
---]]
-local url_answer = "http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx"
+
+local url_topics_ash = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
+
 --[[
 item
 {
@@ -104,7 +94,7 @@ local function add_resource_cache( rst,url )
 	rst[#rst+1] = v
 end
 
-function WorkFlow.create( url )
+function WorkFlow.create( t )
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),WorkFlow)
 	
@@ -112,7 +102,11 @@ function WorkFlow.create( url )
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
-			layer:init( url or url_topics_temp )
+			if t and type(t)=='table' then
+				layer._pid = t.pid
+				layer._uid = t.uid
+			end
+			layer:init()
 		elseif "exit" == event then
 			layer:release()
 		end
@@ -136,16 +130,14 @@ function WorkFlow:save()
 	end
 end
 
-function WorkFlow:init_data( url_topics )
-	local loadbox = loadingbox.open( self )
-	--[[
-	local s = kits.http_get( url_topics,login.cookie() )
-	if s then
-		my_print( string.sub(s,1,255) )
+function WorkFlow:init_data( )
+	if not (self._pid and self._uid) then
+		my_print('error : WorkFlow:init_data invalid arguments')
+		return
 	end
-	--]]
+	local loadbox = loadingbox.open( self )
+	local url_topics = url_topics_ash..'?pid='..self._pid..'&uid'..self._uid
 	init_answer_map()
-
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
@@ -638,6 +630,8 @@ function WorkFlow:clone_item( state )
 		return self._item_finished:clone()
 	elseif state == ui.STATE_UNFINISHED then
 		return self._item_unfinished:clone()
+	else
+		my_print( '	ERROR: clone_item state = '..tostring(state) )
 	end
 end
 
@@ -663,6 +657,7 @@ function WorkFlow:set_current( i )
 end
 
 function WorkFlow:add_item( t )
+	t.state = t.state or ui.STATE_UNFINISHED
 	local item = self:clone_item( t.state )
 	if item then
 		local n = uikits.child(item,ui.ITEM_NUM)
@@ -678,6 +673,8 @@ function WorkFlow:add_item( t )
 		self._pageview:addPage( layout )
 		--layout:setTouchEnabled(false)
 		--self:set_image( #self._list )
+	else
+		my_print( '	ERROR: clone_item() return nil' )
 	end
 end
 
@@ -1664,6 +1661,7 @@ function WorkFlow:set_anwser_field( i )
 				end
 			end
 			local layout = self._pageview:getPage( i-1 )
+
 			self._topics[t].init(self,self._answer_field,layout,self._data[i],self._data[i].options,i)
 			--如果内容超出滚动区
 			local size = layout:getSize()
@@ -1689,11 +1687,11 @@ function WorkFlow:set_anwser_field( i )
 	end
 end
 
-function WorkFlow:init( url )
+function WorkFlow:init()
 	if not self._root then
 		self._list = {}
 		self:init_gui()
-		self:init_data( url )
+		self:init_data()
 	end
 end
 

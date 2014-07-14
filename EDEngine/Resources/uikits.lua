@@ -504,9 +504,9 @@ end
 
 local function pushScene( scene,transition,t )
 	if transition then
-		Director:pushScene( transition:create(t or 1,scene.create()) )
+		Director:pushScene( transition:create(t or 1,scene) )
 	else
-		Director:pushScene( scene.create() )
+		Director:pushScene( scene )
 	end
 end
 
