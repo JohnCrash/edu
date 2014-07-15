@@ -502,6 +502,19 @@ local function delay_call( obj,func,delay,param1,param2,param3)
 	end
 end
 
+local function timer( obj,func,delay,param1,param2,param3)
+	if obj and func and delay then
+		 local scheduler = obj:getScheduler()
+		 local schedulerID
+		 local function delay_call_func()
+			scheduler:unscheduleScriptEntry(schedulerID)
+			schedulerID = nil		
+			func(obj,param1,param2,param3)
+		end
+		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)		 
+	end
+end
+
 local function pushScene( scene,transition,t )
 	if transition then
 		Director:pushScene( transition:create(t or 1,scene) )

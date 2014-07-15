@@ -14,8 +14,12 @@ local ui = {
 	WORKFLOW = 'objective_item/start_objective',
 	WORKFLOW2 = 'subjective_item/completed_subjective',
 	COMMIT = 'submit',
-	OBJECTIVE_NUM = 'objective_no',
-	SUBJECTIVE_NUM = 'subjective_no',
+	OBJECTIVE_NUM = 'objective_item/objective_no',
+	SUBJECTIVE_NUM = 'objective_item/subjective_no',
+	WHITE_STAR = 'objective_item/white_star_',
+	RED_STAR = 'objective_item/red_star_',
+	WHITE_STAR2 = 'subjective_item/white_star_',
+	RED_STAR2 = 'subjective_item/red_star_',	
 }
 
 --[[
@@ -60,6 +64,27 @@ function WorkCommit.create( t )
 	return scene
 end
 
+function WorkFlow:init_star()
+	self._white_star = {}
+	self._red_star = {}
+	self._white_star2 = {}
+	self._red_star2 = {}
+	for i = 1,5 do
+		self._white_star[i] = uikits.child( self._root,ui.WHITE_STAR..i )
+		self._red_star[i] =  uikits.child( self._root,ui.RED_STAR..i )
+		self._white_star2[i] = uikits.child( self._root,ui.WHITE_STAR2..i )
+		self._red_star2[i] =  uikits.child( self._root,ui.RED_STAR2..i )		
+	end
+end
+
+--p = 1 ~ 100 ?
+function WorkFlow:setPercent( p )
+	if p < 0 then p = 0 end
+	if p > 100 then p = 100 end
+	local n = math.floor( p / 10 )
+	
+end
+
 function WorkCommit:init()
 	if not self._root then
 		self._root = uikits.fromJson{file=ui.FILE}
@@ -68,10 +93,12 @@ function WorkCommit:init()
 			function(sender)
 				uikits.popScene()
 			end)
-	
+		
+		self:init_star()
+		
 		uikits.event(uikits.child(self._root,ui.WORKFLOW),
 						function(sender)
-							uikits.pushScene(WorkFlow.create(self._arguments.url))
+							uikits.pushScene(WorkFlow.create{pid=self._arguments.pid,uid=self._arguments.uid})
 						end,'click')
 		uikits.event(uikits.child(self._root,ui.WORKFLOW2),
 						function(sender)
@@ -89,15 +116,15 @@ function WorkCommit:init()
 				end_date:setText( self._arguments.end_date )
 			end
 			local obj_num = uikits.child(self._root,ui.OBJECTIVE_NUM)
-			if self._arguments.topics_num then
-				obj_num:setText(tostring(self._arguments.topics_num))
+			if self._arguments.cnt_item then
+				obj_num:setText(tostring(self._arguments.cnt_item))
 			end
 			local subj_num = uikits.child(self._root,ui.SUBJECTIVE_NUM)
 			if self._arguments.subjective_num then
 				subj_num:setText(tostring(self._arguments.subjective_num))
 			end
-			local commit = uikits.child(self._root,ui.COMMIT)
 			
+			local commit = uikits.child(self._root,ui.COMMIT)
 			uikits.event(commit,function(sender)
 					--提交
 					uikits.pushScene( Score.create{} )

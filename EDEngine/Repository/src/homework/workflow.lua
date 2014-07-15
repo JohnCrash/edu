@@ -16,8 +16,10 @@ local ui = {
 	LIST = 'milk_write/state_view',
 	LINK_DOT = res_root..'round_dot.png',
 	ARROW = 'arrow',
+	ARROW_UP = 'up',
 	PAGE_VIEW = 'questions_view',
 	NEXT_BUTTON = 'milk_write/next_problem',
+	FINISH_BUTTON = 'milk_write/finish_5',
 	ITEM_CURRENT = 'state_past',
 	ITEM_FINISHED = 'state_now',
 	ITEM_UNFINISHED = 'state_future',
@@ -128,8 +130,12 @@ function WorkFlow:save()
 	if self._url_topics and self.data then
 		--收集答案
 		for i,v in pairs(self.data) do
-			v.my_answer = self._data[i].my_answer
-			v.state = self._data[i].state
+			if self._data and self._data[i] then
+				v.my_answer = self._data[i].my_answer
+				v.state = self._data[i].state
+			else
+				my_print( 'error : WorkFlow:save self._data['..i..'] = nil')
+			end
 		end
 		local result = json.encode( self.data )
 		if result then
@@ -143,18 +149,32 @@ function WorkFlow:save_answer()
 	--比较下看看答案修改过没，如果修改过就保存
 	self._topics_table.answers = self._topics_table.answers or {}
 	local isc = false
-	for i,v in pairs(self._data) do
-		if v.my_answer and self._topics_table.answers[v.item_id] ~= v.my_answer then
-			if v.item_id then
-				self._topics_table.answers[v.item_id] = v.my_answer
-				isc = true
-			else
-				my_print('error : WorkFlow:save_answer v.item_id = nil' )
+	local b = true
+	if self._data then
+		for i,v in pairs(self._data) do
+			if v.my_answer and self._topics_table.answers[v.item_id] ~= v.my_answer then
+				if v.item_id then
+					self._topics_table.answers[v.item_id] = v.my_answer
+					isc = true	
+				else
+					my_print('error : WorkFlow:save_answer v.item_id = nil' )
+				end
 			end
+			--结束按钮
+			if v.state == ui.STATE_UNFINISHED then
+				b = false
+			end				
 		end
-	end
-	if isc then
-		topics.write( self._pid,self._topics_table )
+		if isc then
+			topics.write( self._pid,self._topics_table )
+		end
+		if b then
+			self._next_button:setVisible(false)
+			self._finish_button:setVisible(true)
+		else
+			self._next_button:setVisible(true)
+			self._finish_button:setVisible(false)		
+		end		
 	end
 end
 
@@ -193,8 +213,15 @@ function WorkFlow:init_data( )
 			end)
 	if not ret then
 		--加载失败
-		neterror_box.open( self )
 		my_print('Connect faild : '..url_topics )
+		loadbox:removeFromParent()
+		local box = loadingbox.open( self,loadingbox.RETRY,
+			function( id )
+				if id == loadingbox.TRY then
+					self:init_data() --? FIXBUG
+				end
+				box:removeFromParent() --CLOSE
+			end)
 	end
 end
 
@@ -527,6 +554,7 @@ end
 
 function WorkFlow:load_original_data_from_string( str )
 	local res = {}
+	local b = true
 	if str then
 		local data = kits.decode_json(str)
 
@@ -556,6 +584,7 @@ function WorkFlow:load_original_data_from_string( str )
 					k.my_answer = v.my_answer
 				end
 				k.state = v.state
+				if k.state == ui.STATE_UNFINISHED then b =false end
 				k.item_id = v.item_id
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					my_print( self._type_convs[k.item_type].name )
@@ -571,6 +600,10 @@ function WorkFlow:load_original_data_from_string( str )
 				else
 					my_print('不支持的题型: '..v.item_type)
 				end
+			end
+			if b then
+				self._next_button:setVisible(false)
+				self._finish_button:setVisible(true)
 			end
 		end
 	end
@@ -592,6 +625,7 @@ function WorkFlow:init_gui()
 	self._pageview_size = self._pageview:getSize()
 	
 	self._arrow = uikits.child(self._root,ui.ARROW)
+	self._arrow_up = uikits.child(self._root,ui.ARROW_UP)
 	
 	uikits.event(self._pageview,
 			function(sender,eventType)
@@ -611,9 +645,16 @@ function WorkFlow:init_gui()
 	self._item_size = self._item_current:getSize()
 	
 	self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
+	self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )
 	uikits.event( self._next_button,
 				function(sender)
 					self:next_item()
+				end,'click')
+	uikits.event( self._finish_button,
+				function(sender)
+					--保存
+					self:save()
+					uikits.popScene()
 				end,'click')
 				
 	self:init_anser_gui()
@@ -880,8 +921,12 @@ local function relayout_link( layout,data,op,i )
 				end
 			end
 			my_print( data.my_answer )
+			if string.len(data.my_answer) > 0 then
+				data.state = ui.STATE_FINISHED
+			else
+				data.state = ui.STATE_UNFINISHED
+			end
 			save_my_answer()
-			data.state = ui.STATE_FINISHED
 		end
 	end
 	local function select_rect(item,b)
@@ -1176,9 +1221,13 @@ local function relayout_click( layout,data,op,i,ismulti )
 					data.my_answer = answer_abc[i]
 					bg:addChild( rect_node[i] )
 				end
-				data.state = ui.STATE_FINISHED
 				data.my_answer = string_sort(data.my_answer)
 				my_print( data.my_answer )
+				if string.len(data.my_answer) > 0 then
+					data.state = ui.STATE_FINISHED
+				else
+					data.state = ui.STATE_UNFINISHED
+				end				
 				save_my_answer()
 			end,'click' )
 	end
@@ -1395,11 +1444,6 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 								end
 							end
 						end
-						if #drags > 0 then
-							data.state = ui.STATE_FINISHED
-						else
-							data.state = ui.STATE_UNFINISHED
-						end
 						--收集答案
 						data.my_answer = ''
 						for k=1,table.maxn(drags) do
@@ -1410,6 +1454,11 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 							end
 						end
 						my_print( data.my_answer )
+						if string.len(data.my_answer) > 0 then
+							data.state = ui.STATE_FINISHED
+						else
+							data.state = ui.STATE_UNFINISHED
+						end						
 						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
@@ -1711,11 +1760,16 @@ function WorkFlow:set_anwser_field( i )
 			local insize = layout:getInnerContainerSize()
 			if size.height < insize.height then
 				self._arrow:setVisible(true)
+				self._arrow_up:setVisible(true)
 				uikits.event( self._arrow,function(sender)
 					layout:scrollToBottom(0.3,true)
 				end,'click')
+				uikits.event( self._arrow_up,function(sender)
+					layout:scrollToTop(0.3,true)
+				end,'click')				
 			else
 				self._arrow:setVisible(false)
+				self._arrow_up:setVisible(false)
 			end
 		else
 			--不支持的类型
