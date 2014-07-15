@@ -154,14 +154,14 @@ end
 function WorkList:clear_all_item()
 	if self._list then
 		for i =1,#self._list do
-			if i == 1 then
-				self._item:setVisible(false) --模板
-			else
-				local u = uikits.child( self._list[i],ui.END_DATE )
-				if u and u._scID then
-					u:getScheduler():unscheduleScriptEntry(u._scID)
-				end
+			local u = uikits.child( self._list[i],ui.END_DATE )
+			if u and u._scID then
+				u:getScheduler():unscheduleScriptEntry(u._scID)
+			end
+			if i ~= 1 then
 				self._list[i]:removeFromParent()
+			else
+				self._list[i]:setVisible(false) --第一个是模板
 			end
 		end
 		self._list = {}
@@ -186,7 +186,7 @@ function WorkList:init_new_list()
 			loadbox:removeFromParent()
 		end
 		local function order_download() --顺序下载,知道大于WEEK,或者大于total
-			if err == ERR_DATA then --现在中发生错误
+			if err == ERR_DATA then --下载中发生错误
 				close_scheduler()
 				return
 			elseif err == ERR_NOTCONNECT then --没有网络
@@ -251,8 +251,8 @@ end
 function WorkList:init()
 	if not self._root then
 		self:init_gui()
-		self:init_new_list()
 	end
+	self:init_new_list()	
 end
 
 function WorkList:init_data_list()
@@ -270,7 +270,12 @@ function WorkList:init_gui()
 	self._scrollview = uikits.child(self._root,ui.LIST)
 	self._item = uikits.child(self._root,ui.ITEM)
 	local back = uikits.child(self._root,ui.BACK)
-	uikits.event(back,function(sender)uikits.popScene()end)
+	uikits.event(back,
+		function(sender)
+			if not self._busy then
+				uikits.popScene()
+			end
+		end)
 	self._item:setVisible(false)
 	local size = self._item:getSize()
 	self._item_width = size.width
@@ -282,6 +287,7 @@ function WorkList:init_gui()
 		end)
 	uikits.event( uikits.child(self._root,ui.HISTORY_BUTTON),
 		function(sender)
+			self:init_history_list()
 		end)
 	uikits.event( uikits.child(self._root,ui.STATIST_BUTTON),
 		function(sender)
@@ -290,10 +296,23 @@ function WorkList:init_gui()
 	self._list = {}
 end
 
+function WorkList:init_history_list()
+	if not self._scID and not self._busy then
+	end
+end
+
 function WorkList:relayout()
-	self._scrollview:setInnerContainerSize(cc.size(self._item_width,self._item_height*(#self._list)))
+	local height = self._item_height*(#self._list)
+	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
+	local offy = 0
+	local size = self._scrollview:getSize()
+	
+	if height < size.height then
+		offy = size.height - height --顶到顶
+	end
+
 	for i = 1,#self._list do
-		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)))
+		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
 	end
 end
 
@@ -363,21 +382,24 @@ function WorkList:add_item( t )
 
 	uikits.event(item,
 			function(sender)
-				uikits.pushScene(WorkCommit.create{
-					pid=t.paper_id,
-					uid=t.teacher_id,
-					caption=t.exam_name,
-					cnt_item = t.cnt_item,
-					cnt_item_finish = t.cnt_item_finish,
-					finish_time = t.finish_time,
-					in_time = t.in_time,
-					})
+				if not self._busy then
+					uikits.pushScene(WorkCommit.create{
+						pid=t.paper_id,
+						uid=t.teacher_id,
+						caption=t.exam_name,
+						cnt_item = t.cnt_item,
+						cnt_item_finish = t.cnt_item_finish,
+						finish_time = t.finish_time,
+						in_time = t.in_time,
+						})
+				end
 			end,'click')
 
 	return item
 end
 
 function WorkList:release()
+	self:clear_all_item()
 end
 
 return WorkList

@@ -64,7 +64,7 @@ function WorkCommit.create( t )
 	return scene
 end
 
-function WorkFlow:init_star()
+function WorkCommit:init_star()
 	self._white_star = {}
 	self._red_star = {}
 	self._white_star2 = {}
