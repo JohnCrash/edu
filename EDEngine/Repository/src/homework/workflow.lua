@@ -217,10 +217,10 @@ function WorkFlow:init_data( )
 		loadbox:removeFromParent()
 		local box = loadingbox.open( self,loadingbox.RETRY,
 			function( id )
+				box:removeFromParent() --CLOSE
 				if id == loadingbox.TRY then
 					self:init_data() --? FIXBUG
 				end
-				box:removeFromParent() --CLOSE
 			end)
 	end
 end

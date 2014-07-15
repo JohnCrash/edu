@@ -21,7 +21,8 @@ local function my_print( a )
 end
 local cookie_student = 'sc1=5B6A71FC333621695A285AC22CEDBF378D849D96ak96OwHoBYOcj3sCd0E24kV%2fbAusZhjjsUzUhMKTulZwFkjPwGhmamK%2b8VOQqknvELD2mN0fxGHdiCYZ%2fXdbaewnwrbp3A%3d%3d'
 local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
-
+local ERR_DATA = 1
+local ERR_NOTCONNECT = 2
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',
 	BACK = 'white/back',
@@ -35,6 +36,9 @@ local ui = {
 	ITEM_COUNT = 'questions_number1',
 	ITEM_COUNT2 = 'questions_number2', --主观题数量
 	END_DATE = 'time',
+	NEW_BUTTON = 'white/new2',
+	HISTORY_BUTTON = 'white/history1',
+	STATIST_BUTTON = 'white/statistical1',
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -99,8 +103,7 @@ function WorkList:init_data_by_cache()
 	end
 end
 
-function WorkList:get_page( i )
-	local loadbox = loadingbox.open( self )
+function WorkList:get_page( i,func )
 	local url = worklist_url..'?p='..i
 	--先尝试下载
 	local ret = mt.new('GET',url,login.cookie(),
@@ -108,14 +111,113 @@ function WorkList:get_page( i )
 							if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 								if obj.state == 'OK' and obj.data then
 									kits.write_cache( cache.get_name(url),obj.data)
+									func( url,i,true )
+								else
+									func( url,i,false )
 								end
-								loadbox:removeFromParent()
 							end
 						end )
+	if not ret then
+		--没有网络
+	end
+	return ret
+end
+
+local WEEK = 7*24*3600
+
+function WorkList:add_page_from_cache( idx )
+	local url = worklist_url..'?p='..idx
+	local result = cache.get_data( url )
+	local need_continue = false
+	if result then
+		local data = kits.decode_json( result )
+		if data and data.esi and type(data.esi)=='table' then
+			need_continue = idx < data.total
+			for i,v in pairs(data.esi) do
+				if v.in_time then
+					local t = unix_date_by_string(v.in_time)
+					if os.time() - t < WEEK then
+						self:add_item(v)
+					else
+						need_continue = false
+					end
+				else
+					need_continue = false
+				end
+			end
+		end
+	end
+	self:relayout()
+	return need_continue
+end
+
+function WorkList:clear_all_item()
+	if self._list then
+		for i =1,#self._list do
+			if i == 1 then
+				self._item:setVisible(false) --模板
+			else
+				self._list[i]:removeFromParent()
+			end
+		end
+		self._list = {}
+	end
 end
 
 function WorkList:init_new_list()
-	self:get_page( 0 )
+	if not self._scID and not self._busy then
+		local loadbox = loadingbox.open( self )
+		local scheduler = self:getScheduler()
+		local idx = 1
+		local ding = false
+		local err = false
+		local quit = false
+		self._busy = true
+		self._data = {}
+		self:clear_all_item()
+		local function close_scheduler()
+			scheduler:unscheduleScriptEntry(self._scID)
+			self._scID = nil
+			self._busy = false
+			loadbox:removeFromParent()
+		end
+		local function order_download() --顺序下载,知道大于WEEK,或者大于total
+			if err == ERR_DATA then --现在中发生错误
+				close_scheduler()
+				return
+			elseif err == ERR_NOTCONNECT then --没有网络
+				close_scheduler()
+				return
+			end
+			if quit then --正常退出
+				close_scheduler()
+				return
+			end
+			if not ding then --正在下载
+				local ret = self:get_page( idx,
+						function(url,i,b)
+							if b then --成功下载完成
+								if self:add_page_from_cache( i ) then
+									idx = idx + 1 --继续下载
+								else
+									quit = true
+								end
+							else --现在中发生错误
+								err = ERR_DATA
+								my_print( 'GET : "'..tostring(url)..'" error!' )
+							end
+							ding = false
+						end )
+				if ret then
+					ding = true --正常开始下载
+				else
+					err = ERR_NOTCONNECT
+					my_print( 'GET : "'..idx..'" error!' )
+				end
+			end
+		end
+		self._scID = scheduler:scheduleScriptFunc( order_download,0.1,false )
+	end
 end
 
 function WorkList:init_data()
@@ -139,15 +241,13 @@ function WorkList:init_data()
 	end
 end
 
-
-
 function WorkList:init_history_list()
 end
 
 function WorkList:init()
 	if not self._root then
 		self:init_gui()
-		self:init_data()
+		init_new_list()
 	end
 end
 
@@ -172,7 +272,17 @@ function WorkList:init_gui()
 	self._item_width = size.width
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
-	
+	uikits.event( uikits.child(self._root,ui.NEW_BUTTON),
+		function(sender)
+			self:init_new_list()
+		end)
+	uikits.event( uikits.child(self._root,ui.HISTORY_BUTTON),
+		function(sender)
+		end)
+	uikits.event( uikits.child(self._root,ui.STATIST_BUTTON),
+		function(sender)
+		end)
+		
 	self._list = {}
 end
 
@@ -232,7 +342,7 @@ function WorkList:add_item( t )
 			local function timer_func()
 				dt = end_time - os.time()
 				if dt > 0 then
-					u:setString(toDiffDateString(dt..'结束'))
+					u:setString(toDiffDateString(dt))
 				else
 					--过期
 					u:setString('')
