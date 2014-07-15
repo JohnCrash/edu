@@ -19,7 +19,6 @@ p:1
 local function my_print( a )
 	print( a )
 end
-local cookie_student = 'sc1=5B6A71FC333621695A285AC22CEDBF378D849D96ak96OwHoBYOcj3sCd0E24kV%2fbAusZhjjsUzUhMKTulZwFkjPwGhmamK%2b8VOQqknvELD2mN0fxGHdiCYZ%2fXdbaewnwrbp3A%3d%3d'
 local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
@@ -39,6 +38,7 @@ local ui = {
 	NEW_BUTTON = 'white/new2',
 	HISTORY_BUTTON = 'white/history1',
 	STATIST_BUTTON = 'white/statistical1',
+	ISCOMMIT = 'hassubmitted',
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -157,6 +157,10 @@ function WorkList:clear_all_item()
 			if i == 1 then
 				self._item:setVisible(false) --模板
 			else
+				local u = uikits.child( self._list[i],ui.END_DATE )
+				if u and u._scID then
+					u:getScheduler():unscheduleScriptEntry(u._scID)
+				end
 				self._list[i]:removeFromParent()
 			end
 		end
@@ -247,7 +251,7 @@ end
 function WorkList:init()
 	if not self._root then
 		self:init_gui()
-		init_new_list()
+		self:init_new_list()
 	end
 end
 
@@ -314,26 +318,30 @@ function WorkList:add_item( t )
 	end
 	if t.cnt_item and t.cnt_item_finish then --数量
 		local text = uikits.child( item,ui.ITEM_COUNT)
-		local b = text and text:setString( t.cnt_item )
+		local b = text and text:setString( tostring(t.cnt_item) )
 	end
-	if t.cnt_item_finish then --完成数量
-		local text = uikits.child( item,ui.ITEM_FINISH)
-		local b = text and text:setString( t.cnt_item_finish )
-	end	
 	if t.cnt_item and t.cnt_item_finish then --数量
 		local p = t.cnt_item_finish*100/t.cnt_item
 		if p > 100 then p = 100 end
 		uikits.child( item,ui.ITEM_PERCENT_TEXT):setString( tostring(math.floor(p))..'%' )
 		uikits.child( item,ui.ITEM_BAR):setPercent( p )
 	end
-
+	if t.status then --提交状态,0未提交,10,11已经提交
+		local isc = uikits.child( item,ui.ISCOMMIT )
+		if isc then
+			if t.status == 0 then
+				isc:setVisible( true )
+			else
+				isc:setVisible( false )
+			end
+		end
+	end
 	if t.finish_time then --结束日期
 		local u = uikits.child( item,ui.END_DATE )
 		u:setString('')
 		t.finish_time_unix = unix_date_by_string( t.finish_time )
 		if t.finish_time_unix and os.time() < t.finish_time_unix then
 			local scheduler = u:getScheduler()
-			local scID
 			local end_time = t.finish_time_unix
 			local dt = end_time - os.time()
 			if dt > 0 then
@@ -346,10 +354,10 @@ function WorkList:add_item( t )
 				else
 					--过期
 					u:setString('')
-					scheduler:unscheduleScriptEntry(scID)
+					scheduler:unscheduleScriptEntry(u._scID)
 				end
 			end
-			scID = scheduler:scheduleScriptFunc( timer_func,1,false )
+			u._scID = scheduler:scheduleScriptFunc( timer_func,1,false )
 		end
 	end
 
