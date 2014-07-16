@@ -1,4 +1,4 @@
-local lfs = require "lfs"
+﻿local lfs = require "lfs"
 local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
@@ -298,6 +298,27 @@ local function decode_json( buf )
 	return nil
 end
 
+local function toDiffDateString( d )
+	if d then
+		local day = math.floor( d /(3600*24) )
+		local hours = math.floor( (d - day*3600*24)/3600 )
+		local mins = math.floor( (d - day*3600*24 - hours*3600)/60 )
+		local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
+		local result = ''
+		if day > 0 then
+			result = result..day..'天'
+		end
+		if hours > 0 or day > 0 then
+			result = result..hours..'小时'
+		end
+		if mins > 0 or hours > 0 or day > 0 then
+			result = result..mins..'分'
+		end
+		result = result..sec..'秒'
+		return result
+	end
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -318,6 +339,7 @@ local exports = {
 	write_cache = write_cache,
 	exist_cache = exist_cache,
 	decode_json = decode_json,
+	toDiffDateString = toDiffDateString,
 }
 
 return exports

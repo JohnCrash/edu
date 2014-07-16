@@ -35,11 +35,13 @@ local ui = {
 	ITEM_FINISH = 'questionsnumber',
 	ITEM_COUNT = 'questions_number1',
 	ITEM_COUNT2 = 'questions_number2', --主观题数量
-	END_DATE = 'time',
+	END_DATE = 'Label_34',
 	NEW_BUTTON = 'white/new2',
 	HISTORY_BUTTON = 'white/history1',
 	STATIST_BUTTON = 'white/statistical1',
 	ISCOMMIT = 'hassubmitted',
+	NOCOMMIT = 'not_submitted',
+	TIMELABEL = 'time_text',
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -56,25 +58,6 @@ local function unix_date_by_string( str )
 			return d/1000
 		end
 	end
-end
-
-local function toDiffDateString( d )
-	local day = math.floor( d /(3600*24) )
-	local hours = math.floor( (d - day*3600*24)/3600 )
-	local mins = math.floor( (d - day*3600*24 - hours*3600)/60 )
-	local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
-	local result = ''
-	if day > 0 then
-		result = result..day..'天'
-	end
-	if hours > 0 or day > 0 then
-		result = result..hours..'时'
-	end
-	if mins > 0 or hours > 0 or day > 0 then
-		result = result..mins..'分'
-	end
-	result = result..sec..'秒'
-	return result
 end
 
 function WorkList.create()
@@ -143,9 +126,9 @@ function WorkList:add_page_from_cache( idx,last )
 					if not last then
 						if dt < WEEK then --结束作业后+7天
 							if dt > 0 then
-								print( '	add:+'..toDiffDateString(dt) )
+								print( '	add:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	add:-'..toDiffDateString(-dt) )
+								print( '	add:-'..kits.toDiffDateString(-dt) )
 							end
 							self:add_item(v)
 						else
@@ -155,16 +138,16 @@ function WorkList:add_page_from_cache( idx,last )
 					else
 						if dt > WEEK then
 							if dt > 0 then
-								print( '	add:+'..toDiffDateString(dt) )
+								print( '	add:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	add:-'..toDiffDateString(-dt) )
+								print( '	add:-'..kits.toDiffDateString(-dt) )
 							end
 							self:add_item(v)
 						end
 							if dt > 0 then
-								print( '	?:+'..toDiffDateString(dt) )
+								print( '	?:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	?:-'..toDiffDateString(-dt) )
+								print( '	?:-'..kits.toDiffDateString(-dt) )
 							end
 					end
 				else
@@ -421,11 +404,14 @@ function WorkList:add_item( t )
 	end
 	if t.status then --提交状态,0未提交,10,11已经提交
 		local isc = uikits.child( item,ui.ISCOMMIT )
-		if isc then
-			if t.status == 0 then
+		local noc = uikits.child( item,ui.NOCOMMIT )
+		if isc and noc then
+			if t.status ~= 0 then
 				isc:setVisible( true )
+				noc:setVisible( false )
 			else
 				isc:setVisible( false )
+				noc:setVisible( true )
 			end
 		end
 	end
@@ -438,19 +424,28 @@ function WorkList:add_item( t )
 			local end_time = t.finish_time_unix
 			local dt = end_time - os.time()
 			if dt > 0 then
-				u:setString(toDiffDateString(dt))
+				u:setString(kits.toDiffDateString(dt))
 			end
 			local function timer_func()
 				dt = end_time - os.time()
 				if dt > 0 then
-					u:setString(toDiffDateString(dt))
+					u:setString(kits.toDiffDateString(dt))
 				else
 					--过期
-					u:setString('')
+					local txt = uikits.child( item,ui.TIMELABEL )
+					if txt then txt:setString('已过期:') end
+					u:setString(kits.toDiffDateString(-dt))
 					scheduler:unscheduleScriptEntry(u._scID)
+					u._scID = nil
 				end
 			end
 			u._scID = scheduler:scheduleScriptFunc( timer_func,1,false )
+		elseif  t.finish_time_unix then
+			--过期
+			local dt = t.finish_time_unix - os.time()
+			local txt = uikits.child( item,ui.TIMELABEL )
+			if txt then txt:setString('已过期:') end
+			u:setString(kits.toDiffDateString(-dt))		
 		end
 	end
 
@@ -465,6 +460,9 @@ function WorkList:add_item( t )
 						cnt_item_finish = t.cnt_item_finish,
 						finish_time = t.finish_time,
 						in_time = t.in_time,
+						status = t.status,
+						course_name = t.course_name,
+						finish_time_unix = t.finish_time_unix,
 						})
 				end
 			end,'click')
