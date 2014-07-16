@@ -22,6 +22,7 @@ end
 local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
+local HISTORY = 1
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',
 	BACK = 'white/back',
@@ -123,23 +124,48 @@ function WorkList:get_page( i,func )
 	return ret
 end
 
-local WEEK = 7*24*3600
+local WEEK = 0--7*24*3600
 
-function WorkList:add_page_from_cache( idx )
+function WorkList:add_page_from_cache( idx,last )
 	local url = worklist_url..'?p='..idx
 	local result = cache.get_data( url )
 	local need_continue = false
 	if result then
 		local data = kits.decode_json( result )
-		if data and data.esi and type(data.esi)=='table' then
+		if data and data.total and data.esi and type(data.esi)=='table' then
+			self._total = data.total
 			need_continue = idx < data.total
 			for i,v in pairs(data.esi) do
-				if v.in_time then
-					local t = unix_date_by_string(v.in_time)
-					if os.time() - t < WEEK then
-						self:add_item(v)
+				if v.finish_time then
+					local t = unix_date_by_string(v.finish_time)
+					local dt = os.time() - t
+					print( 'v.finish_time = '..t..' current='..os.time() )
+					if not last then
+						if dt < WEEK then --结束作业后+7天
+							if dt > 0 then
+								print( '	add:+'..toDiffDateString(dt) )
+							else
+								print( '	add:-'..toDiffDateString(-dt) )
+							end
+							self:add_item(v)
+						else
+							print( '	stop' )
+							need_continue = false
+						end
 					else
-						need_continue = false
+						if dt > WEEK then
+							if dt > 0 then
+								print( '	add:+'..toDiffDateString(dt) )
+							else
+								print( '	add:-'..toDiffDateString(-dt) )
+							end
+							self:add_item(v)
+						end
+							if dt > 0 then
+								print( '	?:+'..toDiffDateString(dt) )
+							else
+								print( '	?:-'..toDiffDateString(-dt) )
+							end
 					end
 				else
 					need_continue = false
@@ -168,17 +194,15 @@ function WorkList:clear_all_item()
 	end
 end
 
-function WorkList:init_new_list()
+function WorkList:load_page( first,last )
 	if not self._scID and not self._busy then
 		local loadbox = loadingbox.open( self )
 		local scheduler = self:getScheduler()
-		local idx = 1
+		local idx = first
 		local ding = false
 		local err = false
 		local quit = false
 		self._busy = true
-		self._data = {}
-		self:clear_all_item()
 		local function close_scheduler()
 			scheduler:unscheduleScriptEntry(self._scID)
 			self._scID = nil
@@ -194,6 +218,8 @@ function WorkList:init_new_list()
 				return
 			end
 			if quit then --正常退出
+				self._first_idx = 1
+				self._last_idx = idx
 				close_scheduler()
 				return
 			end
@@ -201,8 +227,16 @@ function WorkList:init_new_list()
 				local ret = self:get_page( idx,
 						function(url,i,b)
 							if b then --成功下载完成
-								if self:add_page_from_cache( i ) then
-									idx = idx + 1 --继续下载
+								if self:add_page_from_cache( i,last ) then
+									if last then
+										if idx >= last then
+											quit = true
+										else
+											idx = idx + 1 --继续下载
+										end
+									else
+										idx = idx + 1 --继续下载
+									end
 								else
 									quit = true
 								end
@@ -221,6 +255,14 @@ function WorkList:init_new_list()
 			end
 		end
 		self._scID = scheduler:scheduleScriptFunc( order_download,0.1,false )
+	end
+end
+
+function WorkList:init_new_list()
+	if not self._scID and not self._busy then
+		self._mode = nil
+		self:clear_all_item()
+		self:load_page( 1 )
 	end
 end
 
@@ -243,9 +285,6 @@ function WorkList:init_data()
 		loadbox:removeFromParent()
 		self:init_data_by_cache()
 	end
-end
-
-function WorkList:init_history_list()
 end
 
 function WorkList:init()
@@ -292,12 +331,47 @@ function WorkList:init_gui()
 	uikits.event( uikits.child(self._root,ui.STATIST_BUTTON),
 		function(sender)
 		end)
-		
+
+	uikits.event( self._scrollview,
+		function(sender,t)
+			if self._mode == HISTORY then
+				if t == ccui.ScrollviewEventType.scrollToTop then
+					self:history_scroll( t )
+				elseif t == ccui.ScrollviewEventType.scrollToBottom then
+					self:history_scroll( t )
+				end
+			end
+		end)
 	self._list = {}
 end
 
 function WorkList:init_history_list()
 	if not self._scID and not self._busy then
+		self._mode = HISTORY
+		self:clear_all_item()
+		self:load_page( 1,5 )
+	end
+end
+
+function WorkList:history_scroll( t )
+	if t == ccui.ScrollviewEventType.scrollToTop then
+		if self._first_idx and self._first_idx == 1 then
+			self._scrollview:setBounceEnabled( true )
+			return
+		end
+	elseif t == ccui.ScrollviewEventType.scrollToBottom then
+		if self._last_idx and self._last_idx == self._total then
+			self._scrollview:setBounceEnabled( true )
+			return
+		end
+		--继续载入
+		self._scrollview:setBounceEnabled( false )
+		if self._last_idx then
+			self:load_page( self._last+1,self._last+6 ) --一次最多装载5页
+		else
+			self:clear_all_item()
+			self:load_page( 1 )
+		end
 	end
 end
 
