@@ -9,6 +9,37 @@ local ui = {
 	TRY = 'red_in/again',
 }
 
+--放一个旋转圈
+local function put_lading_circle( parent )
+	local size
+	if not parent then return end
+	
+	if parent.getSize then
+		size = parent:getSize()
+	else
+		size = uikits.screenSize()
+		size.width = size.width * uikits.scale()
+		size.height = size.height * uikits.scale()
+	end
+	--旋转体
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.LOADING)
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(ui.LOADING)	
+	local circle = ccs.Armature:create('load')
+--BUG? 不能加入相对布局窗体中
+--	local layout = uikits.layout{bgcolor=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255)),
+		--bgcolor2=cc.c3b(math.random(0,255),math.random(0,255),math.random(0,255)),anchorX=0.5,anchorY=0.5,
+		--x = size.width/2,y = size.height/2,width,width=100,height=100
+		--}
+	if circle then
+		circle:getAnimation():playWithIndex(0)
+		circle:setAnchorPoint(cc.p(0.5,0.5))
+		circle:setPosition( cc.p(size.width/2,size.height/2) )
+	--	layout:addChild( circle )
+		parent:addChild( circle )
+		return circle
+	end
+end
+
 local function open_loadingbox( parent,dt,func )
 	local s
 	if dt == 1 then
@@ -68,4 +99,5 @@ return
 	TRY = 4,
 	CLOSE = 5,
 	open = open_loadingbox,
+	circle = put_lading_circle,
 }

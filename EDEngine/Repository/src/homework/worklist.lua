@@ -462,6 +462,7 @@ function WorkList:add_item( t )
 						course_name = t.course_name,
 						finish_time_unix = t.finish_time_unix,
 						exam_id = t.exam_id,
+						uid = login.uid(),
 						})
 				end
 			end,'click')

@@ -12,7 +12,7 @@ score.lua 提交结果
 topics.lua 和题相关的缓冲
 
 
-取得作业
+取得作业 (老师端)
 	http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx
 	参数pid,uid
 		?pid=93ca856727be4c09b8658935e81db8b8&uid=122097
@@ -23,7 +23,7 @@ topics.lua 和题相关的缓冲
 		examId:900af39af9914b19a8b903acadfb86c1
 		itemId:568f6630cf764f0cb8b7d5d7459c5e3f
 		answer:A "填空用,分割"
-		times:4
+		times:4 --做题用时
 		tid:122097
 	
 取单题答案

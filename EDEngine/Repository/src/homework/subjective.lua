@@ -1,21 +1,8 @@
 ﻿local uikits = require "uikits"
 
 local ui = {
-	FILE = 'homework/z3_1/z3_1.json',
-	BACK = 'white/back',
-	HOME = 'Button_31',
-	CAPTION = 'white/lesson_name',
-	END_DATE = 'white/time_over',
-	RANK = 'ranking',
-	TOPICS = 'objective_no',
-	TOPICS2 = 'subjective_no',
-	USE_TIME = 'time',
-	EXP = 'experience_no',
-	SILVER = 'silver_no',
-	GOLD = 'gold_no',
-	LEVEL = 'level',
-	ITEM = 'newview/subject1',
-	GO_WRONG = 'wrong',
+	FILE = 'homework/z22_1/z22_1.json',
+	BACK = 'milk_write/back',
 }
 
 local Subjective = class("Subjective")
@@ -46,7 +33,7 @@ function Subjective:init()
 			function(sender)
 				uikits.popScene()
 			end)
-		
+		self:addChild(self._root)
 	end
 end
 

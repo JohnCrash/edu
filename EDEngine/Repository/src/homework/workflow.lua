@@ -3,6 +3,7 @@ local cache = require "cache"
 local login = require "login"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
+local mt = require "mt"
 
 kits.log( "Hello World!" )
 kits.log( "====================" )
@@ -71,11 +72,13 @@ local this
 local function save_my_answer()
 	if this then
 		this:save_answer()
+	else
+		kits.log('error save_my_answer this = nil')
 	end
 end
 
 local url_topics_ash = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
-
+local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
 --[[
 item
 {
@@ -109,8 +112,7 @@ function WorkFlow.create( t )
 	local function onNodeEvent(event)
 		if "enter" == event then
 			if t and type(t)=='table' then
-				layer._pid = t.pid
-				layer._uid = t.uid
+				layer._args = t
 			end
 			layer:init()
 		elseif "exit" == event then
@@ -141,6 +143,28 @@ function WorkFlow:save()
 	end
 end
 
+function WorkFlow:commit_topics( v )
+	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
+	..'&itemId='..tostring(v.item_id)
+	..'&answer='..tostring(v.my_answer)
+	..'&times='..0
+	..'&tid='..tostring(self._args.tid)
+	kits.log('commit '..url)
+	local ret = mt.new('GET',url,login.cookie(),
+					function(obj)
+						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+							if obj.state == 'OK' and obj.data then
+								kits.log('	commit '..url..' success!')
+							else
+								kits.log('	commit '..url..' faild!')
+							end
+						end
+					end )
+	if not ret then
+		kits.log('	commit '..url..' faild!')
+	end
+end
+
 --每道题存一遍
 function WorkFlow:save_answer()
 	--比较下看看答案修改过没，如果修改过就保存
@@ -150,7 +174,9 @@ function WorkFlow:save_answer()
 	if self._data then
 		for i,v in pairs(self._data) do
 			if v.my_answer and self._topics_table.answers[v.item_id] ~= v.my_answer then
+			--答案被修改过,需要存储
 				if v.item_id then
+					self:commit_topics( v )
 					self._topics_table.answers[v.item_id] = v.my_answer
 					isc = true	
 				else
@@ -163,7 +189,7 @@ function WorkFlow:save_answer()
 			end				
 		end
 		if isc then
-			topics.write( self._pid,self._topics_table )
+			topics.write( self._args.pid,self._topics_table )
 		end
 		if b then
 			self._next_button:setVisible(false)
@@ -176,15 +202,15 @@ function WorkFlow:save_answer()
 end
 
 function WorkFlow:init_data( )
-	if not (self._pid and self._uid) then
+	if not (self._args.pid and self._args.uid) then
 		kits.log('error : WorkFlow:init_data invalid arguments')
 		return
 	end
 	local loadbox = loadingbox.open( self )
-	local url_topics = url_topics_ash..'?pid='..self._pid..'&uid'..self._uid
+	local url_topics = url_topics_ash..'?pid='..self._args.pid..'&uid'..self._args.uid
 	init_answer_map()
 	this = self 
-	self._topics_table = topics.read( self._pid ) or {}
+	self._topics_table = topics.read( self._args.pid ) or {}
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
@@ -873,6 +899,7 @@ local function relayout_link( layout,data,op,i )
 	local answer_links = {}
 	
 	local function add_line()
+		answer[up] = down
 		local x,y = ui1[up]:getPosition()
 		x = x + ui1[up]:getSize().width*WorkFlow.scale/2
 		local x2,y2 = ui2[down]:getPosition()
@@ -885,7 +912,6 @@ local function relayout_link( layout,data,op,i )
 	end
 	local function do_link()
 		if up and down then
-			answer[up] = down
 			if answer_links[up] then
 				answer_links[up]:removeFromParent()
 			end
@@ -999,6 +1025,7 @@ local function relayout_link( layout,data,op,i )
 			local s = string.sub(data.my_answer,i,i)
 			if s and answer_idx[s] then
 				--加入连线
+				print( tostring(i).. answer_idx[s])
 				up = i
 				down = answer_idx[s]
 				add_line()
