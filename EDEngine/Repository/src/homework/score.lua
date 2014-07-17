@@ -46,12 +46,11 @@ function Score:init()
 			function(sender)
 				uikits.popScene()
 			end)
-		
+		self:addChild( self._root )
 	end
 end
 
 function Score:release()
-	
 end
 
 return Score

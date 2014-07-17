@@ -319,6 +319,10 @@ local function toDiffDateString( d )
 	end
 end
 
+local function my_log( a )
+	print( tostring(a) )
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -340,6 +344,7 @@ local exports = {
 	exist_cache = exist_cache,
 	decode_json = decode_json,
 	toDiffDateString = toDiffDateString,
+	log = my_log,
 }
 
 return exports

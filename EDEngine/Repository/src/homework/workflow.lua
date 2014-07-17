@@ -4,11 +4,8 @@ local login = require "login"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
 
-local function my_print( a )
-	print( a )
-end
-my_print( "Hello World!" )
-my_print( "====================" )
+kits.log( "Hello World!" )
+kits.log( "====================" )
 local res_root = 'homework/z21_1/'
 local ui = {
 	FILE = res_root..'z21_1.json',
@@ -134,7 +131,7 @@ function WorkFlow:save()
 				v.my_answer = self._data[i].my_answer
 				v.state = self._data[i].state
 			else
-				my_print( 'error : WorkFlow:save self._data['..i..'] = nil')
+				kits.log( 'error : WorkFlow:save self._data['..i..'] = nil')
 			end
 		end
 		local result = json.encode( self.data )
@@ -157,7 +154,7 @@ function WorkFlow:save_answer()
 					self._topics_table.answers[v.item_id] = v.my_answer
 					isc = true	
 				else
-					my_print('error : WorkFlow:save_answer v.item_id = nil' )
+					kits.log('error : WorkFlow:save_answer v.item_id = nil' )
 				end
 			end
 			--结束按钮
@@ -180,7 +177,7 @@ end
 
 function WorkFlow:init_data( )
 	if not (self._pid and self._uid) then
-		my_print('error : WorkFlow:init_data invalid arguments')
+		kits.log('error : WorkFlow:init_data invalid arguments')
 		return
 	end
 	local loadbox = loadingbox.open( self )
@@ -209,11 +206,11 @@ function WorkFlow:init_data( )
 					end
 				end
 				loadbox:removeFromParent()
-				my_print('cache request faild :'..url_topics)
+				kits.log('cache request faild :'..url_topics)
 			end)
 	if not ret then
 		--加载失败
-		my_print('Connect faild : '..url_topics )
+		kits.log('Connect faild : '..url_topics )
 		loadbox:removeFromParent()
 		local box = loadingbox.open( self,loadingbox.RETRY,
 			function( id )
@@ -282,7 +279,7 @@ local function parse_html( str )
 			t.type = 1
 			t.text = s
 		else
-			my_print( '		ERROR parse_html:'..tostring(str) )
+			kits.log( '		ERROR parse_html:'..tostring(str) )
 		end
 	end
 	return t
@@ -298,7 +295,7 @@ local function parse_rect( str )
 		if n1 and n2 and n3 and n4 then
 			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
 		else
-			my_print( '		ERROR parse_rect : ' ..tostring(str) )
+			kits.log( '		ERROR parse_rect : ' ..tostring(str) )
 		end
 	end
 end	
@@ -313,10 +310,10 @@ local function parse_answer(s)
 		if ca and ca.answers and type(ca.answers) == 'table' then
 			return ca.answers
 		else
-			my_print('		ERROR parse_answer: '..tostring(s) )
+			kits.log('		ERROR parse_answer: '..tostring(s) )
 		end
 	else
-		my_print('		ERROR parse_answer: '..tostring(s) )
+		kits.log('		ERROR parse_answer: '..tostring(s) )
 	end
 end
 
@@ -325,9 +322,9 @@ local function print_rects( t )
 	if t and type(t) == 'table' then
 		for i,v in pairs(t) do
 			if v.x1 and v.y1 and v.x2 and v.y2 then
-				my_print( '		rect# '..v.x1..','..v.y1..','..v.x2..','..v.y2 )
+				kits.log( '		rect# '..v.x1..','..v.y1..','..v.x2..','..v.y2 )
 			else
-				my_print( '		nil' )
+				kits.log( '		nil' )
 			end
 		end	
 	end --]]
@@ -338,9 +335,9 @@ local function print_items( t )
 	if t and type(t)=='table' then
 		for i,v in pairs(t) do
 			if v.type == 1 then
-				my_print( '		text# '..tostring(v.text) )
+				kits.log( '		text# '..tostring(v.text) )
 			elseif v.type == 2 then
-				my_print( '		image# '..tostring(v.image) )
+				kits.log( '		image# '..tostring(v.image) )
 			end
 		end
 	end--]]
@@ -348,11 +345,11 @@ end
 
 local function print_drag( e )
 --[[
-	my_print( 'drag:' )
-	my_print( '	img = '..tostring(e.img) )
-	my_print( '	drag_rects:')
+	kits.log( 'drag:' )
+	kits.log( '	img = '..tostring(e.img) )
+	kits.log( '	drag_rects:')
 	print_rects( e.drag_rects )
-	my_print( '	drag_objs:')
+	kits.log( '	drag_objs:')
 	print_items( e.drag_objs )--]]
 end
 
@@ -387,9 +384,9 @@ local function drag_conv(s,e)
 end		
 
 local function print_click( e )
-	my_print( 'click:' )
-	my_print( '	img = '..tostring(e.img) )
-	my_print( '	click_rects:')
+	kits.log( 'click:' )
+	kits.log( '	img = '..tostring(e.img) )
+	kits.log( '	click_rects:')
 	print_rects( e.click_rects )
 end
 
@@ -419,8 +416,8 @@ local function click_conv(s,e)
 end
 
 local function print_sort( e )
-	my_print( 'sort:' )
-	my_print( '	sort_items:')
+	kits.log( 'sort:' )
+	kits.log( '	sort_items:')
 	print_items( e.sort_items )
 end
 
@@ -444,10 +441,10 @@ local function sort_conv(s,e)
 end
 
 local function print_link( e )
-	my_print( 'sort:' )
-	my_print( '	link_items1:')
+	kits.log( 'sort:' )
+	kits.log( '	link_items1:')
 	print_items( e.link_items1 )
-	my_print( '	link_items2:')
+	kits.log( '	link_items2:')
 	print_items( e.link_items2 )
 	
 end
@@ -576,7 +573,7 @@ function WorkFlow:load_original_data_from_string( str )
 				else
 					k.isload = true
 					k.image = 'Pic/my/'..i..'.png'
-					my_print( k.image )
+					kits.log( k.image )
 				end
 				if self._topics_table and self._topics_table.answers then
 					k.my_answer = self._topics_table.answers[v.item_id]
@@ -587,18 +584,18 @@ function WorkFlow:load_original_data_from_string( str )
 				if k.state == ui.STATE_UNFINISHED then b =false end
 				k.item_id = v.item_id
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
-					my_print( self._type_convs[k.item_type].name )
+					kits.log( self._type_convs[k.item_type].name )
 					k.resource_cache = {} 
 					k.resource_cache.urls = {} --资源缓冲表,
 					local b,msg = self._type_convs[k.item_type].conv( v,k )
 					if b then
 						res[#res+1] = k
 					else
-						my_print('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
-						my_print('	error msg: '..msg )
+						kits.log('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
+						kits.log('	error msg: '..msg )
 					end
 				else
-					my_print('不支持的题型: '..v.item_type)
+					kits.log('不支持的题型: '..v.item_type)
 				end
 			end
 			if b then
@@ -707,7 +704,7 @@ function WorkFlow:clone_item( state )
 	elseif state == ui.STATE_UNFINISHED then
 		return self._item_unfinished:clone()
 	else
-		my_print( '	ERROR: clone_item state = '..tostring(state) )
+		kits.log( '	ERROR: clone_item state = '..tostring(state) )
 	end
 end
 
@@ -750,7 +747,7 @@ function WorkFlow:add_item( t )
 		--layout:setTouchEnabled(false)
 		--self:set_image( #self._list )
 	else
-		my_print( '	ERROR: clone_item() return nil' )
+		kits.log( '	ERROR: clone_item() return nil' )
 	end
 end
 
@@ -788,7 +785,7 @@ end
 local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
-			--my_print('	#TEXT: '..t.text )
+			--kits.log('	#TEXT: '..t.text )
 			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
@@ -822,7 +819,7 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other,pageview )
 						end
 					end
 				end )
-		if not r then my_print( msg ) end
+		if not r then kits.log( msg ) end
 	end
 end
 
@@ -920,7 +917,7 @@ local function relayout_link( layout,data,op,i )
 					data.my_answer = data.my_answer..'0'
 				end
 			end
-			my_print( data.my_answer )
+			kits.log( data.my_answer )
 			if string.len(data.my_answer) > 0 then
 				data.state = ui.STATE_FINISHED
 			else
@@ -1136,7 +1133,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						for i,v in pairs(sorts) do
 							data.my_answer = data.my_answer..map_abc(v)
 						end
-						my_print( data.my_answer )
+						kits.log( data.my_answer )
 						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePos()
@@ -1222,7 +1219,7 @@ local function relayout_click( layout,data,op,i,ismulti )
 					bg:addChild( rect_node[i] )
 				end
 				data.my_answer = string_sort(data.my_answer)
-				my_print( data.my_answer )
+				kits.log( data.my_answer )
 				if string.len(data.my_answer) > 0 then
 					data.state = ui.STATE_FINISHED
 				else
@@ -1453,7 +1450,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 								data.my_answer = data.my_answer..'0'
 							end
 						end
-						my_print( data.my_answer )
+						kits.log( data.my_answer )
 						if string.len(data.my_answer) > 0 then
 							data.state = ui.STATE_FINISHED
 						else
@@ -1534,7 +1531,7 @@ WorkFlow._topics = {
 								data.my_answer = ''
 								data.state = ui.STATE_UNFINISHED
 							end
-							my_print( data.my_answer )
+							kits.log( data.my_answer )
 							save_my_answer()
 						end)
 					uikits.event(self._option_no,
@@ -1549,7 +1546,7 @@ WorkFlow._topics = {
 								data.my_answer = ''
 								data.state = ui.STATE_UNFINISHED
 							end			
-							my_print( data.my_answer )				
+							kits.log( data.my_answer )				
 							save_my_answer()
 						end)
 					if not data._layout_ then
@@ -1578,7 +1575,7 @@ WorkFlow._topics = {
 									data.my_answer = ''
 									data.state = ui.STATE_UNFINISHED
 								end
-								my_print( data.my_answer )
+								kits.log( data.my_answer )
 								save_my_answer()
 							end)
 					end
@@ -1613,7 +1610,7 @@ WorkFlow._topics = {
 								end
 								--保持顺序CB->BC
 								data.my_answer = string_sort(data.my_answer)
-								my_print( data.my_answer )
+								kits.log( data.my_answer )
 								save_my_answer()
 							end)
 					end
@@ -1774,9 +1771,9 @@ function WorkFlow:set_anwser_field( i )
 		else
 			--不支持的类型
 			if  self._topics[t] and  self._topics[t].name then
-				my_print( "Can't support type "..t.."	name : "..self._topics[t].name )
+				kits.log( "Can't support type "..t.."	name : "..self._topics[t].name )
 			else
-				my_print( "Can't support type "..t )
+				kits.log( "Can't support type "..t )
 			end
 			self._option_not_support:setVisible(true)
 		end

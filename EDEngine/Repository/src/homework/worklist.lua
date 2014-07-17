@@ -16,9 +16,6 @@ timer:-1
 type:-1
 p:1
 --]]
-local function my_print( a )
-	print( a )
-end
 local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
@@ -83,7 +80,7 @@ function WorkList:init_data_by_cache()
 		self._data = json.decode( result )
 		self:init_data_list()
 	else
-		my_print('error : WorkList:init_data_by_cache result = nil')
+		kits.log('error : WorkList:init_data_by_cache result = nil')
 	end
 end
 
@@ -103,6 +100,7 @@ function WorkList:get_page( i,func )
 						end )
 	if not ret then
 		--没有网络
+		kits.log('WorkList:get_page error :'..url )
 	end
 	return ret
 end
@@ -122,32 +120,32 @@ function WorkList:add_page_from_cache( idx,last )
 				if v.finish_time then
 					local t = unix_date_by_string(v.finish_time)
 					local dt = os.time() - t
-					print( 'v.finish_time = '..t..' current='..os.time() )
+					kits.log( 'v.finish_time = '..t..' current='..os.time() )
 					if not last then
 						if dt < WEEK then --结束作业后+7天
 							if dt > 0 then
-								print( '	add:+'..kits.toDiffDateString(dt) )
+								kits.log( '	add:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	add:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	add:-'..kits.toDiffDateString(-dt) )
 							end
 							self:add_item(v)
 						else
-							print( '	stop' )
+							kits.log( '	stop' )
 							need_continue = false
 						end
 					else
 						if dt > WEEK then
 							if dt > 0 then
-								print( '	add:+'..kits.toDiffDateString(dt) )
+								kits.log( '	add:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	add:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	add:-'..kits.toDiffDateString(-dt) )
 							end
 							self:add_item(v)
 						end
 							if dt > 0 then
-								print( '	?:+'..kits.toDiffDateString(dt) )
+								kits.log( '	?:+'..kits.toDiffDateString(dt) )
 							else
-								print( '	?:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	?:-'..kits.toDiffDateString(-dt) )
 							end
 					end
 				else
@@ -225,7 +223,7 @@ function WorkList:load_page( first,last )
 								end
 							else --现在中发生错误
 								err = ERR_DATA
-								my_print( 'GET : "'..tostring(url)..'" error!' )
+								kits.log( 'GET : "'..tostring(url)..'" error!' )
 							end
 							ding = false
 						end )
@@ -233,7 +231,7 @@ function WorkList:load_page( first,last )
 					ding = true --正常开始下载
 				else
 					err = ERR_NOTCONNECT
-					my_print( 'GET : "'..idx..'" error!' )
+					kits.log( 'GET : "'..idx..'" error!' )
 				end
 			end
 		end
@@ -264,7 +262,7 @@ function WorkList:init_data()
 						end )
 	if not ret then
 		--加载失败,无网络运行
-		my_print('Connect faild : '..worklist_url )
+		kits.log('Connect faild : '..worklist_url )
 		loadbox:removeFromParent()
 		self:init_data_by_cache()
 	end
@@ -454,7 +452,7 @@ function WorkList:add_item( t )
 				if not self._busy then
 					uikits.pushScene(WorkCommit.create{
 						pid=t.paper_id,
-						uid=t.teacher_id,
+						tid=t.teacher_id,
 						caption=t.exam_name,
 						cnt_item = t.cnt_item,
 						cnt_item_finish = t.cnt_item_finish,
@@ -463,6 +461,7 @@ function WorkList:add_item( t )
 						status = t.status,
 						course_name = t.course_name,
 						finish_time_unix = t.finish_time_unix,
+						exam_id = t.exam_id,
 						})
 				end
 			end,'click')

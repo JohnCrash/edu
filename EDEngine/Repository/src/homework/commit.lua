@@ -3,6 +3,10 @@ local kits = require "kits"
 local uikits = require "uikits"
 local WorkFlow = require "homework/workflow"
 local Score = require "homework/score"
+local loadingbox = require "homework/loadingbox"
+local login = require 'login'
+local mt = require "mt"
+local cache = require "cache"
 
 local ui = {
 	FILE = 'homework/z2_1/z2_1.json',
@@ -37,7 +41,8 @@ local commit_sort_url = ''
 --[[
 	取得作业表
 --]]
-local topics_url = 'http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx'
+
+local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
 local WorkCommit = class("WorkCommit")
 WorkCommit.__index = WorkCommit
 
@@ -81,6 +86,20 @@ function WorkCommit:init_star()
 	end
 end
 
+function WorkCommit:setPercent2( p )
+	if p < 0 then p = 0 end
+	if p > 100 then p = 100 end
+	local n = math.floor( p / 20 )
+	for i = 1, 5 do
+		if i <= n then
+			self._red_star2[i]:setVisible(true)
+			self._white_star2[i]:setVisible(false)
+		else
+			self._red_star2[i]:setVisible(false)
+			self._white_star2[i]:setVisible(true)		
+		end
+	end
+end
 --p = 1 ~ 100 ?
 function WorkCommit:setPercent( p )
 	if p < 0 then p = 0 end
@@ -183,7 +202,9 @@ function WorkCommit:init()
 			commit:setEnabled(true)
 			uikits.event(commit,function(sender)
 					--提交
-					uikits.pushScene( Score.create{} )
+					if self._arguments.status == 0 then
+						self:commit()
+					end
 				end,'click')			
 		end	
 		if self._arguments.cnt_item_finish and self._arguments.cnt_item and self._arguments.cnt_item_finish > 0 then
@@ -192,6 +213,32 @@ function WorkCommit:init()
 			self:setPercent(0)
 		end
 	end		
+end
+
+function WorkCommit:commit()
+	local loadbox = loadingbox.open( self )
+	local url = commit_url..'?examId='..self._arguments.exam_id..'&tid='..self._arguments.tid
+	local ret = mt.new('GET',url,login.cookie(),
+						function(obj)
+							if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+								if obj.state == 'OK'  then
+									if obj.data then
+										kits.write_cache( cache.get_name(url),obj.data)
+									end
+									--成功提交
+									self._arguments = 10 --标记已经提交
+									uikits.pushScene( Score.create(self._arguments) )
+								else
+									--失败
+								end
+								loadbox:removeFromParent()
+							end
+						end )
+	if not ret then
+		--提交失败
+		kits.log('WorkCommit:commit error : '..url )
+		loadbox:removeFromParent()
+	end
 end
 
 function WorkCommit:release()
