@@ -331,9 +331,15 @@ local function parse_html( str )
 	else
 		s = string.gsub(str,'<.->','') --删除里面的全部< >
 		if s then
+			--形如 A."",B."",去掉
+			local ss = string.match(s,'"(.-)"')
 			t.type = 1
-			t.text = s
-			kits.log('	parse_html : '..s)
+			if ss then
+				t.text = ss
+			else
+				t.text = s
+			end
+			kits.log('	parse_html : '..t.text)
 		else
 			kits.log( '		ERROR parse_html:'..tostring(str) )
 		end
@@ -402,22 +408,29 @@ end
 local function print_drag( e )
 --[[
 	kits.log( 'drag:' )
-	kits.log( '	img = '..tostring(e.img) )
+	kits.log( '	attachment = '..tostring(e.attachment[1]) )
 	kits.log( '	drag_rects:')
 	print_rects( e.drag_rects )
 	kits.log( '	drag_objs:')
 	print_items( e.drag_objs )--]]
 end
 
+local function load_attachment(s,e,info)
+	e.attachment = eattachment or {}
+	for i=1,10 do
+		local res,msg = parse_attachment(s,i,info)
+		if res then
+			e.attachment[#e.attachment+1] = res
+			add_resource_cache( e.resource_cache.urls,res )
+		else
+			return res,msg
+		end	
+	end
+end
+
 --单,多拖拽转换
 local function drag_conv(s,e)
-	local res,msg = parse_attachment(s,1,'drag_conv')
-	if res then
-		e.img = res
-		add_resource_cache( e.resource_cache.urls,res )
-	else
-		return res,msg
-	end
+	load_attachment(s,e,'drag_conv')
 	local t = {}
 	local t2 = {}
 	res,msg = parse_options( s,
@@ -441,20 +454,14 @@ end
 
 local function print_click( e )
 	kits.log( 'click:' )
-	kits.log( '	img = '..tostring(e.img) )
+	kits.log( '	attachment = '..tostring(e.attachment[1]) )
 	kits.log( '	click_rects:')
 	print_rects( e.click_rects )
 end
 
 --单点和多点转换
 local function click_conv(s,e)
-	local res,msg = parse_attachment(s,1,'click_conv')
-	if res then
-		e.img = res
-		add_resource_cache( e.resource_cache.urls,res )
-	else
-		return res,msg
-	end
+	load_attachment(s,e,'click_conv')
 	local t = {}
 	local res,msg = parse_options( s,
 		function(op)
@@ -479,6 +486,7 @@ end
 
 --排序题转换
 local function sort_conv(s,e)
+	load_attachment(s,e,'sort_conv')
 	local t = {}
 	local res,msg = parse_options( s,
 		function(op)
@@ -506,6 +514,7 @@ local function print_link( e )
 end
 --连线题转换
 local function link_conv(s,e)
+	load_attachment(s,e,'link_conv')
 	local t = {}
 	local t2 = {}
 	local res,msg = parse_options( s,
@@ -535,12 +544,14 @@ WorkFlow._type_convs=
 {
 	[1] = {name='判断',
 				conv=function(s,e)
+					load_attachment(s,e,'pd_conv')
 					e.answer = parse_answer( s )
 					return true
 				end
 			},
 	[2] = {name='单选',
 				conv=function(s,e)
+					load_attachment(s,e,'signal_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
 						e.options = #op.options --取得选择题个数
@@ -553,6 +564,7 @@ WorkFlow._type_convs=
 			},
 	[3] = {name='多选',
 				conv=function(s,e)
+					load_attachment(s,e,'multi_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
 						e.options = #op.options --取得选择题个数
@@ -568,6 +580,7 @@ WorkFlow._type_convs=
 			},	
 	[5] = {name='填空',
 				conv=function(s,e)
+					load_attachment(s,e,'edit_conv')
 					local ca = kits.decode_json( s.correct_answer )
 					if ca and ca.answers and type(ca.answers)=='table' then
 						e.options = #ca.answers --多少个空
@@ -924,9 +937,74 @@ local function expand_rect( rc,s )
 	rc.y2 = rc.y2 + s
 end
 
---设置题干
+local function attachment_ui_bg( t )
+	if t and type(t)=='table' and t.attachment then
+		for i,v in pairs(t.attachment) do
+			if v and type(v)=='string' and string.len(v)>4 then
+				local ex = string.lower( string.sub(v,-3) )
+				if ex=='png' or ex=='gif' or ex=='jpg' then
+					print( v )
+					print( cache.get_name(v) )
+					return uikits.image{image=cache.get_name(v),x=t.x,anchorX=t.anchorX}
+				end
+			end
+		end
+	end
+	kits.log('error attachment_ui_bg not found image' )
+end
+
+local function attachment_ui_player( t )
+	if t and type(t)=='table' and t.attachment then
+		for i,v in pairs(t.attachment) do
+			if v and type(v)=='string' and string.len(v)>4 then
+				local ex = string.lower( string.sub(v,-3) )
+				if ex=='mp3' or ex=='wav' then
+					local pbox = uikits.fromJson{file=ui.PLAYBOX}
+					if pbox then
+						pbox:setAnchorPoint(cc.p(0.5,0))
+						pbox:setPosition(cc.p(t.x or 0,t.y or 0))
+						local play_but = uikits.child(pbox,ui.PLAY)
+						local pause_but = uikits.child(pbox,ui.PAUSE)
+						local file = cache.get_name(v)
+						local snd_idx
+						play_but:setVisible(true)
+						pause_but:setVisible(false)
+						uikits.event(play_but,
+							function(sender)
+								snd_idx = uikits.playSound(file)
+						--		play_but:setVisible(false)
+						--		pause_but:setVisible(true)
+							end )
+							--[[ 目前声音不支持监听状态
+						uikits.event(pause_but,
+							function(sender)
+								if snd_idx then
+									play_but:setVisible(true)
+									pause_but:setVisible(false)
+									uikits.pauseSound(snd_idx)							
+								end
+							end ) --]]
+					end
+					return pbox
+				end
+			end
+		end
+	end
+	kits.log('error attachment_ui_player not found sound' )
+end
+
+--设置题干,包括附件
 local function set_topics_image( layout,data,x,y )
+	--每种题型都有可能有附件声音,或者图片(暂时没有处理?)
+	local size = layout:getSize()
+	local player = attachment_ui_player{attachment = data.attachment,x = size.width/2,anchorX=0.5}
+	if player then
+		layout:addChild( player )
+		player:setPosition(cc.p(size.width/2,y+WorkFlow.space))
+		y = y + player:getSize().height
+	end
 	if data.image then
+	--题目图片
 		local img = uikits.image{image=data.image}
 		img:setScaleX(WorkFlow.scale)
 		img:setScaleY(WorkFlow.scale)
@@ -1109,7 +1187,6 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	local orgp = {}
 	local place_rect = nil
 	local sorts = {}
-	
 	local function isin( item )
 		for i,v in pairs(sorts) do
 			if v == item then
@@ -1238,7 +1315,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
 		orgp[v] = cc.p(x,y)
 	end
-	set_topics_image( layout,data,0,result.height + 26 + result.height )
+	set_topics_image( layout,data,0,result.height + 36 + result.height )
 	--恢复答案
 	if data.my_answer then
 		for i = 1,string.len(data.my_answer) do
@@ -1253,57 +1330,17 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	end
 end
 
-local function attachment_ui( t )
-	if t and t.image and type(t.image)=='string' and string.len(t.image)>4 then
-		local ex = string.lower(string.sub(t.image,-3))
-		if ex=='gif' or ex=='png' or ex=='jpg' then
-			return uikits.image{image=t.image,x=t.x,anchorX=t.anchorX}
-		elseif ex == 'mp3' then
-			kits.log('error attachment_ui not support mp3 '..t.image)
-			local pbox = uikits.fromJson{file=ui.PLAYBOX}
-			if pbox then
-				pbox:setAnchorPoint(cc.p(0.5,0))
-				pbox:setPosition(cc.p(t.x or 0,t.y or 0))
-				local play_but = uikits.child(pbox,ui.PLAY)
-				local pause_but = uikits.child(pbox,ui.PAUSE)
-				local file = t.image
-				local snd_idx
-				play_but:setVisible(true)
-				pause_but:setVisible(false)
-				uikits.event(play_but,
-					function(sender)
-						snd_idx = uikits.playSound(file)
-						play_but:setVisible(false)
-						pause_but:setVisible(true)
-					end )
-				uikits.event(pause_but,
-					function(sender)
-						if snd_idx then
-							play_but:setVisible(true)
-							pause_but:setVisible(false)
-							uikits.pauseSound(snd_idx)							
-						end
-					end )
-			end
-			return pbox
-		else
-			kits.log('error attachment_ui '..t.image )
-		end
-	else
-		kits.log( 'error attachment_ui' )
-	end
-end
-
 local function relayout_click( layout,data,op,i,ismulti )
 	local size = layout:getSize()
-	local bg = attachment_ui{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
-	--uikits.image{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
-	local bg_size = bg:getSize()
+	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,anchorX=0.5}
 	local rects = {}
 	local rect_node = {}
-
+	local bg_size = bg:getSize()
+	
 	bg:setScaleX(WorkFlow.scale)
 	bg:setScaleY(WorkFlow.scale)
+	
+	local total_height = bg_size.height
 	layout:addChild( bg )
 	for i,v in pairs(data.click_rects) do
 		local rc = {x1=v.x1,y1=bg_size.height-v.y1,x2=v.x2,y2=bg_size.height-v.y2,c=v.c}
@@ -1351,7 +1388,7 @@ local function relayout_click( layout,data,op,i,ismulti )
 				save_my_answer()
 			end,'click' )
 	end
-	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale )
+	set_topics_image( layout,data,0,bg_size.height*WorkFlow.scale )
 	--载入答案
 	if data.my_answer and type(data.my_answer)=='string' then
 		for i = 1,string.len(data.my_answer) do
@@ -1373,8 +1410,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg =  attachment_ui{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
-	--uikits.image{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
+	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getSize().width/2,anchorX = 0.5}
 	local drags = {}
 	local draging_item
 	
@@ -1382,6 +1418,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local bgsize = bg:getSize()
 	bg:setScaleX(WorkFlow.scale)
 	bg:setScaleY(WorkFlow.scale)
+
 	for k,v in pairs( data.drag_rects ) do
 		bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
 	end
@@ -1602,7 +1639,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 		orgp[v] = cc.p(x,y)
 	end
 
-	set_topics_image( layout,data,0,bg:getSize().height*WorkFlow.scale+y+WorkFlow.space+rc.height)
+	set_topics_image( layout,data,0,bg_size.height*WorkFlow.scale+y+WorkFlow.space+rc.height)
 	--恢复答案
 	if data.my_answer then
 		for i = 1,string.len(data.my_answer) do
