@@ -12,7 +12,7 @@ score.lua 提交结果
 topics.lua 和题相关的缓冲
 
 
-取得作业 (老师端)
+取得卷面 (老师端)
 	http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx
 	参数pid,uid
 		?pid=93ca856727be4c09b8658935e81db8b8&uid=122097
@@ -48,8 +48,24 @@ topics.lua 和题相关的缓冲
 	参数pid,uid
 		isright - 0错
 		
+
+取头像
+seg1= (userId/10000)%100
+seg2= (userId/100)%100
+type =  
+	face1: 1,// 在线头像、回复头像、访客头像 30x30
+     face2: 2,//微博头像 50x50
+     face3: 3,//
+     face4: 4,//
+http://image.lejiaolexue.com/ulogo/seg1/seg2/userId_type.jpg
+
 提交顺序
-	
+1.学生端，取作业.
+http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx?teacherId=12297&examId=00231a8e919e4c6cbfaa601462adf49d
+2.学生提交作业的顺序列表.
+http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx?teacherId=122097&examId=00231a8e919e4c6cbfaa601462adf49d
+
+
 统计
 
 分支合并		

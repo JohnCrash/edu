@@ -4,10 +4,20 @@ require "Opengl"
 require "OpenglConstants"
 require "StudioConstants"
 require "GuiConstants"
+require "AudioEngine" 
 
 local Director = cc.Director:getInstance()
 local defaultFont = "fonts/Marker Felt.ttf"
 local defaultFontSize = 16
+
+local function playSound( file )
+end
+
+local function pauseSound( id )
+end
+
+local function isSoundPlaying( id )
+end
 
 local function init_layout( s,t )
 	local ss = s:getSize()
@@ -680,4 +690,7 @@ return {
 	rect = rect,
 	move = move,
 	scale = get_scale,
+	isSoundPlaying = isSoundPlaying,
+	pauseSound = pauseSound,
+	playSound = playSound,
 }

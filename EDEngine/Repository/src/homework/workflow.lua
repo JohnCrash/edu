@@ -10,6 +10,9 @@ kits.log( "====================" )
 local res_root = 'homework/z21_1/'
 local ui = {
 	FILE = res_root..'z21_1.json',
+	PLAYBOX = 'homework/playbox/playbox.json',
+	PLAY = 'play',
+	PAUSE = 'pause',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	LINK_DOT = res_root..'round_dot.png',
@@ -77,7 +80,8 @@ local function save_my_answer()
 	end
 end
 
-local url_topics_ash = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
+local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
+local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
 local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
 --[[
 item
@@ -183,13 +187,19 @@ function WorkFlow:save_answer()
 					kits.log('error : WorkFlow:save_answer v.item_id = nil' )
 				end
 			end
-			--结束按钮
+			--结束按钮,状态改变
 			if v.state == ui.STATE_UNFINISHED then
 				b = false
 			end				
 		end
 		if isc then
-			topics.write( self._args.pid,self._topics_table )
+			if self._args.exam_id then --作业
+				topics.write( self._args.exam_id,self._topics_table )
+			elseif self._args.pid then --卷面
+				topics.write( self._args.pid,self._topics_table )
+			else
+				kits.log('error : WorkFlow:save_answer exam_id = nil and pid = nil')
+			end
 		end
 		if b then
 			self._next_button:setVisible(false)
@@ -207,10 +217,24 @@ function WorkFlow:init_data( )
 		return
 	end
 	local loadbox = loadingbox.open( self )
-	local url_topics = url_topics_ash..'?pid='..self._args.pid..'&uid'..self._args.uid
+	local url_topics
+	if self._args.exam_id then
+		--取作业
+		url_topics = loadextam_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
+		--取得以前做的答案
+		self._topics_table = topics.read( self._args.exam_id ) or {}
+	elseif self._args.pid then
+		--取卷面
+		url_topics = loadpaper_url..'?pid='..self._args.pid..'&uid='..self._args.uid
+		--取得以前做的答案
+		self._topics_table = topics.read( self._args.pid ) or {}
+	else
+		kits.log('error : WorkFlow:init_data exam_id=nil and pid=nil')
+		return
+	end
 	init_answer_map()
 	this = self 
-	self._topics_table = topics.read( self._args.pid ) or {}
+	
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
@@ -258,6 +282,7 @@ local function parse_options(s,option1_func,option2_func,msg)
 				end
 			end
 		else
+			kits.log( 'error parse_options '..tostring(s.options) )
 			return false,msg.." 'options.options' ?"
 		end
 		if result and type(result) == 'table'  and result.options2 and type(result.options2)=='table' then
@@ -267,9 +292,11 @@ local function parse_options(s,option1_func,option2_func,msg)
 				end
 			end
 		else
+			kits.log( 'error parse_options '..tostring(s.options) )
 			return false,msg.." 'options.options2' ?"
 		end		
 	else
+		kits.log( 'error parse_options '..tostring(s.options) )
 		return false,msg.." 'options' ?"
 	end
 	return true
@@ -293,17 +320,20 @@ end
 --fontSize
 --fontColor
 local function parse_html( str )
-	local s = string.match(str,'<img%s+src="(.-)"') --匹配<img src="
+	local s = string.match(str,'%s+src%s*=%s*"(.-)"') --匹配<img src="
 	local t = {}
 	t.type = 0 --失败
 	if s then
 		t.type = 2
 		t.image = s
+		kits.log('	parse_html : '..s)
+		--kits.log( '	parse_html : '..s..'		'..tostring(str) )
 	else
 		s = string.gsub(str,'<.->','') --删除里面的全部< >
 		if s then
 			t.type = 1
 			t.text = s
+			kits.log('	parse_html : '..s)
 		else
 			kits.log( '		ERROR parse_html:'..tostring(str) )
 		end
@@ -312,12 +342,12 @@ local function parse_html( str )
 end
 
 local function parse_rect( str )
-	local s,n1,n2,n3,n4 = string.match(str,'(%u).*\"(%d+),(%d+),(%d+),(%d+)\"')
+	local s,n1,n2,n3,n4 = string.match(str,'(%u).*\"(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)\"')
 
 	if s and n1 and n2 and n3 and n4 then
 		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}
 	else
-		n1,n2,n3,n4 = string.match(str,'\"(%d+),(%d+),(%d+),(%d+)\"')
+		n1,n2,n3,n4 = string.match(str,'\"(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)\"')
 		if n1 and n2 and n3 and n4 then
 			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
 		else
@@ -592,7 +622,6 @@ function WorkFlow:load_original_data_from_string( str )
 			for i,v in ipairs(ds) do
 				local k = {}
 				k.item_type = v.item_type
-				k.state = ui.STATE_UNFINISHED
 				if v.image then
 					k.isload = true --is downloaded?
 					k.image = v.image
@@ -602,12 +631,17 @@ function WorkFlow:load_original_data_from_string( str )
 					kits.log( k.image )
 				end
 				if self._topics_table and self._topics_table.answers then
+					--从答案表中取答案
 					k.my_answer = self._topics_table.answers[v.item_id]
 				else
 					k.my_answer = v.my_answer
 				end
-				k.state = v.state
-				if k.state == ui.STATE_UNFINISHED then b =false end
+				if k.my_answer then
+					k.state =  ui.STATE_FINISHED
+				else
+					k.state = ui.STATE_UNFINISHED
+					b = false
+				end
 				k.item_id = v.item_id
 				if self._type_convs[k.item_type] and self._type_convs[k.item_type].conv then
 					kits.log( self._type_convs[k.item_type].name )
@@ -815,8 +849,28 @@ local function item_ui( t )
 			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
-			return uikits.image{image=cache.get_name(t.image)}
+			--可能是.mp3
+			--png,jpg,gif
+			if t.image and type(t.image)=='string' and string.len(t.image)>4 then
+				local ex = string.lower( string.sub(t.image,-3) )
+				print('===')
+				print( ex )
+				if ex == 'png' or ex == 'jpg' or ex == 'gif' then
+					print( '	'..t.image )
+					return uikits.image{image=cache.get_name(t.image)}
+				elseif ex == 'mp3' then
+					kits.log('ERROR MP3 '..t.image )
+				else
+					kits.log('error item_ui not support file format :'..t.image)
+				end
+			else
+				kits.log('error item_ui image='..tostring(t.image))	
+			end
+		else
+			kits.log('error item_ui type='..tostring(t.type))
 		end
+	else
+		kits.log('error item_ui t = nil')
 	end
 end
 
@@ -1199,9 +1253,43 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 	end
 end
 
+local function attachment_ui( t )
+	if t and t.image and type(t.image)=='string' and string.len(t.image)>4 then
+		local ex = string.lower(string.sub(t.image,-3))
+		if ex=='gif' or ex=='png' or ex=='jpg' then
+			return uikits.image{image=t.image,x=t.x,anchorX=t.anchorX}
+		elseif ex == 'mp3' then
+			kits.log('error attachment_ui not support mp3 '..t.image)
+			local pbox = uikits.fromJson{file=ui.PLAYBOX}
+			if pbox then
+				pbox:setAnchorPoint(cc.p(0.5,0))
+				pbox:setPosition(cc.p(t.x or 0,t.y or 0))
+				local play_but = uikits.child(pbox,ui.PLAY)
+				local pause_but = uikits.child(pbox,ui.PAUSE)
+				local file = t.image
+				play_but:setVisible(true)
+				pause_but:setVisible(false)
+				uikits.event(play_but,
+					function(sender)
+						
+					end )
+				uikits.event(pause_but,
+					function(sender)
+					end )
+			end
+			return pbox
+		else
+			kits.log('error attachment_ui '..t.image )
+		end
+	else
+		kits.log( 'error attachment_ui' )
+	end
+end
+
 local function relayout_click( layout,data,op,i,ismulti )
 	local size = layout:getSize()
-	local bg = uikits.image{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
+	local bg = attachment_ui{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
+	--uikits.image{image=cache.get_name(data.img),x = size.width/2,anchorX=0.5}
 	local bg_size = bg:getSize()
 	local rects = {}
 	local rect_node = {}
@@ -1277,7 +1365,8 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg = uikits.image{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
+	local bg =  attachment_ui{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
+	--uikits.image{image=cache.get_name(data.img),x=layout:getSize().width/2,anchorX = 0.5}
 	local drags = {}
 	local draging_item
 	
