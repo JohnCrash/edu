@@ -11,12 +11,15 @@ local defaultFont = "fonts/Marker Felt.ttf"
 local defaultFontSize = 16
 
 local function playSound( file )
+	return AudioEngine.playEffect( file )
 end
 
 local function pauseSound( id )
+	AudioEngine.pauseEffect( id )
 end
 
 local function isSoundPlaying( id )
+	--cocos2d-x not support isPlaying?
 end
 
 local function init_layout( s,t )

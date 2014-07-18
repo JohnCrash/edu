@@ -11,8 +11,8 @@ local res_root = 'homework/z21_1/'
 local ui = {
 	FILE = res_root..'z21_1.json',
 	PLAYBOX = 'homework/playbox/playbox.json',
-	PLAY = 'play',
-	PAUSE = 'pause',
+	PLAY = 'pause',
+	PAUSE = 'play',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	LINK_DOT = res_root..'round_dot.png',
@@ -1267,14 +1267,22 @@ local function attachment_ui( t )
 				local play_but = uikits.child(pbox,ui.PLAY)
 				local pause_but = uikits.child(pbox,ui.PAUSE)
 				local file = t.image
+				local snd_idx
 				play_but:setVisible(true)
 				pause_but:setVisible(false)
 				uikits.event(play_but,
 					function(sender)
-						
+						snd_idx = uikits.playSound(file)
+						play_but:setVisible(false)
+						pause_but:setVisible(true)
 					end )
 				uikits.event(pause_but,
 					function(sender)
+						if snd_idx then
+							play_but:setVisible(true)
+							pause_but:setVisible(false)
+							uikits.pauseSound(snd_idx)							
+						end
 					end )
 			end
 			return pbox
