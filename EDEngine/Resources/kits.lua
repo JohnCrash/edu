@@ -273,12 +273,13 @@ end
 local function write_cache( name,buf )
   local filename = cache_dir..name
   local file = io.open(filename,'wb')
-  if file then
+  if file and buf and type(buf)=='string' then
     file:write(buf)
     file:close()
 	return true
   else
      --local file error?
+	 print( 'buf="'..tostring(buf)..'"'..",type="..type(buf) )
      cclog('Can not write cache '..filename)
 	 return false
   end
@@ -296,6 +297,17 @@ local function decode_json( buf )
 		print('decode_json argument #1 is nil')
 	end
 	return nil
+end
+
+--'/Date(1405425300000+0800)/'
+local function unix_date_by_string( str )
+	local t = string.match( str,"(%d+)%+0800" )
+	if t then
+		local d = tonumber( t )
+		if d then
+			return d/1000
+		end
+	end
 end
 
 local function toDiffDateString( d )
@@ -343,6 +355,7 @@ local exports = {
 	write_cache = write_cache,
 	exist_cache = exist_cache,
 	decode_json = decode_json,
+	unix_date_by_string = unix_date_by_string,
 	toDiffDateString = toDiffDateString,
 	log = my_log,
 }

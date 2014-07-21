@@ -46,17 +46,6 @@ local ui = {
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
 
---'/Date(1405425300000+0800)/'
-local function unix_date_by_string( str )
-	local t = string.match( str,"(%d+)%+0800" )
-	if t then
-		local d = tonumber( t )
-		if d then
-			return d/1000
-		end
-	end
-end
-
 function WorkList.create()
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),WorkList)
@@ -118,7 +107,7 @@ function WorkList:add_page_from_cache( idx,last )
 			need_continue = idx < data.total
 			for i,v in pairs(data.esi) do
 				if v.finish_time then
-					local t = unix_date_by_string(v.finish_time)
+					local t = kits.unix_date_by_string(v.finish_time)
 					local dt = os.time() - t
 					kits.log( 'v.finish_time = '..t..' current='..os.time() )
 					if not last then
@@ -416,7 +405,7 @@ function WorkList:add_item( t )
 	if t.finish_time then --结束日期
 		local u = uikits.child( item,ui.END_DATE )
 		u:setString('')
-		t.finish_time_unix = unix_date_by_string( t.finish_time )
+		t.finish_time_unix = kits.unix_date_by_string( t.finish_time )
 		if t.finish_time_unix and os.time() < t.finish_time_unix then
 			local scheduler = u:getScheduler()
 			local end_time = t.finish_time_unix

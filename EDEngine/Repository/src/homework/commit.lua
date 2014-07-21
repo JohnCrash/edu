@@ -15,7 +15,12 @@ local ui = {
 	CAPTION = 'white/lesson_name',
 	END_DATE = 'white/time_over',
 	LIST = 'top_view',
+	NAME = 'name',
+	PHOTO = 'student_logo_1',
+	TIME = 'time_student',
+	NUMBER = 'number_1',
 	ITEM = 'top_view/top_1',
+	TOPICS = 'red_case',
 	WORKFLOW = 'objective_item/start_objective',
 	WORKFLOW_COMPLETE = 'objective_item/completed_objective',
 	WORKFLOW2 = 'subjective_item/start_subjective',
@@ -44,7 +49,7 @@ local commit_sort_url = ''
 --]]
 
 local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
-local commit_list_url = 'http://new.www.lejiaolexue.com' --?
+local commit_list_url = 'http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx'
 local WorkCommit = class("WorkCommit")
 WorkCommit.__index = WorkCommit
 
@@ -118,26 +123,114 @@ function WorkCommit:setPercent( p )
 	end
 end
 
+function WorkCommit:addCommitStudent( id,na,ti )
+	local item
+	if self._item then
+		item = self._item:clone()
+	end
+	if item then
+		self._list = self._list or {}
+		self._list[#self._list+1] = item	
+		item:setVisible( true )
+		local num = uikits.child(item,ui.NUMBER)
+		if num then
+			num:setString( tostring(#self._list) )
+		end
+		local name = uikits.child(item,ui.NAME)
+		if name then
+			name:setString( na )
+		end
+		local commit_time = uikits.child(item,ui.TIME)
+		if commit_time and ti and type(ti)=='string' then
+			local d = os.time()-kits.unix_date_by_string(ti)
+			commit_time:setString(kits.toDiffDateString(d))
+		end
+		local photo = uikits.child(item,ui.PHOTO)
+		if photo then
+			local url = login.get_logo(id)
+			cache.download( url,login.cookie(),
+				function(b)
+					if b then
+						photo:loadTexture( cache.get_name(url) )
+					else
+						kits.log('error : WorkCommit:addCommitStudent download logo')
+					end
+				end)
+		end
+		self._scrollview:addChild( item )
+	end
+end
+
+function WorkCommit:relayoutScroolView()
+	local height = self._item_height*(#self._list) + self._topics_height
+	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
+	local offy = 0
+	local size = self._scrollview:getSize()
+	
+	if height < size.height then
+		offy = size.height - height --顶到顶
+	end
+
+	for i = 1,#self._list do
+		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
+	end
+end
+
+function WorkCommit:init_commit_list_by_table( t )
+	if t and type(t)=='table' then
+		for i,v in pairs(t) do
+			if v and type(v) == 'table' and v.student_id and v.student_name and v.finish_time then
+				self:addCommitStudent( v.student_id,v.student_name,v.finish_time )
+			end
+		end
+		self:relayoutScroolView()
+	end
+end
+
+function WorkCommit:clear_commit_list()
+	if self._list then
+		for i,v in pairs(self._list) do
+			v:removeFromParent()
+		end
+		self._list = {}
+	end
+end
 --提交列表
 function WorkCommit:init_commit_list()
 	if self._args and self._scrollview then
+		self:clear_commit_list()
 		local circle = loadingbox.circle( self._scrollview )
-		local url = commit_list_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
+		local url = commit_list_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
+		local function load_from_cache()
+			local data = cache.get_data(url)
+			if data then
+				local result = json.decode(data)
+				if result then
+					self:init_commit_list_by_table( result )
+				else
+					kits.log("error : WorkCommit:init_commit_lis decode failed")
+				end
+			end
+		end
 		local ret = mt.new('GET',url,login.cookie(),
 							function(obj)
 								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 									if obj.state == 'OK'  then
 										if obj.data then
 											--加载列表
+											kits.write_cache(cache.get_name(url),obj.data)
+											load_from_cache()
 										end
 									else
 										--失败
+									--	load_from_cache()
 									end
-									--circle:removeFromParent()
+									circle:removeFromParent()
 								end
 							end )
 		if not ret then
-			--circle:removeFromParent()
+			load_from_cache()
+			circle:removeFromParent()
 			kits.log('WorkCommit:init_commit_list error : '..url )
 		end	
 	end
@@ -148,6 +241,17 @@ function WorkCommit:init()
 		self._root = uikits.fromJson{file=ui.FILE}
 		self:addChild(self._root)
 		self._scrollview = uikits.child( self._root,ui.LIST )
+		self._item = uikits.child( self._root,ui.ITEM )
+		self._topics = uikits.child( self._scrollview,ui.TOPICS)
+		if self._topics then
+			self._topics_height = self._topics:getSize().height
+		end
+		if self._item then
+			self._item:setVisible(false)
+			local size = self._item:getSize()
+			self._item_width = size.width
+			self._item_height = size.height
+		end
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)

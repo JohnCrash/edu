@@ -83,8 +83,36 @@ local function request_resources( rtable,efunc )
 	return true
 end
 
+local function download( url,cookie,func )
+	local mh,msg = mt.new('GET',url,cookie,
+			function(obj)
+				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+					if obj.state == 'OK'  then
+						if obj.data then
+							kits.write_cache(get_name(url),obj.data)
+							func( true )
+						end
+					else
+						if is_done( url ) then --下载失败尝试使用本地缓冲
+							func( true )
+						else
+							func( false )
+						end
+					end
+				end
+			end )
+	if not mh then
+		if is_done( url ) then
+			func( true )
+		else
+			func( false )
+		end
+	end
+end
+
 return {
 	request_resources = request_resources,
 	get_name = get_name,
 	get_data = get_data,
+	download = download,
 }

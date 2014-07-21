@@ -11,7 +11,19 @@ local function get_uid()
 	return uid_student
 end
 
+local logo_url = 'http://image.lejiaolexue.com/ulogo/'
+
+--返回logo cache文件名
+--如果不存在则先下载
+local function get_logo( uid )
+	local seg1 = math.floor(uid/10000)%100
+	local seg2 = math.floor(uid/100)%100
+	local logo_type = 2 --50x50
+	return logo_url..tostring(seg1)..'/'..tostring(seg2)..'/'..tostring(uid)..'_'..logo_type..'.jpg'
+end
+
 return {
 	cookie = get_cookie,
 	uid = get_uid,
+	get_logo = get_logo,
 }
