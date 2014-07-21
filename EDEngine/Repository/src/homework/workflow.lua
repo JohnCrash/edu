@@ -84,6 +84,7 @@ end
 local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
 local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
 local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
+local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
 --[[
 item
 {
@@ -148,13 +149,43 @@ function WorkFlow:save()
 	end
 end
 
+--从服务器上取答案
+function WorkFlow:get_cloud_topics( v,func )
+	local url = cloud_answer_url..'?examld='..tostring(self._args.exam_id)
+	..'&itemId='..tostring(v.item_id)
+	..'&teacherId='..tostring(self._args.tid)
+	local ret,msg = mt.new('GET',url,login.cookie(),
+					function(obj)
+						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+							if obj.state == 'OK' and obj.data then
+								print("data:")
+								print("==================")
+								print(obj.data)
+								print("==================")
+								kits.log('	cloud answer :'..url..' success!')
+								local answer
+								func( answer )
+							else
+								func()
+								kits.log('	get cloud answer '..url..' faild?')
+							end
+						end
+					end )
+	if not ret then
+		kits.log('	get cloud answer '..url..' faild!')
+		if msg then
+			kits.log( msg )
+		end
+		func()
+	end
+end
+
 function WorkFlow:commit_topics( v )
 	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
 	..'&answer='..tostring(v.my_answer)
 	..'&times='..0
 	..'&tid='..tostring(self._args.tid)
-	kits.log('commit '..url)
 	local ret = mt.new('GET',url,login.cookie(),
 					function(obj)
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
@@ -650,7 +681,7 @@ function WorkFlow:load_original_data_from_string( str )
 				else
 					k.my_answer = v.my_answer
 				end
-				if k.my_answer then
+				if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
 					k.state =  ui.STATE_FINISHED
 				else
 					k.state = ui.STATE_UNFINISHED

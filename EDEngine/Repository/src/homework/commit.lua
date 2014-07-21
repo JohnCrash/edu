@@ -6,7 +6,6 @@ local Subjective = require "homework/subjective"
 local Score = require "homework/score"
 local loadingbox = require "homework/loadingbox"
 local login = require 'login'
-local mt = require "mt"
 local cache = require "cache"
 
 local ui = {
@@ -212,27 +211,15 @@ function WorkCommit:init_commit_list()
 				end
 			end
 		end
-		local ret = mt.new('GET',url,login.cookie(),
-							function(obj)
-								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-									if obj.state == 'OK'  then
-										if obj.data then
-											--加载列表
-											kits.write_cache(cache.get_name(url),obj.data)
-											load_from_cache()
-										end
-									else
-										--失败
-									--	load_from_cache()
-									end
-									circle:removeFromParent()
-								end
-							end )
-		if not ret then
-			load_from_cache()
-			circle:removeFromParent()
-			kits.log('WorkCommit:init_commit_list error : '..url )
-		end	
+		cache.download(url,login.cookie(),
+			function(b)
+				if b then
+					load_from_cache()
+				else
+					kits.log( 'error : WorkCommit:init_commit_list '..url )
+				end
+				circle:removeFromParent()
+			end)
 	end
 end
 
@@ -355,27 +342,16 @@ end
 function WorkCommit:commit()
 	local loadbox = loadingbox.open( self )
 	local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
-	local ret = mt.new('GET',url,login.cookie(),
-						function(obj)
-							if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-								if obj.state == 'OK'  then
-									if obj.data then
-										kits.write_cache( cache.get_name(url),obj.data)
-									end
-									--成功提交
-									self._args.status = 10 --标记已经提交
-									uikits.pushScene( Score.create(self._args) )
-								else
-									--失败
-								end
-								loadbox:removeFromParent()
-							end
-						end )
-	if not ret then
-		--提交失败
-		kits.log('WorkCommit:commit error : '..url )
-		loadbox:removeFromParent()
-	end
+	cache.download(url,login.cookie(),
+		function(b)
+			if b then
+				self._args.status = 10 --标记已经提交
+				uikits.pushScene( Score.create(self._args) )
+			else
+				kits.log('WorkCommit:commit error : '..url )
+			end
+			loadbox:removeFromParent()
+		end)
 end
 
 function WorkCommit:release()

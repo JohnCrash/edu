@@ -2,7 +2,6 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local login = require 'login'
-local mt = require "mt"
 local cache = require "cache"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "homework/loadingbox"
@@ -76,22 +75,10 @@ end
 function WorkList:get_page( i,func )
 	local url = worklist_url..'?p='..i
 	--先尝试下载
-	local ret = mt.new('GET',url,login.cookie(),
-						function(obj)
-							if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-								if obj.state == 'OK' and obj.data then
-									kits.write_cache( cache.get_name(url),obj.data)
-									func( url,i,true )
-								else
-									func( url,i,false )
-								end
-							end
-						end )
-	if not ret then
-		--没有网络
-		kits.log('WorkList:get_page error :'..url )
-	end
-	return ret
+	cache.download(url,login.cookie(),
+		function(b)
+			func( url,i,b )
+		end)
 end
 
 local WEEK = 0--7*24*3600
@@ -194,7 +181,8 @@ function WorkList:load_page( first,last )
 				return
 			end
 			if not ding then --正在下载
-				local ret = self:get_page( idx,
+				ding = true --正常开始下载
+				self:get_page( idx,
 						function(url,i,b)
 							if b then --成功下载完成
 								if self:add_page_from_cache( i,last ) then
@@ -211,17 +199,11 @@ function WorkList:load_page( first,last )
 									quit = true
 								end
 							else --现在中发生错误
-								err = ERR_DATA
+								err = ERR_NOTCONNECT
 								kits.log( 'GET : "'..tostring(url)..'" error!' )
 							end
 							ding = false
 						end )
-				if ret then
-					ding = true --正常开始下载
-				else
-					err = ERR_NOTCONNECT
-					kits.log( 'GET : "'..idx..'" error!' )
-				end
 			end
 		end
 		self._scID = scheduler:scheduleScriptFunc( order_download,0.1,false )
@@ -238,23 +220,14 @@ end
 
 function WorkList:init_data()
 	local loadbox = loadingbox.open( self )
-	--先尝试下载
-	local ret = mt.new('GET',worklist_url,login.cookie(),
-						function(obj)
-							if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-								if obj.state == 'OK' and obj.data then
-									kits.write_cache( cache.get_name(worklist_url),obj.data)
-								end
-								loadbox:removeFromParent()
-								self:init_data_by_cache()
-							end
-						end )
-	if not ret then
-		--加载失败,无网络运行
-		kits.log('Connect faild : '..worklist_url )
-		loadbox:removeFromParent()
-		self:init_data_by_cache()
-	end
+	cache.download( worklist_url,login.cookie(),
+		function(b)
+			if b then
+				self:init_data_by_cache()
+			else
+				kits.log('Connect faild : '..worklist_url )
+			end
+		end)
 end
 
 function WorkList:init()
