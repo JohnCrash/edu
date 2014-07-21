@@ -4,6 +4,7 @@ local login = require "login"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
 local mt = require "mt"
+local json = require "json-c"
 
 kits.log( "Hello World!" )
 kits.log( "====================" )
@@ -140,7 +141,7 @@ function WorkFlow:save()
 				kits.log( 'error : WorkFlow:save self._data['..i..'] = nil')
 			end
 		end
-		local result = json.encode( self.data )
+		local result = json.encode( self.data,2 )
 		if result then
 			kits.write_cache(cache.get_name( self._url_topics ),result)
 		end
@@ -866,10 +867,7 @@ local function item_ui( t )
 			--png,jpg,gif
 			if t.image and type(t.image)=='string' and string.len(t.image)>4 then
 				local ex = string.lower( string.sub(t.image,-3) )
-				print('===')
-				print( ex )
 				if ex == 'png' or ex == 'jpg' or ex == 'gif' then
-					print( '	'..t.image )
 					return uikits.image{image=cache.get_name(t.image)}
 				elseif ex == 'mp3' then
 					kits.log('ERROR MP3 '..t.image )
@@ -943,8 +941,6 @@ local function attachment_ui_bg( t )
 			if v and type(v)=='string' and string.len(v)>4 then
 				local ex = string.lower( string.sub(v,-3) )
 				if ex=='png' or ex=='gif' or ex=='jpg' then
-					print( v )
-					print( cache.get_name(v) )
 					return uikits.image{image=cache.get_name(v),x=t.x,anchorX=t.anchorX}
 				end
 			end
@@ -1157,7 +1153,6 @@ local function relayout_link( layout,data,op,i )
 			local s = string.sub(data.my_answer,i,i)
 			if s and answer_idx[s] then
 				--加入连线
-				print( tostring(i).. answer_idx[s])
 				up = i
 				down = answer_idx[s]
 				add_line()

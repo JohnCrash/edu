@@ -6,8 +6,11 @@
 extern "C" {
 #endif
 
+extern int luaopen_json( lua_State *L );
+
 static luaL_Reg luax_exts[] = {
     {"mt", luaopen_threadcurl},
+	{"json-c",luaopen_json},
     {NULL, NULL}
 };
 

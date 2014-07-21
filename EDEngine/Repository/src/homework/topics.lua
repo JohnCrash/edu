@@ -1,6 +1,6 @@
 ﻿local kits = require 'kits'
 local cache = require 'cache'
-local json = require 'json'
+local json = require 'json-c'
 
 local function read_topics_cache( pid )
 	local result = kits.read_cache( pid )
@@ -17,7 +17,7 @@ local function read_topics_cache( pid )
 end
 
 local function write_topics_cache( pid,t )
-	local result = json.encode( t )
+	local result = json.encode( t,2 )
 	if result then
 		kits.write_cache( pid,result )
 	else

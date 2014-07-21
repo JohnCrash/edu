@@ -2,7 +2,7 @@
 local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
-local json = require "json"
+local json = require "json-c"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local cache_dir = local_dir.."cache/"

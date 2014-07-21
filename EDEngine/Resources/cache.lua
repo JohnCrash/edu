@@ -27,6 +27,7 @@ end
 local function get_data( url )
 	local n = get_name( url )
 	if n then
+		print( n )
 		return kits.read_cache( n )
 	end
 end

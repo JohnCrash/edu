@@ -76,3 +76,5 @@ lua_cocos2dx_manual.cpp
 =======
     if (argc >= 3 && argc <= 6)
 >>>>>>> e1b29a8ef61248ec047b17be921e031d0d637904
+
+
