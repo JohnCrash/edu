@@ -9,6 +9,7 @@ require "AudioEngine"
 local Director = cc.Director:getInstance()
 local defaultFont = "fonts/Marker Felt.ttf"
 local defaultFontSize = 16
+local log_caller
 
 local function playSound( file )
 	return AudioEngine.playEffect( file )
@@ -419,7 +420,22 @@ local function fromJson( t )
 			s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file)
 		end
 	end
+	if not s then
+		kits.log('uikits.fromJson return nil')
+		log_caller()
+	end
 	return s
+end
+
+local function log_caller()
+	local caller = debug.getinfo(3,'nSl')
+	local func = debug.getinfo(2,'n')
+	if caller and func then
+		kits.log('	call from '..caller.source..':'..caller.currentline )
+		kits.log('		function:'..func.name )
+	else
+		kits.log("ERROR: log_caller debug.getinfo return nil.")
+	end
 end
 
 --root is ui.Widget
@@ -428,29 +444,37 @@ local function child( root,path )
 	local c={}
 	local i = 1
 	local j
-	while true do
-		j = string.find(path,'/',i)
-		if j then
-			c[#c+1] = string.sub(path,i,j-1)
+	if path and type(path)=='string' and string.len(path)>0 then
+		while true do
+			j = string.find(path,'/',i)
+			if j then
+				c[#c+1] = string.sub(path,i,j-1)
+			else
+				c[#c+1] = string.sub(path,i)
+				break
+			end
+			i = j + 1
+		end
+		local w = root
+		for i,v in ipairs(c) do
+			if w then
+				local wt
+				wt = w:getChildByName( v )
+				if not wt then wt = w:getChildByTag( v ) end
+				w = wt
+			end
+		end
+		if w == root then
+			--打印调用者信息
+			kits.log('ERROR: uikits.child return nil')
+			log_caller()
 		else
-			c[#c+1] = string.sub(path,i)
-			break
+			return w
 		end
-		i = j + 1
-	end
-	local w = root
-	for i,v in ipairs(c) do
-		if w then
-			local wt
-			wt = w:getChildByName( v )
-			if not wt then wt = w:getChildByTag( v ) end
-			w = wt
-		end
-	end
-	if w == root then
-		return nil
 	else
-		return w
+			--打印调用者信息
+			kits.log('ERROR: uikits.child return nil')
+			log_caller()
 	end
 end
 
@@ -696,4 +720,5 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	log_caller = log_caller,
 }

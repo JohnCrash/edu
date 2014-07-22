@@ -1,4 +1,6 @@
-﻿local uikits = require "uikits"
+﻿local kits = require "kits"
+local uikits = require "uikits"
+local json = require "json-c"
 
 local ui = {
 	FILE = 'homework/z22_1/z22_1.json',
@@ -9,6 +11,21 @@ local ui = {
 	ITEM_UNFINISHED = 'state_future',
 	NEXT_BUTTON = 'milk_write/next_problem', 
 	FINISH_BUTTON = 'milk_write/finish_5',
+	TEACHER_VIEW = 'teacher_view',
+	TOPICS = 'teacher_view/homework_text',
+	RECORD_BUTTON = 'white_3/recording',
+	CAM_BUTTON = 'white_3/photograph',
+	PHOTO_BUTTON = 'white_3/photo',
+	
+	AUDIO_VIEW = 'chat_view',
+	AUDIO_BUTTON = 'chat',
+	AUDIO_TIME = 'chat_time',
+	AUDIO_DELETE_BUTTON = 'delete',
+	
+	PICTURE_VIEW = 'picture_view',
+	PICTURE_PIC = 'picture',
+	PICTURE_DELETE_BUTTON = 'delete',
+	
 	ITEM_NUM = 'number',
 	STATE_CURRENT = 1,
 	STATE_FINISHED = 2,
@@ -78,7 +95,7 @@ function Subjective:set_current( i )
 		if ps ~= i then
 			self._pageview:scrollToPage(i-1)
 		end
-		self:set_anwser_field(i)
+		--self:set_anwser_field(i)
 	end
 end
 
@@ -94,13 +111,41 @@ function Subjective:add_item( t )
 		local index = #self._list
 		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 		--add page
-		local layout = uikits.scrollview{bgcolor=cc.c3b(255,255,255)}
-		--layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
+		local layout = self._contentview:clone()
+
+		layout:setVisible(true)
+		local topics = uikits.child(layout,ui.TOPICS)
+		topics:setString( t.topics )
+		
+		local audio_view = uikits.child(layout,ui.AUDIO_VIEW)
+		audio_view:setVisible(false)
+		
+		local picture_view = uikits.child(layout,ui.PICTURE_VIEW)
+		picture_view:setVisible(false)
+		
 		self._pageview:addPage( layout )
-		--layout:setTouchEnabled(false)
-		--self:set_image( #self._list )
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
+	end
+end
+
+function Subjective:relayout()
+	if self._scrollview and #self._list > 0 then
+		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
+		local b = true
+		for i,v in ipairs(self._list) do
+			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
+			if v.state == ui.STATE_UNFINISHED then
+				b = false
+			end
+		end
+		if b then
+			self._next_button:setVisible(false)
+			self._finish_button:setVisible(true)
+		else
+			self._next_button:setVisible(true)
+			self._finish_button:setVisible(false)		
+		end		
 	end
 end
 
@@ -114,6 +159,30 @@ function Subjective:save()
 end
 
 function Subjective:init()
+	self:init_data()
+	self:init_gui()
+end
+
+function Subjective:init_data()
+	if self._args and self._args.pid then
+	else
+		local res = kits.read_cache('sujective.json')
+		if res then
+			print( res )
+			local t = json.decode(res)
+			if t and type(t)=='table' then
+				print( 'decode ok' )
+				for i,v in pairs(t) do
+					print( v.topics )
+				end
+				self._data = t
+			end
+		end
+		kits.log('载入模拟数据..')
+	end
+end
+
+function Subjective:init_gui()
 	if not self._root then
 		self._list = {}
 		self._root = uikits.fromJson{file=ui.FILE}
@@ -127,10 +196,29 @@ function Subjective:init()
 		self._scrollview = uikits.child(self._root,ui.LIST)
 		self._contentview = uikits.child(self._root,ui.PAGE_VIEW)
 		self._contentview_size = self._contentview:getSize()
+		self._teacher_view = uikits.child(self._contentview,ui.TEACHER_VIEW)
+		self._teacher_view:setEnabled(false) --有点印象翻页,关闭它
+		
+		self._record_but = uikits.child(self._contentview,ui.RECORD_BUTTON)
+		self._cam_but = uikits.child(self._contentview,ui.CAM_BUTTON)
+		self._photo_but = uikits.child(self._contentview,ui.PHOT_BUTTON)
+		uikits.event( self._record_but,
+			function(sender)
+				print('record audio')
+			end)
+		uikits.event( self._cam_but,
+			function(sender)
+				print('open camer')
+			end)
+		uikits.event( self._photo_but,
+			function(sender)
+				print('open photo directory' )
+			end)
+			
 		local x_,y_ = self._contentview:getPosition()
 		local anp = self._contentview:getAnchorPoint()
 		self._pageview = uikits.pageview{
-			bgcolor=cc.c3b(128,128,128),
+			bgcolor=self._root:getBackGroundColor(),
 			x = x_,
 			y = y_,
 			anchorX = anp.x,
@@ -172,7 +260,15 @@ function Subjective:init()
 						uikits.popScene()
 					end,'click')		
 		local x
-		x,self._item_y = self._item_current:getPosition()				
+		x,self._item_y = self._item_current:getPosition()			
+		---装入数据
+		if self._data then
+			for i,v in pairs(self._data) do
+				self:add_item( v )
+			end
+			self:set_current(1)
+			self:relayout()
+		end
 	end
 end
 
