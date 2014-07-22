@@ -153,6 +153,7 @@ namespace kits
 			case GET:
 				break;
 			case POST:
+				curl_easy_setopt(curl,CURLOPT_POSTFIELDS,pct->post_form.c_str());
 				break;
 			default:;
 			}

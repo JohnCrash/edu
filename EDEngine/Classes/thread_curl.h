@@ -33,6 +33,7 @@ struct curl_t
 	std::string url;
 	std::string cookie;
 	std::string err;
+	std::string post_form;
 	int errcode;
 	float progress;// 0-1
 	void (* progressFunc)(curl_t *t);
@@ -49,7 +50,7 @@ struct curl_t
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
-		err(),errcode(0),progress(0),
+		err(),post_form(),errcode(0),progress(0),
 		progressFunc(nullptr),pthread(nullptr),
 		size(0),data(nullptr),ref(0),user_data(nullptr),
 		refcount(0),bfastEnd(false),this_ref(0),usize(0),

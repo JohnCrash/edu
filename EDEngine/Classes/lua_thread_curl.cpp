@@ -87,7 +87,9 @@ static int do_curl(lua_State *L)
 			if( strcmp("GET",method)==0 )
 				m = kits::GET;
 			else if( strcmp("POST",method)==0 )
+			{
 				m = kits::POST;
+			}
 			else
 				m = kits::GET;
 			std::string cookie;
@@ -96,6 +98,13 @@ static int do_curl(lua_State *L)
 			
 			kits::curl_t *pct = new kits::curl_t(m,url,cookie);
 			pct->retain();
+			if( m == kits::POST )
+			{ //post form
+				if( lua_isstring(L,5) )
+				{
+					pct->post_form = lua_tostring(L,5);
+				}
+			}
 			pct->ref = LUA_REFNIL;
 			if( lua_isfunction(L,4) )
 			{

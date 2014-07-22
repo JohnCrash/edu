@@ -150,18 +150,17 @@ function WorkFlow:save()
 end
 
 --从服务器上取答案
+--examId=
+--examld=
 function WorkFlow:get_cloud_topics( v,func )
-	local url = cloud_answer_url..'?examld='..tostring(self._args.exam_id)
+	local form = 'examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
 	..'&teacherId='..tostring(self._args.tid)
-	local ret,msg = mt.new('GET',url,login.cookie(),
+	local url = cloud_answer_url..'?'..form
+	local ret,msg = mt.new('POST',url,login.cookie(),
 					function(obj)
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
-								print("data:")
-								print("==================")
-								print(obj.data)
-								print("==================")
 								kits.log('	cloud answer :'..url..' success!')
 								local answer
 								func( answer )
@@ -170,7 +169,7 @@ function WorkFlow:get_cloud_topics( v,func )
 								kits.log('	get cloud answer '..url..' faild?')
 							end
 						end
-					end )
+					end,form )
 	if not ret then
 		kits.log('	get cloud answer '..url..' faild!')
 		if msg then
@@ -406,8 +405,6 @@ local function parse_answer(s)
 		else
 			kits.log('		ERROR parse_answer: '..tostring(s) )
 		end
-	else
-		kits.log('		ERROR parse_answer: '..tostring(s) )
 	end
 end
 
@@ -684,6 +681,7 @@ function WorkFlow:load_original_data_from_string( str )
 				if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
 					k.state =  ui.STATE_FINISHED
 				else
+					self:get_cloud_topics(v,function()end)
 					k.state = ui.STATE_UNFINISHED
 					b = false
 				end
