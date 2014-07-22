@@ -42,6 +42,19 @@ end
 --请求资源列表rtable,一个url列表
 --请求如果获得了全部资源,将调用函数efunc
 --该函数立刻返回,任务交给后台线程下载
+--[[
+	rtable = {
+		urls = 
+		{
+			[1] = {url,cookie,done},
+			[2] = {url,cookie,done},
+			...
+			--url,cookie 链接地址,cookie
+			--done 回调，如果给定链接下载成功通知，并传给数据.不缓存数据
+		}
+		ui --延时调用
+	}
+--]]
 local function request_resources( rtable,efunc )
 	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
 		efunc and type(efunc)=='function' then
@@ -60,7 +73,11 @@ local function request_resources( rtable,efunc )
 							function(obj)
 								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED' then
 									if obj.state =='OK' and obj.data then
-										kits.write_cache( get_name(v.url),obj.data )
+										if v.done and type(v.done)=='function' then
+											v.done( obj.data )
+										else
+											kits.write_cache( get_name(v.url),obj.data )
+										end
 										efunc( rtable,i,true )
 									else
 										--下载失败

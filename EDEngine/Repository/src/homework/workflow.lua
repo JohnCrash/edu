@@ -457,6 +457,44 @@ local function load_attachment(s,e,info)
 	end
 end
 
+function WorkFlow:load_cloud_answer( e )
+	if e and type(e)=='table' then
+		if e.my_answer and type(e.my_answer)=='string' and string.len(e.my_answer)>0 then
+			--已经有答案了
+			return
+		else
+			--cloud
+			--向资源请求表加入答案链接，和处理程序。
+			local form = 'examId='..tostring(self._args.exam_id)
+				..'&itemId='..tostring(e.item_id)
+				..'&teacherId='..tostring(self._args.tid)
+			local url = cloud_answer_url..'?'..form
+			local n = #e.resource_cache.urls
+			e.resource_cache.urls[n+1] = 
+			{
+				url = url,
+				cookie = login.cookie(),
+				done = function(data) --处理下载的答案
+					if data and type(data)=='string' then
+						local result = json.decode(data)
+						if result and type(result)=='table' and result.detail and 
+							type(result.detail)=='table' and  result.detail.answer  and 
+							type(result.detail.answer)=='string' then
+							local t = json.decode(result.detail.answer)
+							if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
+								kits.log('	CLOUD ANSWER:'..result.detail.answer )
+								if #t.answers > 0 and t.answers[1].value then
+									e.my_answer = t.answers[1].value
+								end
+							end
+						end
+					end
+				end
+			}
+		end
+	end
+end
+
 --单,多拖拽转换
 local function drag_conv(s,e)
 	load_attachment(s,e,'drag_conv')
@@ -475,7 +513,7 @@ local function drag_conv(s,e)
 	e.drag_rects = t
 	e.drag_objs = t2
 	e.answer = parse_answer( s )
-	
+
 	print_drag( e ) --for debug
 	
 	return res,msg
@@ -681,7 +719,6 @@ function WorkFlow:load_original_data_from_string( str )
 				if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
 					k.state =  ui.STATE_FINISHED
 				else
-					self:get_cloud_topics(v,function()end)
 					k.state = ui.STATE_UNFINISHED
 					b = false
 				end
@@ -692,6 +729,7 @@ function WorkFlow:load_original_data_from_string( str )
 					k.resource_cache.urls = {} --资源缓冲表,
 					local b,msg = self._type_convs[k.item_type].conv( v,k )
 					if b then
+						self:load_cloud_answer( k ) --如果没有本地答案，尝试从网上获取
 						res[#res+1] = k
 					else
 						kits.log('转换问题 "'..self._type_convs[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
@@ -939,7 +977,10 @@ function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other,pageview )
 						end
 					end
 				end )
-		if not r then kits.log( msg ) end
+		if not r then 
+			--加载失败
+			kits.log( msg ) 
+		end
 	end
 end
 
@@ -1663,7 +1704,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 		orgp[v] = cc.p(x,y)
 	end
 
-	set_topics_image( layout,data,0,bg_size.height*WorkFlow.scale+y+WorkFlow.space+rc.height)
+	set_topics_image( layout,data,0,bgsize.height*WorkFlow.scale+y+WorkFlow.space+rc.height)
 	--恢复答案
 	if data.my_answer then
 		for i = 1,string.len(data.my_answer) do

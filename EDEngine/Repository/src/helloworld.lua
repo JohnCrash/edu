@@ -38,7 +38,6 @@ local function init_test_resource()
   pfu:addSearchPath(local_dir)
 end
 
-
 init_test_resource()
 --require "src/controller"
 

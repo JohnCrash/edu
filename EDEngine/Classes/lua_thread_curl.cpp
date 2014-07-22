@@ -37,7 +37,8 @@ static void lua_mainThread_progressFunc( void *ptr )
 				{
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->ref);
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->this_ref);
-					lua_call(L,1,0);
+					pLuaStack->executeFunction(1);
+					//lua_call(L,1,0);
 					if( ptc->state == kits::OK ||  ptc->state == kits::FAILED ||
 						ptc->state == kits::CANCEL )
 					{//进度函数将不再被调用,释放引用
