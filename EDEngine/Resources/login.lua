@@ -22,6 +22,10 @@ local function get_name()
 end
 local logo_url = 'http://image.lejiaolexue.com/ulogo/'
 
+local function set_selector(idx)
+	selector = idx
+	print('登陆用户:'..tostring(get_name()))
+end
 --返回logo cache文件名
 --如果不存在则先下载
 local function get_logo( uid )
@@ -36,4 +40,6 @@ return {
 	uid = get_uid,
 	get_logo = get_logo,
 	get_name = get_name,
+	set_selector = set_selector,
+	test_login = test_login,
 }

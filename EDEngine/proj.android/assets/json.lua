@@ -272,6 +272,12 @@ function decode_scanObject(s,startPos)
   until false	-- infinite loop while key-value pairs are found
 end
 
+--特殊转义表
+function canv_string(s)
+	s = string.gsub(s,'\\/','/')
+	s = string.gsub(s,'\\u(%x%x)(%x%x)',function(s1,s2) return '\\'..s1..'\\'..s2 end )
+	return s
+end
 --- Scans a JSON string from the opening inverted comma or single quote to the
 -- end of the string.
 -- Returns the string extracted as a Lua string,
@@ -303,9 +309,18 @@ function decode_scanString(s,startPos)
     endPos = endPos + 1
     base.assert(endPos <= stringLen+1, "String decoding failed: unterminated string at position " .. endPos)
   until bEnded
+  
   local stringValue = 'return ' .. string.sub(s, startPos, endPos-1)
   local stringEval = base.loadstring(stringValue)
-  base.assert(stringEval, 'Failed to load string [ ' .. stringValue .. '] in JSON4Lua.decode_scanString at position ' .. startPos .. ' : ' .. endPos)
+  if not stringEval then
+		--lua 不能转义字符\/,将\/简单的替换成/
+		--转义字符\\u000a
+		local ss = string.sub(s,startPos,endPos-1)
+		ss = canv_string(ss)
+		stringValue = 'return '..ss
+		stringEval = base.loadstring(stringValue)
+		base.assert(stringEval, 'Failed to load string [ ' .. stringValue .. '] in JSON4Lua.decode_scanString at position ' .. startPos .. ' : ' .. endPos)
+  end
   return stringEval(), endPos  
 end
 

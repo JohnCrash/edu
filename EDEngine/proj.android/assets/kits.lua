@@ -1,10 +1,11 @@
-local lfs = require "lfs"
+﻿local lfs = require "lfs"
 local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
-local json = require "json"
+local json = require "json-c"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local cache_dir = local_dir.."cache/"
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
@@ -163,6 +164,11 @@ local function read_local_file( name )
   local file = local_dir..name
   if not local_exists(file) then return false end
   local alls
+  
+  file = io.open(file,"rb")
+  alls = file:read("*a")
+  file:close()
+  --[[
   for line in io.lines(file) do
     if not alls then
       alls = line
@@ -170,6 +176,7 @@ local function read_local_file( name )
       alls = alls..line
     end
   end
+  --]]
   return alls
 end
 
@@ -238,6 +245,96 @@ local function download_file(file)
   end
 end
 
+local function exist_cache( name )
+	local filename = cache_dir..name
+	return local_exists( filename )
+end
+
+local function read_cache( name )
+  local file = cache_dir..name
+  if not local_exists(file) then return false end
+  local alls
+  
+  file = io.open(file,"rb")
+  alls = file:read("*a")
+  file:close()
+  --[[
+  for line in io.lines(file) do
+    if not alls then
+      alls = line
+    else
+      alls = alls..line
+    end
+  end
+  --]]
+  return alls
+end
+
+local function write_cache( name,buf )
+  local filename = cache_dir..name
+  local file = io.open(filename,'wb')
+  if file and buf and type(buf)=='string' then
+    file:write(buf)
+    file:close()
+	return true
+  else
+     --local file error?
+	 print( 'buf="'..tostring(buf)..'"'..",type="..type(buf) )
+     cclog('Can not write cache '..filename)
+	 return false
+  end
+end
+
+local function decode_json( buf )
+	if buf then
+		local b,re = pcall( json.decode,buf )
+		if b then
+			return re
+		else
+			print('JSON.DECODE ERROR: '..re)
+		end
+	else
+		print('decode_json argument #1 is nil')
+	end
+	return nil
+end
+
+--'/Date(1405425300000+0800)/'
+local function unix_date_by_string( str )
+	local t = string.match( str,"(%d+)%+0800" )
+	if t then
+		local d = tonumber( t )
+		if d then
+			return d/1000
+		end
+	end
+end
+
+local function toDiffDateString( d )
+	if d then
+		local day = math.floor( d /(3600*24) )
+		local hours = math.floor( (d - day*3600*24)/3600 )
+		local mins = math.floor( (d - day*3600*24 - hours*3600)/60 )
+		local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
+		local result = ''
+		if day > 0 then
+			result = result..day..'天'
+		end
+		if hours > 0 or day > 0 then
+			result = result..hours..'小时'
+		end
+		if mins > 0 or hours > 0 or day > 0 then
+			result = result..mins..'分'
+		end
+		result = result..sec..'秒'
+		return result
+	end
+end
+
+local function my_log( a )
+	print( tostring(a) )
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -253,7 +350,14 @@ local exports = {
 	write_local_file = write_local_file,
 	http_post = http_post,
 	http_get = http_get,
-	encode_url = encode_url
+	encode_url = encode_url,
+	read_cache = read_cache,
+	write_cache = write_cache,
+	exist_cache = exist_cache,
+	decode_json = decode_json,
+	unix_date_by_string = unix_date_by_string,
+	toDiffDateString = toDiffDateString,
+	log = my_log,
 }
 
 return exports

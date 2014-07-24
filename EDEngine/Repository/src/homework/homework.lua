@@ -4,6 +4,7 @@ local WorkList = require "homework/worklist"
 local WorkLoading = require "homework/workloading"
 local WorkCommit = require "homework/commit"
 local WorkFlow = require "homework/workflow"
+local login = require "login"
 
 --str = "<img src=\"http://www.lexuelejiao.com/92342.png\" \\>"
 --print("============================")
@@ -67,6 +68,19 @@ function HomeWork:init()
 	--simple ui
 
 	--uikits.pushScene( WorkLoading )
+	--simple login ui
+	local yy = 1
+	for i,v in pairs(login.test_login) do
+		self:addChild( uikits.checkbox{caption=v.name,width=32,height=48,fontSize=32,
+			y = yy,eventSelect=function(sender,b)
+				if b then
+					login.set_selector( i )
+				end
+			end})
+		self:addChild( uikits.text{caption=v.name,width=240,height=48,fontSize=32,y = yy,font='fonts/simsun.ttc',x=32,
+			eventClick=function(sender)end} )
+		yy = yy + 48
+	end
 	local wk = {
 		{text = '装载',scene=WorkLoading},
 		{text = '作业列表',scene=WorkList},
@@ -75,10 +89,11 @@ function HomeWork:init()
 	}
 	for i,v in pairs(wk) do
 		self:addChild( uikits.button{caption=v.text,width = 240,height=48,fontSize=32,
-					y = 48*i,
+					y = yy,
 					eventClick=function(sender)
 						uikits.pushScene( v.scene.create(v.arg) )
 					end} )
+		yy = yy + 48
 	end
 end
 

@@ -161,7 +161,7 @@ function WorkCommit:addCommitStudent( id,na,ti )
 end
 
 function WorkCommit:relayoutScroolView()
-	local height = self._item_height*(#self._list) + self._topics_height
+	local height = self._item_height*(#self._list)
 	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
 	local offy = 0
 	local size = self._scrollview:getSize()
@@ -229,10 +229,7 @@ function WorkCommit:init()
 		self:addChild(self._root)
 		self._scrollview = uikits.child( self._root,ui.LIST )
 		self._item = uikits.child( self._root,ui.ITEM )
-		self._topics = uikits.child( self._scrollview,ui.TOPICS)
-		if self._topics then
-			self._topics_height = self._topics:getSize().height
-		end
+		self._topics = uikits.child( self._root,ui.TOPICS)
 		if self._item then
 			self._item:setVisible(false)
 			local size = self._item:getSize()

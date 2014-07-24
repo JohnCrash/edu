@@ -183,8 +183,9 @@ function WorkFlow:commit_topics( v )
 	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
 	..'&answer='..tostring(v.my_answer)
-	..'&times='..0
+	..'&times='..math.floor(os.time()-self._topics_begin_time) --做题题目计时器
 	..'&tid='..tostring(self._args.tid)
+	self._topics_begin_time = os.time() --重新计时
 	local ret = mt.new('GET',url,login.cookie(),
 					function(obj)
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
@@ -1976,7 +1977,7 @@ function WorkFlow:set_anwser_field( i )
 				end
 			end
 			local layout = self._pageview:getPage( i-1 )
-
+			self._topics_begin_time = os.time()--开始计时
 			self._topics[t].init(self,self._answer_field,layout,self._data[i],self._data[i].options,i)
 			--如果内容超出滚动区
 			local size = layout:getSize()

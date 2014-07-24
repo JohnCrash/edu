@@ -18,9 +18,13 @@ p:1
 local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
-local HISTORY = 1
+
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',
+	STATISTICS_FILE = 'homework/statistics_1/statistics_1.json',
+	MORE = 'homework/more_1/more_1.json',
+	MORE_VIEW = 'more_view',
+	LESSON = 'lesson',
 	BACK = 'white/back',
 	LIST = 'newview',
 	ITEM = 'newview/subject_1',
@@ -32,12 +36,23 @@ local ui = {
 	ITEM_COUNT = 'questions_number1',
 	ITEM_COUNT2 = 'questions_number2', --主观题数量
 	END_DATE = 'Label_34',
-	NEW_BUTTON = 'white/new2',
+	SCORE = 'Label_37',
+	NEW_BUTTON = 'white/new1',
+	NEW_HOT_BUTTON = 'white/new2',
 	HISTORY_BUTTON = 'white/history1',
+	HISTORY_HOT_BUTTON = 'white/history2',
 	STATIST_BUTTON = 'white/statistical1',
+	STATIST_HOT_BUTTON = 'white/statistical2',
+	SETTING_BUTTON = 'white/more1',
+	SETTING_HOT_BUTTON = 'white/more2',
 	ISCOMMIT = 'hassubmitted',
 	NOCOMMIT = 'not_submitted',
 	TIMELABEL = 'time_text',
+	COMMENT = 'comment',
+	HISTORY = 1,
+	NEW = 2,
+	STATIST = 3,
+	SETTING = 4,
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -211,6 +226,10 @@ function WorkList:load_page( first,last )
 end
 
 function WorkList:init_new_list()
+	self:SwapButton( ui.NEW )
+	self._scrollview:setVisible(true)
+	self._statistics:setVisible(false)
+	self._setting:setVisible(false)
 	if not self._scID and not self._busy then
 		self._mode = nil
 		self:clear_all_item()
@@ -246,8 +265,63 @@ function WorkList:init_data_list()
 	self:relayout()
 end
 
+function WorkList:init_statistics()
+	self:SwapButton( ui.STATIST )
+	self._scrollview:setVisible(false)
+	self._statistics:setVisible(true)
+	self._setting:setVisible(false)
+end
+
+function WorkList:init_setting()
+	self:SwapButton( ui.SETTING )
+	self._scrollview:setVisible(false)
+	self._statistics:setVisible(false)	
+	self._setting:setVisible(true)
+end
+
+function WorkList:SwapButton(s)
+	if s == ui.NEW then
+		self._new_button:setVisible(false)
+		self._new_button2:setVisible(true)
+	else
+		self._new_button:setVisible(true)
+		self._new_button2:setVisible(false)	
+	end
+	if s == ui.HISTORY then
+		self._history_button:setVisible(false)
+		self._history_button2:setVisible(true)	
+	else
+		self._history_button:setVisible(true)
+		self._history_button2:setVisible(false)		
+	end
+	if s == ui.STATIST then
+		self._statist_button:setVisible(false)
+		self._statist_button2:setVisible(true)	
+	else
+		self._statist_button:setVisible(true)
+		self._statist_button2:setVisible(false)	
+	end
+	if s == ui.SETTING then
+		self._setting_button:setVisible(false)
+		self._setting_button2:setVisible(true)		
+	else
+		self._setting_button:setVisible(true)
+		self._setting_button2:setVisible(false)		
+	end
+end
+
 function WorkList:init_gui()
 	self._root = uikits.fromJson{file=ui.FILE}
+	
+	self._statistics_root = uikits.fromJson{file=ui.STATISTICS_FILE}
+	self._statistics = uikits.child(self._statistics_root,ui.LESSON):clone()
+	
+	self._setting_root = uikits.fromJson{file=ui.MORE}
+	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
+	
+	self._root:addChild(self._statistics)
+	self._root:addChild(self._setting)
+	
 	self:addChild(self._root)
 	self._scrollview = uikits.child(self._root,ui.LIST)
 	self._item = uikits.child(self._root,ui.ITEM)
@@ -263,21 +337,54 @@ function WorkList:init_gui()
 	self._item_width = size.width
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
-	uikits.event( uikits.child(self._root,ui.NEW_BUTTON),
+	
+	self._new_button = uikits.child(self._root,ui.NEW_BUTTON)
+	uikits.event( self._new_button,
 		function(sender)
 			self:init_new_list()
 		end)
-	uikits.event( uikits.child(self._root,ui.HISTORY_BUTTON),
+	self._new_button2 = uikits.child(self._root,ui.NEW_HOT_BUTTON)
+	uikits.event( self._new_button2,
+		function(sender)
+			self:init_new_list()
+		end)
+	
+	self._history_button = uikits.child(self._root,ui.HISTORY_BUTTON)
+	uikits.event( self._history_button,
 		function(sender)
 			self:init_history_list()
 		end)
-	uikits.event( uikits.child(self._root,ui.STATIST_BUTTON),
+	self._history_button2 = uikits.child(self._root,ui.HISTORY_HOT_BUTTON)
+	uikits.event( self._history_button2,
 		function(sender)
+			self:init_history_list()
 		end)
-
+		
+	self._statist_button = uikits.child(self._root,ui.STATIST_BUTTON)
+	uikits.event( self._statist_button,
+		function(sender)
+			self:init_statistics()
+		end)
+	self._statist_button2 = uikits.child(self._root,ui.STATIST_HOT_BUTTON)
+	uikits.event( self._statist_button2,
+		function(sender)
+			self:init_statistics()
+		end)
+		
+	self._setting_button = uikits.child(self._root,ui.SETTING_BUTTON)
+	uikits.event( self._setting_button,
+		function(sender)
+			self:init_setting()
+		end)
+	self._setting_button2 = uikits.child(self._root,ui.SETTING_HOT_BUTTON)
+	uikits.event( self._setting_button2,
+		function(sender)
+			self:init_setting()
+		end)
+	
 	uikits.event( self._scrollview,
 		function(sender,t)
-			if self._mode == HISTORY then
+			if self._mode == ui.HISTORY then
 				if t == ccui.ScrollviewEventType.scrollToTop then
 					self:history_scroll( t )
 				elseif t == ccui.ScrollviewEventType.scrollToBottom then
@@ -289,8 +396,11 @@ function WorkList:init_gui()
 end
 
 function WorkList:init_history_list()
+	self:SwapButton( ui.HISTORY )
+	self._scrollview:setVisible(true)
+	self._statistics:setVisible(false)
 	if not self._scID and not self._busy then
-		self._mode = HISTORY
+		self._mode = ui.HISTORY
 		self:clear_all_item()
 		self:load_page( 1,5 )
 	end
@@ -374,6 +484,16 @@ function WorkList:add_item( t )
 				noc:setVisible( true )
 			end
 		end
+	end
+	--分数
+	if t.real_score then
+		uikits.child(item,ui.SCORE):setString( tostring(t.real_score) )
+	end
+	--已经批改标记
+	if false then
+		uikits.child(item,ui.COMMENT):setVisible(true)
+	else
+		uikits.child(item,ui.COMMENT):setVisible(false)
 	end
 	if t.finish_time then --结束日期
 		local u = uikits.child( item,ui.END_DATE )

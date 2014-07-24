@@ -195,15 +195,13 @@ local function check_all_md5()
 				if v.download and v.md5 then
 					local file = kits.read_local_file(v.download)
 					if file then
-						print( v.download )
-						print( " md5 source:"..v.md5 )
-						if md5.sumhexa then
-							print( "	md5.sum:"..md5.sumhexa(file))
+						if md5.sumhexa(file) == v.md5 then
+							print( v.download.."	( passed )" )
 						else
-							print( "not md5.sumhexa" )
+							print( v.download.."	( fail! )" )
 						end
 					else
-						--print("Can't open "..v.download)
+						print("Can't open "..v.download)
 					end
 				end
 			end
@@ -213,7 +211,7 @@ end
 
 --return result,oplist
 local function doSync()
-check_all_md5()
+	--check_all_md5()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if platform == kTargetWindows then
 		print("本地版本不进行跟新.")
@@ -268,6 +266,7 @@ local function CreateSyncLayer()
 		layer:unscheduleUpdate()
 		--do script
 		package.path = package.path..';'..local_dir..'?.lua'
+		package.path = package.path..';'..local_dir..'src/?.lua'
 		require ('src/helloworld')
 	end
 	
