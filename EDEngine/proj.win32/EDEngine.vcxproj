@@ -82,7 +82,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;giflib.lib;jsonD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;jsonD.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);$(EngineRoot)external\giflib\Debug;$(EngineRoot)external\json-c\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
