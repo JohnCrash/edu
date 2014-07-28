@@ -52,8 +52,11 @@ local course={
 
 local ui = {
 	FILE = 'homework/studenthomework_1.json',
+	FILE_3_4 = 'homework/studenthomework43.json',
 	STATISTICS_FILE = 'homework/statistics.json',
+	STATISTICS_FILE_3_4 = 'homework/statistics43.json',
 	MORE = 'homework/more.json',
+	MORE_3_4 = 'homework/more43.json',
 	MORE_VIEW = 'more_view',
 	LESSON = 'lesson',
 	BACK = 'white/back',
@@ -436,13 +439,13 @@ function WorkList:SwapButton(s)
 end
 
 function WorkList:init_gui()
-	self._root = uikits.fromJson{file=ui.FILE}
+	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	
-	self._statistics_root = uikits.fromJson{file=ui.STATISTICS_FILE}
+	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
 	self:addChild(self._statistics_root)
 	self._statistics_root:setVisible(false)
 	
-	self._setting_root = uikits.fromJson{file=ui.MORE}
+	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	
 	self._root:addChild(self._setting)

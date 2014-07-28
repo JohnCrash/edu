@@ -11,6 +11,7 @@ kits.log( "====================" )
 local res_root = 'homework/'
 local ui = {
 	FILE = res_root..'workflow.json',
+	FILE_3_4 = res_root..'workflow43.json',
 	PLAYBOX = 'homework/playbox.json',
 	PLAY = 'pause',
 	PAUSE = 'play',
@@ -750,9 +751,14 @@ function WorkFlow:load_original_data_from_string( str )
 end
 
 function WorkFlow:init_gui()
-	WorkFlow.scale = uikits.initDR{width=1920,height=1080}
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		WorkFlow.scale = uikits.initDR{width=1920,height=1080}
+	else
+		WorkFlow.scale = uikits.initDR{width=1440,height=1080}
+	end
+	
 	WorkFlow.space = 16*WorkFlow.scale
-	self._root = uikits.fromJson{file=ui.FILE}
+	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 		--保存

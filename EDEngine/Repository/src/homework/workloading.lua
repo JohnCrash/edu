@@ -3,6 +3,7 @@ local WorkList = require "homework/worklist"
 
 local ui = {
 	FILE = 'homework/studentloading.json',
+	FILE_3_4 = 'homework/studentloading43.json',
 }
 
 local WorkLoading = class("WorkLoading")
@@ -27,7 +28,7 @@ end
 
 function WorkLoading:init()
 	if not self._root then
-		self._root = uikits.fromJson{file=ui.FILE}
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		self:addChild(self._root)	
 	end
 	--test

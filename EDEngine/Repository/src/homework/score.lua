@@ -2,6 +2,7 @@
 
 local ui = {
 	FILE = 'homework/result.json',
+	FILE_3_4 = 'homework/result43.json',
 	BACK = 'white/back',
 	HOME = 'home',
 	CAPTION = 'white/lesson_name',
@@ -42,7 +43,7 @@ end
 
 function Score:init()
 	if not self._root then
-		self._root = uikits.fromJson{file=ui.FILE}
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)
