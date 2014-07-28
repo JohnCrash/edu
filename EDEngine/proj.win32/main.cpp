@@ -35,8 +35,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		//reload lua engine
 		LuaEngine * pEngine = LuaEngine::getInstance();
 		ScriptEngineManager::getInstance()->setScriptEngine(nullptr);
-		pEngine = LuaEngine::getInstance();
-		ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
+	//	pEngine = LuaEngine::getInstance();
+	//	ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
 	}
 #else
 	ret = Application::getInstance()->run();

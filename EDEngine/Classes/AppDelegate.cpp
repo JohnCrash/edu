@@ -3,6 +3,7 @@
 #include "SimpleAudioEngine.h"
 #include "lua_ext.h"
 #include "luaDebug.h"
+#include "AssetsManager.h"
 
 AppDelegate::AppDelegate()
 {
@@ -71,32 +72,26 @@ void AppDelegate::initLuaEngine()
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
  
-    auto pEngine = LuaEngine::getInstance();
-	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
-    ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
-    
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 )
-	// || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID ||CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
-    LuaStack* stack = pEngine->getLuaStack();
-	#ifdef _DEBUG
-	startRuntime();
-	#endif
-    //register_assetsmanager_test_sample(stack->getLuaState());
-#endif
-//#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-//	auto path = "/sdcard/Edengine/";
-//#else
 	auto path = FileUtils::getInstance()->getWritablePath();
-//#endif
 	if( path.length() > 0 )
 		if( path.back() == '/'||
 			path.back() == '\\' )
 		{
 			path.pop_back();
 		}
-	pEngine->addSearchPath(path.c_str());
-	FileUtils::getInstance()->addSearchPath("res/");
-	
+	std::string luap = path + "\\luacore";
+	FileUtils::getInstance()->addSearchPath(luap.c_str());
+
+    auto pEngine = LuaEngine::getInstance();
+	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
+    ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
+    
+    LuaStack* stack = pEngine->getLuaStack();
+	stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
+    register_assetsmanager_test_sample(stack->getLuaState());
+	#ifdef _DEBUG
+		startRuntime();
+	#endif
     pEngine->executeScriptFile("bootstrap.lua");
 }
 

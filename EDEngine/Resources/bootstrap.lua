@@ -215,7 +215,7 @@ local function doSync()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if platform == kTargetWindows then
 		print("本地版本不进行跟新.")
-		return "ok"
+		return true,"ok"
 	end
 	
   if isNeedSync() then
@@ -258,7 +258,8 @@ local function CreateSyncLayer()
 	loadingBar:setPercent(0)
 	loadingBar:setScaleY(3)
 	loadingBar:setScaleX(3)
-	loadingBar:setPosition(cc.p(widgetSize.width / 2.0, widgetSize.height / 2.0 + loadingBar:getSize().height / 4.0))
+	local H = loadingBar:getContentSize().height
+	loadingBar:setPosition(cc.p(widgetSize.width / 2.0, widgetSize.height / 2.0 + H / 4.0))
 	layer:addChild(loadingBar)
   
 	local function exit_loading()
