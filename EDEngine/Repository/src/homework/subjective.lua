@@ -196,7 +196,7 @@ function Subjective:init_gui()
 		
 		self._scrollview = uikits.child(self._root,ui.LIST)
 		self._contentview = uikits.child(self._root,ui.PAGE_VIEW)
-		self._contentview_size = self._contentview:getSize()
+		self._contentview_size = self._contentview:getContentSize()
 		self._teacher_view = uikits.child(self._contentview,ui.TEACHER_VIEW)
 		self._teacher_view:setEnabled(false) --有点印象翻页,关闭它
 		
@@ -244,7 +244,7 @@ function Subjective:init_gui()
 		self._item_current:setVisible(false)
 		self._item_finished:setVisible(false)
 		self._item_unfinished:setVisible(false)
-		self._item_size = self._item_current:getSize()
+		self._item_size = self._item_current:getContentSize()
 
 		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
 		self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )

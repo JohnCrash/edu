@@ -155,33 +155,33 @@ local function test( layer )
 	for i = 1,32 do
 		local ox,oy = 32,32
 		local t = uikits.text{caption="Text"..i,fontSize=30,eventClick=function(sender) print("text click")end}
-		local y = oy + (i-1)*t:getSize().height
-		h = h + t:getSize().height
+		local y = oy + (i-1)*t:getContentSize().height
+		h = h + t:getContentSize().height
 		t:setPosition{x=ox,y=y}
 		sv:addChild(t)
 		--checkbox
-		local c = uikits.checkbox{x=ox+t:getSize().width,y=y,check=i%2==1 and true or false,
+		local c = uikits.checkbox{x=ox+t:getContentSize().width,y=y,check=i%2==1 and true or false,
 						eventSelect=function (sender,b) print(b) end}
 		sv:addChild(c)
 		--button
-		local b = uikits.button{x=ox+t:getSize().width+c:getSize().width,y=y,
-											fontSize=32,width=320,height=c:getSize().height,
+		local b = uikits.button{x=ox+t:getContentSize().width+c:getContentSize().width,y=y,
+											fontSize=32,width=320,height=c:getContentSize().height,
 											caption="Button 中文"..i,
 											eventClick=function (sender) print('click') end}
 		sv:addChild(b)
 		--slider
-		local s = uikits.slider{width=320,height=c:getSize().height,
-										x=b:getPosition()+b:getSize().width,y= y,percent=i*100/32,
+		local s = uikits.slider{width=320,height=c:getContentSize().height,
+										x=b:getPosition()+b:getContentSize().width,y= y,percent=i*100/32,
 										eventPercent=function (sender,percent) print(percent) end}
 		sv:addChild(s)
 		--edit
 		local e = uikits.editbox{caption='Input here:',
-			x=s:getPosition()+s:getSize().width,y= y}
+			x=s:getPosition()+s:getContentSize().width,y= y}
 		sv:addChild(e)
 		--image
-		local img = uikits.image{image='cocosui/sliderballnormal.png',x=e:getPosition()+e:getSize().width,y=y}
+		local img = uikits.image{image='cocosui/sliderballnormal.png',x=e:getPosition()+e:getContentSize().width,y=y}
 		sv:addChild(img)
-		local img2 = uikits.image{image='cocosui/button.png',x=img:getPosition()+img:getSize().width,y=y,
+		local img2 = uikits.image{image='cocosui/button.png',x=img:getPosition()+img:getContentSize().width,y=y,
 		scale9=true,width=64,height=32,touch=true}
 		sv:addChild(img2)
 	end

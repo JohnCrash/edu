@@ -767,7 +767,7 @@ function WorkFlow:init_gui()
 		end)
 	self._scrollview = uikits.child(self._root,ui.LIST)
 	self._pageview = uikits.child(self._root,ui.PAGE_VIEW)
-	self._pageview_size = self._pageview:getSize()
+	self._pageview_size = self._pageview:getContentSize()
 	
 	self._arrow = uikits.child(self._root,ui.ARROW)
 	self._arrow_up = uikits.child(self._root,ui.ARROW_UP)
@@ -787,7 +787,7 @@ function WorkFlow:init_gui()
 	self._item_finished:setVisible(false)
 	self._item_unfinished:setVisible(false)
 
-	self._item_size = self._item_current:getSize()
+	self._item_size = self._item_current:getContentSize()
 	
 	self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
 	self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )
@@ -1069,12 +1069,12 @@ end
 --设置题干,包括附件
 local function set_topics_image( layout,data,x,y )
 	--每种题型都有可能有附件声音,或者图片(暂时没有处理?)
-	local size = layout:getSize()
+	local size = layout:getContentSize()
 	local player = attachment_ui_player{attachment = data.attachment,x = size.width/2,anchorX=0.5}
 	if player then
 		layout:addChild( player )
 		player:setPosition(cc.p(size.width/2,y+WorkFlow.space))
-		y = y + player:getSize().height
+		y = y + player:getContentSize().height
 	end
 	if data.image then
 	--题目图片
@@ -1082,11 +1082,11 @@ local function set_topics_image( layout,data,x,y )
 		img:setScaleX(WorkFlow.scale)
 		img:setScaleY(WorkFlow.scale)
 		layout:addChild(img)
-		uikits.relayout_h( {img},x,y+2*WorkFlow.space,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-		local size = layout:getSize()
+		uikits.relayout_h( {img},x,y+2*WorkFlow.space,layout:getContentSize().width,WorkFlow.space,WorkFlow.scale)
+		local size = layout:getContentSize()
 		local width,height
 		width = size.width
-		height = y+img:getSize().height*WorkFlow.scale + 4 * WorkFlow.space
+		height = y+img:getContentSize().height*WorkFlow.scale + 4 * WorkFlow.space
 		layout:setInnerContainerSize( cc.size(width,height) )
 	end
 end
@@ -1106,10 +1106,10 @@ local function relayout_link( layout,data,op,i )
 	local function add_line()
 		answer[up] = down
 		local x,y = ui1[up]:getPosition()
-		x = x + ui1[up]:getSize().width*WorkFlow.scale/2
+		x = x + ui1[up]:getContentSize().width*WorkFlow.scale/2
 		local x2,y2 = ui2[down]:getPosition()
-		x2 = x2 + ui2[down]:getSize().width*WorkFlow.scale/2
-		y2 = y2 + ui2[down]:getSize().height*WorkFlow.scale
+		x2 = x2 + ui2[down]:getContentSize().width*WorkFlow.scale/2
+		y2 = y2 + ui2[down]:getContentSize().height*WorkFlow.scale
 		local node = uikits.line{x1=x,y1=y,x2=x2,y2=y2,linewidth=2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
 		node:setPosition(cc.p( 0,0 ) )
 		layout:addChild( node )
@@ -1159,7 +1159,7 @@ local function relayout_link( layout,data,op,i )
 	end
 	local function select_rect(item,b)
 		local x,y = item:getPosition()
-		local size = item:getSize()
+		local size = item:getContentSize()
 		size.width = size.width*WorkFlow.scale
 		size.height = size.height*WorkFlow.scale
 		if b then
@@ -1182,7 +1182,7 @@ local function relayout_link( layout,data,op,i )
 				select_rect(ui1[up],true)
 				do_link()
 			end,'click' )		
-		local s = item:getSize()
+		local s = item:getContentSize()
 		layout:addChild(item)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
 		table.insert( dot1,dot )
@@ -1208,17 +1208,17 @@ local function relayout_link( layout,data,op,i )
 		layout:addChild(dot)		
 	end
 
-	local rect1 = uikits.relayout_h( ui2,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local rect1 = uikits.relayout_h( ui2,0,0,layout:getContentSize().width,WorkFlow.space,WorkFlow.scale)
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,WorkFlow.space,WorkFlow.scale)
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
-		local size = v:getSize()
+		local size = v:getContentSize()
 		size.width = size.width*WorkFlow.scale
 		dot1[i]:setPosition( cc.p(x+size.width/2,y ) )
 	end
 	for i,v in pairs(ui2) do
 		local x,y = v:getPosition()
-		local size = v:getSize()
+		local size = v:getContentSize()
 		size.width = size.width*WorkFlow.scale
 		size.height = size.height*WorkFlow.scale
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height ) )	
@@ -1246,7 +1246,7 @@ local function relayout_link( layout,data,op,i )
 end
 
 local function get_center_pt( item )
-	local size = item:getSize()
+	local size = item:getContentSize()
 	local x,y = item:getPosition()
 	return size.width*WorkFlow.scale/2+x,size.height*WorkFlow.scale/2+y
 end
@@ -1373,13 +1373,13 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 					end
 				end)
 	end
-	local result = uikits.relayout_h( ui1,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,WorkFlow.space,WorkFlow.scale)
 	uikits.move( ui1,0,result.height + 26 )
 	place_rect = {x1=result.x-4,y1=4,x2=result.x+result.width+4,y2=result.height + 12}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
 	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
-		local size = v:getSize()
+		local size = v:getContentSize()
 		size.width = size.width * WorkFlow.scale
 		size.height = size.height * WorkFlow.scale
 		local x,y = v:getPosition()
@@ -1403,11 +1403,11 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 end
 
 local function relayout_click( layout,data,op,i,ismulti )
-	local size = layout:getSize()
+	local size = layout:getContentSize()
 	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,anchorX=0.5}
 	local rects = {}
 	local rect_node = {}
-	local bg_size = bg:getSize()
+	local bg_size = bg:getContentSize()
 	
 	bg:setScaleX(WorkFlow.scale)
 	bg:setScaleY(WorkFlow.scale)
@@ -1482,12 +1482,12 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getSize().width/2,anchorX = 0.5}
+	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,anchorX = 0.5}
 	local drags = {}
 	local draging_item
 	
 	layout:addChild(bg)
-	local bgsize = bg:getSize()
+	local bgsize = bg:getContentSize()
 	bg:setScaleX(WorkFlow.scale)
 	bg:setScaleY(WorkFlow.scale)
 
@@ -1516,7 +1516,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	local function get_pt_center( item,i )
 		local xx,yy = bg:getPosition()
 		local v = data.drag_rects[i]
-		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		xx = xx - bg:getContentSize().width*WorkFlow.scale/2
 		local rc =  {
 				x1 = xx + v.x1 * WorkFlow.scale,
 				x2 = xx + v.x2 * WorkFlow.scale,
@@ -1524,7 +1524,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 				y2 = yy + (bgsize.height-v.y2)*WorkFlow.scale
 			}
 			normal_rect( rc )
-		local sz = item:getSize()
+		local sz = item:getContentSize()
 		local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
 		local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
 		local cp  = {x = rc.x1 + offx,y = rc.y1+ offy } 
@@ -1532,7 +1532,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	end
 	local function put_in( sender,x,y )
 		local xx,yy = bg:getPosition()
-		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		xx = xx - bg:getContentSize().width*WorkFlow.scale/2
 		for i,v in pairs( data.drag_rects ) do
 			local rc = {
 				x1 = xx + v.x1 * WorkFlow.scale,
@@ -1542,7 +1542,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 			}
 			normal_rect( rc )
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
-				local sz = sender:getSize()
+				local sz = sender:getContentSize()
 				local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
 				local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
@@ -1565,7 +1565,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 	end
 	local function put_in_multi( sender,x,y )
 		local xx,yy = bg:getPosition()
-		xx = xx - bg:getSize().width*WorkFlow.scale/2
+		xx = xx - bg:getContentSize().width*WorkFlow.scale/2
 		for i,v in pairs( data.drag_rects ) do
 			local rc = {
 				x1 = xx + v.x1 * WorkFlow.scale,
@@ -1575,7 +1575,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 			}
 			normal_rect( rc )
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
-				local sz = draging_item:getSize()
+				local sz = draging_item:getContentSize()
 				local offx = ((rc.x2-rc.x1) - sz.width*WorkFlow.scale)/2
 				local offy = ((rc.y2-rc.y1) - sz.height*WorkFlow.scale)/2
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
@@ -1703,9 +1703,9 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 					end
 				end)
 	end
-	local rc = uikits.relayout_h( ui1,0,0,layout:getSize().width,WorkFlow.space,WorkFlow.scale)
+	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,WorkFlow.space,WorkFlow.scale)
 	local x,y = bg:getPosition()
-	uikits.move( ui1,0,bg:getSize().height*WorkFlow.scale+y+WorkFlow.space )
+	uikits.move( ui1,0,bg:getContentSize().height*WorkFlow.scale+y+WorkFlow.space )
 	for k,v in pairs( ui1 ) do
 		local x,y = v:getPosition()
 		orgp[v] = cc.p(x,y)
@@ -1988,7 +1988,7 @@ function WorkFlow:set_anwser_field( i )
 			self._topics_begin_time = os.time()--开始计时
 			self._topics[t].init(self,self._answer_field,layout,self._data[i],self._data[i].options,i)
 			--如果内容超出滚动区
-			local size = layout:getSize()
+			local size = layout:getContentSize()
 			local insize = layout:getInnerContainerSize()
 			if size.height < insize.height then
 				self._arrow:setVisible(true)

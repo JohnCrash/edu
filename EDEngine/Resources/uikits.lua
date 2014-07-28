@@ -7,7 +7,7 @@ require "GuiConstants"
 require "AudioEngine" 
 
 local Director = cc.Director:getInstance()
-local defaultFont = "fonts/Marker Felt.ttf"
+local defaultFont = "fonts/simfang.ttf"
 local defaultFontSize = 16
 local log_caller
 
@@ -24,8 +24,8 @@ local function isSoundPlaying( id )
 end
 
 local function init_layout( s,t )
-	local ss = s:getSize()
-	s:setSize{width=t.width or ss.width,height=t.height or ss.height}
+	local ss = s:getContentSize()
+	s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}
 	if t.bgcolor and t.bgcolor2 then
 		s:setBackGroundColorType(LAYOUT_COLOR_GRADIENT)
 		s:setBackGroundColor(t.bgcolor,t.bgcolor2)
@@ -179,7 +179,7 @@ local function checkbox( t )
 			cb:setSelectedState( t.check )
 		end
 		if t.event and type(t.event) == 'function' then
-			cb:addEventListenerCheckBox(t.event)
+			cb:addEventListener(t.event)
 			--[[ Event function prototype
 				local function selectedEvent(sender,eventType)
 				if eventType == ccui.CheckBoxEventType.selected then
@@ -198,7 +198,7 @@ local function checkbox( t )
 					t.eventSelect(sender,false)
 				end
 			end
-			cb:addEventListenerCheckBox(event_select)
+			cb:addEventListener(event_select)
 		end
 	end
 	return cb
@@ -213,7 +213,7 @@ local function button( t )
 					t.press or "cocosui/buttonHighlighted.png", 
 					t.disable or "")
 		init_node(cb,t)
-		cb:setSize{width = t.width or 64,height = t.height or 32}
+		cb:setContentSize{width = t.width or 64,height = t.height or 32}
 		cb:setTitleFontSize( t.fontSize or defaultFontSize )
 		cb:setTitleFontName( t.font or defaultFont)
 		cb:setTitleText( t.caption or '' )
@@ -247,13 +247,13 @@ local function slider( t )
 		s:loadSlidBallTextures( t.slidBall or "cocosui/sliderThumb.png", "cocosui/sliderThumb.png", "")
 		s:loadProgressBarTexture(t.progressBar or "cocosui/sliderProgress.png")
 		init_node(s,t)
-		s:setSize{width=t.width or 160,height=t.height or 32 }
+		s:setContentSize{width=t.width or 160,height=t.height or 32 }
 		s:setPercent( t.percent or 0 )
 		if t.event and type(t.event)=='function' then
-			slider:addEventListenerSlider(t.event)
+			slider:addEventListener(t.event)
 		end
 		if t.eventPercent and not t.event and type(t.eventPercent) == 'function' then
-			s:addEventListenerSlider(function (sender,eventType)
+			s:addEventListener(function (sender,eventType)
 															if eventType == ccui.SliderEventType.percentChanged then
 																t.eventPercent(sender,sender:getPercent())
 															end
@@ -279,9 +279,9 @@ local function scrollview( t )
 	if t and type(t)=='table' then
 		s = ccui.ScrollView:create()
 		init_node(s,t)
-		s:setSize{width=t.width or 320,height=t.height or 200 }
+		s:setContentSize{width=t.width or 320,height=t.height or 200 }
 		if t.event and type(t.event)=='function' then
-			s:addEventListenerScrollView(t.event)
+			s:addEventListener(t.event)
 			--[[ Event function prototype
 				local function scrollEvent(sender, eventType)
 					if eventType == SCROLLVIEW_EVENT_SCROLLING  then
@@ -300,12 +300,12 @@ local function editbox( t )
 		s = ccui.TextField:create()
 		s:setTouchEnabled(true)
 		init_node(s,t)
-		s:setSize{width=t.width or 160,height=t.height or 32 }
+		s:setContentSize{width=t.width or 160,height=t.height or 32 }
 		s:setFontSize( t.fontSize or defaultFontSize )
 		s:setFontName( t.font or defaultFont)
 		s:setPlaceHolder( t.caption or '' )
 		if t.event and type(t.event)=='function' then
-			s:addEventListenerTextField(t.event)
+			s:addEventListener(t.event)
 			--[[ Event function prototype
 					local function textFieldEvent(sender, eventType)
 						if eventType == ccui.TextFiledEventType.attach_with_ime then
@@ -328,8 +328,8 @@ local function imageview( t )
 		if t.image then
 			s:loadTexture(t.image)
 		end
-		local ss = s:getSize()
-		s:setSize{width=t.width or ss.width,height=t.height or ss.height}		
+		local ss = s:getContentSize()
+		s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}		
 		s:setScale9Enabled( t.scale9 or false )
 		s:setTouchEnabled( t.touch or false )
 	end
@@ -354,7 +354,7 @@ local function pageview( t )
 		init_layout(s,t)
 		s:setTouchEnabled(true)
 		if t.event then
-			s:addEventListenerPageView(t.event)
+			s:addEventListener(t.event)
 			--[[ Event function prototype
 			local function pageViewEvent(sender, eventType)
 				if eventType == ccui.PageViewEventType.turning then
@@ -521,7 +521,7 @@ local function event( obj,func,eventType )
 					end
 				end)
 		elseif cc_type(obj) == 'ccui.CheckBox' then
-			obj:addEventListenerCheckBox(
+			obj:addEventListener(
 				function(sender,eventType)
 					if eventType == ccui.CheckBoxEventType.selected then
 						func(sender,true)
@@ -530,13 +530,13 @@ local function event( obj,func,eventType )
 					end
 				end)
 		elseif cc_type(obj)=='ccui.Slider' then
-			obj:addEventListenerSlider(func)
+			obj:addEventListener(func)
 		elseif cc_type(obj)=='ccui.ScrollView' then
-			obj:addEventListenerScrollView(func)
+			obj:addEventListener(func)
 		elseif cc_type(obj)=='ccui.PageView' then
-			obj:addEventListenerPageView(func)
+			obj:addEventListener(func)
 		elseif cc_type(obj)=='ccui.TextField' then
-			obj:addEventListenerTextField(func)
+			obj:addEventListener(func)
 		elseif cc_type(obj)=='cc.MenuItemFont' then
 			obj:registerScriptTapHandler(func)
 		else
@@ -591,7 +591,7 @@ local function relayout_h( items,xx,y,width,space,scale,expet )
 	h = w
 	if items and type(items)=='table' then
 		for i,v in pairs(items) do
-			local size = v:getSize()
+			local size = v:getContentSize()
 			
 			if scale then
 				size.width = size.width*scale
@@ -610,7 +610,7 @@ local function relayout_h( items,xx,y,width,space,scale,expet )
 		--æ”÷–
 		local x = (width-w)/2 + xx
 		for i,v in pairs(items) do
-			local size = v:getSize()
+			local size = v:getContentSize()
 			if scale then
 				size.width = size.width*scale
 				size.height = size.height*scale			

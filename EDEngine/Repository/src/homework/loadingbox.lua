@@ -14,8 +14,8 @@ local function put_lading_circle( parent )
 	local size
 	if not parent then return end
 	
-	if parent.getSize then
-		size = parent:getSize()
+	if parent.getContentSize then
+		size = parent:getContentSize()
 	else
 		size = uikits.screenSize()
 		size.width = size.width * uikits.scale()
@@ -53,8 +53,8 @@ local function open_loadingbox( parent,dt,func )
 	end
 	s:setAnchorPoint{x=0.5,y=0.5}
 	local size
-	if parent.getSize then
-		size = parent:getSize()
+	if parent.getContentSize then
+		size = parent:getContentSize()
 	else
 		size = uikits.screenSize()
 		size.width = size.width * uikits.scale()
@@ -70,7 +70,7 @@ local function open_loadingbox( parent,dt,func )
 		s._circle = ccs.Armature:create('load')
 		s._circle:getAnimation():playWithIndex(0)
 		s._circle:setAnchorPoint(cc.p(0.5,0.5))
-		size = s:getSize()
+		size = s:getContentSize()
 		s._circle:setPosition(cc.p(size.width/2,size.height*2/3))
 		s:addChild( s._circle )
 	end

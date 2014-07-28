@@ -328,7 +328,7 @@ function WorkList:clone_statistics_item(v)
 				if t and t.date then
 					if idx == 1 then
 						sitem = uikits.child(scrollview,ui.ST_MONTH)
-						size = sitem:getSize()
+						size = sitem:getContentSize()
 						ox,oy = sitem:getPosition()
 					else
 						sitem = uikits.child(scrollview,ui.ST_MONTH):clone()
@@ -384,7 +384,7 @@ function WorkList:relayout_statistics()
 		local height = self._statistics_item_height*(#self._statistics_list)
 		self._scrollview:setInnerContainerSize(cc.size(self._statistics_item_width,height))
 		local offy = 0
-		local size = self._scrollview:getSize()
+		local size = self._scrollview:getContentSize()
 		print( 'height = '..height )
 		print( '_statistics_item_width = '..self._statistics_item_width )
 		if height < size.height then
@@ -461,14 +461,14 @@ function WorkList:init_gui()
 			end
 		end)
 	self._item:setVisible(false)
-	local size = self._item:getSize()
+	local size = self._item:getContentSize()
 	self._item_width = size.width
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
 	local statistics_item = uikits.child(self._statistics_root,ui.LESSON)
 	self._statistics_item = statistics_item
 	if statistics_item then
-		size = statistics_item:getSize()
+		size = statistics_item:getContentSize()
 		self._statistics_item_width = size.width
 		self._statistics_item_height = size.height
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
@@ -484,14 +484,14 @@ function WorkList:init_gui()
 	
 	self._new_x,self._redline_y = self._redline:getPosition()
 	self._history_button = uikits.child(self._root,ui.HISTORY_BUTTON)
-	self._history_x = self._new_x + self._history_button:getSize().width
+	self._history_x = self._new_x + self._history_button:getContentSize().width
 	
 	uikits.event( self._history_button,
 		function(sender)
 			self:init_history_list()
 		end)
 	self._statist_button = uikits.child(self._root,ui.STATIST_BUTTON)
-	self._statist_x = self._history_x + self._statist_button:getSize().width
+	self._statist_x = self._history_x + self._statist_button:getContentSize().width
 	
 	uikits.event( self._statist_button,
 		function(sender)
@@ -499,7 +499,7 @@ function WorkList:init_gui()
 		end)
 		
 	self._setting_button = uikits.child(self._root,ui.SETTING_BUTTON)
-	self._setting_x = self._statist_x + self._setting_button:getSize().width
+	self._setting_x = self._statist_x + self._setting_button:getContentSize().width
 	
 	uikits.event( self._setting_button,
 		function(sender)
@@ -558,7 +558,7 @@ function WorkList:relayout()
 	local height = self._item_height*(#self._list)
 	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
 	local offy = 0
-	local size = self._scrollview:getSize()
+	local size = self._scrollview:getContentSize()
 	
 	if height < size.height then
 		offy = size.height - height --顶到顶
