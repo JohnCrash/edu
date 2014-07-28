@@ -1,0 +1,93 @@
+[
+    {
+		"state": null,
+		"image":"Pic/384x1_130426151011.jpg",
+		"item_type": 1,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"0\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"对\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"错\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"B\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/111589xdiantu_131218144714.png",
+		"item_type": 2,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"1\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"常用以形容面目狰狞或因痛苦、惊恐而失态。\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"自己顾自己还来不及(无暇顾及他人)。\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"形容极其艰苦。\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"自己看不起自己。\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"C\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/111043xdiantu_131126094541.png",
+		"item_type": 3,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"2\",\"options\":[{\"id\":\"1\",\"option\":\"1.\\\"\\\"\"},{\"id\":\"2\",\"option\":\"2.\\\"\\\"\"},{\"id\":\"3\",\"option\":\"3.\\\"\\\"\"},{\"id\":\"4\",\"option\":\"4.\\\"\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"BC\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/107861x0_130628144317.png",
+		"item_type": 4,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"3\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<span style='color:#003300'>傣<\\/span><\\/p>\\u000a\\u000a<p><span lang=en-us style='color:black'>\\\"\"}],\"options2\":[{\"id\":\"1\",\"option\":\"A.\\\"<span style='color:black'>族<\\/span><span style='font-size:10.0pt;color:black'> <\\/span><span lang=en-us style='color:\\u000ablack'>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<span style='color:#003300'>辈<\\/span><\\/p>\\u000a\\u000a<p><span lang=en-us style='font-family:lucida sans unicode;color:black'>&nbsp;<\\/span><\\/p>\\u000a\\u000a<p><span style='color:black'>\\\"\"}],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"A\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/104971x0_120808095619.png",
+		"item_type": 5,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"0\",\"options\":[],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"嫩绿\"},{\"id\":\"0\",\"value\":\"汇成\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/104978x0_120808101430.png",
+		"item_type": 5,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"0\",\"options\":[],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"嫩绿\"},{\"id\":\"0\",\"value\":\"汇成\"}]}"
+	},
+	{
+		"state": null,
+		"image":"Pic/112672x0_140513100914.png",
+		"item_type": 6,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"3\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<span style='color:#003300'>傣<\\/span><\\/p>\\u000a\\u000a<p><span lang=en-us style='color:black'>\\\"\"}],\"options2\":[{\"id\":\"1\",\"option\":\"A.\\\"<span style='color:black'>族<\\/span><span style='font-size:10.0pt;color:black'> <\\/span><span lang=en-us style='color:\\u000ablack'>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<span style='color:#003300'>辈<\\/span><\\/p>\\u000a\\u000a<p><span lang=en-us style='font-family:lucida sans unicode;color:black'>&nbsp;<\\/span><\\/p>\\u000a\\u000a<p><span style='color:black'>\\\"\"}],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"A\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/112676x0_140513103019.png",
+		"item_type": 7,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"6\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<span style='font-size:14.0pt'>竹子<\\/span><\\/p><p><span lang=en-us style='font-size:14.0pt;font-family:lucida sans unicode,\\\"sans-serif\\\"'>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<span style='font-size:14.0pt'>唯一的<\\/span><\\/p><p><span lang=en-us style='font-size:14.0pt;font-family:lucida sans unicode,\\\"sans-serif\\\"'>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<span style='font-size:14.0pt'>是<\\/span><\\/p><p><span lang=en-us style='font-size:14.0pt;font-family:lucida sans unicode,\\\"sans-serif\\\"'>\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"<span style='font-size:14.0pt'>食物<\\/span><\\/p><p><span lang=en-us style='font-size:14.0pt;font-family:lucida sans unicode,\\\"sans-serif\\\"'>\\\"\"},{\"id\":\"5\",\"option\":\"E.\\\"<span style='font-size:14.0pt'>熊猫<\\/span><\\/p><p><span lang=en-us style='font-size:14.0pt;font-family:lucida sans unicode,\\\"sans-serif\\\"'>\\\"\"},{\"id\":\"6\",\"option\":\"F.\\\"<span style='font-size:14.0pt'>吗？<\\/span><\\/p><p><span style='font-size:14.0pt'>\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/384x1_130426151011.jpg",
+		"item_type": 8,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"7\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<img align=absmiddle width=352 height=42 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/988\\/158\\/4977cf17821b58606fcf8c2d552ab643.png><\\/span><\\/p><p><span lang=en-us>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<img align=absmiddle width=352 height=42 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/118\\/333\\/1e839c2044cfc25dcaadb2970fea4693.png><\\/span><\\/p><p><span lang=en-us>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<img align=absmiddle width=354 height=42 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/259\\/349\\/6eaedeb65e15a23c07df71829b677ef5.png><\\/span><\\/p><p><span lang=en-us>\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"<img align=absmiddle width=352 height=42 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/215\\/239\\/14cdd89a0cfce624e911971a7a59211d.png><\\/span><\\/p><p><span lang=en-us>\\\"\"},{\"id\":\"5\",\"option\":\"E.\\\"<img align=absmiddle width=352 height=43 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/129\\/292\\/4d505f63cf11e9f9fbdb570a732af283.png><\\/span><\\/p><p><span lang=en-us>\\\"\"},{\"id\":\"6\",\"option\":\"F.\\\"<img align=absmiddle width=352 height=42 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/122\\/185\\/c6c0372cb468f7a562427c0f60a391da.png><\\/span>\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"FCDBEA\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/139445x0_200810281640.jpg",
+		"item_type": 9,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"8\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"134,117,270,209\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"4,119,131,202\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"279,123,403,205\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"415,120,541,205\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"A\"}]}"
+	}
+	{
+		"state": null,
+		"image":"Pic/111778xdiantu_140113141442.png",
+		"item_type": 10,
+		"options": "{\"drag_position\":\"0\",\"item_type\":\"9\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"125,-1,199,44\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"322,49,389,98\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"211,99,279,148\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"215,151,285,204\\\"\"},{\"id\":\"5\",\"option\":\"E.\\\"342,100,409,151\\\"\"},{\"id\":\"6\",\"option\":\"F.\\\"279,101,340,150\\\"\"},{\"id\":\"7\",\"option\":\"G.\\\"148,150,213,204\\\"\"},{\"id\":\"8\",\"option\":\"H.\\\"81,152,146,201\\\"\"},{\"id\":\"9\",\"option\":\"I.\\\"270,2,340,48\\\"\"},{\"id\":\"10\",\"option\":\"J.\\\"202,3,266,48\\\"\"},{\"id\":\"11\",\"option\":\"K.\\\"255,50,317,96\\\"\"},{\"id\":\"12\",\"option\":\"L.\\\"391,53,458,99\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"ABCD\"}]}"
+	}	
+	{
+		"state": null,
+		"image":"Pic/95655xdiantu_130926094051.JPG",
+		"item_type": 11,
+		"options": "{\"drag_position\":\"2\",\"item_type\":\"10\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"29,66,128,156\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"295,101,400,191\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"426,64,519,157\\\"\"}],\"options2\":[{\"id\":\"1\",\"option\":\"A.\\\"<img align=absmiddle width=67 height=49 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/95\\/403\\/8e960cd98ee382570a05fee7ceefa41f.png>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<img align=absmiddle width=67 height=49 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/39\\/153\\/079299cea85351d8563480c4d41fa0cf.png>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<img align=absmiddle width=67 height=49 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/274\\/336\\/bfa779ba99e06ead0f0d3316af8f1180.png>\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"<img align=absmiddle width=67 height=49 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/222\\/297\\/3cfdba78e427ed278e11e208b84bf438.png><\\/span>\\\"\"}],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"AC;BB;CA\"}]}"
+	}	
+	{
+		"state": null,
+		"image":"Pic/95619xdiantu_140331121310.png",
+		"item_type": 12,
+		"options": "{\"drag_position\":\"2\",\"item_type\":\"11\",\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"134,90,231,171\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"237,95,324,173\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"332,93,434,179\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"447,91,546,189\\\"\"},{\"id\":\"5\",\"option\":\"E.\\\"553,91,649,190\\\"\"}],\"options2\":[{\"id\":\"1\",\"option\":\"A.\\\"<span lang=en-us\\u000astyle='font-size:13.5pt'><img align=absmiddle width=74 height=68 src=http:\\/\\/image.lejiaolexue.com\\/item_img\\/209\\/142\\/a64c5b52b84aa6cd936043491f3b4339.png><\\/span><\\/p><p><span style='font-size:13.5pt'>\\\"\"}],\"sort_char\":\"\"}",
+		"correct_answer": "{\"answers\":[]}"
+	}		
+]
