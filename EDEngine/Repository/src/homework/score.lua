@@ -1,9 +1,9 @@
 ﻿local uikits = require "uikits"
 
 local ui = {
-	FILE = 'homework/z3_1/z3_1.json',
+	FILE = 'homework/result.json',
 	BACK = 'white/back',
-	HOME = 'Button_31',
+	HOME = 'home',
 	CAPTION = 'white/lesson_name',
 	END_DATE = 'white/time_over',
 	TIMELABEL = 'white/text',

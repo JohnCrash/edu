@@ -51,9 +51,9 @@ local course={
 }
 
 local ui = {
-	FILE = 'homework/studenthomework_1/studenthomework_1.json',
-	STATISTICS_FILE = 'homework/statistics_1/statistics.json',
-	MORE = 'homework/more_1/more_1.json',
+	FILE = 'homework/studenthomework_1.json',
+	STATISTICS_FILE = 'homework/statistics.json',
+	MORE = 'homework/more.json',
 	MORE_VIEW = 'more_view',
 	LESSON = 'lesson',
 	BACK = 'white/back',

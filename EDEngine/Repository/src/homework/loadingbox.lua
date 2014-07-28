@@ -1,10 +1,10 @@
 ﻿local uikits = require "uikits"
 
 local ui = {
-	LOADBOX = 'homework/ladingbox_1/ladingbox_1.json',
-	LOADING = 'homework/load/load.ExportJson',
-	FILE = 'homework/network_error/networkbox.json', --网络错误
-	FILE2 = 'homework/network_error/repairbox.json', --系统维护500
+	LOADBOX = 'homework/ladingbox.json',
+	LOADING = 'load/load.ExportJson',
+	FILE = 'homework/networkbox.json', --网络错误
+	FILE2 = 'homework/repairbox.json', --系统维护500
 	EXIT = 'red_in/out',
 	TRY = 'red_in/again',
 }

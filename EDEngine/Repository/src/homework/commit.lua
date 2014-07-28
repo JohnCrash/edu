@@ -9,7 +9,7 @@ local login = require 'login'
 local cache = require "cache"
 
 local ui = {
-	FILE = 'homework/z2_1/z2_1.json',
+	FILE = 'homework/commit.json',
 	BACK = 'white/back',
 	CAPTION = 'white/lesson_name',
 	END_DATE = 'white/time_over',

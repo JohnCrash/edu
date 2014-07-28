@@ -2,7 +2,7 @@
 local WorkList = require "homework/worklist"
 
 local ui = {
-	FILE = 'homework/studentloading_1/studentloading_1.json',
+	FILE = 'homework/studentloading.json',
 }
 
 local WorkLoading = class("WorkLoading")

@@ -3,7 +3,7 @@ local uikits = require "uikits"
 local json = require "json-c"
 
 local ui = {
-	FILE = 'homework/z22_1/z22_1.json',
+	FILE = 'homework/subjective.json',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	ITEM_CURRENT = 'state_now',
