@@ -85,13 +85,13 @@ local ui = {
 	ST_CAPTION = 'lesson1/text1',
 	ST_SCROLLVIEW = 'lesson_view',
 	ST_MONTH = 'month',
-	ST_DATE = 'date',
-	ST_COUNT = 'number',
-	ST_AVERAGE='average',
-	ST_TIME='time',
-	ST_COUNT_BAR='number_bar',
-	ST_AVERAGE_BAR='average_bar',
-	ST_TIME_BAR='time_bar',
+	ST_DATE = 'years',
+	ST_COUNT = 'text6',
+	ST_AVERAGE='text2',
+	ST_TIME='text4',
+--	ST_COUNT_BAR='number_bar',
+--	ST_AVERAGE_BAR='average_bar',
+--	ST_TIME_BAR='time_bar',
 	ST_COUNT_TEXT='text_no',
 	ST_AVERAGE_TEXT='text_av',
 	ST_TIME_TEXT='text_ti',
@@ -333,16 +333,13 @@ function WorkList:clone_statistics_item(v)
 					end
 					--次数
 					local ct = uikits.child(sitem,ui.ST_COUNT)
-					uikits.child(ct,ui.ST_COUNT_BAR):setPercent(t.count)
-					uikits.child(ct,ui.ST_COUNT_TEXT):setString(tostring(t.count)..'次')
+					ct:setString(tostring(t.count))
 					--平均分
 					local av = uikits.child(sitem,ui.ST_AVERAGE)
-					uikits.child(av,ui.ST_AVERAGE_BAR):setPercent(t.scroe)
-					uikits.child(av,ui.ST_AVERAGE_TEXT):setString(tostring(t.scroe)..'分')
+					av:setString(tostring(t.scroe))
 					--用时
 					local ti = uikits.child(sitem,ui.ST_TIME)
-					uikits.child(ti,ui.ST_TIME_BAR):setPercent(t.time)
-					uikits.child(ti,ui.ST_TIME_TEXT):setString(tostring(t.time)..'h')
+					ti:setString(tostring(t.time))
 					
 					table.insert(list,sitem)
 					uikits.child(sitem,ui.ST_DATE):setString(t.date)
