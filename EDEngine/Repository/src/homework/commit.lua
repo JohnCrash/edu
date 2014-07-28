@@ -9,7 +9,8 @@ local login = require 'login'
 local cache = require "cache"
 
 local ui = {
-	FILE = 'homework/z2_1/z2_1.json',
+	FILE = 'homework/commit.json',
+	FILE_3_4 = 'homework/commit43.json',
 	BACK = 'white/back',
 	CAPTION = 'white/lesson_name',
 	END_DATE = 'white/time_over',
@@ -225,7 +226,7 @@ end
 
 function WorkCommit:init()
 	if not self._root then
-		self._root = uikits.fromJson{file=ui.FILE}
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		self:addChild(self._root)
 		self._scrollview = uikits.child( self._root,ui.LIST )
 		self._item = uikits.child( self._root,ui.ITEM )

@@ -19,10 +19,44 @@ local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.as
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
 
+local res_local = "homework/studenthomework_1/"
+local course={
+	[101]={name="综合科目",logo=""},
+	[10001]={name="小学语文",logo="chinese1"},
+	[10002]={name="小学数学",logo="math"},
+	[10003]={name="小学英语",logo="english"},
+	[10005]={name="小学英语笔试",logo="english"},
+	[10009]={name="(小学)信息技术",logo="infomation"},
+	[10010]={name="(小学)安全知识",logo=""},
+	[10011]={name="(小学)智力百科",logo=""},
+	[11005]={name="小学英语听力",logo="english"},
+	[20001]={name="初中语文",logo="chinese1"},
+	[20002]={name="初中数学",logo="math"},
+	[20003]={name="初中英语",logo="english"},
+	[20004]={name="初中物理",logo="physics"},
+	[20005]={name="初中化学",logo="chemistry"},
+	[20006]={name="初中政治",logo="politics"},
+	[20007]={name="初中生物",logo="biolody"},
+	[20008]={name="初中地理",logo="geography"},
+	[20009]={name="初中历史",logo="history"},
+	[30001]={name="高中语文",logo="chinese1"},
+	[30002]={name="高中数学",logo="math"},
+	[30003]={name="高中英语",logo="english"},
+	[30004]={name="高中物理",logo="physics"},
+	[30005]={name="高中化学",logo="chemistry"},
+	[30006]={name="高中政治",logo="politics"},
+	[30007]={name="高中生物",logo="biolody"},
+	[30008]={name="高中地理",logo="geography"},
+	[30009]={name="高中历史",logo="history"},
+}
+
 local ui = {
-	FILE = 'homework/studenthomework_1/studenthomework_1.json',
-	STATISTICS_FILE = 'homework/statistics_1/statistics_1.json',
-	MORE = 'homework/more_1/more_1.json',
+	FILE = 'homework/studenthomework_1.json',
+	FILE_3_4 = 'homework/studenthomework43.json',
+	STATISTICS_FILE = 'homework/statistics.json',
+	STATISTICS_FILE_3_4 = 'homework/statistics43.json',
+	MORE = 'homework/more.json',
+	MORE_3_4 = 'homework/more43.json',
 	MORE_VIEW = 'more_view',
 	LESSON = 'lesson',
 	BACK = 'white/back',
@@ -38,13 +72,10 @@ local ui = {
 	END_DATE = 'Label_34',
 	SCORE = 'Label_37',
 	NEW_BUTTON = 'white/new1',
-	NEW_HOT_BUTTON = 'white/new2',
 	HISTORY_BUTTON = 'white/history1',
-	HISTORY_HOT_BUTTON = 'white/history2',
 	STATIST_BUTTON = 'white/statistical1',
-	STATIST_HOT_BUTTON = 'white/statistical2',
 	SETTING_BUTTON = 'white/more1',
-	SETTING_HOT_BUTTON = 'white/more2',
+	BUTTON_LINE = 'white/redline',
 	ISCOMMIT = 'hassubmitted',
 	NOCOMMIT = 'not_submitted',
 	TIMELABEL = 'time_text',
@@ -53,6 +84,20 @@ local ui = {
 	NEW = 2,
 	STATIST = 3,
 	SETTING = 4,
+	CLASS_TYPE = 'chinese',
+	ST_CAPTION = 'lesson1/text1',
+	ST_SCROLLVIEW = 'lesson_view',
+	ST_MONTH = 'month',
+	ST_DATE = 'years',
+	ST_COUNT = 'text6',
+	ST_AVERAGE='text2',
+	ST_TIME='text4',
+--	ST_COUNT_BAR='number_bar',
+--	ST_AVERAGE_BAR='average_bar',
+--	ST_TIME_BAR='time_bar',
+	ST_COUNT_TEXT='text_no',
+	ST_AVERAGE_TEXT='text_av',
+	ST_TIME_TEXT='text_ti',
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -227,9 +272,10 @@ end
 
 function WorkList:init_new_list()
 	self:SwapButton( ui.NEW )
-	self._scrollview:setVisible(true)
-	self._statistics:setVisible(false)
+	self:show_statistics(false)
+	self:show_list(true)
 	self._setting:setVisible(false)
+	
 	if not self._scID and not self._busy then
 		self._mode = nil
 		self:clear_all_item()
@@ -265,61 +311,143 @@ function WorkList:init_data_list()
 	self:relayout()
 end
 
+function WorkList:clone_statistics_item(v)
+	local item = self._statistics_item:clone()
+	if item then
+		if v.course and course[v.course] then
+			uikits.child(item,ui.ST_CAPTION):setString(course[v.course].name )
+		end
+		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
+		local idx = 1
+		local sitem
+		local list = {}
+		local size
+		local ox,oy
+		if v.pm and type(v.pm)=='table' then
+			for i,t in pairs(v.pm) do
+				if t and t.date then
+					if idx == 1 then
+						sitem = uikits.child(scrollview,ui.ST_MONTH)
+						size = sitem:getSize()
+						ox,oy = sitem:getPosition()
+					else
+						sitem = uikits.child(scrollview,ui.ST_MONTH):clone()
+						scrollview:addChild(sitem)
+					end
+					--次数
+					local ct = uikits.child(sitem,ui.ST_COUNT)
+					ct:setString(tostring(t.count))
+					--平均分
+					local av = uikits.child(sitem,ui.ST_AVERAGE)
+					av:setString(tostring(t.scroe))
+					--用时
+					local ti = uikits.child(sitem,ui.ST_TIME)
+					ti:setString(tostring(t.time))
+					
+					table.insert(list,sitem)
+					uikits.child(sitem,ui.ST_DATE):setString(t.date)
+					idx = idx + 1
+				end
+			end
+			--排列
+			scrollview:setInnerContainerSize(cc.size(size.width*#list,size.height))
+			for i,t in pairs(list) do
+				t:setPosition(cc.p(ox+size.width*(i-1),oy))
+			end
+		end
+		item:setVisible(true)
+		self._scrollview:addChild(item)
+		self._statistics_list = self._statistics_list or {}
+		table.insert(self._statistics_list,item)
+	end
+	return item
+end
+
+function WorkList:show_statistics(b)
+	if self._statistics_list then
+		for i,v in pairs(self._statistics_list) do
+			v:setVisible(b)
+		end
+	end
+end
+
+function WorkList:show_list(b)
+	if self._list then
+		for i,v in pairs(self._list) do
+			v:setVisible(b)
+		end
+	end
+end
+
+function WorkList:relayout_statistics()
+	if self._statistics_list then
+		local height = self._statistics_item_height*(#self._statistics_list)
+		self._scrollview:setInnerContainerSize(cc.size(self._statistics_item_width,height))
+		local offy = 0
+		local size = self._scrollview:getSize()
+		print( 'height = '..height )
+		print( '_statistics_item_width = '..self._statistics_item_width )
+		if height < size.height then
+			offy = size.height - height --顶到顶
+		end
+
+		for i = 1,#self._statistics_list do
+			self._statistics_list[#self._statistics_list-i+1]:setPosition(cc.p(self._statistics_item_ox,self._statistics_item_height*(i-1)+offy))
+		end
+	end
+end
+
 function WorkList:init_statistics()
 	self:SwapButton( ui.STATIST )
-	self._scrollview:setVisible(false)
-	self._statistics:setVisible(true)
+	self:show_statistics(true)
+	self:show_list(false)
 	self._setting:setVisible(false)
+	if not self._statistics_data then
+		local result = kits.read_cache('statatics.json')
+		local msg
+		if result then
+			self._statistics_data,msg = json.decode(result)
+		end
+		if self._statistics_data and type(self._statistics_data)=='table' then
+			for i,v in pairs(self._statistics_data) do
+				self:clone_statistics_item(v)
+			end
+		else
+			kits.log('decode json error:'..tostring(msg))
+		end		
+	end
+	self:relayout_statistics()
 end
 
 function WorkList:init_setting()
 	self:SwapButton( ui.SETTING )
-	self._scrollview:setVisible(false)
-	self._statistics:setVisible(false)	
+	self:show_statistics(false)
+	self:show_list(false)
 	self._setting:setVisible(true)
 end
 
 function WorkList:SwapButton(s)
 	if s == ui.NEW then
-		self._new_button:setVisible(false)
-		self._new_button2:setVisible(true)
-	else
-		self._new_button:setVisible(true)
-		self._new_button2:setVisible(false)	
-	end
-	if s == ui.HISTORY then
-		self._history_button:setVisible(false)
-		self._history_button2:setVisible(true)	
-	else
-		self._history_button:setVisible(true)
-		self._history_button2:setVisible(false)		
-	end
-	if s == ui.STATIST then
-		self._statist_button:setVisible(false)
-		self._statist_button2:setVisible(true)	
-	else
-		self._statist_button:setVisible(true)
-		self._statist_button2:setVisible(false)	
-	end
-	if s == ui.SETTING then
-		self._setting_button:setVisible(false)
-		self._setting_button2:setVisible(true)		
-	else
-		self._setting_button:setVisible(true)
-		self._setting_button2:setVisible(false)		
+		self._redline:setPosition(cc.p(self._new_x,self._redline_y))
+	elseif s == ui.HISTORY then
+		self._redline:setPosition(cc.p(self._history_x,self._redline_y))
+	elseif s == ui.STATIST then
+		self._redline:setPosition(cc.p(self._statist_x,self._redline_y))
+	elseif s == ui.SETTING then
+		self._redline:setPosition(cc.p(self._setting_x,self._redline_y))
 	end
 end
 
 function WorkList:init_gui()
-	self._root = uikits.fromJson{file=ui.FILE}
+	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	
-	self._statistics_root = uikits.fromJson{file=ui.STATISTICS_FILE}
-	self._statistics = uikits.child(self._statistics_root,ui.LESSON):clone()
+	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
+	self:addChild(self._statistics_root)
+	self._statistics_root:setVisible(false)
 	
-	self._setting_root = uikits.fromJson{file=ui.MORE}
+	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	
-	self._root:addChild(self._statistics)
 	self._root:addChild(self._setting)
 	
 	self:addChild(self._root)
@@ -337,47 +465,43 @@ function WorkList:init_gui()
 	self._item_width = size.width
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
+	local statistics_item = uikits.child(self._statistics_root,ui.LESSON)
+	self._statistics_item = statistics_item
+	if statistics_item then
+		size = statistics_item:getSize()
+		self._statistics_item_width = size.width
+		self._statistics_item_height = size.height
+		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
+	end
 	
 	self._new_button = uikits.child(self._root,ui.NEW_BUTTON)
 	uikits.event( self._new_button,
 		function(sender)
 			self:init_new_list()
 		end)
-	self._new_button2 = uikits.child(self._root,ui.NEW_HOT_BUTTON)
-	uikits.event( self._new_button2,
-		function(sender)
-			self:init_new_list()
-		end)
 	
+	self._redline = uikits.child(self._root,ui.BUTTON_LINE)
+	
+	self._new_x,self._redline_y = self._redline:getPosition()
 	self._history_button = uikits.child(self._root,ui.HISTORY_BUTTON)
+	self._history_x = self._new_x + self._history_button:getSize().width
+	
 	uikits.event( self._history_button,
 		function(sender)
 			self:init_history_list()
 		end)
-	self._history_button2 = uikits.child(self._root,ui.HISTORY_HOT_BUTTON)
-	uikits.event( self._history_button2,
-		function(sender)
-			self:init_history_list()
-		end)
-		
 	self._statist_button = uikits.child(self._root,ui.STATIST_BUTTON)
+	self._statist_x = self._history_x + self._statist_button:getSize().width
+	
 	uikits.event( self._statist_button,
-		function(sender)
-			self:init_statistics()
-		end)
-	self._statist_button2 = uikits.child(self._root,ui.STATIST_HOT_BUTTON)
-	uikits.event( self._statist_button2,
 		function(sender)
 			self:init_statistics()
 		end)
 		
 	self._setting_button = uikits.child(self._root,ui.SETTING_BUTTON)
+	self._setting_x = self._statist_x + self._setting_button:getSize().width
+	
 	uikits.event( self._setting_button,
-		function(sender)
-			self:init_setting()
-		end)
-	self._setting_button2 = uikits.child(self._root,ui.SETTING_HOT_BUTTON)
-	uikits.event( self._setting_button2,
 		function(sender)
 			self:init_setting()
 		end)
@@ -397,8 +521,10 @@ end
 
 function WorkList:init_history_list()
 	self:SwapButton( ui.HISTORY )
-	self._scrollview:setVisible(true)
-	self._statistics:setVisible(false)
+	self:show_statistics(false)
+	self:show_list(true)
+	self._setting:setVisible(false)
+	
 	if not self._scID and not self._busy then
 		self._mode = ui.HISTORY
 		self:clear_all_item()
@@ -461,6 +587,11 @@ function WorkList:add_item( t )
 	end
 	if t.course_name then --科目名称
 		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
+	end
+	if t.course and course[t.course] and course[t.course].logo then --类型
+		uikits.child(item,ui.CLASS_TYPE):loadTexture(res_local..course[t.class_id].logo..'.jpg')
+	else
+		--默认设置
 	end
 	if t.cnt_item and t.cnt_item_finish then --数量
 		local text = uikits.child( item,ui.ITEM_COUNT)

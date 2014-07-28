@@ -71,6 +71,18 @@ local function InitDesignResolutionMode(t)
 	end
 	return 1
 end
+local FACTOR_3_4 = 1
+local FACTOR_9_16 = 2
+local function get_factor()
+	local glview = Director:getOpenGLView()
+	local ss = glview:getFrameSize()
+	local factor = ss.height/ss.width
+	if factor > (3/4+9/16)/2 then --更接近3/4
+		return FACTOR_3_4,factor
+	else --更接近9/16
+		return FACTOR_9_16,factor
+	end
+end
 
 local function get_scale()
 	return scale
@@ -418,6 +430,13 @@ local function fromJson( t )
 	if t and type(t)=='table' then
 		if t.file and type(t.file)=='string' then
 			s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file)
+		elseif t.file_9_16 and t.file_3_4 then
+			--根据不同的分辨率加载文件
+			if get_factor() == FACTOR_3_4 then
+				s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file_3_4)
+			else
+				s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file_9_16)
+			end
 		end
 	end
 	if not s then
@@ -721,4 +740,7 @@ return {
 	pauseSound = pauseSound,
 	playSound = playSound,
 	log_caller = log_caller,
+	FACTOR_3_4 = FACTOR_3_4,
+	FACTOR_9_16 = FACTOR_9_16,
+	get_factor = get_factor,
 }

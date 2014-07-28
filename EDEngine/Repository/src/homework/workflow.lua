@@ -8,10 +8,11 @@ local json = require "json-c"
 
 kits.log( "Hello World!" )
 kits.log( "====================" )
-local res_root = 'homework/z21_1/'
+local res_root = 'homework/'
 local ui = {
-	FILE = res_root..'z21_1.json',
-	PLAYBOX = 'homework/playbox/playbox.json',
+	FILE = res_root..'workflow.json',
+	FILE_3_4 = res_root..'workflow43.json',
+	PLAYBOX = 'homework/playbox.json',
 	PLAY = 'pause',
 	PAUSE = 'play',
 	BACK = 'milk_write/back',
@@ -750,9 +751,14 @@ function WorkFlow:load_original_data_from_string( str )
 end
 
 function WorkFlow:init_gui()
-	WorkFlow.scale = uikits.initDR{width=1920,height=1080}
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		WorkFlow.scale = uikits.initDR{width=1920,height=1080}
+	else
+		WorkFlow.scale = uikits.initDR{width=1440,height=1080}
+	end
+	
 	WorkFlow.space = 16*WorkFlow.scale
-	self._root = uikits.fromJson{file=ui.FILE}
+	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 		--保存
@@ -921,7 +927,7 @@ function WorkFlow:init_anser_gui()
 	self._option_edit[1] = uikits.child(a,ui.EDIT_1)
 	self._option_edit[2] = uikits.child(a,ui.EDIT_2)
 	self._option_edit[3] = uikits.child(a,ui.EDIT_3)
-	self._option_edit[4] = uikits.child(a,ui.EDIT_4)
+	--self._option_edit[4] = uikits.child(a,ui.EDIT_4)
 end
 
 local function item_ui( t )
@@ -1861,23 +1867,25 @@ WorkFlow._topics = {
 					if op then
 						data.answer = data.answer or {}
 						for i = 1,op do
-							self._option_edit[i]:setVisible(true)
-							local e = uikits.child(self._option_edit[i],ui.ANSWER_TEXT)
-							if data.answer and data.answer[i] then
-								e:setText(data.answer[i])
-							else
-								e:setText('')
-							end
-							uikits.event(e,
-									function(sender,eventType)
-										if eventType == ccui.TextFiledEventType.insert_text then
-											data.state = ui.STATE_FINISHED
-											data.answer[i] = sender:getStringValue()
-										elseif eventType == ccui.TextFiledEventType.delete_backward then
-											data.state = ui.STATE_FINISHED
-											data.answer[i] = sender:getStringValue()
-										end
-									end)							
+							if self._option_edit[i] then
+								self._option_edit[i]:setVisible(true)
+								local e = uikits.child(self._option_edit[i],ui.ANSWER_TEXT)
+								if data.answer and data.answer[i] then
+									e:setText(data.answer[i])
+								else
+									e:setText('')
+								end
+								uikits.event(e,
+										function(sender,eventType)
+											if eventType == ccui.TextFiledEventType.insert_text then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											elseif eventType == ccui.TextFiledEventType.delete_backward then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											end
+										end)	
+							end									
 						end
 					end
 				end},
@@ -1953,7 +1961,7 @@ function WorkFlow:set_anwser_field( i )
 			for i=1,8 do
 				self._option_img[i]:setVisible(false)
 			end
-			for i=1,4 do
+			for i=1,#self._option_edit do
 				self._option_edit[i]:setVisible(false)
 			end
 			self._option_link:setVisible(false)

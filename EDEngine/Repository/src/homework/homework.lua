@@ -64,7 +64,11 @@ local args =
 function HomeWork:init()
 	--uikits.test( self )
 	--require('src/test').scroll( self )
-	uikits.initDR{width=1920,height=1080}
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1920,height=1080}
+	else
+		uikits.initDR{width=1440,height=1080}
+	end
 	--simple ui
 
 	--uikits.pushScene( WorkLoading )

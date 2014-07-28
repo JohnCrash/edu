@@ -3,7 +3,8 @@ local uikits = require "uikits"
 local json = require "json-c"
 
 local ui = {
-	FILE = 'homework/z22_1/z22_1.json',
+	FILE = 'homework/subjective.json',
+	FILE_3_4 = 'homework/subjective43.json',
 	BACK = 'milk_write/back',
 	LIST = 'milk_write/state_view',
 	ITEM_CURRENT = 'state_now',
@@ -185,7 +186,7 @@ end
 function Subjective:init_gui()
 	if not self._root then
 		self._list = {}
-		self._root = uikits.fromJson{file=ui.FILE}
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)
