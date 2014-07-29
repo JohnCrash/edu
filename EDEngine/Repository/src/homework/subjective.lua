@@ -66,13 +66,32 @@ function Subjective:clone_item( state )
 	end
 end
 
+function Subjective:init_delay_release()
+	local scheduler = self:getScheduler()
+	local function timer_func()
+		if self._remove_items and #self._remove_items>0 then
+			for i,v in pairs(self._remove_items) do
+				v:removeFromParent()
+			end
+			self._remove_items = nil
+		end
+	end
+	self._scID = scheduler:scheduleScriptFunc( timer_func,1,false )
+end
+
 function Subjective:set_item_state( i,ste )
 	if self._list[i] then
 		local item = self._list[i]
 		local num = uikits.child(item,ui.ITEM_NUM)
 		local s = num:getString()
 		local x,y = item:getPosition()
-		item:removeFromParent()
+		--3.2不能再其方法内部释放对象
+		--item:removeFromParent()
+		--延迟释放
+		item:setVisible(false)
+		self._remove_items = self._remove_items or {}
+		table.insert(self._remove_items,item)
+		
 		item = self:clone_item(ste)
 		local n = uikits.child(item,ui.ITEM_NUM )
 		n:setString( s )
@@ -162,6 +181,7 @@ end
 function Subjective:init()
 	self:init_data()
 	self:init_gui()
+	self:init_delay_release()
 end
 
 function Subjective:init_data()
@@ -202,7 +222,7 @@ function Subjective:init_gui()
 		
 		self._record_but = uikits.child(self._contentview,ui.RECORD_BUTTON)
 		self._cam_but = uikits.child(self._contentview,ui.CAM_BUTTON)
-		self._photo_but = uikits.child(self._contentview,ui.PHOT_BUTTON)
+		self._photo_but = uikits.child(self._contentview,ui.PHOTO_BUTTON)
 		uikits.event( self._record_but,
 			function(sender)
 				print('record audio')
@@ -274,7 +294,10 @@ function Subjective:init_gui()
 end
 
 function Subjective:release()
-	
+	if self._scID then
+		self:getScheduler():unscheduleScriptEntry(self._scID)
+		self._scID = nil
+	end
 end
 
 return Subjective
