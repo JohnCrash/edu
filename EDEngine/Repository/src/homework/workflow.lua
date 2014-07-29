@@ -1353,7 +1353,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 		item:addTouchEventListener(
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
-						local p = sender:getTouchStartPos()
+						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
@@ -1362,7 +1362,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
-						local p = sender:getTouchEndPos()
+						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
 						layout:setEnabled(true)
@@ -1385,7 +1385,7 @@ local function relayout_sort( layout,data,op,i,isH,pageview )
 						kits.log( data.my_answer )
 						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
-						local p = sender:getTouchMovePos()
+						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
 						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 						place_item( sender,p.x,p.y )
@@ -1646,7 +1646,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 		item:addTouchEventListener(
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
-						local p = sender:getTouchStartPos()
+						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * WorkFlow.scale
 						sp.y = sp.y * WorkFlow.scale
@@ -1662,7 +1662,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 							end
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
-						local p = sender:getTouchEndPos()
+						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
 						pageview:setEnabled(true)
 						layout:setEnabled(true)
@@ -1710,7 +1710,7 @@ local function relayout_drag( layout,data,op,i,ismul,pageview )
 						end						
 						save_my_answer()
 					elseif eventType == ccui.TouchEventType.moved then
-						local p = sender:getTouchMovePos()
+						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
 						if ismul then
 							if draging_item then

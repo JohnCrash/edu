@@ -314,13 +314,17 @@ function WorkCommit:init()
 		end
 		local commit = uikits.child(self._root,ui.COMMIT)
 		if self._args.status ~= 0 then --提交状态,0未提交,10,11已经提交
-			--commit:setEnabled(false)
+			commit:setBright(false)
+			commit:setHighlighted(false)
+			commit:setEnabled(false)
 			--临时修改
 			uikits.event(commit,function(sender)
 					uikits.pushScene( Score.create(self._args) )
 				end,'click')				
 		else
 			commit:setEnabled(true)
+			commit:setBright(true)
+			commit:setHighlighted(true)
 			uikits.event(commit,function(sender)
 					--提交
 					if self._args.status == 0 then

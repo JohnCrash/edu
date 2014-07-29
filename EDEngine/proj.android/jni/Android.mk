@@ -13,7 +13,8 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/lua_thread_curl.cpp \
 				   ../../Classes/thread_curl.cpp \
 				   ../../Classes/Console.cpp \
-				   ../../Classes/lua_json.cpp
+				   ../../Classes/lua_json.cpp \
+				   ../../Classes/AssetsManager.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
