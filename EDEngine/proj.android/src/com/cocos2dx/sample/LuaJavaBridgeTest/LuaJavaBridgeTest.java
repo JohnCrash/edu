@@ -1,9 +1,6 @@
 /****************************************************************************
-Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2011      Zynga Inc.
-Copyright (c) 2013-2014 Chukong Technologies Inc.
- 
+
 http://www.cocos2d-x.org
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,21 +20,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-****************************************************************************/
-package org.cocos2dx.cpp;
+ ****************************************************************************/
+package com.cocos2dx.sample.LuaJavaBridgeTest;
 
-import org.cocos2dx.lib.Cocos2dxActivity;
-import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
+import org.cocos2dx.lib.Cocos2dxLuaJavaBridge;
 
-public class AppActivity extends Cocos2dxActivity {
-    public Cocos2dxGLSurfaceView onCreateView() {
-        Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
-        // TestCpp should create stencil buffer
-        //glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);
-        glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
-//Android SDK Document        
-//        setEGLConfigChooser(int redSize, int greenSize, int blueSize, int alphaSize, int depthSize, int stencilSize)
-//        Install a config chooser which will choose a config with at least the specified depthSize and stencilSize, and exactly the specified redSize, greenSize, blueSize and alphaSize.
-        return glSurfaceView;
-    }
+public class LuaJavaBridgeTest
+{	
+	public static int addTwoNumbers(final int num1,final int num2){
+		return num1 + num2;
+	}
+	
+	public static void callbackLua(final String tipInfo,final int luaFunc){
+		Cocos2dxLuaJavaBridge.callLuaFunctionWithString(luaFunc, "success");
+		Cocos2dxLuaJavaBridge.releaseLuaFunction(luaFunc);
+	}
 }
