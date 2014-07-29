@@ -79,7 +79,7 @@ void AppDelegate::initLuaEngine()
 		{
 			path.pop_back();
 		}
-	std::string luap = path + "\\luacore";
+	std::string luap = path + "/luacore";
 	FileUtils::getInstance()->addSearchPath(luap.c_str());
 
     auto pEngine = LuaEngine::getInstance();
