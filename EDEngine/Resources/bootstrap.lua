@@ -250,11 +250,11 @@ local function CreateSyncLayer()
 	local widgetSize = cc.Director:getInstance():getVisibleSize()
 	local first = 0
 	local maxcount,count
-  local err,filelist
+	local err,filelist
   
 	loadingBar:setTag(0)
 	loadingBar:setName("LoadingBar")
-	loadingBar:loadTexture("loading/sliderProgress.png")
+	loadingBar:loadTexture("res/loading/sliderProgress.png")
 	loadingBar:setPercent(0)
 	loadingBar:setScaleY(3)
 	loadingBar:setScaleX(3)
@@ -318,7 +318,7 @@ local function CreateSyncLayer()
 	local function onNodeEvent(tag)
         if tag == "exit" then
 			cclog('Exit loading...')
-            layer:unscheduleUpdate()
+			layer:unscheduleUpdate()
 			first = 0
         end
     end

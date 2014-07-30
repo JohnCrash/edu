@@ -267,16 +267,19 @@ function WorkFlow:init_data( )
 	end
 	init_answer_map()
 	this = self 
-	
+	kits.log('WorkFlow:init_data request :'..url_topics )
 	local ret = cache.request_resources( { urls = { [1]={url = url_topics,cookie=login.cookie()}},ui=self },
 			function(rtb,i,isok)
 				if isok then
+					kits.log('	request success')
 					local result = cache.get_data( url_topics )
 					if result and type(result) == 'string' then
+						kits.log('	cache.get_data success')
 						self._data = self:load_original_data_from_string( result )
 						local x
 						x,self._item_y = self._item_current:getPosition()
 						if self._data then
+							kits.log('	load_original_data_from_string success')
 							self._url_topics = url_topics
 							for i,v in pairs(self._data) do
 								self:add_item( v )
@@ -691,9 +694,13 @@ function WorkFlow:load_original_data_from_string( str )
 	local res = {}
 	local b = true
 	if str then
+		kits.log('================')
+		kits.log( str )
+		kits.log('================')
 		local data = kits.decode_json(str)
 
 		if data then
+			kits.log('	load_original_data_from_string decode_json success')
 			local ds
 			if data.item and type(data.item)=='table' then
 				ds = data.item
@@ -701,6 +708,11 @@ function WorkFlow:load_original_data_from_string( str )
 				ds = data
 			end
 			self.data = ds --保存副本
+			kits.log('	type(ds)='..type(ds)..',#ds='..table.maxn(ds))
+			for i,v in ipairs(ds) do
+				kits.log('	key='..tostring(i))
+				kits.log('	value='..tostring(v))
+			end
 			for i,v in ipairs(ds) do
 				local k = {}
 				k.item_type = v.item_type
@@ -745,7 +757,11 @@ function WorkFlow:load_original_data_from_string( str )
 				self._next_button:setVisible(false)
 				self._finish_button:setVisible(true)
 			end
+		else
+			kits.log('	load_original_data_from_string decode_json faild')
 		end
+	else
+		kits.log('	load_original_data_from_string decode_json str=nil')
 	end
 	return res
 end

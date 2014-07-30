@@ -152,9 +152,13 @@ end
 function Subjective:relayout()
 	if self._scrollview and #self._list > 0 then
 		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
-		local b = true
+		
 		for i,v in ipairs(self._list) do
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
+		end
+		
+		local b = true
+		for i,v in ipairs(self._data) do
 			if v.state == ui.STATE_UNFINISHED then
 				b = false
 			end
@@ -165,7 +169,7 @@ function Subjective:relayout()
 		else
 			self._next_button:setVisible(true)
 			self._finish_button:setVisible(false)		
-		end		
+		end
 	end
 end
 
@@ -246,6 +250,10 @@ function Subjective:init_gui()
 			anchorY = anp.y,
 			width=self._contentview_size.width,
 			height=self._contentview_size.height}
+		print('x_='..x_)
+		print('y_='..y_)
+		print('anp.x='..anp.x)
+		print('anp.y='..anp.y)		
 		self._contentview:setVisible(false)
 		self._root:addChild( self._pageview )
 		

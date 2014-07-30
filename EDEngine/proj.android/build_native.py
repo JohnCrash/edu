@@ -1,4 +1,4 @@
-#!/usr/bin/python
+﻿#!/usr/bin/python
 # build_native.py
 # Build native codes
 
@@ -158,7 +158,7 @@ def build(ndk_build_param,android_platform,build_mode):
     print 'cocos_root = %s' % cocos_root
     app_android_root = current_dir
     print 'app_android_root = %s' % app_android_root
-    copy_resources(app_android_root)
+    #copy_resources(app_android_root)
     print 'build...'
     if android_platform is not None:
 				sdk_root = check_environment_variables_sdk()

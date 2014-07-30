@@ -14,6 +14,7 @@ end
 --require("mobdebug").start("192.168.2.182")
 
 local function isNeedSync()
+--[[ android test,always return true 
   local version_xml = 'version.xml'
   local local_version = kits.read_local_file(version_xml)
   if not local_version then
@@ -34,6 +35,7 @@ local function isNeedSync()
       return true
     end
   end
+  --]]
   return true
 end
 
@@ -250,11 +252,11 @@ local function CreateSyncLayer()
 	local widgetSize = cc.Director:getInstance():getVisibleSize()
 	local first = 0
 	local maxcount,count
-  local err,filelist
+	local err,filelist
   
 	loadingBar:setTag(0)
 	loadingBar:setName("LoadingBar")
-	loadingBar:loadTexture("loading/sliderProgress.png")
+	loadingBar:loadTexture("res/loading/sliderProgress.png")
 	loadingBar:setPercent(0)
 	loadingBar:setScaleY(3)
 	loadingBar:setScaleX(3)
@@ -318,7 +320,7 @@ local function CreateSyncLayer()
 	local function onNodeEvent(tag)
         if tag == "exit" then
 			cclog('Exit loading...')
-            layer:unscheduleUpdate()
+			layer:unscheduleUpdate()
 			first = 0
         end
     end

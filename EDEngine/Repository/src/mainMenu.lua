@@ -118,12 +118,23 @@ function CreateTestMenu()
         BeginPos = {x = location.x, y = location.y}
         CurPos = {x = curPosx, y = nextPosy}
     end
-
     local listener = cc.EventListenerTouchOneByOne:create()
     listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCH_BEGAN )
     listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCH_MOVED )
     local eventDispatcher = menuLayer:getEventDispatcher()
     eventDispatcher:addEventListenerWithSceneGraphPriority(listener, menuLayer)
-		
+	
+	--下面的代码用于测试
+	local function onKeyRelease(key,event)
+		print('key='..tostring(key))
+		if key == cc.KeyCode.KEY_ESCAPE then
+			cc.Director:getInstance():endToLua()
+		end
+	end	
+	local listener_keyboard = cc.EventListenerKeyboard:create()
+	listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
+	local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+	directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+	
     return menuLayer
 end

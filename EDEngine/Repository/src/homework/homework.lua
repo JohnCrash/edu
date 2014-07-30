@@ -4,6 +4,7 @@ local WorkList = require "homework/worklist"
 local WorkLoading = require "homework/workloading"
 local WorkCommit = require "homework/commit"
 local WorkFlow = require "homework/workflow"
+local Subjective = require "homework/subjective"
 local login = require "login"
 
 --str = "<img src=\"http://www.lexuelejiao.com/92342.png\" \\>"
@@ -90,6 +91,7 @@ function HomeWork:init()
 		{text = '作业列表',scene=WorkList},
 		{text = '提交',scene=WorkCommit,arg=args},
 		{text = '做作业',scene=WorkFlow,arg=args},
+		{text = '主观题',scene=Subjective},
 	}
 	for i,v in pairs(wk) do
 		self:addChild( uikits.button{caption=v.text,width = 240,height=48,fontSize=32,
