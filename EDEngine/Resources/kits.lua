@@ -5,7 +5,13 @@ local http = require "socket.http"
 local json = require "json-c"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
-local cache_dir = local_dir.."cache/"
+local cache_dir
+local platform = CCApplication:getInstance():getTargetPlatform()
+if platform == kTargetWindows then
+	cache_dir = local_dir.."cache/"
+else
+	cache_dir = local_dir.."test/"
+end
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()

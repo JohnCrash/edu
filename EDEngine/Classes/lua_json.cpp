@@ -1,6 +1,7 @@
 ﻿#include "lua_ext.h"
 #include "tolua++.h"
 #include "json-c/json.h"
+#include "cocos2d.h"
 
 #if __cplusplus
 extern "C" {
@@ -146,9 +147,14 @@ bool decode_json( lua_State *L,json_object *jobject )
 		json_object_is_type(jobject,json_type_int) )
 	{
 		if( json_object_is_type(jobject,json_type_int) )
+		{
 			lua_pushnumber(L,json_object_get_int(jobject));
+		}
 		else
+		{
 			lua_pushnumber(L,json_object_get_double(jobject));
+		}
+		
 		return true;
 	}
 	else if( json_object_is_type(jobject,json_type_boolean) )
@@ -193,6 +199,10 @@ bool decode_json( lua_State *L,json_object *jobject )
 				lua_pop(L,1);
 		}
 		return true;
+	}
+	else
+	{
+		CCLOG(" 	json unkown type");
 	}
 	return false;
 }
