@@ -1,7 +1,6 @@
 ﻿#include "lua_ext.h"
 #include "tolua++.h"
 #include "json-c/json.h"
-#include "cocos2d.h"
 
 #if __cplusplus
 extern "C" {
@@ -199,10 +198,6 @@ bool decode_json( lua_State *L,json_object *jobject )
 				lua_pop(L,1);
 		}
 		return true;
-	}
-	else
-	{
-		CCLOG(" 	json unkown type");
 	}
 	return false;
 }
