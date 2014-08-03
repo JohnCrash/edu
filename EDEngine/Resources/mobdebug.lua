@@ -423,6 +423,40 @@ local function is_pending(peer)
 end
 local lastline
 local get_value
+
+--返回一个表,nvalue可能是a.b.c.d
+local function split_value(nvalue)
+	local t = {}
+	for w in string.gmatch(nvalue,"[^%.]+") do
+		table.insert(t,w)
+	end
+	return t
+end
+--先尝试取upvalue,local,然后global
+local function getLuaValue(level,nvalue)
+	--nvalue,可能是由一系列的点分割的.如a.b.c.d
+	local svalue = split_value(nvalue)
+	if svalue and svalue[1] then
+		local i = 1
+		repeat
+			local name,value = debug.getupvalue(level,i)
+			if name == svalue[1] then
+				return value[] --value["b.c"]能成功吗?
+			end
+			i = i + 1
+		until not name
+		i = 1
+		repeat
+			local name,value = debug.getlocal(level,i)
+			if name == svalue[1] then
+				--同上upvalue
+			end
+			i = i + 1
+		until not name
+		--都没找到,最后尝试在global中
+	end
+end
+
 local function debug_hook(event, line)
   -- (1) LuaJIT needs special treatment. Because debug_hook is set for
   -- *all* coroutines, and not just the one being debugged as in regular Lua
@@ -592,7 +626,7 @@ local function debug_hook(event, line)
 		elseif res=='getv' then
 			--取变量,先看看是不是一个upvalue,local,global
 			--get_value
-			local info
+			local info = getLuaValue(stack_current+1,get_value) --要包括getLuaValue函数级
 			if info then
 				status,res = coroutine.resume(core_debugger,events.GETV,info)
 			else
