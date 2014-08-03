@@ -78,7 +78,7 @@ local debug = require "debug"
 local coro_debugger
 local coro_debugee
 local coroutines = {}; setmetatable(coroutines, {__mode = "k"}) -- "weak" keys
-local events = { BREAK = 1, WATCH = 2, RESTART = 3, STACK = 4 }
+local events = { BREAK = 1, WATCH = 2, RESTART = 3, STACK = 4, GETV = 5,ERROR = 6 }
 local breakpoints = {}
 local watches = {}
 local lastsource
@@ -91,6 +91,7 @@ local step_into = false
 local step_over = false
 local step_level = 0
 local stack_level = 0
+local stack_current = 0
 local server
 local buf
 local outputs = {}
@@ -421,6 +422,7 @@ local function is_pending(peer)
   return buf
 end
 local lastline
+local get_value
 local function debug_hook(event, line)
   -- (1) LuaJIT needs special treatment. Because debug_hook is set for
   -- *all* coroutines, and not just the one being debugged as in regular Lua
@@ -565,6 +567,7 @@ local function debug_hook(event, line)
 	  print(3)
     end
 	
+	stack_current = 2 --初始状态
     -- handle 'stack' command that provides stack() information to the debugger
     if status and res == 'stack' then
       while status and res == 'stack' do
@@ -577,7 +580,29 @@ local function debug_hook(event, line)
       end
     end
 
-    -- need to recheck once more as resume after 'stack' command may
+	while status do
+		if res=='track' then
+			--改变调用堆栈
+			local info = debug.getinfo(stack_current,'Sl')
+			if info and info.source and info.currentline then
+				status,res = coroutine.resume(coro_debugger,events.BREAK,info.source,info.currentline)
+			else
+				status,res = coroutine.resume(coro_debugger,events.ERROR)
+			end
+		elseif res=='getv' then
+			--取变量,先看看是不是一个upvalue,local,global
+			--get_value
+			local info
+			if info then
+				status,res = coroutine.resume(core_debugger,events.GETV,info)
+			else
+				status,res = coroutine.resume(coro_debugger,events.ERROR)
+			end
+		else
+			break
+		end
+	end
+   -- need to recheck once more as resume after 'stack' command may
     -- return something else (for example, 'exit'), which needs to be handled
     if status and res and res ~= 'stack' then
 	--[[
@@ -812,6 +837,32 @@ local function debugger_loop(sev, svars, sfile, sline)
       else step_level = stack_level end
 
 	  eval_env = do_command_and_switch_hook(command)
+	elseif command == 'TRACKBACK' then
+		--返回调用堆栈的上一个层次
+		stack_current = stack_current + 1
+		if stack_current > stack_level then stack_current = stack_level end
+		local ev,file,line = coroutine.yield("track")
+		if ev == events.BREAK then
+			print('202 Paused: '..tostring(file)..'@'..tostring(line))
+			server:send("202 Paused "..file.." "..line.."\n")
+		end
+	elseif command == 'TRACKFRONT' then
+		--返回调用堆栈的下一个层次
+		stack_current = stack_current - 1
+		if stack_current < 2 then stack_current = 2 end
+		local ev,file,line = coroutine.yield("track")
+		if ev == events.BREAK then
+			print('202 Paused: '..tostring(file)..'@'..tostring(line))
+			server:send("202 Paused "..file.." "..line.."\n")
+		end			
+	elseif command == 'GETV' then
+		--取得变量
+		local _,_,value = string.find(line,"^[A-Z]+%s+(.+)%s*$")
+		get_value = value
+		local ev,res = coroutine.yield("getv")
+		if ev == events.GETV then
+			server:send("GETV "..tostring(res))
+		end
     elseif command == "BASEDIR" then
       local _, _, dir = string.find(line, "^[A-Z]+%s+(.+)%s*$")
       if dir then
