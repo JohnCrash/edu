@@ -283,9 +283,29 @@ local function remove_breakpoint(file, line)
   if breakpoints[line] then breakpoints[line][file] = nil end
 end
 
+local function get_file_name(f)
+	return string.match(f,"(%a+%.lua)")
+end
+
 local function has_breakpoint(file, line)
-  return breakpoints[line]
-     and breakpoints[line][iscasepreserving and string.lower(file) or file]
+	if breakpoints[line] then
+		local filename = get_file_name(iscasepreserving and string.lower(file) or file)
+		if filename then
+			for f,v in pairs(breakpoints[line]) do
+				--仅仅比较文件名称
+				if get_file_name(f) == filename then
+					print('TRUE '..tostring(filename)..'#'..tostring(get_file_name(f)))
+					return true
+				end
+			end
+		else
+			print('F=NIL '..tostring(file)..'#'..line)
+		end
+	end
+	return false
+--原始代码
+--  return breakpoints[line]
+--     and breakpoints[line][iscasepreserving and string.lower(file) or file]
 end
 
 local function restore_vars(vars)
@@ -391,7 +411,8 @@ end
 
 local function is_pending(peer)
   -- if there is something already in the buffer, skip check
-  if not buf and checkcount >= mobdebug.checkcount then
+  --if not buf and checkcount >= mobdebug.checkcount then
+  if not buf then
     peer:settimeout(0) -- non-blocking
     buf = peer:receive(1)
     peer:settimeout() -- back to blocking
@@ -399,7 +420,7 @@ local function is_pending(peer)
   end
   return buf
 end
-
+local lastline
 local function debug_hook(event, line)
   -- (1) LuaJIT needs special treatment. Because debug_hook is set for
   -- *all* coroutines, and not just the one being debugged as in regular Lua
@@ -441,11 +462,20 @@ local function debug_hook(event, line)
     -- (3) breakpoint; check for line first as it's known; then for file
     -- (4) socket call (only do every Xth check)
     -- (5) at least one watch is registered
-    if not (
-      step_into or step_over or breakpoints[line] or watchescnt > 0
-      or is_pending(server)
-    ) then checkcount = checkcount + 1; return end
-
+	local caller2 = debug.getinfo(2, "S")
+	
+    if not (step_into or step_over or breakpoints[line] or watchescnt > 0 or is_pending(server)) then 
+	--	print('['..tostring(line)..']'..tostring(caller2.source)..'$is_pending:'..tostring(is_pending(server)))
+		lastline = line
+		checkcount = checkcount + 1; return 
+	end
+	--解决多次按运行的问题,相同的行就直接继续
+	if lastline == line then
+		checkcount = checkcount + 1;
+		return
+	end
+	lastline = line
+	--print('<'..tostring(line)..'>'..tostring(caller2.source))
     checkcount = mobdebug.checkcount -- force check on the next command
 
     -- this is needed to check if the stack got shorter or longer.
@@ -462,7 +492,7 @@ local function debug_hook(event, line)
     stack_level = stack_depth(stack_level+1)
 
     local caller = debug.getinfo(2, "S")
-
+	--print('-->'..tostring(caller.source))
     -- grab the filename and fix it if needed
     local file = lastfile
     if (lastsource ~= caller.source) then
@@ -517,11 +547,20 @@ local function debug_hook(event, line)
       or (step_over and stack_level <= step_level)
       or has_breakpoint(file, line)
       or is_pending(server))
-
+	--[[  
+		print('status='..tostring(status))
+		print('step_over='..tostring(step_over))
+		print('step_into='..tostring(step_into))
+		print('stack_level='..tostring(stack_level))
+		print('step_level='..tostring(step_level))
+		print('has_breakpoint='..tostring(has_breakpoint(file, line))..' '..tostring(file)..'#'..tostring(line))
+		print('is_pending(server)='..tostring(is_pending(server)))
+	--]]	
     if getin then
       vars = vars or capture_vars()
       step_into = false
       step_over = false
+	  print('events.Break')
       status, res = coroutine.resume(coro_debugger, events.BREAK, vars, file, line)
 	  print(3)
     end
@@ -570,6 +609,34 @@ local function stringify_results(status, ...)
   return pcall(serpent.dump, t, {sparse = false})
 end
 
+local _no_blocking = false
+local function do_command_and_switch_hook(command)
+	server:send("200 OK\n")
+	print('DO:'..command)
+	local ev, vars, file, line, idx_watch = coroutine.yield()
+	print('DONE')
+	if ev == events.BREAK then
+		if not is_pending(server) then
+			_no_blocking = false
+			print('202 Paused: '..tostring(file)..'@'..tostring(line))
+			server:send("202 Paused " .. file .. " " .. line .. "\n")
+		else
+			--有很多运行时发送的命令
+			_no_blocking = true
+			server:settimeout(0.5)
+		end
+	elseif ev == events.WATCH then
+		print('Paused: '..tostring(file)..'@'..tostring(line)..'#'..tostring(idx_watch))
+		server:send("203 Paused " .. file .. " " .. line .. " " .. idx_watch .. "\n")
+	elseif ev == events.RESTART then
+	-- nothing to do
+	else
+		server:send("401 Error in Execution " .. #file .. "\n")
+		server:send(file)
+	end
+	return vars
+end
+
 local function debugger_loop(sev, svars, sfile, sline)
   local command
   local app, osname
@@ -582,10 +649,17 @@ local function debugger_loop(sev, svars, sfile, sline)
   while true do
     local line, err
     local wx = rawget(genv, "wx") -- use rawread to make strict.lua happy
-    if (wx or mobdebug.yield) and server.settimeout then server:settimeout(mobdebug.yieldtimeout) end
+	if (wx or mobdebug.yield) and server.settimeout then 
+		print('settimeout '..tostring(mobdebug.yieldtimeout))
+		server:settimeout(mobdebug.yieldtimeout) 
+	end
     while true do
       line, err = server:receive()
       if not line and err == "timeout" then
+		if _no_blocking then
+			--命令执行完了,切换回hook继续执行
+			do_command_and_switch_hook("RUN")
+		end
         -- yield for wx GUI applications if possible to avoid "busyness"
         app = app or (wx and wx.wxGetApp and wx.wxGetApp())
         if app then
@@ -614,12 +688,16 @@ local function debugger_loop(sev, svars, sfile, sline)
         if buf then line = buf .. line; buf = nil end
         break
       end
-    end
-    if server.settimeout then server:settimeout() end -- back to blocking
+    end	
+    if server.settimeout and not _no_blocking then 
+		print('settimeout blocking 1')
+		server:settimeout() 
+	end -- back to blocking
     command = string.sub(line, string.find(line, "^[A-Z]+"))
     if command == "SETB" then
       local _, _, _, file, line = string.find(line, "^([A-Z]+)%s+(.-)%s+(%d+)%s*$")
       if file and line then
+		print('		Add BP:'..tostring(file)..'@'..tostring(line))
         set_breakpoint(file, tonumber(line))
         server:send("200 OK\n")
       else
@@ -628,6 +706,7 @@ local function debugger_loop(sev, svars, sfile, sline)
     elseif command == "DELB" then
       local _, _, _, file, line = string.find(line, "^([A-Z]+)%s+(.-)%s+(%d+)%s*$")
       if file and line then
+		print('		Del BP:'..tostring(file)..'@'..tostring(line))
         remove_breakpoint(file, tonumber(line))
         server:send("200 OK\n")
       else
@@ -672,6 +751,7 @@ local function debugger_loop(sev, svars, sfile, sline)
 
         if size == 0 and name == '-' then -- RELOAD the current script being debugged
           server:send("200 OK 0\n")
+		  print('LOAD Yield')
           coroutine.yield("load")
         else
           -- receiving 0 bytes blocks (at least in luasocket 2.0.2), so skip reading
@@ -681,6 +761,7 @@ local function debugger_loop(sev, svars, sfile, sline)
             if func then
               server:send("200 OK 0\n")
               debugee = func
+			  print('LOAD Yield2')
               coroutine.yield("load")
             else
               server:send("401 Error in Expression " .. #res .. "\n")
@@ -718,57 +799,19 @@ local function debugger_loop(sev, svars, sfile, sline)
         server:send("400 Bad Request\n")
       end
     elseif command == "RUN" then
-      server:send("200 OK\n")
-
-      local ev, vars, file, line, idx_watch = coroutine.yield()
       eval_env = vars
-      if ev == events.BREAK then
-        server:send("202 Paused " .. file .. " " .. line .. "\n")
-      elseif ev == events.WATCH then
-        server:send("203 Paused " .. file .. " " .. line .. " " .. idx_watch .. "\n")
-      elseif ev == events.RESTART then
-        -- nothing to do
-      else
-        server:send("401 Error in Execution " .. #file .. "\n")
-        server:send(file)
-      end
+	  eval_env = do_command_and_switch_hook(command)
     elseif command == "STEP" then
-      server:send("200 OK\n")
       step_into = true
-
-      local ev, vars, file, line, idx_watch = coroutine.yield()
-      eval_env = vars
-      if ev == events.BREAK then
-        server:send("202 Paused " .. file .. " " .. line .. "\n")
-      elseif ev == events.WATCH then
-        server:send("203 Paused " .. file .. " " .. line .. " " .. idx_watch .. "\n")
-      elseif ev == events.RESTART then
-        -- nothing to do
-      else
-        server:send("401 Error in Execution " .. #file .. "\n")
-        server:send(file)
-      end
+	  eval_env = do_command_and_switch_hook(command)
     elseif command == "OVER" or command == "OUT" then
-      server:send("200 OK\n")
       step_over = true
-      
       -- OVER and OUT are very similar except for 
       -- the stack level value at which to stop
       if command == "OUT" then step_level = stack_level - 1
       else step_level = stack_level end
 
-      local ev, vars, file, line, idx_watch = coroutine.yield()
-      eval_env = vars
-      if ev == events.BREAK then
-        server:send("202 Paused " .. file .. " " .. line .. "\n")
-      elseif ev == events.WATCH then
-        server:send("203 Paused " .. file .. " " .. line .. " " .. idx_watch .. "\n")
-      elseif ev == events.RESTART then
-        -- nothing to do
-      else
-        server:send("401 Error in Execution " .. #file .. "\n")
-        server:send(file)
-      end
+	  eval_env = do_command_and_switch_hook(command)
     elseif command == "BASEDIR" then
       local _, _, dir = string.find(line, "^[A-Z]+%s+(.+)%s*$")
       if dir then
@@ -788,6 +831,7 @@ local function debugger_loop(sev, svars, sfile, sline)
       -- in this case we simply return an empty result
       local vars, ev = {}
       if seen_hook then
+		print('STACK Yield')
         ev, vars = coroutine.yield("stack")
       end
       if ev and ev ~= events.STACK then
@@ -816,6 +860,7 @@ local function debugger_loop(sev, svars, sfile, sline)
               tbl[n] = select(2, pcall(serpent.line, tbl[n], {nocode = true, comment = false})) end
             local file = table.concat(tbl, "\t").."\n"
             server:send("204 Output " .. stream .. " " .. #file .. "\n" .. file)
+			print('OUTPUT Yield')
             tbl = {coroutine.yield()}
           end
         end)
@@ -825,8 +870,10 @@ local function debugger_loop(sev, svars, sfile, sline)
       end
     elseif command == "EXIT" then
       server:send("200 OK\n")
+	  print('Exit Yield')
       coroutine.yield("exit")
     else
+		print('ERROR COMMAND='..tostring(command))
       server:send("400 Bad Request\n")
     end
   end

@@ -9,7 +9,14 @@ local test_login =
 	[5] = {name='赵小雪',uid = 122068,cookie='sc1=1ABBC23D33E46E8C97D0C35D087248F3D999015Eak99MgfnBYOcgXtZJkE170V%2fbwv3NRjis0zUi8KTvFZwQkjPwGZmMTO%2b8l6QqkrvS%2bP2md8fxG7diCAZ%2fSNbaewnwrbp3A%3d%3d'},
 }
 local selector = 2
+
+local function get_name()
+	return test_login[selector].name
+end
+
 local function get_cookie()
+	kits.log('	cookie='..test_login[selector].cookie )
+	kits.log('	user='..get_name())
 	return test_login[selector].cookie
 end
 
@@ -17,9 +24,6 @@ local function get_uid()
 	return test_login[selector].uid
 end
 
-local function get_name()
-	return test_login[selector].name
-end
 local logo_url = 'http://image.lejiaolexue.com/ulogo/'
 
 local function set_selector(idx)
