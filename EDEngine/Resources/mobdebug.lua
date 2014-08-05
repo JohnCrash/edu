@@ -426,34 +426,102 @@ local get_value
 
 --返回一个表,nvalue可能是a.b.c.d
 local function split_value(nvalue)
-	local t = {}
-	for w in string.gmatch(nvalue,"[^%.]+") do
-		table.insert(t,w)
+	local s,e = string.find(nvalue,'%.')
+	if s then
+		return string.sub(nvalue,1,s-1),string.sub(nvalue,s+1)
+	else
+		return nvalue
 	end
-	return t
+end
+
+--t是一个表，s是一个形如a.b.c的字符串，函数返回t.a.b.c
+local function table_value_by_string(t,s)
+	local tmp = t
+	for s in string.gmatch(s,"[^%.]+") do
+		tmp = tmp[s]
+		if type(tmp)~='table' then
+			break
+		end
+	end
+	return tmp
 end
 --先尝试取upvalue,local,然后global
 local function getLuaValue(level,nvalue)
 	--nvalue,可能是由一系列的点分割的.如a.b.c.d
-	local svalue = split_value(nvalue)
-	if svalue and svalue[1] then
+	local m,v = split_value(nvalue)
+	if m then
+		--print('m = '..tostring(m)..' v='..tostring(v) )
 		local i = 1
 		repeat
-			local name,value = debug.getupvalue(level,i)
-			if name == svalue[1] then
-				return value[] --value["b.c"]能成功吗?
-			end
-			i = i + 1
-		until not name
-		i = 1
-		repeat
 			local name,value = debug.getlocal(level,i)
-			if name == svalue[1] then
-				--同上upvalue
+			--print('local name='..tostring(name)..' value='..tostring(value))
+			if name == m then
+				if v then
+					if type(value)=='table' then
+						return table_value_by_string(value,v)
+					else
+						return nil
+					end
+				else
+					return value
+				end
 			end
 			i = i + 1
 		until not name
-		--都没找到,最后尝试在global中
+		local c = debug.getinfo(level,'f')
+		if c and c.func then
+			i = 1
+			repeat
+				local name,value = debug.getupvalue(c.func,i)
+				--print('upvalue name='..tostring(name)..' value='..tostring(value))
+				if name == m then
+					if v then
+						if type(value)=='table' then
+							return table_value_by_string(value,v)
+						else
+							return nil
+						end
+					else
+						return value
+					end
+				end
+				i = i + 1
+			until not name
+			--都没找到,最后尝试在函数的环境中查找
+			local G = debug.getfenv(c.func)
+			if G then
+				return table_value_by_string(G,nvalue)
+			end
+		else
+			print('cant getinfo level='..level)
+		end
+	end
+end
+
+--将值转换为调试信息
+local function value_to_debug_info(value)
+	if value then
+		local str = {}
+		if type(value)=='table' then
+			for k,v in pairs(value) do
+				table.insert(str,tostring(k)..':'..tostring(v)..'\t')
+			end
+			return table.concat(str)
+		elseif type(value)=='userdata' then
+			local t = getmetatable(value)
+			if t and type(t)=='table' then
+				for k,v in pairs(t) do
+					table.insert(str,tostring(k)..':'..tostring(v)..'\t')
+				end
+				return table.concat(str)
+			else
+				return tostring(value)
+			end
+		else
+			return tostring(value)
+		end
+	else
+		return tostring(value)
 	end
 end
 
@@ -575,7 +643,8 @@ local function debug_hook(event, line)
         end
       end
     end
-
+	
+	stack_current = 2 --初始状态
     -- need to get into the "regular" debug handler, but only if there was
     -- no watch that was fired. If there was a watch, handle its result.
     local getin = (status == nil) and
@@ -601,7 +670,6 @@ local function debug_hook(event, line)
 	  print(3)
     end
 	
-	stack_current = 2 --初始状态
     -- handle 'stack' command that provides stack() information to the debugger
     if status and res == 'stack' then
       while status and res == 'stack' do
@@ -627,11 +695,8 @@ local function debug_hook(event, line)
 			--取变量,先看看是不是一个upvalue,local,global
 			--get_value
 			local info = getLuaValue(stack_current+1,get_value) --要包括getLuaValue函数级
-			if info then
-				status,res = coroutine.resume(core_debugger,events.GETV,info)
-			else
-				status,res = coroutine.resume(coro_debugger,events.ERROR)
-			end
+			local out = value_to_debug_info(info)
+			status,res = coroutine.resume(coro_debugger,events.GETV,out)
 		else
 			break
 		end
@@ -749,7 +814,6 @@ local function debugger_loop(sev, svars, sfile, sline)
       end
     end	
     if server.settimeout and not _no_blocking then 
-		print('settimeout blocking 1')
 		server:settimeout() 
 	end -- back to blocking
     command = string.sub(line, string.find(line, "^[A-Z]+"))
@@ -793,7 +857,7 @@ local function debugger_loop(sev, svars, sfile, sline)
     elseif command == "LOAD" then
       local _, _, size, name = string.find(line, "^[A-Z]+%s+(%d+)%s+(%S.-)%s*$")
       size = tonumber(size)
-
+   
       if abort == nil then -- no LOAD/RELOAD allowed inside start()
         if size > 0 then server:receive(size) end
         if sfile and sline then
@@ -871,7 +935,7 @@ local function debugger_loop(sev, svars, sfile, sline)
       else step_level = stack_level end
 
 	  eval_env = do_command_and_switch_hook(command)
-	elseif command == 'TRACKBACK' then
+	elseif command == 'TRACEBACK' then
 		--返回调用堆栈的上一个层次
 		stack_current = stack_current + 1
 		if stack_current > stack_level then stack_current = stack_level end
@@ -880,7 +944,7 @@ local function debugger_loop(sev, svars, sfile, sline)
 			print('202 Paused: '..tostring(file)..'@'..tostring(line))
 			server:send("202 Paused "..file.." "..line.."\n")
 		end
-	elseif command == 'TRACKFRONT' then
+	elseif command == 'TRACEFRONT' then
 		--返回调用堆栈的下一个层次
 		stack_current = stack_current - 1
 		if stack_current < 2 then stack_current = 2 end
@@ -895,7 +959,7 @@ local function debugger_loop(sev, svars, sfile, sline)
 		get_value = value
 		local ev,res = coroutine.yield("getv")
 		if ev == events.GETV then
-			server:send("GETV "..tostring(res))
+			server:send("GETV "..tostring(res).."\n")
 		end
     elseif command == "BASEDIR" then
       local _, _, dir = string.find(line, "^[A-Z]+%s+(.+)%s*$")
