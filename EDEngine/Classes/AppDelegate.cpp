@@ -45,6 +45,7 @@ void AppDelegate::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
+	glview->setFrameSize(1024,576);
     auto screenSize = glview->getFrameSize();
     
 	auto pFileUtils = FileUtils::getInstance();
@@ -59,11 +60,12 @@ void AppDelegate::initLuaEngine()
     //auto designSize = Size(480, 320);
 	//auto designSize = Size(960, 640);
     auto designSize = Size(1024, 768);
+	// auto designSize = Size(1024, 576);
 
     if (screenSize.height > 320)
     {
-//        auto resourceSize = Size(960, 640);
-		auto resourceSize = Size(1024, 768);
+//        auto resourceSize = Size(960, 640); //4:3
+		auto resourceSize = Size(1024, 768); 
         std::vector<std::string> searchPaths;
         searchPaths.push_back("hd");
         pFileUtils->setSearchPaths(searchPaths);

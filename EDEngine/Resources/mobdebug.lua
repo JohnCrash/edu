@@ -424,6 +424,20 @@ end
 local lastline
 local get_value
 
+function __G__TRACKBACK__(errmsg)
+	local t = debug.getinfo(2,'Sl')
+	if t and server then
+		--server:send('202 Paused '..tostring(t.source)..' '..tostring(t.currentline)..'\n')
+		server:send('ERROR '..tostring(t.source)..' '..tostring(t.currentline)..'\n')
+		--剥离掉不要的信息"[]:line: msg"
+		if errmsg and type(errmsg)=='string' then
+			local msg = string.match(errmsg,']:%d+: (.+)$')
+			server:send('ERRMSG '..tostring(msg)..'\n')
+		end
+		print(tostring(errmsg))
+	end
+end
+
 --返回一个表,nvalue可能是a.b.c.d
 local function split_value(nvalue)
 	local s,e = string.find(nvalue,'%.')
@@ -498,22 +512,41 @@ local function getLuaValue(level,nvalue)
 	end
 end
 
+local function space_n(n)
+	--返回有n个space的字符串
+	local t = {}
+	for i=1,n do
+		table.insert(t,' ')
+	end
+	return table.concat(t)
+end
+
+local function table_to_debug_info(t)
+	local str = {}
+	--补齐
+	local m = 0
+	for k,v in pairs(t) do
+		if string.len(k)>m then
+			m = string.len(k)
+		end
+	end
+	for k,v in pairs(t) do
+		k = k..space_n(m-string.len(k))
+		table.insert(str,tostring(k)..':'..tostring(v)..'\t')
+	end	
+	return table.concat(str)
+end
+
 --将值转换为调试信息
 local function value_to_debug_info(value)
 	if value then
 		local str = {}
 		if type(value)=='table' then
-			for k,v in pairs(value) do
-				table.insert(str,tostring(k)..':'..tostring(v)..'\t')
-			end
-			return table.concat(str)
+			return table_to_debug_info(value)
 		elseif type(value)=='userdata' then
 			local t = getmetatable(value)
 			if t and type(t)=='table' then
-				for k,v in pairs(t) do
-					table.insert(str,tostring(k)..':'..tostring(v)..'\t')
-				end
-				return table.concat(str)
+				return table_to_debug_info(t)
 			else
 				return tostring(value)
 			end

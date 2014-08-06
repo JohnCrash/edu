@@ -705,6 +705,90 @@ local function popScene()
 	Director:popScene()
 end
 
+local function scroll(root,scrollID,itemID)
+	local t = {_self = layer,_root = root}
+	t._scrollview = child(root,scrollID)
+	t._item = child(t._scrollview,itemID)
+	if not t._scrollview or not t._item then
+		kits.log('ERROR : scroll resource not exist')
+		log_caller()
+		return
+	end
+	t._list = {}
+	t._item:setVisible(false)
+	local size = t._item:getContentSize()
+	t._item_width = size.width
+	t._item_height = size.height
+	t._item_ox,t._item_oy = t._item:getPosition()
+
+	t.relayout = function(self)
+		local height = self._item_height*(#self._list)
+		self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
+		local offy = 0
+		local size = self._scrollview:getContentSize()
+		
+		if height < size.height then
+			offy = size.height - height --¶¥µ½¶¥
+		end
+
+		for i = 1,#self._list do
+			self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
+		end
+	end
+	t.setVisible = function(self,b)
+		self._scrollview:setVisible(b)
+	end
+	t.additem = function(self,data)
+		local item
+		if #self._list==0 then
+			item = self._item
+			item:setVisible(true)
+			item:setAnchorPoint(cc.p(0,0))
+			self._list[#self._list+1] = item
+		else
+			item = self._item:clone()
+			self._list[#self._list+1] = item
+			self._scrollview:addChild(item)		
+		end
+		if data and type(data)=='table' then
+			for k,v in pairs(data) do
+				if k and type(k)=='string' and v and type(v)=='function' then
+					local c = child(item,k)
+					if c then
+						v(c,item)
+					end
+				elseif k and v then
+					local c = child(item,k)
+					if c and (cc_type(c)=='ccui.TextField' or cc_type(c)=='ccui.Text' or
+								cc_type(c)=='ccui.Button') then
+						if cc_type(c)=='ccui.Button' then
+							c:setTitleText( tostring(v) )
+						else
+							c:setString( tostring(v) )
+						end
+					elseif c and cc_type(c)=='ccui.Slider' then
+						if type(v) == 'number' then
+							c:setPercent( v )
+						end
+					end
+				end
+			end
+		end
+		return item
+	end
+	t.clear = function(self)
+		for i=1,#self._list do
+			if self._list[i] ~= self._item then
+				self._list[i]:removeFromParent()
+			else
+				self._list[i]:setVisible(false)
+			end
+		end
+		self._list = {}
+	end
+	return t
+end
+
 return {
 	text = text,
 	textbmfont = textbmfont,
@@ -743,4 +827,5 @@ return {
 	FACTOR_3_4 = FACTOR_3_4,
 	FACTOR_9_16 = FACTOR_9_16,
 	get_factor = get_factor,
+	scroll = scroll
 }

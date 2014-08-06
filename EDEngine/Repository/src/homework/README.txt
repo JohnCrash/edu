@@ -86,3 +86,14 @@ lua_cocos2dx_manual.cpp
 >>>>>>> e1b29a8ef61248ec047b17be921e031d0d637904
 
 
+老师端
+取待批作业列表
+	http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx
+	action:search
+	exam-status:
+	exam-tag:
+	in-time:0
+	in-time-begin:2013-11-11 11:11:11
+	in-time-end:2014-08-05                           #搜索的时间范围
+	course:0
+	
