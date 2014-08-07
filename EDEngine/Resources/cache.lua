@@ -2,6 +2,8 @@
 local mt = require "mt"
 local md5 = require "md5"
 local uikits = require "uikits"
+local json = require "json-c"
+local login = require "login"
 
 local function isurl( url )
 	if url and type(url)=='string' and string.len(url) > 4 then
@@ -100,8 +102,8 @@ local function request_resources( rtable,efunc )
 	return true
 end
 
-local function download( url,cookie,func )
-	local mh,msg = mt.new('GET',url,cookie,
+local function request( url,func )
+	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK'  then
@@ -113,6 +115,8 @@ local function download( url,cookie,func )
 						if is_done( url ) then --下载失败尝试使用本地缓冲
 							func( true )
 						else
+							kits.log('ERROR : request failed! url = '..tostring(url))
+							kits.log('	reason: is_done return false')
 							func( false )
 						end
 					end
@@ -123,13 +127,41 @@ local function download( url,cookie,func )
 			func( true )
 		else
 			func( false )
+			kits.log('ERROR : request failed! url = '..tostring(url))
+			kits.log('	reason:'..tostring(msg))
 		end
 	end
+end
+
+local function request_json( url,func )
+	local function json_proc(b)
+		if b then
+			local data = get_data(url)
+			if data then
+				local t = json.decode(data)
+				if t then
+					func(t)
+				else
+					func(false)
+					kits.log('ERROR : request_json json decode failed! url = '..tostring(url))
+					kits.log('data='..string.sub(tostring(data),1,128)..'...')
+				end
+			else
+				func(false)
+				kits.log('ERROR : request_json get_data = nil! url = '..tostring(url))
+			end
+		else
+			func(false)
+			kits.log('ERROR : request_json failed url = '..tostring(url))
+		end
+	end
+	request(url,json_proc)
 end
 
 return {
 	request_resources = request_resources,
 	get_name = get_name,
 	get_data = get_data,
-	download = download,
+	request = request,
+	request_json = request_json,
 }

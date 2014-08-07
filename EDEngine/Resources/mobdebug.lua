@@ -461,6 +461,10 @@ local function table_value_by_string(t,s)
 end
 --先尝试取upvalue,local,然后global
 local function getLuaValue(level,nvalue)
+	if not debug.getinfo(level) then
+		print( 'ERROR getLuaValue levle out of range! level = '..level )
+		return
+	end
 	--nvalue,可能是由一系列的点分割的.如a.b.c.d
 	local m,v = split_value(nvalue)
 	if m then
@@ -471,7 +475,7 @@ local function getLuaValue(level,nvalue)
 			--print('local name='..tostring(name)..' value='..tostring(value))
 			if name == m then
 				if v then
-					if type(value)=='table' then
+					if type(value)=='table' or type(value)=='userdata' then
 						return table_value_by_string(value,v)
 					else
 						return nil
@@ -490,7 +494,7 @@ local function getLuaValue(level,nvalue)
 				--print('upvalue name='..tostring(name)..' value='..tostring(value))
 				if name == m then
 					if v then
-						if type(value)=='table' then
+						if type(value)=='table' or type(value)=='userdata' then
 							return table_value_by_string(value,v)
 						else
 							return nil
@@ -551,10 +555,30 @@ local function value_to_debug_info(value)
 				return tostring(value)
 			end
 		else
+			--太长的话折行
+			if type(value)=='string' and string.len(value)>96 then
+				local t = {}
+				local len = string.len(value)
+				for i = 1,len,96 do
+					table.insert( t,string.sub(value,i,i+96) )
+					table.insert( t,'\t' )
+					if #t > 4 then
+						if i+96 < len then
+							table.insert( t,'......\t')
+							--结尾
+							table.insert( t,string.sub(value,-96) )
+						else
+							table.insert( t,string.sub(value,i+97))
+						end
+						break
+					end
+				end
+				return table.concat(t)
+			end
 			return tostring(value)
 		end
 	else
-		return tostring(value)
+		return tostring(value) --nil
 	end
 end
 

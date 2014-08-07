@@ -1,4 +1,5 @@
 ﻿local uikits = require "uikits"
+local StudentList = require "homework/studentlist"
 
 local ui = {
 	FILE = 'laoshizuoye/jinruzgt.json',
@@ -6,6 +7,7 @@ local ui = {
 	BACK = 'ding/back',
 	LIST = 'newview',
 	ITEM = 'newview/subject1',
+	STUDENT_LIST_BUTTON = 'ding/liebiao',
 }
 
 local TeacherSubjective = class("TeacherSubjective")
@@ -33,6 +35,10 @@ function TeacherSubjective:init_gui()
 	self:addChild(self._root)
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)uikits.popScene()end)	
+	local student_but = uikits.child(self._root,ui.STUDENT_LIST_BUTTON)
+	uikits.event(student_but,function(sender)
+			uikits.pushScene(StudentList.create())
+		end)
 end
 
 function TeacherSubjective:init()

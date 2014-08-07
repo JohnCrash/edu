@@ -1,12 +1,12 @@
 ﻿local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
-local login = require 'login'
 local cache = require "cache"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
 
+local course_icon = topics.course_icon
 --[[
 argument
 status:-1
@@ -19,36 +19,7 @@ local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.as
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
 
-local res_local = "homework/studenthomework_1/"
-local course={
-	[101]={name="综合科目",logo=""},
-	[10001]={name="小学语文",logo="chinese1"},
-	[10002]={name="小学数学",logo="math"},
-	[10003]={name="小学英语",logo="english"},
-	[10005]={name="小学英语笔试",logo="english"},
-	[10009]={name="(小学)信息技术",logo="infomation"},
-	[10010]={name="(小学)安全知识",logo=""},
-	[10011]={name="(小学)智力百科",logo=""},
-	[11005]={name="小学英语听力",logo="english"},
-	[20001]={name="初中语文",logo="chinese1"},
-	[20002]={name="初中数学",logo="math"},
-	[20003]={name="初中英语",logo="english"},
-	[20004]={name="初中物理",logo="physics"},
-	[20005]={name="初中化学",logo="chemistry"},
-	[20006]={name="初中政治",logo="politics"},
-	[20007]={name="初中生物",logo="biolody"},
-	[20008]={name="初中地理",logo="geography"},
-	[20009]={name="初中历史",logo="history"},
-	[30001]={name="高中语文",logo="chinese1"},
-	[30002]={name="高中数学",logo="math"},
-	[30003]={name="高中英语",logo="english"},
-	[30004]={name="高中物理",logo="physics"},
-	[30005]={name="高中化学",logo="chemistry"},
-	[30006]={name="高中政治",logo="politics"},
-	[30007]={name="高中生物",logo="biolody"},
-	[30008]={name="高中地理",logo="geography"},
-	[30009]={name="高中历史",logo="history"},
-}
+local res_local = "homework/"
 
 local ui = {
 	FILE = 'homework/studenthomework_1.json',
@@ -70,7 +41,7 @@ local ui = {
 	ITEM_COUNT = 'questions_number1',
 	ITEM_COUNT2 = 'questions_number2', --主观题数量
 	END_DATE = 'Label_34',
-	SCORE = 'Label_37',
+	SCORE = 'fenshu',
 	NEW_BUTTON = 'white/new1',
 	HISTORY_BUTTON = 'white/history1',
 	STATIST_BUTTON = 'white/statistical1',
@@ -135,7 +106,7 @@ end
 function WorkList:get_page( i,func )
 	local url = worklist_url..'?p='..i
 	--先尝试下载
-	cache.download(url,login.cookie(),
+	cache.request(url,
 		function(b)
 			func( url,i,b )
 		end)
@@ -160,9 +131,9 @@ function WorkList:add_page_from_cache( idx,last )
 					if not last then
 						if dt < WEEK then --结束作业后+7天
 							if dt > 0 then
-								kits.log( '	add:+'..kits.toDiffDateString(dt) )
+								kits.log( '	add:+'..kits.time_to_string(dt) )
 							else
-								kits.log( '	add:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	add:-'..kits.time_to_string(-dt) )
 							end
 							self:add_item(v)
 						else
@@ -172,16 +143,16 @@ function WorkList:add_page_from_cache( idx,last )
 					else
 						if dt > WEEK then
 							if dt > 0 then
-								kits.log( '	add:+'..kits.toDiffDateString(dt) )
+								kits.log( '	add:+'..kits.time_to_string(dt) )
 							else
-								kits.log( '	add:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	add:-'..kits.time_to_string(-dt) )
 							end
 							self:add_item(v)
 						end
 							if dt > 0 then
-								kits.log( '	?:+'..kits.toDiffDateString(dt) )
+								kits.log( '	?:+'..kits.time_to_string(dt) )
 							else
-								kits.log( '	?:-'..kits.toDiffDateString(-dt) )
+								kits.log( '	?:-'..kits.time_to_string(-dt) )
 							end
 					end
 				else
@@ -271,6 +242,7 @@ function WorkList:load_page( first,last )
 end
 
 function WorkList:init_new_list()
+	if self._busy then return end
 	self:SwapButton( ui.NEW )
 	self:show_statistics(false)
 	self:show_list(true)
@@ -285,7 +257,7 @@ end
 
 function WorkList:init_data()
 	local loadbox = loadingbox.open( self )
-	cache.download( worklist_url,login.cookie(),
+	cache.request( worklist_url,
 		function(b)
 			if b then
 				self:init_data_by_cache()
@@ -314,8 +286,8 @@ end
 function WorkList:clone_statistics_item(v)
 	local item = self._statistics_item:clone()
 	if item then
-		if v.course and course[v.course] then
-			uikits.child(item,ui.ST_CAPTION):setString(course[v.course].name )
+		if v.course and course_icon[v.course] then
+			uikits.child(item,ui.ST_CAPTION):setString(course_icon[v.course].name )
 		end
 		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
 		local idx = 1
@@ -398,6 +370,7 @@ function WorkList:relayout_statistics()
 end
 
 function WorkList:init_statistics()
+	if self._busy then return end
 	self:SwapButton( ui.STATIST )
 	self:show_statistics(true)
 	self:show_list(false)
@@ -420,6 +393,7 @@ function WorkList:init_statistics()
 end
 
 function WorkList:init_setting()
+	if self._busy then return end
 	self:SwapButton( ui.SETTING )
 	self:show_statistics(false)
 	self:show_list(false)
@@ -520,6 +494,7 @@ function WorkList:init_gui()
 end
 
 function WorkList:init_history_list()
+	if self._busy then return end
 	self:SwapButton( ui.HISTORY )
 	self:show_statistics(false)
 	self:show_list(true)
@@ -588,8 +563,11 @@ function WorkList:add_item( t )
 	if t.course_name then --科目名称
 		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
 	end
-	if t.course and course[t.course] and course[t.course].logo then --类型
-		uikits.child(item,ui.CLASS_TYPE):loadTexture(res_local..course[t.class_id].logo..'.jpg')
+	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
+		local pic =  uikits.child(item,ui.CLASS_TYPE)
+		pic:loadTexture(res_local..course_icon[t.course].logo)
+		pic:setScaleX(1/uikits.scale())
+		pic:setScaleY(1/uikits.scale())
 	else
 		--默认设置
 	end
@@ -635,17 +613,17 @@ function WorkList:add_item( t )
 			local end_time = t.finish_time_unix
 			local dt = end_time - os.time()
 			if dt > 0 then
-				u:setString(kits.toDiffDateString(dt))
+				u:setString(kits.time_to_string(dt))
 			end
 			local function timer_func()
 				dt = end_time - os.time()
 				if dt > 0 then
-					u:setString(kits.toDiffDateString(dt))
+					u:setString(kits.time_to_string(dt))
 				else
 					--过期
 					local txt = uikits.child( item,ui.TIMELABEL )
 					if txt then txt:setString('已过期:') end
-					u:setString(kits.toDiffDateString(-dt))
+					u:setString(kits.time_to_string(-dt))
 					scheduler:unscheduleScriptEntry(u._scID)
 					u._scID = nil
 				end
@@ -656,7 +634,7 @@ function WorkList:add_item( t )
 			local dt = t.finish_time_unix - os.time()
 			local txt = uikits.child( item,ui.TIMELABEL )
 			if txt then txt:setString('已过期:') end
-			u:setString(kits.toDiffDateString(-dt))		
+			u:setString(kits.time_to_string(-dt))		
 		end
 	end
 

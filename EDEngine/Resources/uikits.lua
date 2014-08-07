@@ -705,8 +705,31 @@ local function popScene()
 	Director:popScene()
 end
 
-local function scroll(root,scrollID,itemID)
-	local t = {_self = layer,_root = root}
+local function set_item(c,v)
+	if c then
+		if c and (cc_type(c)=='ccui.TextField' or cc_type(c)=='ccui.Text' or
+					cc_type(c)=='ccui.Button') then
+			if cc_type(c)=='ccui.Button' then
+				c:setTitleText( tostring(v) )
+			else
+				c:setString( tostring(v) )
+			end
+		elseif c and cc_type(c)=='ccui.Slider' then
+			if type(v) == 'number' then
+				c:setPercent( v )
+			end
+		else
+			kits.log('ERROR set_item unknow set type')
+			log_caller()
+		end
+	else
+		kits.log('ERROR set_item item = nil')
+		log_caller()
+	end
+end
+
+local function scroll(root,scrollID,itemID,horiz,space)
+	local t = {_root = root}
 	t._scrollview = child(root,scrollID)
 	t._item = child(t._scrollview,itemID)
 	if not t._scrollview or not t._item then
@@ -714,6 +737,7 @@ local function scroll(root,scrollID,itemID)
 		log_caller()
 		return
 	end
+	local space = space or 0
 	t._list = {}
 	t._item:setVisible(false)
 	local size = t._item:getContentSize()
@@ -722,17 +746,39 @@ local function scroll(root,scrollID,itemID)
 	t._item_ox,t._item_oy = t._item:getPosition()
 
 	t.relayout = function(self)
-		local height = self._item_height*(#self._list)
-		self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
-		local offy = 0
-		local size = self._scrollview:getContentSize()
-		
-		if height < size.height then
-			offy = size.height - height --顶到顶
-		end
+		if horiz then --横向
+			local width = 0
+			for i=1,#self._list do
+				width = width + self._list[i]:getContentSize().width + space
+			end
+			if self._scrollview.setInnerContainerSize then
+				self._scrollview:setInnerContainerSize(cc.size(width,_item_height))
+			end
 
-		for i = 1,#self._list do
-			self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
+			local item_width = self._item_ox
+			for i = 1,#self._list do
+				self._list[#self._list-i+1]:setPosition(cc.p(item_width,self._item_oy))
+				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
+			end
+		else --纵向
+			local height = 0 --self._item_height*(#self._list)
+			for i=1,#self._list do
+				height = height + self._list[i]:getContentSize().height + space
+			end
+			if self._scrollview.setInnerContainerSize then
+				self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
+			end
+			local offy = 0
+			local size = self._scrollview:getContentSize()
+			
+			if height < size.height then
+				offy = size.height - height --顶到顶
+			end
+			local item_height = 0
+			for i = 1,#self._list do
+				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
+			end
 		end
 	end
 	t.setVisible = function(self,b)
@@ -750,7 +796,7 @@ local function scroll(root,scrollID,itemID)
 			self._list[#self._list+1] = item
 			self._scrollview:addChild(item)		
 		end
-		if data and type(data)=='table' then
+		if item and data and type(data)=='table' then
 			for k,v in pairs(data) do
 				if k and type(k)=='string' and v and type(v)=='function' then
 					local c = child(item,k)
@@ -759,18 +805,7 @@ local function scroll(root,scrollID,itemID)
 					end
 				elseif k and v then
 					local c = child(item,k)
-					if c and (cc_type(c)=='ccui.TextField' or cc_type(c)=='ccui.Text' or
-								cc_type(c)=='ccui.Button') then
-						if cc_type(c)=='ccui.Button' then
-							c:setTitleText( tostring(v) )
-						else
-							c:setString( tostring(v) )
-						end
-					elseif c and cc_type(c)=='ccui.Slider' then
-						if type(v) == 'number' then
-							c:setPercent( v )
-						end
-					end
+					set_item(c,v)
 				end
 			end
 		end
@@ -787,6 +822,67 @@ local function scroll(root,scrollID,itemID)
 		self._list = {}
 	end
 	return t
+end
+
+local function tab(root,LineID,butTable)
+	local t = {_root = root}
+	t._line = child(root,LineID)
+	if not t._line then
+		kits.log('ERROR tab _line = nil at '..tostring(LineID))
+		log_caller()
+		return
+	end
+	t._line_x,t._line_y = t._line:getPosition()
+	t._line_size = t._line:getContentSize()
+	t._line_anchor_pt = t._line:getAnchorPoint()
+	t._buts = {}
+	if butTable and type(butTable)=='table' then
+		for i,v in pairs(butTable) do
+			local but = child(root,i)
+			if but and cc_type(but) =='ccui.Button' and v and type(v)=='function' then
+				event(but,function(sender)
+						if v(sender) then
+							local x,y = sender:getPosition()
+							local pt = sender:getAnchorPoint()
+							local size = sender:getContentSize()
+							local xx = x-pt.x*size.width+t._line_anchor_pt.x*t._line_size.width
+							t._line:setPosition(cc.p(xx,t._line_y))
+						end
+					end)
+				table.insert(t._buts,but)
+			else
+				kits.log('ERROR tab but = nil at '..tostring(v))
+				log_caller()
+			end
+		end
+	else
+		kits.log('ERROR tab butTable=nil or not table')
+		log_caller()
+		return
+	end
+end
+
+local function set(root,t)
+	if t and type(t)=='table' then
+		for k,v in pairs(t) do
+			local item = child(root,k)
+			if item then
+				set_item(item,v)
+			else
+				kits.log('ERROR set '..tostring(k)..' cant found tag on root' )
+				log_caller()
+			end
+		end
+	else
+		kits.log('ERROR set invalid paramter')
+		log_caller()
+	end
+end
+
+local function fitsize(child,w,h)
+	local size = child:getContentSize()
+	child:setScaleX(w/size.width/get_scale())
+	child:setScaleY(h/size.height/get_scale())
 end
 
 return {
@@ -827,5 +923,9 @@ return {
 	FACTOR_3_4 = FACTOR_3_4,
 	FACTOR_9_16 = FACTOR_9_16,
 	get_factor = get_factor,
-	scroll = scroll
+	scroll = scroll,
+	tab = tab,
+	set = set,
+	set_item = set_item,
+	fitsize = fitsize,
 }

@@ -96,4 +96,86 @@ lua_cocos2dx_manual.cpp
 	in-time-begin:2013-11-11 11:11:11
 	in-time-end:2014-08-05                           #搜索的时间范围
 	course:0
+	返回结构:
+	{
+		"cur_page": 1,
+		"page": [
+			{
+				"book_version": 0,
+				"cnt_class": 1,
+				"cnt_student": 4,
+				"course": 0,
+				"course_name": "综合科目",
+				"exam_id": "9e2358edd2454923a5d2178b2acea78b",
+				"exam_name": "2014年07月16日一键导入试卷",
+				"exam_type": 11,
+				"finish_time": "/Date(1406287560000+0800)/",
+				"in_time": "/Date(1406201190443+0800)/",
+				"items": 7,
+				"node_section": 0,
+				"node_section_name": "",
+				"node_unit": 0,
+				"node_vol": 0,
+				"open_time": "/Date(1406201160000+0800)/",
+				"paper_id": "15f4383c2ca948498de13a6933c9445b",
+				"period": 1,
+				"score_type": 2,
+				"span_time": 30,
+				"state": 1,
+				"tag_comment": 0,
+				"tag_parentcheck": 0,
+				"tag_selfcheck": 1,
+				"tag_solution": 1,
+				"teacher_id": 122097
+			},
+		],
+		...
+		"total_item": 36,
+		"total_page": 4	
+	}
 	
+取班级	
+	http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx
+	?action=brief&examid=f823cf1e1f8d454bb85295468a452019
+	返回结构:
+	[
+		{
+			"class_id": 141442,
+			"class_name": "四年级三班",
+			"cnt_group": 0,
+			"cnt_student": 4,
+			"cnt_student_mark": 1,
+			"cnt_student_submit": 1,
+			"exam_id": "f823cf1e1f8d454bb85295468a452019",
+			"has_score": 0,
+			"paper_id": "b3f0a76890eb4c0496437ad45023739a",
+			"real_score": 0,
+			"school_id": 126453,
+			"state": 1,
+			"teacher_id": 122097
+		}
+	]
+
+取得作业成绩,全班的统计	
+	http://new.www.lejiaolexue.com/exam/handler/ExamStatistic.ashx
+	?q=table&exam_id=9e2358edd2454923a5d2178b2acea78b&c_id=141442
+	返回结构:
+	{"ave_score":0,"highest_score":0,"lowest_score":0,"median":0,"st_dev":0}
+
+班级作业的统计信息
+	http://new.www.lejiaolexue.com/exam/handler/examstatistic.ashx
+	?q=rank&exam_id=9e2358edd2454923a5d2178b2acea78b&c_id=141442&has_score=1
+	返回结构: 其中status = 10 or 11 表示已经提交
+	[
+		{
+			"correct": 25,
+			"id": 1,
+			"real_score": 3,
+			"score": 30,
+			"status": 0,
+			"student_id": 125907,
+			"student_name": "杨朝来",
+			"time": 3
+		},
+		...
+	]

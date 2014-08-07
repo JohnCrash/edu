@@ -1,9 +1,14 @@
 ﻿local uikits = require "uikits"
 local cache = require "cache"
-local login = require 'login'
 local kits = require "kits"
+local login = require "login"
 local json = require "json-c"
 local loadingbox = require "homework/loadingbox"
+local TeacherBatch = require "homework/teacherbatch"
+local topics = require "homework/topics"
+
+local topics_course = topics.course_icon
+local res_local = "homework/"
 
 local ui = {
 	FILE = 'laoshizuoye/daiyue.json',
@@ -33,6 +38,8 @@ local ui = {
 }
 
 local exam_list_url="http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx"
+local get_class_url = "http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx"
+
 local TeacherList = class("TeacherList")
 TeacherList.__index = TeacherList
 
@@ -53,27 +60,48 @@ function TeacherList.create()
 	return scene
 end
 
-function TeacherList:SwapButton(s)
-	self._scrollview:setVisible(false)
-	if s == ui.READYBATCH then
-		self._scrollview:setVisible(true)
-		self._redline:setPosition(cc.p(self._ready_batch_x,self._redline_y))
-	elseif s == ui.RELEASE then
-		self._redline:setPosition(cc.p(self._release_x,self._redline_y))
-	elseif s == ui.HISTORY then
-		self._redline:setPosition(cc.p(self._history_x,self._redline_y))
-	elseif s == ui.STATIST then
-		self._redline:setPosition(cc.p(self._statist_x,self._redline_y))
-	elseif s == ui.SETTING then
-		self._redline:setPosition(cc.p(self._setting_x,self._redline_y))		
-	end
-end
-
 function TeacherList:add_batch_item( v )
-	self._scrollview:additem{
-		[ui.ITEM_CAPTION] = v.exam_name,
-		[ui.ITEM_TOPICS_NUM] = v.items
-	}
+	if v and type(v)=='table' then
+		local item = self._scrollview:additem{
+			[ui.ITEM_CAPTION] = v.exam_name,
+			[ui.ITEM_TOPICS_NUM] = v.items,
+			[ui.ITEM_CLOSE_TIME] = function(child,item)
+				if v.finish_time and type(v.finish_time)=='string' then
+					local end_time = kits.unix_date_by_string( v.finish_time )
+					local dt = end_time - os.time()
+					if dt > 0 then
+						child:setString( kits.time_to_string(dt) )
+					else
+						child:setString('已过')
+					end
+				end
+			end,
+			[ui.ITEM_CLASS] = function(child,item)
+				child:setString('Loading...')
+				if v.exam_id and type(v.exam_id)=='string' then
+					local url = get_class_url..'?action=brief&examid='..
+					v.exam_id
+					cache.request_json(url,function(class)
+						if class and type(class)=='table' and class[1] and class[1].class_name then
+							child:setString( class[1].class_name )
+							uikits.event(item,function(sender)
+								uikits.pushScene(TeacherBatch.create(v,class[1]))
+							end,'click')
+							return
+						end
+					end)
+				end
+			end,
+			[ui.ITEM_ICON] = function(child,item)
+				if v and v.course and topics_course and topics_course[v.course] then
+					child:loadTexture(res_local..topics_course[v.course].logo)
+					uikits.fitsize(child,280,280)
+				end
+			end
+		}
+	else
+		kits.log('ERROR TeacherList:add_batch_item vailed v')
+	end
 end
 
 function TeacherList:add_ready_batch_from_table( t )
@@ -89,11 +117,13 @@ function TeacherList:add_ready_batch_from_table( t )
 end
 --待阅
 function TeacherList:init_ready_batch()
-	self:SwapButton(ui.READYBATCH)
+	if self._busy then return false end
 	
+	self._scrollview:setVisible(true)
 	if not self._scID and not self._busy then
 		self._mode = ui.READYBATCH
 		self._scrollview:clear()
+		self._busy = true
 		local loadbox = loadingbox.open(self)
 		local total_page = 1
 		function down_page( page )
@@ -104,46 +134,56 @@ function TeacherList:init_ready_batch()
 				'&in-time=0'..
 				'&sort=0'..
 				'&page='..page
-			cache.download(url,login.cookie(),
-				function(b)
-					if b then
-						local data = cache.get_data(url)
-						if data then
-							local t = json.decode( data )
-							if t.total_page then total_page = t.total_page end
+			cache.request_json(url,
+				function(t)
+					if t and t.total_page then 
+						total_page = t.total_page
+						if self and self.add_ready_batch_from_table then
 							local retb = self:add_ready_batch_from_table(t)
 							if page<total_page and retb then
 								down_page( page+1 )
 							else
+								self._busy =false
 								loadbox:removeFromParent()
 							end
-						else
-							kits.log('ERROR TeacherList:init_ready_batch data=nil')
 						end
 					else
+						self._busy =false
 						loadbox:removeFromParent()
-						kits.log('Connect faild : '..url )
 					end				
 				end)
 		end
 		down_page(1)
-	end	
+	end
+	return true
 end
 --布置
 function TeacherList:init_ready_release()
-	self:SwapButton(ui.RELEASE)
+	if self._busy then return false end
+	
+	self._scrollview:setVisible(false)
+	return true
 end
 --历史
 function TeacherList:init_ready_history()
-	self:SwapButton(ui.HISTORY)
+	if self._busy then return false end
+	
+	self._scrollview:setVisible(false)
+	return true
 end
 --统计
 function TeacherList:init_ready_statistics()
-	self:SwapButton(ui.STATIST)
+	if self._busy then return false end
+	
+	self._scrollview:setVisible(false)
+	return true
 end
 --设置
 function TeacherList:init_ready_setting()
-	self:SwapButton(ui.SETTING)
+	if self._busy then return false end
+	
+	self._scrollview:setVisible(false)
+	return true
 end
 
 function TeacherList:init_gui()
@@ -151,26 +191,19 @@ function TeacherList:init_gui()
 	self:addChild(self._root)
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
-	uikits.event(back,function(sender)uikits.popScene()end)
+	uikits.event(back,function(sender)
+		if self._busy then return false end
+		uikits.popScene()end)
 	--列表视图
 	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
 	--切换标签
-	self._redline = uikits.child(self._root,ui.BUTTON_LINE)
-	self._ready_batch_button = uikits.child(self._root,ui.TAB_BUTTON_1)
-	self._release_button = uikits.child(self._root,ui.TAB_BUTTON_2)
-	self._history_button = uikits.child(self._root,ui.TAB_BUTTON_3)
-	self._statist_button = uikits.child(self._root,ui.TAB_BUTTON_4)
-	self._setting_button = uikits.child(self._root,ui.TAB_BUTTON_5)
-	self._ready_batch_x,self._redline_y = self._redline:getPosition()
-	self._release_x = self._ready_batch_x + self._release_button:getContentSize().width
-	self._history_x = self._release_x + self._release_button:getContentSize().width
-	self._statist_x = self._history_x + self._release_button:getContentSize().width
-	self._setting_x = self._statist_x + self._release_button:getContentSize().width
-	uikits.event(self._ready_batch_button,function(sender)self:init_ready_batch()end)
-	uikits.event(self._release_button,function(sender)self:init_ready_release()end)
-	uikits.event(self._history_button,function(sender)self:init_ready_history()end)
-	uikits.event(self._statist_button,function(sender)self:init_ready_statistics()end)
-	uikits.event(self._setting_button,function(sender)self:init_ready_setting() end)
+	self._tab = uikits.tab(self._root,ui.BUTTON_LINE,
+		{[ui.TAB_BUTTON_1]=function(sender) return self:init_ready_batch()end,
+		[ui.TAB_BUTTON_2]=function(sender) return self:init_ready_release()end,
+		[ui.TAB_BUTTON_3]=function(sender) return self:init_ready_history()end,
+		[ui.TAB_BUTTON_4]=function(sender) return self:init_ready_statistics()end,
+		[ui.TAB_BUTTON_5]=function(sender) return self:init_ready_setting() end,
+		})
 end
 
 function TeacherList:init()

@@ -694,9 +694,6 @@ function WorkFlow:load_original_data_from_string( str )
 	local res = {}
 	local b = true
 	if str then
-		kits.log('================')
-		kits.log( str )
-		kits.log('================')
 		local data = kits.decode_json(str)
 
 		if data then

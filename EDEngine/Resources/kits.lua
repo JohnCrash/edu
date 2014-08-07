@@ -316,7 +316,7 @@ local function unix_date_by_string( str )
 	end
 end
 
-local function toDiffDateString( d )
+local function time_to_string( d,expet_sec )
 	if d then
 		local day = math.floor( d /(3600*24) )
 		local hours = math.floor( (d - day*3600*24)/3600 )
@@ -332,9 +332,26 @@ local function toDiffDateString( d )
 		if mins > 0 or hours > 0 or day > 0 then
 			result = result..mins..'分'
 		end
-		result = result..sec..'秒'
+		if not expet_sec then
+			result = result..sec..'秒'
+		end
 		return result
 	end
+end
+
+local function check_table(t,...)
+	if t and type(t)=='table' then
+		for i = 1,select('#',...) do
+			if not t[select(i,...)] then
+				print( 'ERROR '..tostring(select(i,...))..' not exist!' )
+				return false
+			end
+		end
+	else
+		print('ERROR assert invalid paramter t=nil or not table')
+		return false
+	end
+	return true
 end
 
 local function my_log( a )
@@ -362,8 +379,9 @@ local exports = {
 	exist_cache = exist_cache,
 	decode_json = decode_json,
 	unix_date_by_string = unix_date_by_string,
-	toDiffDateString = toDiffDateString,
+	time_to_string = time_to_string,
 	log = my_log,
+	check = check_table,
 }
 
 return exports

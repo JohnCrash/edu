@@ -64,16 +64,16 @@ function Score:init()
 			local end_time = self._args.finish_time_unix
 			local dt = self._args.finish_time_unix - os.time()
 			if dt > 0 then
-				end_date:setString( kits.toDiffDateString(dt))
+				end_date:setString( kits.time_to_string(dt))
 				local function timer_func()
 					dt = end_time - os.time()
 					if dt > 0 then
-						end_date:setString(kits.toDiffDateString(dt))
+						end_date:setString(kits.time_to_string(dt))
 					else
 						--过期
 						local txt = uikits.child( self._root,ui.TIMELABEL )
 						if txt then txt:setString('已过期:') end
-						end_date:setString(kits.toDiffDateString(-dt))
+						end_date:setString(kits.time_to_string(-dt))
 						scheduler:unscheduleScriptEntry(self._scID)
 						self._scID = nil
 					end		
@@ -83,7 +83,7 @@ function Score:init()
 				--过期
 				local txt = uikits.child( self._root,ui.TIMELABEL )
 				if txt then txt:setString('已过期:') end
-				end_date:setString(kits.toDiffDateString(-dt))				
+				end_date:setString(kits.time_to_string(-dt))				
 			end
 		end
 

@@ -5,7 +5,6 @@ local WorkFlow = require "homework/workflow"
 local Subjective = require "homework/subjective"
 local Score = require "homework/score"
 local loadingbox = require "homework/loadingbox"
-local login = require 'login'
 local cache = require "cache"
 
 local ui = {
@@ -143,17 +142,17 @@ function WorkCommit:addCommitStudent( id,na,ti )
 		local commit_time = uikits.child(item,ui.TIME)
 		if commit_time and ti and type(ti)=='string' then
 			local d = os.time()-kits.unix_date_by_string(ti)
-			commit_time:setString(kits.toDiffDateString(d))
+			commit_time:setString(kits.time_to_string(d))
 		end
 		local photo = uikits.child(item,ui.PHOTO)
 		if photo then
 			local url = login.get_logo(id)
-			cache.download( url,login.cookie(),
+			cache.request( url,
 				function(b)
 					if b then
 						photo:loadTexture( cache.get_name(url) )
 					else
-						kits.log('error : WorkCommit:addCommitStudent download logo')
+						kits.log('error : WorkCommit:addCommitStudent request logo')
 					end
 				end)
 		end
@@ -197,7 +196,7 @@ function WorkCommit:clear_commit_list()
 end
 --提交列表
 function WorkCommit:init_commit_list()
-	if self._args and self._scrollview then
+	if self._args and self._args.exam_id and self._args.tid and self._scrollview then
 		self:clear_commit_list()
 		local circle = loadingbox.circle( self._scrollview )
 		local url = commit_list_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
@@ -212,7 +211,7 @@ function WorkCommit:init_commit_list()
 				end
 			end
 		end
-		cache.download(url,login.cookie(),
+		cache.request(url,
 			function(b)
 				if b then
 					load_from_cache()
@@ -221,6 +220,8 @@ function WorkCommit:init_commit_list()
 				end
 				circle:removeFromParent()
 			end)
+	else
+		kits.log('ERROR WorkCommit:init_commit_list _args _args invalid')
 	end
 end
 
@@ -278,16 +279,16 @@ function WorkCommit:init()
 			local end_time = self._args.finish_time_unix
 			local dt = self._args.finish_time_unix - os.time()
 			if dt > 0 then
-				end_date:setString( kits.toDiffDateString(dt))
+				end_date:setString( kits.time_to_string(dt))
 				local function timer_func()
 					dt = end_time - os.time()
 					if dt > 0 then
-						end_date:setString(kits.toDiffDateString(dt))
+						end_date:setString(kits.time_to_string(dt))
 					else
 						--过期
 						local txt = uikits.child( self._root,ui.TIMELABEL )
 						if txt then txt:setString('已过期:') end
-						end_date:setString(kits.toDiffDateString(-dt))
+						end_date:setString(kits.time_to_string(-dt))
 						scheduler:unscheduleScriptEntry(self._scID)
 						self._scID = nil
 					end		
@@ -297,7 +298,7 @@ function WorkCommit:init()
 				--过期
 				local txt = uikits.child( self._root,ui.TIMELABEL )
 				if txt then txt:setString('已过期:') end
-				end_date:setString(kits.toDiffDateString(-dt))				
+				end_date:setString(kits.time_to_string(-dt))				
 			end
 		end
 		local obj_num = uikits.child(self._root,ui.OBJECTIVE_NUM)
@@ -344,7 +345,7 @@ end
 function WorkCommit:commit()
 	local loadbox = loadingbox.open( self )
 	local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
-	cache.download(url,login.cookie(),
+	cache.request(url,
 		function(b)
 			if b then
 				self._args.status = 10 --标记已经提交
