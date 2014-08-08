@@ -16,7 +16,51 @@ topics.lua 和题相关的缓冲
 	http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx
 	参数pid,uid
 		?pid=93ca856727be4c09b8658935e81db8b8&uid=122097
-
+可能的数据结构:
+	{
+		"detail": [
+			{
+				"Id": "cd432d4d56474a99913ca255653ab3aa",
+				"item_id": "9aec352705e94eac94171466838884a0",
+				"item_oper": "",
+				"item_oper_param1": 0,
+				"item_parent": "9f88850d71324bd58dd0aef5706442d5",
+				"item_type": 1,
+				"paper_id": "15f4383c2ca948498de13a6933c9445b",
+				"part_id": 2,
+				"score": 230,
+				"sort_stru": 1,
+				"stru_id": 1,
+				"tag": 2
+			},
+			...		
+		],
+	    "frame": [
+			{
+				"item_type": 14,
+				"paper_id": "15f4383c2ca948498de13a6933c9445b",
+				"part_id": 2,
+				"score": "0",
+				"score_show": 1,
+				"stru_desc": "",
+				"stru_id": 1,
+				"stru_name": "复合",
+				"tag_show": 1
+			}
+		],
+		"item": null,
+		"part": [
+			{
+				"paper_id": "15f4383c2ca948498de13a6933c9445b",
+				"part_desc": "请点击修改第I卷的文字说明",
+				"part_id": 1,
+				"part_name": "第I卷（选择题）",
+				"part_visible": 0
+			},
+			...
+		]		
+	}
+	
 单题提交		
 	http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx
 	参数:
@@ -74,18 +118,6 @@ http://image.lejiaolexue.com/ulogo/seg1/seg2/userId_type.jpg
 	teacherId=122097&examId=00231a8e919e4c6cbfaa601462adf49d
 
 
-统计
-
-分支合并		
-lua_cocos2dx_manual.cpp
-	5514
-<<<<<<< my-branch
-    if (argc == 0)
-=======
-    if (argc >= 3 && argc <= 6)
->>>>>>> e1b29a8ef61248ec047b17be921e031d0d637904
-
-
 老师端
 取待批作业列表
 	http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx
@@ -111,6 +143,7 @@ lua_cocos2dx_manual.cpp
 				"exam_type": 11,
 				"finish_time": "/Date(1406287560000+0800)/",
 				"in_time": "/Date(1406201190443+0800)/",
+				"real_score":100,
 				"items": 7,
 				"node_section": 0,
 				"node_section_name": "",

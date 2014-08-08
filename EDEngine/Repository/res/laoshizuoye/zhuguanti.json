@@ -593,7 +593,7 @@
               "sizePercentY": 0.454545468,
               "sizeType": 0,
               "tag": 343,
-              "touchAble": true,
+              "touchAble": false,
               "useMergedTexture": false,
               "visible": true,
               "width": 1920,

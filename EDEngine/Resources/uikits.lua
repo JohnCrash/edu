@@ -545,7 +545,11 @@ local function event( obj,func,eventType )
 	end
 end
 
-local function delay_call( obj,func,delay,param1,param2,param3)
+local function delay_call( target,func,delay,param1,param2,param3 )
+	local obj = target
+	if not target then
+		obj = cc.Director:getInstance() --如果没有对象，使用全局对象
+	end
 	if obj and func and delay then
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
@@ -554,7 +558,7 @@ local function delay_call( obj,func,delay,param1,param2,param3)
 			schedulerID = nil		
 			func(obj,param1,param2,param3)
 		end
-		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)		 
+		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)	
 	end
 end
 
@@ -728,7 +732,8 @@ local function set_item(c,v)
 	end
 end
 
-local function scroll(root,scrollID,itemID,horiz,space)
+--itemID2 代表可能的第二类item
+local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	local t = {_root = root}
 	t._scrollview = child(root,scrollID)
 	t._item = child(t._scrollview,itemID)
@@ -737,14 +742,33 @@ local function scroll(root,scrollID,itemID,horiz,space)
 		log_caller()
 		return
 	end
+	if itemID2 then
+		t._item2 = child(t._scrollview,itemID2)
+		if t._item2 then t._item2:setVisible(false) end
+	end
 	local space = space or 0
 	t._list = {}
 	t._item:setVisible(false)
 	local size = t._item:getContentSize()
+	t._item:setAnchorPoint(cc.p(0,0))
 	t._item_width = size.width
 	t._item_height = size.height
 	t._item_ox,t._item_oy = t._item:getPosition()
-
+	if not horiz then
+		--将不是_item的子节点都视为tops，tops在滚动布局中保持顶部位置
+		local nodes = t._scrollview:getChildren()
+		t._tops = {}
+		for i,v in pairs(nodes) do
+			if v ~= t._item and v~= t._item2 then
+				v:setAnchorPoint(cc.p(0,0))
+				v._ox,v._oy = v:getPosition()
+				if not t._tops_space then
+					t._tops_space = v._oy - t._item_oy - t._item_height
+				end
+				table.insert(t._tops,v)
+			end
+		end
+	end
 	t.relayout = function(self)
 		if horiz then --横向
 			local width = 0
@@ -761,7 +785,11 @@ local function scroll(root,scrollID,itemID,horiz,space)
 				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
 			end
 		else --纵向
-			local height = 0 --self._item_height*(#self._list)
+			local cs = self._scrollview:getContentSize()
+			local height = 0
+			if not self._item2 then
+				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
+			end
 			for i=1,#self._list do
 				height = height + self._list[i]:getContentSize().height + space
 			end
@@ -779,22 +807,30 @@ local function scroll(root,scrollID,itemID,horiz,space)
 				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
 				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
 			end
+			--放置置顶元件
+			if self._tops_space then
+				item_height = item_height + self._tops_space--起始阶段置顶元件和item的间隔
+				for i = 1,#self._tops do
+					self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+				end
+			end
 		end
 	end
 	t.setVisible = function(self,b)
 		self._scrollview:setVisible(b)
 	end
-	t.additem = function(self,data)
+	t.additem = function(self,data,index)
 		local item
-		if #self._list==0 then
-			item = self._item
-			item:setVisible(true)
-			item:setAnchorPoint(cc.p(0,0))
-			self._list[#self._list+1] = item
+		if index == 2 then
+			item = self._item2:clone()
 		else
 			item = self._item:clone()
+		end
+		if item then
 			self._list[#self._list+1] = item
-			self._scrollview:addChild(item)		
+			item:setVisible(true)
+			item:setAnchorPoint(cc.p(0,0))
+			self._scrollview:addChild(item)
 		end
 		if item and data and type(data)=='table' then
 			for k,v in pairs(data) do
@@ -813,11 +849,7 @@ local function scroll(root,scrollID,itemID,horiz,space)
 	end
 	t.clear = function(self)
 		for i=1,#self._list do
-			if self._list[i] ~= self._item then
-				self._list[i]:removeFromParent()
-			else
-				self._list[i]:setVisible(false)
-			end
+			self._list[i]:removeFromParent()
 		end
 		self._list = {}
 	end

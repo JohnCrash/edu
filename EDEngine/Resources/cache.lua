@@ -5,6 +5,12 @@ local uikits = require "uikits"
 local json = require "json-c"
 local login = require "login"
 
+local request_list = {}
+
+local function random_delay()
+	return math.random()
+end
+
 local function isurl( url )
 	if url and type(url)=='string' and string.len(url) > 4 then
 		if string.lower( string.sub(url,1,4) ) == 'http' then
@@ -41,6 +47,13 @@ local function is_done( url )
 	end
 end
 
+local function is_hot( url,sec )
+	local n = get_name(url)
+	if n then
+		return kits.hot_cache( n,sec )
+	end
+	return false
+end
 --请求资源列表rtable,一个url列表
 --请求如果获得了全部资源,将调用函数efunc
 --该函数立刻返回,任务交给后台线程下载
@@ -65,10 +78,12 @@ local function request_resources( rtable,efunc )
 				if is_done(v.url) then
 					if rtable.ui then
 						--延迟
-						uikits.delay_call( rtable.ui,efunc,0.1,rtable,i,true )
+						uikits.delay_call( rtable.ui,efunc,random_delay(),rtable,i,true )
 					else
 						efunc( rtable,i,true ) --已经下载了
 					end
+				elseif is_hot(v.url,60) then
+					uikits.delay_call( rtable.ui,efunc,random_delay(),rtable,i,true )
 				else
 					--开始后台下载
 					local mh,msg = mt.new('GET',v.url,v.cookie,
@@ -83,14 +98,23 @@ local function request_resources( rtable,efunc )
 										efunc( rtable,i,true )
 									else
 										--下载失败
-										efunc( rtable,i,false )
+										if obj.state == 'FAILED' and is_done(v.url) then --忽略CANCEL
+											efunc( rtable,i,true )
+										else
+											efunc( rtable,i,false )
+										end
 									end
 								end
 							end)
 					if not mh then
 						--下载失败
-						efunc( rtable,i,false )
+						if obj.state == 'FAILED' and is_done(v.url) then --忽略CANCEL
+							efunc( rtable,i,true )
+						else
+							efunc( rtable,i,false )
+						end
 					end
+					table.insert(request_list,mh)
 				end
 			else
 				efunc( rtable,i,false )
@@ -103,6 +127,10 @@ local function request_resources( rtable,efunc )
 end
 
 local function request( url,func )
+	if is_hot(url,60) then
+		uikits.delay_call( nil,func,random_delay(),true )
+		return
+	end
 	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
@@ -112,7 +140,7 @@ local function request( url,func )
 							func( true )
 						end
 					else
-						if is_done( url ) then --下载失败尝试使用本地缓冲
+						if obj.state == 'FAILED' and is_done( url ) then --下载失败尝试使用本地缓冲
 							func( true )
 						else
 							kits.log('ERROR : request failed! url = '..tostring(url))
@@ -131,6 +159,7 @@ local function request( url,func )
 			kits.log('	reason:'..tostring(msg))
 		end
 	end
+	table.insert(request_list,mh)
 end
 
 local function request_json( url,func )
@@ -158,10 +187,18 @@ local function request_json( url,func )
 	request(url,json_proc)
 end
 
+local function request_cancel()
+	for i,m in pairs(request_list) do
+		m:cancel()
+	end
+	request_list = {}
+end
+
 return {
 	request_resources = request_resources,
 	get_name = get_name,
 	get_data = get_data,
 	request = request,
 	request_json = request_json,
+	request_cancel = request_cancel,
 }

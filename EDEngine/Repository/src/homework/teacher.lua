@@ -117,7 +117,7 @@ function TeacherList:add_ready_batch_from_table( t )
 end
 --待阅
 function TeacherList:init_ready_batch()
-	if self._busy then return false end
+	cache.request_cancel()
 	
 	self._scrollview:setVisible(true)
 	if not self._scID and not self._busy then
@@ -159,28 +159,28 @@ function TeacherList:init_ready_batch()
 end
 --布置
 function TeacherList:init_ready_release()
-	if self._busy then return false end
+	cache.request_cancel()
 	
 	self._scrollview:setVisible(false)
 	return true
 end
 --历史
 function TeacherList:init_ready_history()
-	if self._busy then return false end
+	cache.request_cancel()
 	
 	self._scrollview:setVisible(false)
 	return true
 end
 --统计
 function TeacherList:init_ready_statistics()
-	if self._busy then return false end
+	cache.request_cancel()
 	
 	self._scrollview:setVisible(false)
 	return true
 end
 --设置
 function TeacherList:init_ready_setting()
-	if self._busy then return false end
+	cache.request_cancel()
 	
 	self._scrollview:setVisible(false)
 	return true
@@ -192,7 +192,7 @@ function TeacherList:init_gui()
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)
-		if self._busy then return false end
+		cache.request_cancel()
 		uikits.popScene()end)
 	--列表视图
 	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)

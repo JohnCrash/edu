@@ -32,10 +32,16 @@ local function set_selector(idx)
 end
 --返回logo cache文件名
 --如果不存在则先下载
-local function get_logo( uid )
+local function get_logo( uid,t )
 	local seg1 = math.floor(uid/10000)%100
 	local seg2 = math.floor(uid/100)%100
 	local logo_type = 2 --50x50
+	if t then
+		if t > 2 then
+			t = 99
+		end
+		logo_type = t
+	end
 	return logo_url..tostring(seg1)..'/'..tostring(seg2)..'/'..tostring(uid)..'_'..logo_type..'.jpg'
 end
 

@@ -251,6 +251,18 @@ local function download_file(file)
   end
 end
 
+local function hot_cache( name,sec )
+	local filename = cache_dir..name
+	local s = lfs.attributes( filename )
+	if s and s.change then
+		local dt = os.time() - s.change
+		if dt < sec*1000 then
+			return true
+		end
+	end
+	return false
+end
+
 local function exist_cache( name )
 	local filename = cache_dir..name
 	return local_exists( filename )
@@ -376,6 +388,7 @@ local exports = {
 	encode_url = encode_url,
 	read_cache = read_cache,
 	write_cache = write_cache,
+	hot_cache = hot_cache,
 	exist_cache = exist_cache,
 	decode_json = decode_json,
 	unix_date_by_string = unix_date_by_string,
