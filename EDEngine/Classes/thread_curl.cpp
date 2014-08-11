@@ -9,6 +9,8 @@
 #include "curl/include/android/curl/curl.h"
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "curl/include/ios/curl/curl.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+#include "curl/include/ios/curl/curl.h"
 #endif
 
 namespace kits
