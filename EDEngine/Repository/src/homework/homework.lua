@@ -11,7 +11,7 @@ local StudentList = require "homework/studentlist"
 local TeacherSubjective = require "homework/teachersubjective"
 
 local login = require "login"
-
+local sc = require "homework/search"
 --str = "<img src=\"http://www.lexuelejiao.com/92342.png\" \\>"
 --print("============================")
 --print(str)
@@ -46,9 +46,9 @@ end
 function HomeWork.create()
 	local scene = cc.Scene:create()
 	local layer = HomeWork.extend(cc.Layer:create())
-	
+
 	scene:addChild(layer)
-	
+
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
