@@ -53,7 +53,8 @@ local ui = {
 	TOPICS_DIFF = 'yanse/nandu',
 	TOPICS_AVG = 'yanse/pingcuolv',
 	TOPICS_RATE = 'yanse/benban',
-	TOPICS_ITEM = 'yanse/ti',
+	TOPICS_ITEM = 'ti',
+	TOPICS_TITLE = 'yanse',
 }
 
 local Batch = class("Batch")
@@ -85,6 +86,42 @@ function Batch:add_paper_item( topicType,topicID )
 			[ui.TOPICS_DIFF] = '', --难度
 			[ui.TOPICS_AVG] = '', --平均错误率
 			[ui.TOPICS_RATE] = '', --班错误率
+			[ui.TOPICS_ITEM] = function(child,item)
+				--topics.types[topicType].canv(s,e)
+				--topics.types[topicType].init(child,e)
+				local size = child:getContentSize()
+				size.height = size.height/2
+				child:setContentSize(size)
+				local loadbox = loadingbox.circle(child)
+				local url = "http://new.www.lejiaolexue.com/exam/handler/ExamStructure.ashx?q=item&exam_id="..
+				self._args.exam_id.."&item_id="..
+				topicID
+				cache.request_json(url,function(t)
+					if t then
+						local data = {}
+						--测试用
+						if not t.image then
+							t.image =  'Pic/my/1.png'
+						end
+						if t.difficulty_name then
+							uikits.set(item,
+							{
+								[ui.TOPICS_DIFF] = t.difficulty_name
+							})
+						end
+						if topics.types[topicType].conv(t,data) then
+							data.eventInitComplate = function(layout,data)
+								self:paper_relayout()
+							end
+							data._scrollParent = self._topicsview
+							topics.types[topicType].init(child,data)
+							loadbox:removeFromParent()
+						else
+							kits.log('')
+						end
+					end
+				end)
+			end
 		}
 	end
 end
@@ -97,7 +134,27 @@ function Batch:init_paper_list_by_table( p )
 			end
 		end
 	end
-	self._papers:relayout()
+	self:paper_relayout()
+end
+
+function Batch:paper_relayout()
+	if self._papers and self._papers._list then
+		for k,item in pairs(self._papers._list) do
+			local layout = uikits.child(item,ui.TOPICS_ITEM)
+			local title = uikits.child(item,ui.TOPICS_TITLE)
+			if layout and title then
+				local item_size = item:getContentSize()
+				local size = layout:getContentSize()
+				local tx,tx = title:getPosition()
+				local tsize = title:getContentSize()
+				local ox,oy = layout:getPosition()
+				local space = item_size.height-tx-tsize.height
+				title:setPosition(cc.p(ox,oy+size.height+space))
+				item:setContentSize(cc.size(item_size.width,size.height+tsize.height+2*space))
+			end
+		end
+		self._papers:relayout()
+	end
 end
 
 function Batch:init_topics_paper_list()

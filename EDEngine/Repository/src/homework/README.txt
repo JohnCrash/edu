@@ -212,3 +212,65 @@ http://image.lejiaolexue.com/ulogo/seg1/seg2/userId_type.jpg
 		},
 		...
 	]
+	
+取单题内容	
+	http://new.www.lejiaolexue.com/exam/handler/ExamStructure.ashx
+	?q=item&exam_id=10f6cc6397464e829e10747b1c1ac800&item_id=004bf582a837441c81e40d3c0e43071b&_=1407726806982
+	返回:
+	{
+		"Id": "8b085f68b5dd42b98e58d5ef6ee4cccb",
+		"answer": 1,
+		"apply_area1": 0,
+		"apply_area2": 0,
+		"apply_year": 0,
+		"attachment": "{\"attachments\":[{\"group\":\"1\",\"id\":\"1\",\"mini_src\":\"f1f87e2f0934d70c3c16933c628767c3.mp3\",\"name\":null,\"type\":\"0\",\"value\":\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/127\\/112\\/f1f87e2f0934d70c3c16933c628767c3.mp3\"}]}",
+		"attachment_obj": [],
+		"cnt_comment": 0,
+		"cnt_favor": 0,
+		"cnt_praise": 0,
+		"cnt_refer": 0,
+		"cnt_view": 0,
+		"content": "<div class=wordsection1><div><div><div><div><div><p class=msonormal align=center style='margin:0cm;margin-bottom:.0001pt;\r\ntext-align:center'><b><span style='font-size:16.0pt;font-family:楷体_gb2312;\r\ncolor:green'>戴上声调帽儿，拼音变完整。</span></b></p>\r\n\r\n<p class=msonormal align=center style='margin:0cm;margin-bottom:.0001pt;\r\ntext-align:center'><span lang=en-us style='font-size:5.5pt'>&nbsp;</span></p>\r\n\r\n<p align=center style='text-align:center'><span lang=en-us><img mini_src=\"07d8fee86792b54e2c66efe464b5bfa0.jpg\" mini=\"http://image.lejiaolexue.com/item_image/139/354/07d8fee86792b54e2c66efe464b5bfa0.jpg\" src=\"http://image.lejiaolexue.com/item_image/139/354/07d8fee86792b54e2c66efe464b5bfa0.jpg\" /></span></p>\r\n\r\n<p align=center style='text-align:center'><span lang=en-us style='font-size:\r\n9.0pt'>&nbsp;</span></p>\r\n\r\n<p class=msonormal align=center style='text-align:center'><span lang=en-us>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>\r\n\r\n<p><span lang=en-us><img mini_src=\"b0e3cc9558667bf999091bc754bac228.png\" mini=\"http://image.lejiaolexue.com/item_image/135/210/b0e3cc9558667bf999091bc754bac228.png\" src=\"http://image.lejiaolexue.com/item_image/135/210/b0e3cc9558667bf999091bc754bac228.png\" />",
+		"correct_answer": "{\"answers\":[{\"id\":\"0\",\"value\":\"BDC\"}]}",
+		"correct_answer_obj": [],
+		"course": 10001,
+		"difficulty": 50,
+		"difficulty_name": "中等",
+		"explain": "<span lang=en-us><img mini_src=\"2c1049b8559848ac1d97124a86fe894b.png\" mini=\"http://image.lejiaolexue.com/item_image/32/117/2c1049b8559848ac1d97124a86fe894b.png\" src=\"http://image.lejiaolexue.com/item_image/32/117/2c1049b8559848ac1d97124a86fe894b.png\" /></span></p></div></div></div></div></div></div>",
+		"from_paper": null,
+		"in_time": "/Date(1407395070467+0800)/",
+		"in_time_ts": 0,
+		"interact_type": 64,
+		"item_id": "004bf582a837441c81e40d3c0e43071b",
+		"item_id_num": 191738,
+		"item_name": "连线",
+		"item_type": 4,
+		"last_time": "/Date(1407395070467+0800)/",
+		"last_time_ts": 0,
+		"options": "{\"char_num\":null,\"drag_position\":\"0\",\"item_type\":\"3\",\"oper\":null,\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<img mini_src=\\\"5d224e55a5895665c0cb1e8310cde599.jpg\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/989\\/154\\/5d224e55a5895665c0cb1e8310cde599.jpg\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/989\\/154\\/5d224e55a5895665c0cb1e8310cde599.jpg\\\" \\/>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<img mini_src=\\\"1f8638d3406a80350ce90f80841e0acb.jpg\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/978\\/137\\/1f8638d3406a80350ce90f80841e0acb.jpg\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/978\\/137\\/1f8638d3406a80350ce90f80841e0acb.jpg\\\" \\/>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<img mini_src=\\\"6f977624be7c33ce0cd1800391f4ba77.jpg\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/134\\/198\\/6f977624be7c33ce0cd1800391f4ba77.jpg\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/134\\/198\\/6f977624be7c33ce0cd1800391f4ba77.jpg\\\" \\/>\\\"\"}],\"options2\":[{\"id\":\"1\",\"option\":\"A.\\\"<img mini_src=\\\"514b14883e1af96720a3fde60926b749.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/31\\/105\\/514b14883e1af96720a3fde60926b749.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/31\\/105\\/514b14883e1af96720a3fde60926b749.png\\\" \\/>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<img mini_src=\\\"859770e1da627314810ef36f60325865.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/982\\/964\\/859770e1da627314810ef36f60325865.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/982\\/964\\/859770e1da627314810ef36f60325865.png\\\" \\/>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<img mini_src=\\\"089314e570e497da7dccab13dfb0b966.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/32\\/291\\/089314e570e497da7dccab13dfb0b966.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/32\\/291\\/089314e570e497da7dccab13dfb0b966.png\\\" \\/>\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"<img mini_src=\\\"e15247bf0c8b0afb219788883ad34f8a.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/206\\/247\\/e15247bf0c8b0afb219788883ad34f8a.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/206\\/247\\/e15247bf0c8b0afb219788883ad34f8a.png\\\" \\/><\\/span>\\\"\"}],\"sort_char\":\"\"}",
+		"options_obj": {
+			"drag_position": 0,
+			"item_type": 0,
+			"options": [],
+			"options2": [],
+			"sort_char": null
+		},
+		"parent_item_id": "",
+		"real_score": 1,
+		"ref_item_id": "",
+		"score": 10,
+		"section_name": "汉语拼音（b p m f）",
+		"sub_count": 0,
+		"sub_sort": 0,
+		"tag": 0,
+		"tag_apply": 7,
+		"tag_detail": 1,
+		"tag_method": 115,
+		"tag_open": 1,
+		"tag_original": 1,
+		"test_point": null,
+		"user_author": 0,
+		"user_author_name": "",
+		"user_owner": 0,
+		"version": 1
+	}
