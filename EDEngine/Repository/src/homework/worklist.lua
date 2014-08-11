@@ -2,6 +2,7 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
+local login = require "login"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"

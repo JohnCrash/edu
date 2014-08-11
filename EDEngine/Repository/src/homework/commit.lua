@@ -6,6 +6,7 @@ local Subjective = require "homework/subjective"
 local Score = require "homework/score"
 local loadingbox = require "homework/loadingbox"
 local cache = require "cache"
+local login = require "login"
 
 local ui = {
 	FILE = 'homework/commit.json',

@@ -137,6 +137,20 @@ function Batch:init_paper_list_by_table( p )
 	self:paper_relayout()
 end
 
+function Batch:init_paper_item_space( item )
+	local layout = uikits.child(item,ui.TOPICS_ITEM)
+	local title = uikits.child(item,ui.TOPICS_TITLE)
+	if layout and title then
+		local item_size = item:getContentSize()
+		local size = layout:getContentSize()
+		local tx,ty = title:getPosition()
+		local tsize = title:getContentSize()
+		local ox,oy = layout:getPosition()
+		self._paper_item_space = item_size.height-ty-tsize.height
+		self._paper_item_space2 = ty-oy-size.height
+	end
+end
+
 function Batch:paper_relayout()
 	if self._papers and self._papers._list then
 		for k,item in pairs(self._papers._list) do
@@ -145,12 +159,11 @@ function Batch:paper_relayout()
 			if layout and title then
 				local item_size = item:getContentSize()
 				local size = layout:getContentSize()
-				local tx,tx = title:getPosition()
 				local tsize = title:getContentSize()
 				local ox,oy = layout:getPosition()
-				local space = item_size.height-tx-tsize.height
-				title:setPosition(cc.p(ox,oy+size.height+space))
-				item:setContentSize(cc.size(item_size.width,size.height+tsize.height+2*space))
+				title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
+				item:setContentSize(cc.size(item_size.width,
+					size.height+tsize.height+self._paper_item_space+self._paper_item_space2))
 			end
 		end
 		self._papers:relayout()
@@ -365,6 +378,7 @@ function Batch:init_gui()
 	self._topicsview = uikits.child(self._topics_root,ui.TOPICS_VIEW)
 	self._commits = uikits.scroll(self._topics_root,ui.COMMIT_LIST,ui.COMMIT_ITEM,true)
 	self._papers = uikits.scroll(self._topics_root,ui.PAPER_LIST,ui.PAPER_ITEM)
+	self:init_paper_item_space( uikits.child(self._topicsview,ui.PAPER_ITEM))
 	self:addChild(self._topics_root)
 	--初始化主观题列表
 	self._subjective_root = uikits.fromJson{file_9_16=ui.FILE_SUBJECTIVE_LIST,file_3_4=ui.FILE_SUBJECTIVE_LIST_3_4}

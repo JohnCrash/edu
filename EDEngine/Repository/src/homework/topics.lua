@@ -508,7 +508,7 @@ local function attachment_ui_bg( t )
 			if v and type(v)=='string' and string.len(v)>4 then
 				local ex = string.lower( string.sub(v,-3) )
 				if ex=='png' or ex=='gif' or ex=='jpg' then
-					return uikits.image{image=cache.get_name(v),x=t.x,anchorX=t.anchorX}
+					return uikits.image{image=cache.get_name(v),x=t.x,y=t.y,anchorX=t.anchorX}
 				end
 			end
 		end
@@ -708,10 +708,10 @@ local function relayout_link( layout,data )
 		table.insert( dot2,dot )
 		dot:setScaleX(0.5)
 		dot:setScaleY(0.5)		
-		layout:addChild(dot)		
+		layout:addChild(dot)
 	end
 
-	local rect1 = uikits.relayout_h( ui2,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
+	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
@@ -875,9 +875,9 @@ local function relayout_sort( layout,data,isH )
 					end
 				end)
 	end
-	local result = uikits.relayout_h( ui1,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
-	uikits.move( ui1,0,result.height + 26 )
-	place_rect = {x1=result.x-4,y1=4,x2=result.x+result.width+4,y2=result.height + 12}
+	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
+	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
+	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
 	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
@@ -906,7 +906,7 @@ end
 --点选
 local function relayout_click( layout,data,ismulti )
 	local size = layout:getContentSize()
-	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,anchorX=0.5}
+	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,y=2*TOPICS_SPACE,anchorX=0.5}
 	local rects = {}
 	local rect_node = {}
 	local bg_size = bg:getContentSize()
@@ -983,7 +983,7 @@ local function relayout_drag( layout,data,ismul )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,anchorX = 0.5}
+	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5}
 	local drags = {}
 	local draging_item
 	
@@ -1210,7 +1210,7 @@ local function relayout_drag( layout,data,ismul )
 	end
 	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local x,y = bg:getPosition()
-	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+TOPICS_SPACE )
+	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+2*TOPICS_SPACE )
 	for k,v in pairs( ui1 ) do
 		local x,y = v:getPosition()
 		orgp[v] = cc.p(x,y)
