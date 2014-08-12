@@ -117,7 +117,7 @@ local function string_sort( s )
 	return table.concat( t )
 end
 
-local function answer(layout,data)
+local function call_answer_event(layout,data)
 	if data and data.eventAnswer then
 		data.eventAnswer(layout,data)
 	end
@@ -471,7 +471,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 						if efunc and type(efunc)=='function' then
 							efunc(layout,data,param1,param2,param3)
 							--初始化完成
-							if data.eventInitComplate and type(data.eventInitComplate)=='function' then
+							if data.eventInitComplate then
 								data.eventInitComplate(layout,data)
 							end
 						end
@@ -660,7 +660,7 @@ local function relayout_link( layout,data )
 			else
 				data.state = ui.STATE_UNFINISHED
 			end
-			answer(layout,data)
+			call_answer_event(layout,data)
 		end
 	end
 	local function select_rect(item,b)
@@ -888,7 +888,7 @@ local function relayout_sort( layout,data,isH )
 							data.my_answer = data.my_answer..map_abc(v)
 						end
 						kits.log( data.my_answer )
-						answer(layout,data)
+						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -981,7 +981,7 @@ local function relayout_click( layout,data,ismulti )
 				else
 					data.state = ui.STATE_UNFINISHED
 				end				
-				answer(layout,data)
+				call_answer_event(layout,data)
 			end,'click' )
 	end
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
@@ -1218,7 +1218,7 @@ local function relayout_drag( layout,data,ismul )
 						else
 							data.state = ui.STATE_UNFINISHED
 						end						
-						answer(layout,data)
+						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -1274,8 +1274,9 @@ end
 						编辑题是一个ccui.TextFeild数组.这些控件组成答题区，控件位置有调用者设置.
 		my_answer 答案，一个字符串
 --]]
+local res_root = 'homework/'
 local types={
-	[1] = {name='判断',
+	[1] = {name='判断',img=res_root..'true_or_false_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'pd_conv')
 					e.answer = parse_answer( s )
@@ -1284,8 +1285,8 @@ local types={
 				init=function(layout,data)
 					if data._options  then --具有答题区
 						--初始化答案
-						local _options_yes = data._options[1]
-						local _options_no = data._options[2]
+						local _option_yes = data._options[1]
+						local _option_no = data._options[2]
 						_option_yes:setVisible(true)
 						_option_no:setVisible(true)
 						if data.my_answer == 'A' then
@@ -1311,7 +1312,7 @@ local types={
 								data.state = ui.STATE_UNFINISHED
 							end
 							kits.log( data.my_answer )
-							answer(layout,data)
+							call_answer_event(layout,data)
 						end)
 					uikits.event(_option_no,
 						function (sender,b)
@@ -1326,13 +1327,13 @@ local types={
 								data.state = ui.STATE_UNFINISHED
 							end			
 							kits.log( data.my_answer )				
-							answer(layout,data)
+							call_answer_event(layout,data)
 						end)						
 					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[2] = {name='单选',
+	[2] = {name='单选',img=res_root..'single_item.png',
 				conv=function(s,e)		
 					load_attachment(s,e,'signal_conv')
 					local op = kits.decode_json( s.options )
@@ -1367,14 +1368,14 @@ local types={
 										data.state = ui.STATE_UNFINISHED
 									end
 									kits.log( data.my_answer )
-									answer(layout,data)
+									call_answer_event(layout,data)
 								end)
 						end
 					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[3] = {name='多选',
+	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=function(s,e)		
 					load_attachment(s,e,'multi_conv')
 					local op = kits.decode_json( s.options )
@@ -1414,20 +1415,20 @@ local types={
 									--保持顺序CB->BC
 									data.my_answer = string_sort(data.my_answer)
 									kits.log( data.my_answer )
-									answer(layout,data)
+									call_answer_event(layout,data)
 								end)
 						end
 					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[4] = {name='连线',
+	[4] = {name='连线',img=res_root..'connection_item.png',
 				conv=link_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_link)
 				end
 			},	
-	[5] = {name='填空',
+	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
 					local ca = kits.decode_json( s.correct_answer )
@@ -1467,37 +1468,37 @@ local types={
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[7] = {name='横排序',
+	[7] = {name='横排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_sort,true)
 				end
 			},
-	[8] = {name='竖排序',
+	[8] = {name='竖排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_sort,false)
 				end
 			},
-	[9] = {name='点图单选',
+	[9] = {name='点图单选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_click,false)
 				end
 			},
-	[10] = {name='点图多选',
+	[10] = {name='点图多选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_click,true)
 				end
 			},
-	[11] = {name='单拖放',
+	[11] = {name='单拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_drag,false)
 				end
 			},
-	[12] = {name='多拖放',
+	[12] = {name='多拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_drag,true)
