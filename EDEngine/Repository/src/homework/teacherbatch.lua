@@ -28,6 +28,7 @@ local ui = {
 	TAB_BUTTON_3 = 'heitiao/xuesheng',
 	TOPICS_VIEW = 'keguan',
 	SUBJECTIVE_VIEW = 'zuguan',
+	SUBJECTIVE_ITEM = 'zhuguan1',
 	STUDENT_LIST = 'xuesheng',
 	STUDENT_ITEM_TITLE = 'ztxx',
 	STUDENT_ITEM = 'xs1',
@@ -99,10 +100,6 @@ function Batch:add_paper_item( topicType,topicID )
 				cache.request_json(url,function(t)
 					if t then
 						local data = {}
-						--测试用
-						if not t.image then
-							t.image =  'Pic/my/1.png'
-						end
 						if t.difficulty_name then
 							uikits.set(item,
 							{
@@ -113,7 +110,6 @@ function Batch:add_paper_item( topicType,topicID )
 							data.eventInitComplate = function(layout,data)
 								self:paper_relayout()
 							end
-							data._scrollParent = self._topicsview
 							topics.types[topicType].init(child,data)
 							loadbox:removeFromParent()
 						else
@@ -383,6 +379,11 @@ function Batch:init_gui()
 	--初始化主观题列表
 	self._subjective_root = uikits.fromJson{file_9_16=ui.FILE_SUBJECTIVE_LIST,file_3_4=ui.FILE_SUBJECTIVE_LIST_3_4}
 	self._subjectiveview = uikits.child(self._subjective_root,ui.SUBJECTIVE_VIEW)
+	self._subjectives = uikits.scroll(self._subjective_root,ui.SUBJECTIVE_VIEW,ui.SUBJECTIVE_ITEM)
+	self._subjectives:additem{}
+	self._subjectives:additem{}
+	self._subjectives:relayout()
+	
 	self:addChild(self._subjective_root)	
 	self._subjectiveview:setVisible(false)
 	--学生列表

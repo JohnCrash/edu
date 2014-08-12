@@ -117,7 +117,10 @@ local function string_sort( s )
 	return table.concat( t )
 end
 
-local function save_my_answer()
+local function answer(layout,data)
+	if data and data.eventAnswer then
+		data.eventAnswer(layout,data)
+	end
 end
 
 local function item_ui( t )
@@ -657,7 +660,7 @@ local function relayout_link( layout,data )
 			else
 				data.state = ui.STATE_UNFINISHED
 			end
-			save_my_answer()
+			answer(layout,data)
 		end
 	end
 	local function select_rect(item,b)
@@ -754,6 +757,17 @@ local function get_center_pt( item )
 	return size.width*uikits.scale()/2+x,size.height*uikits.scale()/2+y
 end
 
+local function setEnabledParent( layout,b )
+	local parent = layout
+	while parent do
+		if tolua.type(parent) == 'ccui.ScrollView' or 
+			tolua.type(parent) == 'ccui.PageView' then
+			parent:setEnabled(b)
+		end
+		parent = parent:getParent() 
+	end
+end
+
 --排序
 local function relayout_sort( layout,data,isH )
 	local ui1 = {}
@@ -842,18 +856,20 @@ local function relayout_sort( layout,data,isH )
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * uikits.scale()
 						sp.y = sp.y * uikits.scale()
-						if data._scrollParent then
-							data._scrollParent:setEnabled(false)
-						end
+						setEnabledParent(layout,false)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(false)
+						--end
 						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
-						if data._scrollParent then
-							data._scrollParent:setEnabled(true)
-						end
+						setEnabledParent(layout,true)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(true)
+						--end
 						layout:setEnabled(true)
 						sender:setLocalZOrder(zorder)
 						if not place_item( sender,p.x,p.y ) then 
@@ -872,7 +888,7 @@ local function relayout_sort( layout,data,isH )
 							data.my_answer = data.my_answer..map_abc(v)
 						end
 						kits.log( data.my_answer )
-						save_my_answer()
+						answer(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -965,7 +981,7 @@ local function relayout_click( layout,data,ismulti )
 				else
 					data.state = ui.STATE_UNFINISHED
 				end				
-				save_my_answer()
+				answer(layout,data)
 			end,'click' )
 	end
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
@@ -1138,9 +1154,10 @@ local function relayout_drag( layout,data,ismul )
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * uikits.scale()
 						sp.y = sp.y * uikits.scale()
-						if data._scrollParent then
-							data._scrollParent:setEnabled(false)
-						end
+						setEnabledParent(layout,false)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(false)
+						--end
 						layout:setEnabled(false)
 						if ismul then
 							if not sender.isclone then
@@ -1154,9 +1171,10 @@ local function relayout_drag( layout,data,ismul )
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
-						if data._scrollParent then
-							data._scrollParent:setEnabled(true)
-						end
+						setEnabledParent(layout,true)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(true)
+						--end
 						layout:setEnabled(true)
 						if ismul then
 							if draging_item then
@@ -1200,7 +1218,7 @@ local function relayout_drag( layout,data,ismul )
 						else
 							data.state = ui.STATE_UNFINISHED
 						end						
-						save_my_answer()
+						answer(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -1244,6 +1262,18 @@ local function relayout_drag( layout,data,ismul )
 	end
 end
 
+--[[
+	conv(s,e) 输入的源数据，e是输出的数据
+	
+	init根据data构建题目,并且将题目内容放置在layout中。
+	data中可以附加下列事件
+		eventInitComplate(layout,data) 当试题初始化完毕调用
+		eventAnswer(layout,data) 当题做了一次回答(修改)
+	data中可以附加的数据
+		_options 一个控件数组，对于判断题，选择题，它是一个ccui.CheckBox对象数组
+						编辑题是一个ccui.TextFeild数组.这些控件组成答题区，控件位置有调用者设置.
+		my_answer 答案，一个字符串
+--]]
 local types={
 	[1] = {name='判断',
 				conv=function(s,e)
@@ -1252,6 +1282,53 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
+					if data._options  then --具有答题区
+						--初始化答案
+						local _options_yes = data._options[1]
+						local _options_no = data._options[2]
+						_option_yes:setVisible(true)
+						_option_no:setVisible(true)
+						if data.my_answer == 'A' then
+							_option_yes:setSelectedState(true)
+							_option_no:setSelectedState(false)
+						elseif data.my_answer == 'B' then
+							_option_yes:setSelectedState(false)
+							_option_no:setSelectedState(true)	
+						else
+							_option_yes:setSelectedState(false)
+							_option_no:setSelectedState(false)
+						end
+					uikits.event(_option_yes,
+						function (sender,b)
+							if b then
+								if data.my_answer == 'B' then
+									_option_no:setSelectedState(false)
+								end
+								data.my_answer = 'A'
+								data.state = ui.STATE_FINISHED
+							else
+								data.my_answer = ''
+								data.state = ui.STATE_UNFINISHED
+							end
+							kits.log( data.my_answer )
+							answer(layout,data)
+						end)
+					uikits.event(_option_no,
+						function (sender,b)
+							if b then
+								if data.my_answer == 'A' then
+									_option_yes:setSelectedState(false)
+								end
+								data.my_answer = 'B'
+								data.state = ui.STATE_FINISHED
+							else
+								data.my_answer = ''
+								data.state = ui.STATE_UNFINISHED
+							end			
+							kits.log( data.my_answer )				
+							answer(layout,data)
+						end)						
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
@@ -1268,6 +1345,32 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
+					if data._options then
+						local _options = data._options
+						for i = 1,#_options do
+							_options[i]:setVisible(true)
+							if answer_abc[i] == data.my_answer then
+								_options[i]:setSelectedState(true)
+							else
+								_options[i]:setSelectedState(false)
+							end
+							local m = i
+							uikits.event(_options[i],
+								function(sender,b)
+									if b then
+										data.my_answer = answer_abc[m]
+										self:clear_all_option_check()
+										sender:setSelectedState(true)
+										data.state = ui.STATE_FINISHED
+									else
+										data.my_answer = ''
+										data.state = ui.STATE_UNFINISHED
+									end
+									kits.log( data.my_answer )
+									answer(layout,data)
+								end)
+						end
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
@@ -1284,6 +1387,37 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
+					if data._options then
+						local _options = data._options
+						for i = 1, #_options do
+							_options[i]:setVisible(true)
+							if data.my_answer and type(data.my_answer)=='string' and
+								string.find(data.my_answer,answer_abc[i]) then
+								_options[i]:setSelectedState(true)
+							else
+								_options[i]:setSelectedState(false)
+							end
+							local m = i
+							uikits.event(_options[i],
+								function(sender,b)
+									data.my_answer = data.my_answer or ''
+									if string.find(data.my_answer,answer_abc[m]) then
+										data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
+									else
+										data.my_answer = data.my_answer .. answer_abc[m]
+									end
+									if string.len(data.my_answer) > 0 then
+										data.state = ui.STATE_FINISHED
+									else
+										data.state = ui.STATE_UNFINISHED
+									end
+									--保持顺序CB->BC
+									data.my_answer = string_sort(data.my_answer)
+									kits.log( data.my_answer )
+									answer(layout,data)
+								end)
+						end
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
@@ -1306,6 +1440,30 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
+					if data.options then
+						for i = 1,data.options do
+							local _options = data._options
+							if _options and _options[i] then
+								_options[i]:setVisible(true)
+								local e = uikits.child(_options[i],ui.ANSWER_TEXT)
+								if data.answer and data.answer[i] then
+									e:setText(data.answer[i])
+								else
+									e:setText('')
+								end
+								uikits.event(e,
+										function(sender,eventType)
+											if eventType == ccui.TextFiledEventType.insert_text then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											elseif eventType == ccui.TextFiledEventType.delete_backward then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											end
+										end)	
+							end									
+						end	
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
@@ -1354,4 +1512,7 @@ return
 	topics_map = topics,
 	course_icon = course_icon,
 	types = types,
+	STATE_CURRENT = 1,
+	STATE_FINISHED = 2,
+	STATE_UNFINISHED = 3,	
 }
