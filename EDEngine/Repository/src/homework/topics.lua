@@ -748,6 +748,12 @@ local function relayout_link( layout,data )
 	end
 end
 
+local function get_center_pt( item )
+	local size = item:getContentSize()
+	local x,y = item:getPosition()
+	return size.width*uikits.scale()/2+x,size.height*uikits.scale()/2+y
+end
+
 --排序
 local function relayout_sort( layout,data,isH )
 	local ui1 = {}
