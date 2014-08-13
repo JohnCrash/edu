@@ -736,7 +736,11 @@ end
 --itemID2 代表可能的第二类item
 local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	local t = {_root = root}
-	t._scrollview = child(root,scrollID)
+	if scrollID then
+		t._scrollview = child(root,scrollID)
+	else
+		t._scrollview = root
+	end
 	t._item = child(t._scrollview,itemID)
 	if not t._scrollview or not t._item then
 		kits.log('ERROR : scroll resource not exist')

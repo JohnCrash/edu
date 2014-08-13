@@ -1,6 +1,7 @@
 require "Cocos2d"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local platform = CCApplication:getInstance():getTargetPlatform()
 
 local function init_test_resource()
   local res = local_dir..'res/'
@@ -62,6 +63,6 @@ local function main()
 	cc.Director:getInstance():replaceScene(scene)
 end
 
---require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.2.182")
 
 main()
