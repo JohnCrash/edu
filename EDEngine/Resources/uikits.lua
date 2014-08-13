@@ -759,13 +759,13 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t._item_width = size.width
 	t._item_height = size.height
 	t._item_ox,t._item_oy = t._item:getPosition()
-	if not horiz then
+
 		--将不是_item的子节点都视为tops，tops在滚动布局中保持顶部位置
 		local nodes = t._scrollview:getChildren()
 		t._tops = {}
 		for i,v in pairs(nodes) do
 			if v ~= t._item and v~= t._item2 then
-				v:setAnchorPoint(cc.p(0,0))
+				--v:setAnchorPoint(cc.p(0,0))
 				v._ox,v._oy = v:getPosition()
 				if not t._tops_space then
 					t._tops_space = v._oy - t._item_oy - t._item_height
@@ -773,15 +773,25 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				table.insert(t._tops,v)
 			end
 		end
-	end
+
 	t.relayout = function(self)
 		if horiz then --横向
 			local width = 0
+			local item_max_height = 0
 			for i=1,#self._list do
-				width = width + self._list[i]:getContentSize().width + space
+				local size = self._list[i]:getContentSize()
+				width = width + size.width + space
+				item_max_height = math.max(item_max_height,size.height)
 			end
 			if self._scrollview.setInnerContainerSize then
 				self._scrollview:setInnerContainerSize(cc.size(width,_item_height))
+			else
+				local size = self._scrollview:getContentSize()
+				local dh = item_max_height - self._item_height
+				if dh > 0 then
+					self._scrollview:setContentSize(cc.size(size.width,size.height+dh))
+					move( self._tops,0,dh)
+				end
 			end
 
 			local item_width = self._item_ox

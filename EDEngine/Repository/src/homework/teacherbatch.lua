@@ -325,6 +325,13 @@ function Batch:init_subjective()
 							end
 						else
 							child:setVisible(false)
+							--将image向上移动
+							local img = uikits.child(item,ui.SUBJECTIVE_IMAGE)
+							if img then
+								local size = child:getContentSize()
+								local x,y = img:getPosition()
+								img:setPosition( cc.p(x,y+size.height))
+							end
 						end
 					end
 				}

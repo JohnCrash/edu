@@ -8,6 +8,8 @@ local ui = {
 	LIST = 'newview',
 	ITEM = 'newview/subject1',
 	STUDENT_LIST_BUTTON = 'ding/liebiao',
+	SUBJECTIVE_LIST = 'gundong',
+	SUBJECTIVE_ITEM = 'xuesheng1',
 }
 
 local TeacherSubjective = class("TeacherSubjective")
@@ -39,6 +41,12 @@ function TeacherSubjective:init_gui()
 	uikits.event(student_but,function(sender)
 			uikits.pushScene(StudentList.create())
 		end)
+	
+	self._subjectives = uikits.scroll(self._root,ui.SUBJECTIVE_LIST,ui.SUBJECTIVE_ITEM)
+	self._subjectives:additem()
+	self._subjectives:additem()
+	self._subjectives:additem()
+	self._subjectives:relayout()
 end
 
 function TeacherSubjective:init()
