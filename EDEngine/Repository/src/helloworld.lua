@@ -34,7 +34,12 @@ local function init_test_resource()
     pfu:addSearchPath(res..'scenetest/TriggerTest')    
   end
   pfu:addSearchPath(res)
-  pfu:addSearchPath(local_dir..'cache/')
+	if platform == kTargetWindows then
+		pfu:addSearchPath(local_dir..'cache/')
+	else
+		pfu:addSearchPath(local_dir..'test/')
+	end
+  
   pfu:addSearchPath(local_dir)
 end
 

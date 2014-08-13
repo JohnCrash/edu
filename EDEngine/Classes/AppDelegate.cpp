@@ -45,7 +45,9 @@ void AppDelegate::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	
 	glview->setFrameSize(1024,576);
+#endif	
     auto screenSize = glview->getFrameSize();
     
 	auto pFileUtils = FileUtils::getInstance();

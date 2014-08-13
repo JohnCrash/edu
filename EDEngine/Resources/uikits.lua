@@ -326,6 +326,7 @@ local function imageview( t )
 		s = ccui.ImageView:create()
 		init_node( s,t )
 		if t.image then
+			kits.log('imageview loadTexture '..t.image)
 			s:loadTexture(t.image)
 		end
 		local ss = s:getContentSize()

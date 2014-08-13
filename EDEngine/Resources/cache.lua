@@ -90,6 +90,8 @@ local function request_resources( rtable,efunc )
 							function(obj)
 								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED' then
 									if obj.state =='OK' and obj.data then
+										kits.log('request:'..v.url..' successed!')
+										kits.log('	request data write to '..get_name(v.url))
 										if v.done and type(v.done)=='function' then
 											v.done( obj.data )
 										else
@@ -136,6 +138,8 @@ local function request( url,func )
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK'  then
 						if obj.data then
+							kits.log('request:'..url..' successed!')
+							kits.log('	request data write to '..get_name(url))
 							kits.write_cache(get_name(url),obj.data)
 							func( true )
 						end
