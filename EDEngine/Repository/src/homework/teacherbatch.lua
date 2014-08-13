@@ -5,6 +5,7 @@ local kits = require "kits"
 local json = require "json-c"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
+local TeacherSubjective = require "homework/teachersubjective"
 
 local ui = {
 	FILE = 'laoshizuoye/jinruzuoye.json',
@@ -35,6 +36,7 @@ local ui = {
 	SUBJECTIVE_AUDIO_BUTTON = 'yuyin',
 	SUBJECTIVE_AUDIO_TIME = 'shijian',
 	SUBJECTIVE_IMAGE = 'zhaopian',
+	SUBJECTIVE_BUTTON = 'jinru',
 	STUDENT_LIST = 'xuesheng',
 	STUDENT_ITEM_TITLE = 'ztxx',
 	STUDENT_ITEM = 'xs1',
@@ -333,18 +335,21 @@ function Batch:init_subjective()
 								img:setPosition( cc.p(x,y+size.height))
 							end
 						end
+					end,
+					[ui.SUBJECTIVE_BUTTON] = function(child,item)
+						uikits.event(child,function(sender)
+							uikits.pushScene(TeacherSubjective.create())
+						end)
 					end
 				}
 				local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,true,16)
 				layout:clear()
-				local item_height_max = 0
 				if v.image and type(v.image) == 'table' then
 					for i,p in pairs(v.image) do
 						if p and type(p)=='string' and string.len(p)>0 then
 							local it = layout:additem()
 							if it then
 								it:loadTexture(p)
-								item_height_max = math.max(it:getContentSize().height,item_height_max)
 							end
 						end
 					end

@@ -767,10 +767,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			if v ~= t._item and v~= t._item2 then
 				--v:setAnchorPoint(cc.p(0,0))
 				v._ox,v._oy = v:getPosition()
-				if not t._tops_space then
-					t._tops_space = v._oy - t._item_oy - t._item_height
+				if v._oy > t._item_oy then
+					if not t._tops_space then
+						t._tops_space = v._oy - t._item_oy - t._item_height
+					end
+					table.insert(t._tops,v)
 				end
-				table.insert(t._tops,v)
 			end
 		end
 
