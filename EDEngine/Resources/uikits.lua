@@ -557,7 +557,7 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 		 local function delay_call_func()
 			scheduler:unscheduleScriptEntry(schedulerID)
 			schedulerID = nil		
-			func(obj,param1,param2,param3)
+			func(param1,param2,param3)
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)	
 	end

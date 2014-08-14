@@ -136,13 +136,11 @@ local function request( url,func )
 	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-					if obj.state == 'OK'  then
-						if obj.data then
-							kits.log('request:'..url..' successed!')
-							kits.log('	request data write to '..get_name(url))
-							kits.write_cache(get_name(url),obj.data)
-							func( true )
-						end
+					if obj.state == 'OK' and obj.data then
+						kits.log('request:'..url..' successed!')
+						kits.log('	request data write to '..get_name(url))
+						kits.write_cache(get_name(url),obj.data)
+						func( true )
 					else
 						if obj.state == 'FAILED' and is_done( url ) then --下载失败尝试使用本地缓冲
 							func( true )
@@ -191,6 +189,40 @@ local function request_json( url,func )
 	request(url,json_proc)
 end
 
+--上传
+--http://file-stu.lejiaolexue.com/rest/user/upload/hw
+--下载
+--http://file-stu.lejiaolexue.com/rest/dl
+local function upload(url,filename,data,func,progress_func)
+	local progress = nil
+	if progress_func and type(progress_func)=='function' then
+		progress = progress_func
+	end
+	local mh,msg = mt.new("HTTPPOST",url,login.cookie(),
+		function(obj)
+			if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+				if obj.state == 'OK' and obj.data then
+					local t = json.decode(obj.data)
+					if t and type(t)=='table' and t.md5 and type(t.md5)=='string' and string.len(t.md5)>0 then
+						func(true,t.md5)
+						return
+					end
+				end
+				func(false)
+				kits.log('ERROR : upload failed! url = '..tostring(url)..' filename='..filename)
+				kits.log('	reason:'..tostring(obj.errmsg))
+			end
+			if obj.state == 'LOADING' and progress then
+				progress( obj.progress )
+			end
+		end,{{copyname='filedata',filename=filename,filecontents=data}})
+	if not mh then
+		func(false)
+		kits.log('ERROR : upload failed! url = '..tostring(url)..' filename='..filename)
+		kits.log('	reason:'..tostring(msg))
+	end
+end
+
 local function request_cancel()
 	for i,m in pairs(request_list) do
 		m:cancel()
@@ -205,4 +237,5 @@ return {
 	request = request,
 	request_json = request_json,
 	request_cancel = request_cancel,
+	upload = upload,
 }

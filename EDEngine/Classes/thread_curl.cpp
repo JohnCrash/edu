@@ -97,6 +97,8 @@ namespace kits
 			}
 			if( dltotal  != 0 )
 				ptc->progress = dlnow/dltotal;
+			else if( ultotal != 0 )
+				ptc->progress = ulnow/ultotal;
 			if( ptc->progressFunc )
 				ptc->progressFunc(ptc);
 		}

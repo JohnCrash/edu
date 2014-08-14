@@ -65,22 +65,4 @@ end
 
 require("mobdebug").start("192.168.2.182")
 
-local mt = require "mt"
-local login = require "login"
-local cache = require "cache"
-local kits = require "kits"
-
-local data = kits.read_cache('Pic/6x1_130628141210.jpg')
-local mh,msg = mt.new("HTTPPOST","http://file-stu.lejiaolexue.com/rest/user/upload/hw",login.cookie(),
-	function(obj)
-		if obj.state=='OK' and obj.data then
-			kits.log('	DATA:'..tostring(obj.data))
-		end
-		kits.log('STATE '..tostring(obj.state))
-	end,{
-			{copyname="filedata",filename="6x1_130628141210.jpg",filecontents=data},
-	})
-if not mh then
-	kits.log('ERROR upload')
-end
 main()
