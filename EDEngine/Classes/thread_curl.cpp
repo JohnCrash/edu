@@ -60,6 +60,31 @@ namespace kits
 		}
 	}
 
+	struct StreamStruct
+	{
+		char *readptr;
+		size_t sizeleft;
+		StreamStruct(const char *p,size_t s):readptr((char*)p),sizeleft(s){}
+	};
+	static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+	{
+		StreamStruct *pooh = (StreamStruct *)userp;
+		if( pooh )
+		{
+			size_t len = size*nmemb;
+			if( len > pooh->sizeleft )
+				len = pooh->sizeleft;
+			if( len > 0 )
+			{
+				memcpy( ptr,pooh->readptr,len);
+				pooh->sizeleft -= len;
+				pooh->readptr += len;
+			}
+			return len;
+		}
+		return 0;
+	}
+
 	static int progressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 	{
 		curl_t *ptc = (curl_t *)clientp;
@@ -153,7 +178,34 @@ namespace kits
 			case GET:
 				break;
 			case POST:
-				curl_easy_setopt(curl,CURLOPT_POSTFIELDS,pct->post_form.c_str());
+				{
+					struct curl_slist *headers=NULL;
+					headers = curl_slist_append(headers, "Content-Type: text/xml");
+					curl_easy_setopt(curl,CURLOPT_POSTFIELDS,pct->post_form.c_str());
+					curl_easy_setopt(curl,CURLOPT_POSTFIELDSIZE,pct->post_form.size());
+					curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+				}
+				break;
+			case HTTPPOST:
+				{
+					struct curl_httppost *formpost=NULL;
+					struct curl_httppost *lastptr=NULL;
+					struct curl_slist *headerlist=NULL;
+					for(auto it=pct->posts.begin();it!=pct->posts.end();++it)
+					{
+						StreamStruct ss(it->filecontents.c_str(),it->filecontents.size());
+					  curl_formadd(&formpost,
+						&lastptr,
+						CURLFORM_COPYNAME, it->copyname.c_str(),
+						CURLFORM_COPYCONTENTS,it->copycontents.c_str(),
+						CURLFORM_FILENAME,it->filename.c_str(),
+						CURLFORM_STREAM,&ss,
+						CURLFORM_CONTENTSLENGTH,it->filecontents.size(),
+						CURLFORM_END);
+					}
+					curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+					curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+				}
 				break;
 			default:;
 			}
