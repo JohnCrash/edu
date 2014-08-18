@@ -110,6 +110,7 @@ http://image.lejiaolexue.com/ulogo/seg1/seg2/userId_type.jpg
 		teacherId
 		examId
 		teacherId=12297&examId=00231a8e919e4c6cbfaa601462adf49d
+	
 2.学生提交作业的顺序列表.
 	http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx
 	参数:

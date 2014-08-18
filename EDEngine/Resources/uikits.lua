@@ -7,6 +7,8 @@ require "GuiConstants"
 require "AudioEngine" 
 
 local Director = cc.Director:getInstance()
+local FileUtils = cc.FileUtils:getInstance()
+
 local defaultFont = "fonts/simfang.ttf"
 local defaultFontSize = 16
 local log_caller
@@ -324,14 +326,16 @@ local function imageview( t )
 	local s
 	if t and type(t)=='table' then
 		s = ccui.ImageView:create()
-		init_node( s,t )
-		if t.image then
+		
+		if t.image and FileUtils:isFileExist(t.image) then
+			kits.log('imageview loadTexture '..t.image)
 			s:loadTexture(t.image)
 		end
 		local ss = s:getContentSize()
-		s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}		
+		s:setContentSize{width=t.width or 16,height=t.height or 16}		
 		s:setScale9Enabled( t.scale9 or false )
 		s:setTouchEnabled( t.touch or false )
+		init_node( s,t )
 	end
 	return s
 end
@@ -556,7 +560,7 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 		 local function delay_call_func()
 			scheduler:unscheduleScriptEntry(schedulerID)
 			schedulerID = nil		
-			func(obj,param1,param2,param3)
+			func(param1,param2,param3)
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)	
 	end
@@ -735,7 +739,11 @@ end
 --itemID2 代表可能的第二类item
 local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	local t = {_root = root}
-	t._scrollview = child(root,scrollID)
+	if scrollID then
+		t._scrollview = child(root,scrollID)
+	else
+		t._scrollview = root
+	end
 	t._item = child(t._scrollview,itemID)
 	if not t._scrollview or not t._item then
 		kits.log('ERROR : scroll resource not exist')
@@ -754,29 +762,41 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t._item_width = size.width
 	t._item_height = size.height
 	t._item_ox,t._item_oy = t._item:getPosition()
-	if not horiz then
+
 		--将不是_item的子节点都视为tops，tops在滚动布局中保持顶部位置
 		local nodes = t._scrollview:getChildren()
 		t._tops = {}
 		for i,v in pairs(nodes) do
 			if v ~= t._item and v~= t._item2 then
-				v:setAnchorPoint(cc.p(0,0))
+				--v:setAnchorPoint(cc.p(0,0))
 				v._ox,v._oy = v:getPosition()
-				if not t._tops_space then
-					t._tops_space = v._oy - t._item_oy - t._item_height
+				if v._oy > t._item_oy then
+					if not t._tops_space then
+						t._tops_space = v._oy - t._item_oy - t._item_height
+					end
+					table.insert(t._tops,v)
 				end
-				table.insert(t._tops,v)
 			end
 		end
-	end
+
 	t.relayout = function(self)
 		if horiz then --横向
 			local width = 0
+			local item_max_height = 0
 			for i=1,#self._list do
-				width = width + self._list[i]:getContentSize().width + space
+				local size = self._list[i]:getContentSize()
+				width = width + size.width + space
+				item_max_height = math.max(item_max_height,size.height)
 			end
 			if self._scrollview.setInnerContainerSize then
 				self._scrollview:setInnerContainerSize(cc.size(width,_item_height))
+			else
+				local size = self._scrollview:getContentSize()
+				local dh = item_max_height - self._item_height
+				if dh > 0 then
+					self._scrollview:setContentSize(cc.size(size.width,size.height+dh))
+					move( self._tops,0,dh)
+				end
 			end
 
 			local item_width = self._item_ox

@@ -15,8 +15,8 @@ local function get_name()
 end
 
 local function get_cookie()
-	kits.log('	cookie='..test_login[selector].cookie )
-	kits.log('	user='..get_name())
+	--kits.log('	cookie='..test_login[selector].cookie )
+	--kits.log('	user='..get_name())
 	return test_login[selector].cookie
 end
 

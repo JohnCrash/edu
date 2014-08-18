@@ -561,9 +561,9 @@ function WorkList:add_item( t )
 	if t.exam_name then --作业名称
 		uikits.child( item,ui.ITEM_TITLE):setString( t.exam_name )
 	end
-	if t.course_name then --科目名称
-		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
-	end
+--	if t.course_name then --科目名称
+--		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
+--	end
 	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)

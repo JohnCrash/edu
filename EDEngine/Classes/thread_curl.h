@@ -3,6 +3,7 @@
 #ifndef _MY_THREAD_CURL_H_
 #define _MY_THREAD_CURL_H_
 #include <string>
+#include <vector>
 #include <thread>
 
 namespace kits
@@ -10,7 +11,8 @@ namespace kits
 enum CURL_METHOD
 {
 	GET,
-	POST
+	POST,
+	HTTPPOST
 };
 
 enum CURL_STATE
@@ -26,6 +28,14 @@ enum CURL_STATE
 	typedef unsigned char byte;
 #endif
 
+struct post_t
+{
+	std::string copyname;
+	std::string copycontents;
+	std::string filename;
+	std::string filecontents;
+};
+
 struct curl_t
 {
 	CURL_METHOD method;
@@ -34,6 +44,7 @@ struct curl_t
 	std::string cookie;
 	std::string err;
 	std::string post_form;
+	std::vector<post_t> posts;
 	int errcode;
 	float progress;// 0-1
 	void (* progressFunc)(curl_t *t);
@@ -50,7 +61,7 @@ struct curl_t
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
-		err(),post_form(),errcode(0),progress(0),
+		err(),errcode(0),progress(0),
 		progressFunc(nullptr),pthread(nullptr),
 		size(0),data(nullptr),ref(0),user_data(nullptr),
 		refcount(0),bfastEnd(false),this_ref(0),usize(0),

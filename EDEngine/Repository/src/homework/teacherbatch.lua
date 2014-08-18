@@ -5,6 +5,7 @@ local kits = require "kits"
 local json = require "json-c"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
+local TeacherSubjective = require "homework/teachersubjective"
 
 local ui = {
 	FILE = 'laoshizuoye/jinruzuoye.json',
@@ -28,6 +29,14 @@ local ui = {
 	TAB_BUTTON_3 = 'heitiao/xuesheng',
 	TOPICS_VIEW = 'keguan',
 	SUBJECTIVE_VIEW = 'zuguan',
+	SUBJECTIVE_ITEM = 'zhuguan1',
+	SUBJECTIVE_TITLE = 'yaoqiu',
+	SUBJECTIVE_COMMITNUM = 'yiti/tijiaoren',
+	SUBJECTIVE_AUDIO = 'audio',
+	SUBJECTIVE_AUDIO_BUTTON = 'yuyin',
+	SUBJECTIVE_AUDIO_TIME = 'shijian',
+	SUBJECTIVE_IMAGE = 'zhaopian',
+	SUBJECTIVE_BUTTON = 'jinru',
 	STUDENT_LIST = 'xuesheng',
 	STUDENT_ITEM_TITLE = 'ztxx',
 	STUDENT_ITEM = 'xs1',
@@ -99,10 +108,6 @@ function Batch:add_paper_item( topicType,topicID )
 				cache.request_json(url,function(t)
 					if t then
 						local data = {}
-						--测试用
-						if not t.image then
-							t.image =  'Pic/my/1.png'
-						end
 						if t.difficulty_name then
 							uikits.set(item,
 							{
@@ -113,7 +118,6 @@ function Batch:add_paper_item( topicType,topicID )
 							data.eventInitComplate = function(layout,data)
 								self:paper_relayout()
 							end
-							data._scrollParent = self._topicsview
 							topics.types[topicType].init(child,data)
 							loadbox:removeFromParent()
 						else
@@ -294,11 +298,67 @@ function Batch:init_topics()
 	return true
 end
 
+--主观题
 function Batch:init_subjective()
 	cache.request_cancel()
 	self._topicsview:setVisible(false)
 	self._subjectiveview:setVisible(true)
 	self._studentview:setVisible(false)
+	
+	self._subjectives:clear()
+	local result = kits.read_cache("sujective_list.json")
+	if result then
+		local t = json.decode(result)
+		if t then
+			local size = nil
+			for k,v in pairs(t) do
+				local item = self._subjectives:additem{
+					[ui.SUBJECTIVE_TITLE] = v.title or '',
+					[ui.SUBJECTIVE_COMMITNUM] = tostring(v.commits or 0)..'人',
+					[ui.SUBJECTIVE_AUDIO] = function(child,item)
+						size = size or child:getContentSize()
+						if v.audio and type(v.audio)=='string' and string.len(v.audio) > 0 then
+							local play_but = uikits.child(child,ui.SUBJECTIVE_AUDIO_BUTTON)
+							local time_txt =  uikits.child(child,ui.SUBJECTIVE_AUDIO_TIME)
+							if play_but and time_txt then
+								uikits.event(play_but,function(sender)
+										uikits.playSound(v.audio)
+								end)
+							end
+						else
+							child:setVisible(false)
+							--将image向上移动
+							local img = uikits.child(item,ui.SUBJECTIVE_IMAGE)
+							if img then
+								local size = child:getContentSize()
+								local x,y = img:getPosition()
+								img:setPosition( cc.p(x,y+size.height))
+							end
+						end
+					end,
+					[ui.SUBJECTIVE_BUTTON] = function(child,item)
+						uikits.event(child,function(sender)
+							uikits.pushScene(TeacherSubjective.create())
+						end)
+					end
+				}
+				local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,true,16)
+				layout:clear()
+				if v.image and type(v.image) == 'table' then
+					for i,p in pairs(v.image) do
+						if p and type(p)=='string' and string.len(p)>0 then
+							local it = layout:additem()
+							if it then
+								it:loadTexture(p)
+							end
+						end
+					end
+				end
+				layout:relayout()
+			end
+			self._subjectives:relayout()
+		end
+	end
 	return true
 end
 
@@ -383,6 +443,8 @@ function Batch:init_gui()
 	--初始化主观题列表
 	self._subjective_root = uikits.fromJson{file_9_16=ui.FILE_SUBJECTIVE_LIST,file_3_4=ui.FILE_SUBJECTIVE_LIST_3_4}
 	self._subjectiveview = uikits.child(self._subjective_root,ui.SUBJECTIVE_VIEW)
+	self._subjectives = uikits.scroll(self._subjective_root,ui.SUBJECTIVE_VIEW,ui.SUBJECTIVE_ITEM)
+	
 	self:addChild(self._subjective_root)	
 	self._subjectiveview:setVisible(false)
 	--学生列表

@@ -70,6 +70,79 @@ static void lua_progressFunc( kits::curl_t * ptc )
 	}
 }
 
+/*
+	{
+		[1] = {
+			copyname,
+			copycontents,
+			filename,
+			contents,
+		}
+		....
+	}
+*/
+static void httppost_param(lua_State *L,int i,kits::curl_t *pct)
+{
+	if(lua_istable(L,i))
+	{
+		kits::post_t item;
+
+		lua_pushstring(L,"copyname");
+		lua_gettable(L,i);
+		if( lua_isstring(L,-1) )
+		{
+			item.copyname = lua_tostring(L,-1);
+		}
+		lua_pop(L,1);
+		lua_pushstring(L,"copycontents");
+		lua_gettable(L,i);
+		if( lua_isstring(L,-1))
+		{
+			size_t len;
+			const char *str = lua_tolstring(L,-1,&len);
+			if( len > 0 && str )
+			{
+				item.copycontents.reserve(len);
+				memcpy((void*)item.copycontents.c_str(),str,len);
+			}
+		}
+		lua_pop(L,1);
+		lua_pushstring(L,"filename");
+		lua_gettable(L,i);
+		if( lua_isstring(L,-1))
+		{
+			item.filename = lua_tostring(L,-1);
+		}
+		lua_pop(L,1);
+		lua_pushstring(L,"filecontents");
+		lua_gettable(L,i);
+		if( lua_isstring(L,-1))
+		{
+			size_t len;
+			const char *str = lua_tolstring(L,-1,&len);
+			if( len > 0 && str )
+			{
+				item.filecontents.resize(len);
+				memcpy((void*)item.filecontents.c_str(),str,len);
+			}
+		}
+		lua_pop(L,1);
+		pct->posts.push_back(item);
+	}
+}
+static void httppost_params(lua_State *L,int i,kits::curl_t *pct)
+{
+	if( lua_istable(L,i) )
+	{
+		lua_pushnil(L);
+		while( lua_next(L,i) != 0 )
+		{
+			//key -2,value -1
+			httppost_param(L,lua_gettop(L),pct);
+			lua_pop(L,1); //pop value
+		}
+	}
+}
 /* mt.do_curl(mothed,url,cookie,progressFunc)
 	mothed "GET" , "POST" ...
 	progressFunc progress callback
@@ -91,6 +164,10 @@ static int do_curl(lua_State *L)
 			{
 				m = kits::POST;
 			}
+			else if(strcmp("HTTPPOST",method) == 0 )
+			{
+				m = kits::HTTPPOST;
+			}
 			else
 				m = kits::GET;
 			std::string cookie;
@@ -105,6 +182,9 @@ static int do_curl(lua_State *L)
 				{
 					pct->post_form = lua_tostring(L,5);
 				}
+			}else if( m == kits::HTTPPOST )
+			{
+				httppost_params(L,5,pct);
 			}
 			pct->ref = LUA_REFNIL;
 			if( lua_isfunction(L,4) )

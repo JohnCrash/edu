@@ -117,7 +117,10 @@ local function string_sort( s )
 	return table.concat( t )
 end
 
-local function save_my_answer()
+local function call_answer_event(layout,data)
+	if data and data.eventAnswer then
+		data.eventAnswer(layout,data)
+	end
 end
 
 local function item_ui( t )
@@ -285,7 +288,8 @@ local function parse_answer(s)
 		if ca and ca.answers and type(ca.answers) == 'table' then
 			return ca.answers
 		else
-			kits.log('		ERROR parse_answer: '..tostring(s) )
+			kits.log('		ERROR parse_answer: '..tostring(ca) )
+			kits.log('		have not correct_answer')
 		end
 	end
 end
@@ -468,7 +472,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 						if efunc and type(efunc)=='function' then
 							efunc(layout,data,param1,param2,param3)
 							--初始化完成
-							if data.eventInitComplate and type(data.eventInitComplate)=='function' then
+							if data.eventInitComplate then
 								data.eventInitComplate(layout,data)
 							end
 						end
@@ -583,8 +587,8 @@ local function set_topics_image( layout,data,x,y )
 		end
 		if layout.setInnerContainerSize then
 			layout:setInnerContainerSize( cc.size(width,height) )
-		else
-			layout:setContentSize( cc.size(width,height) )
+		--else
+		--	layout:setContentSize( cc.size(width,height) )
 		end
 	end
 end
@@ -657,7 +661,7 @@ local function relayout_link( layout,data )
 			else
 				data.state = ui.STATE_UNFINISHED
 			end
-			save_my_answer()
+			call_answer_event(layout,data)
 		end
 	end
 	local function select_rect(item,b)
@@ -711,6 +715,7 @@ local function relayout_link( layout,data )
 		layout:addChild(dot)
 	end
 
+	print('link '..layout:getContentSize().width)
 	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	for i,v in pairs(ui1) do
@@ -745,6 +750,23 @@ local function relayout_link( layout,data )
 		for i = 1,#ui1 do
 			data.my_answer	 = data.my_answer .. '0'
 		end
+	end
+end
+
+local function get_center_pt( item )
+	local size = item:getContentSize()
+	local x,y = item:getPosition()
+	return size.width*uikits.scale()/2+x,size.height*uikits.scale()/2+y
+end
+
+local function setEnabledParent( layout,b )
+	local parent = layout
+	while parent do
+		if tolua.type(parent) == 'ccui.ScrollView' or 
+			tolua.type(parent) == 'ccui.PageView' then
+			parent:setEnabled(b)
+		end
+		parent = parent:getParent() 
 	end
 end
 
@@ -836,18 +858,20 @@ local function relayout_sort( layout,data,isH )
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * uikits.scale()
 						sp.y = sp.y * uikits.scale()
-						if data._scrollParent then
-							data._scrollParent:setEnabled(false)
-						end
+						setEnabledParent(layout,false)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(false)
+						--end
 						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
-						if data._scrollParent then
-							data._scrollParent:setEnabled(true)
-						end
+						setEnabledParent(layout,true)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(true)
+						--end
 						layout:setEnabled(true)
 						sender:setLocalZOrder(zorder)
 						if not place_item( sender,p.x,p.y ) then 
@@ -866,7 +890,7 @@ local function relayout_sort( layout,data,isH )
 							data.my_answer = data.my_answer..map_abc(v)
 						end
 						kits.log( data.my_answer )
-						save_my_answer()
+						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -875,6 +899,7 @@ local function relayout_sort( layout,data,isH )
 					end
 				end)
 	end
+	print('sort '..layout:getContentSize().width)
 	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
@@ -906,7 +931,7 @@ end
 --点选
 local function relayout_click( layout,data,ismulti )
 	local size = layout:getContentSize()
-	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,y=2*TOPICS_SPACE,anchorX=0.5}
+	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,y=2*TOPICS_SPACE,anchorX=0.5,anchorY=0}
 	local rects = {}
 	local rect_node = {}
 	local bg_size = bg:getContentSize()
@@ -959,9 +984,10 @@ local function relayout_click( layout,data,ismulti )
 				else
 					data.state = ui.STATE_UNFINISHED
 				end				
-				save_my_answer()
+				call_answer_event(layout,data)
 			end,'click' )
 	end
+	print('click '..layout:getContentSize().width)
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
 	--载入答案
 	if data.my_answer and type(data.my_answer)=='string' then
@@ -983,7 +1009,7 @@ local function relayout_drag( layout,data,ismul )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5}
+	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5,anchorY=0}
 	local drags = {}
 	local draging_item
 	
@@ -1132,9 +1158,10 @@ local function relayout_drag( layout,data,ismul )
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * uikits.scale()
 						sp.y = sp.y * uikits.scale()
-						if data._scrollParent then
-							data._scrollParent:setEnabled(false)
-						end
+						setEnabledParent(layout,false)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(false)
+						--end
 						layout:setEnabled(false)
 						if ismul then
 							if not sender.isclone then
@@ -1148,9 +1175,10 @@ local function relayout_drag( layout,data,ismul )
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
 						p = layout:convertToNodeSpace( p )
-						if data._scrollParent then
-							data._scrollParent:setEnabled(true)
-						end
+						setEnabledParent(layout,true)
+						--if data._scrollParent then
+						--	data._scrollParent:setEnabled(true)
+						--end
 						layout:setEnabled(true)
 						if ismul then
 							if draging_item then
@@ -1194,7 +1222,7 @@ local function relayout_drag( layout,data,ismul )
 						else
 							data.state = ui.STATE_UNFINISHED
 						end						
-						save_my_answer()
+						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
 						p = layout:convertToNodeSpace(p)
@@ -1208,6 +1236,7 @@ local function relayout_drag( layout,data,ismul )
 					end
 				end)
 	end
+	print('drag '..layout:getContentSize().width)
 	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local x,y = bg:getPosition()
 	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+2*TOPICS_SPACE )
@@ -1238,56 +1267,178 @@ local function relayout_drag( layout,data,ismul )
 	end
 end
 
+--[[
+	conv(s,e) 输入的源数据，e是输出的数据
+	
+	init根据data构建题目,并且将题目内容放置在layout中。
+	data中可以附加下列事件
+		eventInitComplate(layout,data) 当试题初始化完毕调用
+		eventAnswer(layout,data) 当题做了一次回答(修改)
+	data中可以附加的数据
+		_options 一个控件数组，对于判断题，选择题，它是一个ccui.CheckBox对象数组
+						编辑题是一个ccui.TextFeild数组.这些控件组成答题区，控件位置有调用者设置.
+		my_answer 答案，一个字符串
+--]]
+local max_options = 6
+local res_root = 'homework/'
 local types={
-	[1] = {name='判断',
+	[1] = {name='判断',img=res_root..'true_or_false_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'pd_conv')
 					e.answer = parse_answer( s )
 					return true
 				end,
 				init=function(layout,data)
+					if data._options  then --具有答题区
+						--初始化答案
+						local _option_yes = data._options[1]
+						local _option_no = data._options[2]
+						_option_yes:setVisible(true)
+						_option_no:setVisible(true)
+						if data.my_answer == 'A' then
+							_option_yes:setSelectedState(true)
+							_option_no:setSelectedState(false)
+						elseif data.my_answer == 'B' then
+							_option_yes:setSelectedState(false)
+							_option_no:setSelectedState(true)	
+						else
+							_option_yes:setSelectedState(false)
+							_option_no:setSelectedState(false)
+						end
+					uikits.event(_option_yes,
+						function (sender,b)
+							if b then
+								if data.my_answer == 'B' then
+									_option_no:setSelectedState(false)
+								end
+								data.my_answer = 'A'
+								data.state = ui.STATE_FINISHED
+							else
+								data.my_answer = ''
+								data.state = ui.STATE_UNFINISHED
+							end
+							kits.log( data.my_answer )
+							call_answer_event(layout,data)
+						end)
+					uikits.event(_option_no,
+						function (sender,b)
+							if b then
+								if data.my_answer == 'A' then
+									_option_yes:setSelectedState(false)
+								end
+								data.my_answer = 'B'
+								data.state = ui.STATE_FINISHED
+							else
+								data.my_answer = ''
+								data.state = ui.STATE_UNFINISHED
+							end			
+							kits.log( data.my_answer )				
+							call_answer_event(layout,data)
+						end)						
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[2] = {name='单选',
+	[2] = {name='单选',img=res_root..'single_item.png',
 				conv=function(s,e)		
 					load_attachment(s,e,'signal_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
-						e.options = #op.options --取得选择题个数
+						e.options = math.min(#op.options,max_options) --取得选择题个数
 					else
+						e.options = 0
 						return false,"single select 'options'?"
 					end
 					e.answer = parse_answer( s )
 					return true
 				end,
 				init=function(layout,data)
+					if data._options then
+						local _options = data._options
+						for i = 1,data.options do
+							_options[i]:setVisible(true)
+							if answer_abc[i] == data.my_answer then
+								_options[i]:setSelectedState(true)
+							else
+								_options[i]:setSelectedState(false)
+							end
+							local m = i
+							uikits.event(_options[i],
+								function(sender,b)
+									if b then
+										data.my_answer = answer_abc[m]
+										for i=1,#_options do
+											_options[i]:setSelectedState(false)
+										end
+										sender:setSelectedState(true)
+										data.state = ui.STATE_FINISHED
+									else
+										data.my_answer = ''
+										data.state = ui.STATE_UNFINISHED
+									end
+									kits.log( data.my_answer )
+									call_answer_event(layout,data)
+								end)
+						end
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[3] = {name='多选',
+	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=function(s,e)		
 					load_attachment(s,e,'multi_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
-						e.options = #op.options --取得选择题个数
+						e.options = math.min(#op.options,max_options) --取得选择题个数
 					else
+						e.options = 0
 						return false,"multiple select 'options'?"
 					end
 					e.answer = parse_answer( s )
 					return true
 				end,
 				init=function(layout,data)
+					if data._options then
+						local _options = data._options
+						for i = 1, data.options do
+							_options[i]:setVisible(true)
+							if data.my_answer and type(data.my_answer)=='string' and
+								string.find(data.my_answer,answer_abc[i]) then
+								_options[i]:setSelectedState(true)
+							else
+								_options[i]:setSelectedState(false)
+							end
+							local m = i
+							uikits.event(_options[i],
+								function(sender,b)
+									data.my_answer = data.my_answer or ''
+									if string.find(data.my_answer,answer_abc[m]) then
+										data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
+									else
+										data.my_answer = data.my_answer .. answer_abc[m]
+									end
+									if string.len(data.my_answer) > 0 then
+										data.state = ui.STATE_FINISHED
+									else
+										data.state = ui.STATE_UNFINISHED
+									end
+									--保持顺序CB->BC
+									data.my_answer = string_sort(data.my_answer)
+									kits.log( data.my_answer )
+									call_answer_event(layout,data)
+								end)
+						end
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[4] = {name='连线',
+	[4] = {name='连线',img=res_root..'connection_item.png',
 				conv=link_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_link)
 				end
 			},	
-	[5] = {name='填空',
+	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
 					local ca = kits.decode_json( s.correct_answer )
@@ -1300,40 +1451,64 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
+					if data.options then
+						for i = 1,data.options do
+							local _options = data._options
+							if _options and _options[i] then
+								_options[i]:setVisible(true)
+								local e = uikits.child(_options[i],ui.ANSWER_TEXT)
+								if data.answer and data.answer[i] then
+									e:setText(data.answer[i])
+								else
+									e:setText('')
+								end
+								uikits.event(e,
+										function(sender,eventType)
+											if eventType == ccui.TextFiledEventType.insert_text then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											elseif eventType == ccui.TextFiledEventType.delete_backward then
+												data.state = ui.STATE_FINISHED
+												data.answer[i] = sender:getStringValue()
+											end
+										end)	
+							end									
+						end	
+					end
 					cache_done(layout,data,relayout_topics)
 				end
 			},
-	[7] = {name='横排序',
+	[7] = {name='横排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_sort,true)
 				end
 			},
-	[8] = {name='竖排序',
+	[8] = {name='竖排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_sort,false)
 				end
 			},
-	[9] = {name='点图单选',
+	[9] = {name='点图单选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_click,false)
 				end
 			},
-	[10] = {name='点图多选',
+	[10] = {name='点图多选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_click,true)
 				end
 			},
-	[11] = {name='单拖放',
+	[11] = {name='单拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_drag,false)
 				end
 			},
-	[12] = {name='多拖放',
+	[12] = {name='多拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
 					cache_done(layout,data,relayout_drag,true)
@@ -1348,4 +1523,7 @@ return
 	topics_map = topics,
 	course_icon = course_icon,
 	types = types,
+	STATE_CURRENT = 1,
+	STATE_FINISHED = 2,
+	STATE_UNFINISHED = 3,	
 }
