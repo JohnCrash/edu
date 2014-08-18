@@ -7,6 +7,8 @@ require "GuiConstants"
 require "AudioEngine" 
 
 local Director = cc.Director:getInstance()
+local FileUtils = cc.FileUtils:getInstance()
+
 local defaultFont = "fonts/simfang.ttf"
 local defaultFontSize = 16
 local log_caller
@@ -324,15 +326,16 @@ local function imageview( t )
 	local s
 	if t and type(t)=='table' then
 		s = ccui.ImageView:create()
-		init_node( s,t )
-		if t.image then
+		
+		if t.image and FileUtils:isFileExist(t.image) then
 			kits.log('imageview loadTexture '..t.image)
 			s:loadTexture(t.image)
 		end
 		local ss = s:getContentSize()
-		s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}		
+		s:setContentSize{width=t.width or 16,height=t.height or 16}		
 		s:setScale9Enabled( t.scale9 or false )
 		s:setTouchEnabled( t.touch or false )
+		init_node( s,t )
 	end
 	return s
 end

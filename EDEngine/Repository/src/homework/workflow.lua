@@ -21,8 +21,8 @@ local ui = {
 	ARROW = 'arrow',
 	ARROW_UP = 'up',
 	PAGE_VIEW = 'questions_view',
-	NEXT_BUTTON = 'milk_write/next_problem',
-	FINISH_BUTTON = 'milk_write/finish_5',
+	NEXT_BUTTON = 'next_problem',
+	FINISH_BUTTON = 'finish_5',
 	ITEM_CURRENT = 'state_past',
 	ITEM_FINISHED = 'state_now',
 	ITEM_UNFINISHED = 'state_future',
@@ -529,6 +529,7 @@ function WorkFlow:add_item( t )
 		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 		--add page
 		local layout = uikits.scrollview{bgcolor=cc.c3b(255,255,255)}
+		layout:setContentSize(self._pageview_size)
 		--layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
 		self._pageview:addPage( layout )
 		--layout:setTouchEnabled(false)
@@ -552,8 +553,8 @@ function WorkFlow:init_anser_gui()
 	self._option_img[4] = uikits.child(a,ui.OPTION_D)
 	self._option_img[5] = uikits.child(a,ui.OPTION_E)
 	self._option_img[6] = uikits.child(a,ui.OPTION_F)
-	self._option_img[7] = uikits.child(a,ui.OPTION_G)
-	self._option_img[8] = uikits.child(a,ui.OPTION_H)
+	--self._option_img[7] = uikits.child(a,ui.OPTION_G)
+	--self._option_img[8] = uikits.child(a,ui.OPTION_H)
 	
 	self._option_link = uikits.child(a,ui.LINK_TEXT)
 	self._option_drag = uikits.child(a,ui.DRAG_TEXT)
@@ -609,7 +610,7 @@ function WorkFlow:set_anwser_field( i )
 			end
 			self._answer_items = {}
 			--重置答题区控件
-			for i=1,8 do
+			for i=1,6 do
 				self._option_img[i]:setVisible(false)
 			end
 			for i=1,#self._option_edit do
@@ -637,7 +638,7 @@ function WorkFlow:set_anwser_field( i )
 				data._options[2] = self._option_no
 			elseif t==2 or t==3 then --单选,多选
 				data._options = {}
-				for i=1,8 do
+				for i=1,6 do
 					data._options[i] = self._option_img[i]
 				end
 			elseif t==5 then --填空

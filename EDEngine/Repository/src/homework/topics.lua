@@ -288,7 +288,8 @@ local function parse_answer(s)
 		if ca and ca.answers and type(ca.answers) == 'table' then
 			return ca.answers
 		else
-			kits.log('		ERROR parse_answer: '..tostring(s) )
+			kits.log('		ERROR parse_answer: '..tostring(ca) )
+			kits.log('		have not correct_answer')
 		end
 	end
 end
@@ -586,8 +587,8 @@ local function set_topics_image( layout,data,x,y )
 		end
 		if layout.setInnerContainerSize then
 			layout:setInnerContainerSize( cc.size(width,height) )
-		else
-			layout:setContentSize( cc.size(width,height) )
+		--else
+		--	layout:setContentSize( cc.size(width,height) )
 		end
 	end
 end
@@ -714,6 +715,7 @@ local function relayout_link( layout,data )
 		layout:addChild(dot)
 	end
 
+	print('link '..layout:getContentSize().width)
 	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	for i,v in pairs(ui1) do
@@ -897,6 +899,7 @@ local function relayout_sort( layout,data,isH )
 					end
 				end)
 	end
+	print('sort '..layout:getContentSize().width)
 	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
@@ -928,7 +931,7 @@ end
 --点选
 local function relayout_click( layout,data,ismulti )
 	local size = layout:getContentSize()
-	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,y=2*TOPICS_SPACE,anchorX=0.5}
+	local bg = attachment_ui_bg{attachment = data.attachment,x = size.width/2,y=2*TOPICS_SPACE,anchorX=0.5,anchorY=0}
 	local rects = {}
 	local rect_node = {}
 	local bg_size = bg:getContentSize()
@@ -984,6 +987,7 @@ local function relayout_click( layout,data,ismulti )
 				call_answer_event(layout,data)
 			end,'click' )
 	end
+	print('click '..layout:getContentSize().width)
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
 	--载入答案
 	if data.my_answer and type(data.my_answer)=='string' then
@@ -1005,7 +1009,7 @@ local function relayout_drag( layout,data,ismul )
 	local ui2 = {}
 	local sp
 	local orgp = {}
-	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5}
+	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5,anchorY=0}
 	local drags = {}
 	local draging_item
 	
@@ -1232,6 +1236,7 @@ local function relayout_drag( layout,data,ismul )
 					end
 				end)
 	end
+	print('drag '..layout:getContentSize().width)
 	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local x,y = bg:getPosition()
 	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+2*TOPICS_SPACE )
@@ -1274,6 +1279,7 @@ end
 						编辑题是一个ccui.TextFeild数组.这些控件组成答题区，控件位置有调用者设置.
 		my_answer 答案，一个字符串
 --]]
+local max_options = 6
 local res_root = 'homework/'
 local types={
 	[1] = {name='判断',img=res_root..'true_or_false_item.png',
@@ -1338,8 +1344,9 @@ local types={
 					load_attachment(s,e,'signal_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
-						e.options = #op.options --取得选择题个数
+						e.options = math.min(#op.options,max_options) --取得选择题个数
 					else
+						e.options = 0
 						return false,"single select 'options'?"
 					end
 					e.answer = parse_answer( s )
@@ -1348,7 +1355,7 @@ local types={
 				init=function(layout,data)
 					if data._options then
 						local _options = data._options
-						for i = 1,#_options do
+						for i = 1,data.options do
 							_options[i]:setVisible(true)
 							if answer_abc[i] == data.my_answer then
 								_options[i]:setSelectedState(true)
@@ -1360,7 +1367,9 @@ local types={
 								function(sender,b)
 									if b then
 										data.my_answer = answer_abc[m]
-										self:clear_all_option_check()
+										for i=1,#_options do
+											_options[i]:setSelectedState(false)
+										end
 										sender:setSelectedState(true)
 										data.state = ui.STATE_FINISHED
 									else
@@ -1380,8 +1389,9 @@ local types={
 					load_attachment(s,e,'multi_conv')
 					local op = kits.decode_json( s.options )
 					if op and op.options and type(op.options)=='table' then
-						e.options = #op.options --取得选择题个数
+						e.options = math.min(#op.options,max_options) --取得选择题个数
 					else
+						e.options = 0
 						return false,"multiple select 'options'?"
 					end
 					e.answer = parse_answer( s )
@@ -1390,7 +1400,7 @@ local types={
 				init=function(layout,data)
 					if data._options then
 						local _options = data._options
-						for i = 1, #_options do
+						for i = 1, data.options do
 							_options[i]:setVisible(true)
 							if data.my_answer and type(data.my_answer)=='string' and
 								string.find(data.my_answer,answer_abc[i]) then

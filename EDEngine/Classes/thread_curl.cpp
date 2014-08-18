@@ -124,6 +124,9 @@ namespace kits
 					CCLOG("kits::writerCallback alloc error! %d\n",size*nmemb);
 					return 0; //?
 				}
+			}else
+			{
+				CCLOG("kits::writerCallback 0");
 			}
 			if( vecs->size() > 128 )rebuild_vector_t( *vecs );
 		}
