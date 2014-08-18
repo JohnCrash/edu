@@ -71,6 +71,8 @@
 		F5943B141998F92000A4881E /* libmacx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5943AEE1998F85300A4881E /* libmacx.a */; };
 		F5943B1D1998FA9A00A4881E /* libgiflib_macx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5943B1A1998FA8500A4881E /* libgiflib_macx.a */; };
 		F5943B291998FAF000A4881E /* libluabindings Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5943B241998FADB00A4881E /* libluabindings Mac.a */; };
+		F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */; };
+		F5BA4CCA199A3B3B000B95B2 /* AppleBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */; };
 		F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */; };
 		F5E0ED611997B21700B61F2E /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC41997A9AC007C8988 /* Console.cpp */; };
 		F5E0ED621997B21A00B61F2E /* lua_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC51997A9AC007C8988 /* lua_ext.cpp */; };
@@ -305,6 +307,14 @@
 		F5943AE91998F85300A4881E /* macx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = macx.xcodeproj; path = "../../../cocos2d-x/external/json-c/macx/macx.xcodeproj"; sourceTree = "<group>"; };
 		F5943B151998FA8400A4881E /* giflib_macx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = giflib_macx.xcodeproj; path = "../../../cocos2d-x/external/giflib/giflib_macx/giflib_macx.xcodeproj"; sourceTree = "<group>"; };
 		F5943B1E1998FADB00A4881E /* cocos2d_lua_bindings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cocos2d_lua_bindings.xcodeproj; path = "../../../cocos2d-x/cocos/scripting/lua-bindings/proj.ios_mac/cocos2d_lua_bindings.xcodeproj"; sourceTree = "<group>"; };
+		F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AppleBundle.cpp; path = ../Classes/AppleBundle.cpp; sourceTree = "<group>"; };
+		F5BA4CC8199A3B3B000B95B2 /* AppleBundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppleBundle.h; path = ../Classes/AppleBundle.h; sourceTree = "<group>"; };
+		F5CC68F3199B8EE500145900 /* AssetsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetsManager.h; path = ../Classes/AssetsManager.h; sourceTree = "<group>"; };
+		F5CC68F4199B8EE500145900 /* Console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../Classes/Console.h; sourceTree = "<group>"; };
+		F5CC68F5199B8EE500145900 /* lua_ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lua_ext.h; path = ../Classes/lua_ext.h; sourceTree = "<group>"; };
+		F5CC68F6199B8EE500145900 /* lua_thread_curl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lua_thread_curl.h; path = ../Classes/lua_thread_curl.h; sourceTree = "<group>"; };
+		F5CC68F7199B8EE500145900 /* luaDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaDebug.h; path = ../Classes/luaDebug.h; sourceTree = "<group>"; };
+		F5CC68F8199B8EE500145900 /* thread_curl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread_curl.h; path = ../Classes/thread_curl.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -371,6 +381,12 @@
 		15AA9C4015B7EC450033D6C2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				F5CC68F3199B8EE500145900 /* AssetsManager.h */,
+				F5CC68F4199B8EE500145900 /* Console.h */,
+				F5CC68F5199B8EE500145900 /* lua_ext.h */,
+				F5CC68F6199B8EE500145900 /* lua_thread_curl.h */,
+				F5CC68F7199B8EE500145900 /* luaDebug.h */,
+				F5CC68F8199B8EE500145900 /* thread_curl.h */,
 				F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */,
 				F53B0FC41997A9AC007C8988 /* Console.cpp */,
 				F53B0FC51997A9AC007C8988 /* lua_ext.cpp */,
@@ -382,6 +398,8 @@
 				1AFAF8B416D35DE700DB1158 /* AppDelegate.h */,
 				1AFAF8B516D35DE700DB1158 /* HelloWorldScene.cpp */,
 				1AFAF8B616D35DE700DB1158 /* HelloWorldScene.h */,
+				F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */,
+				F5BA4CC8199A3B3B000B95B2 /* AppleBundle.h */,
 			);
 			name = Classes;
 			path = ../classes;
@@ -785,6 +803,7 @@
 				F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */,
 				F53B0FCF1997A9AC007C8988 /* luaDebug.cpp in Sources */,
 				F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */,
+				F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -802,6 +821,7 @@
 				F5E0ED641997B21F00B61F2E /* lua_thread_curl.cpp in Sources */,
 				F5E0ED651997B22200B61F2E /* luaDebug.cpp in Sources */,
 				F5E0ED661997B22400B61F2E /* thread_curl.cpp in Sources */,
+				F5BA4CCA199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

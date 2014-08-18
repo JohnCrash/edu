@@ -1,6 +1,73 @@
 #include "lua_ext.h"
 #include "lua_thread_curl.h"
 #include "tolua++.h"
+#include "cocos2d.h"
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+#include "AppleBundle.h"
+#endif
+
+static void pathsp(std::string& path)
+{
+	if( path.length() > 0 )
+		if( path.back() == '/'||
+           path.back() == '\\' )
+		{
+			path.pop_back();
+		}
+}
+
+std::string getDirectory(EDDirectory edd)
+{
+    std::string path;
+    switch(edd)
+    {
+        case APP_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            path = FileUtils::getInstance()->getWritablePath();
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+            path = macBundlePath();
+#endif
+            break;
+        case LUA_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            path = FileUtils::getInstance()->getWritablePath();
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+            path = macBundlePath();
+#endif
+            pathsp(path);
+            path += "/Resources/src";
+            break;
+        case RESOURCE_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            path = FileUtils::getInstance()->getWritablePath();
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+            path = macBundlePath();
+#endif
+            pathsp(path);
+            path += "/Resources/res";
+            break;
+        case CACHE_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            path = FileUtils::getInstance()->getWritablePath();
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+            path = macBundlePath();
+#endif
+            pathsp(path);
+            path += "/Resources/temp";
+            break;
+        case LUACORE_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+            path = FileUtils::getInstance()->getWritablePath();
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+            path = macBundlePath();
+#endif
+            pathsp(path);
+            path += "/Resources/luacore";            
+            break;
+    }
+    pathsp(path);
+    return path;
+}
 
 #if __cplusplus
 extern "C" {
@@ -41,12 +108,46 @@ static int cc_istype(lua_State *L)
 	return 1;
 }
 
+/*
+    1 = APP directory
+    2 = LUA source root directory
+    3 = resource directory
+    4 = configure directory
+*/
+static int cc_directory(lua_State *L)
+{
+    if(lua_isnumber(L, 1))
+    {
+        int i = (int)lua_tonumber(L, 1);
+        std::string str;
+        switch(i)
+        {
+            case 1: //APP
+                str = getDirectory(APP_DIRECTORY);
+                lua_pushstring(L, str.c_str());
+                break;
+            case 2: //LUA Source
+                str = getDirectory(APP_DIRECTORY);
+                lua_pushstring(L, str.c_str());
+                break;
+            case 3: //Resource
+                str = getDirectory(RESOURCE_DIRECTORY);
+                lua_pushstring(L, str.c_str());
+                break;
+            default:
+                lua_pushnil(L);
+        }
+    }
+    return 1;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
 
 	lua_register( L,"cc_type",cc_gettype);
 	lua_register( L,"cc_istype",cc_istype);
+    lua_register( L,"cc_directory",cc_directory);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

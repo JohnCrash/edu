@@ -4,6 +4,9 @@
 #include "lua_ext.h"
 #include "luaDebug.h"
 #include "AssetsManager.h"
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+#include "AppleBundle.h"
+#endif
 
 AppDelegate::AppDelegate()
 {
@@ -59,7 +62,7 @@ void AppDelegate::initLuaEngine()
 #endif
     //auto designSize = Size(480, 320);
 	//auto designSize = Size(960, 640);
-    auto designSize = Size(1024, 768);
+    auto designSize = Size(1024,768);
 	// auto designSize = Size(1024, 576);
 
     if (screenSize.height > 320)
@@ -73,16 +76,10 @@ void AppDelegate::initLuaEngine()
     }
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
- 
-	auto path = FileUtils::getInstance()->getWritablePath();
-	if( path.length() > 0 )
-		if( path.back() == '/'||
-			path.back() == '\\' )
-		{
-			path.pop_back();
-		}
-	std::string luap = path + "/luacore";
-	FileUtils::getInstance()->addSearchPath(luap.c_str());
+    
+	auto path = getDirectory(LUACORE_DIRECTORY);
+
+	FileUtils::getInstance()->addSearchPath("/Resources/luacore");
 
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
