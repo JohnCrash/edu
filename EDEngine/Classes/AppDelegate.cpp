@@ -81,7 +81,7 @@ void AppDelegate::initLuaEngine()
     
 	auto path = getDirectory(LUACORE_DIRECTORY);
 
-	FileUtils::getInstance()->addSearchPath("/Resources/luacore");
+	FileUtils::getInstance()->addSearchPath("luacore");
 
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
