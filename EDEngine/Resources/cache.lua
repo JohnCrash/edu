@@ -29,6 +29,7 @@ local function get_name( url )
 			return md5.sumhexa(url)
 		end
 	end
+	return nil
 end
 
 --得到资源cache数据
@@ -103,6 +104,8 @@ local function request_resources( rtable,efunc )
 										if obj.state == 'FAILED' and is_done(v.url) then --忽略CANCEL
 											efunc( rtable,i,true )
 										else
+											kits.log('ERROR : request_resources failed! url = '..tostring(v.url))
+											kits.log('	reason: is_done return false : '..tostring(get_name(v.url)))
 											efunc( rtable,i,false )
 										end
 									end
@@ -138,7 +141,7 @@ local function request( url,func )
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
 						kits.log('request:'..url..' successed!')
-						kits.log('	request data write to '..get_name(url))
+						kits.log('	request data write to '..tostring(get_name(url)))
 						kits.write_cache(get_name(url),obj.data)
 						func( true )
 					else
@@ -146,7 +149,7 @@ local function request( url,func )
 							func( true )
 						else
 							kits.log('ERROR : request failed! url = '..tostring(url))
-							kits.log('	reason: is_done return false')
+							kits.log('	reason: is_done return false : '..tostring(get_name(url)))
 							func( false )
 						end
 					end

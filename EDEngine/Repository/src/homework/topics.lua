@@ -127,7 +127,7 @@ local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
 			--kits.log('	#TEXT: '..t.text )
-			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
+			return uikits.text{caption=t.text,font=nil,fontSize=32,color=cc.c3b(0,0,0)}
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
 			--可能是.mp3
@@ -183,8 +183,10 @@ local function add_resource_cache( rst,url )
 				and url.image then
 		v.url = url.image
 	end
-	v.cookie = login.cookie()
-	rst[#rst+1] = v
+	if v.url then
+		v.cookie = login.cookie()
+		rst[#rst+1] = v
+	end
 end
 
 local function parse_options(s,option1_func,option2_func,msg)
