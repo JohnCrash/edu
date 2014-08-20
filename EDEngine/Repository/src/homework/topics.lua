@@ -2,7 +2,6 @@
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
-local login = require 'login'
 local loadingbox = require "homework/loadingbox"
 
 local course={
@@ -184,7 +183,6 @@ local function add_resource_cache( rst,url )
 		v.url = url.image
 	end
 	if v.url then
-		v.cookie = login.cookie()
 		rst[#rst+1] = v
 	end
 end

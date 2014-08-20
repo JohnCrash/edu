@@ -154,7 +154,8 @@ namespace kits
 		if( curl )
 		{
 			//set timeout
-			//curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
+			curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);			
+			curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
 			//set url
 			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
