@@ -29,13 +29,13 @@ local function get_name( url )
 			return md5.sumhexa(url)
 		end
 	end
+	return nil
 end
 
 --得到资源cache数据
 local function get_data( url )
 	local n = get_name( url )
 	if n then
-		print( n )
 		return kits.read_cache( n )
 	end
 end
@@ -54,91 +54,18 @@ local function is_hot( url,sec )
 	end
 	return false
 end
---请求资源列表rtable,一个url列表
---请求如果获得了全部资源,将调用函数efunc
---该函数立刻返回,任务交给后台线程下载
---[[
-	rtable = {
-		urls = 
-		{
-			[1] = {url,cookie,done},
-			[2] = {url,cookie,done},
-			...
-			--url,cookie 链接地址,cookie
-			--done 回调，如果给定链接下载成功通知，并传给数据.不缓存数据
-		}
-		ui --延时调用
-	}
---]]
-local function request_resources( rtable,efunc )
-	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
-		efunc and type(efunc)=='function' then
-		for i,v in pairs(rtable.urls) do
-			if type(v)=='table' and isurl(v.url) then
-				if is_done(v.url) then
-					if rtable.ui then
-						--延迟
-						uikits.delay_call( rtable.ui,efunc,random_delay(),rtable,i,true )
-					else
-						efunc( rtable,i,true ) --已经下载了
-					end
-				elseif is_hot(v.url,60) then
-					uikits.delay_call( rtable.ui,efunc,random_delay(),rtable,i,true )
-				else
-					--开始后台下载
-					local mh,msg = mt.new('GET',v.url,v.cookie,
-							function(obj)
-								if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED' then
-									if obj.state =='OK' and obj.data then
-										kits.log('request:'..v.url..' successed!')
-										kits.log('	request data write to '..get_name(v.url))
-										if v.done and type(v.done)=='function' then
-											v.done( obj.data )
-										else
-											kits.write_cache( get_name(v.url),obj.data )
-										end
-										efunc( rtable,i,true )
-									else
-										--下载失败
-										if obj.state == 'FAILED' and is_done(v.url) then --忽略CANCEL
-											efunc( rtable,i,true )
-										else
-											efunc( rtable,i,false )
-										end
-									end
-								end
-							end)
-					if not mh then
-						--下载失败
-						if obj.state == 'FAILED' and is_done(v.url) then --忽略CANCEL
-							efunc( rtable,i,true )
-						else
-							efunc( rtable,i,false )
-						end
-					end
-					table.insert(request_list,mh)
-				end
-			else
-				efunc( rtable,i,false )
-			end
-		end
-	else
-		return false,"request_resources invalid argument"
-	end
-	return true
-end
 
 local function request( url,func )
-	if is_hot(url,60) then
-		uikits.delay_call( nil,func,random_delay(),true )
-		return
-	end
+	--if is_hot(url,60) then
+	--	uikits.delay_call( nil,func,random_delay(),true )
+	--	return
+	--end
 	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
 						kits.log('request:'..url..' successed!')
-						kits.log('	request data write to '..get_name(url))
+						kits.log('	request data write to '..tostring(get_name(url)))
 						kits.write_cache(get_name(url),obj.data)
 						func( true )
 					else
@@ -146,7 +73,7 @@ local function request( url,func )
 							func( true )
 						else
 							kits.log('ERROR : request failed! url = '..tostring(url))
-							kits.log('	reason: is_done return false')
+							kits.log('	reason: is_done return false : '..tostring(get_name(url)))
 							func( false )
 						end
 					end
@@ -228,6 +155,41 @@ local function request_cancel()
 		m:cancel()
 	end
 	request_list = {}
+end
+
+--请求资源列表rtable,一个url列表
+--请求如果获得了全部资源,将调用函数efunc
+--该函数立刻返回,任务交给后台线程下载
+--[[
+	rtable = {
+		urls = 
+		{
+			[1] = {url,done},
+			[2] = {url,done},
+			...
+			--url,cookie 链接地址,cookie
+			--done 回调，如果给定链接下载成功通知，并传给数据.不缓存数据
+		}
+		ui --延时调用
+	}
+--]]
+
+local function request_resources( rtable,efunc )
+	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
+		efunc and type(efunc)=='function' then
+		for i,v in pairs(rtable.urls) do
+			if type(v)=='table' and isurl(v.url) then
+				request(v.url,function(b)
+					efunc( rtable,i,b )
+				end)
+			else
+				efunc( rtable,i,false )
+			end
+		end
+	else
+		return false,"request_resources invalid argument"
+	end
+	return true
 end
 
 return {

@@ -1,6 +1,7 @@
 ﻿local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
+local topics = require "homework/topics"
 local WorkFlow = require "homework/workflow"
 local Subjective = require "homework/subjective"
 local Score = require "homework/score"
@@ -47,7 +48,10 @@ local commit_sort_url = ''
 --[[
 	取得作业表
 --]]
-
+local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
+local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
+local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
+local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
 local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
 local commit_list_url = 'http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx'
 local WorkCommit = class("WorkCommit")
@@ -226,28 +230,7 @@ function WorkCommit:init_commit_list()
 	end
 end
 
-function WorkCommit:init()
-	if not self._root then
-		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
-		self:addChild(self._root)
-		self._scrollview = uikits.child( self._root,ui.LIST )
-		self._item = uikits.child( self._root,ui.ITEM )
-		self._topics = uikits.child( self._root,ui.TOPICS)
-		if self._item then
-			self._item:setVisible(false)
-			local size = self._item:getContentSize()
-			self._item_width = size.width
-			self._item_height = size.height
-		end
-		local back = uikits.child(self._root,ui.BACK)
-		uikits.event(back,
-			function(sender)
-				uikits.popScene()
-			end)
-		
-		self:init_star()
-	end						
-
+function WorkCommit:init_commit_page()
 	if self._args then
 		local but1
 		local but2
@@ -333,14 +316,86 @@ function WorkCommit:init()
 						self:commit()
 					end
 				end,'click')			
-		end	
+		end
 		if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item_finish > 0 then
 			self:setPercent( self._args.cnt_item_finish*100.0/self._args.cnt_item )
 		else
 			self:setPercent(0)
 		end
 		self:init_commit_list()
-	end		
+	end
+end
+
+function WorkCommit:init()
+	if not self._root then
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
+		self:addChild(self._root)
+		self._scrollview = uikits.child( self._root,ui.LIST )
+		self._item = uikits.child( self._root,ui.ITEM )
+		self._topics = uikits.child( self._root,ui.TOPICS)
+		if self._item then
+			self._item:setVisible(false)
+			local size = self._item:getContentSize()
+			self._item_width = size.width
+			self._item_height = size.height
+		end
+		local back = uikits.child(self._root,ui.BACK)
+		uikits.event(back,
+			function(sender)
+				uikits.popScene()
+			end)
+		
+		self:init_star()
+	end						
+	--加载作业,然后计算出客观题和主观题数量
+	--做作业时也使用该数据.
+	
+	local url_topics
+	if self._args.exam_id then
+		--取作业
+		url_topics = loadextam_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
+		--取得以前做的答案
+		self._topics_table = topics.read( self._args.exam_id ) or {}
+	elseif self._args.pid then
+		--取卷面
+		url_topics = loadpaper_url..'?pid='..self._args.pid..'&uid='..self._args.uid
+		--取得以前做的答案
+		self._topics_table = topics.read( self._args.pid ) or {}
+	else
+		kits.log('error : WorkFlow:init_data exam_id=nil and pid=nil')
+		return
+	end
+	kits.log('WorkCommit:init request :'..url_topics )
+	local loadbox = loadingbox.open( self )
+	local ret = cache.request_json( url_topics,function(t)
+				loadbox:removeFromParent()
+				if t then
+					self._args._exam_table = t
+					self._args.url_topics = url_topics
+					--统计能做的客观题数量
+					self._args.cnt_item = self:calc_objective_num(t)
+					self:init_commit_page()
+				end
+			end)	
+end
+
+--计算客观题数量
+function WorkCommit:calc_objective_num(t)
+	local ds
+	if t.item and type(t.item)=='table' then
+		ds = t.item
+	else
+		ds = t
+	end
+	local count = 0
+	if ds then
+		for i,v in pairs(ds) do
+			if v.item_type and topics.types[v.item_type] then
+				count = count + 1
+			end
+		end
+	end
+	return count
 end
 
 function WorkCommit:commit()

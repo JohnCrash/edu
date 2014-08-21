@@ -521,7 +521,7 @@ function WorkList:history_scroll( t )
 		end
 		--继续载入
 		self._scrollview:setBounceEnabled( false )
-		if self._last_idx then
+		if self._last_idx and self._last then
 			self:load_page( self._last+1,self._last+6 ) --一次最多装载5页
 		else
 			self:clear_all_item()
@@ -567,8 +567,9 @@ function WorkList:add_item( t )
 	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)
-		pic:setScaleX(1/uikits.scale())
-		pic:setScaleY(1/uikits.scale())
+		local size = pic:getContentSize()
+		--pic:setScaleX(1/uikits.scale())
+		--pic:setScaleY(1/uikits.scale())
 	else
 		--默认设置
 	end

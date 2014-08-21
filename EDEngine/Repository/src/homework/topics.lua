@@ -2,7 +2,6 @@
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
-local login = require 'login'
 local loadingbox = require "homework/loadingbox"
 
 local course={
@@ -127,7 +126,7 @@ local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
 			--kits.log('	#TEXT: '..t.text )
-			return uikits.text{caption=t.text,font='',fontSize=32,color=cc.c3b(0,0,0)}
+			return uikits.text{caption=t.text,font=nil,fontSize=32,color=cc.c3b(0,0,0)}
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
 			--可能是.mp3
@@ -159,10 +158,10 @@ local function read_topics_cache( pid )
 		if t then
 			return t
 		else
-			print('error : t = nil, read_topics_cache pid = '..tostring(pid))
+			kits.log('error : t = nil, read_topics_cache pid = '..tostring(pid))
 		end
 	else
-		print('error : result = nil , read_topics_cache pid = '..tostring(pid))
+		kits.log('error : result = nil , read_topics_cache pid = '..tostring(pid))
 	end
 end
 
@@ -171,7 +170,7 @@ local function write_topics_cache( pid,t )
 	if result then
 		kits.write_cache( pid,result )
 	else
-		print('error : result = nil, write_topics_cache pid = '..tostring(pid))
+		kits.log('error : result = nil, write_topics_cache pid = '..tostring(pid))
 	end
 end
 
@@ -183,8 +182,9 @@ local function add_resource_cache( rst,url )
 				and url.image then
 		v.url = url.image
 	end
-	v.cookie = login.cookie()
-	rst[#rst+1] = v
+	if v.url then
+		rst[#rst+1] = v
+	end
 end
 
 local function parse_options(s,option1_func,option2_func,msg)
@@ -612,11 +612,8 @@ local function relayout_link( layout,data )
 	
 	local function add_line()
 		answer[up] = down
-		local x,y = ui1[up]:getPosition()
-		x = x + ui1[up]:getContentSize().width*uikits.scale()/2
-		local x2,y2 = ui2[down]:getPosition()
-		x2 = x2 + ui2[down]:getContentSize().width*uikits.scale()/2
-		y2 = y2 + ui2[down]:getContentSize().height*uikits.scale()
+		local x,y = dot1[up]:getPosition()
+		local x2,y2 = dot2[down]:getPosition()
 		local node = uikits.line{x1=x,y1=y,x2=x2,y2=y2,linewidth=2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,1,0,1)}
 		node:setPosition(cc.p( 0,0 ) )
 		layout:addChild( node )
@@ -715,21 +712,20 @@ local function relayout_link( layout,data )
 		layout:addChild(dot)
 	end
 
-	print('link '..layout:getContentSize().width)
 	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
 		size.width = size.width*uikits.scale()
-		dot1[i]:setPosition( cc.p(x+size.width/2,y ) )
+		dot1[i]:setPosition( cc.p(x+size.width/2,y-TOPICS_SPACE ) )
 	end
 	for i,v in pairs(ui2) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
 		size.width = size.width*uikits.scale()
 		size.height = size.height*uikits.scale()
-		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height ) )	
+		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height+TOPICS_SPACE ) )	
 	end
 	set_topics_image( layout,data,0,rect2.y+rect2.height )
 	--载入答案
@@ -899,7 +895,7 @@ local function relayout_sort( layout,data,isH )
 					end
 				end)
 	end
-	print('sort '..layout:getContentSize().width)
+
 	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
@@ -987,7 +983,7 @@ local function relayout_click( layout,data,ismulti )
 				call_answer_event(layout,data)
 			end,'click' )
 	end
-	print('click '..layout:getContentSize().width)
+
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
 	--载入答案
 	if data.my_answer and type(data.my_answer)=='string' then
@@ -1236,7 +1232,7 @@ local function relayout_drag( layout,data,ismul )
 					end
 				end)
 	end
-	print('drag '..layout:getContentSize().width)
+
 	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
 	local x,y = bg:getPosition()
 	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+2*TOPICS_SPACE )

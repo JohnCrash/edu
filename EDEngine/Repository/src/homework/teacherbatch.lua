@@ -220,7 +220,7 @@ function Batch:init_commits_list( t )
 						cache.request(url,function(b)
 							if b and child then
 								child:loadTexture( cache.get_name(url) )
-								uikits.fitsize( child,250,250 )
+								--uikits.fitsize( child,250,250 )
 							end
 						end )
 					end				
@@ -406,7 +406,7 @@ function Batch:init_student_list()
 							cache.request(url,function(b)
 									if b and child then
 										child:loadTexture( cache.get_name(url) )
-										uikits.fitsize( child,300,300 )
+										--uikits.fitsize( child,300,300 )
 									end
 								end)
 						end
