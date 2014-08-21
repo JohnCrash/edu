@@ -95,7 +95,7 @@ function TeacherList:add_batch_item( v )
 			[ui.ITEM_ICON] = function(child,item)
 				if v and v.course and topics_course and topics_course[v.course] then
 					child:loadTexture(res_local..topics_course[v.course].logo)
-					uikits.fitsize(child,280,280)
+					--uikits.fitsize(child,280,280)
 				end
 			end
 		}
@@ -207,7 +207,6 @@ function TeacherList:init_gui()
 end
 
 function TeacherList:init()
-	login.set_selector(1) --现在鲍老师
 	if not self._root then
 		self:init_gui()
 	end

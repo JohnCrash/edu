@@ -129,6 +129,7 @@
     "recording.png",
     "photograph.png",
     "photo.png",
+    "shouhui.png",
     "ditu3.jpg",
     "next_problem_1.png",
     "next_problem_2.png",
@@ -143,18 +144,18 @@
     "type_box.png",
     "multiple_item.png",
     "option_write.png",
-    "option_ax.png",
     "option_a.png",
-    "option_bx.png",
+    "option_ax.png",
     "option_b.png",
-    "option_cx.png",
+    "option_bx.png",
     "option_c.png",
-    "option_dx.png",
+    "option_cx.png",
     "option_d.png",
-    "option_ex.png",
+    "option_dx.png",
     "option_e.png",
-    "option_fx.png",
+    "option_ex.png",
     "option_f.png",
+    "option_fx.png",
     "option_rightx.png",
     "option_right.png",
     "option_wrongx.png",
@@ -1711,7 +1712,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_ax.png",
+                "path": "option_a.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1729,7 +1730,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_a.png",
+                "path": "option_ax.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1783,7 +1784,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_bx.png",
+                "path": "option_b.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1801,7 +1802,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_b.png",
+                "path": "option_bx.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1855,7 +1856,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_cx.png",
+                "path": "option_c.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1873,7 +1874,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_c.png",
+                "path": "option_cx.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1927,7 +1928,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_dx.png",
+                "path": "option_d.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1945,7 +1946,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_d.png",
+                "path": "option_dx.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -1999,7 +2000,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_ex.png",
+                "path": "option_e.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -2017,7 +2018,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_e.png",
+                "path": "option_ex.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -2071,7 +2072,7 @@
               "y": 100,
               "backGroundBox": null,
               "backGroundBoxData": {
-                "path": "option_fx.png",
+                "path": "option_f.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -2089,7 +2090,7 @@
               },
               "frontCross": null,
               "frontCrossData": {
-                "path": "option_f.png",
+                "path": "option_fx.png",
                 "plistFile": "",
                 "resourceType": 0
               },

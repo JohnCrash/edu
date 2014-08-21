@@ -204,12 +204,42 @@ function WorkFlow:save_answer()
 	end
 end
 
+function WorkFlow:init_ui_from_data()
+	local x
+	x,self._item_y = self._item_current:getPosition()
+	if self._data then
+		kits.log('	load_original_data_from_string success')
+		self._url_topics = self._args.url_topics
+		for i,v in pairs(self._data) do
+			self:add_item( v )
+		end
+		self:set_current(1)
+		self:relayout()
+	end
+end
+
 function WorkFlow:init_data( )
+	--提交页面已经加载了题面
+	if self._args._exam_table then --作业已经有了直接加载
+		--加载答案
+		if self._args.exam_id then
+			self._topics_table = topics.read( self._args.exam_id ) or {}
+		elseif self._args.pid then
+			self._topics_table = topics.read( self._args.pid ) or {}
+		else
+			self._topics_table = {}
+			kits.log('error : WorkFlow:init_data exam_id=nil and pid=nil')
+		end
+		self._data = self:load_original_data_from_table(self._args._exam_table)
+		self:init_ui_from_data()
+		return
+	end
+	--正常加载
 	if not (self._args.pid and self._args.uid) then
 		kits.log('error : WorkFlow:init_data invalid arguments')
 		return
 	end
-	local loadbox = loadingbox.open( self )
+	
 	local url_topics
 	if self._args.exam_id then
 		--取作业
@@ -222,31 +252,24 @@ function WorkFlow:init_data( )
 		--取得以前做的答案
 		self._topics_table = topics.read( self._args.pid ) or {}
 	else
+		self._topics_table = {}
 		kits.log('error : WorkFlow:init_data exam_id=nil and pid=nil')
 		return
 	end
 	kits.log('WorkFlow:init_data request :'..url_topics )
+	local loadbox = loadingbox.open( self )
 	local ret = cache.request( url_topics,function(b)
+				loadbox:removeFromParent()
 				if b then
 					kits.log('	request success')
 					local result = cache.get_data( url_topics )
 					if result and type(result) == 'string' then
 						kits.log('	cache.get_data success')
 						self._data = self:load_original_data_from_string( result )
-						local x
-						x,self._item_y = self._item_current:getPosition()
-						if self._data then
-							kits.log('	load_original_data_from_string success')
-							self._url_topics = url_topics
-							for i,v in pairs(self._data) do
-								self:add_item( v )
-							end
-							self:set_current(1)
-							self:relayout()
-						end
+						self._args.url_topics = url_topics
+						self:init_ui_from_data()
 					end
 				end
-				loadbox:removeFromParent()
 			end)
 end
 
@@ -295,79 +318,81 @@ function WorkFlow:load_original_data_from_file( file )
 	end
 end
 
-function WorkFlow:load_original_data_from_string( str )
+function WorkFlow:load_original_data_from_table( data )
 	local res = {}
+	if data then
+		local ds
+		if data.item and type(data.item)=='table' then
+			ds = data.item
+		else
+			ds = data
+		end
+		self.data = ds --保存副本
+		kits.log('	type(ds)='..type(ds)..',#ds='..table.maxn(ds))
+		for i,v in ipairs(ds) do
+			kits.log('	key='..tostring(i))
+			kits.log('	value='..tostring(v))
+		end
+		for i,v in ipairs(ds) do
+			local k = {}
+			k.item_type = v.item_type
+			if v.image then
+				k.isload = true --is downloaded?
+				k.image = v.image
+			else
+				k.isload = true
+				k.image = 'Pic/my/'..i..'.png'
+				kits.log( k.image )
+			end
+			if self._topics_table and self._topics_table.answers then
+				--从答案表中取答案
+				k.my_answer = self._topics_table.answers[v.item_id]
+			else
+				k.my_answer = v.my_answer
+			end
+			if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
+				k.state =  ui.STATE_FINISHED
+			else
+				k.state = ui.STATE_UNFINISHED
+				b = false
+			end
+			k.item_id = v.item_id
+			
+			if topics.types and topics.types[k.item_type] and
+				topics.types[k.item_type].conv then
+				kits.log( topics.types[k.item_type].name )
+				k.resource_cache = {} 
+				k.resource_cache.urls = {} --资源缓冲表,
+				local b,msg = topics.types[k.item_type].conv( v,k )
+				if b then
+					self:load_cloud_answer( k ) --如果没有本地答案，尝试从网上获取
+					res[#res+1] = k
+				else
+					kits.log('转换问题 "'..topics.types[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
+					kits.log('	error msg: '..msg )
+				end
+			else
+				kits.log('不支持的题型: '..v.item_type)
+			end
+		end
+		if b then
+			self._next_button:setVisible(false)
+			self._finish_button:setVisible(true)
+		end
+	else
+		kits.log('	load_original_data_from_table decode_json faild')
+	end
+	return res
+end
+
+function WorkFlow:load_original_data_from_string( str )
 	local b = true
 	if str then
 		local data = kits.decode_json(str)
-
-		if data then
-			kits.log('	load_original_data_from_string decode_json success')
-			local ds
-			if data.item and type(data.item)=='table' then
-				ds = data.item
-			else
-				ds = data
-			end
-			self.data = ds --保存副本
-			kits.log('	type(ds)='..type(ds)..',#ds='..table.maxn(ds))
-			for i,v in ipairs(ds) do
-				kits.log('	key='..tostring(i))
-				kits.log('	value='..tostring(v))
-			end
-			for i,v in ipairs(ds) do
-				local k = {}
-				k.item_type = v.item_type
-				if v.image then
-					k.isload = true --is downloaded?
-					k.image = v.image
-				else
-					k.isload = true
-					k.image = 'Pic/my/'..i..'.png'
-					kits.log( k.image )
-				end
-				if self._topics_table and self._topics_table.answers then
-					--从答案表中取答案
-					k.my_answer = self._topics_table.answers[v.item_id]
-				else
-					k.my_answer = v.my_answer
-				end
-				if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
-					k.state =  ui.STATE_FINISHED
-				else
-					k.state = ui.STATE_UNFINISHED
-					b = false
-				end
-				k.item_id = v.item_id
-				
-				if topics.types and topics.types[k.item_type] and
-					topics.types[k.item_type].conv then
-					kits.log( topics.types[k.item_type].name )
-					k.resource_cache = {} 
-					k.resource_cache.urls = {} --资源缓冲表,
-					local b,msg = topics.types[k.item_type].conv( v,k )
-					if b then
-						self:load_cloud_answer( k ) --如果没有本地答案，尝试从网上获取
-						res[#res+1] = k
-					else
-						kits.log('转换问题 "'..topics.types[k.item_type].name..'" 类型ID"'..k.item_type..'" ID:'..tostring(v.Id))
-						kits.log('	error msg: '..msg )
-					end
-				else
-					kits.log('不支持的题型: '..v.item_type)
-				end
-			end
-			if b then
-				self._next_button:setVisible(false)
-				self._finish_button:setVisible(true)
-			end
-		else
-			kits.log('	load_original_data_from_string decode_json faild')
-		end
+		return self:load_original_data_from_table(data)
 	else
 		kits.log('	load_original_data_from_string decode_json str=nil')
 	end
-	return res
 end
 
 function WorkFlow:init_gui()

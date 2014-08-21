@@ -331,8 +331,8 @@ local function imageview( t )
 			kits.log('imageview loadTexture '..t.image)
 			s:loadTexture(t.image)
 		end
-		local ss = s:getContentSize()
-		s:setContentSize{width=t.width or 16,height=t.height or 16}		
+		--local ss = s:getContentSize()
+		--s:setContentSize{width=t.width or 16,height=t.height or 16}		
 		s:setScale9Enabled( t.scale9 or false )
 		s:setTouchEnabled( t.touch or false )
 		init_node( s,t )
