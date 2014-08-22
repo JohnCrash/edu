@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 local cache = require "cache"
 local login = require "login"
 local loadingbox = require "homework/loadingbox"
@@ -683,6 +683,7 @@ function WorkFlow:set_anwser_field( i )
 					data._options[i] = self._option_edit[i]
 				end
 			end
+			uikits.stopAllSound() --停止可能的播放
 			--保存答案
 			data.eventAnswer=function(layout,data)
 				self:save_answer()

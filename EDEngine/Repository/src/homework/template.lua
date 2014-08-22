@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 
 local ui = {
 	FILE = 'homework/studenthomework_1/studenthomework_1.json',

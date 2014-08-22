@@ -1,4 +1,4 @@
-﻿local kits = require "kits"
+local kits = require "kits"
 local uikits = require "uikits"
 local json = require "json-c"
 

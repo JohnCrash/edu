@@ -1,4 +1,4 @@
-﻿homework.lua 入口
+homework.lua 入口
 loadingbox.lua 加载，网络错误等公用对话栏
 workloading.lua 加载界面,进入界面
 worklist.lua 作业表

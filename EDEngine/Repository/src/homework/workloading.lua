@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 local WorkList = require "homework/worklist"
 
 local ui = {

@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 
 local ui = {
 	LOADBOX = 'homework/ladingbox.json',

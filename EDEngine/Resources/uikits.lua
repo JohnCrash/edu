@@ -25,6 +25,10 @@ local function isSoundPlaying( id )
 	--cocos2d-x not support isPlaying?
 end
 
+local function stopAllSound()
+	AudioEngine.stopAllEffects()
+end
+
 local function init_layout( s,t )
 	local ss = s:getContentSize()
 	s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}
@@ -1000,6 +1004,7 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,
 	FACTOR_9_16 = FACTOR_9_16,

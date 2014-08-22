@@ -1,4 +1,4 @@
-﻿local fio
+local fio
 local se = {}
 
 local tab = 

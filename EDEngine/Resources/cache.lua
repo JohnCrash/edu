@@ -1,4 +1,4 @@
-﻿local kits = require "kits"
+local kits = require "kits"
 local mt = require "mt"
 local md5 = require "md5"
 local uikits = require "uikits"

@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 local cache = require "cache"
 local login = require 'login'
 local kits = require "kits"

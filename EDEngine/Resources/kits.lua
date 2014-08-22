@@ -1,4 +1,4 @@
-﻿local lfs = require "lfs"
+local lfs = require "lfs"
 local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
