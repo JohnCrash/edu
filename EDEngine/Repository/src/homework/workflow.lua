@@ -584,6 +584,7 @@ function WorkFlow:init_anser_gui()
 	self._option_link = uikits.child(a,ui.LINK_TEXT)
 	self._option_drag = uikits.child(a,ui.DRAG_TEXT)
 	self._option_sort = uikits.child(a,ui.POSITION_SORT)
+	self._option_position = uikits.child(a,ui.POSITION_TEXT)
 	self._option_yes = uikits.child(a,ui.OPTION_YES)
 	self._option_no = uikits.child(a,ui.OPTION_NO)
 	self._option_not_support = uikits.child(a,ui.OPTION_NO_SUPPORT)
@@ -646,13 +647,23 @@ function WorkFlow:set_anwser_field( i )
 			self._option_no:setVisible(false)			
 			self._option_drag:setVisible(false)
 			self._option_sort:setVisible(false)
+			self._option_position:setVisible(false)
 			self._option_not_support:setVisible(false)
 		end
 		local t = self._data[i].item_type
 		
 		if topics.types[t] and topics.types[t].img and topics.types[t].init then
 			self._answer_type:loadTexture(topics.types[t].img)
-			
+			--设置题的提示文字
+			if t==4 then
+				self._option_link:setVisible(true)
+			elseif t==8 or t==7 then
+				self._option_sort:setVisible(true)
+			elseif t== 9 or t==10 then
+				self._option_position:setVisible(true)
+			elseif t==11 or t==12 then
+				self._option_drag:setVisible(true)
+			end
 			local layout = self._pageview:getPage( i-1 )
 			self._topics_begin_time = os.time()--开始计时
 			local data = self._data[i]

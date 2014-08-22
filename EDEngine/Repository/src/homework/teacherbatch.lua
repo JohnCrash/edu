@@ -88,6 +88,7 @@ function Batch.create(t,c)
 	return scene
 end
 
+--和StudentWatch.lua add_paper_item相同
 function Batch:add_paper_item( topicType,topicID )
 	if topics.types[topicType] then
 		self._papers:additem{
@@ -101,11 +102,13 @@ function Batch:add_paper_item( topicType,topicID )
 				local size = child:getContentSize()
 				size.height = size.height/2
 				child:setContentSize(size)
-				local loadbox = loadingbox.circle(child)
+				
 				local url = "http://new.www.lejiaolexue.com/exam/handler/ExamStructure.ashx?q=item&exam_id="..
 				self._args.exam_id.."&item_id="..
 				topicID
+				local loadbox = loadingbox.circle(child)
 				cache.request_json(url,function(t)
+					loadbox:removeFromParent()
 					if t then
 						local data = {}
 						if t.difficulty_name then
@@ -119,7 +122,6 @@ function Batch:add_paper_item( topicType,topicID )
 								self:paper_relayout()
 							end
 							topics.types[topicType].init(child,data)
-							loadbox:removeFromParent()
 						else
 							kits.log('')
 						end
@@ -177,18 +179,17 @@ end
 function Batch:init_topics_paper_list()
 	if self._papers then
 		self._papers:clear()
-		local loadbox = loadingbox.open(self)
-		
 		local url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx?pid="..
 			self._args.paper_id..'&uid='..
 			self._args.teacher_id
+		local loadbox = loadingbox.open(self)
 		cache.request_json( url,function(t)
+			loadbox:removeFromParent()
 			if t and type(t)=='table' then
 				if kits.check(t,"detail","part" ) then
 					self:init_paper_list_by_table( t )
 				end
 			end
-			loadbox:removeFromParent()
 		end)
 	end
 end
@@ -370,13 +371,7 @@ local appraise = {
 	{low=0,up=60,title = '待提高'},
 }
 
-function Batch:init_student_list()
-	cache.request_cancel()
-	self._topicsview:setVisible(false)
-	self._subjectiveview:setVisible(false)
-	self._studentview:setVisible(true)
-	
-	self._students:clear()
+function Batch:init_student_list_func()
 	if self._student_list_table then
 		local total_score = self._args.real_score or 100
 		if total_score<= 0 then total_score = 1 end
@@ -412,10 +407,20 @@ function Batch:init_student_list()
 						end
 					}
 				end
-				self._students:relayout()
 			end
 		end
+		self._students:relayout()
 	end
+end
+
+function Batch:init_student_list()
+	cache.request_cancel()
+	self._topicsview:setVisible(false)
+	self._subjectiveview:setVisible(false)
+	self._studentview:setVisible(true)
+	
+	self._students:clear()
+	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
 	return true
 end
 

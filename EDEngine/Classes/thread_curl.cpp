@@ -157,6 +157,8 @@ namespace kits
 			curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);			
 			curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
+			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_LIMIT,1);
+			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_TIME,10);
 			//set url
 			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
 			//?

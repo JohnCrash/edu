@@ -91,6 +91,28 @@ local function open_loadingbox( parent,dt,func )
 	return s
 end
 
+local box = {	
+	removeFromParent = function(self)
+		if self and type(self)=='table' and self._loadingbox then
+			self._loadingbox:removeFromParent()
+			self._loadingbox = nil
+		end
+	end
+}
+local function open_loadingbox_wrap(parent,dt,func)
+	if box._loadingbox then
+		local b = box._loadingbox
+		box._loadingbox = nil
+		local ret,msg = pcall( b.removeFromParent,b )
+		if not ret then
+			kits.log('ERROR open_loadingbox_wrap removeFromParent false')
+			kits.log('	msg:'..tostring(msg))
+		end
+	end
+	box._loadingbox = open_loadingbox(parent,dt,func)
+	return box
+end
+
 return 
 {
 	LOADING = 1,
@@ -98,6 +120,6 @@ return
 	REPAIR = 3,
 	TRY = 4,
 	CLOSE = 5,
-	open = open_loadingbox,
+	open = open_loadingbox_wrap,
 	circle = put_lading_circle,
 }
