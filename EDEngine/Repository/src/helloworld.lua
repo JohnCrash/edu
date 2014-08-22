@@ -37,6 +37,6 @@ local function main()
 	cc.Director:getInstance():replaceScene(scene)
 end
 
-require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.0.182")
 
 main()

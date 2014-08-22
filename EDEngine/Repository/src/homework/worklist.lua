@@ -27,6 +27,8 @@ local ui = {
 	FILE_3_4 = 'homework/studenthomework43.json',
 	STATISTICS_FILE = 'homework/statistics.json',
 	STATISTICS_FILE_3_4 = 'homework/statistics43.json',
+	LOADING_FILE = 'homework/studentloading.json',
+	LOADING_FILE_3_4 = 'homework/studentloading43.json',	
 	MORE = 'homework/more.json',
 	MORE_3_4 = 'homework/more43.json',
 	MORE_VIEW = 'more_view',
@@ -183,6 +185,8 @@ function WorkList:clear_all_item()
 	end
 end
 
+local g_first = true
+
 function WorkList:load_page( first,last )
 	if not self._scID then--and not self._busy then
 		cache.request_cancel()
@@ -192,7 +196,14 @@ function WorkList:load_page( first,last )
 		local err = false
 		local quit = false
 		self.request_cancel = true
-		local loadbox = loadingbox.open( self )
+		local loadbox
+		if g_first then
+			g_first = false
+			loadbox = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
+			self:addChild(loadbox)
+		else
+			loadbox = loadingbox.open( self )
+		end
 		local function close_scheduler()
 			scheduler:unscheduleScriptEntry(self._scID)
 			self._scID = nil
@@ -436,6 +447,7 @@ function WorkList:init_gui()
 	uikits.event(back,
 		function(sender)
 			--if not self._busy then
+				g_first = true
 				uikits.popScene()
 			--end
 		end)

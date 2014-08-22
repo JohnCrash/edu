@@ -1,5 +1,5 @@
 local uikits = require "uikits"
-local WorkList = require "homework/worklist"
+--local WorkList = require "homework/worklist"
 
 local ui = {
 	FILE = 'homework/studentloading.json',
@@ -32,10 +32,10 @@ function WorkLoading:init()
 		self:addChild(self._root)	
 	end
 	--test
-	uikits.delay_call( self,
-		function(self)
-			uikits.pushScene( WorkList,cc.TransitionFlipX )
-		end,1)
+	--uikits.delay_call( self,
+	--	function(self)
+	--		uikits.pushScene( WorkList,cc.TransitionFlipX )
+	--	end,1)
 end
 
 function WorkLoading:release()

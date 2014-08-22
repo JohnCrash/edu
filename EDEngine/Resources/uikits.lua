@@ -951,7 +951,9 @@ local function scrollview_step_add(scrollview,t,n,add_func)
 				add_func(t[i])
 			end			
 		end
-		scrollview:setBounceEnabled(false)
+		if n < count then --只有在还有没添加的才关闭回弹
+			scrollview:setBounceEnabled(false)
+		end
 		add_n_item(offset,n)
 		offset = offset + n + 1
 		event( scrollview,function(sender,state)
