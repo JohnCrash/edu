@@ -1206,10 +1206,13 @@ local function relayout_drag( layout,data,ismul )
 						--收集答案
 						data.my_answer = ''
 						for k=1,table.maxn(drags) do
+							if k>1 then
+								data.my_answer = data.my_answer..';'
+							end
 							if drags[k] then
-								data.my_answer = data.my_answer..answer_abc[drags[k].idx]
+								data.my_answer = data.my_answer..answer_abc[k]..answer_abc[drags[k].idx]
 							else
-								data.my_answer = data.my_answer..'0'
+								data.my_answer = data.my_answer..answer_abc[k]..'0'
 							end
 						end
 						kits.log( data.my_answer )
@@ -1243,7 +1246,17 @@ local function relayout_drag( layout,data,ismul )
 
 	set_topics_image( layout,data,0,bgsize.height*uikits.scale()+y+TOPICS_SPACE+rc.height)
 	--恢复答案
+	--AB;BC;CD
 	if data.my_answer then
+		--将AB;BC;CD转换为BCD
+		local aws = string.gsub(data.my_answer,';','')
+		local s = ''
+		for i = 1,string.len(aws) do
+			if i%2==0 then
+				s = s..string.sub(aws,i,i)
+			end
+		end
+		data.my_answer = s
 		for i = 1,string.len(data.my_answer) do
 			local s = string.sub(data.my_answer,i,i)
 			local k = answer_idx[s]

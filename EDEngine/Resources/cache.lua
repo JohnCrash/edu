@@ -177,7 +177,9 @@ end
 local function request_resources( rtable,efunc )
 	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
 		efunc and type(efunc)=='function' then
+		local b = true
 		for i,v in pairs(rtable.urls) do
+			b = false
 			if type(v)=='table' and isurl(v.url) then
 				request(v.url,function(b)
 					efunc( rtable,i,b )
@@ -185,6 +187,9 @@ local function request_resources( rtable,efunc )
 			else
 				efunc( rtable,i,false )
 			end
+		end
+		if b then
+			efunc( rtable,0,b )
 		end
 	else
 		return false,"request_resources invalid argument"

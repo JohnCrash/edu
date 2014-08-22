@@ -324,6 +324,7 @@ function WorkCommit:init_commit_page()
 		else
 			commit:setEnabled(true)
 			commit:setBright(true)
+			commit:setVisible(true)
 			commit:setHighlighted(true)
 			uikits.event(commit,function(sender)
 					--提交

@@ -3,6 +3,7 @@ local cache = require "cache"
 local kits = require "kits"
 local topics = require "homework/topics"
 local loadingbox = require "homework/loadingbox"
+local json = require "json-c"
 
 local ui = {
 	FILE = 'homework/yijiaokeguan.json',
@@ -105,6 +106,13 @@ function StudentWatch:add_paper_item( topicType,topicID )
 						if topics.types[topicType].conv(t.buffer,data) then
 							data.eventInitComplate = function(layout,data)
 								self:paper_relayout()
+							end
+							child:setEnabled(false) --禁止修改
+							if t.detail.answer and t.detail.answer and type(t.detail.answer)=='string' then --用户作答
+								local asw = json.decode(t.detail.answer)
+								if asw and asw.answers  and asw.answers[1] then
+									data.my_answer = asw.answers[1].value
+								end
 							end
 							topics.types[topicType].init(child,data)
 						else

@@ -121,6 +121,14 @@ function Batch:add_paper_item( topicType,topicID )
 							data.eventInitComplate = function(layout,data)
 								self:paper_relayout()
 							end
+							child:setEnabled(false) --禁止修改
+							--放入正确答案
+							if t.correct_answer and type(t.correct_answer)=='string' then
+								local asw = json.decode(t.correct_answer)
+								if asw and asw.answers and asw.answers[1] then
+									data.my_answer = asw.answers[1].value
+								end
+							end
 							topics.types[topicType].init(child,data)
 						else
 							kits.log('')
@@ -133,13 +141,25 @@ function Batch:add_paper_item( topicType,topicID )
 end
 
 function Batch:init_paper_list_by_table( p )
+	local paper_table = {}
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
-				self:add_paper_item( t.item_type,t.item_id )
+				--self:add_paper_item( t.item_type,t.item_id )
+				local item = { item_type = t.item_type,item_id = t.item_id }
+				table.insert(paper_table,item)
 			end
 		end
 	end
+	uikits.scrollview_step_add( self._papers._scrollview,paper_table,5,function(v)
+		if v then
+			if v.item_type and v.item_id then
+				self:add_paper_item( v.item_type,v.item_id )
+			end
+		else
+			self:paper_relayout()
+		end
+	end)
 	self:paper_relayout()
 end
 
@@ -364,17 +384,18 @@ function Batch:init_subjective()
 end
 
 local appraise = {
-	{low=90,up=100,title = '优秀'},
-	{low=80,up=90,title = '优'},
-	{low=70,up=80,title = '良'},
-	{low=60,up=70,title = '中'},
-	{low=0,up=60,title = '待提高'},
+	[1] = {low=90,up=100,title = '优秀'},
+	[2] = {low=80,up=90,title = '优'},
+	[3] = {low=70,up=80,title = '良'},
+	[4] = {low=60,up=70,title = '中'},
+	[5] = {low=0,up=60,title = '待提高'},
 }
 
 function Batch:init_student_list_func()
 	if self._student_list_table then
 		local total_score = self._args.real_score or 100
 		if total_score<= 0 then total_score = 1 end
+		--没有实现分布加载
 		for i,appr in pairs(appraise) do
 			local st = {}
 			for k,v in pairs(self._student_list_table) do
@@ -407,7 +428,7 @@ function Batch:init_student_list_func()
 						end
 					}
 				end
-			end
+			end --for
 		end
 		self._students:relayout()
 	end
