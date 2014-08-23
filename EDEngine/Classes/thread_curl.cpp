@@ -223,7 +223,6 @@ namespace kits
 
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 
 			curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
-
 			if( pct->size > 0 && pct->data && 
 				result.first > 0 && result.second )
 			{
@@ -256,10 +255,11 @@ namespace kits
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = FAILED;
 			}
-
 			//end
 			if( pct->progressFunc )
+			{
 				pct->progressFunc( pct );
+			}
 			pct->bfastEnd = true;
 			clean_vector_t( bufs );
 		}

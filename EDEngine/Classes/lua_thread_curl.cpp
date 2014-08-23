@@ -35,12 +35,13 @@ static void lua_mainThread_progressFunc( void *ptr )
 					ptc->this_ref != LUA_REFNIL &&
 					L == (lua_State *)ptc->user_data )
 				{
+					ptc->lua_state = ptc->state; //在此之后state可能改变
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->ref);
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->this_ref);
 					pLuaStack->executeFunction(1);
 					//lua_call(L,1,0);
-					if( ptc->state == kits::OK ||  ptc->state == kits::FAILED ||
-						ptc->state == kits::CANCEL )
+					if( ptc->lua_state == kits::OK ||  ptc->lua_state == kits::FAILED ||
+						ptc->lua_state == kits::CANCEL )
 					{//进度函数将不再被调用,释放引用
 						lua_unref( L,ptc->this_ref );
 						ptc->this_ref = LUA_REFNIL;
@@ -52,7 +53,9 @@ static void lua_mainThread_progressFunc( void *ptr )
 	//if L==nillptr?
 	kits::curl_t *ptc = (kits::curl_t *)ptr;
 	if( ptc )
+	{
 		ptc->release();
+	}
 }
 
 static void lua_progressFunc( kits::curl_t * ptc )
@@ -221,7 +224,7 @@ static int do_curl(lua_State *L)
 }
 static int lua_pushState(lua_State *L,kits::curl_t *ptc)
 {
-	switch(ptc->state)
+	switch(ptc->lua_state)
 	{
 	case kits::INIT:
 		lua_pushstring(L,"INIT");
