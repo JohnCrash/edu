@@ -159,6 +159,8 @@ namespace kits
 			curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);			
 			curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
 			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,5);
+			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_LIMIT,1);
+			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_TIME,10);
 			//set url
 			curl_easy_setopt(curl,CURLOPT_URL,pct->url.c_str());
 			//?
@@ -223,7 +225,6 @@ namespace kits
 
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 
 			curl_easy_getinfo(curl,CURLINFO_CONTENT_LENGTH_DOWNLOAD,&pct->usize);
-
 			if( pct->size > 0 && pct->data && 
 				result.first > 0 && result.second )
 			{
@@ -256,10 +257,11 @@ namespace kits
 				if( pct->state == LOADING ) //maybe CANCEL?
 					pct->state = FAILED;
 			}
-
 			//end
 			if( pct->progressFunc )
+			{
 				pct->progressFunc( pct );
+			}
 			pct->bfastEnd = true;
 			clean_vector_t( bufs );
 		}

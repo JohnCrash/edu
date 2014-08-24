@@ -58,6 +58,7 @@ struct curl_t
 	int this_ref;
 	double usize;
 	long retcode;
+	CURL_STATE lua_state;
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
@@ -65,7 +66,7 @@ struct curl_t
 		progressFunc(nullptr),pthread(nullptr),
 		size(0),data(nullptr),ref(0),user_data(nullptr),
 		refcount(0),bfastEnd(false),this_ref(0),usize(0),
-		retcode(0)
+		retcode(0),lua_state(INIT)
 	{
 	}
 	void retain()

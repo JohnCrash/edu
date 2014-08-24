@@ -1,4 +1,4 @@
-﻿local kits = require 'kits'
+local kits = require 'kits'
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
@@ -587,8 +587,8 @@ local function set_topics_image( layout,data,x,y )
 		end
 		if layout.setInnerContainerSize then
 			layout:setInnerContainerSize( cc.size(width,height) )
-		--else
-		--	layout:setContentSize( cc.size(width,height) )
+		else
+			layout:setContentSize( cc.size(width,height) )
 		end
 	end
 end
@@ -1206,10 +1206,13 @@ local function relayout_drag( layout,data,ismul )
 						--收集答案
 						data.my_answer = ''
 						for k=1,table.maxn(drags) do
+							if k>1 then
+								data.my_answer = data.my_answer..';'
+							end
 							if drags[k] then
-								data.my_answer = data.my_answer..answer_abc[drags[k].idx]
+								data.my_answer = data.my_answer..answer_abc[k]..answer_abc[drags[k].idx]
 							else
-								data.my_answer = data.my_answer..'0'
+								data.my_answer = data.my_answer..answer_abc[k]..'0'
 							end
 						end
 						kits.log( data.my_answer )
@@ -1243,7 +1246,17 @@ local function relayout_drag( layout,data,ismul )
 
 	set_topics_image( layout,data,0,bgsize.height*uikits.scale()+y+TOPICS_SPACE+rc.height)
 	--恢复答案
+	--AB;BC;CD
 	if data.my_answer then
+		--将AB;BC;CD转换为BCD
+		local aws = string.gsub(data.my_answer,';','')
+		local s = ''
+		for i = 1,string.len(aws) do
+			if i%2==0 then
+				s = s..string.sub(aws,i,i)
+			end
+		end
+		data.my_answer = s
 		for i = 1,string.len(data.my_answer) do
 			local s = string.sub(data.my_answer,i,i)
 			local k = answer_idx[s]
@@ -1262,6 +1275,53 @@ local function relayout_drag( layout,data,ismul )
 		end
 	end
 end
+
+local function multi_select_conv(s,e)
+	load_attachment(s,e,'multi_conv')
+	local op = kits.decode_json( s.options )
+	if op and op.options and type(op.options)=='table' then
+		e.options = math.min(#op.options,max_options) --取得选择题个数
+	else
+		e.options = 0
+		return false,"multiple select 'options'?"
+	end
+	e.answer = parse_answer( s )
+	return true
+end
+
+local function multi_select_init(layout,data)
+	if data._options then
+		local _options = data._options
+		for i = 1, data.options do
+			_options[i]:setVisible(true)
+			if data.my_answer and type(data.my_answer)=='string' and
+				string.find(data.my_answer,answer_abc[i]) then
+				_options[i]:setSelectedState(true)
+			else
+				_options[i]:setSelectedState(false)
+			end
+			local m = i
+			uikits.event(_options[i],
+				function(sender,b)
+					data.my_answer = data.my_answer or ''
+					if string.find(data.my_answer,answer_abc[m]) then
+						data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
+					else
+						data.my_answer = data.my_answer .. answer_abc[m]
+					end
+					if string.len(data.my_answer) > 0 then
+						data.state = ui.STATE_FINISHED
+					else
+						data.state = ui.STATE_UNFINISHED
+					end
+					--保持顺序CB->BC
+					data.my_answer = string_sort(data.my_answer)
+					kits.log( data.my_answer )
+					call_answer_event(layout,data)
+				end)
+		end --for
+	end --if
+end						
 
 --[[
 	conv(s,e) 输入的源数据，e是输出的数据
@@ -1381,50 +1441,9 @@ local types={
 				end
 			},
 	[3] = {name='多选',img=res_root..'multiple_item.png',
-				conv=function(s,e)		
-					load_attachment(s,e,'multi_conv')
-					local op = kits.decode_json( s.options )
-					if op and op.options and type(op.options)=='table' then
-						e.options = math.min(#op.options,max_options) --取得选择题个数
-					else
-						e.options = 0
-						return false,"multiple select 'options'?"
-					end
-					e.answer = parse_answer( s )
-					return true
-				end,
+				conv=multi_select_conv,
 				init=function(layout,data)
-					if data._options then
-						local _options = data._options
-						for i = 1, data.options do
-							_options[i]:setVisible(true)
-							if data.my_answer and type(data.my_answer)=='string' and
-								string.find(data.my_answer,answer_abc[i]) then
-								_options[i]:setSelectedState(true)
-							else
-								_options[i]:setSelectedState(false)
-							end
-							local m = i
-							uikits.event(_options[i],
-								function(sender,b)
-									data.my_answer = data.my_answer or ''
-									if string.find(data.my_answer,answer_abc[m]) then
-										data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
-									else
-										data.my_answer = data.my_answer .. answer_abc[m]
-									end
-									if string.len(data.my_answer) > 0 then
-										data.state = ui.STATE_FINISHED
-									else
-										data.state = ui.STATE_UNFINISHED
-									end
-									--保持顺序CB->BC
-									data.my_answer = string_sort(data.my_answer)
-									kits.log( data.my_answer )
-									call_answer_event(layout,data)
-								end)
-						end
-					end
+					multi_select_init(layout,data)
 					cache_done(layout,data,relayout_topics)
 				end
 			},
@@ -1471,6 +1490,13 @@ local types={
 							end									
 						end	
 					end
+					cache_done(layout,data,relayout_topics)
+				end
+			},
+	[6] = {name='选择',img=res_root..'multiple_item.png',
+				conv=multi_select_conv,
+				init=function(layout,data)
+					multi_select_init(layout,data)
 					cache_done(layout,data,relayout_topics)
 				end
 			},

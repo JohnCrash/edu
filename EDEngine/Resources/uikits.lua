@@ -25,6 +25,10 @@ local function isSoundPlaying( id )
 	--cocos2d-x not support isPlaying?
 end
 
+local function stopAllSound()
+	AudioEngine.stopAllEffects()
+end
+
 local function init_layout( s,t )
 	local ss = s:getContentSize()
 	s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}
@@ -937,6 +941,37 @@ local function fitsize(child,w,h)
 	child:setScaleY(h/size.height/get_scale())
 end
 
+local function scrollview_step_add(scrollview,t,n,add_func)
+	if t and type(t)=='table' and scrollview and n and add_func 
+	and type(add_func)=='function' then
+		local count = table.maxn(t)
+		local offset = 1
+		local function add_n_item(s,n)
+			for i=s,s+n do
+				add_func(t[i])
+			end			
+		end
+		if n < count then --只有在还有没添加的才关闭回弹
+			scrollview:setBounceEnabled(false)
+		end
+		add_n_item(offset,n)
+		offset = offset + n + 1
+		event( scrollview,function(sender,state)
+				if state == ccui.ScrollviewEventType.scrollToBottom then
+					if offset <= count then
+						add_n_item( offset,n )
+						offset = offset + n + 1
+						add_func()
+					else
+						scrollview:setBounceEnabled(true)
+					end
+				end
+			end)
+	else
+		kits.log('ERROR uikits.scrollview_step_add invalid argument')
+	end
+end
+
 return {
 	text = text,
 	textbmfont = textbmfont,
@@ -971,6 +1006,7 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,
 	FACTOR_9_16 = FACTOR_9_16,
@@ -980,4 +1016,5 @@ return {
 	set = set,
 	set_item = set_item,
 	fitsize = fitsize,
+	scrollview_step_add = scrollview_step_add,
 }

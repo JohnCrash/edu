@@ -1,4 +1,4 @@
-﻿local kits = require "kits"
+local kits = require "kits"
 local mt = require "mt"
 local md5 = require "md5"
 local uikits = require "uikits"
@@ -6,6 +6,15 @@ local json = require "json-c"
 local login = require "login"
 
 local request_list = {}
+local cache_data = {}
+
+local function add_cache_data(url,data)
+	cache_data[url] = data
+end
+
+local function clear_cache()
+	cache_data = {}
+end
 
 local function random_delay()
 	return math.random()
@@ -34,16 +43,24 @@ end
 
 --得到资源cache数据
 local function get_data( url )
-	local n = get_name( url )
-	if n then
-		return kits.read_cache( n )
+	if cache_data[url] then
+		return cache_data[url] --直接从缓存返回
+	else
+		local n = get_name( url )
+		if n then
+			return kits.read_cache( n )
+		end
 	end
 end
 
 local function is_done( url )
-	local s = get_name( url )
-	if s then
-		return kits.exist_cache( s )
+	if cache_data[url] then
+		return true
+	else
+		local s = get_name( url )
+		if s then
+			return kits.exist_cache( s )
+		end
 	end
 end
 
@@ -55,17 +72,14 @@ local function is_hot( url,sec )
 	return false
 end
 
-local function request( url,func )
-	--if is_hot(url,60) then
-	--	uikits.delay_call( nil,func,random_delay(),true )
-	--	return
-	--end
+local function request_nc( url,func ) --网络优先，然后缓存
 	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
 						kits.log('request:'..url..' successed!')
 						kits.log('	request data write to '..tostring(get_name(url)))
+						add_cache_data(url,obj.data) --加入缓存
 						kits.write_cache(get_name(url),obj.data)
 						func( true )
 					else
@@ -87,11 +101,58 @@ local function request( url,func )
 			kits.log('ERROR : request failed! url = '..tostring(url))
 			kits.log('	reason:'..tostring(msg))
 		end
+	else
+		table.insert(request_list,mh)
 	end
-	table.insert(request_list,mh)
+end
+local function request_cn( url,func )
+	if is_done() then
+		func( true )
+	else
+		request_nc( url,func )
+	end
+end
+local function request_n( url,func )
+	local mh,msg = mt.new('GET',url,login.cookie(),
+			function(obj)
+				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+					if obj.state == 'OK' and obj.data then
+						add_cache_data(url,obj.data) --加入缓存
+						func( true )
+					else
+						func( false )
+					end
+				end
+			end )
+	if not mh then
+		func( false )
+		kits.log('ERROR : request failed! url = '..tostring(url))
+		kits.log('	reason:'..tostring(msg))
+	else
+		table.insert(request_list,mh)
+	end
+end
+--两种优先级别网络优先，文件优先
+--priority = 'CN' 表示先文件后网络 'NC' 表示先网络后文件 ,'N'表示仅网络，'C'仅文件
+local function request( url,func,priority )
+	if priority == 'C' then
+		if is_done(url) then
+			func( true )
+		else
+			func( false )
+		end
+	elseif priority == 'N' then
+		request_n( url,func )
+	elseif priority == 'CN' then
+		request_cn( url,func )
+	elseif priority == 'NC' then
+		request_nc( url,func )
+	else
+		request_nc( url,func ) --默认是nc
+	end
 end
 
-local function request_json( url,func )
+local function request_json( url,func,priority )
 	local function json_proc(b)
 		if b then
 			local data = get_data(url)
@@ -113,7 +174,7 @@ local function request_json( url,func )
 			kits.log('ERROR : request_json failed url = '..tostring(url))
 		end
 	end
-	request(url,json_proc)
+	request(url,json_proc,priority)
 end
 
 --上传
@@ -174,17 +235,22 @@ end
 	}
 --]]
 
-local function request_resources( rtable,efunc )
+local function request_resources( rtable,efunc,priority )
 	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
 		efunc and type(efunc)=='function' then
+		local b = true
 		for i,v in pairs(rtable.urls) do
+			b = false
 			if type(v)=='table' and isurl(v.url) then
 				request(v.url,function(b)
 					efunc( rtable,i,b )
-				end)
+				end,priority)
 			else
 				efunc( rtable,i,false )
 			end
+		end
+		if b then
+			efunc( rtable,0,b )
 		end
 	else
 		return false,"request_resources invalid argument"
@@ -200,4 +266,5 @@ return {
 	request_json = request_json,
 	request_cancel = request_cancel,
 	upload = upload,
+	clear = clear_cache,
 }

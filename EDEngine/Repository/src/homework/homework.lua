@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 local kits = require "kits"
 local WorkList = require "homework/worklist"
 local WorkLoading = require "homework/workloading"

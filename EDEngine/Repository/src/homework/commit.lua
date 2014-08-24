@@ -1,4 +1,4 @@
-﻿local json = require "json-c"
+local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
 local topics = require "homework/topics"
@@ -6,6 +6,7 @@ local WorkFlow = require "homework/workflow"
 local Subjective = require "homework/subjective"
 local Score = require "homework/score"
 local loadingbox = require "homework/loadingbox"
+local StudentWatch = require "homework/studentwatch"
 local cache = require "cache"
 local login = require "login"
 
@@ -182,11 +183,15 @@ end
 
 function WorkCommit:init_commit_list_by_table( t )
 	if t and type(t)=='table' then
-		for i,v in pairs(t) do
-			if v and type(v) == 'table' and v.student_id and v.student_name and v.finish_time then
-				self:addCommitStudent( v.student_id,v.student_name,v.finish_time )
+		uikits.scrollview_step_add(self._scrollview,t,9,function(v)
+			if v then 
+				if type(v) == 'table' and v.student_id and v.student_name and v.finish_time then
+					self:addCommitStudent( v.student_id,v.student_name,v.finish_time )
+				end
+			else
+				self:relayoutScroolView()
 			end
-		end
+		end)
 		self:relayoutScroolView()
 	end
 end
@@ -203,7 +208,6 @@ end
 function WorkCommit:init_commit_list()
 	if self._args and self._args.exam_id and self._args.tid and self._scrollview then
 		self:clear_commit_list()
-		local circle = loadingbox.circle( self._scrollview )
 		local url = commit_list_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
 		local function load_from_cache()
 			local data = cache.get_data(url)
@@ -216,14 +220,15 @@ function WorkCommit:init_commit_list()
 				end
 			end
 		end
+		local circle = loadingbox.circle( self._scrollview )
 		cache.request(url,
 			function(b)
+				circle:removeFromParent()
 				if b then
 					load_from_cache()
 				else
 					kits.log( 'error : WorkCommit:init_commit_list '..url )
 				end
-				circle:removeFromParent()
 			end)
 	else
 		kits.log('ERROR WorkCommit:init_commit_list _args _args invalid')
@@ -234,7 +239,9 @@ function WorkCommit:init_commit_page()
 	if self._args then
 		local but1
 		local but2
-		if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item <=self._args.cnt_item_finish then
+		--if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item <=self._args.cnt_item_finish and 
+		--只要已经提交就不能进入做作业了
+		if self._args.status == 10 or self._args.status == 11 then
 			uikits.child(self._root,ui.WORKFLOW):setVisible(false)
 			but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
 		else
@@ -245,10 +252,17 @@ function WorkCommit:init_commit_page()
 		uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)
 		but1:setVisible(true)
 		but2:setVisible(true)
-		uikits.event(but1,
-						function(sender)
-							uikits.pushScene(WorkFlow.create(self._args))
-						end,'click')
+		if self._args.status == 10 or self._args.status == 11 then --提交状态,0,1未提交,10,11已经提交
+			uikits.event(but1,
+							function(sender)
+								uikits.pushScene(StudentWatch.create(self._args))
+							end,'click')		
+		else
+			uikits.event(but1,
+							function(sender)
+								uikits.pushScene(WorkFlow.create(self._args))
+							end,'click')
+		end
 		uikits.event(but2,
 						function(sender)
 							uikits.pushScene(Subjective.create(self._args.url2))
@@ -298,9 +312,10 @@ function WorkCommit:init_commit_page()
 			type_txt:setString( self._args.course_name )
 		end
 		local commit = uikits.child(self._root,ui.COMMIT)
-		if self._args.status ~= 0 then --提交状态,0未提交,10,11已经提交
+		if self._args.status == 10 or self._args.status == 11 then --提交状态,0未提交,10,11已经提交
 			commit:setBright(false)
 			commit:setHighlighted(false)
+			commit:setVisible(false)
 			commit:setEnabled(false)
 			--临时修改
 			uikits.event(commit,function(sender)
@@ -309,10 +324,11 @@ function WorkCommit:init_commit_page()
 		else
 			commit:setEnabled(true)
 			commit:setBright(true)
+			commit:setVisible(true)
 			commit:setHighlighted(true)
 			uikits.event(commit,function(sender)
 					--提交
-					if self._args.status == 0 then
+					if self._args.status == 0 or self._args.status == 1 then
 						self:commit()
 					end
 				end,'click')			
@@ -342,6 +358,7 @@ function WorkCommit:init()
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)
+				cache.request_cancel()
 				uikits.popScene()
 			end)
 		
@@ -403,13 +420,14 @@ function WorkCommit:commit()
 	local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
 	cache.request(url,
 		function(b)
+			loadbox:removeFromParent()
 			if b then
 				self._args.status = 10 --标记已经提交
 				uikits.pushScene( Score.create(self._args) )
 			else
+				--加入提交失败的对话框
 				kits.log('WorkCommit:commit error : '..url )
 			end
-			loadbox:removeFromParent()
 		end)
 end
 

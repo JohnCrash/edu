@@ -1,4 +1,4 @@
-﻿local lfs = require "lfs"
+local lfs = require "lfs"
 local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
@@ -364,6 +364,11 @@ local function check_table(t,...)
 		return false
 	end
 	return true
+end
+
+local function encodeURI(s)
+	s = string.gsub(s, "([^%w%.%- ])", function(c) return string.format("%%%02X", string.byte(c)) end)
+	return string.gsub(s, " ", "+")
 end
 
 local function my_log( a )

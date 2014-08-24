@@ -1,4 +1,4 @@
-﻿local uikits = require "uikits"
+local uikits = require "uikits"
 local cache = require "cache"
 local kits = require "kits"
 local login = require "login"
@@ -115,6 +115,40 @@ function TeacherList:add_ready_batch_from_table( t )
 		kits.log('ERROR TeacherList:init_ready_batch_from_data decode failed')
 	end
 end
+
+function TeacherList:init_batch_list( status )
+	local loadbox = loadingbox.open(self)
+	local total_page = 1
+	function down_page( page )
+		local url = exam_list_url..'?'..'action=search'..
+			'&exam-type=0'.. --全部
+			'&exam-status='..status.. 
+			'&exam-tag=0'..
+			'&in-time=0'..
+			'&sort=0'..
+			'&page='..page
+		cache.request_json(url,
+			function(t)
+				if t and t.total_page then 
+					total_page = t.total_page
+					if self and self.add_ready_batch_from_table then
+						local retb = self:add_ready_batch_from_table(t)
+						if page<total_page and retb then
+							down_page( page+1 )
+						else
+							self._busy =false
+							loadbox:removeFromParent()
+						end
+					end
+				else
+					self._busy =false
+					loadbox:removeFromParent()
+				end				
+			end)
+	end
+	down_page(1)
+end
+
 --待阅
 function TeacherList:init_ready_batch()
 	cache.request_cancel()
@@ -124,36 +158,7 @@ function TeacherList:init_ready_batch()
 		self._mode = ui.READYBATCH
 		self._scrollview:clear()
 		self._busy = true
-		local loadbox = loadingbox.open(self)
-		local total_page = 1
-		function down_page( page )
-			local url = exam_list_url..'?'..'action=search'..
-				'&exam-type=0'.. --全部
-				'&exam-status=2'.. --待批阅
-				'&exam-tag=0'..
-				'&in-time=0'..
-				'&sort=0'..
-				'&page='..page
-			cache.request_json(url,
-				function(t)
-					if t and t.total_page then 
-						total_page = t.total_page
-						if self and self.add_ready_batch_from_table then
-							local retb = self:add_ready_batch_from_table(t)
-							if page<total_page and retb then
-								down_page( page+1 )
-							else
-								self._busy =false
-								loadbox:removeFromParent()
-							end
-						end
-					else
-						self._busy =false
-						loadbox:removeFromParent()
-					end				
-				end)
-		end
-		down_page(1)
+		self:init_batch_list(2)--待批阅
 	end
 	return true
 end
@@ -161,14 +166,20 @@ end
 function TeacherList:init_ready_release()
 	cache.request_cancel()
 	
-	self._scrollview:setVisible(false)
+	self._scrollview:setVisible(true)
 	return true
 end
 --历史
 function TeacherList:init_ready_history()
 	cache.request_cancel()
 	
-	self._scrollview:setVisible(false)
+	self._scrollview:setVisible(true)
+	self._scrollview:clear()
+	if not self._scID and not self._busy then
+		self._mode = ui.HISTORY
+		self._busy = true
+		self:init_batch_list(3)--完成批阅
+	end
 	return true
 end
 --统计

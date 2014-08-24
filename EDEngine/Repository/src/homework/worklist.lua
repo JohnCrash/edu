@@ -1,4 +1,4 @@
-﻿local json = require "json-c"
+local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
@@ -27,6 +27,8 @@ local ui = {
 	FILE_3_4 = 'homework/studenthomework43.json',
 	STATISTICS_FILE = 'homework/statistics.json',
 	STATISTICS_FILE_3_4 = 'homework/statistics43.json',
+	LOADING_FILE = 'homework/studentloading.json',
+	LOADING_FILE_3_4 = 'homework/studentloading43.json',	
 	MORE = 'homework/more.json',
 	MORE_3_4 = 'homework/more43.json',
 	MORE_VIEW = 'more_view',
@@ -183,15 +185,25 @@ function WorkList:clear_all_item()
 	end
 end
 
+local g_first = true
+
 function WorkList:load_page( first,last )
-	if not self._scID and not self._busy then
-		local loadbox = loadingbox.open( self )
+	if not self._scID then--and not self._busy then
+		cache.request_cancel()
 		local scheduler = self:getScheduler()
 		local idx = first
 		local ding = false
 		local err = false
 		local quit = false
-		self._busy = true
+		self.request_cancel = true
+		local loadbox
+		if g_first then
+			g_first = false
+			loadbox = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
+			self:addChild(loadbox)
+		else
+			loadbox = loadingbox.open( self )
+		end
 		local function close_scheduler()
 			scheduler:unscheduleScriptEntry(self._scID)
 			self._scID = nil
@@ -230,7 +242,7 @@ function WorkList:load_page( first,last )
 								else
 									quit = true
 								end
-							else --现在中发生错误
+							else --下载中发生错误
 								err = ERR_NOTCONNECT
 								kits.log( 'GET : "'..tostring(url)..'" error!' )
 							end
@@ -243,13 +255,14 @@ function WorkList:load_page( first,last )
 end
 
 function WorkList:init_new_list()
-	if self._busy then return end
+	--if self._busy then return end
+	cache.request_cancel()
 	self:SwapButton( ui.NEW )
 	self:show_statistics(false)
 	self:show_list(true)
 	self._setting:setVisible(false)
 	
-	if not self._scID and not self._busy then
+	if not self._scID then -- and not self._busy then
 		self._mode = nil
 		self:clear_all_item()
 		self:load_page( 1 )
@@ -371,7 +384,8 @@ function WorkList:relayout_statistics()
 end
 
 function WorkList:init_statistics()
-	if self._busy then return end
+	--if self._busy then return end
+	cache.request_cancel()
 	self:SwapButton( ui.STATIST )
 	self:show_statistics(true)
 	self:show_list(false)
@@ -394,7 +408,8 @@ function WorkList:init_statistics()
 end
 
 function WorkList:init_setting()
-	if self._busy then return end
+	--if self._busy then return end
+	cache.request_cancel()
 	self:SwapButton( ui.SETTING )
 	self:show_statistics(false)
 	self:show_list(false)
@@ -431,9 +446,10 @@ function WorkList:init_gui()
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,
 		function(sender)
-			if not self._busy then
+			--if not self._busy then
+				g_first = true
 				uikits.popScene()
-			end
+			--end
 		end)
 	self._item:setVisible(false)
 	local size = self._item:getContentSize()
@@ -495,13 +511,14 @@ function WorkList:init_gui()
 end
 
 function WorkList:init_history_list()
-	if self._busy then return end
+	--if self._busy then return end
+	cache.request_cancel()
 	self:SwapButton( ui.HISTORY )
 	self:show_statistics(false)
 	self:show_list(true)
 	self._setting:setVisible(false)
 	
-	if not self._scID and not self._busy then
+	if not self._scID then --and not self._busy then
 		self._mode = ui.HISTORY
 		self:clear_all_item()
 		self:load_page( 1,5 )
@@ -587,7 +604,7 @@ function WorkList:add_item( t )
 		local isc = uikits.child( item,ui.ISCOMMIT )
 		local noc = uikits.child( item,ui.NOCOMMIT )
 		if isc and noc then
-			if t.status ~= 0 then
+			if t.status == 10 or  t.status == 11 then
 				isc:setVisible( true )
 				noc:setVisible( false )
 			else
@@ -601,7 +618,7 @@ function WorkList:add_item( t )
 		uikits.child(item,ui.SCORE):setString( tostring(t.real_score) )
 	end
 	--已经批改标记
-	if false then
+	if t.status and (t.status == 10 or  t.status == 11) then
 		uikits.child(item,ui.COMMENT):setVisible(true)
 	else
 		uikits.child(item,ui.COMMENT):setVisible(false)
@@ -642,7 +659,8 @@ function WorkList:add_item( t )
 
 	uikits.event(item,
 			function(sender)
-				if not self._busy then
+				--if not self._busy then
+					cache.request_cancel()
 					uikits.pushScene(WorkCommit.create{
 						pid=t.paper_id,
 						tid=t.teacher_id,
@@ -655,9 +673,11 @@ function WorkList:add_item( t )
 						course_name = t.course_name,
 						finish_time_unix = t.finish_time_unix,
 						exam_id = t.exam_id,
+						real_score = t.real_score,
+						total_time = t.total_time,
 						uid = login.uid(),
 						})
-				end
+				--end
 			end,'click')
 
 	return item
