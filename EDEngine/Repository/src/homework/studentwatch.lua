@@ -110,8 +110,11 @@ function StudentWatch:add_paper_item( topicType,topicID )
 							child:setEnabled(false) --禁止修改
 							if t.detail.answer and t.detail.answer and type(t.detail.answer)=='string' then --用户作答
 								local asw = json.decode(t.detail.answer)
-								if asw and asw.answers  and asw.answers[1] then
-									data.my_answer = asw.answers[1].value
+								if asw and asw.answers  and type(asw.answers)=='table' then
+									data.my_answer = {}
+									for i,v in pairs(asw.answers) do
+										data.my_answer[i] = v.value
+									end
 								end
 							end
 							topics.types[topicType].init(child,data)

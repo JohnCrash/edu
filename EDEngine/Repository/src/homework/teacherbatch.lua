@@ -125,8 +125,11 @@ function Batch:add_paper_item( topicType,topicID )
 							--放入正确答案
 							if t.correct_answer and type(t.correct_answer)=='string' then
 								local asw = json.decode(t.correct_answer)
-								if asw and asw.answers and asw.answers[1] then
-									data.my_answer = asw.answers[1].value
+								if asw and asw.answers and type(asw.answers)=='table'  then
+									data.my_answer = {}
+									for i,v in pairs(asw.answers) do
+										data.my_answer[i] = v.value
+									end
 								end
 							end
 							topics.types[topicType].init(child,data)
@@ -390,7 +393,7 @@ local appraise = {
 	[4] = {low=60,up=70,title = '中'},
 	[5] = {low=0,up=60,title = '待提高'},
 }
-
+local loadbox_student_list
 function Batch:init_student_list_func()
 	if self._student_list_table then
 		local total_score = self._args.real_score or 100
@@ -431,6 +434,10 @@ function Batch:init_student_list_func()
 			end --for
 		end
 		self._students:relayout()
+		if loadbox_student_list then
+			loadbox_student_list:removeFromParent()
+			loadbox_student_list = nil
+		end
 	end
 end
 
@@ -441,6 +448,7 @@ function Batch:init_student_list()
 	self._studentview:setVisible(true)
 	
 	self._students:clear()
+	loadbox_student_list = loadingbox.open(self)
 	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
 	return true
 end

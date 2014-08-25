@@ -97,6 +97,11 @@ local ui={
 local TOPICS_SPACE = 16
 local answer_abc = {}
 local answer_idx = {}
+local EditChildTag = 'answer_text'
+
+local function set_EditChildTag( t )
+	EditChildTag = t
+end
 
 local function init_answer_map()
 	for i = 1,24 do
@@ -644,16 +649,16 @@ local function relayout_link( layout,data )
 			down = nil
 			up = nil
 			--收集答案
-			data.my_answer = ''
+			data.my_answer[1] = ''
 			for i = 1,table.maxn(answer) do
 				if answer[i] then
-					data.my_answer = data.my_answer..answer_abc[answer[i]]
+					data.my_answer[1] = data.my_answer[1]..answer_abc[answer[i]]
 				else
-					data.my_answer = data.my_answer..'0'
+					data.my_answer[1] = data.my_answer[1]..'0'
 				end
 			end
-			kits.log( data.my_answer )
-			if string.len(data.my_answer) > 0 then
+			kits.log( data.my_answer[1] )
+			if string.len(data.my_answer[1]) > 0 then
 				data.state = ui.STATE_FINISHED
 			else
 				data.state = ui.STATE_UNFINISHED
@@ -729,9 +734,9 @@ local function relayout_link( layout,data )
 	end
 	set_topics_image( layout,data,0,rect2.y+rect2.height )
 	--载入答案
-	if data.my_answer and type(data.my_answer)=='string' and string.len(data.my_answer)>0 then
-		for i = 1,string.len(data.my_answer) do
-			local s = string.sub(data.my_answer,i,i)
+	if data.my_answer[1] and type(data.my_answer[1])=='string' and string.len(data.my_answer[1])>0 then
+		for i = 1,string.len(data.my_answer[1]) do
+			local s = string.sub(data.my_answer[1],i,i)
 			if s and answer_idx[s] then
 				--加入连线
 				up = i
@@ -742,9 +747,9 @@ local function relayout_link( layout,data )
 		up = nil
 		down = nil
 	else
-		data.my_answer = ''
+		data.my_answer[1] = ''
 		for i = 1,#ui1 do
-			data.my_answer	 = data.my_answer .. '0'
+			data.my_answer[1]	 = data.my_answer[1] .. '0'
 		end
 	end
 end
@@ -890,11 +895,11 @@ local function relayout_sort( layout,data,isH )
 							data.state = ui.STATE_UNFINISHED
 						end
 						--收集答案
-						data.my_answer = ''
+						data.my_answer[1] = ''
 						for i,v in pairs(sorts) do
-							data.my_answer = data.my_answer..map_abc(v)
+							data.my_answer[1] = data.my_answer[1]..map_abc(v)
 						end
-						kits.log( data.my_answer )
+						kits.log( data.my_answer[1] )
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
@@ -930,9 +935,9 @@ local function relayout_sort( layout,data,isH )
 	end
 	set_topics_image( layout,data,0,result.height + 36 + result.height )
 	--恢复答案
-	if data.my_answer then
-		for i = 1,string.len(data.my_answer) do
-			local s = string.sub(data.my_answer,i,i)
+	if data.my_answer[1] then
+		for i = 1,string.len(data.my_answer[1]) do
+			local s = string.sub(data.my_answer[1],i,i)
 			if s then
 				local n = answer_idx[s]
 				table.insert(sorts,ui1[n])
@@ -969,17 +974,17 @@ local function relayout_click( layout,data,ismulti )
 						rect_node[i]:removeFromParent()
 						rect_node[i] = nil
 						if rects[i].c then
-							if string.find(data.my_answer,rects[i].c) then
-								data.my_answer = string.gsub(data.my_answer,rects[i].c,'')
+							if string.find(data.my_answer[1],rects[i].c) then
+								data.my_answer[1] = string.gsub(data.my_answer[1],rects[i].c,'')
 							end
 						else
-							if string.find(data.my_answer,answer_abc[i]) then
-								data.my_answer = string.gsub(data.my_answer,answer_abc[i],'')
+							if string.find(data.my_answer[1],answer_abc[i]) then
+								data.my_answer[1] = string.gsub(data.my_answer[1],answer_abc[i],'')
 							end
 						end
 					else
 						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
-						data.my_answer = data.my_answer..answer_abc[i]
+						data.my_answer[1] = data.my_answer[1]..answer_abc[i]
 						bg:addChild( rect_node[i] )
 					end
 				else --单点
@@ -988,12 +993,12 @@ local function relayout_click( layout,data,ismulti )
 						rect_node[k] = nil
 					end
 					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
-					data.my_answer = answer_abc[i]
+					data.my_answer[1] = answer_abc[i]
 					bg:addChild( rect_node[i] )
 				end
-				data.my_answer = string_sort(data.my_answer)
-				kits.log( data.my_answer )
-				if string.len(data.my_answer) > 0 then
+				data.my_answer[1] = string_sort(data.my_answer[1])
+				kits.log( data.my_answer[1] )
+				if string.len(data.my_answer[1]) > 0 then
 					data.state = ui.STATE_FINISHED
 				else
 					data.state = ui.STATE_UNFINISHED
@@ -1004,9 +1009,9 @@ local function relayout_click( layout,data,ismulti )
 
 	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
 	--载入答案
-	if data.my_answer and type(data.my_answer)=='string' then
-		for i = 1,string.len(data.my_answer) do
-			local s = string.sub(data.my_answer,i,i)
+	if data.my_answer[1] and type(data.my_answer[1])=='string' then
+		for i = 1,string.len(data.my_answer[1]) do
+			local s = string.sub(data.my_answer[1],i,i)
 			if s then
 				local k = answer_idx[s]
 				local rc = rects[k]
@@ -1015,7 +1020,7 @@ local function relayout_click( layout,data,ismulti )
 			end
 		end
 	else
-		data.my_answer = ''
+		data.my_answer[1] = ''
 	end
 end
 local function relayout_drag( layout,data,ismul )
@@ -1224,19 +1229,19 @@ local function relayout_drag( layout,data,ismul )
 							end
 						end
 						--收集答案
-						data.my_answer = ''
+						data.my_answer[1] = ''
 						for k=1,table.maxn(drags) do
 							if k>1 then
-								data.my_answer = data.my_answer..';'
+								data.my_answer[1] = data.my_answer[1]..';'
 							end
 							if drags[k] then
-								data.my_answer = data.my_answer..answer_abc[k]..answer_abc[drags[k].idx]
+								data.my_answer[1] = data.my_answer[1]..answer_abc[k]..answer_abc[drags[k].idx]
 							else
-								data.my_answer = data.my_answer..answer_abc[k]..'0'
+								data.my_answer[1] = data.my_answer[1]..answer_abc[k]..'0'
 							end
 						end
-						kits.log( data.my_answer )
-						if string.len(data.my_answer) > 0 then
+						kits.log( data.my_answer[1] )
+						if string.len(data.my_answer[1]) > 0 then
 							data.state = ui.STATE_FINISHED
 						else
 							data.state = ui.STATE_UNFINISHED
@@ -1277,18 +1282,18 @@ local function relayout_drag( layout,data,ismul )
 	set_topics_image( layout,data,0,bgsize.height*uikits.scale()+y+TOPICS_SPACE+rc.height)
 	--恢复答案
 	--AB;BC;CD
-	if data.my_answer then
+	if data.my_answer[1] then
 		--将AB;BC;CD转换为BCD
-		local aws = string.gsub(data.my_answer,';','')
+		local aws = string.gsub(data.my_answer[1],';','')
 		local s = ''
 		for i = 1,string.len(aws) do
 			if i%2==0 then
 				s = s..string.sub(aws,i,i)
 			end
 		end
-		data.my_answer = s
-		for i = 1,string.len(data.my_answer) do
-			local s = string.sub(data.my_answer,i,i)
+		data.my_answer[1] = s
+		for i = 1,string.len(data.my_answer[1]) do
+			local s = string.sub(data.my_answer[1],i,i)
 			local k = answer_idx[s]
 			if k and ui1[k] then
 				if ismul then
@@ -1324,8 +1329,8 @@ local function multi_select_init(layout,data)
 		local _options = data._options
 		for i = 1, data.options do
 			_options[i]:setVisible(true)
-			if data.my_answer and type(data.my_answer)=='string' and
-				string.find(data.my_answer,answer_abc[i]) then
+			if data.my_answer[1] and type(data.my_answer[1])=='string' and
+				string.find(data.my_answer[1],answer_abc[i]) then
 				_options[i]:setSelectedState(true)
 			else
 				_options[i]:setSelectedState(false)
@@ -1333,20 +1338,20 @@ local function multi_select_init(layout,data)
 			local m = i
 			uikits.event(_options[i],
 				function(sender,b)
-					data.my_answer = data.my_answer or ''
-					if string.find(data.my_answer,answer_abc[m]) then
-						data.my_answer = string.gsub(data.my_answer,answer_abc[m],'')
+					data.my_answer[1] = data.my_answer[1] or ''
+					if string.find(data.my_answer[1],answer_abc[m]) then
+						data.my_answer[1] = string.gsub(data.my_answer[1],answer_abc[m],'')
 					else
-						data.my_answer = data.my_answer .. answer_abc[m]
+						data.my_answer[1] = data.my_answer[1] .. answer_abc[m]
 					end
-					if string.len(data.my_answer) > 0 then
+					if string.len(data.my_answer[1]) > 0 then
 						data.state = ui.STATE_FINISHED
 					else
 						data.state = ui.STATE_UNFINISHED
 					end
 					--保持顺序CB->BC
-					data.my_answer = string_sort(data.my_answer)
-					kits.log( data.my_answer )
+					data.my_answer[1] = string_sort(data.my_answer[1])
+					kits.log( data.my_answer[1] )
 					call_answer_event(layout,data)
 				end)
 		end --for
@@ -1377,14 +1382,15 @@ local types={
 				init=function(layout,data)
 					if data._options  then --具有答题区
 						--初始化答案
+						data.my_answer = data.my_answer or {}
 						local _option_yes = data._options[1]
 						local _option_no = data._options[2]
 						_option_yes:setVisible(true)
 						_option_no:setVisible(true)
-						if data.my_answer == 'A' then
+						if data.my_answer[1] == 'A' then
 							_option_yes:setSelectedState(true)
 							_option_no:setSelectedState(false)
-						elseif data.my_answer == 'B' then
+						elseif data.my_answer[1] == 'B' then
 							_option_yes:setSelectedState(false)
 							_option_no:setSelectedState(true)	
 						else
@@ -1394,31 +1400,31 @@ local types={
 					uikits.event(_option_yes,
 						function (sender,b)
 							if b then
-								if data.my_answer == 'B' then
+								if data.my_answer[1] == 'B' then
 									_option_no:setSelectedState(false)
 								end
-								data.my_answer = 'A'
+								data.my_answer[1] = 'A'
 								data.state = ui.STATE_FINISHED
 							else
-								data.my_answer = ''
+								data.my_answer[1] = ''
 								data.state = ui.STATE_UNFINISHED
 							end
-							kits.log( data.my_answer )
+							kits.log( data.my_answer[1] )
 							call_answer_event(layout,data)
 						end)
 					uikits.event(_option_no,
 						function (sender,b)
 							if b then
-								if data.my_answer == 'A' then
+								if data.my_answer[1] == 'A' then
 									_option_yes:setSelectedState(false)
 								end
-								data.my_answer = 'B'
+								data.my_answer[1] = 'B'
 								data.state = ui.STATE_FINISHED
 							else
-								data.my_answer = ''
+								data.my_answer[1] = ''
 								data.state = ui.STATE_UNFINISHED
 							end			
-							kits.log( data.my_answer )				
+							kits.log( data.my_answer[1] )				
 							call_answer_event(layout,data)
 						end)						
 					end
@@ -1440,10 +1446,11 @@ local types={
 				end,
 				init=function(layout,data)
 					if data._options then
+						data.my_answer = data.my_answer or {}
 						local _options = data._options
 						for i = 1,data.options do
 							_options[i]:setVisible(true)
-							if answer_abc[i] == data.my_answer then
+							if answer_abc[i] == data.my_answer[1] then
 								_options[i]:setSelectedState(true)
 							else
 								_options[i]:setSelectedState(false)
@@ -1452,17 +1459,17 @@ local types={
 							uikits.event(_options[i],
 								function(sender,b)
 									if b then
-										data.my_answer = answer_abc[m]
+										data.my_answer[1] = answer_abc[m]
 										for i=1,#_options do
 											_options[i]:setSelectedState(false)
 										end
 										sender:setSelectedState(true)
 										data.state = ui.STATE_FINISHED
 									else
-										data.my_answer = ''
+										data.my_answer[1] = ''
 										data.state = ui.STATE_UNFINISHED
 									end
-									kits.log( data.my_answer )
+									kits.log( data.my_answer[1] )
 									call_answer_event(layout,data)
 								end)
 						end
@@ -1486,9 +1493,8 @@ local types={
 	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
-					local ca = kits.decode_json( s.correct_answer )
-					if ca and ca.answers and type(ca.answers)=='table' then
-						e.options = #ca.answers --多少个空
+					if s.cnt_answer then
+						e.options = s.cnt_answer
 					else
 						return false,"edit 'answers'?"
 					end
@@ -1497,13 +1503,14 @@ local types={
 				end,
 				init=function(layout,data)
 					if data.options then
+						data.my_answer = data.my_answer or {}
 						for i = 1,data.options do
 							local _options = data._options
 							if _options and _options[i] then
 								_options[i]:setVisible(true)
-								local e = uikits.child(_options[i],ui.ANSWER_TEXT)
-								if data.answer and data.answer[i] then
-									e:setText(data.answer[i])
+								local e = uikits.child(_options[i],EditChildTag)
+								if data.my_answer[i] then
+									e:setText(data.my_answer[i])
 								else
 									e:setText('')
 								end
@@ -1511,10 +1518,12 @@ local types={
 										function(sender,eventType)
 											if eventType == ccui.TextFiledEventType.insert_text then
 												data.state = ui.STATE_FINISHED
-												data.answer[i] = sender:getStringValue()
+												data.my_answer[i] = sender:getStringValue()
+												call_answer_event(layout,data)
 											elseif eventType == ccui.TextFiledEventType.delete_backward then
 												data.state = ui.STATE_FINISHED
-												data.answer[i] = sender:getStringValue()
+												data.my_answer[i] = sender:getStringValue()
+												call_answer_event(layout,data)
 											end
 										end)	
 							end									
@@ -1526,6 +1535,7 @@ local types={
 	[6] = {name='选择',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					multi_select_init(layout,data)
 					cache_done(layout,data,relayout_topics)
 				end
@@ -1533,36 +1543,42 @@ local types={
 	[7] = {name='横排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_sort,true)
 				end
 			},
 	[8] = {name='竖排序',img=res_root..'sort_item.png',
 				conv=sort_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_sort,false)
 				end
 			},
 	[9] = {name='点图单选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_click,false)
 				end
 			},
 	[10] = {name='点图多选',img=res_root..'position_item.png',
 				conv=click_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_click,true)
 				end
 			},
 	[11] = {name='单拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_drag,false)
 				end
 			},
 	[12] = {name='多拖放',img=res_root..'drag_item.png',
 				conv=drag_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_drag,true)
 				end
 			}	
@@ -1575,6 +1591,7 @@ return
 	topics_map = topics,
 	course_icon = course_icon,
 	types = types,
+	setEditChildTag = set_EditChildTag,
 	STATE_CURRENT = 1,
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
