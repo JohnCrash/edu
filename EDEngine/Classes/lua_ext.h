@@ -1,6 +1,8 @@
 #ifndef _LUA_EXT_
 #define _LUA_EXT_
 
+#include <string>
+
 #if __cplusplus
 extern "C" {
 #endif
@@ -14,4 +16,14 @@ void luaopen_lua_exts(lua_State *L);
 }
 #endif
 
+enum EDDirectory
+{
+    APP_DIRECTORY = 1,
+    LUA_DIRECTORY = 2,
+    RESOURCE_DIRECTORY = 3,
+    CACHE_DIRECTORY = 4,
+    LUACORE_DIRECTORY = 5,
+};
+
+std::string getDirectory(EDDirectory edd);
 #endif

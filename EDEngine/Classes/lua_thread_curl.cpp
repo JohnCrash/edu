@@ -417,7 +417,7 @@ static void set_info(lua_State *L)
 	lua_pushliteral (L, "LuaThreadCurl is lua library.");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "LuaThreadCurl "VERSION);
+	lua_pushliteral (L, "LuaThreadCurl" VERSION);
 	lua_settable (L, -3);
 }
 
