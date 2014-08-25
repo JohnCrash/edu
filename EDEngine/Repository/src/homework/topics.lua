@@ -863,7 +863,16 @@ local function relayout_sort( layout,data,isH )
 						sender:setLocalZOrder(1000)
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
-						p = layout:convertToNodeSpace( p )
+							if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end
 						setEnabledParent(layout,true)
 						--if data._scrollParent then
 						--	data._scrollParent:setEnabled(true)
@@ -889,7 +898,16 @@ local function relayout_sort( layout,data,isH )
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
-						p = layout:convertToNodeSpace(p)
+						if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end						
 						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 						place_item( sender,p.x,p.y )
 					end
@@ -1155,9 +1173,6 @@ local function relayout_drag( layout,data,ismul )
 						sp.x = sp.x * uikits.scale()
 						sp.y = sp.y * uikits.scale()
 						setEnabledParent(layout,false)
-						--if data._scrollParent then
-						--	data._scrollParent:setEnabled(false)
-						--end
 						layout:setEnabled(false)
 						if ismul then
 							if not sender.isclone then
@@ -1170,11 +1185,17 @@ local function relayout_drag( layout,data,ismul )
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
 						local p = sender:getTouchEndPosition()
-						p = layout:convertToNodeSpace( p )
+						if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end						
 						setEnabledParent(layout,true)
-						--if data._scrollParent then
-						--	data._scrollParent:setEnabled(true)
-						--end
 						layout:setEnabled(true)
 						if ismul then
 							if draging_item then
@@ -1187,8 +1208,7 @@ local function relayout_drag( layout,data,ismul )
 											end
 										end
 									end
-									draging_item:removeFromParent()
-									draging_item = nil							
+									uikits.delay_call(layout,function()draging_item:removeFromParent()end,0)
 								end
 							end
 						else
@@ -1224,7 +1244,17 @@ local function relayout_drag( layout,data,ismul )
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
 						local p = sender:getTouchMovePosition()
-						p = layout:convertToNodeSpace(p)
+						if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end
+						
 						if ismul then
 							if draging_item then
 								draging_item:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )

@@ -7,13 +7,15 @@ local login = require "login"
 
 local request_list = {}
 local cache_data = {}
-
+setmetatable(cache_data,{__mode='v'})
+ 
 local function add_cache_data(url,data)
 	cache_data[url] = data
 end
 
 local function clear_cache()
 	cache_data = {}
+	setmetatable(cache_data,{__mode='v'})
 end
 
 local function random_delay()
