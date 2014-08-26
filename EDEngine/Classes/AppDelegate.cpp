@@ -89,12 +89,10 @@ void AppDelegate::initLuaEngine()
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
     LuaStack* stack = pEngine->getLuaStack();
-	stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
-    register_assetsmanager_test_sample(stack->getLuaState());
-	#ifdef _DEBUG
-		startRuntime();
-	#endif
-    pEngine->executeScriptFile("bootstrap.lua");
+
+    //pEngine->executeScriptFile("bootstrap.lua");
+	FileUtils::getInstance()->addSearchPath(FileUtils::getInstance()->getWritablePath());
+	pEngine->executeScriptFile("src/launcher.lua");
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32

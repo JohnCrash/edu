@@ -16,6 +16,22 @@ static void pathsp(std::string& path)
 		}
 }
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+extern std::string g_Cookie;
+extern std::string g_Launch;
+#endif
+
+static int cc_launchparam(lua_State* L)
+{
+	#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+	lua_pushstring(L,g_Launch.c_str());
+	lua_pushstring(L,g_Cookie.c_str());
+	return 2;
+	#else
+	return 0;
+	#endif
+}
+
 std::string getDirectory(EDDirectory edd)
 {
     std::string path;
@@ -23,14 +39,14 @@ std::string getDirectory(EDDirectory edd)
     {
         case APP_DIRECTORY:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            path = FileUtils::getInstance()->getWritablePath();
+            path = cocos2d::FileUtils::getInstance()->getWritablePath();
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
             path = macBundlePath();
 #endif
             break;
         case LUA_DIRECTORY:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            path = FileUtils::getInstance()->getWritablePath();
+            path = cocos2d::FileUtils::getInstance()->getWritablePath();
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
             path = macBundlePath();
 #endif
@@ -39,7 +55,7 @@ std::string getDirectory(EDDirectory edd)
             break;
         case RESOURCE_DIRECTORY:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            path = FileUtils::getInstance()->getWritablePath();
+            path = cocos2d::FileUtils::getInstance()->getWritablePath();
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
             path = macBundlePath();
 #endif
@@ -48,7 +64,7 @@ std::string getDirectory(EDDirectory edd)
             break;
         case CACHE_DIRECTORY:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            path = FileUtils::getInstance()->getWritablePath();
+            path = cocos2d::FileUtils::getInstance()->getWritablePath();
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
             path = macBundlePath();
 #endif
@@ -57,7 +73,7 @@ std::string getDirectory(EDDirectory edd)
             break;
         case LUACORE_DIRECTORY:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS||CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-            path = FileUtils::getInstance()->getWritablePath();
+            path = cocos2d::FileUtils::getInstance()->getWritablePath();
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
             path = macBundlePath();
 #endif
@@ -148,6 +164,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register( L,"cc_type",cc_gettype);
 	lua_register( L,"cc_istype",cc_istype);
     lua_register( L,"cc_directory",cc_directory);
+	lua_register( L,"cc_launchparam",cc_launchparam);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

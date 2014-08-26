@@ -1,9 +1,10 @@
 ﻿require "AudioEngine" 
-
+require "VisibleRect"
 lxp = require "lom"
 kits = require "kits"
 json = require "json"
 curl = require 'curl'
+uikits = require "uikits"
 
 local AMouseScene = class("AMouseScene")
 AMouseScene.__index = AMouseScene
@@ -163,10 +164,11 @@ end
 
 --返回主菜单					
 local function backMain()
-	local scene = cc.Scene:create()
-    scene:addChild(CreateTestMenu())
+	--local scene = cc.Scene:create()
+    --scene:addChild(CreateTestMenu())
 
-    cc.Director:getInstance():replaceScene(scene)
+    --cc.Director:getInstance():replaceScene(scene)
+	uikits.popScene()
 end
 
 function AMouseScene.extend(target)
@@ -375,7 +377,9 @@ function AMouseScene:set_top_list( url )
 		end
 	else
 		print("get players rank error!")
-		if result then print(result) end
+		if result then 
+			print(string.sub(result,1,128)) 
+		end
 	end
 end
 
@@ -469,9 +473,19 @@ end
 
 function AMouseScene:close_Dialog()
 	if self._uiLayer then
-		self._uiLayer:removeFromParent()
+		local layer = self._uiLayer
+		uikits.delay_call(self,function() 
+			layer:removeFromParent()
+			layer = nil end,0)
+		--self._uiLayer:removeFromParent()
 		self._widget = nil
 		self._uiLayer = nil
+		self._where = nil
+	end
+	if self._uiScene then
+		uikits.popScene()
+		self._uiScene = nil
+		self._widget = nil
 		self._where = nil
 	end
 end
@@ -577,7 +591,7 @@ end
 
 --一关结束
 function AMouseScene:game_end_Dialog()
-	if self._uiLayer then return end
+	--if self._uiLayer then return end
 	--60分过关
 	local fen100 = self:getIntegration()
 	local b = fen100 > 60
@@ -607,11 +621,13 @@ function AMouseScene:game_end_Dialog()
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
 			self:startStage()
-			self:play_sound( SND_UI_CLICK )						
+			self:play_sound( SND_UI_CLICK )
 		end
 	end
-	self._uiLayer = cc.Layer:create()
-	self:addChild(self._uiLayer)
+	--self._uiLayer = cc.Layer:create()
+	--self:addChild(self._uiLayer)
+	self._uiScene = cc.Scene:create()
+	uikits.pushScene(self._uiScene)
 	if b then
 		--播放成功过关的声音
 		self:play_sound(SND_NEXT_PROM)
@@ -627,11 +643,11 @@ function AMouseScene:game_end_Dialog()
 	else
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_2/jie_mian_2.json")
 	end
-	self._uiLayer:addChild(self._widget)
-
+	--self._uiLayer:addChild(self._widget)
+	self._uiScene:addChild(self._widget)
 	--设置本地积分
 	if b then
-		local root = self._uiLayer:getChildByTag(3)
+		local root = self._uiScene:getChildByTag(3)
 		local parent = root:getChildByName('ImageView_38')
 		parent:getChildByTag(207):setString(tostring(self._xing_time)) --通关用时
 		parent:getChildByTag(210):setString(tostring(math.floor(self:getIntegration()))..'%') --正确数
@@ -640,11 +656,11 @@ function AMouseScene:game_end_Dialog()
 	end
 	--self._widget:setPosition(cc.p(0,-self._ss.height/10))	
 	if b then
-		local root = self._uiLayer:getChildByTag(3)
+		local root = self._uiScene:getChildByTag(3)
 		root:getChildByTag(7):getChildByTag(8):addTouchEventListener(exitGame) --exit
 		root:getChildByTag(11):getChildByTag(12):addTouchEventListener(nextStage) --next	
 	else
-		local root = self._uiLayer:getChildByTag(3)
+		local root = self._uiScene:getChildByTag(3)
 		root:getChildByTag(7):getChildByTag(8):addTouchEventListener(exitGame) --exit
 		root:getChildByTag(11):getChildByTag(12):addTouchEventListener(tryaginStage) --next
 	end
@@ -1308,6 +1324,7 @@ end
 
 function AMouseScene:init()
 	--游戏基本变量初始化
+	if not self._ss then
 	self._ss = cc.Director:getInstance():getVisibleSize()
 	local radio = self._ss.width/self._ss.height
 	print("radio = "..radio )
@@ -1335,6 +1352,7 @@ function AMouseScene:init()
 
 	--启动游戏
 	self:game_start_Dialog()
+	end
 end
 
 --释放
@@ -1364,8 +1382,9 @@ end
 
 function AMouseMain()
 	cclog("A mouse hello!")
-	require("mobdebug").start("192.168.2.182")
 	local scene = AMouseScene.create()
-	scene:addChild(CreateBackMenuItem())
+	--scene:addChild(CreateBackMenuItem())
 	return scene
 end
+
+return AMouseScene

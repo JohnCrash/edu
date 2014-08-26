@@ -26,15 +26,42 @@ THE SOFTWARE.
 ****************************************************************************/
 package org.cocos2dx.cpp;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 //import org.cocos2dx.cpp.CrashHandler;
 
 public class AppActivity extends Cocos2dxActivity {
+	private static native void launchParam(final String launch,final String cookie);
+	
+	public void getParameterByIntent() {
+		Intent mIntent = this.getIntent();  
+		String launch = mIntent.getStringExtra("launch");
+		String cookie = mIntent.getStringExtra("cookie");
+		launchParam(launch,cookie);
+		//launchParam("amouse","sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d");
+		}
+	/*
+	public void setParameterByIntent(String pkg,String cls,String param1,String param2) 
+	{
+		ComponentName componentName = new ComponentName(pkg,cls); 
+		Intent intent = new Intent();  
+		Bundle bundle = new Bundle();  
+		bundle.putString("launch", param1);
+		bundle.putString("cookie", param2); 
+		intent.putExtras(bundle);  
+		intent.setComponent(componentName);  
+		startActivity(intent);
+	}*/
+	
     public Cocos2dxGLSurfaceView onCreateView() {
 		//CrashHandler crashHandler = CrashHandler.getInstance();  
         //crashHandler.init(getApplicationContext());
-
+    	getParameterByIntent(); //取启动参数
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         // TestCpp should create stencil buffer
         //glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);

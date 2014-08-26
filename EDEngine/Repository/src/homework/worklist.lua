@@ -84,7 +84,6 @@ function WorkList.create()
 	local layer = uikits.extend(cc.Layer:create(),WorkList)
 	
 	scene:addChild(layer)
-	
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -671,6 +670,7 @@ function WorkList:add_item( t )
 						in_time = t.in_time,
 						status = t.status,
 						course_name = t.course_name,
+						course_id = t.course,
 						finish_time_unix = t.finish_time_unix,
 						exam_id = t.exam_id,
 						real_score = t.real_score,
