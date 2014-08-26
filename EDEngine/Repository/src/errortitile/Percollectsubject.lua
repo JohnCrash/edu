@@ -5,6 +5,7 @@ local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local login = require "login"
+local topics = require "src/errortitile/topics"
 --local answer = curweek or require "src/errortitile/answer"
 --local BigquestionView = require "src/errortitile/BigquestionView"
 local Percollectsubject = class("Percollectsubject")
@@ -114,10 +115,39 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	label_item_name = infomation_view:getChildByTag(645)
 	wrong_per = infomation_view:getChildByTag(649)
 	label_difficulty = infomation_view:getChildByTag(647)
+	local questions_view = collect_view:getChildByTag(650)
+	local size_questions_view = questions_view:getContentSize()
+	print("size_questions_view.w::"..size_questions_view.width.."size_questions_view.h"..size_questions_view.height)
 	label_item_name:setString(collectitem.item_name)
 	label_difficulty:setString(collectitem.difficulty)				
 	wrong_per:setString(collectitem.perwrong.."%")	
 	
+	local scrollView = ccui.ScrollView:create()
+    scrollView:setTouchEnabled(true)
+    scrollView:setContentSize(size_questions_view)        
+    scrollView:setPosition(cc.p(0,0))
+	
+    questions_view:addChild(scrollView)
+	local data = {}
+	topics.setEditChildTag("daan")
+	print("tb_wrongtitle_item.item_type::"..uikits.scale())
+	if collectitem.item_type > 0 and collectitem.item_type < 13 then
+--		print(topics.types[item_data.item_type])
+		if topics.types[collectitem.item_type].conv(collectitem,data) then
+			data.eventInitComplate = function(layout,data)
+--				questions_view:setContentSize(size_questions_view)
+--				questions_view:setScaleX(uikits.scale())
+--				questions_view:setScaleY(uikits.scale())
+--				questions_view:setVisible(true)
+			end
+--			questions_view:setVisible(false)
+			questions_view:setEnabled(false)
+			topics.types[collectitem.item_type].init(scrollView,data)
+		end		
+	end	
+
+--	questions_view:addChild()
+--	questions_view:setTouchEnabled(false);
 	--处理更多操作按钮
 	--local share_view =			
 	--local share_box_src = self.share_view:getChildByTag(657)

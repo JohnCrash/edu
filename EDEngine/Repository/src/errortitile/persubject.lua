@@ -4,6 +4,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
+local topics = require "src/errortitile/topics"
 local login = require "login"
 --local answer = curweek or require "src/errortitile/answer"
 local BigquestionView = require "src/errortitile/BigquestionView"
@@ -51,7 +52,7 @@ function create(name,label,id,range)
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end	
-	
+
 function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview_no,tb_wrongtitle_item)
 	
 	local wrong_view
@@ -116,8 +117,32 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	end
 	
 	-- 测试题干显示
+	local size_questions_view = questions_view:getContentSize()
+	local scrollView = ccui.ScrollView:create()
+    scrollView:setTouchEnabled(true)
+    scrollView:setContentSize(size_questions_view)        
+    scrollView:setPosition(cc.p(0,0))
 	
-	local questions_path = "errortitile/11.png"
+    questions_view:addChild(scrollView)
+	local data = {}
+	topics.setEditChildTag("daan")
+	print("tb_wrongtitle_item.item_type::"..uikits.scale())
+	if tb_wrongtitle_item.item_type > 0 and tb_wrongtitle_item.item_type < 13 then
+--		print(topics.types[item_data.item_type])
+		if topics.types[tb_wrongtitle_item.item_type].conv(tb_wrongtitle_item,data) then
+			data.eventInitComplate = function(layout,data)
+--				questions_view:setContentSize(size_questions_view)
+--				questions_view:setScaleX(uikits.scale())
+--				questions_view:setScaleY(uikits.scale())
+--				questions_view:setVisible(true)
+			end
+--			questions_view:setVisible(false)
+			scrollView:setEnabled(false)
+			topics.types[tb_wrongtitle_item.item_type].init(scrollView,data)
+		end		
+	end	
+
+
 	local questions_but = ccui.Button:create()
 	questions_but:setTouchEnabled(true)
 	questions_but:loadTextures(questions_path, questions_path, "")
@@ -499,7 +524,15 @@ function persubject:updatewrongview()
 end	
 
 function persubject:init()	
-	
+	local design	
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		_G.screen_type = 1
+		design = {width=1920,height=1080}
+	else
+		_G.screen_type = 2
+		design = {width=1440,height=1080}	
+	end
+	uikits.initDR(design)
 	if _G.screen_type == 1 then
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/inlesson.json")		
 	else

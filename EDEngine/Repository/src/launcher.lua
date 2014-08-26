@@ -1,10 +1,11 @@
 require "Cocos2d"
 local kits = require "kits"
 local uikits = require "uikits"
+local login = require "login"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
-
+--require("mobdebug").start("192.168.2.182")
 local function init_test_resource()
   local res = local_dir..'res/'
   local pfu = cc.FileUtils:getInstance()
@@ -16,15 +17,18 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir..'cache/')
 	else
 		pfu:addSearchPath('src/')
-		pfu:addSearchPath('res/')		
-		pfu:addSearchPath(local_dir..'test/')
+		pfu:addSearchPath('res/')
+		local dir = local_dir..'test/'
+		if not kits.local_directory_exists(dir) then
+			kits.make_local_directory('test/')
+		end
+		pfu:addSearchPath(dir)
 	end
   
   pfu:addSearchPath(local_dir)
 end
 
 init_test_resource()
-require("mobdebug").start("192.168.2.182")
 
 if uikits.get_factor() == uikits.FACTOR_9_16 then
 	uikits.initDR{width=1920,height=1080}
@@ -34,11 +38,13 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
-app = 'amouse'
-cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
-if cookie then
-	local login = require "login"
+--app = 'amouse'
+--cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
+if cookie and type(cookie)=='string' and string.len(cookie)>1 then
+	
 	login.set_cookie( cookie )
+else
+	login.set_selector(1) --Ñ§Éú
 end
 
 if app == 'homework' then

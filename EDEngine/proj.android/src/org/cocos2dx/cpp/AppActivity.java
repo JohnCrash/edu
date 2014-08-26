@@ -42,8 +42,8 @@ public class AppActivity extends Cocos2dxActivity {
 		Intent mIntent = this.getIntent();  
 		String launch = mIntent.getStringExtra("launch");
 		String cookie = mIntent.getStringExtra("cookie");
-		//launchParam(launch,cookie);
-		launchParam("errortitile","sc=");
+		launchParam(launch,cookie);
+		//launchParam("amouse","sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d");
 		}
 	/*
 	public void setParameterByIntent(String pkg,String cls,String param1,String param2) 

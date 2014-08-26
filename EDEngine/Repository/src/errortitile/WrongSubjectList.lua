@@ -310,10 +310,12 @@ end
 function WrongSubjectList:getdatabyurl()
 	local send_data
 	send_data = "?show_type=2"
---[[	local send_url = t_nextview[2].url..send_data
+--[[	local send_url = t_nextview[1].url..send_data
 	local result = kits.http_get(send_url,cookie1,1)
 					print(result)	
 					local tb_result = json.decode(result)
+					self:format_listdata(tb_result.exer_book_stat)
+					self:updatepage()
 					if 	tb_result.result ~= 0 then				
 						print(tb_result.result.." : "..tb_result.message)				
 					end	--]]
@@ -328,6 +330,7 @@ function WrongSubjectList:getdatabyurl()
 					end
 					
 				else
+				--	print("t.exer_book_stat:"..t.exer_book_stat)
 					self:format_listdata(t.exer_book_stat)
 				end
 				self:updatepage()
@@ -342,6 +345,15 @@ end
 function WrongSubjectList:init()
 	
 	--local subject_view
+	local design	
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		_G.screen_type = 1
+		design = {width=1920,height=1080}
+	else
+		_G.screen_type = 2
+		design = {width=1440,height=1080}	
+	end
+	uikits.initDR(design)
 	if _G.screen_type == 1 then
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/wrong_day.json")		
 		--self.subject_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/lesson.json")
@@ -350,6 +362,12 @@ function WrongSubjectList:init()
 		--self.subject_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/lesson43.json")	
 	end
 	self:addChild(self._widget)
+	
+	local ret = self:getdatabyurl()
+	if ret == false then
+		print("WrongSubjectList get error!")
+		return
+	end
 	
 	local pageView = uikits.child(self._widget,ui.PAGEVIEW) --获取翻页层容器
 
@@ -404,12 +422,6 @@ function WrongSubjectList:init()
 				local scene_next = MoreView.create()								
 				cc.Director:getInstance():replaceScene(scene_next)			
 			end,"click")
-			
-	local ret = self:getdatabyurl()
-	if ret == false then
-		print("WrongSubjectList get error!")
-		return
-	end
 end
 
 function WrongSubjectList:release()

@@ -45,3 +45,18 @@ s_markerFeltFontPath   = "fonts/Marker Felt.ttf"
 s_arialPath            = "fonts/arial.ttf"
 s_thonburiPath         = "fonts/Thonburi.ttf"
 s_tahomaPath           = "fonts/tahoma.ttf"
+
+cookie1 = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
+t_nextview = {
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerStat.ashx.ashx",package_path = "src/hello/WrongSubjectList"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerPreview.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemReason.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemCol.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerStat.ashx.ashx",package_path = "src/hello/CollectView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerPreview.ashx",package_path = "src/hello/CollectView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/WrongStat.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditItemids.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditByItemids.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsSubmit.ashx",package_path = "src/hello/StatisticsView"},
+}

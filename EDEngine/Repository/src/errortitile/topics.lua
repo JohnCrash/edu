@@ -83,8 +83,7 @@ local course_icon={
 	[30008]={name="高中地理",logo="geography.jpg"},
 	[30009]={name="高中历史",logo="history.jpg"},
 }
-local max_options = 6
-local res_root = 'homework/'
+
 local ui={
 	PLAYBOX = 'homework/playbox.json',
 	PLAY = 'pause',
@@ -93,13 +92,15 @@ local ui={
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
 	LINK_DOT = 'homework/round_dot.png',
---	ANSWER_TEXT = 'daan',
 }
 
 local TOPICS_SPACE = 16
 local answer_abc = {}
 local answer_idx = {}
-local EditChildTag = 'daan'
+local EditChildTag = 'answer_text'
+local max_options = 6
+local max_edit = 3
+local res_root = 'homework/'
 
 local function set_EditChildTag( t )
 	EditChildTag = t
@@ -194,6 +195,14 @@ local function add_resource_cache( rst,url )
 	end
 end
 
+local function add_topics_image_resourec( e )
+	if e.item_id then
+		local uri = "http://image.lejiaolexue.com/handler/item/item_preview.ashx?item_id="..e.item_id.."&tag=0"
+		e.topics_image_name = e.item_id..'.jpg'
+		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})
+	end
+end
+
 local function parse_options(s,option1_func,option2_func,msg)
 	if s.options and type(s.options)=='string' then
 		local result = kits.decode_json( s.options )
@@ -225,8 +234,8 @@ local function parse_options(s,option1_func,option2_func,msg)
 end
 
 local function parse_attachment(s,i,msg)
-	if s.val_attach and type(s.val_attach) == 'string' then
-		local result = kits.decode_json( s.val_attach )
+	if s.attachment and type(s.attachment) == 'string' then
+		local result = kits.decode_json( s.attachment )
 		--取得背景
 		if result and type(result) == 'table' and  result.attachments and
 			result.attachments[i] then
@@ -341,6 +350,8 @@ local function load_attachment(s,e,info)
 	e.resource_cache = e.resource_cache or {}
 	e.resource_cache.urls = e.resource_cache.urls or {}
 	e.attachment = eattachment or {}
+	e.item_id = s.item_id
+	add_topics_image_resourec( e )
 	for i=1,10 do
 		local res,msg = parse_attachment(s,i,info)
 		if res then
@@ -433,8 +444,8 @@ local function print_link( e )
 	print_items( e.link_items1 )
 	kits.log( '	link_items2:')
 	print_items( e.link_items2 )
-	
 end
+
 --连线题转换
 local function link_conv(s,e)
 	load_attachment(s,e,'link_conv')
@@ -524,8 +535,8 @@ local function attachment_ui_bg( t )
 			end
 		end
 	end
-	print(#t.attachment)
 	kits.log('error attachment_ui_bg not found image' )
+	return uikits.image{x=t.x,y=t.y,anchorX=t.anchorX}
 end
 
 local function attachment_ui_player( t )
@@ -584,9 +595,9 @@ local function set_topics_image( layout,data,x,y )
 		local width,height
 		width = size.width
 		height = y + 4 * TOPICS_SPACE
-		if data.image then
+		if data.topics_image_name then
 		--题目图片
-			local img = uikits.image{image=data.image}
+			local img = uikits.image{image=data.topics_image_name}
 			img:setScaleX(uikits.scale())
 			img:setScaleY(uikits.scale())
 			layout:addChild(img)
@@ -1324,12 +1335,12 @@ local function multi_select_conv(s,e)
 		return false,"multiple select 'options'?"
 	end
 	e.answer = parse_answer( s )
+	e.my_answer = e.my_answer or {}
 	return true
 end
 
 local function multi_select_init(layout,data)
 	if data._options then
-		data.my_answer = data.my_answer or {}
 		local _options = data._options
 		for i = 1, data.options do
 			_options[i]:setVisible(true)
@@ -1497,12 +1508,19 @@ local types={
 	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
-					local ca = kits.decode_json( s.correct_answer )
-					if ca and ca.answers and type(ca.answers)=='table' then
-						e.options = #ca.answers --多少个空
+					if s.correct_answer and type(s.correct_answer)=='string' then
+						local ans = json.decode(s.correct_answer)
+						if ans and ans.answers and type(ans.answers)=='table' then
+							e.options = #ans.answers
+						else
+							e.options = 1
+						end
+					elseif s.cnt_answer then
+						e.options = s.cnt_answer
 					else
-						return false,"edit 'answers'?"
+						e.options = 1
 					end
+					e.options = math.min(max_edit,e.options)
 					e.answer = parse_answer( s )
 					return true
 				end,
@@ -1510,7 +1528,6 @@ local types={
 					if data.options then
 						data.my_answer = data.my_answer or {}
 						for i = 1,data.options do
-							print(i.."::"..EditChildTag)
 							local _options = data._options
 							if _options and _options[i] then
 								_options[i]:setVisible(true)

@@ -235,6 +235,7 @@ function dopractice:showitemdata(item_data)
 
 	local data = {}
 	print(item_data.item_type)
+	topics.setEditChildTag("daan")
 	if item_data.item_type > 0 and item_data.item_type < 13 then
 --		print(topics.types[item_data.item_type])
 		if topics.types[item_data.item_type].conv(item_data,data) then
