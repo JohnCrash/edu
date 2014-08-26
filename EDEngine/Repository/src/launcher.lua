@@ -58,7 +58,6 @@ if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 else
 	login.set_selector(1) --Ñ§Éú
 end
-
 if app == 'homework' then
 	local worklist = require "homework/worklist"
 	scene = worklist.create()
@@ -78,3 +77,4 @@ else
 end
 	
 cc.Director:getInstance():runWithScene(scene)
+

@@ -1,4 +1,4 @@
-﻿require "AudioEngine" 
+require "AudioEngine" 
 require "VisibleRect"
 lxp = require "lom"
 kits = require "kits"
@@ -1078,7 +1078,9 @@ end
 --初始化游戏数据,i代表关卡,1-10
 function AMouseScene:init_data( i )
 	i = i or 1
-	local promble_xml = kits.read_local_file('res/amouse/data/'..i..'.xml')
+	local filename = 'res/amouse/data/'..tostring(i)..'.xml'
+	filename = cc.FileUtils:getInstance():fullPathForFilename(filename)
+	local promble_xml = kits.read_file(filename)
 	self._words = {} --全部词语
 	self._time_limit = 60 --时限
 	self._word_num = 40 --词数

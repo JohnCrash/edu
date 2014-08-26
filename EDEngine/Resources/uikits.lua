@@ -10,8 +10,9 @@ local kits = require "kits"
 local Director = cc.Director:getInstance()
 local FileUtils = cc.FileUtils:getInstance()
 
-local defaultFont = "fonts/simfang.ttf"
-local defaultFontSize = 16
+--local defaultFont="fonts/simfang.ttf"
+local defaultFont="Marker Felt"
+local defaultFontSize = 32
 local log_caller
 
 local function playSound( file )

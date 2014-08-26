@@ -166,6 +166,17 @@ local function local_exists( file )
   return f ~= nil  
 end
 
+local function read_file(name)
+  local file = name
+  if not local_exists(file) then return false end
+  local alls
+  
+  file = io.open(file,"rb")
+  alls = file:read("*a")
+  file:close()
+  return alls	
+end
+
 local function read_local_file( name )
   local file = local_dir..name
   if not local_exists(file) then return false end
@@ -386,6 +397,7 @@ local exports = {
 	download_http_by_curl = download_http_by_curl,
 	local_exists = local_exists,
 	read_local_file = read_local_file,
+	read_file = read_file,
 	read_network_file = read_network_file,
 	write_local_file = write_local_file,
 	http_post = http_post,
