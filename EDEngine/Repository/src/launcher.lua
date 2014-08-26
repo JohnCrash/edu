@@ -34,7 +34,7 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
-app = 'homework'
+app = 'amouse'
 cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 if cookie then
 	local login = require "login"
@@ -45,6 +45,7 @@ if app == 'homework' then
 	local worklist = require "homework/worklist"
 	scene = worklist.create()
 elseif app == 'amouse' then
+	uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 	local amouse = require "amouse/amouse_om"
 	scene = AMouseMain()	
 elseif app == 'teacher' then

@@ -178,6 +178,15 @@ function StudentWatch:init()
 		local wrong = uikits.child(self._root,ui.WRONG_BUTTON)
 		uikits.event(wrong,function(sender)
 			cache.request_cancel()
+				if self._args then
+					local persubject = require "errortitile/persubject"
+					if persubject then
+						local scene = persubject:create(self._args.course_name,"",self._args.course_id,1)
+						if scene then
+							uikits.pushScene( scene )
+						end
+					end
+				end
 			--uikits.pushScace()
 			end)		
 		--列表视图

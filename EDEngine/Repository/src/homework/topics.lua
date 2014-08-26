@@ -98,6 +98,9 @@ local TOPICS_SPACE = 16
 local answer_abc = {}
 local answer_idx = {}
 local EditChildTag = 'answer_text'
+local max_options = 6
+local max_edit = 3
+local res_root = 'homework/'
 
 local function set_EditChildTag( t )
 	EditChildTag = t
@@ -189,6 +192,14 @@ local function add_resource_cache( rst,url )
 	end
 	if v.url then
 		rst[#rst+1] = v
+	end
+end
+
+local function add_topics_image_resourec( e )
+	if e.item_id then
+		local uri = "http://image.lejiaolexue.com/handler/item/item_preview.ashx?item_id="..e.item_id.."&tag=0"
+		e.topics_image_name = e.item_id..'.jpg'
+		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})
 	end
 end
 
@@ -339,6 +350,8 @@ local function load_attachment(s,e,info)
 	e.resource_cache = e.resource_cache or {}
 	e.resource_cache.urls = e.resource_cache.urls or {}
 	e.attachment = eattachment or {}
+	e.item_id = s.item_id
+	add_topics_image_resourec( e )
 	for i=1,10 do
 		local res,msg = parse_attachment(s,i,info)
 		if res then
@@ -431,8 +444,8 @@ local function print_link( e )
 	print_items( e.link_items1 )
 	kits.log( '	link_items2:')
 	print_items( e.link_items2 )
-	
 end
+
 --连线题转换
 local function link_conv(s,e)
 	load_attachment(s,e,'link_conv')
@@ -582,9 +595,9 @@ local function set_topics_image( layout,data,x,y )
 		local width,height
 		width = size.width
 		height = y + 4 * TOPICS_SPACE
-		if data.image then
+		if data.topics_image_name then
 		--题目图片
-			local img = uikits.image{image=data.image}
+			local img = uikits.image{image=data.topics_image_name}
 			img:setScaleX(uikits.scale())
 			img:setScaleY(uikits.scale())
 			layout:addChild(img)
@@ -1372,9 +1385,7 @@ end
 						编辑题是一个ccui.TextFeild数组.这些控件组成答题区，控件位置有调用者设置.
 		my_answer 答案，一个字符串
 --]]
-local max_options = 6
-local max_edit = 3
-local res_root = 'homework/'
+
 local types={
 	[1] = {name='判断',img=res_root..'true_or_false_item.png',
 				conv=function(s,e)

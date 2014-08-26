@@ -1166,7 +1166,7 @@
                   "backGroundScale9Enable": false,
                   "bgColorB": 255,
                   "bgColorG": 200,
-                  "bgColorOpacity": 100,
+                  "bgColorOpacity": 0,
                   "bgColorR": 150,
                   "bgEndColorB": 255,
                   "bgEndColorG": 200,

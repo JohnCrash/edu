@@ -55,6 +55,12 @@ local function get_data( url )
 	end
 end
 
+local function is_cache( f )
+	if f then
+		return kits.exist_cache( f )
+	end
+end
+
 local function is_done( url )
 	if cache_data[url] then
 		return true
@@ -74,18 +80,22 @@ local function is_hot( url,sec )
 	return false
 end
 
-local function request_nc( url,func ) --网络优先，然后缓存
+local function request_nc( url,func,filename ) --网络优先，然后缓存
 	local mh,msg = mt.new('GET',url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
 						kits.log('request:'..url..' successed!')
 						kits.log('	request data write to '..tostring(get_name(url)))
-						add_cache_data(url,obj.data) --加入缓存
-						kits.write_cache(get_name(url),obj.data)
+						if filename then
+							kits.write_cache(filename,obj.data)
+						else
+							add_cache_data(url,obj.data) --加入缓存
+							kits.write_cache(get_name(url),obj.data)
+						end
 						func( true )
 					else
-						if obj.state == 'FAILED' and is_done( url ) then --下载失败尝试使用本地缓冲
+						if obj.state == 'FAILED' and (is_done( url ) or is_cache(filename)) then --下载失败尝试使用本地缓冲
 							func( true )
 						else
 							kits.log('ERROR : request failed! url = '..tostring(url))
@@ -96,7 +106,7 @@ local function request_nc( url,func ) --网络优先，然后缓存
 				end
 			end )
 	if not mh then
-		if is_done( url ) then
+		if is_done( url ) or is_cache(filename) then
 			func( true )
 		else
 			func( false )
@@ -227,8 +237,8 @@ end
 	rtable = {
 		urls = 
 		{
-			[1] = {url,done},
-			[2] = {url,done},
+			[1] = {url,filename,done},
+			[2] = {url,filename,done},
 			...
 			--url,cookie 链接地址,cookie
 			--done 回调，如果给定链接下载成功通知，并传给数据.不缓存数据
@@ -244,9 +254,9 @@ local function request_resources( rtable,efunc,priority )
 		for i,v in pairs(rtable.urls) do
 			b = false
 			if type(v)=='table' and isurl(v.url) then
-				request(v.url,function(b)
+				request_nc(v.url,function(b)
 					efunc( rtable,i,b )
-				end,priority)
+				end,v.filename)
 			else
 				efunc( rtable,i,false )
 			end
