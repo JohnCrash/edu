@@ -30,6 +30,18 @@ end
 
 init_test_resource()
 
+--¿¿¿¿¿¿¿¿¿
+local function onKeyRelease(key,event)
+	if key == cc.KeyCode.KEY_ESCAPE then
+		uikits.popScene()
+	end
+end
+
+local listener_keyboard = cc.EventListenerKeyboard:create()
+listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
+local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+
 if uikits.get_factor() == uikits.FACTOR_9_16 then
 	uikits.initDR{width=1920,height=1080}
 else
