@@ -79,21 +79,16 @@ void AppDelegate::initLuaEngine()
     }
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
-    
-	auto path = getDirectory(LUACORE_DIRECTORY);
 
 	FileUtils::getInstance()->addSearchPath("luacore");
-
+    FileUtils::getInstance()->addSearchPath("src");
+    FileUtils::getInstance()->addSearchPath("res");
+    
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
     LuaStack* stack = pEngine->getLuaStack();
-	stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
-    register_assetsmanager_test_sample(stack->getLuaState());
-	#ifdef _DEBUG
-		startRuntime();
-	#endif
     pEngine->executeScriptFile("bootstrap.lua");
 }
 
@@ -106,9 +101,6 @@ void AppDelegate::InitForDebugMode()
 	GetCurrentDirectory(255,cur);
 	wcscat(cur,L"\\luacore");
 	SetCurrentDirectory( cur );
-//	GetCurrentDirectory(255,cur);
-//	printf("write dir = %s\n",path.c_str());
-//	printf("current dir= %s\n",cur);
 }
 #endif
 
@@ -159,24 +151,3 @@ void AppDelegate::applicationWillEnterForeground() {
     // if you use SimpleAudioEngine, it must resume here
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
-
-/*
-bool AppDelegate::initInternalLuaEngine()
-{
-	_core = LuaStack::create();
-	_debuger = LuaStack::create();
-	_core->retain();
-	_debuger->retain();
-
-
-	return true;
-}
-
-void AppDelegate::releaseInternalLuaEngine()
-{
-	CC_SAFE_RELEASE(_core);
-	CC_SAFE_RELEASE(_debuger);
-	_core = nullptr;
-	_debuger = nullptr;
-}
-*/
