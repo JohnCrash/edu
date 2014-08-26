@@ -84,7 +84,6 @@ function WorkList.create()
 	local layer = uikits.extend(cc.Layer:create(),WorkList)
 	
 	scene:addChild(layer)
-	
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()

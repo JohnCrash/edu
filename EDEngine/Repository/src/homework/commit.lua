@@ -9,7 +9,7 @@ local loadingbox = require "homework/loadingbox"
 local StudentWatch = require "homework/studentwatch"
 local cache = require "cache"
 local login = require "login"
-
+--[[
 local ui = {
 	FILE = 'homework/commit.json',
 	FILE_3_4 = 'homework/commit43.json',
@@ -32,6 +32,34 @@ local ui = {
 	SUBJECTIVE_NUM = 'objective_item/subjective_no',
 	WHITE_STAR = 'objective_item/white_star_',
 	RED_STAR = 'objective_item/red_star_',
+	WHITE_STAR2 = 'subjective_item/white_star_',
+	RED_STAR2 = 'subjective_item/red_star_',	
+	TYPE_TEXT = 'account_information/lesson_text',
+	TIMELABEL = 'white/text',
+}
+--]]
+local ui = {
+	FILE = 'homework/commit.json',
+	FILE_3_4 = 'homework/commit43.json',
+	BACK = 'white/back',
+	CAPTION = 'white/lesson_name',
+	END_DATE = 'white/time_over',
+	LIST = 'top_view',
+	NAME = 'name',
+	PHOTO = 'student_logo_1',
+	TIME = 'time_student',
+	NUMBER = 'number_1',
+	ITEM = 'top_view/top_1',
+	TOPICS = 'red_case',
+	WORKFLOW = 'objective_item2/start_objective',
+	WORKFLOW_COMPLETE = 'objective_item2/completed_objective',
+	WORKFLOW2 = 'subjective_item/start_subjective',
+	WORKFLOW2_COMPLETE = 'subjective_item/completed_subjective',
+	COMMIT = 'submit',
+	OBJECTIVE_NUM = 'objective_item2/objective_no',
+	SUBJECTIVE_NUM = 'objective_item2/subjective_no',
+	WHITE_STAR = 'objective_item2/white_star_',
+	RED_STAR = 'objective_item2/red_star_',
 	WHITE_STAR2 = 'subjective_item/white_star_',
 	RED_STAR2 = 'subjective_item/red_star_',	
 	TYPE_TEXT = 'account_information/lesson_text',

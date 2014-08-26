@@ -14,12 +14,14 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/thread_curl.cpp \
 				   ../../Classes/Console.cpp \
 				   ../../Classes/lua_json.cpp \
-				   ../../Classes/AssetsManager.cpp
+				   ../../Classes/AssetsManager.cpp \
+				   JniLaunch.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
 					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/lua \
 					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/tolua \
+					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/platform/android/jni
 
 LOCAL_WHOLE_STATIC_LIBRARIES := cocos_lua_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static

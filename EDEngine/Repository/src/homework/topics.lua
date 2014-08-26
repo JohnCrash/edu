@@ -523,6 +523,7 @@ local function attachment_ui_bg( t )
 		end
 	end
 	kits.log('error attachment_ui_bg not found image' )
+	return uikits.image{x=t.x,y=t.y,anchorX=t.anchorX}
 end
 
 local function attachment_ui_player( t )
@@ -1321,6 +1322,7 @@ local function multi_select_conv(s,e)
 		return false,"multiple select 'options'?"
 	end
 	e.answer = parse_answer( s )
+	e.my_answer = e.my_answer or {}
 	return true
 end
 
@@ -1371,6 +1373,7 @@ end
 		my_answer 答案，一个字符串
 --]]
 local max_options = 6
+local max_edit = 3
 local res_root = 'homework/'
 local types={
 	[1] = {name='判断',img=res_root..'true_or_false_item.png',
@@ -1487,17 +1490,26 @@ local types={
 	[4] = {name='连线',img=res_root..'connection_item.png',
 				conv=link_conv,
 				init=function(layout,data)
+					data.my_answer = data.my_answer or {}
 					cache_done(layout,data,relayout_link)
 				end
 			},	
 	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
-					if s.cnt_answer then
+					if s.correct_answer and type(s.correct_answer)=='string' then
+						local ans = json.decode(s.correct_answer)
+						if ans and ans.answers and type(ans.answers)=='table' then
+							e.options = #ans.answers
+						else
+							e.options = 1
+						end
+					elseif s.cnt_answer then
 						e.options = s.cnt_answer
 					else
-						return false,"edit 'answers'?"
+						e.options = 1
 					end
+					e.options = math.min(max_edit,e.options)
 					e.answer = parse_answer( s )
 					return true
 				end,

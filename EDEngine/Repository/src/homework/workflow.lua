@@ -1,3 +1,4 @@
+local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local login = require "login"
@@ -201,6 +202,24 @@ local function answer_clone(a)
 	end
 end
 
+function WorkFlow:check_finished()
+	local b = true
+	if self._data then
+		for i,v in pairs(self._data) do
+			--结束按钮,状态改变
+			if v.state == ui.STATE_UNFINISHED then
+				b = false
+			end				
+		end
+		if b then
+			self._next_button:setVisible(false)
+			self._finish_button:setVisible(true)
+		else
+			self._next_button:setVisible(true)
+			self._finish_button:setVisible(false)		
+		end		
+	end
+end
 --每道题存一遍
 function WorkFlow:save_answer()
 	--比较下看看答案修改过没，如果修改过就保存
@@ -390,7 +409,8 @@ function WorkFlow:load_original_data_from_table( data )
 			else
 				k.my_answer = answer_clone(v.my_answer)
 			end
-			if k.my_answer and (type(k.my_answer[1])=='string' and string.len(k.my_answer[1])>0) or type(k.my_answer[1])=='number' then
+			if k.my_answer and type(k.my_answer)=='table' and k.my_answer[1] and 
+				((type(k.my_answer[1])=='string' and string.len(k.my_answer[1])>0) or type(k.my_answer[1])=='number') then
 				k.state =  ui.STATE_FINISHED
 			else
 				k.state = ui.STATE_UNFINISHED
@@ -730,6 +750,7 @@ function WorkFlow:set_anwser_field( i )
 			self:save_answer() --不在每次修改时保存，而是在每次切换的时候保存
 			data.eventAnswer=function(layout,data)
 				--self:save_answer()
+				self:check_finished()
 			end
 			topics.types[t].init(layout,data)
 			--如果内容超出滚动区

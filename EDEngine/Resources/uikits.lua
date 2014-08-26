@@ -5,6 +5,7 @@ require "OpenglConstants"
 require "StudioConstants"
 require "GuiConstants"
 require "AudioEngine" 
+local kits = require "kits"
 
 local Director = cc.Director:getInstance()
 local FileUtils = cc.FileUtils:getInstance()

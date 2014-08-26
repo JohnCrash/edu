@@ -1369,3 +1369,5 @@ function AMouseMain()
 	scene:addChild(CreateBackMenuItem())
 	return scene
 end
+
+return AMouseScene
