@@ -32,9 +32,26 @@ end
 function create(name,label,id,range)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),persubject)		
-	cur_layer.subject_name = name
-	cur_layer.subject_label = label
-	cur_layer.range = range
+	if name == nil then
+		cur_layer.subject_name = ""		
+	else
+		cur_layer.subject_name = name	
+	end
+	if label == nil then
+		cur_layer.subject_label = ""		
+	else
+		cur_layer.subject_label = label	
+	end
+	if range == nil then
+		cur_layer.range = 1		
+	else
+		cur_layer.range = range	
+	end	
+	if id == nil then
+		cur_layer.subject_id = 101		
+	else
+		cur_layer.subject_id = id	
+	end	
 	cur_layer.subject_id = id
 	cur_layer.pageindex = 1
 	cur_layer.has_error = 0
@@ -125,48 +142,46 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	
     questions_view:addChild(scrollView)
 	local data = {}
-	topics.setEditChildTag("daan")
-	print("tb_wrongtitle_item.item_type::"..uikits.scale())
+
 	if tb_wrongtitle_item.item_type > 0 and tb_wrongtitle_item.item_type < 13 then
---		print(topics.types[item_data.item_type])
 		if topics.types[tb_wrongtitle_item.item_type].conv(tb_wrongtitle_item,data) then
 			data.eventInitComplate = function(layout,data)
---				questions_view:setContentSize(size_questions_view)
---				questions_view:setScaleX(uikits.scale())
---				questions_view:setScaleY(uikits.scale())
---				questions_view:setVisible(true)
 			end
---			questions_view:setVisible(false)
 			scrollView:setEnabled(false)
 			topics.types[tb_wrongtitle_item.item_type].init(scrollView,data)
 		end		
 	end	
 
-
+	local questions_path = "errortitile/kong.png"
 	local questions_but = ccui.Button:create()
 	questions_but:setTouchEnabled(true)
 	questions_but:loadTextures(questions_path, questions_path, "")
 	local size_question = questions_view:getContentSize()	
+--	questions_but:setContentSize(size_question)
 	local scale_x = size_question.width/questions_but:getContentSize().width
 	local scale_y = size_question.height/questions_but:getContentSize().height
+
 	questions_but:setScale(scale_y)
 	questions_but:setPosition(cc.p(size_question.width/2,size_question.height/2))
 	
-	questions_but.file_path = questions_path
+--[[	questions_but.file_path = questions_path
 	questions_but.question_type = tb_wrongtitle_item.item_name
 	questions_but.difficulty = tb_wrongtitle_item.difficulty
 	questions_but.perwrong = tb_wrongtitle_item.perwrong
 	questions_but.isright = tb_wrongtitle_item.isright
 	questions_but.correct_answer = tb_wrongtitle_item.correct_answer
 	questions_but.answer = tb_wrongtitle_item.answer
-	questions_but.question_id = tb_wrongtitle_item.item_id
+	questions_but.question_id = tb_wrongtitle_item.item_id--]]
+	questions_but.tb_wrongtitle_item = tb_wrongtitle_item
+	questions_but.file_path = questions_path
 	--print(self.name..'+'..self.label..'+'..self.range..'+'..self.id)
 	--questions_but:addTouchEventListener(questionsCallback)
 	uikits.event(questions_but,
 		function(sender,eventType)
 			local questions_but = sender
 			local save_is_collect = tag_collect:isVisible()		
-			local scene_next = BigquestionView.create(questions_but.isright,questions_but.answer,questions_but.correct_answer,questions_but.question_id,questions_but.file_path,questions_but.question_type,questions_but.difficulty,questions_but.perwrong,save_is_collect,self.subject_name,self.subject_label,self.range,self.subject_id)								
+			local scene_next = BigquestionView.create(questions_but.tb_wrongtitle_item,questions_but.file_path,save_is_collect,self.subject_name,self.subject_label,self.range,self.subject_id)								
+			--local scene_next = BigquestionView.create(questions_but.isright,questions_but.answer,questions_but.correct_answer,questions_but.question_id,questions_but.file_path,questions_but.question_type,questions_but.difficulty,questions_but.perwrong,save_is_collect,self.subject_name,self.subject_label,self.range,self.subject_id)								
 			--cc.Director:getInstance():replaceScene(scene_next)	
 			uikits.pushScene(scene_next)
 		end,"click")

@@ -117,7 +117,7 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	label_difficulty = infomation_view:getChildByTag(647)
 	local questions_view = collect_view:getChildByTag(650)
 	local size_questions_view = questions_view:getContentSize()
-	print("size_questions_view.w::"..size_questions_view.width.."size_questions_view.h"..size_questions_view.height)
+
 	label_item_name:setString(collectitem.item_name)
 	label_difficulty:setString(collectitem.difficulty)				
 	wrong_per:setString(collectitem.perwrong.."%")	
@@ -129,18 +129,12 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	
     questions_view:addChild(scrollView)
 	local data = {}
-	topics.setEditChildTag("daan")
-	print("tb_wrongtitle_item.item_type::"..uikits.scale())
+
 	if collectitem.item_type > 0 and collectitem.item_type < 13 then
 --		print(topics.types[item_data.item_type])
 		if topics.types[collectitem.item_type].conv(collectitem,data) then
 			data.eventInitComplate = function(layout,data)
---				questions_view:setContentSize(size_questions_view)
---				questions_view:setScaleX(uikits.scale())
---				questions_view:setScaleY(uikits.scale())
---				questions_view:setVisible(true)
 			end
---			questions_view:setVisible(false)
 			questions_view:setEnabled(false)
 			topics.types[collectitem.item_type].init(scrollView,data)
 		end		

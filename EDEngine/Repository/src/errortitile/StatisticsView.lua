@@ -297,7 +297,6 @@ function StatisticsView:init()
 	local title_sel = uikits.child(self._widget,ui.title_sel)
 
 	for i, obj in pairs(all_subject_list) do
-		print(i)
 		local temp_subject = uikits.child(self._widget,all_subject_list[i][3])
 		temp_subject:setVisible(false)		
 	end
@@ -330,7 +329,7 @@ function StatisticsView:init()
 		
 	uikits.event(but_wronglist,
 			function(sender,eventType)
-				local t_wronglist = package.loaded["src/errortitile/WrongSubjectList"]
+				local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
 				if t_wronglist then
 					local scene_next = t_wronglist.create()								
 					cc.Director:getInstance():replaceScene(scene_next)								

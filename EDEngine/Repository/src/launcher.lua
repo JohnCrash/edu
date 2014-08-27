@@ -38,8 +38,8 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
---app = 'amouse'
---cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
+app = 'errortitile'
+cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	
 	login.set_cookie( cookie )

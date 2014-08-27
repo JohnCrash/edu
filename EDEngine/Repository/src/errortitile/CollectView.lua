@@ -271,7 +271,7 @@ function CollectView:init()
 	local but_wronglist = mainmenu:getChildByTag(582)	
 	uikits.event(but_wronglist,
 			function(sender,eventType)
-				local t_wronglist = package.loaded["src/errortitile/WrongSubjectList"]
+				local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
 				if t_wronglist then
 					local scene_next = t_wronglist.create()								
 					cc.Director:getInstance():replaceScene(scene_next)								

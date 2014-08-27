@@ -5,6 +5,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local login = require "login"
+local topics = require "src/errortitile/topics"
 local BigquestionView = class("BigquestionView")
 BigquestionView.__index = BigquestionView
 
@@ -13,22 +14,17 @@ local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
 end
 
-function create(isright,answer,correct_answer,question_id,file_path,question_type,difficulty,perwrong,iscollect,name,label,range,id)
+function create(tb_wrongtitle_item,file_path,iscollect,name,label,range,id)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),BigquestionView)		
 	cur_layer.file_path = file_path	
-	cur_layer.question_type = question_type	
-	cur_layer.difficulty = difficulty	
-	cur_layer.perwrong = perwrong	
+	cur_layer.tb_wrongtitle_item = tb_wrongtitle_item	
 	cur_layer.iscollect = iscollect
 	cur_layer.name = name
 	cur_layer.label = label
 	cur_layer.range = range
 	cur_layer.id = id		
-	cur_layer.isright = isright
-	cur_layer.answer = answer
-	cur_layer.correct_answer = correct_answer
-	cur_layer.question_id = question_id
+
 	--print(question_id)
 	scene:addChild(cur_layer)
 	
@@ -101,17 +97,17 @@ function BigquestionView:init()
 	
 	local answerpic_path = "errortitile/22.png"
 
-	label_type:setString(self.question_type)
-	label_difficulty:setString(self.difficulty)
-	label_perwrong:setString(self.perwrong..'%')
+	label_type:setString(self.tb_wrongtitle_item.question_type)
+	label_difficulty:setString(self.tb_wrongtitle_item.difficulty)
+	label_perwrong:setString(self.tb_wrongtitle_item.perwrong..'%')
 	if answerpic_path == nil then
-		my_txt:setString(self.answer)
+		my_txt:setString(self.tb_wrongtitle_item.answer)
 		my_pic:setVisible(false)
 		right_pic:setVisible(false)	
 		if self.isright == 0 then
 			right_txt:setString("纠正后可显示正确答案")
 		else
-			right_txt:setString(self.correct_answer)
+			right_txt:setString(self.tb_wrongtitle_item.correct_answer)
 		end	
 	else
 	
@@ -135,7 +131,7 @@ function BigquestionView:init()
 		my_txt:setVisible(false)
 		my_pic:setVisible(true)
 		
-		if self.isright == 0 then
+		if self.tb_wrongtitle_item.isright == 0 then
 			right_txt:setString("纠正后可显示正确答案")
 			right_pic:setVisible(false)
 		else	
@@ -161,14 +157,26 @@ function BigquestionView:init()
 	end
 
 
-	local question_pic = cc.Sprite:create(self.file_path)
+	local data = {}
+	print("tb_wrongtitle_item.item_type::"..uikits.scale())
+	if self.tb_wrongtitle_item.item_type > 0 and self.tb_wrongtitle_item.item_type < 13 then
+		if topics.types[self.tb_wrongtitle_item.item_type].conv(self.tb_wrongtitle_item,data) then
+			data.eventInitComplate = function(layout,data)
+			end
+			question_pic_view:setEnabled(false)
+			topics.types[self.tb_wrongtitle_item.item_type].init(question_pic_view,data)
+		end		
+	end
+
+--[[	local question_pic = cc.Sprite:create(self.file_path)
 	local size_question = question_pic_view:getContentSize()		
 	local scale_x = size_question.width/question_pic:getContentSize().width
 	local scale_y = size_question.height/question_pic:getContentSize().height
 	question_pic:setScale(scale_y)
 	question_pic:setPosition(cc.p(size_question.width/2,size_question.height/2))
-	question_pic_view:addChild(question_pic)	
-	if self.iscollect == true then
+	question_pic_view:addChild(question_pic)	--]]
+	
+	if self.tb_wrongtitle_item.iscollect == true then
 		tag_collect:setVisible(true)
 	else
 		tag_collect:setVisible(false)
@@ -196,10 +204,11 @@ function BigquestionView:init()
 	local size_title = titleview:getContentSize()
 	--self._widget:addChild(but_more.share_box)
 	
-	but_more.share_box:setPosition(cc.p(size_view.width-size_share.width,size_view.height-(size_share.height+size_title.height)))
+	print((size_view.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height)))
+	but_more.share_box:setPosition(cc.p(0,0))
 	but_more.share_box:setVisible(false)
 	local but_collect = but_more.share_box:getChildByTag(661)
-	if self.iscollect == true then
+	if self.tb_wrongtitle_item.iscollect == true then
 		but_collect:setSelectedState(false)
 	else
 		but_collect:setSelectedState(true)
@@ -214,7 +223,7 @@ function BigquestionView:init()
 			local but_collect = sender			
 			local send_url
 			but_more.share_box:setVisible(false)
-			send_url = t_nextview[4].url.."?item_id="..self.question_id		
+			send_url = t_nextview[4].url.."?item_id="..self.tb_wrongtitle_item.question_id		
 			local result = kits.http_get(send_url,login.cookie(),1)	
 			local tb_result = json.decode(result)
 			local iscollect = but_collect:getSelectedState()
