@@ -2,27 +2,34 @@ require "Cocos2d"
 local kits = require "kits"
 local uikits = require "uikits"
 local login = require "login"
+local update = require "update"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
---require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.2.182")
 local function init_test_resource()
-  local res = local_dir..'res/'
   local pfu = cc.FileUtils:getInstance()
-  local size = cc.Director:getInstance():getVisibleSize()
-
-	if platform == kTargetWindows then
+  if platform == kTargetWindows then
 		pfu:addSearchPath(local_dir..'src/')
 		pfu:addSearchPath(local_dir..'res/')	
 		pfu:addSearchPath(local_dir..'cache/')
-	else
+		pfu:addSearchPath(write_dir)
+		--默认资源
+		pfu:addSearchPath('luacore/res')
+	else --android
+		--先搜索跟新目录
+		pfu:addSearchPath(local_dir..'src/')
+		pfu:addSearchPath(local_dir..'res/')	
+		pfu:addSearchPath(write_dir)
+		--搜索assets目录
 		pfu:addSearchPath('src/')
 		pfu:addSearchPath('res/')
-		local dir = local_dir..'test/'
-		if not kits.local_directory_exists(dir) then
+		local write_dir = local_dir..'test/'
+		if not kits.local_directory_exists(write_dir) then
 			kits.make_local_directory('test/')
 		end
-		pfu:addSearchPath(dir)
+		--默认资源
+		pfu:addSearchPath('luacore/res')		
 	end
   
   pfu:addSearchPath(local_dir)
@@ -38,31 +45,52 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
-app = 'errortitile'
-cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
+app = 'loading'
+
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	
 	login.set_cookie( cookie )
 else
-	login.set_selector(1) --ѧ��
+	login.set_selector(1) --学生
 end
 
 if app == 'homework' then
-	local worklist = require "homework/worklist"
-	scene = worklist.create()
+	update.create{updates={'homework'},
+		run=function()
+		local worklist = require "homework/worklist"
+		return worklist.create()
+	end}
 elseif app == 'amouse' then
-	uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-	local amouse = require "amouse/amouse_om"
-	scene = AMouseMain()	
+	update.create{updates={'amouse'},
+		run=function()
+		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+		local amouse = require "amouse/amouse_om"
+		return AMouseMain()
+	end}		
 elseif app == 'teacher' then
-	local teacher = require "homework/teacher"
-	scene = teacher.create()
+	update.create{updates={'homework'},
+		run=function()
+		local teacher = require "homework/teacher"
+		return teacher.create()
+	end}	
 elseif app == 'errortitile' then
-	local WrongSubjectList = require "errortitile/WrongSubjectList"
-	scene = WrongSubjectList.create()
+	update.create{updates={'homework','errortitile'},
+		run=function()
+		local WrongSubjectList = require "errortitile/WrongSubjectList"
+		return WrongSubjectList.create()
+	end}		
+elseif app == 'loading' then
+	local update = require "update"
+	scene = update.create{updates={'homework','amouse','errortitle'},
+		run=function()
+			local worklist = require "homework/worklist"
+			return worklist.create()		
+		end}
 else
-	local worklist = require "homework/worklist"
-	scene = worklist.create()
+	update.create{updates={'homework'},
+		run=function()
+		local worklist = require "homework/worklist"
+		return worklist.create()
+	end}
 end
-	
-cc.Director:getInstance():runWithScene(scene)
+

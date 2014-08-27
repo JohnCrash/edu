@@ -13,7 +13,17 @@ local FileUtils = cc.FileUtils:getInstance()
 --local defaultFont="fonts/simfang.ttf"
 local defaultFont="Marker Felt"
 local defaultFontSize = 32
-local log_caller
+
+local function log_caller()
+	local caller = debug.getinfo(3,'nSl')
+	local func = debug.getinfo(2,'n')
+	if caller and func then
+		kits.log('	call from '..caller.source..':'..caller.currentline )
+		kits.log('		function:'..func.name )
+	else
+		kits.log("ERROR: log_caller debug.getinfo return nil.")
+	end
+end
 
 local function playSound( file )
 	return AudioEngine.playEffect( file )
@@ -454,17 +464,6 @@ local function fromJson( t )
 		log_caller()
 	end
 	return s
-end
-
-local function log_caller()
-	local caller = debug.getinfo(3,'nSl')
-	local func = debug.getinfo(2,'n')
-	if caller and func then
-		kits.log('	call from '..caller.source..':'..caller.currentline )
-		kits.log('		function:'..func.name )
-	else
-		kits.log("ERROR: log_caller debug.getinfo return nil.")
-	end
 end
 
 --root is ui.Widget

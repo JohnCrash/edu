@@ -1,329 +1,196 @@
 require "Cocos2d"
 local kits = require "kits"
 local uikits = require "uikits"
-local login = require "login"
 local cache = require "cache"
 local md5 = require "md5"
-local lxp = require "lom"
+local json = require "json-c"
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
+--local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local local_dir = 'f:/test/'
 local platform = CCApplication:getInstance():getTargetPlatform()
+local update_server = 'http://192.168.2.211:81/lgh/new/'
+
 local ui = {
-	FILE = 'studenthomework_1.json',
-	BACK = 'white/back',
+	FILE = 'loadscreen/jiazhan.json',
+	FILE_43 = 'loadscreen/43/jiazhan.json',
+	PROGRESS = 'bo2',
+	EXIT_BUTTON = 'exit',
+	TRY_BUTTON = 'try',
 }
 
 local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
 
-function UpdateProgram.create()
-	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),UpdateProgram)
+--根据filelist.json来跟新文件
+local function update_directory(dir)
 	
-	scene:addChild(layer)
-	
-	local function onNodeEvent(event)
-		if "enter" == event then
-			layer:init()
-		elseif "exit" == event then
-			layer:release()
-		end
-	end	
-	layer:registerScriptHandler(onNodeEvent)
-	return scene
 end
 
-local function isNeedSync()
-  local version_xml = 'version.xml'
-  local local_version = kits.read_local_file(version_xml)
-  if not local_version then
-    return true
-  else
-    local host_version = kits.read_network_file(version_xml)
-    if host_version then
-      local lvt = lxp.parse(local_version)
-      local nvt = lxp.parse(host_version)
-      if lvt and nvt and lvt.tag and nvt.tag and
-        lvt.tag == nvt.tag and lvt.attr and nvt.attr and
-        lvt.attr.number and nvt.attr.number and 
-        lvt.attr.number == nvt.attr.number then
-        return false
-      end
-    else
-      --network error?
-      return true
-    end
-  end
-  return true
-end
-
-local function operate_by_table(filelist)
-	for k,v in pairs(filelist) do
-		if v.download then
-			kits.download_file(v.download)
-		elseif v.mkdir then
-			kits.make_local_directory(v.mkdir)
-		end
+local function download_file(t)
+	local url = update_server..t
+	local local_file = local_dir..t
+	local fbuf = kits.http_get(url)
+	if fbuf then
+		kits.write_file(local_file,fbuf)
+		return true
 	end
 end
 
-local function operate_one_by_one(t)
+local function update_one_by_one(t)
 	if t then
 		if t.download then
-			kits.download_file(t.download)
+			return download_file(t.download)
 		elseif t.mkdir then
-			kits.make_local_directory(t.mkdir)
+			kits.make_directory(t.mkdir)
+			return true
 		elseif t.remove then
 			--delete file
 			kits.del_local_file(t.remove)
 		elseif t.remove_dir then
 			--delete directory
 			kits.del_local_directory(t.remove_dir)
+		else
+			kits.log('update_one_by_one unkown operation')
 		end
-	end
-end
-
-local function table_apped(t,s)
-	if t and s then
-		for k,v in ipairs(s) do
-			t[#t+1] = v
-		end
-	end
-end
-
-local function get_ups_string(ups,name)
-	local lups
-	if not ups or (type(ups)=='string' and string.len(ups)==0) then
-		lups = name
 	else
-		lups = ups..'/'..name
+		kits.log('update_one_by_one t=nil')
 	end
-	return lups
-end
-		
---return filelist table		
-local function filelist_by_table(tb,ups)
-  local filelist = {}
-  if tb and tb.tag then
-    if tb.tag == 'filelist' or tb.tag == 'directory' then
-      for k,v in pairs(tb) do
-        if type(v) == 'table' and v.attr and v.tag and v.attr.name then
-          if v.tag == 'directory' then
-			--make_local_directory(lups) --try make local directory
-			filelist[#filelist+1] = {mkdir=get_ups_string(ups,v.attr.name)}
-            table_apped(filelist,filelist_by_table(v,get_ups_string(ups,v.attr.name)))
-          elseif v.tag == 'file' then
-			filelist[#filelist+1] = {download=get_ups_string(ups,v.attr.name),md5=v.attr.md5}
-          end
-        end
-      end
-    elseif tb.tag == 'file' then
-      if tb.attr and tb.attr.name then
-		filelist[#filelist+1] = {download=get_ups_string(ups,v.attr.name)}
-      end
-    end
-  end	
-  return filelist
 end
 
-local function is_need_download(t,file,md5)
-	if t then
-		for i,v in ipairs(t) do
-			if v.download and v.download == file and v.md5 == md5 then
-				return false
-			end
-		end
-	end
-	return true
-end
-
-local function g_fast_tt(t)
-  local tt = {}
-  for i,v in ipairs(t) do
-	if v.download then
-		tt[v.download] = v.md5
-  elseif v.mkdir then
-    tt[v.mkdir] = 1
-	end
-  end
-  return tt
-end
-
-local function is_need_download2(t,file,md5)
-  return t[file] ~= md5
-end
-
-local function filelist_compare_table(source,target)
-	local source_t = lxp.parse(source)
-	local target_t = lxp.parse(target)
-	local filelist = {}
-	if source_t and target_t then
-		local st = filelist_by_table(source_t,'')
-		local tt = filelist_by_table(target_t,'')
-		local fast_tt = g_fast_tt(tt)
-		local fast_st = g_fast_tt(st)
-		if st and fast_tt and fast_st then
-			--sub operate
-			for i,v in ipairs(tt) do
-				if v.download and not fast_st[v.download] then
-					filelist[#filelist+1] = {remove=v.download}
-				elseif v.mkdir and not fast_st[v.mkdir] then
-					filelist[#filelist+1] = {remove_dir=v.mkdir}
-				end
-			end
-			--add operate
-			for i,v in ipairs(st) do
-				if v.download and is_need_download2(fast_tt,v.download,v.md5) then
-					filelist[#filelist+1] = v
-				elseif v.mkdir and is_need_download2(fast_tt,v.mkdir,1) then
-					filelist[#filelist+1] = v
-				end
-			end			
-		end
-	end
-	return filelist
-end
-
-local function download_compare_filelist(source,target)
-	local filelist = filelist_compare_table(source,target)
-	return filelist
-end
-
-local function download_file_by_table(tb,ups)
-	local filelist = filelist_by_table(tb,ups)
-	return filelist
-end
-
-local function download_all_filelist(filelist)
-  local flt = lxp.parse(filelist)
-  if flt then
-    return download_file_by_table(flt,'')
-  else
-  --filelist file parse error?
-    cclog('Cant parse xml:\n'..filelist)
-    return nil
-  end
-end
-
---right return true
-local function check_all_md5()
-	local filelist = kits.read_local_file('filelist.xml')
-	if filelist then
-		local file_t = filelist_by_table( lxp.parse(filelist),'' )
-		if file_t then
-			for k,v in pairs( file_t ) do
-				if v.download and v.md5 then
-					local file = kits.read_local_file(v.download)
-					if file then
-						if md5.sumhexa(file) == v.md5 then
-							print( v.download.."	( passed )" )
-						else
-							print( v.download.."	( fail! )" )
-						end
+local function check_directory(dir)
+		local res_url = update_server..'res/'..dir..'/version.json'
+		local src_url = update_server..'src/'..dir..'/version.json'
+		local res_local = local_dir..'res/'..dir..'/version.json'
+		local src_local = local_dir..'src/'..dir..'/version.json'
+		--只有在确定下载成功的情况下才跟新
+		local res = kits.http_get(res_url,'',2)
+		if res then
+			local src = kits.http_get(src_url,'',2)
+			if src then
+				local res_v = json.decode(res)
+				local src_v = json.decode(src)
+				if res_v and src_v and type(res_v)=='table' and type(src_v)=='table'
+					and res_v.version and src_v.version then
+					--比较本地和网络版本
+					local l_res_v = kits.read_file(res_local)
+					local l_src_v = kits.read_file(src_local)
+					if not l_res_v then return true end --没有本地版本文件，需要跟新
+					if not l_src_v then return true end
+					local j_res_v = json.decode(l_res_v)
+					local j_src_v = json.decode(l_res_v)
+					if j_res_v.version and j_src_v.version and
+					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
+						return false --完全相同不需要跟新
 					else
-						print("Can't open "..v.download)
+						return true --需要跟新
 					end
+				else
+					kits.log('check_directory  version file error!')
+					return false,true --下传失败,本次不跟新
 				end
+			else
+				kits.log('check_directory '..tostring(src_url)..' failed')
+				return false,true --下传失败,本次不跟新
 			end
+		else
+			kits.log('check_directory '..tostring(res_url)..' failed')
+			return false,true --下传失败,本次不跟新
 		end
+end
+
+local function check_update(t)
+	t.need_updates={}
+	for i,v in pairs(t.updates) do
+		local b,err = check_directory(v)
+		if err then --如果网络错误不在等待，直接不跟新
+			return false
+		end
+		if b then
+			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+		end
+	end
+	return (not #t.need_updates == 0)
+end
+
+function UpdateProgram.create(t)
+	if t and type(t)=='table' and t.updates and t.run 
+	and type(t.updates)=='table' and type(t.run)=='function' then
+		--不需要跟新直接启动
+		if not check_update(t) then
+			local scene = t.run()
+			if scene then
+				cc.Director:getInstance():runWithScene(scene)
+			else
+				kits.log('ERROR UpdateProgram:init run return nil')
+			end
+			return
+		end
+		--需要跟新,打开启动界面
+		local scene = cc.Scene:create()
+		local layer = uikits.extend(cc.Layer:create(),UpdateProgram)
+		
+		scene:addChild(layer)
+		
+		local function onNodeEvent(event)
+			if "enter" == event then
+				layer._args = t
+				layer:init()
+			elseif "exit" == event then
+				layer:release()
+			end
+		end	
+		layer:registerScriptHandler(onNodeEvent)
+		cc.Director:getInstance():runWithScene(scene)
+	else
+		kit.log('ERROR UpdateProgram.create invalid param')
 	end
 end
 
---return result,oplist
-local function doSync()
-	--check_all_md5()
-	local platform = CCApplication:getInstance():getTargetPlatform()
-	if platform == kTargetWindows then
-		print("本地版本不进行跟新.")
-		return true,"ok"
+function UpdateProgram:update()
+	if self._first then
+		self._first = false
+		self._count = 0
+		self._filelist = {}
+		--收集目录中需要跟新个文件
+		for i,v in pairs(self._args.need_updates) do
+			update_directory(v)
+		end
+		self._maxcount = #self._filelist
+	else
+		self._count = self._count+1
+		if self._count > self._maxcount then
+			--操作完成
+			local scene = self._args.run()
+			cc.Director:getInstance():replaceScene(scene)
+		else
+			update_one_by_one(self._filelist[self._count])
+		end
 	end
-	
-  if isNeedSync() then
-    --download version.xml and filelist.xml
-    local filelist_xml = 'filelist.xml'
-    local version_xml = 'version.xml'
-    local local_filelist = kits.read_local_file(filelist_xml)
-    local host_filelist = kits.read_network_file(filelist_xml)
-	local filelist
-    if local_filelist and host_filelist then
-      --compare
-      filelist = download_compare_filelist(host_filelist,local_filelist)
-	  return true,filelist
-    elseif local_filelist then
-      --host down?
-	  return false,'Can not connect synchronous server!\nPlease check your network!'
-    elseif host_filelist then
-      --first sync?
-      filelist = download_all_filelist(host_filelist)
-	  return true,filelist
-    else
-	  return false,'Can not connect synchronous server!'
-    end
-  else
-		return true,'ok'
-  end
 end
 
 function UpdateProgram:init()
-	self._root = uikits.fromJson(ui.FILE)
-	self:addChild(self._root)
-	
-	local first = 0
-	local maxcount,count
-	local err,filelist
-	
-	local function exit_loading()
-		loadingBar:setPercent(100)
-		layer:unscheduleUpdate()
-		--do script
-		package.path = package.path..';'..local_dir..'?.lua'
-		package.path = package.path..';'..local_dir..'src/?.lua'
-		require ('src/launcher')
-	end	
-	local function update()
-			if first==0 then
-			first = 1
-			err,filelist = doSync()
-			if err and filelist and type(filelist)=='table' then
-				maxcount = #filelist
-				count = 0
-			elseif filelist == 'ok' then
-				first = 0
-				kits.log('all ready!')
-				exit_loading()
-				return
-			else
-				first = 0
-				kits.log('error :update filelist is nil')
-				exit_loading()
-				return
-			end
-		end
-		if not filelist then
-		  kits.log('empty update..')
-		  return
-		end
-		count = count + 1
-		if loadingBar ~= nil and count and maxcount then
-			loadingBar:setPercent(100*count/maxcount)
-		end
-		if count > maxcount then
-			kits.download_file('version.xml')
-			kits.download_file('filelist.xml')		
-			exit_loading()
-			kits.log('finiched..')
-		elseif filelist and filelist[count] then
-			operate_one_by_one(filelist[count])
-		else
-			exit_loading()
-			kits.log('download error!')
-		end		
+	if not self._root then
+		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_43}
+		self._progress = uikits.child(self._root,ui.PROGRESS)
+		self._exit = uikits.child(self._root,ui.EXIT_BUTTON)
+		self._try = uikits.child(self._root,ui.TRY_BUTTON)
+		self:addChild(self._root)
 	end
-
-	self:scheduleUpdateWithPriorityLua(update,0)
+	self._first = true
+	self._progress:setPercent(0)
+	self._scheduler = self:getScheduler()
+	if self._scheduler then
+		self._sid = self._scheduler:scheduleScriptFunc(function()
+			self:update()
+		end,0.1,false)
+	end
 end
 
 function UpdateProgram:release()
+	if self._scheduler and self._sid then
+		self._scheduler:unscheduleScriptEntry(self._sid)
+		self._sid = nil
+	end
 end
 
 return UpdateProgram

@@ -214,12 +214,31 @@ local function write_local_file( name,buf )
   end
 end
 
+local function write_file( name,buf )
+  local filename = name
+  local file = io.open(filename,'wb')
+  if file then
+    file:write(buf)
+    file:close()
+  else
+     --local file error?
+     cclog('Can not write file '..filename)
+  end
+end
+
 local function local_directory_exists( dir )
 	local s,err = lfs.attributes( dir )
 	if s and s.mode == 'directory' then
 		return true
 	end
 	return false
+end
+
+local function make_directory( name )
+	local dir = name
+	if not local_directory_exists(dir) then
+		lfs.mkdir(dir)
+	end
 end
 
 local function make_local_directory( name )
@@ -412,6 +431,8 @@ local exports = {
 	time_to_string = time_to_string,
 	log = my_log,
 	check = check_table,
+	write_file = write_file,
+	make_directory = make_directory,
 }
 
 return exports
