@@ -69,6 +69,7 @@ local all_subject_list = {
 {20005,"化学",ui.title_chemistry},
 {20004,"物理",ui.title_physics},
 {20006,"政治",ui.title_politics},
+{101,"综合",ui.title_zonghe},
 {10005,"英语",ui.title_english},
 {20001,"语文",ui.title_chinese},
 {20002,"数学",ui.title_math},
