@@ -33,6 +33,7 @@ local ui = {
 	title_chemistry = '932/934/944',	
 	title_physics = '932/934/945',	
 	title_politics = '932/934/946',
+	title_zonghe = '932/934/4068',
 	title_sel = '932/934/947',
 	
 	label_all_num = '951/999',

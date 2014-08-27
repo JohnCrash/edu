@@ -152,7 +152,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 		end		
 	end	
 
-	local questions_path = "errortitile/kong.png"
+--	local questions_path = "errortitile/kong.png"
 	local questions_but = ccui.Button:create()
 	questions_but:setTouchEnabled(true)
 	questions_but:loadTextures(questions_path, questions_path, "")
