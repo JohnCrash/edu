@@ -1305,9 +1305,9 @@ local function relayout_drag( layout,data,ismul )
 				s = s..string.sub(aws,i,i)
 			end
 		end
-		data.my_answer[1] = s
-		for i = 1,string.len(data.my_answer[1]) do
-			local s = string.sub(data.my_answer[1],i,i)
+		local asw = s
+		for i = 1,string.len(asw) do
+			local s = string.sub(asw,i,i)
 			local k = answer_idx[s]
 			if k and ui1[k] then
 				if ismul then

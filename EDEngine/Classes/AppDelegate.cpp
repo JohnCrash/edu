@@ -48,7 +48,7 @@ void AppDelegate::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 	glview->setFrameSize(1024,576);
 	//glview->setFrameSize(1920,1080);
 #endif	
@@ -79,11 +79,11 @@ void AppDelegate::initLuaEngine()
     }
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
-    
-	auto path = getDirectory(LUACORE_DIRECTORY);
 
 	FileUtils::getInstance()->addSearchPath("luacore");
-
+    FileUtils::getInstance()->addSearchPath("src");
+    FileUtils::getInstance()->addSearchPath("res");
+    
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
@@ -104,9 +104,6 @@ void AppDelegate::InitForDebugMode()
 	GetCurrentDirectory(255,cur);
 	wcscat(cur,L"\\luacore");
 	SetCurrentDirectory( cur );
-//	GetCurrentDirectory(255,cur);
-//	printf("write dir = %s\n",path.c_str());
-//	printf("current dir= %s\n",cur);
 }
 #endif
 
@@ -157,24 +154,3 @@ void AppDelegate::applicationWillEnterForeground() {
     // if you use SimpleAudioEngine, it must resume here
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
-
-/*
-bool AppDelegate::initInternalLuaEngine()
-{
-	_core = LuaStack::create();
-	_debuger = LuaStack::create();
-	_core->retain();
-	_debuger->retain();
-
-
-	return true;
-}
-
-void AppDelegate::releaseInternalLuaEngine()
-{
-	CC_SAFE_RELEASE(_core);
-	CC_SAFE_RELEASE(_debuger);
-	_core = nullptr;
-	_debuger = nullptr;
-}
-*/
