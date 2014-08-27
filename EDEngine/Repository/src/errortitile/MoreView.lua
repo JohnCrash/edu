@@ -13,6 +13,7 @@ local ui = {
 	collect_but = '878/881',
 	statistics_but = '878/882',
 	music_but = '1051/1056',
+	exit_but = '1051/3665',
 	MAINMENU43 = '1430',
 	wronglist43_but = '1430/1432',
 	collect43_but = '1430/1433',
@@ -91,6 +92,16 @@ function MoreView:init()
 	
 	local but_music = uikits.child(self._widget,ui.music_but)
 	but_music:setVisible(true)
+	
+	local but_exit
+	but_exit = uikits.child(self._widget,ui.exit_but)
+	
+	local function exitCallback(sender, eventType) 	
+        if eventType == ccui.TouchEventType.ended then				
+			cc.Director:getInstance():endToLua()
+        end
+    end						
+	but_exit:addTouchEventListener(exitCallback)			
 	--self.statistics_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/statistics_les.json")
 	--self._widget:addChild(self.statistics_view)
 	--处理切换首页按钮
@@ -98,6 +109,7 @@ function MoreView:init()
 	local but_wronglist
 	local but_collect
 	local but_more
+
 	if _G.screen_type == 1 then	
 		but_wronglist = uikits.child(self._widget,ui.wronglist_but)
 		but_collect = uikits.child(self._widget,ui.collect_but)

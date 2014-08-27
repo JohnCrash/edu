@@ -204,7 +204,7 @@ function BigquestionView:init()
 	local size_title = titleview:getContentSize()
 	--self._widget:addChild(but_more.share_box)
 	
-	print((size_view.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height)))
+	--print((size_view.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height)))
 	but_more.share_box:setPosition(cc.p(0,0))
 	but_more.share_box:setVisible(false)
 	local but_collect = but_more.share_box:getChildByTag(661)
