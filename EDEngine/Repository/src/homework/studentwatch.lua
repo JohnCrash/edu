@@ -23,6 +23,7 @@ local ui = {
 	ITEM_WRONG_RATE = 'hui/cuotilv',
 	ITEM_RIGHT = 'hui/dui',
 	ITEM_WRONG = 'hui/cuo',
+	ITEM_ANSWER = 'hui/answer',
 	ITEM_LAYOUT = 'Panel_25',
 }
 
@@ -115,6 +116,26 @@ function StudentWatch:add_paper_item( topicType,topicID )
 									for i,v in pairs(asw.answers) do
 										data.my_answer[i] = v.value
 									end
+								end
+							end
+							--设置答案
+							local aw = uikits.child(item,ui.ITEM_ANSWER)
+							if aw and data.my_answer[1] then
+								if topicType==1 or topicType==2 or topicType==3 or topicType==6 then
+									aw:setText( data.my_answer[1] )
+									print("ANSWER:"..data.my_answer[1] )
+								elseif topicType==5 then --填空
+									local txt = ''
+									for i,v in pairs(data.my_answer) do
+										if v then
+											if i == 1 then
+												txt = v
+											else
+												txt = txt..','..v
+											end
+										end
+									end
+									aw:setText( txt )
 								end
 							end
 							topics.types[topicType].init(child,data)

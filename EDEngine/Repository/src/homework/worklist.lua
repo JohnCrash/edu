@@ -256,7 +256,7 @@ end
 function WorkList:init_new_list()
 	--if self._busy then return end
 	cache.request_cancel()
-	self:SwapButton( ui.NEW )
+	--self:SwapButton( ui.NEW )
 	self:show_statistics(false)
 	self:show_list(true)
 	self._setting:setVisible(false)
@@ -266,6 +266,7 @@ function WorkList:init_new_list()
 		self:clear_all_item()
 		self:load_page( 1 )
 	end
+	return true
 end
 
 function WorkList:init_data()
@@ -385,7 +386,7 @@ end
 function WorkList:init_statistics()
 	--if self._busy then return end
 	cache.request_cancel()
-	self:SwapButton( ui.STATIST )
+	--self:SwapButton( ui.STATIST )
 	self:show_statistics(true)
 	self:show_list(false)
 	self._setting:setVisible(false)
@@ -404,15 +405,17 @@ function WorkList:init_statistics()
 		end		
 	end
 	self:relayout_statistics()
+	return true
 end
 
 function WorkList:init_setting()
 	--if self._busy then return end
 	cache.request_cancel()
-	self:SwapButton( ui.SETTING )
+	--self:SwapButton( ui.SETTING )
 	self:show_statistics(false)
 	self:show_list(false)
 	self._setting:setVisible(true)
+	return true
 end
 
 function WorkList:SwapButton(s)
@@ -464,38 +467,14 @@ function WorkList:init_gui()
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
 	
-	self._new_button = uikits.child(self._root,ui.NEW_BUTTON)
-	uikits.event( self._new_button,
-		function(sender)
-			self:init_new_list()
-		end)
-	
-	self._redline = uikits.child(self._root,ui.BUTTON_LINE)
-	
-	self._new_x,self._redline_y = self._redline:getPosition()
-	self._history_button = uikits.child(self._root,ui.HISTORY_BUTTON)
-	self._history_x = self._new_x + self._history_button:getContentSize().width
-	
-	uikits.event( self._history_button,
-		function(sender)
-			self:init_history_list()
-		end)
-	self._statist_button = uikits.child(self._root,ui.STATIST_BUTTON)
-	self._statist_x = self._history_x + self._statist_button:getContentSize().width
-	
-	uikits.event( self._statist_button,
-		function(sender)
-			self:init_statistics()
-		end)
-		
-	self._setting_button = uikits.child(self._root,ui.SETTING_BUTTON)
-	self._setting_x = self._statist_x + self._setting_button:getContentSize().width
-	
-	uikits.event( self._setting_button,
-		function(sender)
-			self:init_setting()
-		end)
-	
+	self._tab = uikits.tab(self._root,ui.BUTTON_LINE,
+		{
+		[ui.NEW_BUTTON]=function(sender) return self:init_new_list() end,
+		[ui.HISTORY_BUTTON]=function(sender) return self:init_history_list() end,
+		[ui.STATIST_BUTTON]=function(sender) return self:init_statistics() end,
+		[ui.SETTING_BUTTON]=function(sender) return self:init_setting() end,
+		})
+
 	uikits.event( self._scrollview,
 		function(sender,t)
 			if self._mode == ui.HISTORY then
@@ -512,7 +491,7 @@ end
 function WorkList:init_history_list()
 	--if self._busy then return end
 	cache.request_cancel()
-	self:SwapButton( ui.HISTORY )
+	--self:SwapButton( ui.HISTORY )
 	self:show_statistics(false)
 	self:show_list(true)
 	self._setting:setVisible(false)
@@ -522,6 +501,7 @@ function WorkList:init_history_list()
 		self:clear_all_item()
 		self:load_page( 1,5 )
 	end
+	return true
 end
 
 function WorkList:history_scroll( t )

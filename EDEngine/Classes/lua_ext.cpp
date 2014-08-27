@@ -32,7 +32,7 @@ static int cc_launchparam(lua_State* L)
 	#endif
 }
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WINDOWS
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 std::string getDirectory(EDDirectory edd)
 {
     std::string path;

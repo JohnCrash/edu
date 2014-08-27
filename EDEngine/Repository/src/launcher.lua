@@ -5,7 +5,7 @@ local login = require "login"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
---require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.2.182")
 local function init_test_resource()
   local res = local_dir..'res/'
   local pfu = cc.FileUtils:getInstance()
@@ -50,7 +50,7 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
---app = 'amouse'
+app = 'amouse'
 --cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	
