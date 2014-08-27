@@ -29,6 +29,23 @@ local function init_test_resource()
 end
 
 init_test_resource()
+--¼ÓÈë·µ»Ø¼ü
+local function onKeyRelease(key,event)
+	if key == cc.KeyCode.KEY_ESCAPE then
+		uikits.popScene()
+	end
+end
+
+local listener_keyboard = cc.EventListenerKeyboard:create()
+listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
+local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+
+if uikits.get_factor() == uikits.FACTOR_9_16 then
+	uikits.initDR{width=1920,height=1080}
+else
+	uikits.initDR{width=1440,height=1080}
+end
 
 if uikits.get_factor() == uikits.FACTOR_9_16 then
 	uikits.initDR{width=1920,height=1080}
@@ -38,8 +55,6 @@ end
 	
 local app,cookie = cc_launchparam()
 local scene
-app = 'errortitile'
-cookie = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	
 	login.set_cookie( cookie )
