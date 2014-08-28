@@ -33,11 +33,4 @@
 		luaExpat
 ==========================================================
 	
-file.lejiaolexue.com/upgrade
 
-ftpµÿ÷∑’ ∫≈
-ftp://211.154.173.152:2121
-upgrade_ftp
-ftp123!@#
-
-http://new.www.lejiaolexue.com/login.aspx
