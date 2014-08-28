@@ -176,7 +176,7 @@ function BigquestionView:init()
 	question_pic:setPosition(cc.p(size_question.width/2,size_question.height/2))
 	question_pic_view:addChild(question_pic)	--]]
 	
-	if self.tb_wrongtitle_item.iscollect == true then
+	if self.iscollect == true then
 		tag_collect:setVisible(true)
 	else
 		tag_collect:setVisible(false)
@@ -204,16 +204,18 @@ function BigquestionView:init()
 	local size_title = titleview:getContentSize()
 	--self._widget:addChild(but_more.share_box)
 	
-	print((size_view.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height)))
-	but_more.share_box:setPosition(cc.p(0,0))
+	--print((size_but.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height)))
+	--(size_view.width-size_share.width)..":::"..(size_view.height-(size_share.height+size_title.height))
+	but_more.share_box:setPosition(cc.p((size_but.width-size_share.width),(0-size_share.height)))
 	but_more.share_box:setVisible(false)
 	local but_collect = but_more.share_box:getChildByTag(661)
-	if self.tb_wrongtitle_item.iscollect == true then
+	if self.iscollect == true then
 		but_collect:setSelectedState(false)
 	else
 		but_collect:setSelectedState(true)
 	end		
-	self._widget:addChild(but_more.share_box)	
+	--self._widget:addChild(but_more.share_box)	
+	but_more:addChild(but_more.share_box)	
 	local but_sendtofriend = but_more.share_box:getChildByTag(660)
 	local but_sendtogroup = but_more.share_box:getChildByTag(659)
 	
@@ -223,7 +225,7 @@ function BigquestionView:init()
 			local but_collect = sender			
 			local send_url
 			but_more.share_box:setVisible(false)
-			send_url = t_nextview[4].url.."?item_id="..self.tb_wrongtitle_item.question_id		
+			send_url = t_nextview[4].url.."?item_id="..self.tb_wrongtitle_item.item_id		
 			local result = kits.http_get(send_url,login.cookie(),1)	
 			local tb_result = json.decode(result)
 			local iscollect = but_collect:getSelectedState()

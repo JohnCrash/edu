@@ -2,12 +2,7 @@ local uikits = require "uikits"
 local Loading = require "src/errortitile/Loading"
 --local WrongSubjectList = require "src/errortitile/WrongSubjectList"
 screen_type = 1
-local ui = {
-	FILE = 'homework/studenthomework_1/studenthomework_1.json',
-	BACK = 'white/back',
-	LIST = 'newview',
-	ITEM = 'newview/subject1',
-	}		
+	
 local ErrorTitile = class("ErrorTitile")
 ErrorTitile.__index = ErrorTitile
 

@@ -27,6 +27,20 @@ local ui = {
 	empty_pic = '3635',
 	}		
 
+t_nextview = {
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerStat.ashx.ashx",package_path = "src/hello/WrongSubjectList"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerPreview.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemReason.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemCol.ashx",package_path = "src/hello/persubject"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerStat.ashx.ashx",package_path = "src/hello/CollectView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ExerPreview.ashx",package_path = "src/hello/CollectView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/WrongStat.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditItemids.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditByItemids.ashx",package_path = "src/hello/StatisticsView"},
+{url = "http://app.lejiaolexue.com/exerbook/handler/ItemsSubmit.ashx",package_path = "src/hello/StatisticsView"},
+}
+
 local WrongSubjectList = class("WrongSubjectList")
 WrongSubjectList.__index = WrongSubjectList
 local scale = 960/1080
@@ -43,6 +57,7 @@ local all_subject_list = {
 {"science","科学",704,705},
 {10009,"信息技术",708,709},
 {20007,"生物",712,713},
+{101,"综合",4062,4063},
 {10005,"英语",684,685},
 {20001,"语文",678,679},
 {20002,"数学",682,683},
@@ -58,7 +73,7 @@ local all_subject_list = {
 {30009,"历史",696,697},
 }
 local course_map = {
-{101,""},
+{101,"综合"},
 {10001,"语文"},
 {10002,"数学"},
 {10003,"英语"},

@@ -276,6 +276,9 @@ local function parse_html( str )
 			kits.log( '		ERROR parse_html:'..tostring(str) )
 		end
 	end
+	if t.text then
+		t.text = string.gsub(t.text,string.char(10),'')
+	end
 	return t
 end
 

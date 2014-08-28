@@ -6,6 +6,7 @@ local cache = require "cache"
 local topics = require "src/errortitile/topics"
 local resultview = require "src/errortitile/resultview"
 local login = require "login"
+local kits = require "kits"
 --local answer = curweek or require "src/errortitile/answer"
 local dopractice = class("dopractice")
 dopractice.__index = dopractice
