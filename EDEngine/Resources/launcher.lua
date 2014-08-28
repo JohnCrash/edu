@@ -33,8 +33,6 @@ local function init_test_resource()
 		--默认资源
 		pfu:addSearchPath('luacore/res')		
 	end
-  
-  pfu:addSearchPath(local_dir)
 end
 
 init_test_resource()

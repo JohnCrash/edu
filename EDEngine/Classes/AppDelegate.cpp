@@ -91,8 +91,7 @@ void AppDelegate::initLuaEngine()
     LuaStack* stack = pEngine->getLuaStack();
 
     //pEngine->executeScriptFile("bootstrap.lua");
-	FileUtils::getInstance()->addSearchPath(FileUtils::getInstance()->getWritablePath());
-	pEngine->executeScriptFile("src/launcher.lua");
+	pEngine->executeScriptFile("launcher.lua");
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
