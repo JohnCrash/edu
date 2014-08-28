@@ -25,7 +25,7 @@ local function init_test_resource()
 		pfu:addSearchPath('src/')
 		pfu:addSearchPath('res/')
 		local write_dir = local_dir..'test/'
-		if not kits.local_directory_exists(write_dir) then
+		if not kits.directory_exists(write_dir) then
 			kits.make_local_directory('test/')
 		end
 		--默认资源

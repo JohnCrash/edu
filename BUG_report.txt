@@ -1,0 +1,11 @@
+1.uid 用户id
+2.user_ip,用户ip
+3.cpu ,字符串'arm','x86','mips'等
+4.os, 字符串'android','ios'
+5.api, 字符串'android 19'..
+6.core_version ,整数壳版本
+7.luacore_version , 整数壳版本
+8.luaapp_version , lua应用版本
+9.type ,异常类型'c','java','lua'
+10.log 最近的日志,字符串.大
+11.reason ,字符串,大

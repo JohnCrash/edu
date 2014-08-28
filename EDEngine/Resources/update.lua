@@ -16,44 +16,66 @@ local ui = {
 	PROGRESS = 'bo2',
 	EXIT_BUTTON = 'exit',
 	TRY_BUTTON = 'try',
+	CAPTION = 'text',
 }
 
 local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
-
---根据filelist.json来跟新文件
-local function update_directory(dir)
-	
-end
-
-local function download_file(t)
+--2网络问题，1本地问题，0没有问题，3算法结构问题
+local function download_file(t,m5)
 	local url = update_server..t
 	local local_file = local_dir..t
 	local fbuf = kits.http_get(url)
-	if fbuf then
-		kits.write_file(local_file,fbuf)
-		return true
+	if fbuf and (md5.sumhexa(fbuf)==m5 or not m5) then
+		if not kits.write_file(local_file,fbuf) then
+			--可能没有目录创建目录
+			local i = 1
+			local dirs = {}
+			while i do
+				local s = i
+				i = string.find(t,'/',i)
+				local e = i
+				if i then
+					table.insert(dirs,string.sub(t,s,e-1))
+					i = i + 1
+				end
+			end
+			local dir = local_dir
+			for k,v in pairs(dirs) do
+				dir = dir..v
+				kits.make_directory( dir )
+				dir = dir..'/'
+			end
+			--重新写入
+			return kits.write_file(local_file,fbuf),1
+		end
+		return true,0
 	end
+	return false,2
 end
 
 local function update_one_by_one(t)
 	if t then
 		if t.download then
-			return download_file(t.download)
+			return download_file(t.download,t.md5)
 		elseif t.mkdir then
-			kits.make_directory(t.mkdir)
-			return true
+			kits.make_directory(local_dir..t.mkdir)
+			return true,0
 		elseif t.remove then
 			--delete file
-			kits.del_local_file(t.remove)
+			kits.del_file(local_dir..t.remove)
+			return true,0
 		elseif t.remove_dir then
 			--delete directory
-			kits.del_local_directory(t.remove_dir)
+			kits.del_directory(local_dir..t.remove_dir)
+			return true,0
 		else
 			kits.log('update_one_by_one unkown operation')
+			return false,3
 		end
 	else
 		kits.log('update_one_by_one t=nil')
+		return false,3
 	end
 end
 
@@ -77,7 +99,7 @@ local function check_directory(dir)
 					if not l_res_v then return true end --没有本地版本文件，需要跟新
 					if not l_src_v then return true end
 					local j_res_v = json.decode(l_res_v)
-					local j_src_v = json.decode(l_res_v)
+					local j_src_v = json.decode(l_src_v)
 					if j_res_v.version and j_src_v.version and
 					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
 						return false --完全相同不需要跟新
@@ -86,30 +108,29 @@ local function check_directory(dir)
 					end
 				else
 					kits.log('check_directory  version file error!')
-					return false,true --下传失败,本次不跟新
+					return false,1 --下传失败,本次不跟新
 				end
 			else
 				kits.log('check_directory '..tostring(src_url)..' failed')
-				return false,true --下传失败,本次不跟新
+				return false,1 --下传失败,本次不跟新
 			end
 		else
 			kits.log('check_directory '..tostring(res_url)..' failed')
-			return false,true --下传失败,本次不跟新
+			return false,1 --下传失败,本次不跟新
 		end
 end
 
 local function check_update(t)
 	t.need_updates={}
 	for i,v in pairs(t.updates) do
-		local b,err = check_directory(v)
-		if err then --如果网络错误不在等待，直接不跟新
+		local b,e = check_directory(v)
+		if e then --如果网络错误不在等待，直接不跟新
 			return false
-		end
-		if b then
+		elseif b then
 			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
 		end
 	end
-	return (not #t.need_updates == 0)
+	return not (#t.need_updates == 0)
 end
 
 function UpdateProgram.create(t)
@@ -146,24 +167,128 @@ function UpdateProgram.create(t)
 	end
 end
 
+local TRY = 1
+
+function UpdateProgram:ErrorAndExit(msg,t)
+	self._mode = TRY
+	self._count = self._count-1
+	self._text:setText(msg)
+	self._exit:setVisible(true)
+	self._try:setVisible(true)
+	if t==1 then
+		self._try:setTitleText("启动")
+		uikits.event(self._try,function(sender)
+			kits.log('Update complate!')
+			local scene = self._args.run()
+			cc.Director:getInstance():replaceScene(scene)
+		end)
+	end
+end
+
+local function build_fast_table(s)
+	local fast = {}
+	for k,v in pairs(s) do
+		fast[v.name] = v.md5
+	end
+	return fast
+end
+
+local function compare_filelist(s,t,d)
+	local fast_st = build_fast_table(s)
+	local fast_tt = build_fast_table(t)
+	local filelist = {}
+	--sub operate
+	for k,v in pairs(t) do
+		if v.name and not fast_st[v.name] then
+			filelist[#filelist+1] = {remove=d..'/'..v.name,md5=v.md5}
+		end
+	end
+	--add operate
+	for k,v in pairs(s) do
+		if v.name  then
+			if not fast_tt[v.name] or (fast_tt[v.name] and fast_tt[v.name]~=v.md5) then
+				--如果目标不存在该文件，或者目标的md5和原的不相同
+				filelist[#filelist+1] = {download=d..'/'..v.name,md5=v.md5}
+			end
+		end
+	end
+	return filelist
+end
+
+--根据filelist.json来跟新文件
+function UpdateProgram:update_directory(dir)
+	local n_dir = update_server..dir..'/filelist.json'
+	local l_dir = local_dir..dir
+	local nbuf = kits.http_get(n_dir)
+	if not nbuf then
+		--self._try:setHighlighted(false)
+		--self._try:setEnabled(false)
+		self:ErrorAndExit("跟新服务器暂时不可用请稍后再试."..tostring(dir),1)
+	else
+		local n_table = json.decode(nbuf)
+		if n_table and type(n_table)=='table' then
+			if kits.directory_exists(l_dir) then	--创建本地目录
+				kits.make_directory(l_dir)
+			end
+			--开始读取本地json
+			local l_table
+			local lbuf = kits.read_file( l_dir..'/filelist.json')
+			if lbuf then
+				l_table = json.decode(lbuf)
+			end
+			l_table = l_table or {}
+			local op_table = compare_filelist(n_table,l_table,dir)
+			for i,v in pairs(op_table) do
+				table.insert(self._oplist,v)
+			end
+			--最后将filelist.json和version.json跟新下
+			table.insert(self._oplist,{download=dir..'/filelist.json'})
+			table.insert(self._oplist,{download=dir..'/version.json'})
+		else
+			--self._try:setHighlighted(false)
+			--self._try:setEnabled(false)
+			self:ErrorAndExit('跟新服务器异常.'..tostring(dir),1)
+		end
+	end
+end
+
 function UpdateProgram:update()
+	if self._mode==TRY then
+		return
+	end
 	if self._first then
 		self._first = false
 		self._count = 0
-		self._filelist = {}
+		self._maxcount = 0
+		self._oplist = {}
 		--收集目录中需要跟新个文件
 		for i,v in pairs(self._args.need_updates) do
-			update_directory(v)
+			self:update_directory('res/'..v)
+			self:update_directory('src/'..v)
 		end
-		self._maxcount = #self._filelist
+		self._maxcount = #self._oplist
 	else
 		self._count = self._count+1
+		self._progress:setPercent(self._count*100/self._maxcount)
 		if self._count > self._maxcount then
 			--操作完成
+			kits.log('Update complate!')
 			local scene = self._args.run()
 			cc.Director:getInstance():replaceScene(scene)
 		else
-			update_one_by_one(self._filelist[self._count])
+			local b,e = update_one_by_one(self._oplist[self._count])
+			if not b then
+				local t = self._oplist[self._count]
+				if e==1 then --本地问题
+					self:ErrorAndExit('文件操作失败:'..tostring(t.download))
+				elseif e==2 then --网络问题
+					self:ErrorAndExit('下载失败:'..tostring(t.download))
+				elseif e==3 then --算法问题
+					self:ErrorAndExit('跟新出现错误')
+				else
+					self:ErrorAndExit('未知错误')
+				end
+			end
 		end
 	end
 end
@@ -174,7 +299,19 @@ function UpdateProgram:init()
 		self._progress = uikits.child(self._root,ui.PROGRESS)
 		self._exit = uikits.child(self._root,ui.EXIT_BUTTON)
 		self._try = uikits.child(self._root,ui.TRY_BUTTON)
+		self._text = uikits.child(self._root,ui.CAPTION)
+		self._exit:setVisible(false)
+		self._try:setVisible(false)
 		self:addChild(self._root)
+		uikits.event(self._exit,function(sender)
+				cc.Director:getInstance():endToLua()
+			end)
+		uikits.event(self._try,function(sender)
+				self._exit:setVisible(false)
+				self._exit:setVisible(false)
+				self._mode = nil
+				self._text:setText("")
+			end)	
 	end
 	self._first = true
 	self._progress:setPercent(0)
