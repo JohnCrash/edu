@@ -13,20 +13,22 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir..'src/')
 		pfu:addSearchPath(local_dir..'res/')	
 		pfu:addSearchPath(local_dir..'cache/')
-		pfu:addSearchPath(write_dir)
+		pfu:addSearchPath(local_dir)
+		pfu:addSearchPath(local_dir..'luacore/')
 		--默认资源
 		pfu:addSearchPath('luacore/res')
 	else --android
 		--先搜索跟新目录
 		pfu:addSearchPath(local_dir..'src/')
 		pfu:addSearchPath(local_dir..'res/')	
-		pfu:addSearchPath(write_dir)
+		pfu:addSearchPath(local_dir)
+		pfu:addSearchPath(local_dir..'luacore/')
 		--搜索assets目录
 		pfu:addSearchPath('src/')
 		pfu:addSearchPath('res/')
-		local write_dir = local_dir..'test/'
-		if not kits.directory_exists(write_dir) then
-			kits.make_local_directory('test/')
+		local cache_dir = local_dir..'test/'
+		if not kits.directory_exists(cache_dir) then
+			kits.make_directory(cache_dir)
 		end
 		--默认资源
 		pfu:addSearchPath('luacore/res')		

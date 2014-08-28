@@ -5,10 +5,12 @@ local cache = require "cache"
 local md5 = require "md5"
 local json = require "json-c"
 
---local local_dir = cc.FileUtils:getInstance():getWritablePath()
-local local_dir = 'f:/test/'
+local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
-local update_server = 'http://192.168.2.211:81/lgh/new/'
+ 
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/'
+local local_server = 'http://192.168.2.211:81/lgh/'
+local update_server = local_server
 
 local ui = {
 	FILE = 'loadscreen/jiazhan.json',
@@ -121,13 +123,28 @@ local function check_directory(dir)
 end
 
 local function check_update(t)
+	local outer = false
 	t.need_updates={}
 	for i,v in pairs(t.updates) do
 		local b,e = check_directory(v)
 		if e then --如果网络错误不在等待，直接不跟新
-			return false
+			--尝试使用外网的
+			outer = true
 		elseif b then
 			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+		end
+	end
+	if outer then
+		--尝试外网的服务器
+		update_server = liexue_server
+		t.need_updates={}
+		for i,v in pairs(t.updates) do
+			local b,e = check_directory(v)
+			if e then --如果网络错误不在等待，直接不跟新
+				return false
+			elseif b then
+				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+			end
 		end
 	end
 	return not (#t.need_updates == 0)
@@ -137,7 +154,7 @@ function UpdateProgram.create(t)
 	if t and type(t)=='table' and t.updates and t.run 
 	and type(t.updates)=='table' and type(t.run)=='function' then
 		--不需要跟新直接启动
-		if not check_update(t) then
+		if platform==kTargetWindows or not check_update(t) then
 			local scene = t.run()
 			if scene then
 				cc.Director:getInstance():runWithScene(scene)
