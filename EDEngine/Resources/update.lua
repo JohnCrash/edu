@@ -130,6 +130,7 @@ local function check_update(t)
 		if e then --如果网络错误不在等待，直接不跟新
 			--尝试使用外网的
 			outer = true
+			break
 		elseif b then
 			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
 		end
