@@ -17,7 +17,7 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir..'luacore/')
 		--默认资源
 		pfu:addSearchPath('luacore/res')
-	else --android
+	else --android,ios
 		--先搜索跟新目录
 		pfu:addSearchPath(local_dir..'src/')
 		pfu:addSearchPath(local_dir..'res/')	
