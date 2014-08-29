@@ -42,7 +42,19 @@ if uikits.get_factor() == uikits.FACTOR_9_16 then
 else
 	uikits.initDR{width=1440,height=1080}
 end
-	
+
+--android 返回键
+local function onKeyRelease(key,event)
+	print('key='..tostring(key))
+	if key == cc.KeyCode.KEY_ESCAPE then
+		uikits.popScene()
+	end
+end	
+local listener_keyboard = cc.EventListenerKeyboard:create()
+listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
+local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+
 local app,cookie = cc_launchparam()
 local scene
 app = 'loading'
@@ -81,7 +93,7 @@ elseif app == 'errortitile' then
 	end}		
 elseif app == 'loading' then
 	local update = require "update"
-	scene = update.create{updates={'homework','amouse','errortitle'},
+	scene = update.create{updates={'homework','amouse','errortitile'},
 		run=function()
 			local worklist = require "homework/worklist"
 			return worklist.create()		

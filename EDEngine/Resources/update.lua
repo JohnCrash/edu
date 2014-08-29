@@ -16,6 +16,7 @@ local ui = {
 	FILE = 'loadscreen/jiazhan.json',
 	FILE_43 = 'loadscreen/43/jiazhan.json',
 	PROGRESS = 'bo2',
+	PROGRESS_BG = 'bo',
 	EXIT_BUTTON = 'exit',
 	TRY_BUTTON = 'try',
 	CAPTION = 'text',
@@ -81,88 +82,16 @@ local function update_one_by_one(t)
 	end
 end
 
-local function check_directory(dir)
-		local res_url = update_server..'res/'..dir..'/version.json'
-		local src_url = update_server..'src/'..dir..'/version.json'
-		local res_local = local_dir..'res/'..dir..'/version.json'
-		local src_local = local_dir..'src/'..dir..'/version.json'
-		--只有在确定下载成功的情况下才跟新
-		local res = kits.http_get(res_url,'',2)
-		if res then
-			local src = kits.http_get(src_url,'',2)
-			if src then
-				local res_v = json.decode(res)
-				local src_v = json.decode(src)
-				if res_v and src_v and type(res_v)=='table' and type(src_v)=='table'
-					and res_v.version and src_v.version then
-					--比较本地和网络版本
-					local l_res_v = kits.read_file(res_local)
-					local l_src_v = kits.read_file(src_local)
-					if not l_res_v then return true end --没有本地版本文件，需要跟新
-					if not l_src_v then return true end
-					local j_res_v = json.decode(l_res_v)
-					local j_src_v = json.decode(l_src_v)
-					if j_res_v.version and j_src_v.version and
-					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
-						return false --完全相同不需要跟新
-					else
-						return true --需要跟新
-					end
-				else
-					kits.log('check_directory  version file error!')
-					return false,1 --下传失败,本次不跟新
-				end
-			else
-				kits.log('check_directory '..tostring(src_url)..' failed')
-				return false,1 --下传失败,本次不跟新
-			end
-		else
-			kits.log('check_directory '..tostring(res_url)..' failed')
-			return false,1 --下传失败,本次不跟新
-		end
-end
-
-local function check_update(t)
-	local outer = false
-	t.need_updates={}
-	for i,v in pairs(t.updates) do
-		local b,e = check_directory(v)
-		if e then --如果网络错误不在等待，直接不跟新
-			--尝试使用外网的
-			outer = true
-			break
-		elseif b then
-			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
-		end
-	end
-	if outer then
-		--尝试外网的服务器
-		update_server = liexue_server
-		t.need_updates={}
-		for i,v in pairs(t.updates) do
-			local b,e = check_directory(v)
-			if e then --如果网络错误不在等待，直接不跟新
-				return false
-			elseif b then
-				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
-			end
-		end
-	end
-	return not (#t.need_updates == 0)
-end
-
 function UpdateProgram.create(t)
 	if t and type(t)=='table' and t.updates and t.run 
 	and type(t.updates)=='table' and type(t.run)=='function' then
-		--不需要跟新直接启动
-		if platform==kTargetWindows or not check_update(t) then
+		if platform==kTargetWindows then
 			local scene = t.run()
 			if scene then
 				cc.Director:getInstance():runWithScene(scene)
 			else
 				kits.log('ERROR UpdateProgram:init run return nil')
-			end
-			return
+			end		
 		end
 		--需要跟新,打开启动界面
 		local scene = cc.Scene:create()
@@ -193,13 +122,16 @@ function UpdateProgram:ErrorAndExit(msg,t)
 	self._text:setText(msg)
 	self._exit:setVisible(true)
 	self._try:setVisible(true)
-	if t==1 then
+	if t==1 then --正常启动
 		self._try:setTitleText("启动")
 		uikits.event(self._try,function(sender)
 			kits.log('Update complate!')
 			local scene = self._args.run()
 			cc.Director:getInstance():replaceScene(scene)
 		end)
+	elseif t==2 then --退出
+		self._try:setEnabled(false)
+		self._try:setHighlighted(false)
 	end
 end
 
@@ -270,6 +202,97 @@ function UpdateProgram:update_directory(dir)
 	end
 end
 
+function UpdateProgram:NErrorCheckLocal(dir)
+	local src_local = local_dir..'src/'..dir..'/filelist.json' 
+	if not kits.local_exists( src_local ) then --看看有没有本地版本
+		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
+	end
+end
+
+function UpdateProgram:check_directory(dir,n)
+		local res_url = update_server..'res/'..dir..'/version.json'
+		local src_url = update_server..'src/'..dir..'/version.json'
+		local res_local = local_dir..'res/'..dir..'/version.json'
+		local src_local = local_dir..'src/'..dir..'/version.json'
+		--只有在确定下载成功的情况下才跟新
+		local res = kits.http_get(res_url,'',2)
+		if res then
+			local src = kits.http_get(src_url,'',2)
+			if src then
+				local res_v = json.decode(res)
+				local src_v = json.decode(src)
+				if res_v and src_v and type(res_v)=='table' and type(src_v)=='table'
+					and res_v.version and src_v.version then
+					--比较本地和网络版本
+					local l_res_v = kits.read_file(res_local)
+					local l_src_v = kits.read_file(src_local)
+					if not l_res_v then return true end --没有本地版本文件，需要跟新
+					if not l_src_v then return true end
+					local j_res_v = json.decode(l_res_v)
+					local j_src_v = json.decode(l_src_v)
+					if j_res_v.version and j_src_v.version and
+					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
+						return false --完全相同不需要跟新
+					else
+						return true --需要跟新
+					end
+				else
+					kits.log('check_directory  version file error!')
+					--网络失败，本机有没有
+					if n==2 then
+						self:NErrorCheckLocal(dir)
+					end
+					return false,1 --下传失败,本次不跟新
+				end
+			else
+				kits.log('check_directory '..tostring(src_url)..' failed')
+				--网络失败，本机有没有
+				if n==2 then
+					self:NErrorCheckLocal(dir)
+				end
+				return false,1 --下传失败,本次不跟新
+			end
+		else
+			kits.log('check_directory '..tostring(res_url)..' failed')
+			--网络失败，本机有没有
+			if n==2 then
+				self:NErrorCheckLocal(dir)
+			end
+			return false,1 --下传失败,本次不跟新
+		end
+end
+
+function UpdateProgram:check_update(t)
+	local outer = false
+	t.need_updates={}
+	for i,v in pairs(t.updates) do
+		local b,e = self:check_directory(v,1)
+		if e then --如果网络错误不在等待，直接不跟新
+			--尝试使用外网的
+			outer = true
+			break
+		elseif b then
+			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+		end
+	end
+	if outer then
+		--尝试外网的服务器
+		update_server = liexue_server
+		t.need_updates={}
+		for i,v in pairs(t.updates) do
+			local b,e = self:check_directory(v,2)
+			if e then --如果网络错误不在等待，直接不跟新
+				return false
+			elseif b then
+				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+			end
+		end
+	else
+		self._text:setText("Update from 192.168.2.211...")
+	end
+	return not (#t.need_updates == 0)
+end
+
 function UpdateProgram:update()
 	if self._mode==TRY then
 		return
@@ -279,12 +302,24 @@ function UpdateProgram:update()
 		self._count = 0
 		self._maxcount = 0
 		self._oplist = {}
+		--不需要跟新直接启动
+		if not self:check_update(self._args) then
+			local scene = t.run()
+			if scene then
+				cc.Director:getInstance():runWithScene(scene)
+			else
+				kits.log('ERROR UpdateProgram:init run return nil')
+			end
+			return
+		end
 		--收集目录中需要跟新个文件
 		for i,v in pairs(self._args.need_updates) do
 			self:update_directory('res/'..v)
 			self:update_directory('src/'..v)
 		end
 		self._maxcount = #self._oplist
+		self._progress:setVisible(true)
+		self._progress_bg:setVisible(true)
 	else
 		self._count = self._count+1
 		self._progress:setPercent(self._count*100/self._maxcount)
@@ -318,6 +353,7 @@ function UpdateProgram:init()
 		self._exit = uikits.child(self._root,ui.EXIT_BUTTON)
 		self._try = uikits.child(self._root,ui.TRY_BUTTON)
 		self._text = uikits.child(self._root,ui.CAPTION)
+		self._progress_bg = uikits.child(self._root,ui.PROGRESS_BG)
 		self._exit:setVisible(false)
 		self._try:setVisible(false)
 		self:addChild(self._root)
@@ -339,6 +375,8 @@ function UpdateProgram:init()
 			self:update()
 		end,0.1,false)
 	end
+	self._progress:setVisible(false)
+	self._progress_bg:setVisible(false)
 end
 
 function UpdateProgram:release()
