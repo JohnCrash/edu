@@ -80,9 +80,12 @@ void AppDelegate::initLuaEngine()
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
 
-	FileUtils::getInstance()->addSearchPath("luacore");
-    FileUtils::getInstance()->addSearchPath("src");
-    FileUtils::getInstance()->addSearchPath("res");
+	auto fu = FileUtils::getInstance();
+	std::string wpath = fu->getWritablePath();
+	fu->addSearchPath(wpath+"src/luacore");
+	fu->addSearchPath("luacore");
+	fu->addSearchPath("src");
+    fu->addSearchPath("res");
     
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());

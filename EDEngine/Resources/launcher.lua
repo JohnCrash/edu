@@ -6,7 +6,7 @@ local update = require "update"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
-require("mobdebug").start("192.168.2.182")
+--require("mobdebug").start("192.168.2.182")
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
   if platform == kTargetWindows then
@@ -49,7 +49,7 @@ local function onKeyRelease(key,event)
 	if key == cc.KeyCode.KEY_ESCAPE then
 		uikits.popScene()
 	end
-end	
+end
 local listener_keyboard = cc.EventListenerKeyboard:create()
 listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
@@ -57,49 +57,48 @@ directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
 
 local app,cookie = cc_launchparam()
 local scene
-app = 'loading'
+app = 'homework'
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
-	
 	login.set_cookie( cookie )
 else
 	login.set_selector(1) --学生
 end
 
 if app == 'homework' then
-	update.create{updates={'homework'},
+	update.create{name=app,updates={'homework','luacore'},
 		run=function()
 		local worklist = require "homework/worklist"
 		return worklist.create()
 	end}
 elseif app == 'amouse' then
-	update.create{updates={'amouse'},
+	update.create{name=app,updates={'amouse','luacore'},
 		run=function()
 		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 		local amouse = require "amouse/amouse_om"
 		return AMouseMain()
 	end}		
 elseif app == 'teacher' then
-	update.create{updates={'homework'},
+	update.create{name=app,updates={'homework','luacore'},
 		run=function()
 		local teacher = require "homework/teacher"
 		return teacher.create()
 	end}	
 elseif app == 'errortitile' then
-	update.create{updates={'homework','errortitile'},
+	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
 		local WrongSubjectList = require "errortitile/WrongSubjectList"
 		return WrongSubjectList.create()
-	end}		
-elseif app == 'loading' then
-	local update = require "update"
-	scene = update.create{updates={'homework','amouse','errortitile'},
+	end}
+elseif app and string.len(app)>0 then
+	--任意启动
+	update.create{name=app,updates={app,'luacore'},
 		run=function()
-			local worklist = require "homework/worklist"
-			return worklist.create()		
+			local a = require(app)
+			return a.create()
 		end}
 else
-	update.create{updates={'homework'},
+	update.create{name=app,updates={'homework','luacore'},
 		run=function()
 		local worklist = require "homework/worklist"
 		return worklist.create()

@@ -2,8 +2,8 @@ local kits = require "kits"
 local uikits = require "uikits"
 
 local ui = {
-	FILE = 'laoshizuoye/xueshengleibiao.json',
-	FILE_3_4 = 'laoshizuoye/xueshengleibiao43.json',
+	FILE = 'homework/laoshizuoye/xueshengleibiao.json',
+	FILE_3_4 = 'homework/laoshizuoye/xueshengleibiao43.json',
 	BACK = 'ding/back',
 	LIST = 'newview',
 	ITEM = 'newview/subject1',

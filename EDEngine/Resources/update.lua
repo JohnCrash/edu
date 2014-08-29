@@ -304,11 +304,11 @@ function UpdateProgram:update()
 		self._oplist = {}
 		--不需要跟新直接启动
 		if not self:check_update(self._args) then
-			local scene = t.run()
-			if scene then
-				cc.Director:getInstance():runWithScene(scene)
+			local b,scene = pcall(self._args.run)
+			if b then
+				cc.Director:getInstance():replaceScene(scene)
 			else
-				kits.log('ERROR UpdateProgram:init run return nil')
+				self:ErrorAndExit('不能启动:'..tostring(self._args.name)..'代码中含有错误',2)
 			end
 			return
 		end
@@ -326,8 +326,12 @@ function UpdateProgram:update()
 		if self._count > self._maxcount then
 			--操作完成
 			kits.log('Update complate!')
-			local scene = self._args.run()
-			cc.Director:getInstance():replaceScene(scene)
+			local b,scene = pcall(self._args.run)
+			if b then
+				cc.Director:getInstance():replaceScene(scene)
+			else
+				self:ErrorAndExit('不能启动:'..tostring(self._args.name)..'代码中含有错误',2)
+			end
 		else
 			local b,e = update_one_by_one(self._oplist[self._count])
 			if not b then
