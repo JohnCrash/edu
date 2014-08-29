@@ -30,6 +30,7 @@ local function init_test_resource()
 		if not kits.directory_exists(cache_dir) then
 			kits.make_directory(cache_dir)
 		end
+		pfu:addSearchPath(cache_dir)
 		--默认资源
 		pfu:addSearchPath('luacore/res')		
 	end
