@@ -89,6 +89,7 @@ function UpdateProgram.create(t)
 			local scene = t.run()
 			if scene then
 				cc.Director:getInstance():runWithScene(scene)
+				return
 			else
 				kits.log('ERROR UpdateProgram:init run return nil')
 			end		

@@ -1,4 +1,5 @@
 require "Cocos2d"
+local crash = require "crashreport"
 local kits = require "kits"
 local uikits = require "uikits"
 local login = require "login"
@@ -6,6 +7,7 @@ local update = require "update"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
+
 --require("mobdebug").start("192.168.2.182")
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
