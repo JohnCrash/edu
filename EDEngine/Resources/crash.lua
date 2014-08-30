@@ -75,8 +75,8 @@ local function report_export( errmsg,stack_level )
 		local logs = kits.get_logs()
 		if logs then
 			local ca={}
-			for i=1,16 do
-				local inx = #logs+i-16
+			for i=1,32 do
+				local inx = #logs+i-32
 				if inx > 0 and logs[inx]then
 					table.insert(ca,logs[inx])
 				end

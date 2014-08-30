@@ -10,8 +10,8 @@ crash.open("launcher",1)
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
---require("mobdebug").start("192.168.0.182")
-s.g()
+require("mobdebug").start("192.168.0.182")
+
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
   if platform == kTargetWindows then
@@ -52,8 +52,10 @@ end
 --android 返回键
 local function onKeyRelease(key,event)
 	print('key='..tostring(key))
-	if key == cc.KeyCode.KEY_ESCAPE then
-		uikits.popScene()
+	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
+		local console = require "console"
+		cc.Director:getInstance():pushScene( console.create() )
+		--uikits.popScene()
 	end
 end
 local listener_keyboard = cc.EventListenerKeyboard:create()
