@@ -16,6 +16,24 @@ local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
 
+local MAX_LOG = 512
+local LOW_LOG = 256
+local logs = {}
+
+local function get_logs()
+	return logs
+end
+local function my_log( a )
+	local msg = tostring(a)
+	if table.maxn(logs) > MAX_LOG then
+		for i=1,LOW_LOG do
+			table.remove(logs,i)
+		end
+	end
+	table.insert(logs,msg)
+	print( msg )
+end
+
 cclog = function(...)
     print(string.format(...))
 end
@@ -387,10 +405,6 @@ local function encodeURI(s)
 	return string.gsub(s, " ", "+")
 end
 
-local function my_log( a )
-	print( tostring(a) )
-end
-
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -421,6 +435,7 @@ local exports = {
 	make_directory = make_directory,
 	del_file = del_file,
 	del_directory = del_directory,
+	get_logs = get_logs,
 }
 
 return exports

@@ -1,14 +1,17 @@
 require "Cocos2d"
-local crash = require "crashreport"
+local crash = require "crash"
 local kits = require "kits"
 local uikits = require "uikits"
 local login = require "login"
 local update = require "update"
 
+crash.open("launcher",1)
+
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
---require("mobdebug").start("192.168.2.182")
+--require("mobdebug").start("192.168.0.182")
+s.g()
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
   if platform == kTargetWindows then
@@ -18,7 +21,7 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir)
 		pfu:addSearchPath(local_dir..'luacore/')
 		--默认资源
-		pfu:addSearchPath('luacore/res')
+		pfu:addSearchPath(local_dir..'luacore/res')
 	else --android,ios
 		--先搜索跟新目录
 		pfu:addSearchPath(local_dir..'src/')

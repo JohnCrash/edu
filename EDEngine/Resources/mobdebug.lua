@@ -295,7 +295,7 @@ local function has_breakpoint(file, line)
 			for f,v in pairs(breakpoints[line]) do
 				--仅仅比较文件名称
 				if get_file_name(f) == filename then
-					print('TRUE '..tostring(filename)..'#'..tostring(get_file_name(f)))
+					--print('TRUE '..tostring(filename)..'#'..tostring(get_file_name(f)))
 					return true
 				end
 			end
@@ -623,7 +623,7 @@ local function debug_hook(event, line)
     -- (3) breakpoint; check for line first as it's known; then for file
     -- (4) socket call (only do every Xth check)
     -- (5) at least one watch is registered
-	local caller2 = debug.getinfo(2, "S")
+	--local caller2 = debug.getinfo(2, "S")
 	
     if not (step_into or step_over or breakpoints[line] or watchescnt > 0 or is_pending(server)) then 
 	--	print('['..tostring(line)..']'..tostring(caller2.source)..'$is_pending:'..tostring(is_pending(server)))

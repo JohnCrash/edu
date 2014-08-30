@@ -73,19 +73,25 @@ void AppDelegate::initLuaEngine()
 //        auto resourceSize = Size(960, 640); //4:3
 		auto resourceSize = Size(1024, 768); 
         std::vector<std::string> searchPaths;
-        searchPaths.push_back("hd");
-        pFileUtils->setSearchPaths(searchPaths);
+
         director->setContentScaleFactor(resourceSize.height/designSize.height);
     }
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
 
-	auto fu = FileUtils::getInstance();
-	std::string wpath = fu->getWritablePath();
-	fu->addSearchPath(wpath+"src/luacore");
-	fu->addSearchPath("luacore");
-	fu->addSearchPath("src");
-    fu->addSearchPath("res");
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	std::string wpath = pFileUtils->getWritablePath();
+	pFileUtils->addSearchPath(wpath+"src/luacore");
+	pFileUtils->addSearchPath(wpath+"luacore");
+	pFileUtils->addSearchPath(wpath+"src");
+    pFileUtils->addSearchPath(wpath+"res");
+#else
+	std::string wpath = pFileUtils->getWritablePath();
+	pFileUtils->addSearchPath(wpath+"src/luacore");
+	pFileUtils->addSearchPath("luacore");
+	pFileUtils->addSearchPath("src");
+    pFileUtils->addSearchPath("res");
+#endif
     
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
@@ -94,19 +100,24 @@ void AppDelegate::initLuaEngine()
     LuaStack* stack = pEngine->getLuaStack();
 
     //pEngine->executeScriptFile("bootstrap.lua");
-	pEngine->executeScriptFile("crashreport.lua");
+	pEngine->executeScriptFile("crash.lua");
 	pEngine->executeScriptFile("launcher.lua");
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 void AppDelegate::InitForDebugMode()
 {
-	auto path = FileUtils::getInstance()->getWritablePath();
-	
 	TCHAR cur[256];
-	GetCurrentDirectory(255,cur);
-	wcscat(cur,L"\\luacore");
-	SetCurrentDirectory( cur );
+
+	GetModuleFileName(GetModuleHandle(NULL),cur,256);
+	std::wstring path(cur);
+	size_t p = path.rfind('\\');
+	if( p !=std::wstring::npos )
+	{
+		std::wstring wp = path.substr(0,p);
+		wp += TEXT("\\luacore");
+		SetCurrentDirectory( wp.c_str() );
+	}
 }
 #endif
 
