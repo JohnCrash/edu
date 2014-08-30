@@ -23,6 +23,7 @@ local ui = {
 	ITEM_WRONG_RATE = 'hui/cuotilv',
 	ITEM_RIGHT = 'hui/dui',
 	ITEM_WRONG = 'hui/cuo',
+	ITEM_ANSWER = 'hui/answer',
 	ITEM_LAYOUT = 'Panel_25',
 }
 
@@ -110,8 +111,31 @@ function StudentWatch:add_paper_item( topicType,topicID )
 							child:setEnabled(false) --禁止修改
 							if t.detail.answer and t.detail.answer and type(t.detail.answer)=='string' then --用户作答
 								local asw = json.decode(t.detail.answer)
-								if asw and asw.answers  and asw.answers[1] then
-									data.my_answer = asw.answers[1].value
+								if asw and asw.answers  and type(asw.answers)=='table' then
+									data.my_answer = {}
+									for i,v in pairs(asw.answers) do
+										data.my_answer[i] = v.value
+									end
+								end
+							end
+							--设置答案
+							local aw = uikits.child(item,ui.ITEM_ANSWER)
+							if aw and data.my_answer[1] then
+								if topicType==1 or topicType==2 or topicType==3 or topicType==6 then
+									aw:setText( data.my_answer[1] )
+									print("ANSWER:"..data.my_answer[1] )
+								elseif topicType==5 then --填空
+									local txt = ''
+									for i,v in pairs(data.my_answer) do
+										if v then
+											if i == 1 then
+												txt = v
+											else
+												txt = txt..','..v
+											end
+										end
+									end
+									aw:setText( txt )
 								end
 							end
 							topics.types[topicType].init(child,data)
@@ -175,6 +199,15 @@ function StudentWatch:init()
 		local wrong = uikits.child(self._root,ui.WRONG_BUTTON)
 		uikits.event(wrong,function(sender)
 			cache.request_cancel()
+				if self._args then
+					local persubject = require "errortitile/persubject"
+					if persubject then
+						local scene = persubject:create(self._args.course_name,"",self._args.course_id,1)
+						if scene then
+							uikits.pushScene( scene )
+						end
+					end
+				end
 			--uikits.pushScace()
 			end)		
 		--列表视图

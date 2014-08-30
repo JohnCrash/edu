@@ -1,3 +1,4 @@
+local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local login = require "login"
@@ -141,9 +142,22 @@ function WorkFlow:get_cloud_topics( v,func )
 end
 
 function WorkFlow:commit_topics( v )
+	local answer
+	if v and v.my_answer and type(v.my_answer)=='string' then
+		answer = v.my_answer
+	elseif v and v.my_answer and type(v.my_answer)=='table' then
+		answer = ''
+		for i,v in pairs(v.my_answer) do
+			if i ~= 1 then answer = answer..',' end
+			answer = answer..v
+		end
+	else
+		kits.log('ERROR commit my_answer invalid')
+		return
+	end
 	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
-	..'&answer='..tostring(v.my_answer)
+	..'&answer='..tostring(answer)
 	..'&times='..math.floor(os.time()-self._topics_begin_time) --做题题目计时器
 	..'&tid='..tostring(self._args.tid)
 	self._topics_begin_time = os.time() --重新计时
@@ -162,6 +176,50 @@ function WorkFlow:commit_topics( v )
 	end
 end
 
+local function answer_eq(a1,a2)
+	if type(a1)==type(a2) and type(a1)=='string' then
+		return a1==a2
+	elseif type(a1)==type(a2) and type(a1)=='table' and #a1==#a2 then
+		for i=1,#a1 do
+			if a1[i] ~= a2[i] then
+				return false
+			end
+		end
+		return true
+	end
+	return false
+end
+
+local function answer_clone(a)
+	if a and type(a)=='table' then
+		local r = {}
+		for i,v in pairs(a) do
+			r[i] = v
+		end
+		return r
+	else
+		return a
+	end
+end
+
+function WorkFlow:check_finished()
+	local b = true
+	if self._data then
+		for i,v in pairs(self._data) do
+			--结束按钮,状态改变
+			if v.state == ui.STATE_UNFINISHED then
+				b = false
+			end				
+		end
+		if b then
+			self._next_button:setVisible(false)
+			self._finish_button:setVisible(true)
+		else
+			self._next_button:setVisible(true)
+			self._finish_button:setVisible(false)		
+		end		
+	end
+end
 --每道题存一遍
 function WorkFlow:save_answer()
 	--比较下看看答案修改过没，如果修改过就保存
@@ -170,11 +228,11 @@ function WorkFlow:save_answer()
 	local b = true
 	if self._data then
 		for i,v in pairs(self._data) do
-			if v.my_answer and self._topics_table.answers[v.item_id] ~= v.my_answer then
+			if v.my_answer and not answer_eq(self._topics_table.answers[v.item_id],v.my_answer) then
 			--答案被修改过,需要存储
 				if v.item_id then
 					self:commit_topics( v )
-					self._topics_table.answers[v.item_id] = v.my_answer
+					self._topics_table.answers[v.item_id] = answer_clone(v.my_answer)
 					isc = true	
 				else
 					kits.log('error : WorkFlow:save_answer v.item_id = nil' )
@@ -299,8 +357,9 @@ function WorkFlow:load_cloud_answer( e )
 							local t = json.decode(result.detail.answer)
 							if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
 								kits.log('	CLOUD ANSWER:'..result.detail.answer )
-								if #t.answers > 0 and t.answers[1].value then
-									e.my_answer = t.answers[1].value
+								e.my_answer = {}
+								for i,v in pairs(t.answers) do
+									e.my_answer[i] = v.value
 								end
 							end
 						end
@@ -346,11 +405,12 @@ function WorkFlow:load_original_data_from_table( data )
 			end
 			if self._topics_table and self._topics_table.answers then
 				--从答案表中取答案
-				k.my_answer = self._topics_table.answers[v.item_id]
+				k.my_answer = answer_clone(self._topics_table.answers[v.item_id])
 			else
-				k.my_answer = v.my_answer
+				k.my_answer = answer_clone(v.my_answer)
 			end
-			if k.my_answer and type(k.my_answer)=='string' and string.len(k.my_answer)>0 then
+			if k.my_answer and type(k.my_answer)=='table' and k.my_answer[1] and 
+				((type(k.my_answer[1])=='string' and string.len(k.my_answer[1])>0) or type(k.my_answer[1])=='number') then
 				k.state =  ui.STATE_FINISHED
 			else
 				k.state = ui.STATE_UNFINISHED
@@ -407,6 +467,7 @@ function WorkFlow:init_gui()
 	self:addChild(self._root)
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 		--保存
+		self:save_answer()
 		self:save()
 		uikits.popScene()
 		end)
@@ -443,6 +504,7 @@ function WorkFlow:init_gui()
 	uikits.event( self._finish_button,
 				function(sender)
 					--保存
+					self:save_answer()
 					self:save()
 					uikits.popScene()
 				end,'click')
@@ -685,8 +747,10 @@ function WorkFlow:set_anwser_field( i )
 			end
 			uikits.stopAllSound() --停止可能的播放
 			--保存答案
+			self:save_answer() --不在每次修改时保存，而是在每次切换的时候保存
 			data.eventAnswer=function(layout,data)
-				self:save_answer()
+				--self:save_answer()
+				self:check_finished()
 			end
 			topics.types[t].init(layout,data)
 			--如果内容超出滚动区

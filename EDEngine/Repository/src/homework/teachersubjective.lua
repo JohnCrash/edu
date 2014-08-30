@@ -1,9 +1,10 @@
+local kits = require "kits"
 local uikits = require "uikits"
 local StudentList = require "homework/studentlist"
 
 local ui = {
-	FILE = 'laoshizuoye/jinruzgt.json',
-	FILE_3_4 = 'laoshizuoye/jinruzgt43.json',
+	FILE = 'homework/laoshizuoye/jinruzgt.json',
+	FILE_3_4 = 'homework/laoshizuoye/jinruzgt43.json',
 	BACK = 'ding/back',
 	LIST = 'newview',
 	ITEM = 'newview/subject1',

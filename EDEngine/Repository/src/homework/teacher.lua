@@ -11,8 +11,8 @@ local topics_course = topics.course_icon
 local res_local = "homework/"
 
 local ui = {
-	FILE = 'laoshizuoye/daiyue.json',
-	FILE_3_4 = 'laoshizuoye/daiyue43.json',
+	FILE = 'homework/laoshizuoye/daiyue.json',
+	FILE_3_4 = 'homework/laoshizuoye/daiyue43.json',
 	BACK = 'ding/back',
 	LIST = 'zuo',
 	ITEM = 'zuoye1',
@@ -218,6 +218,12 @@ function TeacherList:init_gui()
 end
 
 function TeacherList:init()
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1920,height=1080}
+	else
+		uikits.initDR{width=1440,height=1080}
+	end
+	
 	if not self._root then
 		self:init_gui()
 	end

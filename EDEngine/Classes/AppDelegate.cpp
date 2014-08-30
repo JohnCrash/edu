@@ -4,6 +4,9 @@
 #include "lua_ext.h"
 #include "luaDebug.h"
 #include "AssetsManager.h"
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+#include "AppleBundle.h"
+#endif
 
 AppDelegate::AppDelegate()
 {
@@ -45,7 +48,7 @@ void AppDelegate::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 	glview->setFrameSize(1024,576);
 	//glview->setFrameSize(1920,1080);
 #endif	
@@ -62,7 +65,7 @@ void AppDelegate::initLuaEngine()
 #endif
     //auto designSize = Size(480, 320);
 	//auto designSize = Size(960, 640);
-    auto designSize = Size(1024, 768);
+    auto designSize = Size(1024,768);
 	// auto designSize = Size(1024, 576);
 
     if (screenSize.height > 320)
@@ -76,28 +79,23 @@ void AppDelegate::initLuaEngine()
     }
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
- 
-	auto path = FileUtils::getInstance()->getWritablePath();
-	if( path.length() > 0 )
-		if( path.back() == '/'||
-			path.back() == '\\' )
-		{
-			path.pop_back();
-		}
-	std::string luap = path + "/luacore";
-	FileUtils::getInstance()->addSearchPath(luap.c_str());
 
+	auto fu = FileUtils::getInstance();
+	std::string wpath = fu->getWritablePath();
+	fu->addSearchPath(wpath+"src/luacore");
+	fu->addSearchPath("luacore");
+	fu->addSearchPath("src");
+    fu->addSearchPath("res");
+    
     auto pEngine = LuaEngine::getInstance();
 	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
     
     LuaStack* stack = pEngine->getLuaStack();
-	stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
-    register_assetsmanager_test_sample(stack->getLuaState());
-	#ifdef _DEBUG
-		startRuntime();
-	#endif
-    pEngine->executeScriptFile("bootstrap.lua");
+
+    //pEngine->executeScriptFile("bootstrap.lua");
+	pEngine->executeScriptFile("crashreport.lua");
+	pEngine->executeScriptFile("launcher.lua");
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
@@ -109,9 +107,6 @@ void AppDelegate::InitForDebugMode()
 	GetCurrentDirectory(255,cur);
 	wcscat(cur,L"\\luacore");
 	SetCurrentDirectory( cur );
-//	GetCurrentDirectory(255,cur);
-//	printf("write dir = %s\n",path.c_str());
-//	printf("current dir= %s\n",cur);
 }
 #endif
 
@@ -162,24 +157,3 @@ void AppDelegate::applicationWillEnterForeground() {
     // if you use SimpleAudioEngine, it must resume here
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
-
-/*
-bool AppDelegate::initInternalLuaEngine()
-{
-	_core = LuaStack::create();
-	_debuger = LuaStack::create();
-	_core->retain();
-	_debuger->retain();
-
-
-	return true;
-}
-
-void AppDelegate::releaseInternalLuaEngine()
-{
-	CC_SAFE_RELEASE(_core);
-	CC_SAFE_RELEASE(_debuger);
-	_core = nullptr;
-	_debuger = nullptr;
-}
-*/

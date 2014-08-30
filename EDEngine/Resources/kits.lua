@@ -166,24 +166,20 @@ local function local_exists( file )
   return f ~= nil  
 end
 
-local function read_local_file( name )
-  local file = local_dir..name
+local function read_file(name)
+  local file = name
   if not local_exists(file) then return false end
   local alls
   
   file = io.open(file,"rb")
   alls = file:read("*a")
   file:close()
-  --[[
-  for line in io.lines(file) do
-    if not alls then
-      alls = line
-    else
-      alls = alls..line
-    end
-  end
-  --]]
-  return alls
+  return alls	
+end
+
+local function read_local_file( name )
+  local file = local_dir..name
+  return read_file(name)
 end
 
 local function read_network_file( name )
@@ -191,19 +187,26 @@ local function read_network_file( name )
   return download_http_by_curl(url)
 end
 
-local function write_local_file( name,buf )
-  local filename = local_dir..name
+local function write_file( name,buf )
+  local filename = name
   local file = io.open(filename,'wb')
   if file then
     file:write(buf)
     file:close()
+	return true
   else
      --local file error?
      cclog('Can not write file '..filename)
+	 return false
   end
 end
 
-local function local_directory_exists( dir )
+local function write_local_file( name,buf )
+  local filename = local_dir..name
+  return write_file( name,buf )
+end
+
+local function directory_exists( dir )
 	local s,err = lfs.attributes( dir )
 	if s and s.mode == 'directory' then
 		return true
@@ -211,24 +214,37 @@ local function local_directory_exists( dir )
 	return false
 end
 
-local function make_local_directory( name )
-	local dir = local_dir..name
-	if not local_directory_exists(dir) then
+local function make_directory( name )
+	local dir = name
+	if not directory_exists(dir) then
 		lfs.mkdir(dir)
 	end
 end
 
-local function del_local_directory( name )
+local function make_local_directory( name )
+	make_directory( local_dir..name )
+end
+
+local function del_directory( name )
 	--no imp?
 end
 
-local function del_local_file( name )
-	local filename = local_dir..name
+local function del_local_directory( name )
+	del_directory( local_dir..name )
+end
+
+local function del_file( name )
+	local filename = name
   if os.remove then
     os.remove(filename)
   else
     print('not found os.remove function')
   end
+end
+
+local function del_local_file( name )
+	local filename = local_dir..name
+	del_file(filename)
 end
 
 --try 10 times
@@ -380,12 +396,13 @@ local exports = {
 	del_local_file = del_local_file,
 	del_local_directory = del_local_directory,
 	make_local_directory = make_local_directory,
-	local_directory_exists = local_directory_exists,
+	directory_exists = directory_exists,
 	download_http_by_socket = download_http_by_socket,
 	download_http_by_http = download_http_by_http,
 	download_http_by_curl = download_http_by_curl,
 	local_exists = local_exists,
 	read_local_file = read_local_file,
+	read_file = read_file,
 	read_network_file = read_network_file,
 	write_local_file = write_local_file,
 	http_post = http_post,
@@ -400,6 +417,10 @@ local exports = {
 	time_to_string = time_to_string,
 	log = my_log,
 	check = check_table,
+	write_file = write_file,
+	make_directory = make_directory,
+	del_file = del_file,
+	del_directory = del_directory,
 }
 
 return exports

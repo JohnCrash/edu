@@ -260,7 +260,7 @@ static void set_info(lua_State *L)
 	lua_pushliteral (L, "json is lua library.");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "json "VERSION);
+	lua_pushliteral (L, "json " VERSION);
 	lua_settable (L, -3);
 }
 

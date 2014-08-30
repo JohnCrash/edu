@@ -1,5 +1,3 @@
-local kits = require 'kits'
-
 local test_login = 
 {
 --[[
@@ -13,15 +11,21 @@ local test_login =
 	[2] = {name='熊黎勇',uid=141769,cookie='sc1=FBEE62D6BD4342E8E10DB8354ADD1DF7C4AA3B39akl%2bNQfmBYOcjnsDJUFvu0V%2fYwv3ZxjisEzUh8KSvFYpFEjPwGlmazC%2bqAqQqkbvS7H2mdwfxGLdiSAZpHVbaewlwrbp3A%3d%3d'},
 }
 local selector = 2
+local g_cookie
+local function set_cookie( cookie )
+	g_cookie = cookie
+end
 
 local function get_name()
 	return test_login[selector].name
 end
 
 local function get_cookie()
-	--kits.log('	cookie='..test_login[selector].cookie )
-	--kits.log('	user='..get_name())
-	return test_login[selector].cookie
+	if g_cookie then
+		return g_cookie
+	else
+		return test_login[selector].cookie
+	end
 end
 
 local function get_uid()
@@ -56,4 +60,5 @@ return {
 	get_name = get_name,
 	set_selector = set_selector,
 	test_login = test_login,
+	set_cookie = set_cookie,
 }
