@@ -26,7 +26,7 @@ function Console:init()
 	local ss = glview:getFrameSize()
 	local scale = uikits.get_factor()
 	local bh = 64*scale
-	local view = uikits.scrollview{width=ss.width*scale,height=ss.height*scale-bh,y=bh}
+	local view = uikits.scrollview{width=ss.width*scale,height=ss.height*scale-bh,y=bh,bgcolor=cc.c3b(0,0,64)}
 	local close = uikits.button{caption="close",
 			fontSize=32*scale,width=128*scale,height=64*scale,
 			anchorX=0,anchorY=0}
@@ -35,17 +35,23 @@ function Console:init()
 	end )
 	local h = 0
 	local item_h = 24*scale
-	local logs=kits.get_logs()
-	for i=1,20 do
-		local msg = logs[#logs-i-1]
-		if msg then
-			local item = uikits.text{caption=string.sub(msg,1,128),y=h,fontSize=item_h}
-			view:addChild(item)
-			h = h + item_h
-		end
+	local logs_org=kits.get_logs()
+	local logs = {}
+	for i = 1,#logs_org do
+		table.insert(logs,logs_org[#logs_org-i+1])
 	end
-	view:setInnerContainerSize(cc.size(ss.width*scale*4,h+2*item_h))
-	view:jumpToBottomLeft()
+	uikits.scrollview_step_add(view,logs,20,
+		function(msg)
+			if msg then
+				local item = uikits.text{caption=string.sub(msg,1,128),y=h,fontSize=item_h}
+				view:addChild(item)
+				h = h + item_h
+			else --重新布局
+				view:setInnerContainerSize(cc.size(ss.width*scale*2,h+2*item_h))			
+				view:scrollToBottom(0.1,true)
+			end
+		end,ccui.ScrollviewEventType.scrollToTop)
+		
 	self:addChild(view)
 	self:addChild(close)
 end
