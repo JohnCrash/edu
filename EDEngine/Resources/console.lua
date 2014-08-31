@@ -3,8 +3,9 @@ local uikits = require "uikits"
 
 local Console = class("Console")
 Console.__index = Console
-
+local isopen = false
 function Console.create()
+	if isopen then return end
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),Console)
 	
@@ -22,6 +23,7 @@ function Console.create()
 end
 
 function Console:init()
+	isopen = true
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
 	local scale = uikits.get_factor()
@@ -57,7 +59,7 @@ function Console:init()
 end
 
 function Console:release()
-	
+	isopen = false
 end
 
 return Console

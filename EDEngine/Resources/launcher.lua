@@ -51,10 +51,12 @@ end
 
 --android 返回键
 local function onKeyRelease(key,event)
-	print('key='..tostring(key))
 	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
 		local console = require "console"
-		cc.Director:getInstance():pushScene( console.create() )
+		local scene = console.create()
+		if scene then
+			cc.Director:getInstance():pushScene( scene )
+		end
 		--uikits.popScene()
 	end
 end
