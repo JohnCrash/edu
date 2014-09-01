@@ -4,7 +4,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
-local topics = require "src/errortitile/topics"
+local topics = require "src/errortitile/topicserr"
 local login = require "login"
 --local answer = curweek or require "src/errortitile/answer"
 local BigquestionView = require "src/errortitile/BigquestionView"
@@ -89,7 +89,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	local label_type
 	
 	wrong_view = src_wrongview:clone()
-
+	self.main_wrongview:addChild(wrong_view,1,1000+index)
 	if _G.screen_type == 1 then
 
 		if index%2 == 1 then
@@ -142,36 +142,40 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	
     questions_view:addChild(scrollView)
 	local data = {}
-
 	if tb_wrongtitle_item.item_type > 0 and tb_wrongtitle_item.item_type < 13 then
 		if topics.types[tb_wrongtitle_item.item_type].conv(tb_wrongtitle_item,data) then
 			data.eventInitComplate = function(layout,data)
+				local arraychildren = scrollView:getChildren()
+				for i=1,#arraychildren do 
+					arraychildren[i]:setEnabled(false)
+				end
 			end
-			scrollView:setEnabled(false)
+			data._options = {}
+			--scrollView:setEnabled(false)
 			topics.types[tb_wrongtitle_item.item_type].init(scrollView,data)
 		end		
 	end	
-
+	scrollView:addTouchEventListener(				
+					function(sender,eventType)
+						if eventType == ccui.TouchEventType.began then
+							self.main_wrongview:setEnabled(false)
+						elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+							self.main_wrongview:setEnabled(true)	
+						end
+					end)
+	
 --	local questions_path = "errortitile/kong.png"
-	local questions_but = ccui.Button:create()
+--[[	local questions_but = ccui.Button:create()
 	questions_but:setTouchEnabled(true)
 	questions_but:loadTextures(questions_path, questions_path, "")
 	local size_question = questions_view:getContentSize()	
 --	questions_but:setContentSize(size_question)
 	local scale_x = size_question.width/questions_but:getContentSize().width
-	local scale_y = size_question.height/questions_but:getContentSize().height
+	local scale_y = size_question.height/questions_but:getContentSize().height--]]
 
-	questions_but:setScale(scale_y)
+--[[	questions_but:setScale(scale_y)
 	questions_but:setPosition(cc.p(size_question.width/2,size_question.height/2))
 	
---[[	questions_but.file_path = questions_path
-	questions_but.question_type = tb_wrongtitle_item.item_name
-	questions_but.difficulty = tb_wrongtitle_item.difficulty
-	questions_but.perwrong = tb_wrongtitle_item.perwrong
-	questions_but.isright = tb_wrongtitle_item.isright
-	questions_but.correct_answer = tb_wrongtitle_item.correct_answer
-	questions_but.answer = tb_wrongtitle_item.answer
-	questions_but.question_id = tb_wrongtitle_item.item_id--]]
 	questions_but.tb_wrongtitle_item = tb_wrongtitle_item
 	questions_but.file_path = questions_path
 	--print(self.name..'+'..self.label..'+'..self.range..'+'..self.id)
@@ -185,7 +189,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 			--cc.Director:getInstance():replaceScene(scene_next)	
 			uikits.pushScene(scene_next)
 		end,"click")
-	questions_view:addChild(questions_but)
+	questions_view:addChild(questions_but)--]]
 	--完成测试
 	
 	local size  = wrong_view:getContentSize()
@@ -276,13 +280,6 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	else
 		but_collect:setSelectedState(true)
 	end		
-
---[[    local function touchEvent(sender, eventType)
-        if eventType == ccui.TouchEventType.ended then
-			print("1111111")
-        end
-    end
-	but_more.share_box:addTouchEventListener(touchEvent)--]]
 	
 	wrong_view:addChild(but_more.share_box)	
 	local but_sendtofriend = but_more.share_box:getChildByTag(660)
@@ -341,8 +338,6 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 					but_more.share_box:setVisible(true)
 				end
 			end,"click")		
-	
-	self.main_wrongview:addChild(wrong_view,1,10000+index)
 end
 
 function persubject:encodeURI(s)
@@ -386,16 +381,23 @@ function persubject:updatepage()
 		self.main_wrongview:setInnerContainerSize(cc.size(size_old.width,size_old.height+(size.height+wrong_space)*row_num))
 		
 		local wrongview = self.main_wrongview:getChildren()
+		local pos
 		for i,obj in pairs(wrongview) do
-			local per_size_old_x = wrongview[i]:getPositionX()
-			local per_size_old_y = wrongview[i]:getPositionY()+(size.height+wrong_space)*row_num
-			wrongview[i]:setPosition(cc.p(per_size_old_x,per_size_old_y))
+			local is_clone = wrongview[i]:isVisible()
+			if is_clone == true then
+				local per_size_old_x = wrongview[i]:getPositionX()
+				local per_size_old_y = wrongview[i]:getPositionY()+(size.height+wrong_space)*row_num
+				wrongview[i]:setPosition(cc.p(per_size_old_x,per_size_old_y))		
+			else
+				pos = wrongview[i]:getPositionX()
+			end
 		end
-		
+		pos = per_wrongview_no:getPositionX()
 		
 		for i,obj in pairs(self.wrongtitleitems) do
 			if self.wrongtitleitems[i].isright ~= 1 then		
 				self:addwrong(i+count_old,per_wrongview_no,per_wrongview_has,per_wrongview_no,self.wrongtitleitems[i])
+				pos = per_wrongview_no:getPositionX()
 			else			
 				self:addwrong(i+count_old,per_wrongview_has,per_wrongview_has,per_wrongview_no,self.wrongtitleitems[i])
 			end			
@@ -407,7 +409,7 @@ function persubject:getdatabyurl()
 	local send_data
 	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
 	
---[[	local send_url = t_nextview[2].url..send_data
+	local send_url = t_nextview[2].url..send_data
 	local result = kits.http_get(send_url,cookie1,1)
 	print(result)	
 	local tb_result = json.decode(result)
@@ -432,11 +434,11 @@ function persubject:getdatabyurl()
 			self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
 		end
 	end
-	self:updatepage()--]]
+	self:updatepage()
 					
-	local loadbox = loadingbox.open(self)
+--[[	local loadbox = loadingbox.open(self)
 	is_loading = true
-	cache.request_json( t_nextview[2].url..send_data,function(t)
+	cache.request_json( t_nextview[2].url..send_data,function(t)	
 			if t and type(t)=='table' then
 				self.totalpagecount = t.page_total
 				self.wrongtitleitems = t.exerbook_user_items	
@@ -458,9 +460,9 @@ function persubject:getdatabyurl()
 				end
 				self:updatepage()
 			end
-			is_loading = false
 			loadbox:removeFromParent()
-		end,'N')	
+			is_loading = false
+		end,'N')	--]]
 	return true
 end
 
@@ -522,7 +524,7 @@ function persubject:showpracticeview()
 					end,'N')			
 			end,"click")	
 
-	self:addChild(self.practice_view,1000)
+	self:addChild(self.practice_view,10000)
 end
 
 function persubject:updatewrongview()
@@ -596,10 +598,11 @@ function persubject:init()
 		self.practice_view:setVisible(true)	
 		local practice_view = self.practice_view:getChildByTag(832)--获取开始练习的对话框
 		local but_practice_no = practice_view:getChildByTag(836)--获取只做错题按钮
+		print(self.has_error)
 		if self.has_error == 0 then
-			but_practice_no:setVisible(false)
-		else
 			but_practice_no:setVisible(true)
+		else
+			but_practice_no:setVisible(false)
 		end			
 	end,"click")	
 	--下拉更新错题列表
@@ -614,8 +617,34 @@ function persubject:init()
 	
 end
 
-function persubject:release()
+function persubject:clear_all_item()
+--[[	self.wrongtitleitems = {}
+	self.subject_name = nil
+	self.subject_label = nil
+	self.range = nil
+	self.subject_id = nil
+	self.pageindex = nil
+	self.main_wrongview:removeAllChildren()
+	self.main_wrongview = {}--]]
+--[[	if self._list then
+		for i =1,#self._list do
+			local u = uikits.child( self._list[i],ui.END_DATE )
+			if u and u._scID then
+				u:getScheduler():unscheduleScriptEntry(u._scID)
+			end
+			if i ~= 1 then
+				self._list[i]:removeFromParent()
+			else
+				self._list[i]:setVisible(false) --第一个是模板
+			end
+		end
+		self._list = {}
+	end--]]
+end
 
+function persubject:release()
+	print("1111111111")
+	self:clear_all_item()
 end
 return {
 create = create,

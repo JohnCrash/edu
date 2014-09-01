@@ -1,9 +1,8 @@
 local uikits = require "uikits"
 local socket = require "socket"
-local res = require "src/testResource"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
-local topics = require "src/errortitile/topics"
+local topics = require "src/errortitile/topicserr"
 local kits = require "kits"
 --local answer = curweek or require "src/errortitile/answer"
 local resultview = class("resultview")
