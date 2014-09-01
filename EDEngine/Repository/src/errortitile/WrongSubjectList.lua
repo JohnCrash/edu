@@ -440,7 +440,7 @@ function WrongSubjectList:init()
 end
 
 function WrongSubjectList:release()
-	self._widget = nil
+	--self._widget = nil
 end
 return {
 create = create,

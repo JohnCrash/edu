@@ -5,7 +5,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local login = require "login"
-local topics = require "src/errortitile/topics"
+local topics = require "src/errortitile/topicserr"
 local BigquestionView = class("BigquestionView")
 BigquestionView.__index = BigquestionView
 

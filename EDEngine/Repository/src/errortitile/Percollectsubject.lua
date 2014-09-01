@@ -5,7 +5,7 @@ local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local login = require "login"
-local topics = require "src/errortitile/topics"
+local topics = require "src/errortitile/topicserr"
 --local answer = curweek or require "src/errortitile/answer"
 --local BigquestionView = require "src/errortitile/BigquestionView"
 local Percollectsubject = class("Percollectsubject")
@@ -134,12 +134,23 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 --		print(topics.types[item_data.item_type])
 		if topics.types[collectitem.item_type].conv(collectitem,data) then
 			data.eventInitComplate = function(layout,data)
+				local arraychildren = scrollView:getChildren()
+				for i=1,#arraychildren do 
+					arraychildren[i]:setEnabled(false)
+				end
 			end
-			questions_view:setEnabled(false)
+			--questions_view:setEnabled(false)
 			topics.types[collectitem.item_type].init(scrollView,data)
 		end		
 	end	
-
+	scrollView:addTouchEventListener(				
+					function(sender,eventType)
+						if eventType == ccui.TouchEventType.began then
+							page:setEnabled(false)
+						elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+							page:setEnabled(true)	
+						end
+					end)
 --	questions_view:addChild()
 --	questions_view:setTouchEnabled(false);
 	--处理更多操作按钮
@@ -220,7 +231,7 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 				but_more.share_box:setVisible(true)
 			end
 	end,"click")		
-	page:addChild(collect_view)		
+	page:addChild(collect_view,1,1000+index)		
 end
 
 function Percollectsubject:updatepage()

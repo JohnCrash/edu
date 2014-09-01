@@ -5,7 +5,7 @@ local login = require "login"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
---require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.2.102")
 local function init_test_resource()
   local res = local_dir..'res/'
   local pfu = cc.FileUtils:getInstance()
@@ -53,7 +53,9 @@ else
 	uikits.initDR{width=1440,height=1080}
 end
 	
-local app,cookie = cc_launchparam()
+--local app,cookie = cc_launchparam()
+local app = 'errortitile'
+local cookie = nil
 local scene
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	
