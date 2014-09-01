@@ -349,7 +349,11 @@ function UpdateProgram:update()
 		if self._count > self._maxcount then
 			--操作完成
 			if self._luacore_update then
-				self:ErrorAndExit('本次跟新需要重新启动,请退出再启动程序!',2)
+				--self:ErrorAndExit('本次跟新需要重新启动,请退出再启动程序!',2)
+				--要求重新加载这些文件
+				package.loaded['kits'] = nil
+				package.loaded['uikits'] = nil
+				package.loaded['cache'] = nil				
 				return
 			end
 
