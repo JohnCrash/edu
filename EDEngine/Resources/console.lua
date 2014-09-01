@@ -26,7 +26,7 @@ function Console:init()
 	isopen = true
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
-	local scale = uikits.get_factor()
+	local scale = uikits.scale()
 	local bh = 64*scale
 	local view = uikits.scrollview{width=ss.width*scale,height=ss.height*scale-bh,y=bh,bgcolor=cc.c3b(0,0,64)}
 	local close = uikits.button{caption="close",
@@ -46,11 +46,13 @@ function Console:init()
 		function(msg)
 			if msg then
 				local color
-				local title = string.sub(msg,1,5)
-				if title=='ERROR' or title=='error' then
+				local title = string.sub(msg,1,4)
+				if title=='ERRO' or title=='erro' then
 					color = cc.c3b(255,0,0)
-				elseif title=='WARNI' or title=='warn' then
+				elseif title=='WARN' or title=='warn' then
 					color = cc.c3b(255,255,0)
+				elseif title=='INFO' or title=='info' then
+					color = cc.c3b(0,255,0)
 				else
 					color = cc.c3b(255,255,255)
 				end
@@ -61,7 +63,8 @@ function Console:init()
 					ox = 0
 				end
 				local length = string.len(msg)
-				if length < 80 then
+				local maxn = 96
+				if length < maxn then
 					local item = uikits.text{caption=msg,x=ox,y=h,fontSize=item_h,color=color}
 					view:addChild(item)
 					h = h + item_h
@@ -70,8 +73,8 @@ function Console:init()
 					local i = 1
 					local s = {}
 					while i<=length do
-						table.insert(s,string.sub(msg,i,i+80))
-						i = i + 80
+						table.insert(s,string.sub(msg,i,i+maxn))
+						i = i + maxn + 1
 					end
 					for i=1,#s do
 						local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}

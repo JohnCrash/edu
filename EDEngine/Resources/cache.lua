@@ -85,8 +85,8 @@ local function request_nc( url,func,filename ) --网络优先，然后缓存
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
-						kits.log('request:'..url..' successed!')
-						kits.log('	request data write to '..tostring(get_name(url)))
+						kits.log('INFO : request:'..url..' successed!')
+						kits.log('INFO :	request data write to '..tostring(get_name(url)))
 						if filename then
 							kits.write_cache(filename,obj.data)
 						else
