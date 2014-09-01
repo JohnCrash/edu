@@ -65,9 +65,10 @@ listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_R
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
 
-local app,cookie = cc_launchparam()
+--local app,cookie = cc_launchparam()
 local scene
-app = 'homework'
+local cookie = nil
+app = 'errortitile'
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
