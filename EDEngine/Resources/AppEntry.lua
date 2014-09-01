@@ -78,6 +78,23 @@ function AppEntry:init()
 		eventClick=function(sender)
 			cc.Director:getInstance():endToLua()
 		end}
+	local debugip = uikits.editbox{
+		caption = '192.168.2.*',
+		x=320*scale,y = 64*scale + 2*item_h,
+		width=128*scale,height=48*scale
+	}
+	debugip:setText("192.168.2.182")
+	local isopen = false
+	local debugbutton = uikits.button{caption='debug...',x=320*scale,y = 64*scale + item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			if not isopen then
+				require("mobdebug").start(debugip:getStringValue())
+				isopen = true
+			end
+		end}	
+	bg:addChild(debugip)
+	bg:addChild(debugbutton)
 	bg:addChild(amouse)
 	bg:addChild(tbutton)
 	bg:addChild(sbutton)

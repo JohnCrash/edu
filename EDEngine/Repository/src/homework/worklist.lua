@@ -288,6 +288,7 @@ function WorkList:init()
 	if not self._root then
 		self:init_gui()
 	end
+	self._tab:set(1)
 	self:init_new_list()	
 end
 

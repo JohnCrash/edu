@@ -22,6 +22,22 @@ function Console.create()
 	return scene
 end
 
+local function add_table( t,s )
+	local i = 1
+	local length = string.len(s)
+	while i <= length do
+		local begin = i
+		i = string.find(s,'\n',i)
+		if i then
+			table.insert(t,string.sub(s,begin,i-1))
+		else
+			table.insert(t,string.sub(s,begin))
+			break
+		end
+		i = i + 1
+	end
+end
+
 function Console:init()
 	isopen = true
 	local glview = cc.Director:getInstance():getOpenGLView()
@@ -64,23 +80,18 @@ function Console:init()
 				end
 				local length = string.len(msg)
 				local maxn = 96
-				if length < maxn then
-					local item = uikits.text{caption=msg,x=ox,y=h,fontSize=item_h,color=color}
+				--折行
+				local i = 1
+				local s = {}
+				while i<=length do
+					add_table( s,string.sub(msg,i,i+maxn) )
+					--table.insert(s,string.sub(msg,i,i+maxn))
+					i = i + maxn + 1
+				end
+				for i=1,#s do
+					local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
 					view:addChild(item)
-					h = h + item_h
-				else
-					--折行
-					local i = 1
-					local s = {}
-					while i<=length do
-						table.insert(s,string.sub(msg,i,i+maxn))
-						i = i + maxn + 1
-					end
-					for i=1,#s do
-						local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
-						view:addChild(item)
-						h = h + item_h						
-					end
+					h = h + item_h						
 				end
 			else --重新布局
 				view:setInnerContainerSize(cc.size(ss.width*scale*2,h+2*item_h))			

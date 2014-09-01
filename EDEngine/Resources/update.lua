@@ -289,6 +289,9 @@ function UpdateProgram:check_update(t)
 			outer = true
 			break
 		elseif b then
+			if v == 'luacore' then
+				self._luacore_update = true
+			end
 			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
 		end
 	end
@@ -301,6 +304,9 @@ function UpdateProgram:check_update(t)
 			if e then --如果网络错误不在等待，直接不跟新
 				return false
 			elseif b then
+				if v == 'luacore' then
+					self._luacore_update = true
+				end			
 				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
 			end
 		end
@@ -342,6 +348,11 @@ function UpdateProgram:update()
 		self._progress:setPercent(self._count*100/self._maxcount)
 		if self._count > self._maxcount then
 			--操作完成
+			if self._luacore_update then
+				self:ErrorAndExit('本次跟新需要重新启动,请退出再启动程序!',2)
+				return
+			end
+
 			kits.log('Update complate!')
 			local b,scene = pcall(self._args.run)
 			if b then
