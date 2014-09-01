@@ -1,14 +1,17 @@
 require "Cocos2d"
-local crash = require "crashreport"
+local crash = require "crash"
 local kits = require "kits"
 local uikits = require "uikits"
 local login = require "login"
 local update = require "update"
 
+crash.open("launcher",1)
+
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
 --require("mobdebug").start("192.168.2.182")
+
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
   if platform == kTargetWindows then
@@ -18,7 +21,7 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir)
 		pfu:addSearchPath(local_dir..'luacore/')
 		--默认资源
-		pfu:addSearchPath('luacore/res')
+		pfu:addSearchPath(local_dir..'luacore/res')
 	else --android,ios
 		--先搜索跟新目录
 		pfu:addSearchPath(local_dir..'src/')
@@ -48,9 +51,13 @@ end
 
 --android 返回键
 local function onKeyRelease(key,event)
-	print('key='..tostring(key))
-	if key == cc.KeyCode.KEY_ESCAPE then
-		uikits.popScene()
+	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
+		local console = require "console"
+		local scene = console.create()
+		if scene then
+			cc.Director:getInstance():pushScene( scene )
+		end
+		--uikits.popScene()
 	end
 end
 local listener_keyboard = cc.EventListenerKeyboard:create()

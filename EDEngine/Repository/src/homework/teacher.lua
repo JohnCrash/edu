@@ -1,3 +1,4 @@
+local crash = require "crash"
 local uikits = require "uikits"
 local cache = require "cache"
 local kits = require "kits"
@@ -9,6 +10,8 @@ local topics = require "homework/topics"
 
 local topics_course = topics.course_icon
 local res_local = "homework/"
+
+crash.open("teacher",1)
 
 local ui = {
 	FILE = 'homework/laoshizuoye/daiyue.json',

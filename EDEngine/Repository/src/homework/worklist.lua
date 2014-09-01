@@ -1,3 +1,4 @@
+local crash = require "crash"
 local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
@@ -6,6 +7,8 @@ local login = require "login"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "homework/loadingbox"
 local topics = require "homework/topics"
+
+crash.open("homework",1)
 
 local course_icon = topics.course_icon
 --[[
