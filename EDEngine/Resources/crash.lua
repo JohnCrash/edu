@@ -51,6 +51,10 @@ local function report_export( errmsg,stack_level )
 				break
 			end
 		end
+		kits.log("Call Stack")
+		kits.log("========")
+		kits.log( bugs.call_stack )
+		
 		bugs.errmsg = errmsg
 		bugs.type = 'lua'
 		
@@ -71,7 +75,7 @@ local function report_export( errmsg,stack_level )
 		bugs.luacore_version = luacore_version
 		bugs.luaapp_name = luaapp_name
 		bugs.luaapp_version = luaapp_version
-
+		
 		local logs = kits.get_logs()
 		if logs then
 			local ca={}

@@ -22,6 +22,19 @@ local ui = {
 	CAPTION = 'text',
 }
 
+local function runScene( scene )
+	if scene then
+		director = cc.Director:getInstance()
+		if director then
+			if director:getRunningScene() then
+				director:replaceScene(scene)
+			else
+				director:runWithScene(scene)
+			end
+		end
+	end
+end
+
 local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
 --2网络问题，1本地问题，0没有问题，3算法结构问题
@@ -88,7 +101,8 @@ function UpdateProgram.create(t)
 		if platform==kTargetWindows then
 			local scene = t.run()
 			if scene then
-				cc.Director:getInstance():runWithScene(scene)
+				--cc.Director:getInstance():runWithScene(scene)
+				runScene(scene)
 				return
 			else
 				kits.log('ERROR UpdateProgram:init run return nil')
@@ -109,7 +123,8 @@ function UpdateProgram.create(t)
 			end
 		end	
 		layer:registerScriptHandler(onNodeEvent)
-		cc.Director:getInstance():runWithScene(scene)
+		--cc.Director:getInstance():runWithScene(scene)
+		runScene(scene)
 	else
 		kit.log('ERROR UpdateProgram.create invalid param')
 	end
@@ -128,7 +143,8 @@ function UpdateProgram:ErrorAndExit(msg,t)
 		uikits.event(self._try,function(sender)
 			kits.log('Update complate!')
 			local scene = self._args.run()
-			cc.Director:getInstance():replaceScene(scene)
+			--cc.Director:getInstance():replaceScene(scene)
+			runScene(scene)
 		end)
 	elseif t==2 then --退出
 		self._try:setEnabled(false)

@@ -65,6 +65,9 @@ listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_R
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
 
+local ae = require "AppEntry"
+cc.Director:getInstance():runWithScene( ae.create() )
+--[[
 local app,cookie = cc_launchparam()
 local scene
 app = 'homework'
@@ -114,4 +117,4 @@ else
 		return worklist.create()
 	end}
 end
-
+--]]

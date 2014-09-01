@@ -1,0 +1,93 @@
+local uikits = require "uikits"
+local update = require "update"
+local login = require "login"
+
+local ui = {
+}
+
+local AppEntry = class("AppEntry")
+AppEntry.__index = AppEntry
+
+function AppEntry.create()
+	local scene = cc.Scene:create()
+	local layer = uikits.extend(cc.Layer:create(),AppEntry)
+	
+	scene:addChild(layer)
+	
+	local function onNodeEvent(event)
+		if "enter" == event then
+			layer:init()
+		elseif "exit" == event then
+			layer:release()
+		end
+	end	
+	layer:registerScriptHandler(onNodeEvent)
+	return scene
+end
+
+function AppEntry:init()
+	local glview = cc.Director:getInstance():getOpenGLView()
+	local ss = glview:getFrameSize()
+	local scale = uikits.get_factor()
+	local bg = uikits.layout{width=ss.width*scale,height=ss.height*scale}
+	local item_h = 64*scale
+	
+	local amouse = uikits.button{caption='amouse',x=64*scale,y = 64*scale +5*item_h,
+	width=128*scale,height=48*scale,
+	eventClick=function(sender)
+		update.create{name=app,updates={'amouse','luacore'},
+			run=function()
+			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+			local amouse = require "amouse/amouse_om"
+			return AMouseMain()
+		end}		
+	end}
+		
+	local tbutton = uikits.button{caption='teacher',x=64*scale,y = 64*scale +4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name=app,updates={'homework','luacore'},
+				run=function()
+				login.set_selector(2)
+				local teacher = require "homework/teacher"
+				return teacher.create()
+			end}			
+		end}
+	local sbutton = uikits.button{caption='student',x=64*scale,y = 64*scale + 3*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name=app,updates={'homework','luacore'},
+				run=function()
+				login.set_selector(1) --学生
+				local worklist = require "homework/worklist"
+				return worklist.create()
+				end}
+		end}
+	local ebutton = uikits.button{caption='errortitle',x=64*scale,y = 64*scale + 2*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name=app,updates={'homework','errortitile','luacore'},
+				run=function()
+				login.set_selector(1) --学生
+				local WrongSubjectList = require "errortitile/WrongSubjectList"
+				return WrongSubjectList.create()
+			end}
+		end}
+	local exitbutton = uikits.button{caption='exit',x=64*scale,y = 64*scale + item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			cc.Director:getInstance():endToLua()
+		end}
+	bg:addChild(amouse)
+	bg:addChild(tbutton)
+	bg:addChild(sbutton)
+	bg:addChild(ebutton)
+	bg:addChild(exitbutton)
+	self:addChild(bg)
+end
+
+function AppEntry:release()
+	
+end
+
+return AppEntry
