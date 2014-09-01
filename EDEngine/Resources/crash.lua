@@ -29,10 +29,10 @@ local function report_bug(t)
 			local text = 'value='..value
 			local url_post = crash_url..'?app_id='..tostring(t.appid)..'&sign=unkown&key='..tostring(t.key)
 			local result = kits.http_post(url_post,text,login.cookie())
-			print( "report_bug result:"..tostring(result) )
+			kits.log( "report_bug result:"..tostring(result) )
 		end
 	else
-		print('ERROR report_bug invalid param')
+		kits.log('ERROR report_bug invalid param')
 	end
 end
 
@@ -82,19 +82,19 @@ local function report_export( errmsg,stack_level )
 				end
 			end
 			bugs.log = table.concat(ca,'\n')
-			print( bugs.log)
+			kits.log( bugs.log)
 		end
 		report_bug{ appid = 1,key = md5.sumhexa( t.source..tostring(t.currentline) ),value=bugs}
 		last_source = t.source
 		last_line = t.currentline
 	elseif t then
-		print("_G_ERROR :"..tostring(t.source)..":"..tostring(t.currentline))
-		print("	"..tostring(errmsg))
+		kits.log("_G_ERROR :"..tostring(t.source)..":"..tostring(t.currentline))
+		kits.log("	"..tostring(errmsg))
 	end	
 end
 
 function __G__TRACKBACK__(errmsg)
-	print( tostring(errmsg) )
+	kits.log( tostring(errmsg) )
 	report_export(errmsg,3)
 end
 

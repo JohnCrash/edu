@@ -45,9 +45,40 @@ function Console:init()
 	uikits.scrollview_step_add(view,logs,20,
 		function(msg)
 			if msg then
-				local item = uikits.text{caption=string.sub(msg,1,128),y=h,fontSize=item_h}
-				view:addChild(item)
-				h = h + item_h
+				local color
+				local title = string.sub(msg,1,5)
+				if title=='ERROR' or title=='error' then
+					color = cc.c3b(255,0,0)
+				elseif title=='WARNI' or title=='warn' then
+					color = cc.c3b(255,255,0)
+				else
+					color = cc.c3b(255,255,255)
+				end
+				local ox
+				if string.sub(msg,1,1)=='\t' then
+					ox = 32*scale
+				else
+					ox = 0
+				end
+				local length = string.len(msg)
+				if length < 80 then
+					local item = uikits.text{caption=msg,x=ox,y=h,fontSize=item_h,color=color}
+					view:addChild(item)
+					h = h + item_h
+				else
+					--折行
+					local i = 1
+					local s = {}
+					while i<=length do
+						table.insert(s,string.sub(msg,i,i+80))
+						i = i + 80
+					end
+					for i=1,#s do
+						local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
+						view:addChild(item)
+						h = h + item_h						
+					end
+				end
 			else --重新布局
 				view:setInnerContainerSize(cc.size(ss.width*scale*2,h+2*item_h))			
 				view:scrollToBottom(0.1,true)

@@ -10,7 +10,7 @@ crash.open("launcher",1)
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
-require("mobdebug").start("192.168.0.182")
+--require("mobdebug").start("192.168.2.182")
 
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()

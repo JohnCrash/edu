@@ -17,9 +17,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/AssetsManager.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
-					$(LOCAL_PATH)/../../../../cocos2d-x-github/cocos/base \
-					$(LOCAL_PATH)/../../../../cocos2d-x-github/external/lua/lua \
-					$(LOCAL_PATH)/../../../../cocos2d-x-github/external/lua/tolua \
+					$(LOCAL_PATH)/../../../../cocos2d-xcocos/base \
+					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/lua \
+					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/tolua \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := cocos_lua_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
