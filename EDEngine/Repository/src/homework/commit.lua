@@ -211,7 +211,13 @@ end
 
 function WorkCommit:init_commit_list_by_table( t )
 	if t and type(t)=='table' then
-		uikits.scrollview_step_add(self._scrollview,t,9,function(v)
+		local ldt = {}
+		for i,v in pairs(t) do --将没提交的删除
+			if v.status == 10 or v.status == 11 then
+				table.insert(ldt,v)
+			end
+		end
+		uikits.scrollview_step_add(self._scrollview,ldt,9,function(v)
 			if v then 
 				if type(v) == 'table' and v.student_id and v.student_name and v.finish_time then
 					self:addCommitStudent( v.student_id,v.student_name,v.finish_time )
