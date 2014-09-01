@@ -1,5 +1,3 @@
-local kits = require 'kits'
-
 local test_login = 
 {
 --[[
@@ -23,8 +21,6 @@ local function get_name()
 end
 
 local function get_cookie()
-	--kits.log('	cookie='..test_login[selector].cookie )
-	--kits.log('	user='..get_name())
 	if g_cookie then
 		return g_cookie
 	else

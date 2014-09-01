@@ -1,6 +1,5 @@
 local uikits = require "uikits"
 local socket = require "socket"
-local res = require "src/testResource"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local topics = require "src/errortitile/topicserr"

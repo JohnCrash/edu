@@ -11,8 +11,8 @@ local topics_course = topics.course_icon
 local res_local = "homework/"
 
 local ui = {
-	FILE = 'laoshizuoye/daiyue.json',
-	FILE_3_4 = 'laoshizuoye/daiyue43.json',
+	FILE = 'homework/laoshizuoye/daiyue.json',
+	FILE_3_4 = 'homework/laoshizuoye/daiyue43.json',
 	BACK = 'ding/back',
 	LIST = 'zuo',
 	ITEM = 'zuoye1',

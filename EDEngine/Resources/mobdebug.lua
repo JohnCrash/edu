@@ -1086,7 +1086,7 @@ local function debugger_loop(sev, svars, sfile, sline)
 end
 
 local function connect(controller_host, controller_port)
-  return (socket.connect4 or socket.connect)(controller_host, controller_port)
+	return (socket.connect4 or socket.connect)(controller_host, controller_port)
 end
 
 local function isrunning()
@@ -1107,6 +1107,7 @@ local function start(controller_host, controller_port)
   controller_port = lastport or mobdebug.port
 
   local err
+  socket.tcp():settimeout(1)
   server, err = (socket.connect4 or socket.connect)(controller_host, controller_port)
   
   if server then

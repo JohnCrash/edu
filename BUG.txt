@@ -1,2 +1,32 @@
 1.cimmit页面4:3界面问题,ui.WORKFLOW_COMMPLETE ui.WORKFLOW child错误.
 2.学生列表页红线不对.
+
+1. 读取
+
+参数：
+
+ app_id ：调用者的appID
+
+ sign ：调用者appID对应的签名串，暂时不做验证
+
+ key ：键名
+
+http://api.lejiaolexue.com/ssp/kv/pget.ashx?app_id=12&sign=a1c1dnha73kan&key=abc
+
+ 
+
+2. 保存
+
+参数：
+
+ app_id ：调用者的appID
+
+ sign ：调用者appID对应的签名串，暂时不做验证
+
+ key ：键名
+
+ value ：要保存的内容，建议使用utf-8进行编码，否则汉字会乱码
+
+http://api.lejiaolexue.com/ssp/kv/pset.ashx?app_id=12&sign=a1c1dnha73kan&key=abc&value=anystring
+
+实际调用时上面的参数建议使用post方式
