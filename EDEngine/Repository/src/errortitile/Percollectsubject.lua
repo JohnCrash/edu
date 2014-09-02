@@ -5,7 +5,7 @@ local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local login = require "login"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 --local answer = curweek or require "src/errortitile/answer"
 --local BigquestionView = require "src/errortitile/BigquestionView"
 local Percollectsubject = class("Percollectsubject")
@@ -47,7 +47,7 @@ function Percollectsubject:resetpagedata()
 	if ret == false then
 		return
 	end
-	self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")
+--[[	self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")
 --[[	local title = self._widget:getChildByTag(1150) --获取title
 	local error_num = title:getChildByTag(1151) --获取错题数目文字描述	
 	error_num:setString(self.num)--]]
@@ -73,7 +73,7 @@ function Percollectsubject:resetpagedata()
 	page_data.share_box_src = self.share_view:getChildByTag(657)
 	for i,obj in pairs(self.collect_items) do
 		self:addcollectitem(i,self.collect_items[i],page_data,per_collectview)
-	end				
+	end				--]]
 	
 end
 
@@ -401,7 +401,7 @@ function Percollectsubject:updatecollectview()
 end	
 
 function Percollectsubject:release()
-
+	self.pageindex = 1
 end
 return {
 create = create,

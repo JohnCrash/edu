@@ -5,7 +5,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local login = require "login"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 local BigquestionView = class("BigquestionView")
 BigquestionView.__index = BigquestionView
 
@@ -24,7 +24,6 @@ function create(tb_wrongtitle_item,file_path,iscollect,name,label,range,id)
 	cur_layer.label = label
 	cur_layer.range = range
 	cur_layer.id = id		
-
 	--print(question_id)
 	scene:addChild(cur_layer)
 	
@@ -94,12 +93,21 @@ function BigquestionView:init()
 	local right_pic = answerview:getChildByTag(1788)
 	local my_txt = answerview:getChildByTag(1787)
 	local my_pic = answerview:getChildByTag(1786)
+	local right_label = answerview:getChildByTag(1783)
+	local my_label = answerview:getChildByTag(1785)	
 	
-	local answerpic_path = "errortitile/22.png"
-
-	label_type:setString(self.tb_wrongtitle_item.question_type)
+	right_txt:setVisible(false)	
+	right_pic:setVisible(false)	
+	right_label:setVisible(false)	
+	my_txt:setVisible(false)	
+	my_pic:setVisible(false)	
+	my_label:setVisible(false)	
+--	print("self.tb_wrongtitle_item:::"..self.name)
+	label_type:setString(self.tb_wrongtitle_item.item_name)
 	label_difficulty:setString(self.tb_wrongtitle_item.difficulty)
 	label_perwrong:setString(self.tb_wrongtitle_item.perwrong..'%')
+	
+--[[	local answerpic_path = "errortitile/22.png"
 	if answerpic_path == nil then
 		my_txt:setString(self.tb_wrongtitle_item.answer)
 		my_pic:setVisible(false)
@@ -154,20 +162,22 @@ function BigquestionView:init()
 			right_pic:setVisible(true)
 			right_txt:setVisible(false)
 		end			
-	end
+	end--]]
 
 
 	local data = {}
-	print("tb_wrongtitle_item.item_type::"..uikits.scale())
 	if self.tb_wrongtitle_item.item_type > 0 and self.tb_wrongtitle_item.item_type < 13 then
 		if topics.types[self.tb_wrongtitle_item.item_type].conv(self.tb_wrongtitle_item,data) then
 			data.eventInitComplate = function(layout,data)
+				local arraychildren = question_pic_view:getChildren()
+				for i=1,#arraychildren do 
+					arraychildren[i]:setEnabled(false)
+				end
 			end
-			question_pic_view:setEnabled(false)
 			topics.types[self.tb_wrongtitle_item.item_type].init(question_pic_view,data)
 		end		
 	end
-
+	question_pic_view:setBounceEnabled(true)
 --[[	local question_pic = cc.Sprite:create(self.file_path)
 	local size_question = question_pic_view:getContentSize()		
 	local scale_x = size_question.width/question_pic:getContentSize().width
