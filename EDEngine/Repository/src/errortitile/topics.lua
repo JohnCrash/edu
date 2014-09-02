@@ -101,6 +101,7 @@ local EditChildTag = 'answer_text'
 local max_options = 6
 local max_edit = 3
 local res_root = 'homework/'
+local g_scale = 1.3
 
 local function set_EditChildTag( t )
 	EditChildTag = t
@@ -142,7 +143,10 @@ local function item_ui( t )
 			if t.image and type(t.image)=='string' and string.len(t.image)>4 then
 				local ex = string.lower( string.sub(t.image,-3) )
 				if ex == 'png' or ex == 'jpg' or ex == 'gif' then
-					return uikits.image{image=cache.get_name(t.image)}
+					local img = uikits.image{image=cache.get_name(t.image)}
+					img:setScaleX(uikits.scale()*g_scale)
+					img:setScaleY(uikits.scale()*g_scale)
+					return img
 				elseif ex == 'mp3' then
 					kits.log('ERROR MP3 '..t.image )
 				else
@@ -486,6 +490,10 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 		local r,msg = cache.request_resources( rst,
 				function(rs,i,b)
 					n = n+1
+					if b and rs.urls[i] and rs.urls[i].done and type(rs.urls[i].done)=='function' then
+						local data = cache.get_data( rs.urls[i].url )
+						rs.urls[i].done( data )
+					end
 					if n >= #rs.urls then
 						--全部下载完毕
 					--	rst.loading:removeFromParent() 
@@ -601,11 +609,11 @@ local function set_topics_image( layout,data,x,y )
 		if data.topics_image_name then
 		--题目图片
 			local img = uikits.image{image=data.topics_image_name}
-			img:setScaleX(uikits.scale())
-			img:setScaleY(uikits.scale())
+			img:setScaleX(uikits.scale()*g_scale)
+			img:setScaleY(uikits.scale()*g_scale)
 			layout:addChild(img)
-			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
-			height = height+img:getContentSize().height*uikits.scale() 
+			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
+			height = height+img:getContentSize().height*uikits.scale()*g_scale 
 		end
 		if layout.setInnerContainerSize then
 			layout:setInnerContainerSize( cc.size(width,height) )
@@ -686,8 +694,8 @@ local function relayout_link( layout,data )
 	local function select_rect(item,b)
 		local x,y = item:getPosition()
 		local size = item:getContentSize()
-		size.width = size.width*uikits.scale()
-		size.height = size.height*uikits.scale()
+		size.width = size.width*uikits.scale()*g_scale
+		size.height = size.height*uikits.scale()*g_scale
 		if b then
 			if up_rect then up_rect:removeFromParent() end				
 			up_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.2)}	
@@ -734,19 +742,19 @@ local function relayout_link( layout,data )
 		layout:addChild(dot)
 	end
 
-	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
+	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
-		size.width = size.width*uikits.scale()
+		size.width = size.width*uikits.scale()*g_scale
 		dot1[i]:setPosition( cc.p(x+size.width/2,y-TOPICS_SPACE ) )
 	end
 	for i,v in pairs(ui2) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
-		size.width = size.width*uikits.scale()
-		size.height = size.height*uikits.scale()
+		size.width = size.width*uikits.scale()*g_scale
+		size.height = size.height*uikits.scale()*g_scale
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height+TOPICS_SPACE ) )	
 	end
 	set_topics_image( layout,data,0,rect2.y+rect2.height )
@@ -774,7 +782,7 @@ end
 local function get_center_pt( item )
 	local size = item:getContentSize()
 	local x,y = item:getPosition()
-	return size.width*uikits.scale()/2+x,size.height*uikits.scale()/2+y
+	return size.width*uikits.scale()*g_scale/2+x,size.height*uikits.scale()*g_scale/2+y
 end
 
 local function setEnabledParent( layout,b )
@@ -830,7 +838,7 @@ local function relayout_sort( layout,data,isH )
 		end
 	end
 	local function relayout( item,x,y )
-		uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,TOPICS_SPACE,uikits.scale(),item )
+		uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,TOPICS_SPACE,uikits.scale()*g_scale,item )
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
@@ -874,8 +882,8 @@ local function relayout_sort( layout,data,isH )
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
-						sp.x = sp.x * uikits.scale()
-						sp.y = sp.y * uikits.scale()
+						sp.x = sp.x * uikits.scale()*g_scale
+						sp.y = sp.y * uikits.scale()*g_scale
 						setEnabledParent(layout,false)
 						--if data._scrollParent then
 						--	data._scrollParent:setEnabled(false)
@@ -936,15 +944,15 @@ local function relayout_sort( layout,data,isH )
 				end)
 	end
 
-	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
+	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
 	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
 		local size = v:getContentSize()
-		size.width = size.width * uikits.scale()
-		size.height = size.height * uikits.scale()
+		size.width = size.width * uikits.scale()*g_scale
+		size.height = size.height * uikits.scale()*g_scale
 		local x,y = v:getPosition()
 		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
 		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
@@ -972,8 +980,8 @@ local function relayout_click( layout,data,ismulti )
 	local rect_node = {}
 	local bg_size = bg:getContentSize()
 	
-	bg:setScaleX(uikits.scale())
-	bg:setScaleY(uikits.scale())
+	bg:setScaleX(uikits.scale()*g_scale)
+	bg:setScaleY(uikits.scale()*g_scale)
 	
 	local total_height = bg_size.height
 	layout:addChild( bg )
@@ -1024,7 +1032,7 @@ local function relayout_click( layout,data,ismulti )
 			end,'click' )
 	end
 
-	set_topics_image( layout,data,0,bg_size.height*uikits.scale() )
+	set_topics_image( layout,data,0,bg_size.height*uikits.scale()*g_scale )
 	--载入答案
 	if data.my_answer[1] and type(data.my_answer[1])=='string' then
 		for i = 1,string.len(data.my_answer[1]) do
@@ -1051,8 +1059,8 @@ local function relayout_drag( layout,data,ismul )
 	
 	layout:addChild(bg)
 	local bgsize = bg:getContentSize()
-	bg:setScaleX(uikits.scale())
-	bg:setScaleY(uikits.scale())
+	bg:setScaleX(uikits.scale()*g_scale)
+	bg:setScaleY(uikits.scale()*g_scale)
 
 	for k,v in pairs( data.drag_rects ) do
 		bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
@@ -1079,35 +1087,35 @@ local function relayout_drag( layout,data,ismul )
 	local function get_pt_center( item,i )
 		local xx,yy = bg:getPosition()
 		local v = data.drag_rects[i]
-		xx = xx - bg:getContentSize().width*uikits.scale()/2
+		xx = xx - bg:getContentSize().width*uikits.scale()*g_scale/2
 		local rc =  {
-				x1 = xx + v.x1 * uikits.scale(),
-				x2 = xx + v.x2 * uikits.scale(),
-				y1 = yy + (bgsize.height-v.y1)*uikits.scale(),
-				y2 = yy + (bgsize.height-v.y2)*uikits.scale()
+				x1 = xx + v.x1 * uikits.scale()*g_scale,
+				x2 = xx + v.x2 * uikits.scale()*g_scale,
+				y1 = yy + (bgsize.height-v.y1)*uikits.scale()*g_scale,
+				y2 = yy + (bgsize.height-v.y2)*uikits.scale()*g_scale
 			}
 			normal_rect( rc )
 		local sz = item:getContentSize()
-		local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale())/2
-		local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale())/2
+		local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale()*g_scale)/2
+		local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale()*g_scale)/2
 		local cp  = {x = rc.x1 + offx,y = rc.y1+ offy } 
 		return cp
 	end
 	local function put_in( sender,x,y )
 		local xx,yy = bg:getPosition()
-		xx = xx - bg:getContentSize().width*uikits.scale()/2
+		xx = xx - bg:getContentSize().width*uikits.scale()*g_scale/2
 		for i,v in pairs( data.drag_rects ) do
 			local rc = {
-				x1 = xx + v.x1 * uikits.scale(),
-				x2 = xx + v.x2 * uikits.scale(),
-				y1 = yy + (bgsize.height-v.y1)*uikits.scale(),
-				y2 = yy + (bgsize.height-v.y2)*uikits.scale()
+				x1 = xx + v.x1 * uikits.scale()*g_scale,
+				x2 = xx + v.x2 * uikits.scale()*g_scale,
+				y1 = yy + (bgsize.height-v.y1)*uikits.scale()*g_scale,
+				y2 = yy + (bgsize.height-v.y2)*uikits.scale()*g_scale
 			}
 			normal_rect( rc )
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
 				local sz = sender:getContentSize()
-				local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale())/2
-				local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale())/2
+				local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale()*g_scale)/2
+				local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale()*g_scale)/2
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
 				sender:setPosition( cp )
 				local idx = get_index( sender )
@@ -1128,19 +1136,19 @@ local function relayout_drag( layout,data,ismul )
 	end
 	local function put_in_multi( sender,x,y )
 		local xx,yy = bg:getPosition()
-		xx = xx - bg:getContentSize().width*uikits.scale()/2
+		xx = xx - bg:getContentSize().width*uikits.scale()*g_scale/2
 		for i,v in pairs( data.drag_rects ) do
 			local rc = {
-				x1 = xx + v.x1 * uikits.scale(),
-				x2 = xx + v.x2 * uikits.scale(),
-				y1 = yy + (bgsize.height-v.y1)*uikits.scale(),
-				y2 = yy + (bgsize.height-v.y2)*uikits.scale()
+				x1 = xx + v.x1 * uikits.scale()*g_scale,
+				x2 = xx + v.x2 * uikits.scale()*g_scale,
+				y1 = yy + (bgsize.height-v.y1)*uikits.scale()*g_scale,
+				y2 = yy + (bgsize.height-v.y2)*uikits.scale()*g_scale
 			}
 			normal_rect( rc )
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
 				local sz = draging_item:getContentSize()
-				local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale())/2
-				local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale())/2
+				local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale()*g_scale)/2
+				local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale()*g_scale)/2
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
 				
 				local idx
@@ -1166,13 +1174,13 @@ local function relayout_drag( layout,data,ismul )
 					if j then
 						local v = data.drag_rects[j]
 						local rc = {
-							x1 = xx + v.x1 * uikits.scale(),
-							x2 = xx + v.x2 * uikits.scale(),
-							y1 = yy + (bgsize.height-v.y1)*uikits.scale(),
-							y2 = yy + (bgsize.height-v.y2)*uikits.scale()
+							x1 = xx + v.x1 * uikits.scale()*g_scale,
+							x2 = xx + v.x2 * uikits.scale()*g_scale,
+							y1 = yy + (bgsize.height-v.y1)*uikits.scale()*g_scale,
+							y2 = yy + (bgsize.height-v.y2)*uikits.scale()*g_scale
 						}
-						local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale())/2
-						local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale())/2
+						local offx = ((rc.x2-rc.x1) - sz.width*uikits.scale()*g_scale)/2
+						local offy = ((rc.y2-rc.y1) - sz.height*uikits.scale()*g_scale)/2
 						local cp = {x = rc.x1 + offx,y = rc.y1+ offy }						
 						draging_item:setPosition( cp )
 					end
@@ -1192,8 +1200,8 @@ local function relayout_drag( layout,data,ismul )
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
-						sp.x = sp.x * uikits.scale()
-						sp.y = sp.y * uikits.scale()
+						sp.x = sp.x * uikits.scale()*g_scale
+						sp.y = sp.y * uikits.scale()*g_scale
 						setEnabledParent(layout,false)
 						layout:setEnabled(false)
 						if ismul then
@@ -1288,15 +1296,15 @@ local function relayout_drag( layout,data,ismul )
 				end)
 	end
 
-	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale())
+	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
 	local x,y = bg:getPosition()
-	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()+y+2*TOPICS_SPACE )
+	uikits.move( ui1,0,bg:getContentSize().height*uikits.scale()*g_scale+y+2*TOPICS_SPACE )
 	for k,v in pairs( ui1 ) do
 		local x,y = v:getPosition()
 		orgp[v] = cc.p(x,y)
 	end
 
-	set_topics_image( layout,data,0,bgsize.height*uikits.scale()+y+TOPICS_SPACE+rc.height)
+	set_topics_image( layout,data,0,bgsize.height*uikits.scale()*g_scale+y+TOPICS_SPACE+rc.height)
 	--恢复答案
 	--AB;BC;CD
 	if data.my_answer[1] then
@@ -1334,8 +1342,13 @@ local function multi_select_conv(s,e)
 	if op and op.options and type(op.options)=='table' then
 		e.options = math.min(#op.options,max_options) --取得选择题个数
 	else
-		e.options = 0
+		e.options = max_options
+		kits.log('ERROR multi_select_conv '..tostring(s.options))
 		return false,"multiple select 'options'?"
+	end
+	if e.options or (e.options and e.options <= 0) then
+		e.options = max_options
+		kits.log('ERROR : multi_select_conv '..tostring(s.options))
 	end
 	e.answer = parse_answer( s )
 	e.my_answer = e.my_answer or {}
@@ -1376,6 +1389,118 @@ local function multi_select_init(layout,data)
 	end --if
 end						
 
+local function judge(layout,data)
+	if data._options  then --具有答题区
+		--初始化答案
+		data.my_answer = data.my_answer or {}
+		local _option_yes = data._options[1]
+		local _option_no = data._options[2]
+		_option_yes:setVisible(true)
+		_option_no:setVisible(true)
+		if data.my_answer[1] == 'A' then
+			_option_yes:setSelectedState(true)
+			_option_no:setSelectedState(false)
+		elseif data.my_answer[1] == 'B' then
+			_option_yes:setSelectedState(false)
+			_option_no:setSelectedState(true)	
+		else
+			_option_yes:setSelectedState(false)
+			_option_no:setSelectedState(false)
+		end
+	uikits.event(_option_yes,
+		function (sender,b)
+			if b then
+				if data.my_answer[1] == 'B' then
+					_option_no:setSelectedState(false)
+				end
+				data.my_answer[1] = 'A'
+				data.state = ui.STATE_FINISHED
+			else
+				data.my_answer[1] = ''
+				data.state = ui.STATE_UNFINISHED
+			end
+			kits.log( data.my_answer[1] )
+			call_answer_event(layout,data)
+		end)
+	uikits.event(_option_no,
+		function (sender,b)
+			if b then
+				if data.my_answer[1] == 'A' then
+					_option_yes:setSelectedState(false)
+				end
+				data.my_answer[1] = 'B'
+				data.state = ui.STATE_FINISHED
+			else
+				data.my_answer[1] = ''
+				data.state = ui.STATE_UNFINISHED
+			end			
+			kits.log( data.my_answer[1] )				
+			call_answer_event(layout,data)
+		end)						
+	end
+end
+
+local function single_select(layout,data)
+	if data._options then
+		data.my_answer = data.my_answer or {}
+		local _options = data._options
+		for i = 1,data.options do
+			_options[i]:setVisible(true)
+			if answer_abc[i] == data.my_answer[1] then
+				_options[i]:setSelectedState(true)
+			else
+				_options[i]:setSelectedState(false)
+			end
+			local m = i
+			uikits.event(_options[i],
+				function(sender,b)
+					if b then
+						data.my_answer[1] = answer_abc[m]
+						for i=1,#_options do
+							_options[i]:setSelectedState(false)
+						end
+						sender:setSelectedState(true)
+						data.state = ui.STATE_FINISHED
+					else
+						data.my_answer[1] = ''
+						data.state = ui.STATE_UNFINISHED
+					end
+					kits.log( data.my_answer[1] )
+					call_answer_event(layout,data)
+				end)
+		end
+	end
+end
+
+local function edit_topics(layout,data)
+	if data.options then
+		data.my_answer = data.my_answer or {}
+		for i = 1,data.options do
+			local _options = data._options
+			if _options and _options[i] then
+				_options[i]:setVisible(true)
+				local e = uikits.child(_options[i],EditChildTag)
+				if data.my_answer[i] then
+					e:setText(data.my_answer[i])
+				else
+					e:setText('')
+				end
+				uikits.event(e,
+						function(sender,eventType)
+							if eventType == ccui.TextFiledEventType.insert_text then
+								data.state = ui.STATE_FINISHED
+								data.my_answer[i] = sender:getStringValue()
+								call_answer_event(layout,data)
+							elseif eventType == ccui.TextFiledEventType.delete_backward then
+								data.state = ui.STATE_FINISHED
+								data.my_answer[i] = sender:getStringValue()
+								call_answer_event(layout,data)
+							end
+						end)	
+			end									
+		end	
+	end
+end
 --[[
 	conv(s,e) 输入的源数据，e是输出的数据
 	
@@ -1397,55 +1522,8 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data._options  then --具有答题区
-						--初始化答案
-						data.my_answer = data.my_answer or {}
-						local _option_yes = data._options[1]
-						local _option_no = data._options[2]
-						_option_yes:setVisible(true)
-						_option_no:setVisible(true)
-						if data.my_answer[1] == 'A' then
-							_option_yes:setSelectedState(true)
-							_option_no:setSelectedState(false)
-						elseif data.my_answer[1] == 'B' then
-							_option_yes:setSelectedState(false)
-							_option_no:setSelectedState(true)	
-						else
-							_option_yes:setSelectedState(false)
-							_option_no:setSelectedState(false)
-						end
-					uikits.event(_option_yes,
-						function (sender,b)
-							if b then
-								if data.my_answer[1] == 'B' then
-									_option_no:setSelectedState(false)
-								end
-								data.my_answer[1] = 'A'
-								data.state = ui.STATE_FINISHED
-							else
-								data.my_answer[1] = ''
-								data.state = ui.STATE_UNFINISHED
-							end
-							kits.log( data.my_answer[1] )
-							call_answer_event(layout,data)
-						end)
-					uikits.event(_option_no,
-						function (sender,b)
-							if b then
-								if data.my_answer[1] == 'A' then
-									_option_yes:setSelectedState(false)
-								end
-								data.my_answer[1] = 'B'
-								data.state = ui.STATE_FINISHED
-							else
-								data.my_answer[1] = ''
-								data.state = ui.STATE_UNFINISHED
-							end			
-							kits.log( data.my_answer[1] )				
-							call_answer_event(layout,data)
-						end)						
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,judge)
 				end
 			},
 	[2] = {name='单选',img=res_root..'single_item.png',
@@ -1462,43 +1540,15 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data._options then
-						data.my_answer = data.my_answer or {}
-						local _options = data._options
-						for i = 1,data.options do
-							_options[i]:setVisible(true)
-							if answer_abc[i] == data.my_answer[1] then
-								_options[i]:setSelectedState(true)
-							else
-								_options[i]:setSelectedState(false)
-							end
-							local m = i
-							uikits.event(_options[i],
-								function(sender,b)
-									if b then
-										data.my_answer[1] = answer_abc[m]
-										for i=1,#_options do
-											_options[i]:setSelectedState(false)
-										end
-										sender:setSelectedState(true)
-										data.state = ui.STATE_FINISHED
-									else
-										data.my_answer[1] = ''
-										data.state = ui.STATE_UNFINISHED
-									end
-									kits.log( data.my_answer[1] )
-									call_answer_event(layout,data)
-								end)
-						end
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,single_select)
 				end
 			},
 	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
-					multi_select_init(layout,data)
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[4] = {name='连线',img=res_root..'connection_item.png',
@@ -1528,42 +1578,15 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data.options then
-						data.my_answer = data.my_answer or {}
-						for i = 1,data.options do
-							local _options = data._options
-							if _options and _options[i] then
-								_options[i]:setVisible(true)
-								local e = uikits.child(_options[i],EditChildTag)
-								if data.my_answer[i] then
-									e:setText(data.my_answer[i])
-								else
-									e:setText('')
-								end
-								uikits.event(e,
-										function(sender,eventType)
-											if eventType == ccui.TextFiledEventType.insert_text then
-												data.state = ui.STATE_FINISHED
-												data.my_answer[i] = sender:getStringValue()
-												call_answer_event(layout,data)
-											elseif eventType == ccui.TextFiledEventType.delete_backward then
-												data.state = ui.STATE_FINISHED
-												data.my_answer[i] = sender:getStringValue()
-												call_answer_event(layout,data)
-											end
-										end)	
-							end									
-						end	
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,edit_topics)
 				end
 			},
 	[6] = {name='选择',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					multi_select_init(layout,data)
-					cache_done(layout,data,relayout_topics)
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[7] = {name='横排序',img=res_root..'sort_item.png',
