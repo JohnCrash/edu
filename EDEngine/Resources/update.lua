@@ -354,7 +354,6 @@ function UpdateProgram:update()
 				package.loaded['kits'] = nil
 				package.loaded['uikits'] = nil
 				package.loaded['cache'] = nil				
-				return
 			end
 
 			kits.log('Update complate!')

@@ -101,7 +101,7 @@ local EditChildTag = 'answer_text'
 local max_options = 6
 local max_edit = 3
 local res_root = 'homework/'
-local g_scale = 2
+local g_scale = 1.3
 
 local function set_EditChildTag( t )
 	EditChildTag = t
@@ -743,7 +743,7 @@ local function relayout_link( layout,data )
 	end
 
 	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*4,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout:getContentSize().width,TOPICS_SPACE,uikits.scale()*g_scale)
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
