@@ -65,10 +65,12 @@ listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_R
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
 
---local app,cookie = cc_launchparam()
+local ae = require "AppEntry"
+cc.Director:getInstance():runWithScene( ae.create() )
+--[[
+local app,cookie = cc_launchparam()
 local scene
-local cookie = nil
-app = 'errortitile'
+app = 'homework'
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
@@ -115,4 +117,4 @@ else
 		return worklist.create()
 	end}
 end
-
+--]]
