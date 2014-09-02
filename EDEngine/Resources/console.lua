@@ -4,9 +4,14 @@ local uikits = require "uikits"
 local Console = class("Console")
 Console.__index = Console
 
-local isopen = false
+local isopen_flag = false
+
+function Console.isopen()
+	return isopen_flag
+end
+
 function Console.create()
-	if isopen then return end
+	if isopen_flag then return end
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),Console)
 	
@@ -40,7 +45,7 @@ local function add_table( t,s )
 end
 
 function Console:init()
-	isopen = true
+	isopen_flag = true
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
 	local scale = uikits.scale()
@@ -106,13 +111,13 @@ function Console:init()
 		width=240*scale,height=64*scale
 	}
 	debugip:setText("192.168.2.182")
-	local isopen = false
+	local isdebug
 	local debugbutton = uikits.button{caption='Debug...',x=(128+240)*scale,
 		width=128*scale,height=64*scale,
 		eventClick=function(sender)
-			if not isopen then
+			if not isdebug then
 				require("mobdebug").start(debugip:getStringValue())
-				isopen = true
+				isdebug = true
 			end
 		end}
 	self:addChild(debugip)
@@ -123,7 +128,7 @@ function Console:init()
 end
 
 function Console:release()
-	isopen = false
+	isopen_flag = false
 end
 
 return Console
