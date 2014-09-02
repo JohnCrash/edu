@@ -56,7 +56,7 @@ function AppEntry:init()
 	local sbutton = uikits.button{caption='student',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name=app,updates={'homework','luacore'},
+			update.create{name=app,updates={'homework','errortitile','luacore'},
 				run=function()
 				login.set_selector(1) --Ñ§Éú
 				local worklist = require "homework/worklist"

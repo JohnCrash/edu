@@ -10,7 +10,7 @@ crash.open("launcher",1)
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
-require("mobdebug").start("192.168.2.182")
+--require("mobdebug").start("192.168.2.182")
 
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
@@ -128,7 +128,7 @@ else
 end
 
 if app == 'homework' then
-	update.create{name=app,updates={'homework','luacore'},
+	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
 		local worklist = require "homework/worklist"
 		return worklist.create()
