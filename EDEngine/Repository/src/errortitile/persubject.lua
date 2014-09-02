@@ -4,7 +4,7 @@ local json = require "json-c"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 local login = require "login"
 --local answer = curweek or require "src/errortitile/answer"
 local BigquestionView = require "src/errortitile/BigquestionView"
@@ -16,13 +16,13 @@ local scale = 640/1920
 
 local is_loading
 
-persubject.subject_name = nil
+--[[persubject.subject_name = nil
 persubject.subject_label = nil
 persubject.range = nil
 persubject.subject_id = nil
 persubject.pageindex = nil
 persubject.wrongtitleitems = {}
-persubject.totalpagecount = 0
+persubject.totalpagecount = 0--]]
 
 local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)
@@ -150,7 +150,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 					arraychildren[i]:setEnabled(false)
 				end
 			end
-			data._options = {}
+			data._options = nil
 			--scrollView:setEnabled(false)
 			topics.types[tb_wrongtitle_item.item_type].init(scrollView,data)
 		end		
@@ -164,16 +164,16 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 						end
 					end)
 	
---	local questions_path = "errortitile/kong.png"
---[[	local questions_but = ccui.Button:create()
+	local questions_path = "errortitile/kong.png"
+	local questions_but = ccui.Button:create()
 	questions_but:setTouchEnabled(true)
 	questions_but:loadTextures(questions_path, questions_path, "")
 	local size_question = questions_view:getContentSize()	
 --	questions_but:setContentSize(size_question)
 	local scale_x = size_question.width/questions_but:getContentSize().width
-	local scale_y = size_question.height/questions_but:getContentSize().height--]]
+	local scale_y = size_question.height/questions_but:getContentSize().height
 
---[[	questions_but:setScale(scale_y)
+	questions_but:setScale(scale_y)
 	questions_but:setPosition(cc.p(size_question.width/2,size_question.height/2))
 	
 	questions_but.tb_wrongtitle_item = tb_wrongtitle_item
@@ -189,7 +189,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 			--cc.Director:getInstance():replaceScene(scene_next)	
 			uikits.pushScene(scene_next)
 		end,"click")
-	questions_view:addChild(questions_but)--]]
+	questions_view:addChild(questions_but)
 	--完成测试
 	
 	local size  = wrong_view:getContentSize()
@@ -409,9 +409,9 @@ function persubject:getdatabyurl()
 	local send_data
 	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
 	
-	local send_url = t_nextview[2].url..send_data
-	local result = kits.http_get(send_url,cookie1,1)
-	print(result)	
+--[[	local send_url = t_nextview[2].url..send_data
+	local result = kits.http_get(send_url,login.cookie(),1)
+	--kits.log('ERROR--result:::'..result )
 	local tb_result = json.decode(result)
 	if 	tb_result.result ~= 0 then				
 		print(tb_result.result.." : "..tb_result.message)				
@@ -434,11 +434,17 @@ function persubject:getdatabyurl()
 			self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
 		end
 	end
-	self:updatepage()
+	self:updatepage()--]]
 					
---[[	local loadbox = loadingbox.open(self)
+	local loadbox = loadingbox.open(self)
 	is_loading = true
-	cache.request_json( t_nextview[2].url..send_data,function(t)	
+	local send_url
+	if t_nextview then
+		send_url = t_nextview[2].url 
+	else
+		send_url = "http://app.lejiaolexue.com/exerbook/handler/ExerPreview.ashx"
+	end
+	cache.request_json( send_url..send_data,function(t)	
 			if t and type(t)=='table' then
 				self.totalpagecount = t.page_total
 				self.wrongtitleitems = t.exerbook_user_items	
@@ -462,7 +468,7 @@ function persubject:getdatabyurl()
 			end
 			loadbox:removeFromParent()
 			is_loading = false
-		end,'N')	--]]
+		end,'N')	
 	return true
 end
 
@@ -618,6 +624,7 @@ function persubject:init()
 end
 
 function persubject:clear_all_item()
+	self.pageindex = 1
 --[[	self.wrongtitleitems = {}
 	self.subject_name = nil
 	self.subject_label = nil
@@ -643,7 +650,6 @@ function persubject:clear_all_item()
 end
 
 function persubject:release()
-	print("1111111111")
 	self:clear_all_item()
 end
 return {

@@ -2,7 +2,7 @@ local uikits = require "uikits"
 local socket = require "socket"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 local kits = require "kits"
 --local answer = curweek or require "src/errortitile/answer"
 local resultview = class("resultview")
@@ -66,6 +66,7 @@ function resultview:showviewdata(item_data)
 			local scene_next = t_wronglist.create()								
 			cc.Director:getInstance():replaceScene(scene_next)								
 		end			--]]
+	--	uikits.popScene()
 		uikits.popScene()		
 	end,"click")
 

@@ -2,7 +2,7 @@ local uikits = require "uikits"
 local socket = require "socket"
 local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 local resultview = require "src/errortitile/resultview"
 local login = require "login"
 local kits = require "kits"
@@ -157,41 +157,13 @@ function dopractice:submitanswer(item_id,item_answer,item_type)
 	local tab_json = {}
 	--tab_json[1] = item_id
 --	print(item_type)
+	uikits.stopAllSound()
 	if item_type > 0 and item_type < 13 then
 		tab_json.item_id = item_id
 		tab_json.answer = ''
 		if item_answer == nil then
 			tab_json.answer = ''
 		else
---[[			if type(item_answer)=='table' then
-				--tab_json.answer = json.encode(item_answer)
-				for i = 1,#item_answer do 
-					tab_json.answer = tab_json.answer .. item_answer[i]
-					if i ~= #item_answer then
-						tab_json.answer = tab_json.answer .. ','
-					end
-				end
-			--	data.my_answer = data.my_answer .. answer_abc[m]
-			elseif type(item_answer)=='string' then
-			    
-				if item_type == 11 then
-					local answer_abc = {}
-					for i = 1,24 do
-						answer_abc[i] = string.char( string.byte('A') + i - 1 )
-					end
-					
-					for i=1,string.len(item_answer) do 
-						local per_answer = string.sub(item_answer,i,i)
-						
-						tab_json.answer = tab_json.answer ..answer_abc[i].. per_answer
-						if i ~= string.len(item_answer) then
-							tab_json.answer = tab_json.answer .. ';'
-						end
-					end
-				else
-					tab_json.answer = item_answer
-				end
-			end--]]
 			if item_type == 5 then
 				for i = 1,#item_answer do 
 					tab_json.answer = tab_json.answer .. item_answer[i]
@@ -205,10 +177,10 @@ function dopractice:submitanswer(item_id,item_answer,item_type)
 		end
 		json_data[1] = tab_json
 		send_data = json.encode(json_data)
-		print("send_data"..send_data)
+	--	print("send_data"..send_data)
 --		print(t_nextview[11].url)
 		result = kits.http_post(t_nextview[11].url,send_data,login.cookie(),1)
-		print(result)
+	--	print(result)
 		local tb_result = json.decode(result)
 		if tb_result.result == 0 then
 			if tb_result.corr_cnt == 1 then

@@ -5,7 +5,7 @@ local loadingbox = require "src/errortitile/loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local login = require "login"
-local topics = require "src/errortitile/topicserr"
+local topics = require "src/errortitile/topics"
 --local answer = curweek or require "src/errortitile/answer"
 --local BigquestionView = require "src/errortitile/BigquestionView"
 local Percollectsubject = class("Percollectsubject")
@@ -401,7 +401,7 @@ function Percollectsubject:updatecollectview()
 end	
 
 function Percollectsubject:release()
-
+	self.pageindex = 1
 end
 return {
 create = create,
