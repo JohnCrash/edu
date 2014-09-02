@@ -33,8 +33,14 @@ function create(name,label,id,range)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),persubject)		
 	if name == nil then
-		cur_layer.subject_name = ""		
+--[[		print("11111111")--]]
+		cur_layer.subject_name = "未知科目"		
 	else
+--[[		if type(name)=='table' then
+			print("222222")
+		else
+			print("333333333")
+		end--]]
 		cur_layer.subject_name = name	
 	end
 	if label == nil then
@@ -42,6 +48,7 @@ function create(name,label,id,range)
 	else
 		cur_layer.subject_label = label	
 	end
+--[[	print("range::::"..range)--]]
 	if range == nil then
 		cur_layer.range = 1		
 	else

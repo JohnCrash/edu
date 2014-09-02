@@ -49,28 +49,70 @@ else
 	uikits.initDR{width=1440,height=1080}
 end
 
+local mode
 --android 返回键
 local function onKeyRelease(key,event)
 	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
-		local console = require "console"
-		local scene = console.create()
-		if scene then
-			cc.Director:getInstance():pushScene( scene )
+		if mode==2 then
+			local console = require "console"
+			local scene = console.create()
+			if scene then
+				cc.Director:getInstance():pushScene( scene )
+			end
+		else
+			uikits.popScene()
 		end
-		--uikits.popScene()
 	end
 end
 local listener_keyboard = cc.EventListenerKeyboard:create()
 listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+--控制台打开方式
+local function onTouchBegan(touch, event)
+	local t = touch:getLocation()
+	local glview = cc.Director:getInstance():getOpenGLView()
+	local ss = glview:getFrameSize()
+	local scale = uikits.scale()
+	local w = ss.width*scale-128
+	local h = ss.height*scale-128
+	if t.x < 128 and t.y < 128 then
+		mode = 1
+	end
+	if t.x > w and t.y > h then
+		mode = 1
+	end	
+	return true
+end
+local function onTouchMoved(touch, event)
+	local t = touch:getLocation()
+end
 
-local ae = require "AppEntry"
-cc.Director:getInstance():runWithScene( ae.create() )
---[[
+local function onTouchEnded(touch, event)
+	if mode == 1 then
+		local t = touch:getLocation()
+		local glview = cc.Director:getInstance():getOpenGLView()
+		local ss = glview:getFrameSize()
+		local scale = uikits.scale()
+		local w = ss.width*scale-128
+		local h = ss.height*scale-128
+		if t.x > w and t.y > h then
+			mode = 2
+		end
+		if t.x < 128 and t.y < 128 then
+			mode = 1
+		end		
+	end
+end
+
+local listener = cc.EventListenerTouchOneByOne:create()
+listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCH_BEGAN )
+listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCH_MOVED )
+listener:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCH_ENDED )
+directorEventDispatcher:addEventListenerWithFixedPriority(listener, 1)
+		
 local app,cookie = cc_launchparam()
 local scene
-app = 'homework'
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
@@ -111,10 +153,8 @@ elseif app and string.len(app)>0 then
 			return a.create()
 		end}
 else
-	update.create{name=app,updates={'homework','luacore'},
-		run=function()
-		local worklist = require "homework/worklist"
-		return worklist.create()
-	end}
+	local ae = require "AppEntry"
+	mode = 2
+	cc.Director:getInstance():runWithScene( ae.create() )
 end
---]]
+

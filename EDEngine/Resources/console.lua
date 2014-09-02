@@ -3,6 +3,7 @@ local uikits = require "uikits"
 
 local Console = class("Console")
 Console.__index = Console
+
 local isopen = false
 function Console.create()
 	if isopen then return end
@@ -22,11 +23,27 @@ function Console.create()
 	return scene
 end
 
+local function add_table( t,s )
+	local i = 1
+	local length = string.len(s)
+	while i <= length do
+		local begin = i
+		i = string.find(s,'\n',i)
+		if i then
+			table.insert(t,string.sub(s,begin,i-1))
+		else
+			table.insert(t,string.sub(s,begin))
+			break
+		end
+		i = i + 1
+	end
+end
+
 function Console:init()
 	isopen = true
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
-	local scale = uikits.get_factor()
+	local scale = uikits.scale()
 	local bh = 64*scale
 	local view = uikits.scrollview{width=ss.width*scale,height=ss.height*scale-bh,y=bh,bgcolor=cc.c3b(0,0,64)}
 	local close = uikits.button{caption="close",
@@ -46,11 +63,13 @@ function Console:init()
 		function(msg)
 			if msg then
 				local color
-				local title = string.sub(msg,1,5)
-				if title=='ERROR' or title=='error' then
+				local title = string.sub(msg,1,4)
+				if title=='ERRO' or title=='erro' then
 					color = cc.c3b(255,0,0)
-				elseif title=='WARNI' or title=='warn' then
+				elseif title=='WARN' or title=='warn' then
 					color = cc.c3b(255,255,0)
+				elseif title=='INFO' or title=='info' then
+					color = cc.c3b(0,255,0)
 				else
 					color = cc.c3b(255,255,255)
 				end
@@ -61,30 +80,44 @@ function Console:init()
 					ox = 0
 				end
 				local length = string.len(msg)
-				if length < 80 then
-					local item = uikits.text{caption=msg,x=ox,y=h,fontSize=item_h,color=color}
+				local maxn = 96
+				--折行
+				local i = 1
+				local s = {}
+				while i<=length do
+					add_table( s,string.sub(msg,i,i+maxn) )
+					--table.insert(s,string.sub(msg,i,i+maxn))
+					i = i + maxn + 1
+				end
+				for i=1,#s do
+					local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
 					view:addChild(item)
 					h = h + item_h
-				else
-					--折行
-					local i = 1
-					local s = {}
-					while i<=length do
-						table.insert(s,string.sub(msg,i,i+80))
-						i = i + 80
-					end
-					for i=1,#s do
-						local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
-						view:addChild(item)
-						h = h + item_h						
-					end
 				end
 			else --重新布局
 				view:setInnerContainerSize(cc.size(ss.width*scale*2,h+2*item_h))			
 				view:scrollToBottom(0.1,true)
 			end
 		end,ccui.ScrollviewEventType.scrollToTop)
-		
+	--加一个调试
+	local debugip = uikits.editbox{
+		caption = '192.168.2.*',
+		x=128*scale,
+		width=240*scale,height=64*scale
+	}
+	debugip:setText("192.168.2.182")
+	local isopen = false
+	local debugbutton = uikits.button{caption='Debug...',x=(128+240)*scale,
+		width=128*scale,height=64*scale,
+		eventClick=function(sender)
+			if not isopen then
+				require("mobdebug").start(debugip:getStringValue())
+				isopen = true
+			end
+		end}
+	self:addChild(debugip)
+	self:addChild(debugbutton)
+	
 	self:addChild(view)
 	self:addChild(close)
 end

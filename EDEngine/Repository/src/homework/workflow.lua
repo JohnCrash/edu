@@ -59,15 +59,7 @@ local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperIte
 local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
 local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
 local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
---[[
-item
-{
-	image,
-	isload, --图片已经存在
-	item_type, --题型
-	isdone,
-}
---]]
+
 local WorkFlow = class("WorkFlow")
 WorkFlow.__index = WorkFlow
 
@@ -165,14 +157,21 @@ function WorkFlow:commit_topics( v )
 					function(obj)
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
+								v.commit_faild = nil
 								kits.log('	commit '..url..' success!')
 							else
+								v.commit_faild = true
+								kits.log('ERROR : WorkFlow:commit_topics')
 								kits.log('	commit '..url..' faild!')
 							end
 						end
 					end )
 	if not ret then
+		v.commit_faild = true
+		kits.log('ERROR : WorkFlow:commit_topics')
 		kits.log('	commit '..url..' faild!')
+	else
+		v.commit_faild = nil
 	end
 end
 
@@ -199,6 +198,13 @@ local function answer_clone(a)
 		return r
 	else
 		return a
+	end
+end
+
+local function has_answer( answer )
+	if answer and type(answer)=='table' and answer[1] and type(answer[1])=='string' and 
+	(string.len(answer[1])>0 or type(answer[1])=='number') then
+		return true
 	end
 end
 
@@ -231,7 +237,9 @@ function WorkFlow:save_answer()
 			if v.my_answer and not answer_eq(self._topics_table.answers[v.item_id],v.my_answer) then
 			--答案被修改过,需要存储
 				if v.item_id then
-					self:commit_topics( v )
+					if has_answer(v.my_answer) then
+						self:commit_topics( v )
+					end
 					self._topics_table.answers[v.item_id] = answer_clone(v.my_answer)
 					isc = true	
 				else
@@ -241,7 +249,10 @@ function WorkFlow:save_answer()
 			--结束按钮,状态改变
 			if v.state == ui.STATE_UNFINISHED then
 				b = false
-			end				
+			end		
+			if v.commit_faild then
+				self:commit_topics( v ) --如果发生提交失败将，每次重试
+			end
 		end
 		if isc then
 			if self._args.exam_id then --作业
@@ -333,7 +344,7 @@ end
 
 function WorkFlow:load_cloud_answer( e )
 	if e and type(e)=='table' then
-		if e.my_answer and type(e.my_answer)=='string' and string.len(e.my_answer)>0 then
+		if e.my_answer and has_answer(e.my_answer) then
 			--已经有答案了
 			return
 		else
@@ -347,7 +358,6 @@ function WorkFlow:load_cloud_answer( e )
 			e.resource_cache.urls[n+1] = 
 			{
 				url = url,
-				cookie = login.cookie(),
 				done = function(data) --处理下载的答案
 					if data and type(data)=='string' then
 						local result = json.decode(data)
@@ -360,6 +370,11 @@ function WorkFlow:load_cloud_answer( e )
 								e.my_answer = {}
 								for i,v in pairs(t.answers) do
 									e.my_answer[i] = v.value
+								end
+								if has_answer(e.my_answer) then
+									e.state = ui.STATE_FINISHED
+								else
+									e.state = ui.STATE_UNFINISHED
 								end
 							end
 						end
@@ -395,22 +410,15 @@ function WorkFlow:load_original_data_from_table( data )
 		for i,v in ipairs(ds) do
 			local k = {}
 			k.item_type = v.item_type
-			if v.image then
-				k.isload = true --is downloaded?
-				k.image = v.image
-			else
-				k.isload = true
-				k.image = 'Pic/my/'..i..'.png'
-				kits.log( k.image )
-			end
+
 			if self._topics_table and self._topics_table.answers then
 				--从答案表中取答案
-				k.my_answer = answer_clone(self._topics_table.answers[v.item_id])
+				local local_answer = self._topics_table.answers[v.item_id]
+				k.my_answer = answer_clone(local_answer)
 			else
 				k.my_answer = answer_clone(v.my_answer)
 			end
-			if k.my_answer and type(k.my_answer)=='table' and k.my_answer[1] and 
-				((type(k.my_answer[1])=='string' and string.len(k.my_answer[1])>0) or type(k.my_answer[1])=='number') then
+			if has_answer(k.my_answer) then
 				k.state =  ui.STATE_FINISHED
 			else
 				k.state = ui.STATE_UNFINISHED
@@ -579,6 +587,7 @@ function WorkFlow:clone_item( state )
 		return self._item_unfinished:clone()
 	else
 		kits.log( '	ERROR: clone_item state = '..tostring(state) )
+		return self._item_unfinished:clone()
 	end
 end
 
@@ -661,32 +670,6 @@ end
 function WorkFlow:clear_all_option_check()
 	for i = 1,#self._option_img do
 		self._option_img[i]:setSelectedState(false)
-	end
-end
-
-function WorkFlow:cache_done( rst,efunc,layout,data,op,i,other,pageview )
-	if rst and type(rst)=='table' then
-		--开始请求资源
-		local n = 0
-		
-		rst.loading = loadingbox.open( layout )
-
-		local r,msg = cache.request_resources( rst,
-				function(rs,i,b)
-					n = n+1
-					if n >= #rs.urls then
-						--全部下载完毕
-						rst.loading:removeFromParent() 
-						rst.loading = nil 
-						if efunc and type(efunc)=='function' then
-							efunc(layout,data,op,i,other,pageview)
-						end
-					end
-				end )
-		if not r then 
-			--加载失败
-			kits.log( msg ) 
-		end
 	end
 end
 

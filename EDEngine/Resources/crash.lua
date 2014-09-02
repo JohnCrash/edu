@@ -12,8 +12,8 @@ local last_source
 local last_line
 
 --http://api.lejiaolexue.com/ssp/kv/pset.ashx?app_id=12&sign=a1c1dnha73kan&key=abc&value=anystring
-local crash_url ="http://api.lejiaolexue.com/ssp/kv/pset.ashx"
-local crash_url_get ="http://api.lejiaolexue.com/ssp/kv/pget.ashx"
+local crash_url ="http://api.lejiaolexue.com/ssp/debug/pset.ashx"
+local crash_url_get ="http://api.lejiaolexue.com/ssp/debug/pget.ashx"
 
 local platform = CCApplication:getInstance():getTargetPlatform()
 
@@ -29,7 +29,7 @@ local function report_bug(t)
 			local text = 'value='..value
 			local url_post = crash_url..'?app_id='..tostring(t.appid)..'&sign=unkown&key='..tostring(t.key)
 			local result = kits.http_post(url_post,text,login.cookie())
-			kits.log( "report_bug result:"..tostring(result) )
+			kits.log( "INFO : report_bug result:"..tostring(result) )
 		end
 	else
 		kits.log('ERROR report_bug invalid param')
@@ -51,9 +51,9 @@ local function report_export( errmsg,stack_level )
 				break
 			end
 		end
-		kits.log("Call Stack")
+		kits.log("INFO : Call Stack")
 		kits.log("========")
-		kits.log( bugs.call_stack )
+		kits.log( "INFO : "..bugs.call_stack )
 		
 		bugs.errmsg = errmsg
 		bugs.type = 'lua'
@@ -92,13 +92,13 @@ local function report_export( errmsg,stack_level )
 		last_source = t.source
 		last_line = t.currentline
 	elseif t then
-		kits.log("_G_ERROR :"..tostring(t.source)..":"..tostring(t.currentline))
-		kits.log("	"..tostring(errmsg))
+		kits.log("ERROR _G_ERROR :"..tostring(t.source)..":"..tostring(t.currentline))
+		kits.log("INFO : "..tostring(errmsg))
 	end	
 end
 
 function __G__TRACKBACK__(errmsg)
-	kits.log( tostring(errmsg) )
+	kits.log( "ERROR : "..tostring(errmsg) )
 	report_export(errmsg,3)
 end
 

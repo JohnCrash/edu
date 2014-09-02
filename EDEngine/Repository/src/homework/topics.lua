@@ -486,6 +486,10 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 		local r,msg = cache.request_resources( rst,
 				function(rs,i,b)
 					n = n+1
+					if b and rs.urls[i] and rs.urls[i].done and type(rs.urls[i].done)=='function' then
+						local data = cache.get_data( rs.urls[i].url )
+						rs.urls[i].done( data )
+					end
 					if n >= #rs.urls then
 						--全部下载完毕
 						rst.loading:removeFromParent() 
@@ -1334,8 +1338,13 @@ local function multi_select_conv(s,e)
 	if op and op.options and type(op.options)=='table' then
 		e.options = math.min(#op.options,max_options) --取得选择题个数
 	else
-		e.options = 0
+		e.options = max_options
+		kits.log('ERROR multi_select_conv '..tostring(s.options))
 		return false,"multiple select 'options'?"
+	end
+	if e.options or (e.options and e.options <= 0) then
+		e.options = max_options
+		kits.log('ERROR : multi_select_conv '..tostring(s.options))
 	end
 	e.answer = parse_answer( s )
 	e.my_answer = e.my_answer or {}
@@ -1376,6 +1385,118 @@ local function multi_select_init(layout,data)
 	end --if
 end						
 
+local function judge(layout,data)
+	if data._options  then --具有答题区
+		--初始化答案
+		data.my_answer = data.my_answer or {}
+		local _option_yes = data._options[1]
+		local _option_no = data._options[2]
+		_option_yes:setVisible(true)
+		_option_no:setVisible(true)
+		if data.my_answer[1] == 'A' then
+			_option_yes:setSelectedState(true)
+			_option_no:setSelectedState(false)
+		elseif data.my_answer[1] == 'B' then
+			_option_yes:setSelectedState(false)
+			_option_no:setSelectedState(true)	
+		else
+			_option_yes:setSelectedState(false)
+			_option_no:setSelectedState(false)
+		end
+	uikits.event(_option_yes,
+		function (sender,b)
+			if b then
+				if data.my_answer[1] == 'B' then
+					_option_no:setSelectedState(false)
+				end
+				data.my_answer[1] = 'A'
+				data.state = ui.STATE_FINISHED
+			else
+				data.my_answer[1] = ''
+				data.state = ui.STATE_UNFINISHED
+			end
+			kits.log( data.my_answer[1] )
+			call_answer_event(layout,data)
+		end)
+	uikits.event(_option_no,
+		function (sender,b)
+			if b then
+				if data.my_answer[1] == 'A' then
+					_option_yes:setSelectedState(false)
+				end
+				data.my_answer[1] = 'B'
+				data.state = ui.STATE_FINISHED
+			else
+				data.my_answer[1] = ''
+				data.state = ui.STATE_UNFINISHED
+			end			
+			kits.log( data.my_answer[1] )				
+			call_answer_event(layout,data)
+		end)						
+	end
+end
+
+local function single_select(layout,data)
+	if data._options then
+		data.my_answer = data.my_answer or {}
+		local _options = data._options
+		for i = 1,data.options do
+			_options[i]:setVisible(true)
+			if answer_abc[i] == data.my_answer[1] then
+				_options[i]:setSelectedState(true)
+			else
+				_options[i]:setSelectedState(false)
+			end
+			local m = i
+			uikits.event(_options[i],
+				function(sender,b)
+					if b then
+						data.my_answer[1] = answer_abc[m]
+						for i=1,#_options do
+							_options[i]:setSelectedState(false)
+						end
+						sender:setSelectedState(true)
+						data.state = ui.STATE_FINISHED
+					else
+						data.my_answer[1] = ''
+						data.state = ui.STATE_UNFINISHED
+					end
+					kits.log( data.my_answer[1] )
+					call_answer_event(layout,data)
+				end)
+		end
+	end
+end
+
+local function edit_topics(layout,data)
+	if data.options then
+		data.my_answer = data.my_answer or {}
+		for i = 1,data.options do
+			local _options = data._options
+			if _options and _options[i] then
+				_options[i]:setVisible(true)
+				local e = uikits.child(_options[i],EditChildTag)
+				if data.my_answer[i] then
+					e:setText(data.my_answer[i])
+				else
+					e:setText('')
+				end
+				uikits.event(e,
+						function(sender,eventType)
+							if eventType == ccui.TextFiledEventType.insert_text then
+								data.state = ui.STATE_FINISHED
+								data.my_answer[i] = sender:getStringValue()
+								call_answer_event(layout,data)
+							elseif eventType == ccui.TextFiledEventType.delete_backward then
+								data.state = ui.STATE_FINISHED
+								data.my_answer[i] = sender:getStringValue()
+								call_answer_event(layout,data)
+							end
+						end)	
+			end									
+		end	
+	end
+end
 --[[
 	conv(s,e) 输入的源数据，e是输出的数据
 	
@@ -1397,55 +1518,8 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data._options  then --具有答题区
-						--初始化答案
-						data.my_answer = data.my_answer or {}
-						local _option_yes = data._options[1]
-						local _option_no = data._options[2]
-						_option_yes:setVisible(true)
-						_option_no:setVisible(true)
-						if data.my_answer[1] == 'A' then
-							_option_yes:setSelectedState(true)
-							_option_no:setSelectedState(false)
-						elseif data.my_answer[1] == 'B' then
-							_option_yes:setSelectedState(false)
-							_option_no:setSelectedState(true)	
-						else
-							_option_yes:setSelectedState(false)
-							_option_no:setSelectedState(false)
-						end
-					uikits.event(_option_yes,
-						function (sender,b)
-							if b then
-								if data.my_answer[1] == 'B' then
-									_option_no:setSelectedState(false)
-								end
-								data.my_answer[1] = 'A'
-								data.state = ui.STATE_FINISHED
-							else
-								data.my_answer[1] = ''
-								data.state = ui.STATE_UNFINISHED
-							end
-							kits.log( data.my_answer[1] )
-							call_answer_event(layout,data)
-						end)
-					uikits.event(_option_no,
-						function (sender,b)
-							if b then
-								if data.my_answer[1] == 'A' then
-									_option_yes:setSelectedState(false)
-								end
-								data.my_answer[1] = 'B'
-								data.state = ui.STATE_FINISHED
-							else
-								data.my_answer[1] = ''
-								data.state = ui.STATE_UNFINISHED
-							end			
-							kits.log( data.my_answer[1] )				
-							call_answer_event(layout,data)
-						end)						
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,judge)
 				end
 			},
 	[2] = {name='单选',img=res_root..'single_item.png',
@@ -1462,43 +1536,15 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data._options then
-						data.my_answer = data.my_answer or {}
-						local _options = data._options
-						for i = 1,data.options do
-							_options[i]:setVisible(true)
-							if answer_abc[i] == data.my_answer[1] then
-								_options[i]:setSelectedState(true)
-							else
-								_options[i]:setSelectedState(false)
-							end
-							local m = i
-							uikits.event(_options[i],
-								function(sender,b)
-									if b then
-										data.my_answer[1] = answer_abc[m]
-										for i=1,#_options do
-											_options[i]:setSelectedState(false)
-										end
-										sender:setSelectedState(true)
-										data.state = ui.STATE_FINISHED
-									else
-										data.my_answer[1] = ''
-										data.state = ui.STATE_UNFINISHED
-									end
-									kits.log( data.my_answer[1] )
-									call_answer_event(layout,data)
-								end)
-						end
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,single_select)
 				end
 			},
 	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
-					multi_select_init(layout,data)
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[4] = {name='连线',img=res_root..'connection_item.png',
@@ -1528,42 +1574,15 @@ local types={
 					return true
 				end,
 				init=function(layout,data)
-					if data.options then
-						data.my_answer = data.my_answer or {}
-						for i = 1,data.options do
-							local _options = data._options
-							if _options and _options[i] then
-								_options[i]:setVisible(true)
-								local e = uikits.child(_options[i],EditChildTag)
-								if data.my_answer[i] then
-									e:setText(data.my_answer[i])
-								else
-									e:setText('')
-								end
-								uikits.event(e,
-										function(sender,eventType)
-											if eventType == ccui.TextFiledEventType.insert_text then
-												data.state = ui.STATE_FINISHED
-												data.my_answer[i] = sender:getStringValue()
-												call_answer_event(layout,data)
-											elseif eventType == ccui.TextFiledEventType.delete_backward then
-												data.state = ui.STATE_FINISHED
-												data.my_answer[i] = sender:getStringValue()
-												call_answer_event(layout,data)
-											end
-										end)	
-							end									
-						end	
-					end
-					cache_done(layout,data,relayout_topics)
+					data.my_answer = data.my_answer or {}
+					cache_done(layout,data,edit_topics)
 				end
 			},
 	[6] = {name='选择',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					multi_select_init(layout,data)
-					cache_done(layout,data,relayout_topics)
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[7] = {name='横排序',img=res_root..'sort_item.png',

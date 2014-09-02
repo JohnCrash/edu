@@ -893,6 +893,18 @@ local function tab(root,LineID,butTable)
 	t._line_size = t._line:getContentSize()
 	t._line_anchor_pt = t._line:getAnchorPoint()
 	t._buts = {}
+	t.set = function( self,i )
+		if self._buts and type(self._buts)=='table' and self._buts[i] then
+			local sender = t._buts[i]
+			local x,y = sender:getPosition()
+			local pt = sender:getAnchorPoint()
+			local size = sender:getContentSize()
+			local xx = x-pt.x*size.width+t._line_anchor_pt.x*t._line_size.width
+			t._line:setPosition(cc.p(xx,t._line_y))			
+		else
+			kits.log('ERROR uikits tab but = nil at '..tostring(i))
+		end
+	end
 	if butTable and type(butTable)=='table' then
 		for i,v in pairs(butTable) do
 			local but = child(root,i)
@@ -917,6 +929,7 @@ local function tab(root,LineID,butTable)
 		log_caller()
 		return
 	end
+	return t
 end
 
 local function set(root,t)
