@@ -236,7 +236,7 @@ function Batch:init_commits_list( t )
 	local count = 1
 	self._commits:clear()
 	for k,v in pairs(t) do
-		if v.status==10 or v.status==11 or v.status == 0 then
+		if v.status==10 or v.status==11 then
 			self._commits:additem{
 				[ui.COMMIT_NAME] =v.student_name..'('..v.real_score..')',
 				[ui.COMMIT_ICON] = function(child,item)
@@ -403,8 +403,8 @@ function Batch:init_student_list_func()
 			local st = {}
 			for k,v in pairs(self._student_list_table) do
 				local score = v.real_score/total_score
-				if score >= appr.low and score < appr.up then
-				-- and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
+				if score >= appr.low and score < appr.up 
+				 and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
 					table.insert(st,1,v)
 				end
 			end
