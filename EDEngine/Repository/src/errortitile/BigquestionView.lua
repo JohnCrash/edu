@@ -235,7 +235,13 @@ function BigquestionView:init()
 			local but_collect = sender			
 			local send_url
 			but_more.share_box:setVisible(false)
-			send_url = t_nextview[4].url.."?item_id="..self.tb_wrongtitle_item.item_id		
+			local base_url
+			if t_nextview then
+				base_url = t_nextview[4].url 
+			else
+				base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemCol.ashx"
+			end		
+			send_url = base_url.."?item_id="..self.tb_wrongtitle_item.item_id		
 			local result = kits.http_get(send_url,login.cookie(),1)	
 			local tb_result = json.decode(result)
 			local iscollect = but_collect:getSelectedState()
