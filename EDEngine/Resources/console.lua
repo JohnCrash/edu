@@ -3,6 +3,7 @@ local uikits = require "uikits"
 
 local Console = class("Console")
 Console.__index = Console
+
 local isopen = false
 function Console.create()
 	if isopen then return end
@@ -91,14 +92,32 @@ function Console:init()
 				for i=1,#s do
 					local item = uikits.text{caption=s[#s-i+1],x=ox,y=h,fontSize=item_h,color=color}
 					view:addChild(item)
-					h = h + item_h						
+					h = h + item_h
 				end
 			else --重新布局
 				view:setInnerContainerSize(cc.size(ss.width*scale*2,h+2*item_h))			
 				view:scrollToBottom(0.1,true)
 			end
 		end,ccui.ScrollviewEventType.scrollToTop)
-		
+	--加一个调试
+	local debugip = uikits.editbox{
+		caption = '192.168.2.*',
+		x=128*scale,
+		width=240*scale,height=64*scale
+	}
+	debugip:setText("192.168.2.182")
+	local isopen = false
+	local debugbutton = uikits.button{caption='Debug...',x=(128+240)*scale,
+		width=128*scale,height=64*scale,
+		eventClick=function(sender)
+			if not isopen then
+				require("mobdebug").start(debugip:getStringValue())
+				isopen = true
+			end
+		end}
+	self:addChild(debugip)
+	self:addChild(debugbutton)
+	
 	self:addChild(view)
 	self:addChild(close)
 end

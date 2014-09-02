@@ -195,6 +195,8 @@ function WorkCommit:addCommitStudent( id,na,ti )
 end
 
 function WorkCommit:relayoutScroolView()
+	if not self._list then return end
+	
 	local height = self._item_height*(#self._list)
 	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
 	local offy = 0
