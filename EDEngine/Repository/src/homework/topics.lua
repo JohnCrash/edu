@@ -1523,7 +1523,11 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,judge)
+					if data._isdone_ then
+						judge(layout,data)
+					else
+						cache_done(layout,data,judge)
+					end
 				end
 			},
 	[2] = {name='单选',img=res_root..'single_item.png',
@@ -1541,14 +1545,22 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,single_select)
+					if data._isdone_ then
+						single_select(layout,data)
+					else					
+						cache_done(layout,data,single_select)
+					end
 				end
 			},
 	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,multi_select_init)
+					if data._isdone_ then
+						multi_select_init(layout,data)
+					else
+						cache_done(layout,data,multi_select_init)
+					end
 				end
 			},
 	[4] = {name='连线',img=res_root..'connection_item.png',
@@ -1561,15 +1573,15 @@ local types={
 	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
-					if s.correct_answer and type(s.correct_answer)=='string' then
+					if s.cnt_answer then
+						e.options = s.cnt_answer					
+					elseif s.correct_answer and type(s.correct_answer)=='string' then
 						local ans = json.decode(s.correct_answer)
 						if ans and ans.answers and type(ans.answers)=='table' then
 							e.options = #ans.answers
 						else
 							e.options = 1
 						end
-					elseif s.cnt_answer then
-						e.options = s.cnt_answer
 					else
 						e.options = 1
 					end
@@ -1579,14 +1591,22 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,edit_topics)
+					if data._isdone_ then
+						edit_topics(layout,data)
+					else
+						cache_done(layout,data,edit_topics)
+					end
 				end
 			},
 	[6] = {name='选择',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,multi_select_init)
+					if data._isdone_ then
+						multi_select_init(layout,data)
+					else
+						cache_done(layout,data,multi_select_init)
+					end
 				end
 			},
 	[7] = {name='横排序',img=res_root..'sort_item.png',

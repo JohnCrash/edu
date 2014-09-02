@@ -10,7 +10,7 @@ crash.open("launcher",1)
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
---require("mobdebug").start("192.168.2.182")
+require("mobdebug").start("192.168.2.182")
 
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
@@ -50,14 +50,21 @@ else
 end
 
 local mode
+local isconsole_open
 --android 返回键
 local function onKeyRelease(key,event)
 	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
 		if mode==2 then
-			local console = require "console"
-			local scene = console.create()
-			if scene then
-				cc.Director:getInstance():pushScene( scene )
+			if isconsole_open then
+				isconsole_open = nil
+				cc.Director:getInstance():popScene()
+			else
+				local console = require "console"
+				local scene = console.create()
+				if scene then
+					isconsole_open = true
+					cc.Director:getInstance():pushScene( scene )
+				end
 			end
 		else
 			uikits.popScene()
