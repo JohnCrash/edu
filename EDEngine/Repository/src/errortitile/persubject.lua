@@ -61,7 +61,7 @@ function create(name,label,id,range)
 	end	
 	cur_layer.subject_id = id
 	cur_layer.pageindex = 1
-	cur_layer.has_error = 0
+	cur_layer.has_correct = 0
 --	print(name.."::"..label.."::"..range.."::"..id.."::")
 	is_loading = false
 	scene:addChild(cur_layer)
@@ -371,7 +371,7 @@ function persubject:updatepage()
 
 		for i,obj in pairs(self.wrongtitleitems) do
 			if self.wrongtitleitems[i].isright ~= 1 then		
-				--self.has_error = true
+				--self.has_correct = true
 				self:addwrong(i,per_wrongview_no,per_wrongview_has,per_wrongview_no,self.wrongtitleitems[i])
 			else			
 				self:addwrong(i,per_wrongview_has,per_wrongview_has,per_wrongview_no,self.wrongtitleitems[i])
@@ -425,7 +425,7 @@ function persubject:getdatabyurl()
 	end	
 	self.totalpagecount = tb_result.page_total
 	self.wrongtitleitems = tb_result.exerbook_user_items	
-	self.has_error = tb_result.has_correct
+	self.has_correct = tb_result.has_correct
 	local tab_json = {}
 	for i,obj in pairs(self.wrongtitleitems) do
 		tab_json[i] = self.wrongtitleitems[i].item_id
@@ -455,7 +455,7 @@ function persubject:getdatabyurl()
 			if t and type(t)=='table' then
 				self.totalpagecount = t.page_total
 				self.wrongtitleitems = t.exerbook_user_items	
-				self.has_error = t.has_correct
+				self.has_correct = t.has_correct
 				local tab_json = {}
 				for i,obj in pairs(self.wrongtitleitems) do
 					tab_json[i] = self.wrongtitleitems[i].item_id
@@ -611,11 +611,11 @@ function persubject:init()
 		self.practice_view:setVisible(true)	
 		local practice_view = self.practice_view:getChildByTag(832)--获取开始练习的对话框
 		local but_practice_no = practice_view:getChildByTag(836)--获取只做错题按钮
-		print(self.has_error)
-		if self.has_error == 0 then
-			but_practice_no:setVisible(true)
-		else
+		print("self.has_correct::"..self.has_correct)
+		if self.has_correct == 0 then
 			but_practice_no:setVisible(false)
+		else
+			but_practice_no:setVisible(true)
 		end			
 	end,"click")	
 	--下拉更新错题列表
