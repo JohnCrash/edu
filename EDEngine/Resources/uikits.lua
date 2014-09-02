@@ -84,7 +84,7 @@ local function InitDesignResolutionMode(t)
 				}		
 		--]]
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
-		scale = t.width/ss.width
+		scale = 2.5*ss.width/t.width
 		return scale
 	end
 	return 1

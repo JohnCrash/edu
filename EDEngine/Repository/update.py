@@ -4,6 +4,7 @@ import os
 import sys
 import hashlib
 import json
+import string
 
 def mmd5(name,bstr):
 	if bstr == True:
@@ -44,8 +45,11 @@ def ldir(proot,item):
 						item.append({'name':dir+"/"+d,'md5':md5val})
 						print dir+"/"+d,"\t",md5val
 					else:
-						item.append({'name':d,'md5':md5val})
-						print d,"\t",md5val
+						if string.lower(d) != 'thumbs.db':
+							item.append({'name':d,'md5':md5val})
+							print d,"\t",md5val
+						else:
+							print "found ",d
 					
 def write_json(root):
 	filelist = open('filelist.json','w')
