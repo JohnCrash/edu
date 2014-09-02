@@ -100,7 +100,13 @@ function dopractice:getdatabyurl(index)
 	send_data = json.encode(json_data)
 	print(self.tb_item_id[index])
 	print(send_data)
-	result = kits.http_post(t_nextview[10].url,send_data,login.cookie(),1)
+	local base_url
+	if t_nextview then
+		base_url = t_nextview[10].url 
+	else
+		base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditByItemids.ashx"
+	end		
+	result = kits.http_post(base_url,send_data,login.cookie(),1)
 	print(result)
 	local tb_result = json.decode(result)
 	if tb_result.result == 0 then
@@ -179,7 +185,13 @@ function dopractice:submitanswer(item_id,item_answer,item_type)
 		send_data = json.encode(json_data)
 	--	print("send_data"..send_data)
 --		print(t_nextview[11].url)
-		result = kits.http_post(t_nextview[11].url,send_data,login.cookie(),1)
+		local base_url
+		if t_nextview then
+			base_url = t_nextview[11].url 
+		else
+			base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemsSubmit.ashx"
+		end		
+		result = kits.http_post(base_url,send_data,login.cookie(),1)
 	--	print(result)
 		local tb_result = json.decode(result)
 		if tb_result.result == 0 then

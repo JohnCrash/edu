@@ -246,11 +246,17 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 						if tag ~= tag_box then
 							--local per_checkbox = check_view:getChildByTag(72+i)
 							check_boxlist[j]:setSelectedState(false)
-						else					
-							if check_boxlist[j]:getSelectedState() == true then
-								send_url = t_nextview[3].url.."?item_id="..tb_wrongtitle_item.item_id.."&reason="..j
+						else		
+							local base_url
+							if t_nextview then
+								base_url = t_nextview[3].url
 							else
-								send_url = t_nextview[3].url.."?item_id="..tb_wrongtitle_item.item_id.."&reason="..0
+								base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemReason.ashx"
+							end
+							if check_boxlist[j]:getSelectedState() == true then
+								send_url = base_url.."?item_id="..tb_wrongtitle_item.item_id.."&reason="..j
+							else
+								send_url = base_url.."?item_id="..tb_wrongtitle_item.item_id.."&reason="..0
 							end	
 						end			
 
@@ -298,7 +304,13 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 			local but_collect = sender		
 			local send_url
 			but_more.share_box:setVisible(false)
-			send_url = t_nextview[4].url.."?item_id="..tb_wrongtitle_item.item_id			
+			local base_url
+			if t_nextview then
+				base_url = t_nextview[4].url
+			else
+				base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemCol.ashx"
+			end
+			send_url = base_url.."?item_id="..tb_wrongtitle_item.item_id			
 			local result = kits.http_get(send_url,login.cookie(),1)	
 			--print(t_nextview[4].url.."?item_id="..tb_wrongtitle_item.item_id)
 			local tb_result = json.decode(result)
@@ -463,7 +475,13 @@ function persubject:getdatabyurl()
 				local json_data = {}
 				json_data.item_id = tab_json
 				send_data = json.encode(json_data)
-				result = kits.http_post(t_nextview[8].url,send_data,login.cookie(),1)
+				local base_url
+				if t_nextview then
+					base_url = t_nextview[8].url 
+				else
+					base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx"
+				end				
+				result = kits.http_post(base_url,send_data,login.cookie(),1)
 				local tb_result = json.decode(result)
 				if tb_result.result == 0 then
 					local tb_perwrong = tb_result.exer_book_stat
@@ -506,7 +524,13 @@ function persubject:showpracticeview()
 				local send_data
 				send_data = "?range="..self.range.."&course="..self.subject_id.."&redoflag=2&show_type=2"
 				local loadbox = loadingbox.open(self)
-				cache.request_json( t_nextview[9].url..send_data,function(t)
+				local base_url
+				if t_nextview then
+					base_url = t_nextview[9].url 
+				else
+					base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditItemids.ashx"
+				end		
+				cache.request_json( base_url..send_data,function(t)
 						local tb_item_id
 						if t and type(t)=='table' then
 							tb_item_id = t.exerbook_user_items
@@ -525,7 +549,13 @@ function persubject:showpracticeview()
 				local send_data
 				send_data = "?range="..self.range.."&course="..self.subject_id.."&redoflag=1&show_type=2"
 				local loadbox = loadingbox.open(self)
-				cache.request_json( t_nextview[9].url..send_data,function(t)
+				local base_url
+				if t_nextview then
+					base_url = t_nextview[9].url 
+				else
+					base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemsEditItemids.ashx"
+				end		
+				cache.request_json( base_url..send_data,function(t)
 						local tb_item_id
 						if t and type(t)=='table' then
 							tb_item_id = t.exerbook_user_items
