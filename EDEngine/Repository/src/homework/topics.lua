@@ -103,6 +103,10 @@ local max_edit = 3
 local res_root = 'homework/'
 local g_scale = 2*1.3
 
+local function get_default_scale()
+	return 2*1.3
+end
+
 local function set_scale(s)
 	g_scale = s
 end
@@ -1675,4 +1679,5 @@ return
 	STATE_UNFINISHED = 3,	
 	get_scale = get_scale,
 	set_scale = set_scale,
+	get_default_scale = get_default_scale,
 }

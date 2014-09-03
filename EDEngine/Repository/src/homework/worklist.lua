@@ -55,7 +55,8 @@ local ui = {
 	SETTING_BUTTON = 'white/more1',
 	BUTTON_LINE = 'white/redline',
 	ISCOMMIT = 'hassubmitted',
-	NOCOMMIT = 'not_submitted',
+	ISMARK = 'comment',
+	MARKING = 'comment2',
 	TIMELABEL = 'time_text',
 	COMMENT = 'comment',
 	HISTORY = 1,
@@ -590,18 +591,26 @@ function WorkList:add_item( t )
 		uikits.child( item,ui.ITEM_PERCENT_TEXT):setString( tostring(math.floor(p))..'%' )
 		uikits.child( item,ui.ITEM_BAR):setPercent( p )
 	end
+	
+	local isc = uikits.child( item,ui.ISCOMMIT )
+	local issee = uikits.child( item,ui.ISMARK )
+	local marking = uikits.child( item,ui.MARKING )	
 	if t.status then --提交状态,0未提交,10,11已经提交
-		local isc = uikits.child( item,ui.ISCOMMIT )
-		local noc = uikits.child( item,ui.NOCOMMIT )
-		if isc and noc then
+		if isc and issee and marking then
 			if t.status == 10 or  t.status == 11 then
-				isc:setVisible( true )
-				noc:setVisible( false )
-			else
 				isc:setVisible( false )
-				noc:setVisible( true )
+				issee:setVisible( false )
+				marking:setVisible( true )
+			else
+				isc:setVisible( true )
+				issee:setVisible( false )
+				marking:setVisible( false )
 			end
+		else
+			kits.log("WARNING WorkList:add_item isc noc marking = nil")
 		end
+	else
+		kits.log("WARNING WorkList:add_item t.status = nil")
 	end
 	--分数
 	if t.real_score then
