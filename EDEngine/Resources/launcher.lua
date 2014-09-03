@@ -77,7 +77,7 @@ local function onTouchBegan(touch, event)
 	local t = touch:getLocation()
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
-	local scale = uikits.scale()
+	local scale = 2
 	local w = ss.width*scale-128
 	local h = ss.height*scale-128
 	if t.x < 128 and t.y < 128 then
@@ -97,7 +97,7 @@ local function onTouchEnded(touch, event)
 		local t = touch:getLocation()
 		local glview = cc.Director:getInstance():getOpenGLView()
 		local ss = glview:getFrameSize()
-		local scale = uikits.scale()
+		local scale = 2
 		local w = ss.width*scale-128
 		local h = ss.height*scale-128
 		if t.x > w and t.y > h then

@@ -1,5 +1,4 @@
 require "AudioEngine" 
-require "VisibleRect"
 lxp = require "lom"
 kits = require "kits"
 json = require "json"
@@ -23,6 +22,11 @@ local SND_FAIL = 5
 local SND_NEXT_PROM = 6
 local SND_PASS = 7
 local SND_GOLD = 8
+
+local function screenCenterPt()
+	local s = uikits.screenSize()
+	return cc.p(s.width/2,s.height/2)
+end
 
 --print( 'do convert' )
 --require "src/amouse/resize_json"
@@ -198,7 +202,7 @@ function AMouseScene:init_bg_and_ui()
 	end
 	--背景
 	self._bg = cc.Sprite:create("amouse/mainscene.png")
-	self._bg:setPosition(VisibleRect:center())
+	self._bg:setPosition(screenCenterPt())
 	self:addChild(self._bg)
 	--题目背景
 	self._sprite_bg = cc.Sprite:create("amouse/NewUI01.png")

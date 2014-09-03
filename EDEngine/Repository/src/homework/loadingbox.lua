@@ -10,6 +10,7 @@ local ui = {
 	TRY = 'red_in/again',
 }
 
+local g_scale = 2
 --放一个旋转圈
 local function put_lading_circle( parent )
 	local size
@@ -19,8 +20,8 @@ local function put_lading_circle( parent )
 		size = parent:getContentSize()
 	else
 		size = uikits.screenSize()
-		size.width = size.width * uikits.scale()
-		size.height = size.height * uikits.scale()
+		size.width = size.width * g_scale
+		size.height = size.height * g_scale
 	end
 	--旋转体
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.LOADING)
@@ -58,8 +59,8 @@ local function open_loadingbox( parent,dt,func )
 		size = parent:getContentSize()
 	else
 		size = uikits.screenSize()
-		size.width = size.width * uikits.scale()
-		size.height = size.height * uikits.scale()
+		size.width = size.width * g_scale
+		size.height = size.height * g_scale
 	end
 	s:setPosition{x=size.width/2,y=size.height/2}
 	--居中显示

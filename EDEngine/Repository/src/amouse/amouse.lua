@@ -1,5 +1,6 @@
 ﻿lxp = require "lom"
 kits = require "kits"
+uikits = require "uikits"
 
 require "AudioEngine"
 
@@ -13,6 +14,10 @@ local SND_RIGHT = 4
 local SND_FAIL = 5
 local SND_NEXT_PROM = 6
 
+local function screenCenterPt()
+	local s = uikits.screenSize()
+	return cc.pt(s.width/2,s.height/2)
+end
 --产生一个xml文档报告游戏体验结果
 local function get_errors_xml(do_num,err_num,err_table)
 	local xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -113,7 +118,7 @@ local function AMouseMainLayer()
     local function onEnter()
 		local next_prom
 		local bg    = cc.Sprite:create("amouse/mainscene.png")
-		bg:setPosition(VisibleRect:center())
+		bg:setPosition(screenCenterPt())
 		layer:addChild(bg)
 		local time_bg = ccui.Button:create()
 		time_bg:loadTextures("amouse/NewUI0.png","amouse/NewUI0.png","")
@@ -302,7 +307,7 @@ local function AMouseMainLayer()
 			end
 		end
 		
-		hummer:setPosition(VisibleRect:center())
+		hummer:setPosition(screenCenterPt())
 		hummer:getAnimation():playWithIndex(1)
 		
 		--local font = cc.LabelTTF:create()

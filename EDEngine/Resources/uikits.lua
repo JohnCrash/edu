@@ -26,7 +26,11 @@ local function log_caller()
 end
 
 local function playSound( file )
-	return AudioEngine.playEffect( file )
+	if FileUtils:isFileExist(file) then
+		return AudioEngine.playEffect( file )
+	else
+		kits.log('ERROR playSound file not exist '..tostring(file))
+	end
 end
 
 local function pauseSound( id )
@@ -84,7 +88,6 @@ local function InitDesignResolutionMode(t)
 				}		
 		--]]
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
-		scale = 2 --2.5*ss.width/t.width
 		return scale
 	end
 	return 1
@@ -138,7 +141,7 @@ local function text( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			tx:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.ended then
+					if eventType == ccui.TouchEventType.began then
 						t.eventClick( sender )
 					end
 				end)
@@ -173,7 +176,7 @@ local function textbmfont( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			tx:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.ended then
+					if eventType == ccui.TouchEventType.began then
 						t.eventClick( sender )
 					end
 				end)
@@ -248,7 +251,7 @@ local function button( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			cb:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.ended then
+					if eventType == ccui.TouchEventType.began then
 						t.eventClick( sender )
 					end
 				end)
@@ -517,7 +520,7 @@ local function event( obj,func,eventType )
 			if eventType == 'click' then
 				obj:addTouchEventListener( 
 				function(sender,eventType) 
-					if eventType == ccui.TouchEventType.ended then
+					if eventType == ccui.TouchEventType.began then
 						func( sender,x,y )
 					end
 				end)				
@@ -525,7 +528,7 @@ local function event( obj,func,eventType )
 		elseif isTouchEvent[cc_type(obj)] then
 			obj:addTouchEventListener( 
 				function(sender,eventType) 
-					if eventType == ccui.TouchEventType.ended then
+					if eventType == ccui.TouchEventType.began then
 						func( sender )
 					end
 				end)

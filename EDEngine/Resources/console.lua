@@ -48,7 +48,7 @@ function Console:init()
 	isopen_flag = true
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
-	local scale = uikits.scale()
+	local scale = 2
 	local bh = 64*scale
 	local view = uikits.scrollview{width=ss.width*scale,height=ss.height*scale-bh,y=bh,bgcolor=cc.c3b(0,0,64)}
 	local close = uikits.button{caption="close",

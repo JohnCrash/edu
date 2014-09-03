@@ -28,7 +28,7 @@ end
 function AppEntry:init()
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
-	local scale = uikits.scale()
+	local scale = 2
 	local bg = uikits.layout{width=ss.width*scale,height=ss.height*scale}
 	local item_h = 64*scale
 	

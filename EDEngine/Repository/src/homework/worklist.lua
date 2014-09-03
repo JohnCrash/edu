@@ -568,8 +568,6 @@ function WorkList:add_item( t )
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)
 		local size = pic:getContentSize()
-		--pic:setScaleX(1/uikits.scale())
-		--pic:setScaleY(1/uikits.scale())
 	else
 		--默认设置
 	end
