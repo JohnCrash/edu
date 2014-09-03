@@ -35,7 +35,7 @@ function AppEntry:init()
 	local amouse = uikits.button{caption='amouse',x=64*scale,y = 64*scale +5*item_h,
 	width=128*scale,height=48*scale,
 	eventClick=function(sender)
-		update.create{name=app,updates={'amouse','luacore'},
+		update.create{name='amouse',updates={'amouse','luacore'},
 			run=function()
 			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 			local amouse = require "amouse/amouse_om"
@@ -46,7 +46,7 @@ function AppEntry:init()
 	local tbutton = uikits.button{caption='teacher',x=64*scale,y = 64*scale +4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name=app,updates={'homework','luacore'},
+			update.create{name='teacher',updates={'homework','luacore'},
 				run=function()
 				login.set_selector(2)
 				local teacher = require "homework/teacher"
@@ -56,7 +56,7 @@ function AppEntry:init()
 	local sbutton = uikits.button{caption='student',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name=app,updates={'homework','errortitile','luacore'},
+			update.create{name='student',updates={'homework','errortitile','luacore'},
 				run=function()
 				login.set_selector(1) --学生
 				local worklist = require "homework/worklist"
@@ -66,7 +66,7 @@ function AppEntry:init()
 	local ebutton = uikits.button{caption='errortitle',x=64*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name=app,updates={'homework','errortitile','luacore'},
+			update.create{name='errortitle',updates={'homework','errortitile','luacore'},
 				run=function()
 				login.set_selector(1) --学生
 				local WrongSubjectList = require "errortitile/WrongSubjectList"

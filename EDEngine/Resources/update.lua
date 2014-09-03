@@ -66,6 +66,12 @@ local function download_file(t,m5)
 			return kits.write_file(local_file,fbuf),1
 		end
 		return true,0
+	else
+		if not fbuf then
+			kits.log("ERROR request "..tostring(url).." failed")
+		else
+			kits.log("ERROR download_file md5 verify failed")
+		end
 	end
 	return false,2
 end
@@ -86,11 +92,11 @@ local function update_one_by_one(t)
 			kits.del_directory(local_dir..t.remove_dir)
 			return true,0
 		else
-			kits.log('update_one_by_one unkown operation')
+			kits.log('ERROR update_one_by_one unkown operation')
 			return false,3
 		end
 	else
-		kits.log('update_one_by_one t=nil')
+		kits.log('ERROR update_one_by_one t=nil')
 		return false,3
 	end
 end
@@ -190,6 +196,7 @@ function UpdateProgram:update_directory(dir)
 	if not nbuf then
 		--self._try:setHighlighted(false)
 		--self._try:setEnabled(false)
+		kits.log("ERROR : update_directory request "..tostring(n_dir).." failed")
 		self:ErrorAndExit("跟新服务器暂时不可用请稍后再试."..tostring(dir),1)
 	else
 		local n_table = json.decode(nbuf)
@@ -222,6 +229,7 @@ end
 function UpdateProgram:NErrorCheckLocal(dir)
 	local src_local = local_dir..'src/'..dir..'/filelist.json' 
 	if not kits.local_exists( src_local ) then --看看有没有本地版本
+		kits.log("INFO : not exists "..src_local)
 		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
 	end
 end
@@ -254,7 +262,9 @@ function UpdateProgram:check_directory(dir,n)
 						return true --需要跟新
 					end
 				else
-					kits.log('check_directory  version file error!')
+					kits.log('ERROR check_directory version file error!')
+					kits.log('	res version='..tostring(res))
+					kits.log('	src version='..tostring(src))
 					--网络失败，本机有没有
 					if n==2 then
 						self:NErrorCheckLocal(dir)
@@ -262,7 +272,7 @@ function UpdateProgram:check_directory(dir,n)
 					return false,1 --下传失败,本次不跟新
 				end
 			else
-				kits.log('check_directory '..tostring(src_url)..' failed')
+				kits.log('ERROR check_directory request '..tostring(src_url)..' failed')
 				--网络失败，本机有没有
 				if n==2 then
 					self:NErrorCheckLocal(dir)
@@ -270,7 +280,7 @@ function UpdateProgram:check_directory(dir,n)
 				return false,1 --下传失败,本次不跟新
 			end
 		else
-			kits.log('check_directory '..tostring(res_url)..' failed')
+			kits.log('ERROR check_directory request '..tostring(res_url)..' failed')
 			--网络失败，本机有没有
 			if n==2 then
 				self:NErrorCheckLocal(dir)
@@ -282,6 +292,7 @@ end
 function UpdateProgram:check_update(t)
 	local outer = false
 	t.need_updates={}
+	kits.log("INFO check "..tostring(update_server))
 	for i,v in pairs(t.updates) do
 		local b,e = self:check_directory(v,1)
 		if e then --如果网络错误不在等待，直接不跟新
@@ -298,6 +309,7 @@ function UpdateProgram:check_update(t)
 	if outer then
 		--尝试外网的服务器
 		update_server = liexue_server
+		kits.log("INFO check "..tostring(update_server))
 		t.need_updates={}
 		for i,v in pairs(t.updates) do
 			local b,e = self:check_directory(v,2)
@@ -361,7 +373,7 @@ function UpdateProgram:update()
 			if b then
 				cc.Director:getInstance():replaceScene(scene)
 			else
-				self:ErrorAndExit('不能启动:'..tostring(self._args.name)..'代码中含有错误',2)
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
 			end
 		else
 			local b,e = update_one_by_one(self._oplist[self._count])
