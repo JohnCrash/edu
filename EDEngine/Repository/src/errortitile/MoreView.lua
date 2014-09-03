@@ -98,7 +98,7 @@ function MoreView:init()
 	
 	local function exitCallback(sender, eventType) 	
         if eventType == ccui.TouchEventType.ended then				
-			cc.Director:getInstance():endToLua()
+			kits.quit()
         end
     end						
 	but_exit:addTouchEventListener(exitCallback)			

@@ -46,7 +46,7 @@ local function download_http_by_socket(host,file,port)
   if connect then
     connect:settimeout(0.1)
     local reqs = "GET "..file.." HTTP/1.0\r\n\r\n"
-    print(reqs)
+    my_log(reqs)
     local result = connect:send(reqs)
     repeat
       local chunk,status,partial = connect:receive(1024)
@@ -91,10 +91,10 @@ local function download_http_by_curl(url,tout)
    if result then
 		return table.concat(t) -- return the whole data as a string  
 	else
-		print( '-----------download_http_by_curl---------------' )
-		print( 'can\'t connect to '..url )
-		print( 'Error message : '..err_msg )
-		print( 'Error code : '..err_code )
+		my_log( '-----------download_http_by_curl---------------' )
+		my_log( 'can\'t connect to '..url )
+		my_log( 'Error message : '..err_msg )
+		my_log( 'Error code : '..err_code )
 		return nil
 	end 
 end
@@ -136,10 +136,10 @@ local function http_post(url,text,cookie,to)
    if result then
 		return table.concat(t) -- return the whole data as a string  
 	else
-		print( '-----------http_post---------------' )
-		print( 'can\'t connect to '..url )
-		print( 'Error message : '..err_msg )
-		print( 'Error code : '..err_code )
+		my_log( '-----------http_post---------------' )
+		my_log( 'can\'t connect to '..url )
+		my_log( 'Error message : '..err_msg )
+		my_log( 'Error code : '..err_code )
 		return nil
 	end
 end
@@ -170,10 +170,10 @@ local function http_get(url,cookie,to)
    if result then
 		return table.concat(t) -- return the whole data as a string  
 	else
-		print( '-----------http_get---------------' )
-		print( 'can\'t connect to '..url )
-		print( 'Error message : '..err_msg )
-		print( 'Error code : '..err_code )
+		my_log( '-----------http_get---------------' )
+		my_log( 'can\'t connect to '..url )
+		my_log( 'Error message : '..err_msg )
+		my_log( 'Error code : '..err_code )
 		return nil
 	end
 end
@@ -197,7 +197,7 @@ end
 
 local function read_local_file( name )
   local file = local_dir..name
-  return read_file(name)
+  return read_file(file)
 end
 
 local function read_network_file( name )
@@ -214,14 +214,14 @@ local function write_file( name,buf )
 	return true
   else
      --local file error?
-     cclog('Can not write file '..filename)
+     my_log('Can not write file '..filename)
 	 return false
   end
 end
 
 local function write_local_file( name,buf )
   local filename = local_dir..name
-  return write_file( name,buf )
+  return write_file( filename,buf )
 end
 
 local function directory_exists( dir )
@@ -256,7 +256,7 @@ local function del_file( name )
   if os.remove then
     os.remove(filename)
   else
-    print('not found os.remove function')
+    my_log('not found os.remove function')
   end
 end
 
@@ -272,8 +272,8 @@ local function download_file(file)
   for i = 1,10 do
 		fbuf = read_network_file(file)
 		if fbuf then break end
-		print('download file \''..file..'\' error,try agin!')
-		print('------------------------------------------------')
+		my_log('download file \''..file..'\' error,try agin!')
+		my_log('------------------------------------------------')
 	end
 	
   if fbuf then
@@ -331,7 +331,7 @@ local function write_cache( name,buf )
 	return true
   else
      --local file error?
-	 print( 'buf="'..tostring(buf)..'"'..",type="..type(buf) )
+	 my_log( 'buf="'..tostring(buf)..'"'..",type="..type(buf) )
      cclog('Can not write cache '..filename)
 	 return false
   end
@@ -343,10 +343,10 @@ local function decode_json( buf )
 		if b then
 			return re
 		else
-			print('JSON.DECODE ERROR: '..re)
+			my_log('JSON.DECODE ERROR: '..re)
 		end
 	else
-		print('decode_json argument #1 is nil')
+		my_log('decode_json argument #1 is nil')
 	end
 	return nil
 end
@@ -370,16 +370,16 @@ local function time_to_string( d,expet_sec )
 		local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
 		local result = ''
 		if day > 0 then
-			result = result..day..'å¤©'
+			result = result..day..'å¤?
 		end
 		if hours > 0 or day > 0 then
 			result = result..hours..'å°æ—¶'
 		end
 		if mins > 0 or hours > 0 or day > 0 then
-			result = result..mins..'åˆ†'
+			result = result..mins..'åˆ?
 		end
 		if not expet_sec then
-			result = result..sec..'ç§’'
+			result = result..sec..'ç§?
 		end
 		return result
 	end
@@ -389,12 +389,12 @@ local function check_table(t,...)
 	if t and type(t)=='table' then
 		for i = 1,select('#',...) do
 			if not t[select(i,...)] then
-				print( 'ERROR '..tostring(select(i,...))..' not exist!' )
+				my_log( 'ERROR '..tostring(select(i,...))..' not exist!' )
 				return false
 			end
 		end
 	else
-		print('ERROR assert invalid paramter t=nil or not table')
+		my_log('ERROR assert invalid paramter t=nil or not table')
 		return false
 	end
 	return true
@@ -403,6 +403,39 @@ end
 local function encodeURI(s)
 	s = string.gsub(s, "([^%w%.%- ])", function(c) return string.format("%%%02X", string.byte(c)) end)
 	return string.gsub(s, " ", "+")
+end
+
+local config_table
+
+local function config(key,value)
+	if not config_table then
+		local result = read_local_file("config.json")
+		if result then
+			config_table = json.decode(result)
+		end
+	end
+	config_table = config_table or {}
+	local oldvalue = config_table[key]
+	if value ~= "get" then
+		config_table[key] = value
+		local result = json.encode(config_table)
+		if result then
+			my_log("WARNING write config file")
+			write_local_file("config.json",result)
+		else
+			my_log("ERROR config json.encode return nil")
+		end
+	end
+	return oldvalue
+end
+
+local function quit()
+	config_table = config_table or {}
+	local result = json.encode(config_table)
+	if result then
+		write_local_file("config.json",result)
+	end
+	cc.Director:getInstance():endToLua()
 end
 
 local exports = {
@@ -436,6 +469,8 @@ local exports = {
 	del_file = del_file,
 	del_directory = del_directory,
 	get_logs = get_logs,
+	config = config,
+	quit = quit,
 }
 
 return exports

@@ -35,6 +35,7 @@ local ui = {
 	MORE = 'homework/more.json',
 	MORE_3_4 = 'homework/more43.json',
 	MORE_VIEW = 'more_view',
+	MORE_SOUND = 'sound',
 	LESSON = 'lesson',
 	BACK = 'white/back',
 	LIST = 'newview',
@@ -444,6 +445,14 @@ function WorkList:init_gui()
 	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	
+	local cs = uikits.child(self._setting,ui.MORE_SOUND)
+	if cs then
+		cs:setSelectedState (kits.config("mute","get"))
+		uikits.event(cs,function(sender,b)
+			kits.config("mute",b)
+			uikits.muteSound(b)
+		end)
+	end
 	self._root:addChild(self._setting)
 	
 	self:addChild(self._root)

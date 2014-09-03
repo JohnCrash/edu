@@ -45,6 +45,18 @@ local function stopAllSound()
 	AudioEngine.stopAllEffects()
 end
 
+local ismute
+
+local function muteSound( b )
+	ismute = b
+end
+
+local function playClickSound()
+	if not ismute then
+		playSound( 'audio/button_press.mp3' )
+	end
+end
+
 local function init_layout( s,t )
 	local ss = s:getContentSize()
 	s:setContentSize{width=t.width or ss.width,height=t.height or ss.height}
@@ -141,7 +153,7 @@ local function text( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			tx:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
+					if eventType == ccui.TouchEventType.ended then
 						t.eventClick( sender )
 					end
 				end)
@@ -176,7 +188,7 @@ local function textbmfont( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			tx:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
+					if eventType == ccui.TouchEventType.ended then
 						t.eventClick( sender )
 					end
 				end)
@@ -214,6 +226,7 @@ local function checkbox( t )
 		if t.eventSelect and not t.event and type(t.eventSelect) == 'function' then
 			local function event_select(sender,eventType)
 				if eventType == ccui.CheckBoxEventType.selected then
+					playClickSound()
 					t.eventSelect(sender,true)
 				elseif eventType == ccui.CheckBoxEventType.unselected then
 					t.eventSelect(sender,false)
@@ -251,7 +264,8 @@ local function button( t )
 		if t.eventClick and not t.event and type(t.eventClick) == 'function' then
 			cb:addTouchEventListener(
 				function (sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
+					if eventType == ccui.TouchEventType.ended then
+						playClickSound()
 						t.eventClick( sender )
 					end
 				end)
@@ -513,6 +527,7 @@ local isTouchEvent = {
 	['ccui.Button'] = true,
 	['ccui.Text'] = true
 }
+
 local function event( obj,func,eventType )
 	if obj and func then
 		obj:setTouchEnabled(true)
@@ -520,15 +535,25 @@ local function event( obj,func,eventType )
 			if eventType == 'click' then
 				obj:addTouchEventListener( 
 				function(sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
+					if eventType == ccui.TouchEventType.ended then
+						playClickSound()
 						func( sender,x,y )
 					end
 				end)				
+			elseif eventType == 'began' then
+				obj:addTouchEventListener( 
+				function(sender,eventType) 
+					if eventType == ccui.TouchEventType.began then
+						playClickSound()
+						func( sender,x,y )
+					end
+				end)			
 			end
 		elseif isTouchEvent[cc_type(obj)] then
 			obj:addTouchEventListener( 
 				function(sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
+					if eventType == ccui.TouchEventType.ended then
+						playClickSound()
 						func( sender )
 					end
 				end)
@@ -536,6 +561,7 @@ local function event( obj,func,eventType )
 			obj:addEventListener(
 				function(sender,eventType)
 					if eventType == ccui.CheckBoxEventType.selected then
+						playClickSound()
 						func(sender,true)
 					elseif eventType == ccui.CheckBoxEventType.unselected then
 						func(sender,false)
@@ -1035,4 +1061,6 @@ return {
 	set_item = set_item,
 	fitsize = fitsize,
 	scrollview_step_add = scrollview_step_add,
+	muteSound = muteSound,
+	playClickSound = playClickSound,
 }

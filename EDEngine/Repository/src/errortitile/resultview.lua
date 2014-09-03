@@ -54,7 +54,7 @@ function resultview:showviewdata(item_data)
 	
 	uikits.event(exit_but,	
 		function(sender,eventType)
---		cc.Director:getInstance():endToLua()
+--		kits.quit()
 		uikits.popScene()	
 		uikits.popScene()	
 	end,"click")

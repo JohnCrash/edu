@@ -76,7 +76,7 @@ function AppEntry:init()
 	local exitbutton = uikits.button{caption='exit',x=64*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			cc.Director:getInstance():endToLua()
+			kits.quit()
 		end}
 	local debugip = uikits.editbox{
 		caption = '192.168.2.*',

@@ -7,6 +7,8 @@ local update = require "update"
 
 crash.open("launcher",1)
 
+uikits.muteSound( kits.config("mute","get") )
+
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
@@ -28,6 +30,7 @@ local function init_test_resource()
 		pfu:addSearchPath(local_dir..'res/')	
 		pfu:addSearchPath(local_dir)
 		pfu:addSearchPath(local_dir..'luacore/')
+		pfu:addSearchPath(local_dir..'res/luacore')
 		--搜索assets目录
 		pfu:addSearchPath('src/')
 		pfu:addSearchPath('res/')

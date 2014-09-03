@@ -478,7 +478,7 @@ function WorkFlow:init_gui()
 		self:save_answer()
 		self:save()
 		uikits.popScene()
-		end)
+		end,'click')
 	self._scrollview = uikits.child(self._root,ui.LIST)
 	self._pageview = uikits.child(self._root,ui.PAGE_VIEW)
 	self._pageview_size = self._pageview:getContentSize()
@@ -622,7 +622,7 @@ function WorkFlow:add_item( t )
 		item:setVisible(true)
 		self._scrollview:addChild(item)
 		local index = #self._list
-		uikits.event(item,function(sender) self:set_current( index ) end,'click')
+		uikits.event(item,function(sender) self:set_current( index ) end,'began')
 		--add page
 		local layout = uikits.scrollview{bgcolor=cc.c3b(255,255,255)}
 		layout:setContentSize(self._pageview_size)

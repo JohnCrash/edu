@@ -572,7 +572,7 @@ local function attachment_ui_player( t )
 								snd_idx = uikits.playSound(file)
 						--		play_but:setVisible(false)
 						--		pause_but:setVisible(true)
-							end )
+							end,'began' )
 							--[[ 目前声音不支持监听状态
 						uikits.event(pause_but,
 							function(sender)
@@ -581,7 +581,7 @@ local function attachment_ui_player( t )
 									pause_but:setVisible(false)
 									uikits.pauseSound(snd_idx)							
 								end
-							end ) --]]
+							end,'began') --]]
 					end
 					return pbox
 				end
@@ -716,7 +716,7 @@ local function relayout_link( layout,data )
 				up = k
 				select_rect(ui1[up],true)
 				do_link()
-			end,'click' )		
+			end,'began' )		
 		local s = item:getContentSize()
 		layout:addChild(item)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
@@ -734,7 +734,7 @@ local function relayout_link( layout,data )
 				down = k
 				select_rect(ui2[down],false)
 				do_link()
-			end,'click' )
+			end,'began' )
 		layout:addChild(item)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
 		table.insert( dot2,dot )
@@ -1030,7 +1030,7 @@ local function relayout_click( layout,data,ismulti )
 					data.state = ui.STATE_UNFINISHED
 				end				
 				call_answer_event(layout,data)
-			end,'click' )
+			end,'began' )
 	end
 
 	set_topics_image( layout,data,0,bg_size.height*g_scale )
@@ -1385,7 +1385,7 @@ local function multi_select_init(layout,data)
 					data.my_answer[1] = string_sort(data.my_answer[1])
 					kits.log( data.my_answer[1] )
 					call_answer_event(layout,data)
-				end)
+				end,'began')
 		end --for
 	end --if
 end						
@@ -1422,7 +1422,7 @@ local function judge(layout,data)
 			end
 			kits.log( data.my_answer[1] )
 			call_answer_event(layout,data)
-		end)
+		end,'began')
 	uikits.event(_option_no,
 		function (sender,b)
 			if b then
@@ -1437,7 +1437,7 @@ local function judge(layout,data)
 			end			
 			kits.log( data.my_answer[1] )				
 			call_answer_event(layout,data)
-		end)						
+		end,'began')						
 	end
 end
 
@@ -1468,7 +1468,7 @@ local function single_select(layout,data)
 					end
 					kits.log( data.my_answer[1] )
 					call_answer_event(layout,data)
-				end)
+				end,'began')
 		end
 	end
 end
