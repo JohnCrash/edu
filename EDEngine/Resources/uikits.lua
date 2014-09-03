@@ -83,7 +83,7 @@ end
 local design = {width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 local scale = 1
 local function getDesignResolution()
-	return design
+	return {width=design.width,height=design.height,mode=design.mode}
 end
 local function InitDesignResolutionMode(t)
 	local glview = Director:getOpenGLView()

@@ -25,7 +25,7 @@ local SND_GOLD = 8
 
 local function screenCenterPt()
 	local s = uikits.screenSize()
-	return cc.p(s.width/2,s.height/2)
+	return cc.p(1024/2,768/2)
 end
 
 --print( 'do convert' )
