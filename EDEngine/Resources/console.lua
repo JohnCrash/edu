@@ -43,9 +43,15 @@ local function add_table( t,s )
 		i = i + 1
 	end
 end
-
+local dr
 function Console:init()
 	isopen_flag = true
+	dr = uikits.getDR()
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1920,height=1080}
+	else
+		uikits.initDR{width=1440,height=1080}
+	end
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
 	local scale = 2
@@ -55,6 +61,7 @@ function Console:init()
 			fontSize=32*scale,width=128*scale,height=64*scale,
 			anchorX=0,anchorY=0}
 	uikits.event(close,function(sender)
+		uikits.initDR{width=dr.width,height=dr.height}
 		uikits.popScene()
 	end )
 	local h = 0
@@ -112,7 +119,7 @@ function Console:init()
 	}
 	debugip:setText("192.168.2.182")
 	local isdebug
-	local debugbutton = uikits.button{caption='Debug...',x=(128+240)*scale,
+	local debugbutton = uikits.button{caption='Debug...',fontSize=32*scale,x=(128+240)*scale,
 		width=128*scale,height=64*scale,
 		eventClick=function(sender)
 			if not isdebug then
@@ -120,6 +127,12 @@ function Console:init()
 				isdebug = true
 			end
 		end}
+	local exitbut = uikits.button{caption='Exit',fontSize=32*scale,x=(128+240+128)*scale,
+		width=128*scale,height=64*scale,
+		eventClick=function(sender)
+			kits.quit()
+		end}		
+	self:addChild(exitbut)		
 	self:addChild(debugip)
 	self:addChild(debugbutton)
 	
@@ -129,6 +142,7 @@ end
 
 function Console:release()
 	isopen_flag = false
+	uikits.initDR{width=dr.width,height=dr.height,mode=dr.mode}
 end
 
 return Console

@@ -370,16 +370,16 @@ local function time_to_string( d,expet_sec )
 		local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
 		local result = ''
 		if day > 0 then
-			result = result..day..'å¤?
+			result = result..day..'å¤©'
 		end
 		if hours > 0 or day > 0 then
 			result = result..hours..'å°æ—¶'
 		end
 		if mins > 0 or hours > 0 or day > 0 then
-			result = result..mins..'åˆ?
+			result = result..mins..'åˆ†'
 		end
 		if not expet_sec then
-			result = result..sec..'ç§?
+			result = result..sec..'ç§’'
 		end
 		return result
 	end

@@ -80,8 +80,11 @@ local function init_node( s,t )
 	s:setPosition{x=t.x or 0,y= t.y or 0}	
 end
 
-local design = {width=1024,height=768}
+local design = {width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 local scale = 1
+local function getDesignResolution()
+	return design
+end
 local function InitDesignResolutionMode(t)
 	local glview = Director:getOpenGLView()
 	local ss = glview:getFrameSize()
@@ -99,7 +102,11 @@ local function InitDesignResolutionMode(t)
 					UNKNOWN  = 5,
 				}		
 		--]]
+		design.width = t.width
+		design.height = t.height
+		design.mode = t.mode
 		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
+		scale = t.width/ss.width
 		return scale
 	end
 	return 1
@@ -1043,6 +1050,7 @@ return {
 	relayout_h = relayout_h,
 	relayout_v = relayout_v,
 	initDR = InitDesignResolutionMode,
+	getDR = getDesignResolution,
 	line = line,
 	rect = rect,
 	move = move,

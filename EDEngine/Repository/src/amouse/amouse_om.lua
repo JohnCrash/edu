@@ -685,13 +685,17 @@ end
 
 --初始化角色
 function AMouseScene:init_role()
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
-	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/NewAnimation.ExportJson")
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
-	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
-	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo("amouse/xing/xing.ExportJson")
-
+	local arm = ccs.ArmatureDataManager:getInstance()
+	if arm then
+		arm:removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
+		arm:addArmatureFileInfo("amouse/NewAnimation.ExportJson")
+		arm:removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
+		arm:addArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
+		arm:removeArmatureFileInfo("amouse/xing/xing.ExportJson")
+		arm:addArmatureFileInfo("amouse/xing/xing.ExportJson")
+	else
+		kits.log("ERROR init_role ccs.ArmatureDataManager:getInstance() return nil")
+	end
 	--时间小虫
 	self._worm = ccs.Armature:create("chong_zi")
 	self._worm:getAnimation():playWithIndex(0)
@@ -1344,6 +1348,11 @@ function AMouseScene:init()
 		self._screen = 1
 		print("4/3" )
 	end
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+	else
+		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+	end	
 	--self._scheduler = cc.Director:getInstance():getScheduler()
 	self._scheduler = self:getScheduler()
 	--初始化玩家数据
