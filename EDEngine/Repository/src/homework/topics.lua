@@ -103,6 +103,14 @@ local max_edit = 3
 local res_root = 'homework/'
 local g_scale = 2*1.3
 
+local function set_scale(s)
+	g_scale = s
+end
+
+local function get_scale()
+	return g_scale
+end
+
 local function set_EditChildTag( t )
 	EditChildTag = t
 end
@@ -1665,4 +1673,6 @@ return
 	STATE_CURRENT = 1,
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
+	get_scale = get_scale,
+	set_scale = set_scale,
 }

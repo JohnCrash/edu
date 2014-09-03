@@ -367,7 +367,7 @@ function WorkFlow:load_cloud_answer( e )
 							local t = json.decode(result.detail.answer)
 							if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
 								kits.log('	CLOUD ANSWER:'..result.detail.answer )
-								e.my_answer = {}
+								e.my_answer = e.my_answer or {}
 								for i,v in pairs(t.answers) do
 									e.my_answer[i] = v.value
 								end

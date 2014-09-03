@@ -548,13 +548,25 @@ local function event( obj,func,eventType )
 					end
 				end)				
 			elseif eventType == 'began' then
-				obj:addTouchEventListener( 
-				function(sender,eventType) 
-					if eventType == ccui.TouchEventType.began then
-						playClickSound()
-						func( sender,x,y )
-					end
-				end)			
+				if cc_type(obj)=='ccui.CheckBox' then
+					obj:addEventListener(
+						function(sender,eventType)
+							if eventType == ccui.CheckBoxEventType.selected then
+								playClickSound()
+								func(sender,true)
+							elseif eventType == ccui.CheckBoxEventType.unselected then
+								func(sender,false)
+							end
+						end)					
+				else
+					obj:addTouchEventListener( 
+					function(sender,eventType) 
+						if eventType == ccui.TouchEventType.began then
+							playClickSound()
+							func( sender,x,y )
+						end
+					end)			
+				end
 			end
 		elseif isTouchEvent[cc_type(obj)] then
 			obj:addTouchEventListener( 
