@@ -40,7 +40,13 @@ UpdateProgram.__index = UpdateProgram
 --2网络问题，1本地问题，0没有问题，3算法结构问题
 local function download_file(t,m5)
 	local url = update_server..t
-	local local_file = local_dir..t
+	local local_file = local_dir..t..'_' --临时文件后面加个下划线
+	if kits.exists_file(local_file) then
+		local result = kits.read_file(local_file)
+		if result and md5.sumhexa(result)==m5 then
+			return true,0 --已经下载好了
+		end
+	end
 	local fbuf = kits.http_get(url)
 	if fbuf and (md5.sumhexa(fbuf)==m5 or not m5) then
 		if not kits.write_file(local_file,fbuf) then
@@ -70,24 +76,46 @@ local function download_file(t,m5)
 		if not fbuf then
 			kits.log("ERROR request "..tostring(url).." failed")
 		else
-			kits.log("ERROR download_file md5 verify failed")
+			kits.log("ERROR download_file md5 verify failed."..url)
+			kits.log("	'"..tostring(md5).."'")
 		end
 	end
 	return false,2
 end
 
+local function download_one_by_one(t)
+	if t and t.download then
+		return download_file(t.download,t.md5)
+	end
+	return false,0
+end
+
 local function update_one_by_one(t)
 	if t then
-		if t.download then
-			return download_file(t.download,t.md5)
-		elseif t.mkdir then
+		if t.download then --做文件删除和改名
+			local oldfile =  local_dir..t.download
+			local newfile =  local_dir..t.download..'_'
+			local e,msg = kits.del_file(oldfile)
+			if kits.rename_file( newfile,oldfile ) then
+				return true,0
+			else
+				kits.log('ERROR  file failed '..tostring(newfile))
+				kits.log('	reason : '..tostring(msg))	
+				return false,1					
+			end
+		elseif t.mkdir then --创建目录
 			kits.make_directory(local_dir..t.mkdir)
 			return true,0
-		elseif t.remove then
+		elseif t.remove then --做文件删除
 			--delete file
-			kits.del_file(local_dir..t.remove)
+			local e,msg = kits.del_file(local_dir..t.remove)
+			if not e then
+				kits.log('ERROR delete file failed '..tostring(t.remove))
+				kits.log('	reason : '..tostring(msg))				
+				return false,1
+			end
 			return true,0
-		elseif t.remove_dir then
+		elseif t.remove_dir then --空目录删除
 			--delete directory
 			kits.del_directory(local_dir..t.remove_dir)
 			return true,0
@@ -107,7 +135,6 @@ function UpdateProgram.create(t)
 		if platform==kTargetWindows then
 			local scene = t.run()
 			if scene then
-				--cc.Director:getInstance():runWithScene(scene)
 				runScene(scene)
 				return
 			else
@@ -228,7 +255,7 @@ end
 
 function UpdateProgram:NErrorCheckLocal(dir)
 	local src_local = local_dir..'src/'..dir..'/filelist.json' 
-	if not kits.local_exists( src_local ) then --看看有没有本地版本
+	if not kits.exists_file( src_local ) then --看看有没有本地版本
 		kits.log("INFO : not exists "..src_local)
 		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
 	end
@@ -332,8 +359,7 @@ function UpdateProgram:update()
 	if self._mode==TRY then
 		return
 	end
-	if self._first then
-		self._first = false
+	if self._step == 1 then --检查跟新
 		self._count = 0
 		self._maxcount = 0
 		self._oplist = {}
@@ -343,7 +369,8 @@ function UpdateProgram:update()
 			if b then
 				cc.Director:getInstance():replaceScene(scene)
 			else
-				self:ErrorAndExit('不能启动:'..tostring(self._args.name)..'代码中含有错误',2)
+				kits.log("ERROR UpdateProgram:update pcall failed")
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
 			end
 			return
 		end
@@ -355,11 +382,38 @@ function UpdateProgram:update()
 		self._maxcount = #self._oplist
 		self._progress:setVisible(true)
 		self._progress_bg:setVisible(true)
-	else
+		self._step = 2
+		kits.log("Ceck version done")
+		kits.log("Download file")
+	elseif self._step == 2 then --现在文件，将下载的文件存为临时文件
 		self._count = self._count+1
 		self._progress:setPercent(self._count*100/self._maxcount)
 		if self._count > self._maxcount then
 			--操作完成
+			self._step = 3
+			self._count = 0
+			self._progress:setPercent(0)
+			kits.log("Download file done")
+			kits.log("Operation file")
+		else
+			local b,e = download_one_by_one(self._oplist[self._count])
+			if not b then
+				local t = self._oplist[self._count]
+				if e==1 then --本地问题
+					self:ErrorAndExit('文件操作失败:'..tostring(t.download))
+				elseif e==2 then --网络问题
+					self:ErrorAndExit('下载失败:'..tostring(t.download))
+				elseif e==3 then --算法问题
+					self:ErrorAndExit('跟新出现错误')
+				else
+					self:ErrorAndExit('未知错误')
+				end
+			end
+		end
+	elseif self._step == 3 then		--操作文件，将临时文件重新命名为正式文件
+		self._count = self._count+1
+		self._progress:setPercent(self._count*100/self._maxcount)
+		if self._count > self._maxcount then
 			if self._luacore_update then
 				--self:ErrorAndExit('本次跟新需要重新启动,请退出再启动程序!',2)
 				--要求重新加载这些文件
@@ -373,8 +427,9 @@ function UpdateProgram:update()
 			if b then
 				cc.Director:getInstance():replaceScene(scene)
 			else
+				kits.log("ERROR UpdateProgram:update pcall failed!")
 				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
-			end
+			end		
 		else
 			local b,e = update_one_by_one(self._oplist[self._count])
 			if not b then
@@ -388,7 +443,7 @@ function UpdateProgram:update()
 				else
 					self:ErrorAndExit('未知错误')
 				end
-			end
+			end			
 		end
 	end
 end
@@ -414,7 +469,8 @@ function UpdateProgram:init()
 				self._text:setText("")
 			end)	
 	end
-	self._first = true
+	self._step = 1
+	kits.log("Ceck version")
 	self._progress:setPercent(0)
 	self._scheduler = self:getScheduler()
 	if self._scheduler then

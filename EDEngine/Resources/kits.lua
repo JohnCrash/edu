@@ -178,15 +178,19 @@ local function http_get(url,cookie,to)
 	end
 end
 
-local function local_exists( file )
+local function exists_file( file )
   local f = io.open(file, "rb")
   if f then f:close() end
   return f ~= nil  
 end
 
+local function local_exists( file )
+	return local_exists( local_dir..file )
+end
+
 local function read_file(name)
   local file = name
-  if not local_exists(file) then return false end
+  if not exists_file(file) then return false end
   local alls
   
   file = io.open(file,"rb")
@@ -254,10 +258,14 @@ end
 local function del_file( name )
 	local filename = name
   if os.remove then
-    os.remove(filename)
+    return os.remove(filename)
   else
     my_log('not found os.remove function')
   end
+end
+
+local function rename_file( old,new )
+	return os.rename(old,new)
 end
 
 local function del_local_file( name )
@@ -299,12 +307,12 @@ end
 
 local function exist_cache( name )
 	local filename = cache_dir..name
-	return local_exists( filename )
+	return exists_file( filename )
 end
 
 local function read_cache( name )
   local file = cache_dir..name
-  if not local_exists(file) then return false end
+  if not exists_file(file) then return false end
   local alls
   
   file = io.open(file,"rb")
@@ -471,6 +479,8 @@ local exports = {
 	get_logs = get_logs,
 	config = config,
 	quit = quit,
+	rename_file = rename_file,
+	exists_file = exists_file,
 }
 
 return exports
