@@ -4,6 +4,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local md5 = require "md5"
 local json = require "json-c"
+local resume = require "resume"
 
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
@@ -133,6 +134,7 @@ function UpdateProgram.create(t)
 	if t and type(t)=='table' and t.updates and t.run 
 	and type(t.updates)=='table' and type(t.run)=='function' then
 		if platform==kTargetWindows then
+			resume.clearflag("update") --update isok
 			local scene = t.run()
 			if scene then
 				runScene(scene)
@@ -365,6 +367,7 @@ function UpdateProgram:update()
 		self._oplist = {}
 		--不需要跟新直接启动
 		if not self:check_update(self._args) then
+			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
 			if b then
 				cc.Director:getInstance():replaceScene(scene)
@@ -423,6 +426,7 @@ function UpdateProgram:update()
 			end
 
 			kits.log('Update complate!')
+			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
 			if b then
 				cc.Director:getInstance():replaceScene(scene)

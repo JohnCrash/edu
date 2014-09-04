@@ -100,6 +100,7 @@ void AppDelegate::initLuaEngine()
     LuaStack* stack = pEngine->getLuaStack();
 
     //pEngine->executeScriptFile("bootstrap.lua");
+	pEngine->executeScriptFile("resume.lua");
 	pEngine->executeScriptFile("crash.lua");
 	pEngine->executeScriptFile("launcher.lua");
 }

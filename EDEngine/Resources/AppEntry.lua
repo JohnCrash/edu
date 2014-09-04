@@ -1,6 +1,7 @@
 local uikits = require "uikits"
 local update = require "update"
 local login = require "login"
+local resume = require "resume"
 
 local ui = {
 }
@@ -101,6 +102,7 @@ function AppEntry:init()
 	bg:addChild(ebutton)
 	bg:addChild(exitbutton)
 	self:addChild(bg)
+	resume.clearflag("update") --update isok
 end
 
 function AppEntry:release()

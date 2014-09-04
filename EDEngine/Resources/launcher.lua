@@ -4,6 +4,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local login = require "login"
 local update = require "update"
+local resume = require "resume"
 
 crash.open("launcher",1)
 
@@ -71,53 +72,12 @@ local function onKeyRelease(key,event)
 		end
 	end
 end
+
 local listener_keyboard = cc.EventListenerKeyboard:create()
 listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
---控制台打开方式
-local function onTouchBegan(touch, event)
-	local t = touch:getLocation()
-	local glview = cc.Director:getInstance():getOpenGLView()
-	local ss = glview:getFrameSize()
-	local scale = 2
-	local w = ss.width*scale-128
-	local h = ss.height*scale-128
-	if t.x < 128 and t.y < 128 then
-		mode = 1
-	end
-	if t.x > w and t.y > h then
-		mode = 1
-	end	
-	return true
-end
-local function onTouchMoved(touch, event)
-	local t = touch:getLocation()
-end
 
-local function onTouchEnded(touch, event)
-	if mode == 1 then
-		local t = touch:getLocation()
-		local glview = cc.Director:getInstance():getOpenGLView()
-		local ss = glview:getFrameSize()
-		local scale = 2
-		local w = ss.width*scale-128
-		local h = ss.height*scale-128
-		if t.x > w and t.y > h then
-			mode = 2
-		end
-		if t.x < 128 and t.y < 128 then
-			mode = 1
-		end		
-	end
-end
-
-local listener = cc.EventListenerTouchOneByOne:create()
-listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCH_BEGAN )
-listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCH_MOVED )
-listener:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCH_ENDED )
-directorEventDispatcher:addEventListenerWithFixedPriority(listener, 1)
-		
 local app,cookie = cc_launchparam()
 local scene
 
@@ -127,6 +87,7 @@ else
 	login.set_selector(1) --学生
 end
 
+resume.clearflag("launcher") --launcher isok
 if app == 'homework' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
@@ -141,7 +102,7 @@ elseif app == 'amouse' then
 		return AMouseMain()
 	end}		
 elseif app == 'teacher' then
-	update.create{name=app,updates={'homework','luacore'},
+	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
 		local teacher = require "homework/teacher"
 		return teacher.create()

@@ -43,13 +43,13 @@ def ldir(proot,item):
 					md5val = mmd5(childdir,False)
 					low = string.lower(d)
 					if(len(dir)>0): #has dir
-						if low != 'thumbs.db' and low[0]!='.':
+						if low != 'thumbs.db' and low != 'resume.lua' and low[0]!='.':
 							item.append({'name':dir+"/"+d,'md5':md5val})
 							print dir+"/"+d,"\t",md5val
 						else:
 							print "found ",d
 					else:
-						if low != 'thumbs.db' and low[0]!='.':
+						if low != 'thumbs.db' and low != 'resume.lua'  and low[0]!='.':
 							item.append({'name':d,'md5':md5val})
 							print d,"\t",md5val
 						else:
