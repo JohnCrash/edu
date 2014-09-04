@@ -517,6 +517,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 					end
 					if n >= #rs.urls then
 						--全部下载完毕
+						data._isdownload = true
 						rst.loading:removeFromParent() 
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
@@ -645,7 +646,10 @@ local function set_topics_image( layout,data,x,y )
 end
 
 local function relayout_topics( layout,data )
-	set_topics_image( layout,data,0,TOPICS_SPACE)
+	if not data._isrelayout_ then
+		data._isrelayout_ = true
+		set_topics_image( layout,data,0,TOPICS_SPACE)
+	end
 end
 
 --连线
@@ -1417,6 +1421,7 @@ local function multi_select_init(layout,data)
 				end,'began')
 		end --for
 	end --if
+	relayout_topics(layout,data)
 end						
 
 local function judge(layout,data)
@@ -1468,6 +1473,7 @@ local function judge(layout,data)
 			call_answer_event(layout,data)
 		end,'began')						
 	end
+	relayout_topics(layout,data)
 end
 
 local function single_select(layout,data)
@@ -1500,6 +1506,7 @@ local function single_select(layout,data)
 				end,'began')
 		end
 	end
+	relayout_topics(layout,data)
 end
 
 local function edit_topics(layout,data)
@@ -1530,6 +1537,7 @@ local function edit_topics(layout,data)
 			end									
 		end	
 	end
+	relayout_topics(layout,data)
 end
 --[[
 	conv(s,e) 输入的源数据，e是输出的数据
@@ -1553,7 +1561,7 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ then
+					if data._isdone_ and data._isdownload then
 						judge(layout,data)
 					else
 						cache_done(layout,data,judge)
@@ -1575,7 +1583,7 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ then
+					if data._isdone_ and data._isdownload then
 						single_select(layout,data)
 					else					
 						cache_done(layout,data,single_select)
@@ -1586,7 +1594,7 @@ local types={
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ then
+					if data._isdone_ and data._isdownload then
 						multi_select_init(layout,data)
 					else
 						cache_done(layout,data,multi_select_init)
@@ -1621,7 +1629,7 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ then
+					if data._isdone_ and data._isdownload then
 						edit_topics(layout,data)
 					else
 						cache_done(layout,data,edit_topics)
@@ -1632,7 +1640,7 @@ local types={
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ then
+					if data._isdone_ and data._isdownload then
 						multi_select_init(layout,data)
 					else
 						cache_done(layout,data,multi_select_init)
