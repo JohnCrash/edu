@@ -96,6 +96,14 @@ function BigquestionView:init()
 	local right_label = answerview:getChildByTag(1783)
 	local my_label = answerview:getChildByTag(1785)	
 	
+	if _G.user_status == 1 then
+		but_more:setVisible(true)	
+		my_txt:setString("我的答案：")
+	elseif _G.user_status == 2 then
+		but_more:setVisible(false)	
+		my_txt:setString("孩子的答案：")
+	end			
+	
 	right_txt:setVisible(false)	
 	right_pic:setVisible(false)	
 	right_label:setVisible(false)	

@@ -1,7 +1,8 @@
 local uikits = require "uikits"
 local kits = require "kits"
 local json = require "json-c"
-
+local login = require "login"
+local cache = require "cache"
 --local answer = curweek or require "src/errortitile/answer"
 local MoreView = class("MoreView")
 MoreView.__index = MoreView
@@ -19,6 +20,10 @@ local ui = {
 	collect43_but = '1430/1433',
 	statistics43_but = '1430/1434',
 	
+	student_view = '1051/4710',
+	per_student_view = '1051/4710/4711',
+	student_name = '4713',
+	student_checkbox = '4714',
 	}		
 
 local collect_space = 10
@@ -38,10 +43,8 @@ local all_subject_list = {
 {0,"全部",593}
 }
 
-local function loadArmature( name )
-		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)
-		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
-end
+local student_space = 40
+local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
 
 function create()
 	local scene = cc.Scene:create()				
@@ -60,19 +63,17 @@ function create()
 	return scene	
 end
 
---[[function MoreView:getdatabyurl()
-	local send_data
-	send_data = "?show_type=1"
-	local result = kits.http_get(t_nextview[5].url..send_data,login.cookie(),1)	
-	--print(result)
-	local tb_collectlist = json.decode(result)
-	if 	tb_collectlist.result == 0 then	
-		self.collectitems = tb_collectlist.exer_book_stat	
-		return true
+function MoreView:getdatabyurl()
+	local result = kits.http_get(get_child_info_url,login.cookie(),1)
+	print(result)
+	local tb_result = json.decode(result)
+	if 	tb_result.result ~= 0 then				
+		print(tb_result.result.." : "..tb_result.message)			
 	else
-		return false
+		--local tb_uig = json.decode(tb_result.uig)
+		self.childinfo = tb_result.uis
 	end	
-end--]]
+end
 
 function MoreView:init()	
 --	loadArmature("errortitile/silver/Export/NewAnimation/NewAnimation.ExportJson")		
@@ -81,10 +82,18 @@ function MoreView:init()
 		print("MoreView get error!")
 		return
 	end		
-	if _G.screen_type == 1 then
-		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more.json")
-	else		
-		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more43.json")
+	if _G.user_status == 1 then
+		if _G.screen_type == 1 then
+			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more.json")
+		else		
+			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more43.json")
+		end
+	elseif _G.user_status == 2 then
+		if _G.screen_type == 1 then
+			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more2.json")
+		else		
+			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more243.json")
+		end
 	end
 	--self._widget = uikits.fromjson{file=ui.BASEFILE}
 	--self._widget:setPosition(cc.p(0,100))
@@ -92,6 +101,13 @@ function MoreView:init()
 	
 	local but_music = uikits.child(self._widget,ui.music_but)
 	but_music:setVisible(true)
+	if but_music then
+		but_music:setSelectedState (kits.config("mute","get"))
+		uikits.event(but_music,function(sender,b)
+			kits.config("mute",b)
+			uikits.muteSound(b)
+		end)
+	end
 	
 	local but_exit
 	but_exit = uikits.child(self._widget,ui.exit_but)
@@ -106,6 +122,54 @@ function MoreView:init()
 	--self._widget:addChild(self.statistics_view)
 	--处理切换首页按钮
 	--local mainmenu = uikits.child(self._widget,ui.MAINMENU)
+	if _G.user_status == 2 then
+		self:getdatabyurl()
+		local student_view = uikits.child(self._widget,ui.student_view)
+		local src_student_view = uikits.child(self._widget,ui.per_student_view)
+		src_student_view:setVisible(false)
+		local size_student_view = student_view:getContentSize()
+		local size_per_student_view = src_student_view:getContentSize()
+		local all_student_width = (size_per_student_view.width * (#self.childinfo)) + (student_space*(#self.childinfo-1))
+		local pos_x_start = (size_student_view.width - all_student_width)/2
+
+		local function selectedEvent(sender,eventType)
+			local checkBox = sender
+			if eventType == ccui.CheckBoxEventType.selected then
+				_G.cur_child_id = checkBox.uid			
+				local parent_view = checkBox:getParent()
+				local tb_all_student = parent_view:getChildren()
+				for i=1,#tb_all_student do 
+					if checkBox ~= tb_all_student[i] then
+						tb_all_student[i]:setSelectedState(false)
+					end
+				end
+			end
+			if eventType == ccui.CheckBoxEventType.unselected then
+				if _G.cur_child_id == checkBox.uid	then
+					checkBox:setSelectedState(true)
+				end
+			end
+		end  
+
+		for i = 1,#self.childinfo do 
+			local cur_student_view = src_student_view:clone()
+			cur_student_view:setVisible(true)
+			student_view:addChild(cur_student_view)
+			cur_student_view:setPositionX(pos_x_start)
+			local student_name = uikits.child(cur_student_view,ui.student_name)
+			local checkBox = uikits.child(cur_student_view,ui.student_checkbox)
+			student_name:setString(self.childinfo[i].uname)
+			if _G.cur_child_id == self.childinfo[i].uid then
+				checkBox:setSelectedState(true)
+			else
+				checkBox:setSelectedState(false)
+			end
+			checkBox.uid = self.childinfo[i].uid
+			checkBox:addEventListener(selectedEvent)  
+			pos_x_start = pos_x_start+size_per_student_view.width+student_space
+		end		
+	end
+
 	local but_wronglist
 	local but_collect
 	local but_more
@@ -120,40 +184,32 @@ function MoreView:init()
 		but_statistics = uikits.child(self._widget,ui.statistics43_but)	
 	end	
 	
-	local function wronglistCallback(sender, eventType) 	
-        if eventType == ccui.TouchEventType.ended then				
-			local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
-			if t_wronglist then
-				local scene_next = t_wronglist.create()								
-				cc.Director:getInstance():replaceScene(scene_next)								
-			end						
-        end
-    end						
-	but_wronglist:addTouchEventListener(wronglistCallback)		
-	
-	--处理切换收藏按钮
-	local function collectCallback(sender, eventType) 	
-        if eventType == ccui.TouchEventType.ended then				
-			local t_collect = package.loaded["src/errortitile/CollectView"]
-			if t_collect then
-				local scene_next = t_collect.create()								
-				cc.Director:getInstance():replaceScene(scene_next)								
-			end						
-        end
-    end						
-	but_collect:addTouchEventListener(collectCallback)			
-	
-	--处理切换统计按钮	
-	local function statisticsCallback(sender, eventType) 	
-        if eventType == ccui.TouchEventType.ended then				
-			local t_statistics = package.loaded["src/errortitile/StatisticsView"]
-			if t_statistics then
-				local scene_next = t_statistics.create()								
-				cc.Director:getInstance():replaceScene(scene_next)								
-			end				
-        end
-    end						
-	but_statistics:addTouchEventListener(statisticsCallback)		
+	uikits.event(but_wronglist,
+			function(sender,eventType)
+				local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
+				if t_wronglist then
+					local scene_next = t_wronglist.create()								
+					cc.Director:getInstance():replaceScene(scene_next)								
+				end					
+			end,"click")
+	--处理切换收藏按钮		
+	uikits.event(but_collect,
+			function(sender,eventType)
+				local t_collect = package.loaded["src/errortitile/CollectView"]
+				if t_collect then
+					local scene_next = t_collect.create()								
+					cc.Director:getInstance():replaceScene(scene_next)								
+				end					
+			end,"click")	
+	--处理切换统计按钮
+	uikits.event(but_statistics,
+			function(sender,eventType)
+				local t_statistics = package.loaded["src/errortitile/StatisticsView"]
+				if t_statistics then
+					local scene_next = t_statistics.create()								
+					cc.Director:getInstance():replaceScene(scene_next)								
+				end					
+			end,"click")		
 	
 	self:addChild(self._widget)
 end

@@ -262,7 +262,11 @@ function StatisticsView:updatepage()
 end
 function StatisticsView:getdatabyurl()
 	local send_data
-	send_data = "?range=3"
+	if _G.user_status == 1 then
+		send_data = "?range=3"
+	elseif _G.user_status == 2 then
+		send_data = "?range=3&user_id=".._G.cur_child_id
+	end
 	
 	local loadbox = loadingbox.open(self)
 	cache.request_json( t_nextview[7].url..send_data,function(t)

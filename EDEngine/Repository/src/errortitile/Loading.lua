@@ -1,13 +1,14 @@
 local uikits = require "uikits"
-local socket = require "socket"
-local res = require "src/testResource"
---local loadingbox = require "src/errortitile/loadingbox"
---local answer = curweek or require "src/errortitile/answer"
-local WrongSubjectList = require "src/errortitile/WrongSubjectList"
+local kits = require "kits"
+local json = require "json-c"
+local login = require "login"
+local cache = require "cache"
+local selstudent = require "errortitile/selstudent"
+local WrongSubjectList = require "errortitile/WrongSubjectList"
 local Loading = class("Loading")
 Loading.__index = Loading
 
-local test_wrong_list_url = 'http://192.168.2.114:81/exerbook/handler/ExerStat.ashx.ashx'
+local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 
 local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)
@@ -32,6 +33,32 @@ function create()
 	return scene	
 end
 
+--local cookie_1 = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
+
+function Loading:getdatabyurl()
+--	local send_data
+--	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
+	
+--	local send_url = t_nextview[2].url..send_data
+	local result = kits.http_get(get_uesr_info_url,login.cookie(),1)
+	kits.log('ERROR--result:::'..result )
+	local tb_result = json.decode(result)
+	if 	tb_result.result ~= 0 then				
+		print(tb_result.result.." : "..tb_result.message)			
+	else
+		--local tb_uig = json.decode(tb_result.uig)
+		if tb_result.uig[1].user_role == 1 then	--?¡ì¨¦¨²
+			_G.user_status = 1
+			local scene_next = WrongSubjectList.create()								
+			cc.Director:getInstance():replaceScene(scene_next)	
+		elseif tb_result.uig[1].user_role == 2 then	--?¨°3¡è
+			_G.user_status = 2
+			local scene_next = selstudent.create()								
+			cc.Director:getInstance():replaceScene(scene_next)				
+		end
+	end	
+	
+end
 
 function Loading:init()	
 --	loadArmature("errortitile/silver/Export/NewAnimation/NewAnimation.ExportJson")	
@@ -52,9 +79,10 @@ function Loading:init()
 	end
 	self:addChild(self._widget)
 	uikits.initDR(design)
+	self:getdatabyurl()
 --	local loadbox = loadingbox.open(self)
-	local scene_next = WrongSubjectList.create()								
-	cc.Director:getInstance():replaceScene(scene_next)	
+--	local scene_next = WrongSubjectList.create()								
+--	cc.Director:getInstance():replaceScene(scene_next)	
 
 end
 

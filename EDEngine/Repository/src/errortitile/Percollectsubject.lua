@@ -151,12 +151,42 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 							page:setEnabled(true)	
 						end
 					end)
+					
+	local questions_path = "errortitile/kong.png"
+	local questions_but = ccui.Button:create()
+	questions_but:setTouchEnabled(true)
+	questions_but:loadTextures(questions_path, questions_path, "")
+	local size_question = questions_view:getContentSize()	
+--	questions_but:setContentSize(size_question)
+	local scale_x = size_question.width/questions_but:getContentSize().width
+	local scale_y = size_question.height/questions_but:getContentSize().height
+
+	questions_but:setScale(scale_y)
+	questions_but:setPosition(cc.p(size_question.width/2,size_question.height/2))
+	
+--	questions_but.tb_wrongtitle_item = tb_wrongtitle_item
+--	questions_but.file_path = questions_path
+	--print(self.name..'+'..self.label..'+'..self.range..'+'..self.id)
+	--questions_but:addTouchEventListener(questionsCallback)
+--[[	uikits.event(questions_but,
+		function(sender,eventType)
+			local questions_but = sender
+			local save_is_collect = tag_collect:isVisible()		
+			local scene_next = BigquestionView.create(questions_but.tb_wrongtitle_item,questions_but.file_path,save_is_collect,self.subject_name,self.subject_label,self.range,self.subject_id)								
+			--local scene_next = BigquestionView.create(questions_but.isright,questions_but.answer,questions_but.correct_answer,questions_but.question_id,questions_but.file_path,questions_but.question_type,questions_but.difficulty,questions_but.perwrong,save_is_collect,self.subject_name,self.subject_label,self.range,self.subject_id)								
+			--cc.Director:getInstance():replaceScene(scene_next)	
+			uikits.pushScene(scene_next)
+		end,"click")--]]
+	questions_view:addChild(questions_but)
+						
 --	questions_view:addChild()
 --	questions_view:setTouchEnabled(false);
 	--处理更多操作按钮
-	--local share_view =			
-	--local share_box_src = self.share_view:getChildByTag(657)
-	--local share_box_src = page.share_box_src
+	if _G.user_status == 1 then
+		but_more:setVisible(true)
+	elseif _G.user_status == 2 then
+		but_more:setVisible(false)
+	end		
 	but_more.share_box = page.share_box_src:clone()
 
 	local size_share = but_more.share_box:getContentSize()
@@ -290,8 +320,14 @@ end
 
 function Percollectsubject:getdatabyurl()
 	local send_data
-	send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time	
-	print(t_nextview[6].url..send_data)
+	
+	--send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time	
+	if _G.user_status == 1 then
+		send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time
+	elseif _G.user_status == 2 then
+		send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time.."&user_id=".._G.cur_child_id
+	end
+--	print(t_nextview[6].url..send_data)
 	local loadbox = loadingbox.open(self)
 	is_loading = true
 	cache.request_json( t_nextview[6].url..send_data,function(t)
@@ -324,8 +360,10 @@ end
 
 function Percollectsubject:init()	
 	if _G.screen_type == 1 then
+		topics.set_scale(1.2)
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/collaction_ti.json")	
 	else
+		topics.set_scale(1)
 		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/collaction_ti43.json")	
 	end
 		
@@ -367,6 +405,11 @@ function Percollectsubject:init()
 				--cc.Director:getInstance():replaceScene(scene_next)		
 			end,'N')	
 	end,"click")
+	if _G.user_status == 1 then
+		but_practice:setVisible(true)
+	elseif _G.user_status == 2 then
+		but_practice:setVisible(false)
+	end		
 	
 	local page_data = self._widget:getChildByTag(641)				
 	local per_collectview = page_data:getChildByTag(642)  --获取单个已纠收藏题view			
@@ -402,6 +445,8 @@ end
 
 function Percollectsubject:release()
 	self.pageindex = 1
+	local default_scale = topics.get_default_scale()
+	topics.set_scale(default_scale)
 end
 return {
 create = create,

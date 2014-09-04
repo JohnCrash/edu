@@ -101,7 +101,27 @@ local EditChildTag = 'answer_text'
 local max_options = 6
 local max_edit = 3
 local res_root = 'homework/'
-local g_scale = 2*1.3
+local g_default_scale
+
+if uikits.get_factor() == uikits.FACTOR_3_4 then
+	g_default_scale = 2*1
+else
+	g_default_scale = 2*1.2
+end
+
+local g_scale = g_default_scale
+
+local function get_default_scale()
+	return g_default_scale
+end
+
+local function set_scale(s)
+	g_scale = s
+end
+
+local function get_scale()
+	return g_scale
+end
 
 local function set_EditChildTag( t )
 	EditChildTag = t
@@ -572,7 +592,7 @@ local function attachment_ui_player( t )
 								snd_idx = uikits.playSound(file)
 						--		play_but:setVisible(false)
 						--		pause_but:setVisible(true)
-							end )
+							end,'began' )
 							--[[ 目前声音不支持监听状态
 						uikits.event(pause_but,
 							function(sender)
@@ -581,7 +601,7 @@ local function attachment_ui_player( t )
 									pause_but:setVisible(false)
 									uikits.pauseSound(snd_idx)							
 								end
-							end ) --]]
+							end,'began') --]]
 					end
 					return pbox
 				end
@@ -716,7 +736,7 @@ local function relayout_link( layout,data )
 				up = k
 				select_rect(ui1[up],true)
 				do_link()
-			end,'click' )		
+			end,'began' )		
 		local s = item:getContentSize()
 		layout:addChild(item)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
@@ -734,7 +754,7 @@ local function relayout_link( layout,data )
 				down = k
 				select_rect(ui2[down],false)
 				do_link()
-			end,'click' )
+			end,'began' )
 		layout:addChild(item)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
 		table.insert( dot2,dot )
@@ -1030,7 +1050,7 @@ local function relayout_click( layout,data,ismulti )
 					data.state = ui.STATE_UNFINISHED
 				end				
 				call_answer_event(layout,data)
-			end,'click' )
+			end,'began' )
 	end
 
 	set_topics_image( layout,data,0,bg_size.height*g_scale )
@@ -1200,9 +1220,11 @@ local function relayout_drag( layout,data,ismul )
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
+						kits.log("drag began")
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * g_scale
 						sp.y = sp.y * g_scale
+						kits.log("drag Disabled scroll")
 						setEnabledParent(layout,false)
 						layout:setEnabled(false)
 						if ismul then
@@ -1215,6 +1237,11 @@ local function relayout_drag( layout,data,ismul )
 							end
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						if eventType == ccui.TouchEventType.ended then
+							kits.log("drag ended")
+						else
+							kits.log("drag canceled")
+						end
 						local p = sender:getTouchEndPosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1225,7 +1252,8 @@ local function relayout_drag( layout,data,ismul )
 							end
 						else
 							p = layout:convertToNodeSpace(p)
-						end						
+						end			
+						kits.log("drag Enabled scroll")
 						setEnabledParent(layout,true)
 						layout:setEnabled(true)
 						if ismul then
@@ -1274,6 +1302,7 @@ local function relayout_drag( layout,data,ismul )
 						end						
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
+						kits.log("drag moved")
 						local p = sender:getTouchMovePosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1385,7 +1414,7 @@ local function multi_select_init(layout,data)
 					data.my_answer[1] = string_sort(data.my_answer[1])
 					kits.log( data.my_answer[1] )
 					call_answer_event(layout,data)
-				end)
+				end,'began')
 		end --for
 	end --if
 end						
@@ -1422,7 +1451,7 @@ local function judge(layout,data)
 			end
 			kits.log( data.my_answer[1] )
 			call_answer_event(layout,data)
-		end)
+		end,'began')
 	uikits.event(_option_no,
 		function (sender,b)
 			if b then
@@ -1437,7 +1466,7 @@ local function judge(layout,data)
 			end			
 			kits.log( data.my_answer[1] )				
 			call_answer_event(layout,data)
-		end)						
+		end,'began')						
 	end
 end
 
@@ -1468,7 +1497,7 @@ local function single_select(layout,data)
 					end
 					kits.log( data.my_answer[1] )
 					call_answer_event(layout,data)
-				end)
+				end,'began')
 		end
 	end
 end
@@ -1665,4 +1694,7 @@ return
 	STATE_CURRENT = 1,
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
+	get_scale = get_scale,
+	set_scale = set_scale,
+	get_default_scale = get_default_scale,
 }
