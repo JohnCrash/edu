@@ -3848,7 +3848,7 @@
         "options": {
           "__type": "PanelSurrogate:#EditorCommon.JsonModel.Component.GUI",
           "classname": "Panel",
-          "name": "objective_item_0",
+          "name": "objective_item2",
           "ZOrder": 0,
           "actiontag": 12107791,
           "anchorPointX": 0,
@@ -3876,7 +3876,7 @@
             "marginLeft": 404,
             "marginRight": 0,
             "marginTop": 330,
-            "relativeName": "objective_item_0",
+            "relativeName": "objective_item2",
             "relativeToName": "root",
             "type": 2
           },

@@ -41,11 +41,15 @@ def ldir(proot,item):
 			else:
 				if(d!='filelist.json' and d!='version.json'):
 					md5val = mmd5(childdir,False)
+					low = string.lower(d)
 					if(len(dir)>0): #has dir
-						item.append({'name':dir+"/"+d,'md5':md5val})
-						print dir+"/"+d,"\t",md5val
+						if low != 'thumbs.db' and low[0]!='.':
+							item.append({'name':dir+"/"+d,'md5':md5val})
+							print dir+"/"+d,"\t",md5val
+						else:
+							print "found ",d
 					else:
-						if string.lower(d) != 'thumbs.db':
+						if low != 'thumbs.db' and low[0]!='.':
 							item.append({'name':d,'md5':md5val})
 							print d,"\t",md5val
 						else:
