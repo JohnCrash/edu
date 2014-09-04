@@ -9,8 +9,8 @@ local resume = require "resume"
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/'
-local local_server = 'http://192.168.2.211:81/lgh/'
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v1/'
+local local_server = 'http://192.168.2.211:81/lgh/v1/'
 local update_server = local_server
 
 local ui = {
@@ -88,7 +88,7 @@ local function download_one_by_one(t)
 	if t and t.download then
 		return download_file(t.download,t.md5)
 	end
-	return false,0
+	return true,0
 end
 
 local function update_one_by_one(t)
@@ -269,8 +269,10 @@ function UpdateProgram:check_directory(dir,n)
 		local res_local = local_dir..'res/'..dir..'/version.json'
 		local src_local = local_dir..'src/'..dir..'/version.json'
 		--只有在确定下载成功的情况下才跟新
+		kits.log("check "..tostring(res_url))
 		local res = kits.http_get(res_url,'',2)
 		if res then
+			kits.log("check "..tostring(src_url))
 			local src = kits.http_get(src_url,'',2)
 			if src then
 				local res_v = json.decode(res)
@@ -373,7 +375,7 @@ function UpdateProgram:update()
 				cc.Director:getInstance():replaceScene(scene)
 			else
 				kits.log("ERROR UpdateProgram:update pcall failed")
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."),请检查您的网络",2)
 			end
 			return
 		end
