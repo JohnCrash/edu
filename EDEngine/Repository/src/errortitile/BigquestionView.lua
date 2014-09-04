@@ -185,6 +185,7 @@ function BigquestionView:init()
 			topics.types[self.tb_wrongtitle_item.item_type].init(question_pic_view,data)
 		end		
 	end
+	question_pic_view:setDirection(ccui.ScrollViewDir.both)
 	question_pic_view:setBounceEnabled(true)
 --[[	local question_pic = cc.Sprite:create(self.file_path)
 	local size_question = question_pic_view:getContentSize()		
