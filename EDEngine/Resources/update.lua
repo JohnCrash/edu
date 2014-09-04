@@ -14,7 +14,7 @@ local update_server = local_server
 
 local ui = {
 	FILE = 'loadscreen/jiazhan.json',
-	FILE_43 = 'loadscreen/43/jiazhan.json',
+	FILE_43 = 'loadscreen/jiazhan43/jiazhan43.json',
 	PROGRESS = 'bo2',
 	PROGRESS_BG = 'bo',
 	EXIT_BUTTON = 'exit',
@@ -476,7 +476,7 @@ function UpdateProgram:init()
 	if self._scheduler then
 		self._sid = self._scheduler:scheduleScriptFunc(function()
 			self:update()
-		end,0.1,false)
+		end,0,false)
 	end
 	self._progress:setVisible(false)
 	self._progress_bg:setVisible(false)
