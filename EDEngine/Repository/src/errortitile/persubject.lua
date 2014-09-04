@@ -220,6 +220,11 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	local check_boxlist = check_view:getChildren()
 	local check_boxnum = check_view:getChildrenCount()	
 	for i=1,check_boxnum do	
+		if _G.user_status == 1 then
+			check_boxlist[i]:setEnabled(true)
+		elseif _G.user_status == 2 then
+			check_boxlist[i]:setEnabled(false)
+		end		
 		if i ~= tb_wrongtitle_item.reason then
 			--local per_checkbox = check_view:getChildByTag(72+i)
 			check_boxlist[i]:setSelectedState(false)
@@ -274,7 +279,12 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	
 	--处理更多操作按钮
 	--local share_view = 
-	--self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")		
+	--self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")	
+	if _G.user_status == 1 then
+		but_more:setVisible(true)
+	elseif _G.user_status == 2 then
+		but_more:setVisible(false)
+	end		
 	local share_box_src = self.share_view:getChildByTag(657)
 	but_more.share_box = share_box_src:clone()
 
@@ -426,7 +436,11 @@ end
 
 function persubject:getdatabyurl()
 	local send_data
-	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
+	if _G.user_status == 1 then
+		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
+	elseif _G.user_status == 2 then
+		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2&user_id=".._G.cur_child_id
+	end
 	
 --[[	local send_url = t_nextview[2].url..send_data
 	local result = kits.http_get(send_url,login.cookie(),1)
@@ -586,9 +600,11 @@ end
 function persubject:init()	
 	local design	
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		topics.set_scale(1.2)
 		_G.screen_type = 1
 		design = {width=1920,height=1080}
 	else
+		topics.set_scale(1)
 		_G.screen_type = 2
 		design = {width=1440,height=1080}	
 	end
@@ -648,6 +664,11 @@ function persubject:init()
 			but_practice_no:setVisible(true)
 		end			
 	end,"click")	
+	if _G.user_status == 1 then
+		but_practice:setVisible(true)
+	elseif _G.user_status == 2 then
+		but_practice:setVisible(false)
+	end	
 	--下拉更新错题列表
 	uikits.event(self.main_wrongview,
 		function(sender,eventType)
@@ -684,6 +705,8 @@ function persubject:clear_all_item()
 		end
 		self._list = {}
 	end--]]
+	local default_scale = topics.get_default_scale()
+	topics.set_scale(default_scale)
 end
 
 function persubject:release()

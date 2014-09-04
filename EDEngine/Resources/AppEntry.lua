@@ -70,8 +70,8 @@ function AppEntry:init()
 			update.create{name='errortitle',updates={'homework','errortitile','luacore'},
 				run=function()
 				login.set_selector(1) --Ñ§Éú
-				local WrongSubjectList = require "errortitile/WrongSubjectList"
-				return WrongSubjectList.create()
+				local Loading = require "errortitile/Loading"
+				return Loading.create()
 			end}
 		end}
 	local exitbutton = uikits.button{caption='exit',x=64*scale,y = 64*scale + item_h,

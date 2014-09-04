@@ -221,8 +221,13 @@ end
 
 function CollectView:getdatabyurl()
 	local send_data
-	send_data = "?show_type=1"
 	
+--	send_data = "?show_type=1"
+	if _G.user_status == 1 then
+		send_data = "?show_type=1"
+	elseif _G.user_status == 2 then
+		send_data = "?show_type=1&user_id=".._G.cur_child_id
+	end
 --[[	local send_url = t_nextview[5].url..send_data
 	local result = kits.http_get(send_url,cookie1,1)
 	print(result)	

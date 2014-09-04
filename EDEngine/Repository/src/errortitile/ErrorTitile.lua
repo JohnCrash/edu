@@ -2,7 +2,8 @@ local uikits = require "uikits"
 local Loading = require "src/errortitile/Loading"
 --local WrongSubjectList = require "src/errortitile/WrongSubjectList"
 screen_type = 1
-	
+user_status = 1	
+cur_child_id = nil
 local ErrorTitile = class("ErrorTitile")
 ErrorTitile.__index = ErrorTitile
 
