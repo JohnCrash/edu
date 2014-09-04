@@ -101,10 +101,18 @@ local EditChildTag = 'answer_text'
 local max_options = 6
 local max_edit = 3
 local res_root = 'homework/'
-local g_scale = 2*1.3
+local g_default_scale
+
+if uikits.get_factor() == uikits.FACTOR_3_4 then
+	g_default_scale = 2*1
+else
+	g_default_scale = 2*1.2
+end
+
+local g_scale = g_default_scale
 
 local function get_default_scale()
-	return 2*1.3
+	return g_default_scale
 end
 
 local function set_scale(s)
@@ -1212,9 +1220,11 @@ local function relayout_drag( layout,data,ismul )
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
+						kits.log("drag began")
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * g_scale
 						sp.y = sp.y * g_scale
+						kits.log("drag Disabled scroll")
 						setEnabledParent(layout,false)
 						layout:setEnabled(false)
 						if ismul then
@@ -1227,6 +1237,11 @@ local function relayout_drag( layout,data,ismul )
 							end
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						if eventType == ccui.TouchEventType.ended then
+							kits.log("drag ended")
+						else
+							kits.log("drag canceled")
+						end
 						local p = sender:getTouchEndPosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1237,7 +1252,8 @@ local function relayout_drag( layout,data,ismul )
 							end
 						else
 							p = layout:convertToNodeSpace(p)
-						end						
+						end			
+						kits.log("drag Enabled scroll")
 						setEnabledParent(layout,true)
 						layout:setEnabled(true)
 						if ismul then
@@ -1286,6 +1302,7 @@ local function relayout_drag( layout,data,ismul )
 						end						
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
+						kits.log("drag moved")
 						local p = sender:getTouchMovePosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
