@@ -506,7 +506,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 		--开始请求资源
 		local n = 0
 		local rst = data.resource_cache
-		--rst.loading = loadingbox.circle( layout )
+		rst.loading = loadingbox.circle( layout )
 
 		local r,msg = cache.request_resources( rst,
 				function(rs,i,b)
