@@ -436,6 +436,9 @@ end
 
 function persubject:getdatabyurl()
 	local send_data
+	if _G.user_status == nil then
+		_G.user_status = 1
+	end
 	if _G.user_status == 1 then
 		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
 	elseif _G.user_status == 2 then

@@ -54,20 +54,28 @@ function resultview:showviewdata(item_data)
 	
 	uikits.event(exit_but,	
 		function(sender,eventType)
---		kits.quit()
-		uikits.popScene()	
-		uikits.popScene()	
+		kits.quit()
+--[[		uikits.popScene()	
+		uikits.popScene()	--]]
 	end,"click")
 	
 	uikits.event(gomainpage_but,
 		function(sender,eventType)
---[[		local t_wronglist = package.loaded["src/errortitile/WrongSubjectList"]
-		if t_wronglist then
-			local scene_next = t_wronglist.create()								
-			cc.Director:getInstance():replaceScene(scene_next)								
-		end			--]]
+			local Loading = require "errortitile/Loading"
+			local scene_next = Loading.create()
+			cc.Director:getInstance():replaceScene(scene_next)
+--[[			local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
+			print(t_wronglist)
+			if t_wronglist then
+				local scene_next = t_wronglist.create()								
+				cc.Director:getInstance():replaceScene(scene_next)
+			else
+				local Loading = require "errortitile/Loading"
+				local scene_next = Loading.create()
+				cc.Director:getInstance():replaceScene(scene_next)
+			end			--]]
 	--	uikits.popScene()
-		uikits.popScene()		
+	--	uikits.popScene()		
 	end,"click")
 
 end
