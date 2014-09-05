@@ -121,6 +121,9 @@ function create()
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),WrongSubjectList)		
 	cur_layer.subject_view = nil
+	cur_layer.wronglist7 = {}
+	cur_layer.wronglist30 = {}
+	cur_layer.wronglist180 = {}
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -233,9 +236,7 @@ function WrongSubjectList:showsubjectlist(src_view,list_type)
 	end	
 	return cur_view
 end
-WrongSubjectList.wronglist7 = {}
-WrongSubjectList.wronglist30 = {}
-WrongSubjectList.wronglist180 = {}
+
 function WrongSubjectList:format_listdata(all_subject)
 	--local num = table.getn(all_subject)
 	local wronglist7_num = 1
@@ -335,7 +336,7 @@ function WrongSubjectList:getdatabyurl()
 	print(_G.user_status)
 	print(send_data)
 --[[	local send_url = t_nextview[1].url..send_data
-	local result = kits.http_get(send_url,cookie1,1)
+	local result = kits.http_get(send_url,login.cookie(),1)
 					print(result)	
 					local tb_result = json.decode(result)
 					self:format_listdata(tb_result.exer_book_stat)
@@ -352,7 +353,6 @@ function WrongSubjectList:getdatabyurl()
 						loadbox:removeFromParent()
 						return false
 					end
-					
 				else
 				--	print("t.exer_book_stat:"..t.exer_book_stat)
 					self:format_listdata(t.exer_book_stat)
