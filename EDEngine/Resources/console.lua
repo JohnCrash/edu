@@ -115,7 +115,7 @@ function Console:init()
 	local debugip = uikits.editbox{
 		caption = '192.168.2.*',
 		x=128*scale,
-		width=240*scale,height=64*scale
+		width=240*scale,height=320*scale
 	}
 	debugip:setText("192.168.2.182")
 	local isdebug

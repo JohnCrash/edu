@@ -531,11 +531,13 @@ function WorkList:history_scroll( t )
 		end
 		--继续载入
 		self._scrollview:setBounceEnabled( false )
-		if self._last_idx and self._last then
-			self:load_page( self._last+1,self._last+6 ) --一次最多装载5页
+		if self._last_idx then
+			self:load_page( self._last_idx+1,self._last_idx+6 ) --一次最多装载5页
 		else
-			self:clear_all_item()
-			self:load_page( 1 )
+			if not self._scID then --只有在没有下载的情况下才跟新
+				self:clear_all_item()
+				self:load_page( 1 )
+			end
 		end
 	end
 end

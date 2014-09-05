@@ -370,7 +370,7 @@ function WorkCommit:init_commit_page()
 				end,'click')			
 		end
 		if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item_finish > 0 then
-			self:setPercent( self._args.cnt_item_finish*100.0/self._args.cnt_item )
+			self:setPercent( math.floor(self._args.cnt_item_finish*100.0/self._args.cnt_item) )
 		else
 			self:setPercent(0)
 		end

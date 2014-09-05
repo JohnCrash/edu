@@ -463,6 +463,18 @@ function WorkFlow:load_original_data_from_string( str )
 	end
 end
 
+function WorkFlow:get_topics_answers_num()
+	local count = 0
+	if self._topics_table and self._topics_table.answers then
+		for k,v in pairs(self._topics_table.answers) do
+			if has_answer(v) then
+				count = count + 1
+			end
+		end
+	end
+	return count
+end
+
 function WorkFlow:init_gui()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		WorkFlow.scale = uikits.initDR{width=1920,height=1080}
@@ -477,6 +489,10 @@ function WorkFlow:init_gui()
 		--保存
 		self:save_answer()
 		self:save()
+		--将做题数量返回上一级
+		if self._topics_table and self._topics_table.answers then
+			self._args.cnt_item_finish = self:get_topics_answers_num()
+		end
 		uikits.popScene()
 		end,'click')
 	self._scrollview = uikits.child(self._root,ui.LIST)
@@ -514,6 +530,9 @@ function WorkFlow:init_gui()
 					--保存
 					self:save_answer()
 					self:save()
+					if self._topics_table and self._topics_table.answers then
+						self._args.cnt_item_finish = self:get_topics_answers_num()
+					end
 					uikits.popScene()
 				end,'click')
 				
