@@ -75,6 +75,18 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
+		
+	local epbutton = uikits.button{caption='parenterrortitle',x=64*scale,y = 64*scale + 6*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name='parenterrortitle',updates={'homework','errortitile','luacore'},
+				run=function()
+				login.set_selector(3) --Ñ§Éú
+				local Loading = require "errortitile/Loading"
+				return Loading.create()
+			end}
+		end}
+
 	local exitbutton = uikits.button{caption='exit',x=64*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -101,6 +113,7 @@ function AppEntry:init()
 	bg:addChild(tbutton)
 	bg:addChild(sbutton)
 	bg:addChild(ebutton)
+	bg:addChild(epbutton)
 	bg:addChild(exitbutton)
 	self:addChild(bg)
 	resume.clearflag("update") --update isok

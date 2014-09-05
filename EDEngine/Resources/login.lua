@@ -9,6 +9,7 @@ local test_login =
 	--]]
 	[1] = {name='刘亮',uid=141770,cookie='sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d'},
 	[2] = {name='熊黎勇',uid=141769,cookie='sc1=FBEE62D6BD4342E8E10DB8354ADD1DF7C4AA3B39akl%2bNQfmBYOcjnsDJUFvu0V%2fYwv3ZxjisEzUh8KSvFYpFEjPwGlmazC%2bqAqQqkbvS7H2mdwfxGLdiSAZpHVbaewlwrbp3A%3d%3d'},
+	[3] = {name='刘景升',uid=141804,cookie='sc1=C806AC16806888222C1EA1B75059AC4919773725akl%2bOgHoBYOcjHsDK0Fu4kV%2fbAusPBi7s0zUh8KSulYpFEjPwGtmaz6%2bqVOQqknvEOr2wN8fxGLdiSYZpHVbaewkwrbp3A%3d%3d'},
 }
 local selector = 2
 local g_cookie
