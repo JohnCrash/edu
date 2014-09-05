@@ -5,7 +5,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local login = require "login"
 local WorkCommit = require "homework/commit"
-local loadingbox = require "homework/loadingbox"
+local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
 
 crash.open("homework",1)

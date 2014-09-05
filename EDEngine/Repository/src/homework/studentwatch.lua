@@ -2,7 +2,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local kits = require "kits"
 local topics = require "homework/topics"
-local loadingbox = require "homework/loadingbox"
+local loadingbox = require "loadingbox"
 local json = require "json-c"
 
 local ui = {

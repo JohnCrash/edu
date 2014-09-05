@@ -2,7 +2,7 @@ local kits = require 'kits'
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
-local loadingbox = require "homework/loadingbox"
+local loadingbox = require "loadingbox"
 
 local course={
 	[101]="综合科目",
