@@ -135,14 +135,25 @@ function MoreView:init()
 		local function selectedEvent(sender,eventType)
 			local checkBox = sender
 			if eventType == ccui.CheckBoxEventType.selected then
+				if _G.cur_child_id == checkBox.uid then
+					return
+				end
 				_G.cur_child_id = checkBox.uid			
-				local parent_view = checkBox:getParent()
+				--local parent_view = checkBox:getParent()
+				local parent_view = checkBox.parentview
 				local tb_all_student = parent_view:getChildren()
 				for i=1,#tb_all_student do 
-					if checkBox ~= tb_all_student[i] then
-						tb_all_student[i]:setSelectedState(false)
-					end
+					local checkBox_temp = uikits.child(tb_all_student[i],ui.student_checkbox)
+--[[					print(checkBox_temp)
+					if checkBox ~= checkBox_temp then
+						checkBox_temp:setSelectedState(false)
+					end--]]
 				end
+				local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
+				if t_wronglist then
+					local scene_next = t_wronglist.create()								
+					cc.Director:getInstance():replaceScene(scene_next)								
+				end					
 			end
 			if eventType == ccui.CheckBoxEventType.unselected then
 				if _G.cur_child_id == checkBox.uid	then
@@ -165,6 +176,33 @@ function MoreView:init()
 				checkBox:setSelectedState(false)
 			end
 			checkBox.uid = self.childinfo[i].uid
+			checkBox.parentview = student_view
+--[[			uikits.event(checkBox,
+				function(sender,eventType)
+					local checkBox = sender
+					if eventType == ccui.CheckBoxEventType.selected then
+						if _G.cur_child_id == checkBox.uid then
+							return
+						end
+						_G.cur_child_id = checkBox.uid			
+						--local parent_view = checkBox:getParent()
+						local parent_view = checkBox.parentview
+						local tb_all_student = parent_view:getChildren()
+						for i=1,#tb_all_student do 
+							local checkBox_temp = uikits.child(tb_all_student[i],ui.student_checkbox)
+						end
+						local t_wronglist = package.loaded["errortitile/WrongSubjectList"]
+						if t_wronglist then
+							local scene_next = t_wronglist.create()								
+							cc.Director:getInstance():replaceScene(scene_next)								
+						end					
+					end
+					if eventType == ccui.CheckBoxEventType.unselected then
+						if _G.cur_child_id == checkBox.uid	then
+							checkBox:setSelectedState(true)
+						end
+					end			
+				end)--]]
 			checkBox:addEventListener(selectedEvent)  
 			pos_x_start = pos_x_start+size_per_student_view.width+student_space
 		end		
