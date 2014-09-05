@@ -530,20 +530,19 @@ function WorkCommit:commit()
 			--检查是否全部成功
 			if self._faild_commit_flag then --上传中发生错误
 				step = 3
+				close_scheduler()
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
-						close_scheduler()
 						self:commit()
-					elseif e== messagebox.CLOSE then
-						close_scheduler()
 					end
 				end,messagebox.RETRY)
 			elseif self._faild_commit_count <= 0 then
-				step = 3
+				step = 2
 			end
 		elseif step==2 then
 			--开始提交作业
 			step = 3
+			close_scheduler()
 			local loadbox = loadingbox.open( self )
 			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
 			cache.request(url,
@@ -556,10 +555,7 @@ function WorkCommit:commit()
 						--加入提交失败的对话框
 						messagebox.open(self,function(e)
 							if e == messagebox.TRY then
-								close_scheduler()
 								self:commit()
-							elseif e== messagebox.CLOSE then
-								close_scheduler()
 							end
 						end,messagebox.RETRY)						
 						kits.log('WorkCommit:commit error : '..url )
