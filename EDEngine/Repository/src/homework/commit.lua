@@ -9,6 +9,7 @@ local loadingbox = require "loadingbox"
 local StudentWatch = require "homework/studentwatch"
 local cache = require "cache"
 local login = require "login"
+local messagebox = require "messagebox"
 --[[
 local ui = {
 	FILE = 'homework/commit.json',
@@ -451,26 +452,132 @@ function WorkCommit:calc_objective_num(t)
 	return count
 end
 
-function WorkCommit:commit()
-	local loadbox = loadingbox.open( self )
-	local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
-	cache.request(url,
-		function(b)
-			loadbox:removeFromParent()
-			if b then
-				self._args.status = 10 --标记已经提交
-				uikits.pushScene( Score.create(self._args) )
-			else
-				--加入提交失败的对话框
-				kits.log('WorkCommit:commit error : '..url )
+function WorkCommit:commit_topics( v )
+	local answer
+	local answer
+	if v and v.my_answer and type(v.my_answer)=='string' then
+		answer = v.my_answer
+	elseif v and v.my_answer and type(v.my_answer)=='table' then
+		answer = ''
+		for i,v in pairs(v.my_answer) do
+			if i ~= 1 then answer = answer..',' end
+			answer = answer..v
+		end
+	else
+		kits.log('ERROR commit my_answer invalid')
+		return
+	end	
+	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
+	..'&itemId='..tostring(v.item_id)
+	..'&answer='..tostring(answer)
+	..'&times='..v.user_time --做题题目计时器
+	..'&tid='..tostring(self._args.tid)
+	local ret = mt.new('GET',url,login.cookie(),
+					function(obj)
+						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+							if obj.state == 'OK' and obj.data then
+								self._faild_commit_count = self._faild_commit_count-1
+								kits.log('	commit '..url..' success!')
+							else
+								self._faild_commit_flag = true
+								kits.log('ERROR : WorkFlow:commit_topics')
+								kits.log('	commit '..url..' faild!')
+							end
+						end
+					end )
+	if not ret then
+		self._faild_commit_flag = true
+		kits.log('ERROR : WorkFlow:commit_topics')
+		kits.log('	commit '..url..' faild!')
+	end
+end
+
+function WorkCommit:commit_topics()	
+	--做题的时候有可能没有正确提交答案，这里再次检查。
+	self._faild_commit_count = 0
+	self._faild_commit_flag = false
+	if self._topics_table then
+		for k,v in pairs(self._topics_table.answers) do
+			if v.commit_faild then --做题过程中没有正确提交
+				self._faild_commit_count = self._faild_commit_count+1
+				self:commit_topics{my_answer=v.answers,user_time=v.user_time}
 			end
-		end)
+		end
+	else
+		kit.log('ERROR WorkCommit:commit self._topics_table = nil')
+		return
+	end
+end
+
+function WorkCommit:commit()	
+	if self._commitSCID then 
+		return
+	end
+	local scheduler = self:getScheduler()
+	local step = 0
+	local function close_scheduler()
+		if self._commitSCID then
+			self:getScheduler():unscheduleScriptEntry(self._commitSCID)
+			self._commitSCID = nil
+		end	
+	end
+	local function commit_func(dt)
+		if step==0 then
+			--处理还没有提交的题
+			step = 1
+			self:commit_topics()
+		elseif step == 1 then
+			--检查是否全部成功
+			if self._faild_commit_flag then --上传中发生错误
+				step = 3
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						close_scheduler()
+						self:commit()
+					elseif e== messagebox.CLOSE then
+						close_scheduler()
+					end
+				end,messagebox.RETRY)
+			elseif self._faild_commit_count <= 0 then
+				step = 3
+			end
+		elseif step==2 then
+			--开始提交作业
+			step = 3
+			local loadbox = loadingbox.open( self )
+			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
+			cache.request(url,
+				function(b)
+					loadbox:removeFromParent()
+					if b then
+						self._args.status = 10 --标记已经提交
+						uikits.pushScene( Score.create(self._args) )
+					else
+						--加入提交失败的对话框
+						messagebox.open(self,function(e)
+							if e == messagebox.TRY then
+								close_scheduler()
+								self:commit()
+							elseif e== messagebox.CLOSE then
+								close_scheduler()
+							end
+						end,messagebox.RETRY)						
+						kits.log('WorkCommit:commit error : '..url )
+					end
+				end)				
+		end
+	end
+	self._commitSCID = scheduler:scheduleScriptFunc( commit_func,0.05,false )
 end
 
 function WorkCommit:release()
 	if self._scID then
 		self:getScheduler():unscheduleScriptEntry(self._scID)
 		self._scID = nil
+	end
+	if self._commitSCID then
+		self:getScheduler():unscheduleScriptEntry(self._commitSCID)
+		self._commitSCID = nil
 	end
 end
 

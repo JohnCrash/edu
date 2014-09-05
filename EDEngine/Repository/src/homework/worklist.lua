@@ -134,14 +134,14 @@ function WorkList:add_page_from_cache( idx,last )
 				if v.finish_time then
 					local t = kits.unix_date_by_string(v.finish_time)
 					local dt = os.time() - t
-					kits.log( 'v.finish_time = '..t..' current='..os.time() )
+					--kits.log( 'v.finish_time = '..t..' current='..os.time() )
 					if not last then
 						if dt < WEEK then --结束作业后+7天
-							if dt > 0 then
-								kits.log( '	add:+'..kits.time_to_string(dt) )
-							else
-								kits.log( '	add:-'..kits.time_to_string(-dt) )
-							end
+						--	if dt > 0 then
+						--		kits.log( '	add:+'..kits.time_to_string(dt) )
+						--	else
+						--		kits.log( '	add:-'..kits.time_to_string(-dt) )
+						--	end
 							self:add_item(v)
 						else
 							kits.log( '	stop' )
@@ -149,18 +149,18 @@ function WorkList:add_page_from_cache( idx,last )
 						end
 					else
 						if dt > WEEK then
-							if dt > 0 then
-								kits.log( '	add:+'..kits.time_to_string(dt) )
-							else
-								kits.log( '	add:-'..kits.time_to_string(-dt) )
-							end
+						--	if dt > 0 then
+						--		kits.log( '	add:+'..kits.time_to_string(dt) )
+						--	else
+						--		kits.log( '	add:-'..kits.time_to_string(-dt) )
+						--	end
 							self:add_item(v)
 						end
-							if dt > 0 then
-								kits.log( '	?:+'..kits.time_to_string(dt) )
-							else
-								kits.log( '	?:-'..kits.time_to_string(-dt) )
-							end
+						--	if dt > 0 then
+						--		kits.log( '	?:+'..kits.time_to_string(dt) )
+						--	else
+						--		kits.log( '	?:-'..kits.time_to_string(-dt) )
+						--	end
 					end
 				else
 					need_continue = false

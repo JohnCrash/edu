@@ -147,10 +147,13 @@ function WorkFlow:commit_topics( v )
 		kits.log('ERROR commit my_answer invalid')
 		return
 	end
+	v.user_time = v.user_time or 0
+	local dt = math.floor(os.time()-self._topics_begin_time) --做题题目计时器
+	v.user_time = v.user_time + dt
 	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
 	..'&answer='..tostring(answer)
-	..'&times='..math.floor(os.time()-self._topics_begin_time) --做题题目计时器
+	..'&times='..dt
 	..'&tid='..tostring(self._args.tid)
 	self._topics_begin_time = os.time() --重新计时
 	local ret = mt.new('GET',url,login.cookie(),
@@ -158,9 +161,13 @@ function WorkFlow:commit_topics( v )
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
 								v.commit_faild = nil
+								self._topics_table.answers[v.item_id].user_time = v.user_time
+								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild
 								kits.log('	commit '..url..' success!')
 							else
 								v.commit_faild = true
+								self._topics_table.answers[v.item_id].user_time = v.user_time
+								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild								
 								kits.log('ERROR : WorkFlow:commit_topics')
 								kits.log('	commit '..url..' faild!')
 							end
@@ -168,6 +175,8 @@ function WorkFlow:commit_topics( v )
 					end )
 	if not ret then
 		v.commit_faild = true
+		self._topics_table.answers[v.item_id].user_time = v.user_time
+		self._topics_table.answers[v.item_id].commit_faild = v.commit_faild		
 		kits.log('ERROR : WorkFlow:commit_topics')
 		kits.log('	commit '..url..' faild!')
 	else
@@ -251,6 +260,7 @@ function WorkFlow:save_answer()
 				b = false
 			end		
 			if v.commit_faild then
+				kits.log('WARNING commit topics faild,try again!')
 				self:commit_topics( v ) --如果发生提交失败将，每次重试
 			end
 		end

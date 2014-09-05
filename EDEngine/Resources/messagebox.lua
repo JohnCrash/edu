@@ -10,7 +10,7 @@ local ui = {
 	TRY = 'red_in/again',
 }
 local g_scale = 2
-local function messagebox( parent )
+local function messagebox( parent,func,dt )
 	local s
 	if dt == 1 then
 		s = uikits.fromJson{file=ui.LOADBOX}
@@ -49,11 +49,17 @@ local function messagebox( parent )
 		local try = uikits.child(s,ui.TRY)
 		if quit then
 			uikits.event( quit,function(sender)
+											uikits.delay_call(parent,function()
+												s:removeFromParent()
+											end,0)
 											func( 5 )
 										end,'click')
 		end
 		if try then
 			uikits.event( try,function(sender)
+											uikits.delay_call(parent,function()
+												s:removeFromParent()
+											end,0)
 											func( 4 )
 										end,'click')		
 		end
