@@ -9,3 +9,17 @@ local ui = {
 	EXIT = 'red_in/out',
 	TRY = 'red_in/again',
 }
+
+local function messagebox( parent )
+	
+end
+
+return 
+{
+	LOADING = 1,
+	RETRY = 2,
+	REPAIR = 3,
+	TRY = 4,
+	CLOSE = 5,
+	open = messagebox,
+}
