@@ -429,6 +429,15 @@ function WorkCommit:init()
 					--统计能做的客观题数量
 					self._args.cnt_item = self:calc_objective_num(t)
 					self:init_commit_page()
+				else
+					--既没有网络也没有缓冲
+					messagebox.open(self,function(e)
+						if e == messagebox.TRY then
+							self:init()
+						elseif e == messagebox.CLOSE then
+							uikits.popScene()
+						end
+					end,messagebox.RETRY)					
 				end
 			end)	
 end

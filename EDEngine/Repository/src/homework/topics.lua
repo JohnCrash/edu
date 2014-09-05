@@ -517,7 +517,6 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 					end
 					if n >= #rs.urls then
 						--全部下载完毕
-						data._isdownload = true
 						rst.loading:removeFromParent() 
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
@@ -1561,11 +1560,8 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ and data._isdownload then
-						judge(layout,data)
-					else
-						cache_done(layout,data,judge)
-					end
+					judge(layout,data)
+					cache_done(layout,data,judge)
 				end
 			},
 	[2] = {name='单选',img=res_root..'single_item.png',
@@ -1583,22 +1579,16 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ and data._isdownload then
-						single_select(layout,data)
-					else					
-						cache_done(layout,data,single_select)
-					end
+					single_select(layout,data)				
+					cache_done(layout,data,single_select)
 				end
 			},
 	[3] = {name='多选',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ and data._isdownload then
-						multi_select_init(layout,data)
-					else
-						cache_done(layout,data,multi_select_init)
-					end
+					multi_select_init(layout,data)
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[4] = {name='连线',img=res_root..'connection_item.png',
@@ -1629,22 +1619,16 @@ local types={
 				end,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ and data._isdownload then
-						edit_topics(layout,data)
-					else
-						cache_done(layout,data,edit_topics)
-					end
+					edit_topics(layout,data)
+					cache_done(layout,data,edit_topics)
 				end
 			},
 	[6] = {name='选择',img=res_root..'multiple_item.png',
 				conv=multi_select_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					if data._isdone_ and data._isdownload then
-						multi_select_init(layout,data)
-					else
-						cache_done(layout,data,multi_select_init)
-					end
+					multi_select_init(layout,data)
+					cache_done(layout,data,multi_select_init)
 				end
 			},
 	[7] = {name='横排序',img=res_root..'sort_item.png',

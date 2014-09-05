@@ -147,6 +147,17 @@ function WorkFlow:commit_topics( v )
 		kits.log('ERROR commit my_answer invalid')
 		return
 	end
+	
+	if not self._topics_table then
+		self._topics_table = {}
+	end
+	if not self._topics_table.answers then
+		self._topics_table.answers = {}
+	end
+	if not self._topics_table.answers[v.item_id] then
+		self._topics_table.answers[v.item_id] = {}
+	end
+	
 	v.user_time = v.user_time or 0
 	local dt = math.floor(os.time()-self._topics_begin_time) --做题题目计时器
 	v.user_time = v.user_time + dt
@@ -160,14 +171,14 @@ function WorkFlow:commit_topics( v )
 					function(obj)
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
-								v.commit_faild = nil
-								self._topics_table.answers[v.item_id].user_time = v.user_time
-								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild
+								v.commit_faild = false
+--								self._topics_table.answers[v.item_id].user_time = v.user_time
+--								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild
 								kits.log('	commit '..url..' success!')
 							else
 								v.commit_faild = true
-								self._topics_table.answers[v.item_id].user_time = v.user_time
-								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild								
+--								self._topics_table.answers[v.item_id].user_time = v.user_time
+--								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild								
 								kits.log('ERROR : WorkFlow:commit_topics')
 								kits.log('	commit '..url..' faild!')
 							end
@@ -175,12 +186,10 @@ function WorkFlow:commit_topics( v )
 					end )
 	if not ret then
 		v.commit_faild = true
-		self._topics_table.answers[v.item_id].user_time = v.user_time
-		self._topics_table.answers[v.item_id].commit_faild = v.commit_faild		
+--		self._topics_table.answers[v.item_id].user_time = v.user_time
+--		self._topics_table.answers[v.item_id].commit_faild = v.commit_faild		
 		kits.log('ERROR : WorkFlow:commit_topics')
 		kits.log('	commit '..url..' faild!')
-	else
-		v.commit_faild = nil
 	end
 end
 
@@ -258,8 +267,8 @@ function WorkFlow:save_answer()
 			--结束按钮,状态改变
 			if v.state == ui.STATE_UNFINISHED then
 				b = false
-			end		
-			if v.commit_faild then
+			end
+			if v.commit_faild and v.item_id then
 				kits.log('WARNING commit topics faild,try again!')
 				self:commit_topics( v ) --如果发生提交失败将，每次重试
 			end
@@ -267,7 +276,7 @@ function WorkFlow:save_answer()
 		if isc then
 			if self._args.exam_id then --作业
 				topics.write( self._args.exam_id,self._topics_table )
-			elseif self._args.pid then --卷面
+			elseif self._args.pid then --卷面	
 				topics.write( self._args.pid,self._topics_table )
 			else
 				kits.log('error : WorkFlow:save_answer exam_id = nil and pid = nil')
