@@ -736,7 +736,7 @@ function WorkFlow:set_anwser_field( i )
 				data._options = {}
 				data._options[1] = self._option_yes
 				data._options[2] = self._option_no
-			elseif t==2 or t==3 then --单选,多选
+			elseif t==2 or t==3 or t==6 then --单选,多选
 				data._options = {}
 				for i=1,6 do
 					data._options[i] = self._option_img[i]

@@ -1380,7 +1380,7 @@ local function multi_select_conv(s,e)
 		kits.log('ERROR multi_select_conv '..tostring(s.options))
 		return false,"multiple select 'options'?"
 	end
-	if e.options or (e.options and e.options <= 0) then
+	if not e.options or (e.options and e.options <= 0) then
 		e.options = max_options
 		kits.log('ERROR : multi_select_conv '..tostring(s.options))
 	end
