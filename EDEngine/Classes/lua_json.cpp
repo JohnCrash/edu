@@ -77,13 +77,31 @@ json_object *lua_travering( lua_State *L,int t )
 			while( lua_next(L,t) != 0 )
 			{
 				//key -2,value -1
-				if( lua_isstring(L,-2) )
+				/* Lua api document
+				While traversing a table, do not call lua_tolstring directly on a key, 
+				unless you know that the key is actually a string. 
+				Recall that lua_tolstring changes the value at the given index; 
+				this confuses the next call to lua_next.
+				*/
+				if( lua_isnumber(L,-2) )
 				{
+					lua_Number d = lua_tonumber(L,-2);
+					char buf[64];
+					if( d == (int)d )
+						sprintf(buf,"%d",(int)d);
+					else
+						sprintf(buf,"%f",d);
+					printf("\tkey=%s\n",buf);
 					json_object *val = lua_travering( L,lua_gettop(L) );
 					if( val )
-					{
+						json_object_object_add( jobject,buf,val );
+				}
+				else if( lua_isstring(L,-2) )
+				{
+					printf("\tkey=%s\n",lua_tostring(L,-2));
+					json_object *val = lua_travering( L,lua_gettop(L) );
+					if( val )
 						json_object_object_add( jobject,lua_tostring(L,-2),val );
-					}
 				}
 				lua_pop(L,1); //pop value
 			}

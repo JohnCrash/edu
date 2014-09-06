@@ -172,13 +172,15 @@ function WorkFlow:commit_topics( v )
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
 								v.commit_faild = false
---								self._topics_table.answers[v.item_id].user_time = v.user_time
---								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild
+								local answer = self._topics_table.answers[v.item_id]
+								answer.user_time = v.user_time
+								answer.commit_faild = v.commit_faild
 								kits.log('	commit '..url..' success!')
 							else
 								v.commit_faild = true
---								self._topics_table.answers[v.item_id].user_time = v.user_time
---								self._topics_table.answers[v.item_id].commit_faild = v.commit_faild								
+								local answer = self._topics_table.answers[v.item_id]
+								answer.user_time = v.user_time
+								answer.commit_faild = v.commit_faild
 								kits.log('ERROR : WorkFlow:commit_topics')
 								kits.log('	commit '..url..' faild!')
 							end
@@ -186,8 +188,9 @@ function WorkFlow:commit_topics( v )
 					end )
 	if not ret then
 		v.commit_faild = true
---		self._topics_table.answers[v.item_id].user_time = v.user_time
---		self._topics_table.answers[v.item_id].commit_faild = v.commit_faild		
+		local answer = self._topics_table.answers[v.item_id]
+		answer.user_time = v.user_time
+		answer.commit_faild = v.commit_faild
 		kits.log('ERROR : WorkFlow:commit_topics')
 		kits.log('	commit '..url..' faild!')
 	end
