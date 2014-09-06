@@ -91,14 +91,12 @@ json_object *lua_travering( lua_State *L,int t )
 						sprintf(buf,"%d",(int)d);
 					else
 						sprintf(buf,"%f",d);
-					printf("\tkey=%s\n",buf);
 					json_object *val = lua_travering( L,lua_gettop(L) );
 					if( val )
 						json_object_object_add( jobject,buf,val );
 				}
 				else if( lua_isstring(L,-2) )
 				{
-					printf("\tkey=%s\n",lua_tostring(L,-2));
 					json_object *val = lua_travering( L,lua_gettop(L) );
 					if( val )
 						json_object_object_add( jobject,lua_tostring(L,-2),val );

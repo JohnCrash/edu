@@ -141,7 +141,7 @@ function WorkFlow:commit_topics( v )
 		answer = ''
 		for i,v in pairs(v.my_answer) do
 			if i ~= 1 then answer = answer..',' end
-			answer = answer..v
+			answer = answer..tostring(v)
 		end
 	else
 		kits.log('ERROR commit my_answer invalid')
