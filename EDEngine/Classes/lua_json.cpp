@@ -29,11 +29,6 @@ bool isArray( lua_State *L,int t )
 			isArray = false;
 		}
 		lua_pop(L,1);
-//		if( !isArray )
-//		{
-			//lua_pop(L,1); //pop key
-//			break;
-//		}
 	}	
 	return isArray;
 }
@@ -150,6 +145,19 @@ int lua_jsonEncode(lua_State *L)
 	return 2;	
 }
 
+static bool isnumber(const char *c)
+{
+	int len = strlen(c);
+	for( int i=0;i<len;++i )
+	{
+		if( c[i] >='0' && c[i] <= '9' )
+			continue;
+		else
+			return false;
+	}
+	return true;
+}
+
 //成功将解码的数据压入堆栈返回true，失败不压入任何东西返回false
 bool decode_json( lua_State *L,json_object *jobject )
 {
@@ -187,7 +195,10 @@ bool decode_json( lua_State *L,json_object *jobject )
 		lua_newtable(L);
 		json_object_object_foreach(jobject, key, val)
 		{
-			lua_pushstring(L,key); //push key
+			if( isnumber(key) )
+				lua_pushinteger(L,atoi(key));
+			else
+				lua_pushstring(L,key); //push key
 			if( decode_json(L,val) ) //push value
 			{
 				lua_settable(L,-3);

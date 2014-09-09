@@ -180,11 +180,13 @@ function WorkFlow:commit_topics( v )
 								kits.log('	commit '..url..' success!')
 							else
 								v.commit_faild = true
-								local answer = self._topics_table.answers[v.item_id]
-								answer.user_time = v.user_time
-								answer.commit_faild = v.commit_faild
-								kits.log('ERROR : WorkFlow:commit_topics')
-								kits.log('	commit '..url..' faild!')
+								if self and self._topics_table and self._topics_table.answers then
+									local answer = self._topics_table.answers[v.item_id]
+									answer.user_time = v.user_time
+									answer.commit_faild = v.commit_faild
+									kits.log('ERROR : WorkFlow:commit_topics')
+									kits.log('	commit '..url..' faild!')
+								end
 							end
 						end
 					end )
@@ -225,9 +227,11 @@ local function answer_clone(a)
 end
 
 local function has_answer( answer )
-	if answer and type(answer)=='table' and answer[1] and type(answer[1])=='string' and 
-	(string.len(answer[1])>0 or type(answer[1])=='number') then
-		return true
+	if answer and type(answer)=='table' then
+		local ans1 = answer[1]
+		if ans1 and ((type(ans1)=='string' and string.len(ans1)>0) or type(ans1)=='number') then
+			return true
+		end
 	end
 end
 
@@ -391,7 +395,7 @@ function WorkFlow:load_cloud_answer( e )
 							local t = json.decode(result.detail.answer)
 							if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
 								kits.log('	CLOUD ANSWER:'..result.detail.answer )
-								e.my_answer = e.my_answer or {}
+								e.my_answer = {}
 								for i,v in pairs(t.answers) do
 									e.my_answer[i] = v.value
 								end
