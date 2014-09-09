@@ -769,6 +769,24 @@ function WorkFlow:set_anwser_field( i )
 					data._options[i] = self._option_edit[i]
 				end
 			end
+			local function layout_scroll_arrow(layout_local,data)
+				--如果内容超出滚动区
+				local size = layout_local:getContentSize()
+				local insize = layout_local:getInnerContainerSize()
+				if size.height < insize.height then
+					self._arrow:setVisible(true)
+					self._arrow_up:setVisible(true)
+					uikits.event( self._arrow,function(sender)
+						layout_local:scrollToBottom(0.3,true)
+					end,'click')
+					uikits.event( self._arrow_up,function(sender)
+						layout_local:scrollToTop(0.3,true)
+					end,'click')				
+				else
+					self._arrow:setVisible(false)
+					self._arrow_up:setVisible(false)
+				end			
+			end
 			uikits.stopAllSound() --停止可能的播放
 			--保存答案
 			self:save_answer() --不在每次修改时保存，而是在每次切换的时候保存
@@ -776,23 +794,11 @@ function WorkFlow:set_anwser_field( i )
 				--self:save_answer()
 				self:check_finished()
 			end
-			topics.types[t].init(layout,data)
-			--如果内容超出滚动区
-			local size = layout:getContentSize()
-			local insize = layout:getInnerContainerSize()
-			if size.height < insize.height then
-				self._arrow:setVisible(true)
-				self._arrow_up:setVisible(true)
-				uikits.event( self._arrow,function(sender)
-					layout:scrollToBottom(0.3,true)
-				end,'click')
-				uikits.event( self._arrow_up,function(sender)
-					layout:scrollToTop(0.3,true)
-				end,'click')				
-			else
-				self._arrow:setVisible(false)
-				self._arrow_up:setVisible(false)
+			data.eventInitComplate=function(layout,data)
+				layout_scroll_arrow(layout,data)
 			end
+			layout_scroll_arrow(layout,data)
+			topics.types[t].init(layout,data)
 		else
 			--不支持的类型
 			if  topics.types[t] and topics.types[t].name then

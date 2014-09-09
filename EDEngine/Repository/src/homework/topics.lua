@@ -1323,13 +1323,20 @@ local function relayout_drag( layout,data,ismul )
 						else
 							p = layout:convertToNodeSpace(p)
 						end
-						
 						if ismul then
 							if draging_item then
 								draging_item:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 							end
 						else
 							sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+						end	
+						--加入一个滚动，应对拖放位置和目标距离超过一屏
+						if layout.scrollToBottom then
+							p = sender:getTouchMovePosition()
+							local layout_size = layout:getContentSize()
+							if p.y < layout_size.height/4 then
+								layout:scrollToBottom(0.2,true)
+							end
 						end
 					end
 				end)
