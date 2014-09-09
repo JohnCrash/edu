@@ -4,6 +4,7 @@ local md5 = require "md5"
 local uikits = require "uikits"
 local json = require "json-c"
 local login = require "login"
+local lfs = require "lfs"
 
 local request_list = {}
 local cache_data = {}
@@ -14,8 +15,26 @@ local function add_cache_data(url,data)
 end
 
 local function clear_cache()
-	cache_data = {}
-	setmetatable(cache_data,{__mode='v'})
+	local path = kits.get_cache_path()
+	local len = string.len(path)
+	kits.log('cache path:'..path)
+	if string.sub(path,len,len) == '/' then
+		path = string.sub(path,1,len-1)
+	end
+	kits.log('cache path:'..path)
+	for file in lfs.dir(path) do
+		if file~='.' and file~='..' then
+			local f = path..'/'..file
+			local attr = lfs.attributes(f)
+			if attr.mode=='directory' then
+			else
+				local dt = os.time() - attr.modification
+				if dt > 7*24*3600 then --保留7天的缓冲数据
+					os.remove(f)
+				end
+			end
+		end
+	end
 end
 
 local function random_delay()

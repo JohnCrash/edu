@@ -446,6 +446,10 @@ local function quit()
 	cc.Director:getInstance():endToLua()
 end
 
+local function get_cache_path()
+	return cache_dir
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -481,6 +485,7 @@ local exports = {
 	quit = quit,
 	rename_file = rename_file,
 	exists_file = exists_file,
+	get_cache_path = get_cache_path,
 }
 
 return exports

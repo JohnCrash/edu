@@ -35,7 +35,7 @@ local function init_test_resource()
 		--搜索assets目录
 		pfu:addSearchPath('src/')
 		pfu:addSearchPath('res/')
-		local cache_dir = local_dir..'test/'
+		local cache_dir = kits.get_cache_path()
 		if not kits.directory_exists(cache_dir) then
 			kits.make_directory(cache_dir)
 		end

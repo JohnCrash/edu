@@ -201,6 +201,7 @@ function WorkList:load_page( first,last )
 		local quit = false
 		self.request_cancel = true
 		local loadbox
+		local local_first = g_first
 		if g_first then
 			g_first = false
 			loadbox = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
@@ -209,6 +210,9 @@ function WorkList:load_page( first,last )
 			loadbox = loadingbox.open( self )
 		end
 		local function close_scheduler()
+			if local_first then
+				cache.clear()
+			end
 			scheduler:unscheduleScriptEntry(self._scID)
 			self._scID = nil
 			self._busy = false
