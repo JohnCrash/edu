@@ -194,6 +194,12 @@ function StatisticsView:showstatisticslist(src_view,cur_statisticsitems)
 					num:setString(cur_statisticsitems.reason_stat[j].cnt)
 					percent = cur_statisticsitems.reason_stat[j].cnt/cur_statisticsitems.cnt*100
 					bar_num:setPercent(percent)								
+				elseif i == 6 then
+					bar_num = uikits.child(cur_view,ui.bar_num_qita)
+					num = uikits.child(cur_view,ui.num_qita)		
+					num:setString(cur_statisticsitems.reason_stat[j].cnt)
+					percent = cur_statisticsitems.reason_stat[j].cnt/cur_statisticsitems.cnt*100
+					bar_num:setPercent(percent)								
 				end
 			end
 		end
