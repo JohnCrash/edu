@@ -140,8 +140,10 @@ function WorkFlow:commit_topics( v )
 	elseif v and v.my_answer and type(v.my_answer)=='table' then
 		answer = ''
 		for i,v in pairs(v.my_answer) do
-			if i ~= 1 then answer = answer..',' end
-			answer = answer..tostring(v)
+			if v then
+				if i ~= 1 then answer = answer..',' end
+				answer = answer..tostring(v)
+			end
 		end
 	else
 		kits.log('ERROR commit my_answer invalid')

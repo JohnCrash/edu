@@ -1035,6 +1035,15 @@ local function scrollview_step_add(scrollview,t,n,add_func,sstate)
 	end
 end
 
+local function animationFormJson( filename,name )
+	local arm = ccs.ArmatureDataManager:getInstance()
+	if arm then
+		arm:removeArmatureFileInfo(filename)
+		arm:addArmatureFileInfo(filename)	
+		return ccs.Armature:create(name)
+	end
+end
+
 return {
 	text = text,
 	textbmfont = textbmfont,
@@ -1083,4 +1092,5 @@ return {
 	scrollview_step_add = scrollview_step_add,
 	muteSound = muteSound,
 	playClickSound = playClickSound,
+	animationFormJson = animationFormJson,
 }

@@ -86,6 +86,7 @@ local course_icon={
 
 local ui={
 	PLAYBOX = 'homework/playbox.json',
+	FLASHBOX = 'homework/topics/jgg.ExportJson',
 	PLAY = 'pause',
 	PAUSE = 'play',
 	STATE_CURRENT = 1,
@@ -1076,6 +1077,7 @@ local function relayout_click( layout,data,ismulti )
 		data.my_answer[1] = ''
 	end
 end
+
 local function relayout_drag( layout,data,ismul )
 	local ui1 = {}
 	local ui2 = {}
@@ -1091,7 +1093,17 @@ local function relayout_drag( layout,data,ismul )
 	bg:setScaleY(g_scale)
 
 	for k,v in pairs( data.drag_rects ) do
-		bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
+		--[[
+		local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
+		box:getAnimation():playWithIndex(0)
+		box:setPosition(cc.p((v.x2+v.x1)/2,bgsize.height-(v.y2+v.y1)/2))
+		local size = box:getContentSize()
+		box:setScaleX(math.abs(v.x2-v.x1)/size.width)
+		box:setScaleY(math.abs(v.y2-v.y1)/size.height)
+		--]]
+		--box:setOpacity (256)
+		--bg:addChild( box )
+		--bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
 	end
 	local function get_index( item )
 		for i = 1,#ui1 do
