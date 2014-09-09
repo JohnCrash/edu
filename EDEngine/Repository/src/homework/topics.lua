@@ -1214,7 +1214,7 @@ local function relayout_drag( layout,data,ismul )
 	end
 	for k,v in pairs( data.drag_objs ) do
 		local item = item_ui( v )
-		layout:addChild( item )
+		layout:addChild( item,100 )
 		table.insert(ui1,item)
 		item:setTouchEnabled(true)
 		item:addTouchEventListener(
@@ -1232,7 +1232,7 @@ local function relayout_drag( layout,data,ismul )
 							if not sender.isclone then
 								draging_item = sender:clone()
 								draging_item.isclone = true
-								layout:addChild( draging_item )
+								layout:addChild( draging_item,100 )
 							else
 								draging_item = sender --isclone
 							end
@@ -1303,7 +1303,6 @@ local function relayout_drag( layout,data,ismul )
 						end						
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
-						kits.log("drag moved")
 						local p = sender:getTouchMovePosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
