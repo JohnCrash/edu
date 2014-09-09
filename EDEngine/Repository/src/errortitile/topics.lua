@@ -1156,6 +1156,16 @@ local function relayout_drag( layout,data,ismul )
 		end
 		return false
 	end
+	local function  xchange( i,j )
+		drags[i].idx = j
+		local temp = drags[i].item
+		drags[i].item = drags[j].item
+		drags[i].item:setPosition( get_pt_center(drags[i].item,i ))
+		
+		drags[j].idx = i
+		drags[j].item = temp
+		drags[j].item:setPosition( get_pt_center(drags[j].item,j ))
+	end
 	local function put_in_multi( sender,x,y )
 		local xx,yy = bg:getPosition()
 		xx = xx - bg:getContentSize().width*g_scale/2
@@ -1186,25 +1196,16 @@ local function relayout_drag( layout,data,ismul )
 					drags[i] = { idx = idx,item = draging_item }
 					draging_item = nil
 				else
-					--?
+					--xchange
 					local j
 					for m,n in pairs(drags) do
 						if n.item == draging_item then
 							j = m
+							break
 						end
 					end
-					if j then
-						local v = data.drag_rects[j]
-						local rc = {
-							x1 = xx + v.x1 * g_scale,
-							x2 = xx + v.x2 * g_scale,
-							y1 = yy + (bgsize.height-v.y1)*g_scale,
-							y2 = yy + (bgsize.height-v.y2)*g_scale
-						}
-						local offx = ((rc.x2-rc.x1) - sz.width*g_scale)/2
-						local offy = ((rc.y2-rc.y1) - sz.height*g_scale)/2
-						local cp = {x = rc.x1 + offx,y = rc.y1+ offy }						
-						draging_item:setPosition( cp )
+					if j and i then --交换i和j
+						xchange( i,j )
 					end
 				end
 				return true
@@ -1212,6 +1213,7 @@ local function relayout_drag( layout,data,ismul )
 		end
 		return false	
 	end
+	local ismoving --触点没有移动标志
 	for k,v in pairs( data.drag_objs ) do
 		local item = item_ui( v )
 		layout:addChild( item,100 )
@@ -1220,12 +1222,11 @@ local function relayout_drag( layout,data,ismul )
 		item:addTouchEventListener(
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
+						ismoving = false
 						local p = sender:getTouchBeganPosition()
-						kits.log("drag began")
 						sp = sender:convertToNodeSpace( p )
 						sp.x = sp.x * g_scale
 						sp.y = sp.y * g_scale
-						kits.log("drag Disabled scroll")
 						setEnabledParent(layout,false)
 						layout:setEnabled(false)
 						if ismul then
@@ -1238,11 +1239,6 @@ local function relayout_drag( layout,data,ismul )
 							end
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
-						if eventType == ccui.TouchEventType.ended then
-							kits.log("drag ended")
-						else
-							kits.log("drag canceled")
-						end
 						local p = sender:getTouchEndPosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1254,7 +1250,6 @@ local function relayout_drag( layout,data,ismul )
 						else
 							p = layout:convertToNodeSpace(p)
 						end			
-						kits.log("drag Enabled scroll")
 						setEnabledParent(layout,true)
 						layout:setEnabled(true)
 						if ismul then
@@ -1303,6 +1298,7 @@ local function relayout_drag( layout,data,ismul )
 						end						
 						call_answer_event(layout,data)
 					elseif eventType == ccui.TouchEventType.moved then
+						ismoving = true
 						local p = sender:getTouchMovePosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
