@@ -763,9 +763,15 @@ local function relayout_link( layout,data )
 		dot:setScaleY(0.5)		
 		layout:addChild(dot)
 	end
-
-	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,g_scale)
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout:getContentSize().width,TOPICS_SPACE,g_scale)
+	local layout_size = layout:getContentSize()
+	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,TOPICS_SPACE,g_scale)
+	if layout_size.width-rect1.width > #ui2*4*TOPICS_SPACE then
+		rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,4*TOPICS_SPACE,g_scale)
+	end
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,TOPICS_SPACE,g_scale)
+	if layout_size.width-rect2.width > #ui1*4*TOPICS_SPACE then
+		local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,4*TOPICS_SPACE,g_scale)
+	end	
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
