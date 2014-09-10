@@ -748,7 +748,7 @@ local function relayout_link( layout,data )
 		layout:addChild(dot)
 	end
 	for i,v in pairs(data.link_items2) do
-		local item = item_ui( v )
+		local item = item_ui( v,10 )
 		ui2[#ui2+1] = item
 		local k = #ui2
 		uikits.event( item,
@@ -826,7 +826,7 @@ local function setEnabledParent( layout,b )
 end
 
 --排序
-local function relayout_sort( layout,data,isH )
+local function relayout_sort( layout,data )
 	local ui1 = {}
 	local orgrcs = {}
 	local sp = {x=0,y=0}
@@ -867,7 +867,8 @@ local function relayout_sort( layout,data,isH )
 		end
 	end
 	local function relayout( item,x,y )
-		uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,TOPICS_SPACE,g_scale,item )
+		local result = uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,TOPICS_SPACE,g_scale,item )
+		uikits.move( sorts,-result.x,TOPICS_SPACE)
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
@@ -903,7 +904,7 @@ local function relayout_sort( layout,data,isH )
 	end
 	for k,v in pairs( data.sort_items ) do
 		local item = item_ui( v )
-		layout:addChild( item )
+		layout:addChild( item,20 )
 		ui1[#ui1+1] = item
 		item:setTouchEnabled(true)
 		item:addTouchEventListener(
@@ -967,22 +968,21 @@ local function relayout_sort( layout,data,isH )
 						else
 							p = layout:convertToNodeSpace(p)
 						end						
-						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 						place_item( sender,p.x,p.y )
+						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 					end
 				end)
 	end
 
 	local layout_size = layout:getContentSize()
-	--local local_scale = 1
 	local result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
-	--if result.width > layout_size.width then
-	--	local_scale = layout_size.width/result.width
-	--	result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*local_scale)
-	--end
+	result.height = result.height + 2*TOPICS_SPACE
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
-	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
+	
+	layout:addChild( uikits.line{x1=place_rect.x1,y1=place_rect.y1+result.height,x2=place_rect.x1+result.width+6,y2=place_rect.y1+result.height,color=cc.c4f(255,0,255,255),linewidth=3},10)	
+	
+	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,fillColor=cc.c4f(1,0,0,0.1),linewidth=2} )
 	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
 		local size = v:getContentSize()
@@ -990,7 +990,7 @@ local function relayout_sort( layout,data,isH )
 		size.height = size.height * g_scale
 		local x,y = v:getPosition()
 		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
-		layout:addChild( uikits.rect{x1=x-1,y1=y-1,x2=x+size.width+1,y2=y+size.height+1,color=cc.c3b(255,0,0),linewidth=2} )
+		layout:addChild( uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
 		orgp[v] = cc.p(x,y)
 	end
 	set_topics_image( layout,data,0,result.height + 36 + result.height )
@@ -1007,6 +1007,195 @@ local function relayout_sort( layout,data,isH )
 		relayout()
 	end
 end
+
+--竖排
+local function relayout_sort_V( layout,data )
+	local ui1 = {}
+	local orgrcs = {}
+	local sp = {x=0,y=0}
+	local zorder = 1
+	local orgp = {}
+	local place_rect = nil
+	local sorts = {}
+	local function isin( item )
+		for i,v in pairs(sorts) do
+			if v == item then
+				return true
+			end
+		end
+	end
+	local function remove_item( item )
+		for i = 1,#sorts do
+			if sorts[i] == item then
+				table.remove(sorts,i)
+				return
+			end
+		end
+	end
+	local function insert( item,x,y )
+		for i = 1,#sorts do
+			local xx,yy = get_center_pt( sorts[i] )
+			if x < xx then
+				table.insert(sorts,i,item)
+				return
+			end
+		end
+		sorts[#sorts+1] = item
+	end
+	local function sort_index( item )
+		for i = 1,#sorts do
+			if sorts[i] == item then
+				return i
+			end
+		end
+	end
+	local function relayout( item,x,y )
+		local result = uikits.relayout_v( sorts,TOPICS_SPACE,g_scale)
+		local ox1,oy1
+		local layout_size = layout:getContentSize()
+		ox1 = layout_size.width/2 + TOPICS_SPACE
+		oy1 = TOPICS_SPACE
+		
+		uikits.move(sorts,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2+place_rect.y2-result.height)		
+	end
+	local function place_item( item,x,y )
+		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
+			if not isin( item ) then
+				insert(item,x,y)
+			end
+			local it = sort_index( item )
+			if it then
+				local b = false
+				table.remove( sorts,it )
+				for i = 1,#sorts do
+					local xx,yy = get_center_pt( sorts[i] )
+					if y < yy then
+						table.insert(sorts,i,item)
+						b = true
+						break
+					end
+				end
+				if not b then
+					table.insert(sorts,item)
+				end
+			end
+			relayout( item,x,y )
+			return true
+		end
+	end
+	local function map_abc(item)
+		for i,v in pairs(ui1) do
+			if v == item then
+				return answer_abc[i]
+			end
+		end
+	end
+	for k,v in pairs( data.sort_items ) do
+		local item = item_ui( v )
+		layout:addChild( item,20 )
+		ui1[#ui1+1] = item
+		item:setTouchEnabled(true)
+		item:addTouchEventListener(
+				function(sender,eventType)
+					if eventType == ccui.TouchEventType.began then
+						local p = sender:getTouchBeganPosition()
+						sp = sender:convertToNodeSpace( p )
+						sp.x = sp.x * g_scale
+						sp.y = sp.y * g_scale
+						setEnabledParent(layout,false)
+						layout:setEnabled(false)
+						zorder = sender:getLocalZOrder()
+						sender:setLocalZOrder(1000)
+					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						local p = sender:getTouchEndPosition()
+							if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end
+						setEnabledParent(layout,true)
+						layout:setEnabled(true)
+						sender:setLocalZOrder(zorder)
+						if not place_item( sender,p.x,p.y ) then 
+							sender:setPosition( orgp[sender] )
+							remove_item( sender )
+						end
+						relayout()
+						if #sorts > 0 then
+							data.state = ui.STATE_FINISHED
+						else
+							data.state = ui.STATE_UNFINISHED
+						end
+						--收集答案
+						data.my_answer[1] = ''
+						for i,v in pairs(sorts) do
+							data.my_answer[1] = data.my_answer[1]..map_abc(v)
+						end
+						kits.log( data.my_answer[1] )
+						call_answer_event(layout,data)
+					elseif eventType == ccui.TouchEventType.moved then
+						local p = sender:getTouchMovePosition()
+						if layout.getInnerContainer then
+							local inner = layout:getInnerContainer()
+							if inner then
+								p = inner:convertToNodeSpace(p)
+							else
+								p = layout:convertToNodeSpace(p)
+							end
+						else
+							p = layout:convertToNodeSpace(p)
+						end						
+						
+						place_item( sender,p.x,p.y )
+						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+					end
+				end)
+	end
+
+	local layout_size = layout:getContentSize()
+	local result = uikits.relayout_v( ui1,TOPICS_SPACE,g_scale)
+	local ox1,oy1
+	ox1 = layout_size.width/2 - result.width - TOPICS_SPACE
+	oy1 = TOPICS_SPACE
+	uikits.move(ui1,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2)
+	--layout:addChild( uikits.rect{x1=ox1,y1=oy1,x2=ox1+result.width,y2=oy1+result.height,fillColor=cc.c4f(1,0,0,0.1)} )
+	
+	local ox2,oy2
+	ox2 = layout_size.width/2 + TOPICS_SPACE
+	oy2 = TOPICS_SPACE
+	layout:addChild( uikits.line{x1=ox2,y1=oy2,x2=ox2,y2=oy2+result.height,color=cc.c4f(255,0,255,255),linewidth=3},10)
+	place_rect = {x1=ox2,y1=oy2,x2=ox2+result.width,y2=oy2+result.height}
+	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,fillColor=cc.c4f(1,0,0,0.1)} )
+	place_rect.y1 = place_rect.y1 + 2 
+	for k,v in pairs( ui1 ) do
+		local size = v:getContentSize()
+		size.width = size.width * g_scale
+		size.height = size.height * g_scale
+		local x,y = v:getPosition()
+		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+		layout:addChild( uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(0,0,1,0.1)} )
+		orgp[v] = cc.p(x,y)
+	end
+	set_topics_image( layout,data,0,result.height + 36 )
+	--恢复答案
+	if data.my_answer[1] then
+		for i = 1,string.len(data.my_answer[1]) do
+			local s = string.sub(data.my_answer[1],i,i)
+			if s then
+				local n = answer_idx[s]
+				table.insert(sorts,ui1[n])
+			end
+		end
+		--排布位置
+		relayout()
+	end
+end
+
 --点选
 local function relayout_click( layout,data,ismulti )
 	local size = layout:getContentSize()
@@ -1043,7 +1232,7 @@ local function relayout_click( layout,data,ismulti )
 							end
 						end
 					else
-						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+						rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2),linewidth=2}
 						data.my_answer[1] = data.my_answer[1]..answer_abc[i]
 						bg:addChild( rect_node[i] )
 					end
@@ -1052,7 +1241,7 @@ local function relayout_click( layout,data,ismulti )
 						s:removeFromParent()
 						rect_node[k] = nil
 					end
-					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+					rect_node[i] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2),linewidth=2}
 					data.my_answer[1] = answer_abc[i]
 					bg:addChild( rect_node[i] )
 				end
@@ -1679,7 +1868,7 @@ local types={
 				conv=sort_conv,
 				init=function(layout,data)
 					data.my_answer = data.my_answer or {}
-					cache_done(layout,data,relayout_sort,false)
+					cache_done(layout,data,relayout_sort_V,false)
 				end
 			},
 	[9] = {name='点图单选',img=res_root..'position_item.png',

@@ -690,9 +690,25 @@ local function relayout_h( items,xx,y,width,space,scale,expet )
 end
 
 --×ÝÏò²¼¾Ö
-local function relayout_v( items,x,space,scale )
+local function relayout_v( items,space,scale )
+	space = space or 0
+	local x,y,w,h = 0,0,0,space
 	for i,v in pairs(items) do
+		local size = v:getContentSize()
+		if scale then
+			size.width = size.width*scale
+			size.height = size.height*scale
+			v:setScaleX(scale)
+			v:setScaleY(scale)
+		end
+		v:setAnchorPoint(cc.p(0,0))
+		v:setPosition(cc.p(x,y))
+		y = y + size.height + space
+		if size.width > w then
+			w = size.width
+		end
 	end
+	return {x=0,y=0,width=w+2*space,height = y}
 end
 
 local function move( items,dx,dy )
