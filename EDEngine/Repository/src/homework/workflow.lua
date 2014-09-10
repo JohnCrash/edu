@@ -375,6 +375,10 @@ function WorkFlow:load_cloud_answer( e )
 		if e.my_answer and has_answer(e.my_answer) then
 			--已经有答案了
 			return
+		elseif self._topics_table and self._topics_table.answers and 
+				self._topics_table.answers[e.item_id] then
+			--已经有答案了
+			return
 		else
 			--cloud
 			--向资源请求表加入答案链接，和处理程序。
@@ -446,7 +450,7 @@ function WorkFlow:load_original_data_from_table( data )
 			else
 				k.my_answer = answer_clone(v.my_answer)
 			end
-			if has_answer(k.my_answer) then
+			if self._topics_table and self._topics_table.answers and self._topics_table.answers[v.item_id] then
 				k.state =  ui.STATE_FINISHED
 			else
 				k.state = ui.STATE_UNFINISHED
@@ -516,7 +520,7 @@ function WorkFlow:init_gui()
 	uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 		--保存
 		self:save_answer()
-		self:save()
+		--self:save()
 		--将做题数量返回上一级
 		if self._topics_table and self._topics_table.answers then
 			self._args.cnt_item_finish = self:get_topics_answers_num()
@@ -557,7 +561,7 @@ function WorkFlow:init_gui()
 				function(sender)
 					--保存
 					self:save_answer()
-					self:save()
+					--self:save()
 					if self._topics_table and self._topics_table.answers then
 						self._args.cnt_item_finish = self:get_topics_answers_num()
 					end

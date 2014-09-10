@@ -973,7 +973,13 @@ local function relayout_sort( layout,data,isH )
 				end)
 	end
 
-	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,g_scale)
+	local layout_size = layout:getContentSize()
+	--local local_scale = 1
+	local result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
+	--if result.width > layout_size.width then
+	--	local_scale = layout_size.width/result.width
+	--	result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*local_scale)
+	--end
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
