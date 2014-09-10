@@ -86,6 +86,7 @@ local course_icon={
 
 local ui={
 	PLAYBOX = 'homework/playbox.json',
+	FLASHBOX = 'homework/topics/jgg.ExportJson',
 	PLAY = 'pause',
 	PAUSE = 'play',
 	STATE_CURRENT = 1,
@@ -763,9 +764,15 @@ local function relayout_link( layout,data )
 		dot:setScaleY(0.5)		
 		layout:addChild(dot)
 	end
-
-	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,g_scale)
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout:getContentSize().width,TOPICS_SPACE,g_scale)
+	local layout_size = layout:getContentSize()
+	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,TOPICS_SPACE,g_scale)
+	if layout_size.width-rect1.width > #ui2*4*TOPICS_SPACE then
+		rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,4*TOPICS_SPACE,g_scale)
+	end
+	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,TOPICS_SPACE,g_scale)
+	if layout_size.width-rect2.width > #ui1*4*TOPICS_SPACE then
+		local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,4*TOPICS_SPACE,g_scale)
+	end	
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
@@ -966,7 +973,13 @@ local function relayout_sort( layout,data,isH )
 				end)
 	end
 
-	local result = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,g_scale)
+	local layout_size = layout:getContentSize()
+	--local local_scale = 1
+	local result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
+	--if result.width > layout_size.width then
+	--	local_scale = layout_size.width/result.width
+	--	result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*local_scale)
+	--end
 	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
 	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,color=cc.c3b(0,0,255),linewidth=2} )
@@ -1070,6 +1083,7 @@ local function relayout_click( layout,data,ismulti )
 		data.my_answer[1] = ''
 	end
 end
+
 local function relayout_drag( layout,data,ismul )
 	local ui1 = {}
 	local ui2 = {}
@@ -1085,7 +1099,17 @@ local function relayout_drag( layout,data,ismul )
 	bg:setScaleY(g_scale)
 
 	for k,v in pairs( data.drag_rects ) do
-		bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
+		--[[
+		local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
+		box:getAnimation():playWithIndex(0)
+		box:setPosition(cc.p((v.x2+v.x1)/2,bgsize.height-(v.y2+v.y1)/2))
+		local size = box:getContentSize()
+		box:setScaleX(math.abs(v.x2-v.x1)/size.width)
+		box:setScaleY(math.abs(v.y2-v.y1)/size.height)
+		--]]
+		--box:setOpacity (256)
+		--bg:addChild( box )
+		--bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
 	end
 	local function get_index( item )
 		for i = 1,#ui1 do
@@ -1149,6 +1173,8 @@ local function relayout_drag( layout,data,ismul )
 					if drags[i] then
 						drags[i].item:setPosition( orgp[drags[i].item] )
 					end
+					sender:setScaleX(g_scale)
+					sender:setScaleY(g_scale)					
 					drags[i] = { idx = idx,item = sender }
 				end
 				return true
@@ -1157,14 +1183,19 @@ local function relayout_drag( layout,data,ismul )
 		return false
 	end
 	local function  xchange( i,j )
-		drags[i].idx = j
-		local temp = drags[i].item
-		drags[i].item = drags[j].item
-		drags[i].item:setPosition( get_pt_center(drags[i].item,i ))
-		
-		drags[j].idx = i
-		drags[j].item = temp
-		drags[j].item:setPosition( get_pt_center(drags[j].item,j ))
+		--source = j -> target = i
+		if i and j and drags[j] then
+			local target
+			target = drags[i]
+			drags[i] = drags[j]
+			drags[j] = target
+			if drags[i] and drags[i].item then
+				drags[i] .item:setPosition(get_pt_center(drags[i].item,i))
+			end
+			if drags[j] and drags[j].item then
+				drags[j] .item:setPosition(get_pt_center(drags[j].item,j))
+			end
+		end
 	end
 	local function put_in_multi( sender,x,y )
 		local xx,yy = bg:getPosition()
@@ -1193,6 +1224,8 @@ local function relayout_drag( layout,data,ismul )
 						drags[i].item:removeFromParent()
 						drags[i] = nil
 					end
+					draging_item:setScaleX(g_scale)
+					draging_item:setScaleY(g_scale)
 					drags[i] = { idx = idx,item = draging_item }
 					draging_item = nil
 				else
@@ -1204,9 +1237,7 @@ local function relayout_drag( layout,data,ismul )
 							break
 						end
 					end
-					if j and i then --交换i和j
-						xchange( i,j )
-					end
+					xchange( i,j )
 				end
 				return true
 			end
@@ -1310,19 +1341,33 @@ local function relayout_drag( layout,data,ismul )
 						else
 							p = layout:convertToNodeSpace(p)
 						end
-						
 						if ismul then
 							if draging_item then
 								draging_item:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 							end
 						else
 							sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
+						end	
+						--加入一个滚动，应对拖放位置和目标距离超过一屏
+						if layout.scrollToBottom then
+							p = sender:getTouchMovePosition()
+							local layout_size = layout:getContentSize()
+							if p.y < layout_size.height/4 then
+								layout:scrollToBottom(0.2,true)
+							end
 						end
 					end
 				end)
 	end
-
-	local rc = uikits.relayout_h( ui1,0,0,layout:getContentSize().width,TOPICS_SPACE,g_scale)
+	local layout_size = layout:getContentSize()
+	local rc = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
+	if rc.width > layout_size.width then --如果太长，缩小重新排列
+		local scale = layout_size.width/rc.width
+		rc = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*scale)		
+	elseif rc.width < layout_size.width/2 then --太小，加大点间距重新排列
+		rc = uikits.relayout_h( ui1,0,0,layout_size.width,4*TOPICS_SPACE,g_scale)	
+	end
+	
 	local x,y = bg:getPosition()
 	uikits.move( ui1,0,bg:getContentSize().height*g_scale+y+2*TOPICS_SPACE )
 	for k,v in pairs( ui1 ) do
@@ -1350,10 +1395,14 @@ local function relayout_drag( layout,data,ismul )
 				if ismul then
 					local ts = ui1[k]:clone()
 					ts.isclone = true
+					ts:setScaleX(g_scale)
+					ts:setScaleY(g_scale)
 					drags[i] = { idx = k,item= ts }
 					layout:addChild( ts )
 					ts:setPosition( get_pt_center(ts,i ))
 				else
+					ui1[k]:setScaleX(g_scale)
+					ui1[k]:setScaleY(g_scale)				
 					drags[i] = { idx = k,item=ui1[k] }
 					ui1[k]:setPosition( get_pt_center(ui1[k],i ))
 				end
