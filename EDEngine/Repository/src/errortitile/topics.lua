@@ -1023,6 +1023,8 @@ local function relayout_sort_V( layout,data )
 	local orgp = {}
 	local place_rect = nil
 	local sorts = {}
+	local scale = 1
+	
 	local function isin( item )
 		for i,v in pairs(sorts) do
 			if v == item then
@@ -1056,13 +1058,13 @@ local function relayout_sort_V( layout,data )
 		end
 	end
 	local function relayout( item,x,y )
-		local result = uikits.relayout_v( sorts,TOPICS_SPACE,g_scale)
+		local result = uikits.relayout_v( sorts,TOPICS_SPACE,g_scale*scale)
 		local ox1,oy1
 		local layout_size = layout:getContentSize()
 		ox1 = layout_size.width/2 + TOPICS_SPACE
 		oy1 = TOPICS_SPACE
 		
-		uikits.move(sorts,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2+place_rect.y2-result.height)		
+		uikits.move(sorts,ox1+TOPICS_SPACE,oy1-TOPICS_SPACE/2+place_rect.y2-result.height)		
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
@@ -1106,8 +1108,8 @@ local function relayout_sort_V( layout,data )
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
-						sp.x = sp.x * g_scale
-						sp.y = sp.y * g_scale
+						sp.x = sp.x * g_scale * scale
+						sp.y = sp.y * g_scale * scale
 						setEnabledParent(layout,false)
 						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
@@ -1139,8 +1141,9 @@ local function relayout_sort_V( layout,data )
 						end
 						--收集答案
 						data.my_answer[1] = ''
-						for i,v in pairs(sorts) do
-							data.my_answer[1] = data.my_answer[1]..map_abc(v)
+						local len = #sorts
+						for i = 1,len do
+							data.my_answer[1] = data.my_answer[1]..map_abc(sorts[len-i+1])
 						end
 						kits.log( data.my_answer[1] )
 						call_answer_event(layout,data)
@@ -1170,7 +1173,13 @@ local function relayout_sort_V( layout,data )
 	oy1 = TOPICS_SPACE
 	uikits.move(ui1,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2)
 	--layout:addChild( uikits.rect{x1=ox1,y1=oy1,x2=ox1+result.width,y2=oy1+result.height,fillColor=cc.c4f(1,0,0,0.1)} )
-	
+	if result.width > (layout_size.width-4*TOPICS_SPACE)/2 then
+		scale = (layout_size.width-4*TOPICS_SPACE)/2/result.width
+		result = uikits.relayout_v( ui1,TOPICS_SPACE,g_scale*scale)
+		ox1 = layout_size.width/2 - result.width - TOPICS_SPACE
+		oy1 = TOPICS_SPACE
+		uikits.move(ui1,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2)		
+	end
 	local ox2,oy2
 	ox2 = layout_size.width/2 + TOPICS_SPACE
 	oy2 = TOPICS_SPACE
@@ -1180,8 +1189,8 @@ local function relayout_sort_V( layout,data )
 	place_rect.y1 = place_rect.y1 + 2 
 	for k,v in pairs( ui1 ) do
 		local size = v:getContentSize()
-		size.width = size.width * g_scale
-		size.height = size.height * g_scale
+		size.width = size.width * g_scale * scale
+		size.height = size.height * g_scale* scale
 		local x,y = v:getPosition()
 		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
 		layout:addChild( uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(0,0,1,0.1)} )
@@ -1190,8 +1199,9 @@ local function relayout_sort_V( layout,data )
 	set_topics_image( layout,data,0,result.height + 36 )
 	--恢复答案
 	if data.my_answer[1] then
-		for i = 1,string.len(data.my_answer[1]) do
-			local s = string.sub(data.my_answer[1],i,i)
+		local len = string.len(data.my_answer[1])
+		for i = 1,len do
+			local s = string.sub(data.my_answer[1],len-i+1,len-i+1)
 			if s then
 				local n = answer_idx[s]
 				table.insert(sorts,ui1[n])
