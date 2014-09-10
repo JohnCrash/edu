@@ -721,12 +721,12 @@ local function relayout_link( layout,data )
 		size.height = size.height*g_scale
 		if b then
 			if up_rect then up_rect:removeFromParent() end				
-			up_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.2)}	
-			layout:addChild(up_rect)
+			up_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.3)}	
+			layout:addChild(up_rect,30)
 		else
 			if down_rect then down_rect:removeFromParent() end				
-			down_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.2)}			
-			layout:addChild(down_rect)
+			down_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.3)}			
+			layout:addChild(down_rect,30)
 		end
 	end
 	for i,v in pairs(data.link_items1) do
@@ -740,15 +740,15 @@ local function relayout_link( layout,data )
 				do_link()
 			end,'began' )		
 		local s = item:getContentSize()
-		layout:addChild(item)
+		layout:addChild(item,20)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
 		table.insert( dot1,dot )
 		dot:setScaleX(0.5)
 		dot:setScaleY(0.5)
-		layout:addChild(dot)
+		layout:addChild(dot,20)
 	end
 	for i,v in pairs(data.link_items2) do
-		local item = item_ui( v,10 )
+		local item = item_ui( v )
 		ui2[#ui2+1] = item
 		local k = #ui2
 		uikits.event( item,
@@ -757,7 +757,7 @@ local function relayout_link( layout,data )
 				select_rect(ui2[down],false)
 				do_link()
 			end,'began' )
-		layout:addChild(item)
+		layout:addChild(item,20)
 		local dot = uikits.image{image=ui.LINK_DOT,anchorX=0.5,anchorY=0.5}
 		table.insert( dot2,dot )
 		dot:setScaleX(0.5)
@@ -778,6 +778,10 @@ local function relayout_link( layout,data )
 		local size = v:getContentSize()
 		size.width = size.width*g_scale
 		dot1[i]:setPosition( cc.p(x+size.width/2,y-TOPICS_SPACE ) )
+
+		--size.width = size.width * g_scale
+		size.height = size.height * g_scale
+		layout:addChild(uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(1,0,0,0.1)})		
 	end
 	for i,v in pairs(ui2) do
 		local x,y = v:getPosition()
@@ -785,6 +789,8 @@ local function relayout_link( layout,data )
 		size.width = size.width*g_scale
 		size.height = size.height*g_scale
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height+TOPICS_SPACE ) )	
+
+		layout:addChild(uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(1,0,0,0.1)})				
 	end
 	set_topics_image( layout,data,0,rect2.y+rect2.height )
 	--载入答案
@@ -1287,7 +1293,7 @@ local function relayout_drag( layout,data,ismul )
 	bg:setScaleX(g_scale)
 	bg:setScaleY(g_scale)
 
-	for k,v in pairs( data.drag_rects ) do
+--	for k,v in pairs( data.drag_rects ) do
 		--[[
 		local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
 		box:getAnimation():playWithIndex(0)
@@ -1299,7 +1305,7 @@ local function relayout_drag( layout,data,ismul )
 		--box:setOpacity (256)
 		--bg:addChild( box )
 		--bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
-	end
+--	end
 	local function get_index( item )
 		for i = 1,#ui1 do
 			if item == ui1[i] then return i end
@@ -1548,10 +1554,11 @@ local function relayout_drag( layout,data,ismul )
 					end
 				end)
 	end
+	local scale = 1
 	local layout_size = layout:getContentSize()
-	local rc = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
+	local rc = uikits.relayout_h( ui1,0,0,layout_size.width,2*TOPICS_SPACE,g_scale)
 	if rc.width > layout_size.width then --如果太长，缩小重新排列
-		local scale = layout_size.width/rc.width
+		scale = layout_size.width/rc.width
 		rc = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*scale)		
 	elseif rc.width < layout_size.width/2 then --太小，加大点间距重新排列
 		rc = uikits.relayout_h( ui1,0,0,layout_size.width,4*TOPICS_SPACE,g_scale)	
@@ -1562,6 +1569,10 @@ local function relayout_drag( layout,data,ismul )
 	for k,v in pairs( ui1 ) do
 		local x,y = v:getPosition()
 		orgp[v] = cc.p(x,y)
+		local size =v:getContentSize()
+		size.width = size.width * g_scale * scale
+		size.height = size.height * g_scale * scale
+		layout:addChild(uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(1,0,0,0.1)})
 	end
 
 	set_topics_image( layout,data,0,bgsize.height*g_scale+y+TOPICS_SPACE+rc.height)
@@ -1587,7 +1598,7 @@ local function relayout_drag( layout,data,ismul )
 					ts:setScaleX(g_scale)
 					ts:setScaleY(g_scale)
 					drags[i] = { idx = k,item= ts }
-					layout:addChild( ts )
+					layout:addChild( ts,10 )
 					ts:setPosition( get_pt_center(ts,i ))
 				else
 					ui1[k]:setScaleX(g_scale)
