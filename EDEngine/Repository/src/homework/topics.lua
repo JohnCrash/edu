@@ -1141,8 +1141,9 @@ local function relayout_sort_V( layout,data )
 						end
 						--收集答案
 						data.my_answer[1] = ''
-						for i,v in pairs(sorts) do
-							data.my_answer[1] = data.my_answer[1]..map_abc(v)
+						local len = #sorts
+						for i = 1,len do
+							data.my_answer[1] = data.my_answer[1]..map_abc(sorts[len-i+1])
 						end
 						kits.log( data.my_answer[1] )
 						call_answer_event(layout,data)
@@ -1198,8 +1199,9 @@ local function relayout_sort_V( layout,data )
 	set_topics_image( layout,data,0,result.height + 36 )
 	--恢复答案
 	if data.my_answer[1] then
-		for i = 1,string.len(data.my_answer[1]) do
-			local s = string.sub(data.my_answer[1],i,i)
+		local len = string.len(data.my_answer[1])
+		for i = 1,len do
+			local s = string.sub(data.my_answer[1],len-i+1,len-i+1)
 			if s then
 				local n = answer_idx[s]
 				table.insert(sorts,ui1[n])
