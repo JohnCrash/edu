@@ -5,6 +5,7 @@ local loadingbox = require "loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local login = require "login"
+local messagebox = require "messagebox"
 local topics = require "src/errortitile/topics"
 --local answer = curweek or require "src/errortitile/answer"
 --local BigquestionView = require "src/errortitile/BigquestionView"
@@ -233,6 +234,15 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 				cache.request_json( t_nextview[6].url..send_data,function(t)
 						if t and type(t)=='table' then
 							uikits.delay_call(self,self.resetpagedata,1,self)
+						else
+							--既没有网络也没有缓冲
+							messagebox.open(self,function(e)
+								if e == messagebox.TRY then
+									self:init()
+								elseif e == messagebox.CLOSE then
+									uikits.popScene()
+								end
+							end,messagebox.RETRY)	
 						end
 						is_loading = false
 						loadbox:removeFromParent()
@@ -351,6 +361,15 @@ function Percollectsubject:getdatabyurl()
 					end
 				end
 				self:updatepage()
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
 			end
 			is_loading = false
 			loadbox:removeFromParent()
@@ -398,6 +417,15 @@ function Percollectsubject:init()
 				local tb_item_id
 				if t and type(t)=='table' then
 					tb_item_id = t.exerbook_user_items
+				else
+					--既没有网络也没有缓冲
+					messagebox.open(self,function(e)
+						if e == messagebox.TRY then
+							self:init()
+						elseif e == messagebox.CLOSE then
+							uikits.popScene()
+						end
+					end,messagebox.RETRY)	
 				end
 				loadbox:removeFromParent()
 				local scene_next = dopractice.create(tb_item_id)	

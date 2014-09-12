@@ -5,6 +5,7 @@ local loadingbox = require "loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local topics = require "src/errortitile/topics"
+local messagebox = require "messagebox"
 local login = require "login"
 --local answer = curweek or require "src/errortitile/answer"
 local BigquestionView = require "src/errortitile/BigquestionView"
@@ -507,6 +508,15 @@ function persubject:getdatabyurl()
 					end
 				end
 				self:updatepage()
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
 			end
 			loadbox:removeFromParent()
 			is_loading = false
@@ -551,6 +561,15 @@ function persubject:showpracticeview()
 						local tb_item_id
 						if t and type(t)=='table' then
 							tb_item_id = t.exerbook_user_items
+						else
+							--既没有网络也没有缓冲
+							messagebox.open(self,function(e)
+								if e == messagebox.TRY then
+									self:init()
+								elseif e == messagebox.CLOSE then
+									uikits.popScene()
+								end
+							end,messagebox.RETRY)	
 						end
 						loadbox:removeFromParent()
 						local scene_next = dopractice.create(tb_item_id)

@@ -7,6 +7,7 @@ local CollectView = require "src/errortitile/CollectView"
 local StatisticsView = require "src/errortitile/StatisticsView"
 local MoreView = require "src/errortitile/MoreView"
 local loadingbox = require "loadingbox"
+local messagebox = require "messagebox"
 local login = require "login"
 local ui = {
 	BASEFILE = "errortitile/TheWrong/Export/wrong_day.json",
@@ -358,6 +359,15 @@ function WrongSubjectList:getdatabyurl()
 					self:format_listdata(t.exer_book_stat)
 				end
 				self:updatepage()
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
 			end
 			loadbox:removeFromParent()
 		end,'N')
