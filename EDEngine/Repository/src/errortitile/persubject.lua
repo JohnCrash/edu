@@ -1,7 +1,7 @@
 local uikits = require "uikits"
 local kits = require "kits"
 local json = require "json-c"
-local loadingbox = require "src/errortitile/loadingbox"
+local loadingbox = require "loadingbox"
 local cache = require "cache"
 local dopractice = require "src/errortitile/dopractice"
 local topics = require "src/errortitile/topics"

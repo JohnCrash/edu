@@ -1,6 +1,6 @@
 local uikits = require "uikits"
 local socket = require "socket"
-local loadingbox = require "src/errortitile/loadingbox"
+local loadingbox = require "loadingbox"
 local cache = require "cache"
 local topics = require "src/errortitile/topics"
 local resultview = require "src/errortitile/resultview"
@@ -196,7 +196,10 @@ function dopractice:submitanswer(item_id,item_answer,item_type)
 		local tb_result = json.decode(result)
 		if tb_result.result == 0 then
 			if tb_result.corr_cnt == 1 then
-				self.right_itemcount = self.right_itemcount+1				
+				uikits.playClickSound(4)
+				self.right_itemcount = self.right_itemcount+1		
+			else
+				uikits.playClickSound(5)						
 			end
 		end		
 	end
