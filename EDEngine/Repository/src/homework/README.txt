@@ -850,3 +850,102 @@ http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx
         "who_submit": 1
     }
 }
+
+取题库层次，版本课章节
+科目->版本->册->章->小节
+course->book_version->vol->unit->section
+http://api.lejiaolexue.com/resource/coursehandler.ashx
+	?limit=1&  （没有表示全部，1和我相关）
+	guid=644&  (忽略)
+	jsonpcallback=jQuery1703576113854069263_1410491147541& (忽略)
+	course=10001& (空给列表,)
+	course_name=%E8%AF%B7%E9%80%89%E6%8B%A9& (科目名称)
+	book_version=0& ()
+	book_version_name=& 
+	vol=0&
+	vol_name=&
+	unit=0&
+	unit_name=&
+	section=0& (小节)
+	section_name=&
+	item=course& (可能值course,book_version,vol,unit,section)
+	_=1410491147652 (忽略)
+
+取科目的题型
+http://new.www.lejiaolexue.com/paper/handler/GetItemType.ashx?
+	course=10002
+	
+取题
+http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?
+	course:10001
+	bv:0
+	vol:0
+	unit:0
+	section:0
+	type:0
+	diff:0
+	p:1
+	paperId:6d34229c768a4c7b87511b29a6b8c77f
+可能的数据
+{
+    "item": [
+        {
+            "Id": "f3f52a7718a8413d85660bc420564b5a",
+            "answer": 1,
+            "apply_area1": 0,
+            "apply_area2": 0,
+            "apply_year": 0,
+            "attachment": "{\"attachments\":[{\"group\":\"1\",\"id\":\"1\",\"mini_src\":\"0ccae7889cfecbf60aabaaebf2b4bd75.mp3\",\"name\":null,\"type\":\"0\",\"value\":\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/323\\/664\\/0ccae7889cfecbf60aabaaebf2b4bd75.mp3\"}]}",
+            "attachment_obj": [],
+            "cnt_comment": 0,
+            "cnt_favor": 0,
+            "cnt_praise": 0,
+            "cnt_refer": 0,
+            "cnt_view": 0,
+            "content": "<div class=wordsection1><p class=msonormal align=center style='text-align:center'><span lang=en-us\r\nstyle='font-size:13.5pt'><img mini_src=\"d1618844b80efd11f27dc0acf1aa3ec0.png\" mini=\"http://image.lejiaolexue.com/item_image/71/365/d1618844b80efd11f27dc0acf1aa3ec0.png\" src=\"http://image.lejiaolexue.com/item_image/71/365/d1618844b80efd11f27dc0acf1aa3ec0.png\" /></span></p>\r\n\r\n<p class=msonormal align=center style='text-align:center'><span lang=en-us\r\nstyle='font-size:13.5pt'><img mini_src=\"54dae7ffe92f915681120eafebb17c51.gif\" mini=\"http://image.lejiaolexue.com/item_image/185/339/54dae7ffe92f915681120eafebb17c51.gif\" src=\"http://image.lejiaolexue.com/item_image/185/339/54dae7ffe92f915681120eafebb17c51.gif\" /></span>",
+            "correct_answer": "{\"answers\":[{\"content\":null,\"id\":\"0\",\"value\":\"DCEAB\"}]}",
+            "correct_answer_obj": [],
+            "course": 10001,
+            "difficulty": 70,
+            "difficulty_name": "难",
+            "explain": "</div>",
+            "from_paper": null,
+            "in_time": "/Date(1409967167770+0800)/",
+            "in_time_ts": 1409995967,
+            "interact_type": 64,
+            "item_id": "e51fdc0a5d744634aa53f3897ca012d5",
+            "item_id_num": 197678,
+            "item_name": "横排序",
+            "item_type": 7,
+            "last_time": "/Date(1409967167770+0800)/",
+            "last_time_ts": 1409995967,
+            "options": "{\"char_num\":null,\"drag_position\":\"0\",\"item_type\":\"6\",\"oper\":null,\"options\":[{\"id\":\"1\",\"option\":\"A.\\\"<span lang=en-us style='font-size:13.5pt'><img mini_src=\\\"d2bb6ee9ad17b990860b2211187b9e1b.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/220\\/237\\/d2bb6ee9ad17b990860b2211187b9e1b.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/220\\/237\\/d2bb6ee9ad17b990860b2211187b9e1b.png\\\" \\/><\\/span>\\\"\"},{\"id\":\"2\",\"option\":\"B.\\\"<span lang=en-us style='font-size:13.5pt'><img mini_src=\\\"850cbfbc3fa18e0b4f5e2e06ddec4ed7.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/255\\/524\\/850cbfbc3fa18e0b4f5e2e06ddec4ed7.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/255\\/524\\/850cbfbc3fa18e0b4f5e2e06ddec4ed7.png\\\" \\/><\\/span>\\\"\"},{\"id\":\"3\",\"option\":\"C.\\\"<span lang=en-us style='font-size:13.5pt'><img mini_src=\\\"c24a20fe0e85ab0881b567f5ba70ed3d.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/156\\/326\\/c24a20fe0e85ab0881b567f5ba70ed3d.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/156\\/326\\/c24a20fe0e85ab0881b567f5ba70ed3d.png\\\" \\/><\\/span>\\\"\"},{\"id\":\"4\",\"option\":\"D.\\\"<span lang=en-us style='font-size:13.5pt'><img mini_src=\\\"368473f4fabeaa824b4249101ee6d4e2.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/171\\/237\\/368473f4fabeaa824b4249101ee6d4e2.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/171\\/237\\/368473f4fabeaa824b4249101ee6d4e2.png\\\" \\/><\\/span>\\\"\"},{\"id\":\"5\",\"option\":\"E.\\\"<span lang=en-us style='font-size:13.5pt'><img mini_src=\\\"c5d47158d30543b76f9af0b924ac865b.png\\\" mini=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/25\\/199\\/c5d47158d30543b76f9af0b924ac865b.png\\\" src=\\\"http:\\/\\/image.lejiaolexue.com\\/item_image\\/25\\/199\\/c5d47158d30543b76f9af0b924ac865b.png\\\" \\/><\\/span><\\/p><p><span style='font-size:13.5pt'>\\\"\"}],\"options2\":[],\"sort_char\":\"\"}",
+            "options_obj": {
+                "drag_position": 0,
+                "item_type": 0,
+                "options": [],
+                "options2": [],
+                "sort_char": null
+            },
+            "parent_item_id": "",
+            "real_score": 0,
+            "ref_item_id": "",
+            "score": 0,
+            "section_name": "数字歌",
+            "sub_count": 0,
+            "sub_sort": 0,
+            "tag": 0,
+            "tag_apply": 7,
+            "tag_detail": 1,
+            "tag_method": 115,
+            "tag_open": 1,
+            "tag_original": 1,
+            "test_point": null,
+            "user_author": 0,
+            "user_author_name": "",
+            "user_owner": 0,
+            "version": 1
+        },
+    ],
+    "t": 9021	
+}

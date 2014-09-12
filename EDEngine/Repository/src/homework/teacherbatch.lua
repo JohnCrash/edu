@@ -238,7 +238,7 @@ function Batch:init_commits_list( t )
 	for k,v in pairs(t) do
 		if v.status==10 or v.status==11 then
 			self._commits:additem{
-				[ui.COMMIT_NAME] =v.student_name..'('..v.real_score..')',
+				[ui.COMMIT_NAME] =v.student_name,
 				[ui.COMMIT_ICON] = function(child,item)
 						local url = login.get_logo(v.student_id,3)
 						cache.request(url,function(b)
