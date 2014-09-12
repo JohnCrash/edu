@@ -51,9 +51,21 @@ local function muteSound( b )
 	ismute = b
 end
 
-local function playClickSound()
+local click_sounds = {
+	'audio/click.mp3',
+	'audio/scroll.mp3',
+	'audio/select.mp3',
+	'audio/right.mp3',
+	'audio/error.mp3',
+}
+
+local function playClickSound( idx )
 	if not ismute then
-		playSound( 'audio/button_press.mp3' )
+		if idx and type(idx)=='number' and idx<=#click_sounds and idx>0 then
+			playSound( click_sounds[idx] )
+		else
+			playSound( click_sounds[1] )
+		end
 	end
 end
 

@@ -797,7 +797,7 @@ function WorkFlow:set_anwser_field( i )
 					self._arrow_up:setVisible(false)
 				end			
 			end
-			uikits.stopAllSound() --停止可能的播放
+			uikits.delay_call( self,uikits.stopAllSound,1.5 ) --停止可能的播放,放置切换声音被关闭
 			--保存答案
 			self:save_answer() --不在每次修改时保存，而是在每次切换的时候保存
 			data.eventAnswer=function(layout,data)
