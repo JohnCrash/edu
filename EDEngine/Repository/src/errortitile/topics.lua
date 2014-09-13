@@ -2,7 +2,7 @@ local kits = require 'kits'
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
-local loadingbox = require "errortitile/loadingbox"
+local loadingbox = require "loadingbox"
 
 local course={
 	[101]="综合科目",
@@ -927,7 +927,9 @@ local function relayout_sort( layout,data )
 						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
+						uikits.playClickSound()
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						uikits.playClickSound(3)
 						local p = sender:getTouchEndPosition()
 							if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -973,8 +975,13 @@ local function relayout_sort( layout,data )
 							end
 						else
 							p = layout:convertToNodeSpace(p)
-						end						
+						end				
+						local select_idx	= sort_index( sender )
 						place_item( sender,p.x,p.y )
+						local cur_idx = sort_index( sender )
+						if select_idx ~= cur_idx and select_idx then
+							uikits.playClickSound(2)
+						end
 						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 					end
 				end)
@@ -1114,7 +1121,9 @@ local function relayout_sort_V( layout,data )
 						layout:setEnabled(false)
 						zorder = sender:getLocalZOrder()
 						sender:setLocalZOrder(1000)
+						uikits.playClickSound()
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						uikits.playClickSound(3)
 						local p = sender:getTouchEndPosition()
 							if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1159,8 +1168,12 @@ local function relayout_sort_V( layout,data )
 						else
 							p = layout:convertToNodeSpace(p)
 						end						
-						
+						local select_idx = sort_index( sender )
 						place_item( sender,p.x,p.y )
+						local cur_idx = sort_index( sender )
+						if select_idx ~= cur_idx  and select_idx then
+							uikits.playClickSound(2)
+						end
 						sender:setPosition( cc.p(p.x-sp.x,p.y-sp.y) )
 					end
 				end)
@@ -1297,12 +1310,19 @@ local function relayout_drag( layout,data,ismul )
 	local bg =  attachment_ui_bg{attachment=data.attachment,x=layout:getContentSize().width/2,y=2*TOPICS_SPACE,anchorX = 0.5,anchorY=0}
 	local drags = {}
 	local draging_item
+	local scale = 1
 	
 	layout:addChild(bg)
 	local bgsize = bg:getContentSize()
 	bg:setScaleX(g_scale)
 	bg:setScaleY(g_scale)
 
+	for k,v in pairs( data.drag_rects ) do
+		v.x1 = v.x1-TOPICS_SPACE
+		v.x2 = v.x2+TOPICS_SPACE
+		v.y1 = v.y1-TOPICS_SPACE
+		v.y2 = v.y2+TOPICS_SPACE		
+	end	
 --	for k,v in pairs( data.drag_rects ) do
 		--[[
 		local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
@@ -1376,6 +1396,8 @@ local function relayout_drag( layout,data,ismul )
 						drags[it] = nil
 					end
 					if drags[i] then
+						drags[i].item:setScaleX(g_scale*scale)
+						drags[i].item:setScaleY(g_scale*scale)					
 						drags[i].item:setPosition( orgp[drags[i].item] )
 					end
 					sender:setScaleX(g_scale)
@@ -1458,6 +1480,7 @@ local function relayout_drag( layout,data,ismul )
 		item:addTouchEventListener(
 				function(sender,eventType)
 					if eventType == ccui.TouchEventType.began then
+						uikits.playClickSound()
 						ismoving = false
 						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
@@ -1475,6 +1498,7 @@ local function relayout_drag( layout,data,ismul )
 							end
 						end
 					elseif eventType == ccui.TouchEventType.ended or eventType == ccui.TouchEventType.canceled then
+						uikits.playClickSound(3)
 						local p = sender:getTouchEndPosition()
 						if layout.getInnerContainer then
 							local inner = layout:getInnerContainer()
@@ -1504,6 +1528,8 @@ local function relayout_drag( layout,data,ismul )
 							end
 						else
 							if not put_in( sender,p.x,p.y ) then
+								sender:setScaleX( g_scale*scale )
+								sender:setScaleY( g_scale*scale )
 								sender:setPosition( orgp[sender] )
 								for i,j in pairs(drags) do
 									if j.item == sender then
@@ -1564,7 +1590,7 @@ local function relayout_drag( layout,data,ismul )
 					end
 				end)
 	end
-	local scale = 1
+	
 	local layout_size = layout:getContentSize()
 	local rc = uikits.relayout_h( ui1,0,0,layout_size.width,2*TOPICS_SPACE,g_scale)
 	if rc.width > layout_size.width then --如果太长，缩小重新排列

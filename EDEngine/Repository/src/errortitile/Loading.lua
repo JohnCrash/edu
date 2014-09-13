@@ -5,6 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local selstudent = require "errortitile/selstudent"
 local WrongSubjectList = require "errortitile/WrongSubjectList"
+local messagebox = require "messagebox"
 local Loading = class("Loading")
 Loading.__index = Loading
 
@@ -40,7 +41,7 @@ function Loading:getdatabyurl()
 --	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
 	
 --	local send_url = t_nextview[2].url..send_data
-	local result = kits.http_get(get_uesr_info_url,login.cookie(),1)
+--[[	local result = kits.http_get(get_uesr_info_url,login.cookie(),1)
 	kits.log('ERROR--result:::'..result )
 	local tb_result = json.decode(result)
 	if 	tb_result.result ~= 0 then				
@@ -56,8 +57,34 @@ function Loading:getdatabyurl()
 			local scene_next = selstudent.create()								
 			cc.Director:getInstance():replaceScene(scene_next)				
 		end
-	end	
-	
+	end	--]]
+	cache.request_json( get_uesr_info_url,function(t)
+		if t and type(t)=='table' then
+			if 	t.result ~= 0 then				
+				print(t.result.." : "..t.message)			
+			else
+				--local tb_uig = json.decode(tb_result.uig)
+				if t.uig[1].user_role == 1 then	--?§éú
+					_G.user_status = 1
+					local scene_next = WrongSubjectList.create()								
+					cc.Director:getInstance():replaceScene(scene_next)	
+				elseif t.uig[1].user_role == 2 then	--?ò3¤
+					_G.user_status = 2
+					local scene_next = selstudent.create()								
+					cc.Director:getInstance():replaceScene(scene_next)				
+				end
+			end	
+		else
+			--既没有网络也没有缓冲
+			messagebox.open(self,function(e)
+				if e == messagebox.TRY then
+					self:init()
+				elseif e == messagebox.CLOSE then
+					uikits.popScene()
+				end
+			end,messagebox.RETRY)	
+		end
+	end,'N')
 end
 
 function Loading:init()	

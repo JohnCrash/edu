@@ -1,8 +1,9 @@
 local uikits = require "uikits"
 local kits = require "kits"
 local json = require "json-c"
-local loadingbox = require "src/errortitile/loadingbox"
+local loadingbox = require "loadingbox"
 local cache = require "cache"
+local messagebox = require "messagebox"
 --local answer = curweek or require "src/errortitile/answer"
 local StatisticsView = class("StatisticsView")
 StatisticsView.__index = StatisticsView
@@ -286,6 +287,15 @@ function StatisticsView:getdatabyurl()
 					self.statisticsitems = t.course_stat
 				end
 				self:updatepage()
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
 			end
 			loadbox:removeFromParent()
 		end,'N')

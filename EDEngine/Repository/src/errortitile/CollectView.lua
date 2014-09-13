@@ -1,11 +1,12 @@
 local uikits = require "uikits"
 local kits = require "kits"
 local json = require "json-c"
-local loadingbox = require "src/errortitile/loadingbox"
+local loadingbox = require "loadingbox"
 local cache = require "cache"
 local login = require "login"
 local StatisticsView = require "src/errortitile/StatisticsView"
 local Percollectsubject = require "src/errortitile/Percollectsubject"
+local messagebox = require "messagebox"
 local CollectView = class("CollectView")
 CollectView.__index = CollectView
 
@@ -250,6 +251,15 @@ function CollectView:getdatabyurl()
 					self.collectitems = t.exer_book_stat
 				end
 				self:updatepage()
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
 			end
 			loadbox:removeFromParent()
 		end,'N')
