@@ -186,7 +186,7 @@ function BigquestionView:init()
 		end		
 	end
 	question_pic_view:setDirection(ccui.ScrollViewDir.both)
-	question_pic_view:setBounceEnabled(true)
+	question_pic_view:setBounceEnabled(false)
 --[[	local question_pic = cc.Sprite:create(self.file_path)
 	local size_question = question_pic_view:getContentSize()		
 	local scale_x = size_question.width/question_pic:getContentSize().width
