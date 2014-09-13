@@ -18,6 +18,8 @@ local ui = {
 	FILE_3_4 = 'homework/laoshizuoye/daiyue43.json',
 	MORE = 'homework/laoshizuoye/gengduo.json',
 	MORE_3_4 = 'homework/laoshizuoye/gengduo43.json',	
+	RELEASEPAGE = 'homework/laoshizuoye/buzhi.json',
+	RELEASE_3_4 = 'homework/laoshizuoye/buzhi43.json',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
 	BACK = 'ding/back',
@@ -162,6 +164,7 @@ function TeacherList:init_ready_batch()
 	
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
+	self._release:setVisible(false)
 	if not self._scID and not self._busy then
 		self._mode = ui.READYBATCH
 		self._scrollview:clear()
@@ -174,7 +177,8 @@ end
 function TeacherList:init_ready_release()
 	cache.request_cancel()
 	
-	self._scrollview:setVisible(true)
+	self._scrollview:setVisible(false)
+	self._release:setVisible(true)
 	self._setting:setVisible(false)
 	return true
 end
@@ -184,6 +188,7 @@ function TeacherList:init_ready_history()
 	
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
+	self._release:setVisible(false)
 	self._scrollview:clear()
 	if not self._scID and not self._busy then
 		self._mode = ui.HISTORY
@@ -198,6 +203,7 @@ function TeacherList:init_ready_statistics()
 	
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(false)
+	self._release:setVisible(false)
 	return true
 end
 --设置
@@ -206,6 +212,7 @@ function TeacherList:init_ready_setting()
 	
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
+	self._release:setVisible(false)
 	return true
 end
 
@@ -213,6 +220,7 @@ function TeacherList:init_gui()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	
+	--设置页
 	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	local cs = uikits.child(self._setting,ui.MORE_SOUND)
@@ -224,6 +232,10 @@ function TeacherList:init_gui()
 		end)
 	end
 	self._root:addChild(self._setting)
+	
+	--发布页
+	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
+	self._root:addChild(self._release)
 	
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
