@@ -83,4 +83,7 @@
       <Filter>resource</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\cocos2d-x\cocos\ui\proj.win32\libGUI.vcxproj" />
+  </ItemGroup>
 </Project>

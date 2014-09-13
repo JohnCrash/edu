@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<problem time_limit="60"  word_num="25">
+<problem time_limit="90"  word_num="25">
 <item name="(　)国(　)民" answer="忧,有又由"/>
 <item name="(　)目睽睽" answer="众,中重种"/>
 <item name="白(　)皑皑" answer="雪,学血靴"/>
@@ -184,7 +184,7 @@
 <item name="责(　)旁(　)" answer="无贷,五带"/>
 <item name="遮(　)盖(　)" answer="天地,田第"/>
 <item name="(　)连(　)返" answer="流忘,六望"/>
-<item name="(　)然有(　)" answer="井条,竟跳"/>
+<item name="(　)然有(　)" answer="井序,竟跳"/>
 <item name="枝(　)(　)茂" answer="繁叶,反也"/>
 <item name="(　)星拱(　)" answer="众月,中越"/>
 <item name="后生(　)(　)" answer="可畏,克为"/>

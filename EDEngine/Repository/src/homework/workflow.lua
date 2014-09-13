@@ -513,6 +513,54 @@ function WorkFlow:get_topics_answers_num()
 	return count
 end
 
+function WorkFlow:optimization_scrollview()
+	local function optimization_scroll()
+		if self._scrollview then
+			local childs = self._scrollview:getChildren()
+			local inner = self._scrollview:getInnerContainer()
+			local inner_x,inner_y = inner:getPosition()
+			local size = self._scrollview:getContentSize()
+			for i,v in pairs(childs) do
+				if v ~= self._item_current and v ~= self._item_finished and 
+					v ~= self._item_unfinished then
+					local x,y = v:getPosition()
+					if x+inner_x < 0 or x+inner_x > size.width then
+						v:setVisible(false)
+					else
+						v:setVisible(true)
+					end
+				end
+			end
+		end
+	end
+	optimization_scroll()
+	uikits.event( self._scrollview,function(sender,eventType)
+			optimization_scroll()
+		end)
+end
+
+function WorkFlow:optimization_pageview()
+	local function optimization_page(idx)
+		local idx = self._pageview:getCurPageIndex()
+		local pages = self._pageview:getPages()
+		for i,v in pairs(pages) do
+			if i-1<=idx+1 and i-1>= idx-1 then
+				v:setVisible(true)
+			else
+				v:setVisible(false)
+			end
+		end
+	end
+	optimization_page()
+	uikits.event( self._pageview,function(sender,eventType)
+			if eventType == ccui.PageViewEventType.turning then
+				local i = sender:getCurPageIndex()
+				optimization_page()
+				self:set_current( i+1 )
+			end					
+		end)
+end
+
 function WorkFlow:init_gui()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		WorkFlow.scale = uikits.initDR{width=1920,height=1080}
@@ -833,6 +881,8 @@ function WorkFlow:init()
 		self._list = {}
 		self:init_gui()
 		self:init_data()
+		self:optimization_scrollview()
+		self:optimization_pageview()
 	end
 	self:init_delay_release()
 end
