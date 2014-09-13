@@ -64,8 +64,8 @@ public class AppActivity extends Cocos2dxActivity {
     	getParameterByIntent(); //取启动参数
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         // TestCpp should create stencil buffer
-        //glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);
-        glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
+        glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);
+        //glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 //Android SDK Document        
 //        setEGLConfigChooser(int redSize, int greenSize, int blueSize, int alphaSize, int depthSize, int stencilSize)
 //        Install a config chooser which will choose a config with at least the specified depthSize and stencilSize, and exactly the specified redSize, greenSize, blueSize and alphaSize.

@@ -174,10 +174,14 @@ function WorkFlow:commit_topics( v )
 						if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 							if obj.state == 'OK' and obj.data then
 								v.commit_faild = false
-								local answer = self._topics_table.answers[v.item_id]
-								answer.user_time = v.user_time
-								answer.commit_faild = v.commit_faild
-								kits.log('	commit '..url..' success!')
+								if self and self._topics_table then
+									local answer = self._topics_table.answers[v.item_id]
+									answer.user_time = v.user_time
+									answer.commit_faild = v.commit_faild
+									kits.log('	commit '..url..' success!')
+								else
+									kits.log('ERROR commit time out success!')
+								end
 							else
 								v.commit_faild = true
 								if self and self._topics_table and self._topics_table.answers then
@@ -186,6 +190,8 @@ function WorkFlow:commit_topics( v )
 									answer.commit_faild = v.commit_faild
 									kits.log('ERROR : WorkFlow:commit_topics')
 									kits.log('	commit '..url..' faild!')
+								else
+									kits.log('ERROR commit time out faild')
 								end
 							end
 						end

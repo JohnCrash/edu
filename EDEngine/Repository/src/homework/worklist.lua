@@ -144,7 +144,6 @@ function WorkList:add_page_from_cache( idx,last )
 						--	end
 							self:add_item(v)
 						else
-							kits.log( '	stop' )
 							need_continue = false
 						end
 					else

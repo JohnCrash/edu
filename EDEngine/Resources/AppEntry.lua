@@ -31,7 +31,6 @@ end
 function AppEntry:LavaFlow( N )
 	local ss = self:getContentSize()
 	local function flower()
-		self:setColor(cc.c3b(0, 0, 0))
 		local plist = 'Particles/ExplodingRing.plist'
 		local emitter = {}
 		for i = 1,N do

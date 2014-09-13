@@ -120,7 +120,6 @@ function Console:init()
 	debugip:setText("192.168.2.182")
 	local isdebug
 	local debugbutton = uikits.button{caption='Debug...',fontSize=32*scale,x=(128+240)*scale,
-		y= 900,
 		width=128*scale,height=64*scale,
 		eventClick=function(sender)
 			if not isdebug then
