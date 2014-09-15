@@ -44,6 +44,14 @@ local ui = {
 	HISTORY = 3,
 	STATIST = 4,
 	SETTING = 5,
+	TOPICS_SELECT = 'ys2',
+	TOPICS_SELECT_BUTTON = 'xuanze',
+	TOPICS_SELECT_UI = 'xuan',
+	TOPICS_SELECT_COURSE = 'xuan/kemu',
+	TOPICS_SELECT_VERSION = 'xuan/banben',
+	TOPICS_SELECT_VOLUME = 'xuan/nianji',
+	TOPICS_SELECT_UNIT = 'xuan/danyuan',
+	TOPICS_SELECT_SECTION = 'xuan/kewen', 
 }
 
 local exam_list_url="http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx"
@@ -180,6 +188,7 @@ function TeacherList:init_ready_release()
 	self._scrollview:setVisible(false)
 	self._release:setVisible(true)
 	self._setting:setVisible(false)
+	self:release_select_list()
 	return true
 end
 --历史
@@ -252,6 +261,54 @@ function TeacherList:init_gui()
 		[ui.TAB_BUTTON_4]=function(sender) return self:init_ready_statistics()end,
 		[ui.TAB_BUTTON_5]=function(sender) return self:init_ready_setting() end,
 		})
+end
+local selevel = {
+	'course',
+	'book_version',
+	'vol',
+	'unit',
+	'section',
+}
+local uilevel = {
+	ui.TOPICS_SELECT_COURSE,
+	ui.TOPICS_SELECT_VERSION,
+	ui.TOPICS_SELECT_VOLUME,
+	ui.TOPICS_SELECT_VOLUME,
+	ui.TOPICS_SELECT_UNIT,
+	ui.TOPICS_SELECT_SECTION,
+}
+function TeacherList:release_select_list( level )
+	level = level or 1
+	self._selector = self._selector or {}
+	local url = "http://api.lejiaolexue.com/resource/coursehandler.ashx?limit=1"
+	for i = 1,level do
+		if self._selector[i-1] and selevel[i-1] then
+			url = url..'&'..selevel[i-1]..'='..self._selector[i-1].id
+		end
+	end
+	url = '&item='..selevel[level]
+	local loadbox = loadingbox.open(self)
+	cache.request(url,function(b)
+			loadbox:removeFromParent()
+			if b then
+				local s = cache.get_data(url)
+				if s and string.sub(s,1,1)=='(' then
+					local js = string.sub(s,2,-2)
+					local t = json.decode(js)
+					if t then
+						local course = uikits.child(self._release,ui.uilevel[level])
+						course:removeAllItems()
+						for k,v in pairs(t) do
+							if v and v.name then
+								local item = uikits.text{caption=v.name,color=cc.c3b(0,0,0),fontSize=48}
+								item._data = v
+								course:addChild( item )
+							end
+						end
+					end
+				end
+			end
+		end)
 end
 
 function TeacherList:init()

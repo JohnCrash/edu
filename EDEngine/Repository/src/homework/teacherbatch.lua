@@ -207,12 +207,12 @@ function Batch:init_topics_paper_list()
 			self._args.teacher_id
 		local loadbox = loadingbox.open(self)
 		cache.request_json( url,function(t)
-			loadbox:removeFromParent()
 			if t and type(t)=='table' then
 				if kits.check(t,"detail","part" ) then
 					self:init_paper_list_by_table( t )
 				end
 			end
+			loadbox:removeFromParent()
 		end)
 	end
 end
@@ -282,6 +282,7 @@ function Batch:init_topics()
 	self._args_class.exam_id.."&c_id="..
 	self._args_class.class_id.."&has_score=1"
 	cache.request_json(url,function(t)
+			loadbox:removeFromParent()
 			if t and type(t)=='table' then
 				table.sort(t,function(a,b)
 						return a.real_score < b.real_score
@@ -317,7 +318,6 @@ function Batch:init_topics()
 				self._topicsview:setVisible(false)
 			end
 			self._busy =false
-			loadbox:removeFromParent()
 		end)
 	return true
 end
