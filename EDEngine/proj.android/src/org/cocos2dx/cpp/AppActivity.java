@@ -44,7 +44,10 @@ public class AppActivity extends Cocos2dxActivity {
 		Intent mIntent = this.getIntent();  
 		String launch = mIntent.getStringExtra("launch");
 		String cookie = mIntent.getStringExtra("cookie");
-		setExternalStorageDirectory( Environment.getExternalStorageDirectory().getName() );
+		String path = Environment.getExternalStorageDirectory().getPath();
+		if( path.length()>0 && path.charAt(path.length()-1)!='/')
+			path += '/';
+		setExternalStorageDirectory( path );
 		launchParam(launch,cookie);
 		//launchParam("errortitile","sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d");
 		}

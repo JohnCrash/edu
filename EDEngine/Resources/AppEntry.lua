@@ -8,6 +8,9 @@ require "ljshellDeprecated"
 local ui = {
 }
 
+local ljshell = require "ljshell"
+kits.log('ShareDir:'..ljshell.getDirectory(ljshell.ShareDir))
+kits.log('DataDir:'..ljshell.getDirectory(ljshell.DataDir))
 local AppEntry = class("AppEntry")
 AppEntry.__index = AppEntry
 

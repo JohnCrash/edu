@@ -79,9 +79,12 @@ function StudentWatch:add_paper_item( topicType,topicID )
 				topicID.."&teacherId="..
 				self._args.tid
 				
-				local loadbox = loadingbox.circle(child)
+				local circle = loadingbox.circle(child)
 				cache.request_json(url,function(t)
-					if not loadbox:removeFromParent() then
+					if circle and cc_isobj(circle) then
+						circle:removeFromParent()
+					else
+						kits.log('WARNING : StudentWatch:add_paper_item already remove')
 						return
 					end
 					if t then
