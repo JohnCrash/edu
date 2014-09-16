@@ -81,7 +81,9 @@ function StudentWatch:add_paper_item( topicType,topicID )
 				
 				local loadbox = loadingbox.circle(child)
 				cache.request_json(url,function(t)
-					loadbox:removeFromParent()
+					if not loadbox:removeFromParent() then
+						return
+					end
 					if t then
 						local data = {}
 						if t.buffer and t.buffer.difficulty_name then

@@ -1,4 +1,5 @@
 require "Cocos2d"
+require "ljshellDeprecated"
 local crash = require "crash"
 local kits = require "kits"
 local uikits = require "uikits"

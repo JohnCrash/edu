@@ -7,7 +7,6 @@ local json = require "json-c"
 local loadingbox = require "loadingbox"
 local TeacherBatch = require "homework/teacherbatch"
 local topics = require "homework/topics"
-
 local topics_course = topics.course_icon
 local res_local = "homework/"
 

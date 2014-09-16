@@ -157,6 +157,18 @@ static int cc_istype(lua_State *L)
 	return 1;
 }
 
+static int cc_isobj(lua_State *L)
+{
+	 tolua_Error tolua_err;
+	 if (!tolua_isusertype(L,1,"cc.Ref",0,&tolua_err))
+		 return 0;
+	 void *obj = tolua_tousertype(L,1,0);
+	 if(!obj)
+			lua_pushboolean(L,false);
+	 else
+		 lua_pushboolean(L,true);
+	 return 1;
+}
 /*
     1 = APP directory
     2 = LUA source root directory
@@ -196,6 +208,7 @@ void luaopen_lua_exts(lua_State *L)
 
 	lua_register( L,"cc_type",cc_gettype);
 	lua_register( L,"cc_istype",cc_istype);
+	lua_register( L,"cc_isobj",cc_isobj);
     lua_register( L,"cc_directory",cc_directory);
 	lua_register( L,"cc_launchparam",cc_launchparam);
 

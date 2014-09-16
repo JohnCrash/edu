@@ -12,6 +12,8 @@ local ui = {
 local g_scale = 2
 local function messagebox( parent,func,dt )
 	local s
+	if not parent then return end
+	if not cc_isobj(parent) then return end
 	if dt == 1 then
 		s = uikits.fromJson{file=ui.LOADBOX}
 	elseif dt == 2 then

@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local update = require "update"
 local login = require "login"
 local resume = require "resume"
+require "ljshellDeprecated"
 
 local ui = {
 }

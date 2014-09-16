@@ -1,5 +1,5 @@
-#ifndef _LUA_EXT_
-#define _LUA_EXT_
+#ifndef _LUA_LJSHELL_EXT_
+#define _LUA_LJSHELL_EXT_
 
 #include <string>
 
@@ -18,15 +18,18 @@ void luaopen_lua_ljshell(lua_State *L);
 
 enum LJDirectory
 {
-    DATA_DIRECTORY = 1,
-    SHARE_DIRECTORY = 2,
-    LOBBY_DIRECTORY = 3,
-    DOWNLOAD_DIRECTORY = 4,
-    APP_DIRECTORY = 5,
-	APPDATA_DIRECTORY = 6,
-	APPTMP_DIRECTORY = 7,
-	USER_DIRECTORY = 8,
-	APPUSER_DIRECTORY  = 9,
+	Data_DIRECTORY = 1,
+    Share_DIRECTORY = 2,
+    Lobby_DIRECTORY = 3,
+    Download_DIRECTORY = 4,
+    App_DIRECTORY = 5,
+	AppData_DIRECTORY = 6,
+	AppTmp_DIRECTORY = 7,
+	User_DIRECTORY = 8,
+	AppUser_DIRECTORY  = 9,
+	IDName_FILE = 10,
+	ShareSetting_FILE = 11,
+	UserSetting_FILE = 12,
 };
 
 std::string getLjShellDirectory(LJDirectory edd);

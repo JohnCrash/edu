@@ -95,9 +95,12 @@ end
 
 local box = {	
 	removeFromParent = function(self)
-		if self and type(self)=='table' and self._loadingbox then
+		if self and type(self)=='table' and self._loadingbox and cc_isobj(self._loadingbox) then
 			self._loadingbox:removeFromParent()
 			self._loadingbox = nil
+			return true
+		else
+			return false
 		end
 	end
 }

@@ -8,24 +8,30 @@ std::string getLjShellDirectory(LJDirectory edd)
 {
 	switch(edd)
 	{
-	case DATA_DIRECTORY:
+	case Data_DIRECTORY:
 		return g_DirMng.GetDataDir();
-	case SHARE_DIRECTORY:
+	case Share_DIRECTORY:
 		return g_DirMng.GetShareDir();
-	case LOBBY_DIRECTORY:
+	case Lobby_DIRECTORY:
 		return g_DirMng.GetLobbyDir();
-	case DOWNLOAD_DIRECTORY:
+	case Download_DIRECTORY:
 		return g_DirMng.GetDownloadDir();
-	case APP_DIRECTORY:
+	case App_DIRECTORY:
 		return g_DirMng.GetAppDir();
-	case APPDATA_DIRECTORY:
+	case AppData_DIRECTORY:
 		return g_DirMng.GetAppDataDir();
-	case APPTMP_DIRECTORY:
+	case AppTmp_DIRECTORY:
 		return g_DirMng.GetAppTmpDir();
-	case USER_DIRECTORY:
+	case User_DIRECTORY:
 		return g_DirMng.GetUserDir();
-	case APPUSER_DIRECTORY:
+	case AppUser_DIRECTORY:
 		return g_DirMng.GetAppUserDir();
+	case IDName_FILE:
+		return g_DirMng.GetIDNamePathName();
+	case ShareSetting_FILE:
+		return g_DirMng.GetShareSettingsPathName();
+	case UserSetting_FILE:
+		return g_DirMng.GetUserSettingsPathName();
 	}
 	return std::string();
 }
