@@ -112,8 +112,8 @@ function AppEntry:Snow( b )
 end
 
 function AppEntry:init()
-	--self:Snow(true)
-	self:LavaFlow(32)
+	self:Snow(true)
+	--self:LavaFlow(32)
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
 	local scale = 2

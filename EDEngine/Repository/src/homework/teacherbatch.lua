@@ -108,7 +108,11 @@ function Batch:add_paper_item( topicType,topicID )
 				topicID
 				local loadbox = loadingbox.circle(child)
 				cache.request_json(url,function(t)
-					loadbox:removeFromParent()
+					if loadbox and cc_isobj(loadbox) then
+						loadbox:removeFromParent()
+					else
+						return
+					end
 					if t then
 						local data = {}
 						if t.difficulty_name then
@@ -282,7 +286,9 @@ function Batch:init_topics()
 	self._args_class.exam_id.."&c_id="..
 	self._args_class.class_id.."&has_score=1"
 	cache.request_json(url,function(t)
-			loadbox:removeFromParent()
+			if not loadbox:removeFromParent() then
+				return
+			end
 			if t and type(t)=='table' then
 				table.sort(t,function(a,b)
 						return a.real_score < b.real_score
@@ -330,7 +336,7 @@ function Batch:init_subjective()
 	self._studentview:setVisible(false)
 	
 	self._subjectives:clear()
-	local result = kits.read_cache("sujective_list.json")
+	local result = kits.read_cache("backup-2/sujective_list.json")
 	if result then
 		local t = json.decode(result)
 		if t then
