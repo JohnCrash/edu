@@ -89,7 +89,7 @@ else
 end
 
 resume.clearflag("launcher") --launcher isok
-if app == 'homework' then
+if app == 'studenthw' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
 		local worklist = require "homework/worklist"
@@ -102,13 +102,13 @@ elseif app == 'amouse' then
 		local amouse = require "amouse/amouse_om"
 		return AMouseMain()
 	end}		
-elseif app == 'teacher' then
+elseif app == 'teacherhw' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
 		local teacher = require "homework/teacher"
 		return teacher.create()
 	end}	
-elseif app == 'errortitile' then
+elseif app == 'exerbook' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
 		local WrongSubjectList = require "errortitile/WrongSubjectList"

@@ -9,6 +9,7 @@ local TeacherBatch = require "homework/teacherbatch"
 local topics = require "homework/topics"
 local topics_course = topics.course_icon
 local res_local = "homework/"
+local subjectiveedit = require "homework/subjectiveedit"
 
 crash.open("teacher",1)
 
@@ -60,6 +61,7 @@ local ui = {
 	TOPICS_LVL_CHECKBOX2 = 'xuan/xia2',
 	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
 	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
+	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
 }
 
 local exam_list_url="http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx"
@@ -273,6 +275,11 @@ function TeacherList:init_gui()
 	self._check[3] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX3)
 	self._check[4] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX4)
 	
+	self._subjective_button = uikits.child(self._release,ui.SUBJECTIVE_EDIT_BUTTON)
+	uikits.event(self._subjective_button,function(sender)
+			uikits.pushScene( subjectiveedit.create() )
+		end
+	)
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)

@@ -182,6 +182,10 @@
     "pic2.jpg",
     "huitu.jpg",
     "bof1.png",
+    "shancct.png",
+    "past3.png",
+    "tianjia2.png",
+    "past2.png",
     "ditu3.jpg",
     "back_1.png",
     "back_2.png",
@@ -248,8 +252,7 @@
     "qr1.png",
     "qr2.png",
     "qr3.png",
-    "xz1.png",
-    "xz2.png"
+    "xsc2.png"
   ],
   "version": "1.5.0.0",
   "widgetTree": {
@@ -880,18 +883,18 @@
                     }
                   },
                   {
-                    "classname": "CheckBox",
+                    "classname": "Button",
                     "name": null,
                     "children": [],
                     "options": {
-                      "__type": "CheckBoxSurrogate:#EditorCommon.JsonModel.Component.GUI",
-                      "classname": "CheckBox",
-                      "name": "xz",
+                      "__type": "ButtonSurrogate:#EditorCommon.JsonModel.Component.GUI",
+                      "classname": "Button",
+                      "name": "shancu",
                       "ZOrder": 0,
-                      "actiontag": 34495251,
+                      "actiontag": 33474079,
                       "anchorPointX": 0.5,
                       "anchorPointY": 0.5,
-                      "classType": "CocoStudio.EngineAdapterWrap.CSCheckBox",
+                      "classType": "CocoStudio.EngineAdapterWrap.CSButton",
                       "colorB": 255,
                       "colorG": 255,
                       "colorR": 255,
@@ -911,44 +914,45 @@
                       "sizePercentX": 0.1,
                       "sizePercentY": 1,
                       "sizeType": 0,
-                      "tag": 6398,
+                      "tag": 10411,
                       "touchAble": true,
                       "useMergedTexture": false,
                       "visible": true,
                       "width": 120,
                       "x": 1140,
                       "y": 50,
-                      "backGroundBox": null,
-                      "backGroundBoxData": {
-                        "path": "xz1.png",
+                      "capInsetsHeight": 1,
+                      "capInsetsWidth": 1,
+                      "capInsetsX": 0,
+                      "capInsetsY": 0,
+                      "disabled": null,
+                      "disabledData": {
+                        "path": null,
+                        "plistFile": null,
+                        "resourceType": 0
+                      },
+                      "fontName": "微软雅黑",
+                      "fontSize": 14,
+                      "fontType": 0,
+                      "normal": null,
+                      "normalData": {
+                        "path": "xsc2.png",
                         "plistFile": "",
                         "resourceType": 0
                       },
-                      "backGroundBoxDisabled": null,
-                      "backGroundBoxDisabledData": {
+                      "pressed": null,
+                      "pressedData": {
                         "path": null,
                         "plistFile": null,
                         "resourceType": 0
                       },
-                      "backGroundBoxSelected": null,
-                      "backGroundBoxSelectedData": {
-                        "path": null,
-                        "plistFile": null,
-                        "resourceType": 0
-                      },
-                      "frontCross": null,
-                      "frontCrossData": {
-                        "path": "xz2.png",
-                        "plistFile": "",
-                        "resourceType": 0
-                      },
-                      "frontCrossDisabled": null,
-                      "frontCrossDisabledData": {
-                        "path": null,
-                        "plistFile": null,
-                        "resourceType": 0
-                      },
-                      "selectedState": false
+                      "scale9Enable": false,
+                      "scale9Height": 100,
+                      "scale9Width": 120,
+                      "text": "",
+                      "textColorB": 255,
+                      "textColorG": 255,
+                      "textColorR": 255
                     }
                   }
                 ],
