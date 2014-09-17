@@ -63,7 +63,19 @@ end
 
 function SubjectiveEdit:set_current( i )
 	if self._current ~= i then
-		self._list[self._current]
+		local current = self._list[self._current]
+		for k,v in pairs(self._list_deletes) do
+			v:removeFromParent()
+		end
+		self._list_deletes = {}
+		--current:removeFromParent()
+		table.insert(self._list_delete,self._list[self._current])
+		table.insert(self._list_delete,self._list[i])
+		
+		self._list[self._current] = self._index_item:clone()
+		uikits.child(self._list[self._current],'sz'):setString(tostring(self._current))
+		self._list[i] = self._index_item_current:clone()
+		uikits.child(self._list[self._current],'sz'):setString(tostring(i))
 		self._current = i
 	end
 end
@@ -94,6 +106,7 @@ function SubjectiveEdit:init()
 		end)
 	self._current = 0
 	self._list = {}
+	self._list_deletes = {}
 	self:index_clear()
 end
 
