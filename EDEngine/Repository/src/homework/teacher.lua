@@ -56,6 +56,10 @@ local ui = {
 	TOPICS_SELECT_UNIT_ITEM = 'dy1',
 	TOPICS_SELECT_SECTION = 'xuan/kewen', 
 	TOPICS_SELECT_SECTION_ITEM = 'ke1', 
+	TOPICS_LVL_CHECKBOX1 = 'xuan/xia',
+	TOPICS_LVL_CHECKBOX2 = 'xuan/xia2',
+	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
+	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
 }
 
 local exam_list_url="http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx"
@@ -263,6 +267,11 @@ function TeacherList:init_gui()
 
 	--选择
 	self._section = uikits.scroll(self._release,ui.TOPICS_SELECT_SECTION,ui.TOPICS_SELECT_SECTION_ITEM,true)
+	self._check = {}
+	self._check[1] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX1)
+	self._check[2] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX2)
+	self._check[3] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX3)
+	self._check[4] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX4)
 	
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
@@ -348,12 +357,16 @@ function TeacherList:add_level_item( level,v )
 		end
 	elseif level == 2 then
 		scroll = self._version
+		self._check[1]:setSelectedState(true)
 	elseif level == 3 then
 		scroll = self._volume
+		self._check[2]:setSelectedState(true)
 	elseif level == 4 then
 		scroll = self._unit
+		self._check[3]:setSelectedState(true)
 	elseif level == 5 then
 		scroll = self._section
+		self._check[4]:setSelectedState(true)
 	end
 	if scroll then
 		local item = scroll:additem()
@@ -417,12 +430,16 @@ end
 function TeacherList:level_clear( level )
 	if level == 1 then
 		self._cousor:clear()
+		self._check[1]:setSelectedState(false)
 	elseif level == 2 then
 		self._version:clear()
+		self._check[2]:setSelectedState(false)
 	elseif level == 3 then
 		self._volume:clear()
+		self._check[3]:setSelectedState(false)
 	elseif level == 4 then
 		self._unit:clear()
+		self._check[4]:setSelectedState(false)
 	elseif level == 5 then
 		self._section:clear()
 	end
@@ -450,7 +467,11 @@ function TeacherList:release_select_list( level )
 					local t = json.decode(js)
 					if t then
 						self:level_clear(level)
+						local tt = {}
 						for k,v in pairs(t) do
+							tt[#t-k-1] = v
+						end
+						for k,v in pairs(tt) do
 							if v and v.name then
 								self:add_level_item(level,v)
 							end
