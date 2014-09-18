@@ -4,7 +4,7 @@ local md5 = require "md5"
 local json = require "json-c"
 local login = require "login"
 
-local luacore_version = 1
+local luacore_version = 2
 local luaapp_name = "unkown"
 local luaapp_version = 0
 

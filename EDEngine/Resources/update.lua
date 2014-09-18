@@ -9,8 +9,8 @@ local resume = require "resume"
 local local_dir = cc.FileUtils:getInstance():getWritablePath()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v1/'
-local local_server = 'http://192.168.2.211:81/lgh/v1/'
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v2/'
+local local_server = 'http://192.168.2.211:81/lgh/v2/'
 local update_server = local_server
 
 local ui = {

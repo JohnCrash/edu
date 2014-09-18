@@ -14,6 +14,13 @@ USING_NS_CC;
 #include "sys/stat.h"
 #include "fcntl.h"
 #include <dirent.h>
+
+extern std::string g_ExternalStorageDirectory;
+std::string GetSDCardDir()
+{
+	return g_ExternalStorageDirectory;
+}
+
 #endif
 
 #define min(a,b) ((a)>(b)?(b):(a))

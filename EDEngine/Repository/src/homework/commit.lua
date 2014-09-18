@@ -260,7 +260,12 @@ function WorkCommit:init_commit_list()
 		local circle = loadingbox.circle( self._scrollview )
 		cache.request(url,
 			function(b)
-				circle:removeFromParent()
+				if circle and cc_isobj(circle) then
+					circle:removeFromParent()
+				else
+					kits.log('WARNING : WorkCommit:init_commit_list circle is not obj')
+					return
+				end
 				if b then
 					load_from_cache()
 				else

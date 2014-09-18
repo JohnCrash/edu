@@ -12,9 +12,9 @@ local Sethwbyerr = require "homework/sethwbyerr"
 local Edithwbyobj = require "homework/edithwbyobj"
 local Publishhw = require "homework/publishhw"
 
-
 local topics_course = topics.course_icon
 local res_local = "homework/"
+local subjectiveedit = require "homework/subjectiveedit"
 
 crash.open("teacher",1)
 
@@ -53,9 +53,13 @@ local ui = {
 	TOPICS_SELECT_BUTTON = 'xuanze',
 	TOPICS_SELECT_UI = 'xuan',
 	TOPICS_SELECT_COURSE = 'xuan/kemu',
+	TOPICS_SELECT_COURSE_ITEM = 'yuwen',
 	TOPICS_SELECT_VERSION = 'xuan/banben',
+	TOPICS_SELECT_VERSION_ITEM = 'bb1',
 	TOPICS_SELECT_VOLUME = 'xuan/nianji',
+	TOPICS_SELECT_VOLUME_ITEM = 'nj1',
 	TOPICS_SELECT_UNIT = 'xuan/danyuan',
+	TOPICS_SELECT_UNIT_ITEM = 'dy1',
 	TOPICS_SELECT_SECTION = 'xuan/kewen', 
 	TOPICS_SET_HOMEWORK_TITLE = 'ys1',
 	TOPICS_SELECT_HOMEWORK_TITLE = 'ys3',
@@ -68,6 +72,12 @@ local ui = {
 	TOPICS_EDIT_OBJ_BUT = 'zuoye/keguang/bianji',
 	TOPICS_EDIT_OBJ_PIC = 'zuoye/keguang/ti1',
 	TOPICS_EDIT_PUBLISH_BUT = 'zuoye/fabu',
+	TOPICS_SELECT_SECTION_ITEM = 'ke1', 
+	TOPICS_LVL_CHECKBOX1 = 'xuan/xia',
+	TOPICS_LVL_CHECKBOX2 = 'xuan/xia2',
+	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
+	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
+	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
 }
 
 local is_need_update
@@ -263,7 +273,31 @@ function TeacherList:init_gui()
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)
+	--选择科目
+	self._cousor = uikits.scroll(self._release,ui.TOPICS_SELECT_COURSE,ui.TOPICS_SELECT_COURSE_ITEM,true)
+
+	--选择版本
+	self._version = uikits.scroll(self._release,ui.TOPICS_SELECT_VERSION,ui.TOPICS_SELECT_VERSION_ITEM,true)
+
+	--选择章
+	self._volume = uikits.scroll(self._release,ui.TOPICS_SELECT_VOLUME,ui.TOPICS_SELECT_VOLUME_ITEM,true)
+
+	--选择单元
+	self._unit = uikits.scroll(self._release,ui.TOPICS_SELECT_UNIT,ui.TOPICS_SELECT_UNIT_ITEM,true)
+
+	--选择
+	self._section = uikits.scroll(self._release,ui.TOPICS_SELECT_SECTION,ui.TOPICS_SELECT_SECTION_ITEM,true)
+	self._check = {}
+	self._check[1] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX1)
+	self._check[2] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX2)
+	self._check[3] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX3)
+	self._check[4] = uikits.child(self._release,ui.TOPICS_LVL_CHECKBOX4)
 	
+	self._subjective_button = uikits.child(self._release,ui.SUBJECTIVE_EDIT_BUTTON)
+	uikits.event(self._subjective_button,function(sender)
+			uikits.pushScene( subjectiveedit.create() )
+		end
+	)
 	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)
@@ -295,6 +329,147 @@ local uilevel = {
 	ui.TOPICS_SELECT_UNIT,
 	ui.TOPICS_SELECT_SECTION,
 }
+local courseimg = {
+	[101]="zhonghe",
+	[10001]="chinese",
+	[10002]="math",
+	[10003]="english",
+	[10005]="english",
+	[10009]="info",
+	[10010]="science",
+	[10011]="science",
+	[11005]="english",
+	[20001]="chinese",
+	[20002]="math",
+	[20003]="english",
+	[20004]="physics",
+	[20005]="chemistry",
+	[20006]="politics",
+	[20007]="organisms",
+	[20008]="geography",
+	[20009]="history",
+	[30001]="chinese",
+	[30002]="math",
+	[30003]="english",
+	[30004]="physics",
+	[30005]="chemistry",
+	[30006]="politics",
+	[30007]="organisms",
+	[30008]="geography",
+	[30009]="history",	
+}
+function TeacherList:add_level_item( level,v )
+	local scroll
+	if level == 1 then
+		local item = self._cousor:additem()
+		if item then
+			local n = courseimg[v.id]
+			if n then
+				item:loadTextureBackGround('homework/laoshizuoye/'..n..'_off.png')
+				item:loadTextureFrontCross('homework/laoshizuoye/'..n..'_on.png')
+				item:loadTextureBackGroundSelected('homework/laoshizuoye/'..n..'_on.png')
+			else
+				kits.log('ERROR TeacherList:add_level_item unkown type')
+			end
+			uikits.event(item,function(sender,b)
+				self._selector[level] = v
+				self:level_reset(level,sender)
+				for i = level+2,5 do
+					self:level_clear(i)
+				end				
+				self:release_select_list( level + 1 )
+			end)
+		end
+	elseif level == 2 then
+		scroll = self._version
+		self._check[1]:setSelectedState(true)
+	elseif level == 3 then
+		scroll = self._volume
+		self._check[2]:setSelectedState(true)
+	elseif level == 4 then
+		scroll = self._unit
+		self._check[3]:setSelectedState(true)
+	elseif level == 5 then
+		scroll = self._section
+		self._check[4]:setSelectedState(true)
+	end
+	if scroll then
+		local item = scroll:additem()
+		if item then
+			local text = uikits.child(item,'mingzi')
+			if text and v and v.name then
+				text:setString( v.name )
+			end
+			uikits.event(item,function(sender,b)
+				self._selector[level] = v
+				self:level_reset(level,sender)
+				for i = level+2,5 do
+					self:level_clear(i)
+				end
+				if level <= 4 then
+					self:release_select_list( level + 1 )
+				end
+			end)
+		end
+	end
+end
+
+function TeacherList:level_reset( level,item )
+	local list
+	if level == 1 then
+		list = self._cousor._list
+	elseif level == 2 then
+		list = self._version._list
+	elseif level == 3 then
+		list = self._volume._list
+	elseif level == 4 then
+		list = self._unit._list
+	elseif level == 5 then
+		list = self._section._list
+	end
+	if list then
+		for k,v in pairs(list) do
+			if v ~= item then
+				v:setSelectedState(false)
+			else
+				v:setSelectedState(true)
+			end
+		end
+	end
+end
+
+function TeacherList:level_relayout( level )
+	if level == 1 then
+		self._cousor:relayout()
+	elseif level == 2 then
+		self._version:relayout()
+	elseif level == 3 then
+		self._volume:relayout()
+	elseif level == 4 then
+		self._unit:relayout()
+	elseif level == 5 then
+		self._section:relayout()
+	end
+end
+
+function TeacherList:level_clear( level )
+	if level == 1 then
+		self._cousor:clear()
+		self._check[1]:setSelectedState(false)
+	elseif level == 2 then
+		self._version:clear()
+		self._check[2]:setSelectedState(false)
+	elseif level == 3 then
+		self._volume:clear()
+		self._check[3]:setSelectedState(false)
+	elseif level == 4 then
+		self._unit:clear()
+		self._check[4]:setSelectedState(false)
+	elseif level == 5 then
+		self._section:clear()
+	end
+end
+
 function TeacherList:release_select_list( level )
 --[[	level = level or 1
 	self._selector = self._selector or {}
@@ -304,25 +479,29 @@ function TeacherList:release_select_list( level )
 			url = url..'&'..selevel[i-1]..'='..self._selector[i-1].id
 		end
 	end
-	url = '&item='..selevel[level]
+	url = url..'&item='..selevel[level]
 	local loadbox = loadingbox.open(self)
 	cache.request(url,function(b)
-			loadbox:removeFromParent()
+			if not loadbox:removeFromParent() then
+				return
+			end
 			if b then
 				local s = cache.get_data(url)
 				if s and string.sub(s,1,1)=='(' then
 					local js = string.sub(s,2,-2)
 					local t = json.decode(js)
 					if t then
-						local course = uikits.child(self._release,ui.uilevel[level])
-						course:removeAllItems()
+						self:level_clear(level)
+						local tt = {}
 						for k,v in pairs(t) do
+							tt[#t-k-1] = v
+						end
+						for k,v in pairs(tt) do
 							if v and v.name then
-								local item = uikits.text{caption=v.name,color=cc.c3b(0,0,0),fontSize=48}
-								item._data = v
-								course:addChild( item )
+								self:add_level_item(level,v)
 							end
 						end
+						self:level_relayout(level)
 					end
 				end
 			end

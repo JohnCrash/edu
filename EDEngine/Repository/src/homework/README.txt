@@ -949,3 +949,6 @@ http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?
     ],
     "t": 9021	
 }
+
+获取班级接口，125907是用户的user_id，调用时换成相应的值即可
+http://api.lejiaolexue.com/rest/user/125907/zone/class

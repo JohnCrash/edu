@@ -15,6 +15,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/Console.cpp \
 				   ../../Classes/lua_json.cpp \
 				   ../../Classes/AssetsManager.cpp \
+				   ../../Classes/lua_ljshell.cpp \
+				   ../../Classes/MD5.cpp \
+				   ../../Classes/Files.cpp \
 				   JniLaunch.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \

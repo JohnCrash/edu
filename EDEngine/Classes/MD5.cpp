@@ -2,7 +2,11 @@
 #include "cocos2d.h"
 USING_NS_CC;
  
-bool IsLittleEndian();
+bool IsLittleEndian()
+{
+	return true;
+}
+
 static int nByteOrder=0;
 
 static void InitByteOrder()

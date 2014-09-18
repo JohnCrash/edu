@@ -2,8 +2,10 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 #include "lua_ext.h"
+#include "lua_ljshell.h"
 #include "luaDebug.h"
 #include "AssetsManager.h"
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
 #endif
@@ -94,11 +96,11 @@ void AppDelegate::initLuaEngine()
 #endif
     
     auto pEngine = LuaEngine::getInstance();
-	luaopen_lua_exts(pEngine->getLuaStack()->getLuaState());
+	auto L = pEngine->getLuaStack()->getLuaState();
+	luaopen_lua_exts(L);
+	luaopen_lua_ljshell(L);
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
-    
-    LuaStack* stack = pEngine->getLuaStack();
-
+	LuaStack* stack = pEngine->getLuaStack();
     //pEngine->executeScriptFile("bootstrap.lua");
 	pEngine->executeScriptFile("resume.lua");
 	pEngine->executeScriptFile("crash.lua");

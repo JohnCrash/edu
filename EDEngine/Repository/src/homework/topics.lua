@@ -540,8 +540,10 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 					if n >= #rs.urls then
 						--全部下载完毕
 						data._isdownload_ = true
-						if rst.loading then
+						if rst.loading and cc_isobj(rst.loading) then
 							rst.loading:removeFromParent() 
+						else
+							return
 						end
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then

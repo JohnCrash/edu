@@ -3,10 +3,14 @@ local uikits = require "uikits"
 local update = require "update"
 local login = require "login"
 local resume = require "resume"
+require "ljshellDeprecated"
 
 local ui = {
 }
 
+local ljshell = require "ljshell"
+kits.log('ShareDir:'..ljshell.getDirectory(ljshell.ShareDir))
+kits.log('DataDir:'..ljshell.getDirectory(ljshell.DataDir))
 local AppEntry = class("AppEntry")
 AppEntry.__index = AppEntry
 
@@ -108,8 +112,8 @@ function AppEntry:Snow( b )
 end
 
 function AppEntry:init()
-	--self:Snow(true)
-	self:LavaFlow(32)
+	self:Snow(true)
+	--self:LavaFlow(32)
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
 	local scale = 2
