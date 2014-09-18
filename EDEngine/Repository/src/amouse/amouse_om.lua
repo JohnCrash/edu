@@ -1335,47 +1335,48 @@ end
 function AMouseScene:init()
 	--游戏基本变量初始化
 	if not self._ss then
-	self._ss = cc.Director:getInstance():getVisibleSize()
-	local radio = self._ss.width/self._ss.height
-	print("radio = "..radio )
-	if radio <= 15/9 and radio >= 4/3 then
-		self._screen = 1
-		print("4/3" )
-	elseif radio >= 15/9 then
-		self._screen = 2
-		print("16/9" )
-	else
-		self._screen = 1
-		print("4/3" )
-	end
-	if uikits.get_factor() == uikits.FACTOR_9_16 then
-		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-	else
-		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-	end	
-	--self._scheduler = cc.Director:getInstance():getScheduler()
-	self._scheduler = self:getScheduler()
-	--初始化玩家数据
-	self:init_player_data()
-	
-	--初始化背景和ui
-	self:init_bg_and_ui()
-	self:init_role()
-	
-	--初始化事件
-	self:init_event()
-
-	--启动游戏
-	self:game_start_Dialog()
+		self._ss = cc.Director:getInstance():getVisibleSize()
+		local radio = self._ss.width/self._ss.height
+		print("radio = "..radio )
+		if radio <= 15/9 and radio >= 4/3 then
+			self._screen = 1
+			print("4/3" )
+		elseif radio >= 15/9 then
+			self._screen = 2
+			print("16/9" )
+		else
+			self._screen = 1
+			print("4/3" )
+		end
+		if uikits.get_factor() == uikits.FACTOR_9_16 then
+			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+		else
+			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+		end	
+		--self._scheduler = cc.Director:getInstance():getScheduler()
+		self._scheduler = self:getScheduler()
+		--初始化玩家数据
+		self:init_player_data()
+		
+		--初始化背景和ui
+		self:init_bg_and_ui()
+		self:init_role()
+		
+		--初始化事件
+		self:init_event()
+		--启动游戏
+		self:game_start_Dialog()
 	end
 end
 
 --释放
 function AMouseScene:release()
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
-	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
-	self:stop_music()
+	if not self._uiScene then
+		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
+		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
+		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
+		self:stop_music()
+	end
 end
 
 function AMouseScene.create()
@@ -1390,7 +1391,7 @@ function AMouseScene.create()
 		elseif "exit" == event then
 			layer:release()
 		end
-	end	
+	end
 	layer:registerScriptHandler(onNodeEvent)
 	return scene 
 end

@@ -1,5 +1,5 @@
 local uikits = require "uikits"
-
+local cache = require "cache"
 local ui = {
 	FILE = 'homework/laoshizuoye/gexinghua.json',
 	FILE_3_4 = 'homework/laoshizuoye/gexinghua43.json',
@@ -17,6 +17,8 @@ local ui = {
 	SOUND_DELTE_TEXT = 'shijian',
 	SOUND_DELTE_BUTTON = 'sc1',
 	DELETE_BUTTON = 'leirong/shancu',
+	INPUT_AREANA = 'leirong/ys',
+	INPUT_TEXT = 'wenzi',
 }
 local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
@@ -56,6 +58,10 @@ function SubjectiveEdit:index_relayout()
 			v:setPosition(cc.p(x,y))
 			local size = v:getContentSize()
 			x = x + size.width + INDEX_SPACE
+			uikits.child(v,'sz'):setString(tostring(i))
+			uikits.event(v,function()
+					self:set_current(i)
+				end)			
 		end
 		self._index_item_add:setPosition( cc.p(x,y) )
 	end
@@ -64,32 +70,103 @@ end
 function SubjectiveEdit:set_current( i )
 	if self._current ~= i then
 		local current = self._list[self._current]
+		self:savepage()
 		for k,v in pairs(self._list_deletes) do
 			v:removeFromParent()
 		end
 		self._list_deletes = {}
-		--current:removeFromParent()
-		table.insert(self._list_delete,self._list[self._current])
-		table.insert(self._list_delete,self._list[i])
-		
-		self._list[self._current] = self._index_item:clone()
-		uikits.child(self._list[self._current],'sz'):setString(tostring(self._current))
+		if self._current and self._list[self._current] then
+			table.insert(self._list_deletes,self._list[self._current])
+			self._list[self._current]:setVisible(false)
+		end
+		if i and self._list[i] then
+			table.insert(self._list_deletes,self._list[i])
+			self._list[i]:setVisible(false)
+		end
+		if self._current and self._current ~= 0 then
+			self._list[self._current] = self._index_item:clone()
+			self._list[self._current]:setVisible(true)
+			self._indexs:addChild(self._list[self._current])
+			local cur = self._current
+		end
 		self._list[i] = self._index_item_current:clone()
-		uikits.child(self._list[self._current],'sz'):setString(tostring(i))
+		self._list[i]:setVisible(true)
+		self._indexs:addChild(self._list[i])
 		self._current = i
+		self:initpage()
+	end
+	self:index_relayout()
+end
+
+function SubjectiveEdit:savepage()
+	if self._current and self._data[self._current] then
+		self._data[self._current].text = self._input_text:getStringValue()
+	end
+end
+
+function SubjectiveEdit:initpage()
+	if self._current and self._data[self._current] then
+		self._input_text:setText(self._data[self._current].text)
 	end
 end
 
 function SubjectiveEdit:index_add()
 	local item = self._index_item_current:clone()
+	item:setVisible(true)
+	self._indexs:addChild(item)
 	table.insert(self._list,item)
+	table.insert(self._data,{})
 	self:set_current( #self._list )
+end
+
+function SubjectiveEdit:index_delete(i)
+	if i and self._list[i] then
+		table.insert(self._list_deletes,self._list[i])
+		self._list[i]:setVisible(false)
+		table.remove(self._list,i)
+		table.remove(self._data,i)
+		self._current = 0
+		if self._list[i] then
+			self:set_current(i)
+		elseif self._list[i-1] then
+			self:set_current(i-1)
+		end
+		self:index_relayout()
+	end
+end
+
+function SubjectiveEdit:addsound( name )
+	if name and self._current and self._data[self._current] then
+		self._data[self._current].imags = self._data[self._current].imags or {}
+		table.insert(self._data[self._current].imags,name)
+	end
+end
+
+function SubjectiveEdit:addphoto( name )
+	if name and self._current and self._data[self._current] then
+		self._data[self._current].imags = self._data[self._current].imags or {}
+		for i,v in pairs(self._data[self._current].imags) do
+			if v then
+				
+			end
+		end
+		table.insert(self._data[self._current].imags,name)
+	end
+end
+
+function SubjectiveEdit:scroll_relayout()
+	local width,height
+	width = self._scroll:getContentSize().width
+	height = 2*self._tops_space + self._tops:getContentSize().height +
+		self._tops_space + self._delete_button:getContentSize().height
+	self._scroll:setInnerContainerSize(cc.size(width,height))
+	self._tops:setPosition(cc.p(self._tops_ox,
+		height-self._tops_space-self._tops:getContentSize().height))
 end
 
 function SubjectiveEdit:init()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
-	--返回按钮
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)
 		cache.request_cancel()
@@ -101,13 +178,29 @@ function SubjectiveEdit:init()
 	self._index_item:setVisible(false)
 	self._index_item_current:setVisible(false)
 	self._index_item_ox,self._index_item_oy = self._index_item_current:getPosition()
+	self._record_button = uikits.child(self._root,ui.RECORD_BUTTON)
+	self._cam_button = uikits.child(self._root,ui.CAM_BUTTON)
+	self._photo_button = uikits.child(self._root,ui.PHOTO_BUTTON)
+	self._scroll = uikits.child(self._root,ui.LIST)
+	self._scroll_list = {}
+	self._data = {}
+	self._tops = uikits.child(self._root,ui.INPUT_AREANA)
+	self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
+	local x,y = self._tops:getPosition()
+	self._tops_space = y-self._tops:getContentSize().height
+	self._tops_ox = x
 	uikits.event(self._index_item_add,function(sender)
 			self:index_add()
 		end)
+	self._delete_button = uikits.child(self._root,ui.DELETE_BUTTON)
+	uikits.event(self._delete_button,function()
+		self:index_delete(self._current)
+	end)
 	self._current = 0
 	self._list = {}
 	self._list_deletes = {}
 	self:index_clear()
+	self:scroll_relayout()
 end
 
 function SubjectiveEdit:release()
