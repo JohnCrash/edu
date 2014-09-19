@@ -4,6 +4,7 @@ kits = require "kits"
 json = require "json"
 curl = require 'curl'
 uikits = require "uikits"
+login = require "login"
 
 local AMouseScene = class("AMouseScene")
 AMouseScene.__index = AMouseScene
@@ -28,7 +29,7 @@ local function screenCenterPt()
 	return cc.p(1024/2,768/2)
 end
 
---print( 'do convert' )
+--kits.log( 'do convert' )
 --require "src/amouse/resize_json"
 --resize_json('D:/1Source/Edu/EDEngine/proj.win32/Debug.win32/res/amouse/jie_mian_1/jie_mian_1.json')
 --resize_json('D:/1Source/Edu/EDEngine/proj.win32/Debug.win32/res/amouse/jie_mian_2/jie_mian_2.json')
@@ -39,6 +40,7 @@ end
 
 local cookie1 = 'sc1=B964C5AB31B11EBA73E96DEC7FE9A793CDAD3028ak99MgbuBYOcjHsDJkE16kV%2fYgv0Yxi7sUzUhsLI5lYpE0jPwGtmazO%2b8luQqkfvSLX2wN0fxGPd03oZpHJbaewnwrbp3A%3d%3d'
 local cookie2 = 'sc1=B4623839ECF0FA103672BA497C781F52454EA887ak99MgfmBYOcjHsDJkE16kV%2fYgv0Yxi7sUzUh8KTvFYoQUjPwGtmazO%2b8luQqkfvSLX2wN0fxGLdiCAZpSBbaewnwrbp3A%3d%3d'
+local cookie = login.cookie()
 --[[
 local s_all_rank_url = 'http://192.168.2.120/ourgame/api/rank/top.ashx?app_id=20001&zone_id=141442&period=0'
 local s_week_rank_url = 'http://192.168.2.120/ourgame/api/rank/top.ashx?app_id=20001&zone_id=141442&period=0'
@@ -49,12 +51,12 @@ local s_week_rank_url = 'http://app.lejiaolexue.com/ourgame/api/rank/top.ashx?ap
 local s_upload_url = 'http://app.lejiaolexue.com/ourgame/api/score/submit.ashx'
 
 local function test_server()
-	print("server test http_get")
-	print("-------------------------------------")
-	print( kits.http_get(s_all_rank_url,cookie2,1) )
+	kits.log("server test http_get")
+	kits.log("-------------------------------------")
+	kits.log( kits.http_get(s_all_rank_url,cookie,1) )
 	
-	print("server test http_post")
-	print("-------------------------------------")
+	kits.log("server test http_post")
+	kits.log("-------------------------------------")
 	local t = 
 	{
 		app_id = 20001,
@@ -65,13 +67,13 @@ local function test_server()
 		chk = 'swer1234234234sdf'
 	}
 	
-	print('OPT_POSTFIELDS:'..kits.encode_url(t))
-	print("-------------------------------------")
-	local reslut = kits.http_post(s_upload_url,kits.encode_url(t),cookie2,1) 
+	kits.log('OPT_POSTFIELDS:'..kits.encode_url(t))
+	kits.log("-------------------------------------")
+	local reslut = kits.http_post(s_upload_url,kits.encode_url(t),cookie,1) 
 	if reslut then
-		print( tostring( reslut ) )
+		kits.log( tostring( reslut ) )
 	else
-		print(" kits.http_post return nil")
+		kits.log(" kits.http_post return nil")
 	end
 end
 
@@ -79,13 +81,13 @@ end
 --上传玩家积分
 function AMouseScene:upload_rank( stage,scor )
 	local text = kits.encode_url{ app_id = 20001,game_id='amouse', stage_id = stage,score = scor,rid = 3,chk = '21342342424323421345235' }
-	local reslut = kits.http_post( s_upload_url,text,cookie2,1 )
+	local reslut = kits.http_post( s_upload_url,text,cookie,10 )
 	if reslut and type(reslut) == 'string' and string.sub(reslut,1,1) == '{' then
-		print('upload : '..tostring(reslut) )
+		kits.log('upload : '..tostring(reslut) )
 		local ret = json.decode(reslut)
 	else
-		print('upload error:')
-		print( reslut )
+		kits.log('upload error:')
+		kits.log( reslut )
 	end
 end
 
@@ -161,7 +163,7 @@ function AMouseScene:play_sound( idx )
 		else
 			return
 		end
-		print( "Play sound: "..name )
+		kits.log( "Play sound: "..name )
 		AudioEngine.playEffect(name)
 	end
 end
@@ -203,19 +205,19 @@ function AMouseScene:init_bg_and_ui()
 	--背景
 	self._bg = cc.Sprite:create("amouse/mainscene.png")
 	self._bg:setPosition(screenCenterPt())
-	self:addChild(self._bg)
+	self:addChild(self._bg,1)
 	--题目背景
 	self._sprite_bg = cc.Sprite:create("amouse/NewUI01.png")
 	self._sprite_bg:setAnchorPoint(cc.p(0.5,0.5))
 	self._sprite_bg:setPosition(cc.p(self._ss.width/2,self._ss.height*4.6/7*ratio))
 	self._sprite_bg:setScaleY(0.8)
 	self._sprite_bg:setScaleX(0.8)
-	self:addChild(self._sprite_bg)
+	self:addChild(self._sprite_bg,2)
 
 	--时间条
 	local widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_3/jie_mian_3.json")
 	if widget then
-		self:addChild(widget)
+		self:addChild(widget,100)
 		widget:setScaleX(0.5)
 		widget:setScaleY(0.5)
 		widget:setTouchEnabled(false)
@@ -231,7 +233,7 @@ function AMouseScene:init_bg_and_ui()
 		if self._pnum_label then
 			--题数
 			self._pnum_label2 = cc.LabelBMFont:create("30", "fonts/font-issue1343.fnt")
-			self._pnum_label:addChild(self._pnum_label2)
+			self._pnum_label:addChild(self._pnum_label2,102)
 			self._pnum_label2:setScaleX(2)
 			self._pnum_label2:setScaleY(2)
 			local size = self._pnum_label:getContentSize()
@@ -243,7 +245,7 @@ function AMouseScene:init_bg_and_ui()
 		--积分
 		if self._fen_label then
 			self._fen_label2 = cc.LabelBMFont:create("0", "fonts/font-issue1343.fnt")
-			self._fen_label:addChild(self._fen_label2)
+			self._fen_label:addChild(self._fen_label2,103)
 			self._fen_label2:setScaleX(2)
 			self._fen_label2:setScaleY(2)
 			local size = self._fen_label:getContentSize()
@@ -257,11 +259,11 @@ function AMouseScene:init_bg_and_ui()
 	self._cn_label = cc.LabelTTF:create("", "Marker Felt", 60)
 	self._cn_label:setColor(cc.c3b(255,0,0))
 	self._cn_label:setPosition(cc.p(self._ss.width/2,self._ss.height*2/3*ratio))
-	self:addChild(self._cn_label)
+	self:addChild(self._cn_label,104)
 	self._nn_label = cc.LabelTTF:create("", "Marker Felt", 30)
 	self._nn_label:setColor(cc.c3b(255,0,0))
 	self._nn_label:setPosition(cc.p(self._ss.width/10,self._ss.height*18/20))
-	self:addChild(self._nn_label)
+	self:addChild(self._nn_label,105)
 end
 
 --取得积分1-100
@@ -283,12 +285,12 @@ function AMouseScene:getIntegration()
 end
 
 function AMouseScene:game_setting_Dialog( where )
-	print("game setting dialog")
+	kits.log("game setting dialog")
 	self:close_Dialog()
 	self._where = where
 	
 	self._uiLayer = cc.Layer:create()
-	self:addChild(self._uiLayer)
+	self:addChild(self._uiLayer,1300)
 	self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_6/jie_mian_6.json")
 	self._uiLayer:addChild(self._widget)
 	--self._widget:setScaleX(0.5)
@@ -306,10 +308,10 @@ function AMouseScene:game_setting_Dialog( where )
 		if eventType == ccui.TouchEventType.ended then
 			self._player_data.music = not sender:getSelectedState()
 			if self._player_data.music then
-				print("music on")
+				kits.log("music on")
 				self:play_music()
 			else
-				print("music off")
+				kits.log("music off")
 				self:stop_music()
 			end
 			self:play_sound( SND_UI_CLICK )			
@@ -319,9 +321,9 @@ function AMouseScene:game_setting_Dialog( where )
 		if eventType == ccui.TouchEventType.ended then
 			self._player_data.sound = not sender:getSelectedState()
 			if self._player_data.sound then
-				print("sound on")
+				kits.log("sound on")
 			else
-				print("sound off")
+				kits.log("sound off")
 			end
 			self:play_sound( SND_UI_CLICK )						
 		end
@@ -350,17 +352,17 @@ end
 
 --访问服务器下载top rank并且设置
 function AMouseScene:set_top_list( url )
-	local result = kits.http_get( url,cookie1,1 ) --time out 1s
+	local result = kits.http_get( url,cookie,10 ) --time out 1s
 	if result and type(result)== 'string' and string.sub(result,1,1) == '{' then
 		local tops = json.decode(result)
 		local i = 1
-		print( result )
+		kits.log( result )
 		if tops and tops.users and type(tops.users)=='table' then
 			for k,v in pairs(tops.users) do
-				print( "table:"..k )
+				kits.log( "table:"..k )
 				if type(v)=='table' then
 					for n,s in pairs(v) do
-						print( "	"..n..":"..s )
+						kits.log( "	"..n..":"..s )
 						if n == 'uname' and type(s)=='string' then
 							self._top_lists[i]:getChildByName('Label_name'):setString(s)
 						elseif n == 'score' and type(s)=='number' then
@@ -377,12 +379,12 @@ function AMouseScene:set_top_list( url )
 				end
 			end
 		else
-			print("players rank table error!")
+			kits.log("players rank table error!")
 		end
 	else
-		print("get players rank error!")
+		kits.log("get players rank error!")
 		if result then 
-			print(string.sub(result,1,128)) 
+			kits.log(string.sub(result,1,128)) 
 		end
 	end
 end
@@ -399,12 +401,12 @@ function AMouseScene:clean_top_list()
 end
 
 function AMouseScene:game_top10_Dialog( where )
-	print("game top10 dialog")
+	kits.log("game top10 dialog")
 	self:close_Dialog()
 	self._where = where
 
 	self._uiLayer = cc.Layer:create()
-	self:addChild(self._uiLayer)
+	self:addChild(self._uiLayer,1300)
 	self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_5/jie_mian_5.json")
 	self._uiLayer:addChild(self._widget)
 	--self._widget:setScaleX(0.5)
@@ -427,7 +429,7 @@ function AMouseScene:game_top10_Dialog( where )
 	--周排行
 	local function week_top( sender,eventType )
 		if eventType == ccui.TouchEventType.ended then
-			print("week top")
+			kits.log("week top")
 			self:clean_top_list()
 			self:set_top_list(s_week_rank_url)
 		elseif eventType == ccui.TouchEventType.began then
@@ -442,7 +444,7 @@ function AMouseScene:game_top10_Dialog( where )
 	--总排行
 	local function all_top( sender,eventType )
 		if eventType == ccui.TouchEventType.ended then
-			print("total top")
+			kits.log("total top")
 			self:clean_top_list()
 			self:set_top_list(s_all_rank_url)
 		elseif eventType == ccui.TouchEventType.began then
@@ -478,6 +480,7 @@ end
 function AMouseScene:close_Dialog()
 	if self._uiLayer then
 		local layer = self._uiLayer
+		layer:setVisible(false)
 		uikits.delay_call(self,function() 
 			layer:removeFromParent()
 			layer = nil end,0)
@@ -513,18 +516,19 @@ function AMouseScene:save_player_data()
 		if s then
 			kits.write_local_file('amouse_stage.json',s)
 		else
-			print("save_player_data error!")
+			kits.log("save_player_data error!")
 		end
 	end
 end
 
 function AMouseScene:game_start_Dialog()
-	print("game start dialog")
+	kits.log("game start dialog")
 	self:close_Dialog()
 	if self._uiLayer then return end
-		
+	
+	self._hummer:setVisible(false)
 	self._uiLayer = cc.Layer:create()
-	self:addChild(self._uiLayer)
+	self:addChild(self._uiLayer,1200)
 	self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_4/jie_mian_4.json")
 	self._uiLayer:addChild(self._widget)
 --	self._widget:setScaleX(0.5)
@@ -532,14 +536,14 @@ function AMouseScene:game_start_Dialog()
 	--self._widget:setPosition(cc.p(0,-self._ss.height/10))
 	local function setting(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
-			print("game setting...")
+			kits.log("game setting...")
 			self:game_setting_Dialog( self.game_start_Dialog )
 			self:play_sound( SND_UI_CLICK )						
 		end
 	end
 	local function top10(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
-			print("game top10...")
+			kits.log("game top10...")
 			self:game_top10_Dialog( self.game_start_Dialog )
 			self:play_sound( SND_UI_CLICK )						
 		end
@@ -550,9 +554,9 @@ function AMouseScene:game_start_Dialog()
 	end
 	local function stages(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
-			print( "game new game...")
+			kits.log( "game new game...")
 			self._stage = tonumber(string.match(sender:getName(),'0+%d0*'))
-			print( "game level "..self._stage )
+			kits.log( "game level "..self._stage )
 			self:delay_call( new_game,0,0.1 )
 			self:play_sound( SND_UI_CLICK )						
 		end
@@ -599,7 +603,7 @@ function AMouseScene:game_end_Dialog()
 	--60分过关
 	local fen100 = self:getIntegration()
 	local b = fen100 > 60
-	print("分数:"..self:getIntegration())
+	kits.log("分数:"..self:getIntegration())
 	local function exitGame(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
@@ -715,7 +719,7 @@ function AMouseScene:init_role()
 	end
 	
 	if self._time_bar then
-		self._time_widget:addChild(self._worm,100)
+		self._time_widget:addChild(self._worm,110)
 		local worm = self._time_widget:getChildByTag(359) --小虫
 		local x,y = worm:getPosition()
 		--隐藏静态虫子
@@ -746,7 +750,7 @@ function AMouseScene:init_role()
 			bone:addDisplay(self._choose_text[i],0)
 			bone:changeDisplayWithIndex(0,true)
 		end
-		self:addChild(self._amouse[i])
+		self:addChild(self._amouse[i],111)
 		self._choose_text[i]:setFontSize(50)
 		self._choose_text[i]:setColor(cc.c3b(0,0,0))
 	end
@@ -754,14 +758,14 @@ function AMouseScene:init_role()
 	self._hummer = ccs.Armature:create("NewAnimation")
 	self:hummer_home()
 	self._hummer:getAnimation():playWithIndex(1)
-	self:addChild(self._hummer)
+	self:addChild(self._hummer,2000)
 end
 
 --延迟调用
 function AMouseScene:delay_call(func,param,delay)
 	local schedulerID
 	if func == nil then
-		print( "func = nil?")
+		kits.log( "func = nil?")
 		return
 	end
 	if not schedulerID then
@@ -792,8 +796,12 @@ function AMouseScene:show_right(i)
 			self._amouse[i]:getAnimation():playWithIndex(6)
 		end
 	end
-	self:show_right_word(1,false)
-	self:show_right_word(2,false)
+	if self._answer_num == 1 then
+		self:show_right_word(1,false)
+		self:show_right_word(2,false)
+	elseif self._answer_num == 2 then
+		self:show_right_word(2,false)
+	end
 end
 
 --开始下一个词
@@ -914,11 +922,11 @@ function AMouseScene:init_event()
 			--返回上一层对话栏
 			--if event == ccui.TouchEventType.ended then
 				if self._where then
-					print( 'self._where:')
+					kits.log( 'self._where:')
 					self._where( self )
 				else
 					--Android return key
-					print( 'self._where: nil')
+					kits.log( 'self._where: nil')
 					self:stop_music()
 					backMain()
 				end
@@ -986,7 +994,7 @@ function AMouseScene:set_word( yp,np )
 			self._choose_text[i]:setString(p[v])
 		end
 	else
-		print("Error word")
+		kits.log("Error word")
 	end
 end
 
@@ -1050,10 +1058,10 @@ function AMouseScene:select_word(index)
 			self:set_word(yp,np)
 		else
 			--error?
-			print("error?")
-			print("flag="..flag)
-			print("yp="..#yp)
-			print("np="..#np)
+			kits.log("error?")
+			kits.log("flag="..flag)
+			kits.log("yp="..#yp)
+			kits.log("np="..#np)
 			self._word_index = self._word_index + 1
 			self:next_select()
 		end
@@ -1111,7 +1119,7 @@ function AMouseScene:init_data( i )
 			end
 	  end
 	else
-		print("Can\'t open resource file : res/amouse/data/.xml")
+		kits.log("Can\'t open resource file : res/amouse/data/.xml")
 	end
 	--一次加载全部的词，然后随机挑出_word_num个词
 	if self._word_num <= #self._words then
@@ -1317,10 +1325,11 @@ end
 
 function AMouseScene:startStage()
 	self._pause = false
+	self._hummer:setVisible(true)
 	--初始化游戏数据
 	self:init_data(self._stage)
 	--开雪花
-	print("New game...")
+	kits.log("New game...")
 	--新的音乐
 	self:play_music()
 	--self:LavaFlow(3)
@@ -1337,16 +1346,16 @@ function AMouseScene:init()
 	if not self._ss then
 		self._ss = cc.Director:getInstance():getVisibleSize()
 		local radio = self._ss.width/self._ss.height
-		print("radio = "..radio )
+		kits.log("radio = "..radio )
 		if radio <= 15/9 and radio >= 4/3 then
 			self._screen = 1
-			print("4/3" )
+			kits.log("4/3" )
 		elseif radio >= 15/9 then
 			self._screen = 2
-			print("16/9" )
+			kits.log("16/9" )
 		else
 			self._screen = 1
-			print("4/3" )
+			kits.log("4/3" )
 		end
 		if uikits.get_factor() == uikits.FACTOR_9_16 then
 			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
@@ -1371,7 +1380,7 @@ end
 
 --释放
 function AMouseScene:release()
-	if not self._uiScene then
+	if not self._uiScene and not self._uiLayer  then
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/NewAnimation.ExportJson")
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/chong_zi/chong_zi.ExportJson")
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo("amouse/xing/xing.ExportJson")
