@@ -19,9 +19,6 @@ local ui = {
 	BANJI_VIEW = 'leirong/banji',
 	PER_BANJI_VIEW = 'leirong/banji/ban1',
 	BANJI_LABEL = 'bm',
-	
-	FILE_RET = 'homework/laoshizuoye/fubujieshu.json',
-	FILE_RET_3_4 = 'homework/laoshizuoye/fubujieshu43.json',
 }
 
 local day_index_seled
@@ -80,20 +77,20 @@ function Publishhw:showbanjilist(tb_banji)
 end
 
 function Publishhw:getdatabyurl()
-	local send_url = 'http://api.lejiaolexue.com/rest/user/125907/zone/class'
+	local send_url = 'http://api.lejiaolexue.com/rest/user/'..login.uid()..'/zone/class'
 	local loadbox = loadingbox.open(self)
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
 				if t.result == 0 then
-					--local tb_banji = t.zone
-					local tb_banji = {}
+					self.tb_banji = t.zone
+--[[					local tb_banji = {}
 					for i=1,10 do 
 						tb_banji[i] = t.zone[1]
-					end
-					self:showbanjilist(tb_banji)
+					end--]]
+					self:showbanjilist(self.tb_banji)
 				end
 			else
-				--��û������Ҳû�л���
+				--既没有网络也没有缓冲
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
 						self:init()
@@ -104,6 +101,120 @@ function Publishhw:getdatabyurl()
 			end
 			loadbox:removeFromParent()
 		end,'NC')
+end
+
+local new_homework_url = 'http://new.www.lejiaolexue.com/paper/handler/AddPaper.ashx?idx=1&title=1'
+local add_homework_item_url = 'http://new.www.lejiaolexue.com/paper/handler/ManuallyItem.ashx'
+local publish_homework_url = 'http://new.www.lejiaolexue.com/exam/handler/pubexam.ashx'
+local finish_days = {
+1,
+2,
+4,
+8,
+9,
+15,
+30,
+60,
+}
+
+function Publishhw:format_item_list()
+	local ret = {}
+	for i,v in pairs(self.tb_parent_view._confirm_item) do
+		local per_item_info = {}
+		per_item_info.item_id = v.item_id
+		per_item_info.item_type = v.item_type
+		per_item_info.origin = 1
+		per_item_info.sort = 100
+		ret[#ret+1] = per_item_info
+	end
+	self._item_count = #ret
+	return ret
+end
+
+function Publishhw:format_publish_data()
+	local ret 
+	local data_cur_sec = os.time()
+	local tb_data = os.date("*t",data_cur_sec )
+	local data_cur_begain = data_cur_sec - tb_data.hour*60*60 - tb_data.min*60 - tb_data.sec
+	local data_finish = data_cur_begain + finish_days[day_index_seled]*24*60*60 + 6*60*60
+	local tb_data_finish = os.date("*t",data_finish )
+	ret = '?exam_name='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'
+	ret = ret..'&paper_id='..self._paperid
+	ret = ret..'&course='..self.tb_parent_view._selector[1].id
+	ret = ret..'&book_version='..self.tb_parent_view._selector[2].id
+	ret = ret..'&node_vol='..self.tb_parent_view._selector[3].id
+	ret = ret..'&node_unit='..self.tb_parent_view._selector[4].id
+	ret = ret..'&node_section='..self.tb_parent_view._selector[5].id
+	ret = ret..'&node_section_name='..self.tb_parent_view._selector[5].name
+	ret = ret..'&period=1&tag_solution=1&tag_selfcheck=1&comment=0&score_type=2&from=1&exam_type=11'
+	ret = ret..'&from_user_id='..login.uid()
+	ret = ret..'&items='..self._item_count
+	ret = ret..'&open_time='..os.date("%Y-%m-%d %X",data_cur_sec )
+	ret = ret..'&finish_time='..os.date("%Y-%m-%d %X",data_finish )
+	
+	local classdata = {}
+	for i,v in pairs(self.tb_banji) do
+		local per_classdata = {}
+		per_classdata.class_id = v.zone_id
+		per_classdata.group_id = ''
+		classdata[#classdata+1] = per_classdata
+	end
+	local tb_class = {}
+	tb_class.result = classdata
+	ret = ret..'&classandgroup='..json.encode(tb_class)
+	return ret
+end
+
+function Publishhw:publish_homework()
+	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
+	local send_url = new_homework_url..send_data_course
+	local result = kits.http_get(send_url,login.cookie(),1)
+	if type(result)=='string' then
+		self._paperid = result
+	else
+		kits.log('new_homework  error')
+		return
+	end
+
+	local send_data_pid = '?pid='..self._paperid
+	local tb_para = self:format_item_list()
+	local send_data_para = '&para='..json.encode(tb_para)
+	
+	send_url = add_homework_item_url..send_data_pid..send_data_para
+	result = kits.http_get(send_url,login.cookie(),1)
+	if result == 'True' then
+		
+	else
+		kits.log('add_homework_item  error')
+		return
+	end
+	
+	local send_data = self:format_publish_data()
+	send_url = publish_homework_url..send_data
+	result = kits.http_get(send_url,login.cookie(),1)
+	if result == '' then
+		uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+	else
+		kits.log('add_homework_item  error')
+		return
+	end
+--[[	local loadbox = loadingbox.open(self)
+	cache.request_json( send_url,function(t)
+			if t and type(t)=='table' then
+				
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:init()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+			end
+			is_loading = false
+			loadbox:removeFromParent()
+		end,'NC')--]]
 end
 
 function Publishhw:init()
@@ -129,7 +240,8 @@ function Publishhw:init()
 
 	uikits.event(but_confirm,
 		function(sender,eventType)
-		uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+		--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+		self:publish_homework()
 	end,"click")	
 
 	banji_sel_num = 0

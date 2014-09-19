@@ -23,8 +23,9 @@ local ui = {
 	ITEM_TYPE = 'ys/lx',
 	ITEM_DIFF = 'ys/nd',
 	ITEM_PER_WRONG = 'ys/cwl',
-	ITEM_CHECKBOX_CONFIRM = 'ys/xz',
+	ITEM_CHECKBOX_CONFIRM = 'ys/shancu',
 	ITEM_QUESTION_VIEW = 'tu',
+	ITEM_NO_FOUND = 'nofound',
 --[[	
 	BUTTON_PREVIEW = 'ding/yl',--]]
 	}
@@ -42,7 +43,6 @@ function Edithwbyobj.create(tb_parent_view)
 	end
 	--layer.confirm_count = #layer.collect_items
 	layer.parentview = tb_parent_view
-
 	scene:addChild(layer)
 	
 	local function onNodeEvent(event)
@@ -61,7 +61,7 @@ function Edithwbyobj:addcollectitem(index,collectitem,page,src_collect_view)
 	local row_num 
 	local pos_x
 	local pos_y		
-	
+
 	local collect_view = src_collect_view:clone()
 	local size  = collect_view:getContentSize()
 
@@ -71,14 +71,13 @@ function Edithwbyobj:addcollectitem(index,collectitem,page,src_collect_view)
 	collect_view:setVisible(true)						
 	pos_y = page:getInnerContainerSize().height-(size.height+ collect_space)*row_num	
 	collect_view:setPosition(cc.p(pos_x,pos_y))	
-
 	local label_item_name = uikits.child(collect_view,ui.ITEM_TYPE)
 	local wrong_per = uikits.child(collect_view,ui.ITEM_PER_WRONG)
 	local label_difficulty = uikits.child(collect_view,ui.ITEM_DIFF)
 	local but_confirm = uikits.child(collect_view,ui.ITEM_CHECKBOX_CONFIRM)
 	local questions_view = uikits.child(collect_view,ui.ITEM_QUESTION_VIEW)
 	
-	uikits.event(but_confirm,
+--[[	uikits.event(but_confirm,
 		function(sender,eventType)
 			local label_num = uikits.child(self._widget,ui.LABEL_NUM)
 			if eventType == false then
@@ -89,7 +88,17 @@ function Edithwbyobj:addcollectitem(index,collectitem,page,src_collect_view)
 				self.parentview.temp_items[collectitem.item_id_num] = {}
 			end
 			label_num:setString(self.confirm_count)
-	end)	
+	end)	--]]
+	
+	uikits.event(but_confirm,
+		function(sender,eventType)
+			print("collectitem.item_id_num::"..collectitem.item_id_num)
+			self.confirm_count = self.confirm_count-1
+			self.parentview.temp_items[collectitem.item_id_num] = collectitem
+			local label_num = uikits.child(self._widget,ui.LABEL_NUM)
+			label_num:setString(self.confirm_count)
+			self:removeitem()
+	end,"click")	
 	
 	local size_questions_view = questions_view:getContentSize()
 
@@ -127,25 +136,57 @@ function Edithwbyobj:addcollectitem(index,collectitem,page,src_collect_view)
 						end
 					end)
 					
-	page:addChild(collect_view,1,1000+index)		
+	page:addChild(collect_view,1,1000+collectitem.item_id_num)		
+end
+
+function Edithwbyobj:removeitem()
+	local page_data = uikits.child(self._widget,ui.QUESTION_VIEW)				
+	local per_collectview = uikits.child(self._widget,ui.PER_QUESTION_VIEW)
+	
+	local collectview = page_data:getChildren()
+	for i,obj in pairs(collectview) do
+		for j,v in pairs(self.parentview.temp_items) do
+			if v.item_id_num+1000 == obj:getTag() then
+				obj:setVisible(false)
+			end
+		end
+	end
+	local row_num = self.confirm_count
+	local size  = per_collectview:getContentSize()	
+	local size_win = self._widget:getContentSize()
+	page_data:setInnerContainerSize(cc.size(size_win.width,(size.height+collect_space)*row_num))
+	local index = 0
+	for i,obj in pairs(collectview) do
+		local is_show = obj:isVisible()
+		if is_show == true then
+			index = index+1
+			pos_y = page_data:getInnerContainerSize().height-(size.height+ collect_space)*index	
+			obj:setPositionY(pos_y)	
+		end		
+	end				
 end
 
 function Edithwbyobj:updatepage()
 	local page_data = uikits.child(self._widget,ui.QUESTION_VIEW)				
 	local per_collectview = uikits.child(self._widget,ui.PER_QUESTION_VIEW)
-		
+	
+--[[	print(#self.parentview.temp_items)
 	--计算行数，设置滚动层长度
+	if #self.parentview.temp_items ~= 0 then
+		for i,obj in pairs(self.collect_items) do
+			page_data:removeChildByTag(1000+obj.item_id_num)
+		end
+	end--]]
 	local row_num = self.confirm_count
-	print(row_num)
+	
 	local size  = per_collectview:getContentSize()	
 	local size_win = self._widget:getContentSize()
 	page_data:setInnerContainerSize(cc.size(size_win.width,(size.height+collect_space)*row_num))
 	local index = 0
 	for i,obj in pairs(self.collect_items) do
 		index = index+1
-		self:addcollectitem(index,obj,page_data,per_collectview)
-	end				
-
+		self:addcollectitem(index,obj,page_data,per_collectview)			
+	end			
 end
 
 function Edithwbyobj:init()
@@ -180,7 +221,7 @@ function Edithwbyobj:init()
 	page_data:setBounceEnabled(false)
 	per_item_view:setVisible(false)
 	local but_confirm = uikits.child(per_item_view,ui.ITEM_CHECKBOX_CONFIRM)
-	but_confirm:setSelectedState(true)
+	--but_confirm:setSelectedState(true)
 	self:updatepage()
 --	self:getdatabyurl()
 end

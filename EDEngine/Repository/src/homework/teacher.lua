@@ -66,8 +66,8 @@ local ui = {
 	TOPICS_SELECT_UNIT_ITEM = 'dy1',
 	TOPICS_SELECT_SECTION = 'xuan/kewen', 
 	TOPICS_SET_HOMEWORK_TITLE = 'ys1',
-	TOPICS_SELECT_HOMEWORK_TITLE = 'ys3',
-	TOPICS_SELECT_QUEREN = 'ys3/queren',
+	TOPICS_SET_HOMEWORK_XIUGAI = 'ys1/xiugai',
+	TOPICS_SELECT_QUEREN = 'ys2/qr',
 	TOPICS_SET_BUTTON_BY_LES = 'xuanze/zz',
 	TOPICS_SET_BUTTON_BY_ERR = 'xuanze/ct',
 	TOPICS_SET_LABEL_EMPTY = 'xuanze/wen1',
@@ -228,15 +228,18 @@ function TeacherList:init_ready_batch()
 	end
 	return true
 end
+
 --布置
 function TeacherList:init_ready_release()
 	cache.request_cancel()
-	
+	self._confirm_item = {}	
 	self._scrollview:setVisible(false)
 	self._release:setVisible(true)
 	self._setting:setVisible(false)
 	self._statistics_root:setVisible(false)
-	self:release_select_list()
+
+	self:set_homework_ui(1)
+	self:release_select_list()	
 	return true
 end
 --历史
@@ -601,7 +604,7 @@ function TeacherList:level_clear( level )
 end
 
 function TeacherList:release_select_list( level )
---[[	level = level or 1
+	level = level or 1
 	self._selector = self._selector or {}
 	local url = "http://api.lejiaolexue.com/resource/coursehandler.ashx?limit=1"
 	for i = 1,level do
@@ -635,32 +638,61 @@ function TeacherList:release_select_list( level )
 					end
 				end
 			end
-		end)--]]
-	self._confirm_item = {}	
-	local button = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
-	uikits.event(button,
+		end)
+end
+
+	
+function TeacherList:set_homework_ui(index)
+	local edit_homework_title = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_TITLE)
+	local sel_homework_title = uikits.child(self._release,ui.TOPICS_SELECT)
+	local sel_homework_view = uikits.child(self._release,ui.TOPICS_SELECT_UI)
+	local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
+	local add_homework_view = uikits.child(self._release,ui.TOPICS_SELECT_BUTTON)
+	
+	if index == 1 then
+		sel_homework_title:setVisible(true)
+		sel_homework_view:setVisible(true)
+		edit_homework_title:setVisible(false)
+		edit_homework_view:setVisible(false)
+		add_homework_view:setVisible(false)
+	elseif index == 2 then
+		sel_homework_title:setVisible(false)
+		sel_homework_view:setVisible(false)
+		edit_homework_title:setVisible(true)
+		edit_homework_view:setVisible(false)
+		add_homework_view:setVisible(true)
+	elseif index == 3 then
+		sel_homework_title:setVisible(false)
+		sel_homework_view:setVisible(false)
+		edit_homework_title:setVisible(true)
+		edit_homework_view:setVisible(true)
+		add_homework_view:setVisible(true)				
+	end
+	local but_confirm = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
+	local but_edit = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_XIUGAI)
+
+	uikits.event(but_confirm,
 		function(sender,eventType)
 		self:set_homework_view()
 		self.temp_items = {}
 		self.edit_type = 0
 	end,"click")
+	uikits.event(but_edit,
+		function(sender,eventType)
+		self:set_homework_ui(1)
+	end,"click")
 end
 
 function TeacherList:set_homework_view( )
-	local set_title = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_TITLE)
-	local set_button_view = uikits.child(self._release,ui.TOPICS_SELECT_BUTTON)
-	set_title:setVisible(true)	
-	set_button_view:setVisible(true)	
-	local select_title = uikits.child(self._release,ui.TOPICS_SELECT_HOMEWORK_TITLE)
-	local select_view = uikits.child(self._release,ui.TOPICS_SELECT_UI)
-	select_title:setVisible(false)	
-	select_view:setVisible(false)	
+	self:set_homework_ui(2)
+
 	local set_button_by_les = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_LES)
 	local set_button_by_err = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_ERR)
 	uikits.event(set_button_by_les,
 		function(sender,eventType)
+		self.edit_type = 1 --添加模式
 		is_need_update = false
-		uikits.pushScene(Sethwbyles.create())
+		uikits.pushScene(Sethwbyles.create(self))
 	end,"click")
 	uikits.event(set_button_by_err,
 		function(sender,eventType)
@@ -673,11 +705,7 @@ function TeacherList:set_homework_view( )
 	local but_obj_edit = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_BUT)
 	local item_obj_pic = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
 	local publish_but = uikits.child(self._release,ui.TOPICS_EDIT_PUBLISH_BUT)
-	
---[[	if self._confirm_item ~= {} then
-		item_obj_pic
-	end --]]
-	
+
 	label_obj_num:setString(#self._confirm_item)
 	uikits.event(but_obj_edit,
 		function(sender,eventType)

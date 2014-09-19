@@ -878,12 +878,12 @@ http://new.www.lejiaolexue.com/paper/handler/GetItemType.ashx?
 取题
 http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?
 	course:10001
-	bv:0
-	vol:0
-	unit:0
-	section:0
-	type:0
-	diff:0
+	bv:0 版本
+	vol:0 册
+	unit:0 单元
+	section:0 课
+	type:0    类型
+	diff:0    难度
 	p:1
 	paperId:6d34229c768a4c7b87511b29a6b8c77f
 可能的数据
