@@ -66,6 +66,7 @@ local ui = {
 	TOPICS_SELECT_QUEREN = 'ys2/qr',
 	TOPICS_SET_BUTTON_BY_LES = 'xuanze/zz',
 	TOPICS_SET_BUTTON_BY_ERR = 'xuanze/ct',
+	TOPICS_SET_LABEL_BY_ERR = 'xuanze/wen5',
 	TOPICS_SET_LABEL_EMPTY = 'xuanze/wen1',
 	TOPICS_EDIT_HOMEWORK_VIEW = 'zuoye',
 	TOPICS_EDIT_OBJ_NUM = 'zuoye/keguang/shul',
@@ -78,6 +79,11 @@ local ui = {
 	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
 	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
 	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
+	TOPICS_SELECT_TITLE_COURSE = 'ys1/kemu',
+	TOPICS_SELECT_TITLE_BV = 'ys1/banben',
+	TOPICS_SELECT_TITLE_VOL = 'ys1/nianji',
+	TOPICS_SELECT_TITLE_UNIT = 'ys1/danyuan',
+	TOPICS_SELECT_TITLE_SECTION = 'ys1/kewen',
 }
 
 local is_need_update
@@ -555,9 +561,44 @@ end
 
 function TeacherList:set_homework_view( )
 	self:set_homework_ui(2)
-
+	
+	local label_course = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_COURSE)
+	local label_bv = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_BV)
+	local label_vol = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_VOL)
+	local label_unit = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_UNIT)
+	local label_section = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_SECTION)
+	
+	if self._selector[1] then
+		label_course:setString(self._selector[1].name)
+	else
+		label_course:setString("")
+	end
+	if self._selector[2] then
+		label_bv:setString(self._selector[2].name)
+	else
+		label_bv:setString("")
+	end
+	if self._selector[3] then
+		label_vol:setString(self._selector[3].name)
+	else
+		label_vol:setString("")
+	end
+	if self._selector[4] then
+		label_unit:setString(self._selector[4].name)
+	else
+		label_unit:setString("")
+	end
+	if self._selector[5] then
+		label_section:setString(self._selector[5].name)
+	else
+		label_section:setString("")
+	end
+	
 	local set_button_by_les = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_LES)
 	local set_button_by_err = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_ERR)
+	local set_label_by_err = uikits.child(self._release,ui.TOPICS_SET_LABEL_BY_ERR)
+	set_label_by_err:setVisible(false)
+	set_button_by_err:setVisible(false)
 	uikits.event(set_button_by_les,
 		function(sender,eventType)
 		self.edit_type = 1 --添加模式
