@@ -13,6 +13,7 @@ local test_login =
 }
 local selector = 2
 local g_cookie
+local g_uid
 local function set_cookie( cookie )
 	g_cookie = cookie
 end
@@ -30,7 +31,11 @@ local function get_cookie()
 end
 
 local function get_uid()
-	return test_login[selector].uid
+	if g_uid then
+		return g_uid
+	else
+		return test_login[selector].uid
+	end
 end
 
 local logo_url = 'http://image.lejiaolexue.com/ulogo/'

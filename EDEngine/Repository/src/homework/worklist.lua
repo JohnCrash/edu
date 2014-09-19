@@ -400,7 +400,7 @@ function WorkList:init_statistics()
 	self:show_list(false)
 	self._setting:setVisible(false)
 	if not self._statistics_data then
-		local result = kits.read_cache('statatics.json')
+		local result = kits.read_cache('backup-2/statatics.json')
 		local msg
 		if result then
 			self._statistics_data,msg = json.decode(result)

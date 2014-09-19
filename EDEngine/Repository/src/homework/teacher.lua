@@ -17,7 +17,7 @@ local res_local = "homework/"
 local subjectiveedit = require "homework/subjectiveedit"
 
 crash.open("teacher",1)
-
+local course_icon = topics.course_icon
 local ui = {
 	FILE = 'homework/laoshizuoye/daiyue.json',
 	FILE_3_4 = 'homework/laoshizuoye/daiyue43.json',
@@ -25,6 +25,10 @@ local ui = {
 	MORE_3_4 = 'homework/laoshizuoye/gengduo43.json',	
 	RELEASEPAGE = 'homework/laoshizuoye/buzhi.json',
 	RELEASE_3_4 = 'homework/laoshizuoye/buzhi43.json',
+	STATISTICS_FILE = 'homework/laoshizuoye/tongji.json',
+	STATISTICS_FILE_3_4 = 'homework/laoshizuoye/tongji43.json',
+	LESSON_LIST = 'lr1',
+	LESSON = 'lesson',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
 	BACK = 'ding/back',
@@ -78,6 +82,20 @@ local ui = {
 	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
 	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
 	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
+	
+	ST_CAPTION = 'lesson1/text1',
+	ST_SCROLLVIEW = 'lesson_view',
+	ST_MONTH = 'month',
+	ST_DATE = 'years',
+	ST_COUNT = 'text6',
+	ST_AVERAGE='text2',
+	ST_TIME='text4',
+--	ST_COUNT_BAR='number_bar',
+--	ST_AVERAGE_BAR='average_bar',
+--	ST_TIME_BAR='time_bar',
+	ST_COUNT_TEXT='text_no',
+	ST_AVERAGE_TEXT='text_av',
+	ST_TIME_TEXT='text_ti',	
 }
 
 local is_need_update
@@ -201,6 +219,7 @@ function TeacherList:init_ready_batch()
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
+	self._statistics_root:setVisible(false)
 	if not self._scID and not self._busy then
 		self._mode = ui.READYBATCH
 		self._scrollview:clear()
@@ -216,6 +235,7 @@ function TeacherList:init_ready_release()
 	self._scrollview:setVisible(false)
 	self._release:setVisible(true)
 	self._setting:setVisible(false)
+	self._statistics_root:setVisible(false)
 	self:release_select_list()
 	return true
 end
@@ -226,6 +246,7 @@ function TeacherList:init_ready_history()
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
+	self._statistics_root:setVisible(false)
 	self._scrollview:clear()
 	if not self._scID and not self._busy then
 		self._mode = ui.HISTORY
@@ -234,6 +255,58 @@ function TeacherList:init_ready_history()
 	end
 	return true
 end
+function TeacherList:clone_statistics_item(v)
+	local item = self._statistics_item:clone()
+	if item then
+		if v.course and course_icon[v.course] then
+			uikits.child(item,ui.ST_CAPTION):setString(course_icon[v.course].name )
+		end
+		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
+		local idx = 1
+		local sitem
+		local list = {}
+		local size
+		local ox,oy
+		if v.pm and type(v.pm)=='table' then
+			for i,t in pairs(v.pm) do
+				if t and t.date then
+					if idx == 1 then
+						sitem = uikits.child(scrollview,ui.ST_MONTH)
+						size = sitem:getContentSize()
+						ox,oy = sitem:getPosition()
+					else
+						sitem = uikits.child(scrollview,ui.ST_MONTH):clone()
+						scrollview:addChild(sitem)
+					end
+					--次数
+					local ct = uikits.child(sitem,ui.ST_COUNT)
+					ct:setString(tostring(t.count))
+					--平均分
+					local av = uikits.child(sitem,ui.ST_AVERAGE)
+					av:setString(tostring(t.scroe))
+					--用时
+					local ti = uikits.child(sitem,ui.ST_TIME)
+					ti:setString(tostring(t.time))
+					
+					table.insert(list,sitem)
+					uikits.child(sitem,ui.ST_DATE):setString(t.date)
+					idx = idx + 1
+				end
+			end
+			--排列
+			scrollview:setInnerContainerSize(cc.size(size.width*#list,size.height))
+			for i,t in pairs(list) do
+				t:setPosition(cc.p(ox+size.width*(i-1),oy))
+			end
+		end
+		item:setVisible(true)
+		self._statistics_view:addChild(item)
+		self._statistics_list = self._statistics_list or {}
+		table.insert(self._statistics_list,item)
+	end
+	return item
+end
+
 --统计
 function TeacherList:init_ready_statistics()
 	cache.request_cancel()
@@ -241,8 +314,50 @@ function TeacherList:init_ready_statistics()
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
+	self._statistics_root:setVisible(true)
+	self:show_statistics(true)
+	if not self._statistics_data then
+		local result = kits.read_cache('backup-2/statatics.json')
+		local msg
+		if result then
+			self._statistics_data,msg = json.decode(result)
+		end
+		if self._statistics_data and type(self._statistics_data)=='table' then
+			for i,v in pairs(self._statistics_data) do
+				self:clone_statistics_item(v)
+			end
+		else
+			kits.log('decode json error:'..tostring(msg))
+		end		
+	end	
+	self:relayout_statistics()
 	return true
 end
+
+function TeacherList:show_statistics(b)
+	if self._statistics_list then
+		for i,v in pairs(self._statistics_list) do
+			v:setVisible(b)
+		end
+	end
+end
+
+function TeacherList:relayout_statistics()
+	if self._statistics_list then
+		local height = self._statistics_item_height*(#self._statistics_list)
+		self._statistics_view:setInnerContainerSize(cc.size(self._statistics_item_width,height))
+		local offy = 0
+		local size = self._statistics_view:getContentSize()
+		if height < size.height then
+			offy = size.height - height --顶到顶
+		end
+
+		for i = 1,#self._statistics_list do
+			self._statistics_list[#self._statistics_list-i+1]:setPosition(cc.p(self._statistics_item_ox,self._statistics_item_height*(i-1)+offy))
+		end
+	end
+end
+
 --设置
 function TeacherList:init_ready_setting()
 	cache.request_cancel()
@@ -250,6 +365,7 @@ function TeacherList:init_ready_setting()
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
 	self._release:setVisible(false)
+	self._statistics_root:setVisible(false)
 	return true
 end
 
@@ -269,6 +385,20 @@ function TeacherList:init_gui()
 		end)
 	end
 	self._root:addChild(self._setting)
+	
+	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
+	self:addChild(self._statistics_root)
+	self._statistics_view = uikits.child(self._statistics_root,ui.LESSON_LIST)
+	self._statistics_root:setVisible(false)
+	--self._statistics_view:setVisible(false)
+	local statistics_item = uikits.child(self._statistics_view,ui.LESSON)
+	self._statistics_item = statistics_item
+	if statistics_item then
+		size = statistics_item:getContentSize()
+		self._statistics_item_width = size.width
+		self._statistics_item_height = size.height
+		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
+	end
 	
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
