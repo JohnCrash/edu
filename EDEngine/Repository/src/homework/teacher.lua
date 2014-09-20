@@ -781,10 +781,12 @@ function TeacherList:init()
 		local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
 		if self.temp_items ~= {} then
 			for i,obj in pairs(self.temp_items) do
-				if self.edit_type == 1 then
-					self._confirm_item[obj.item_id_num] = obj
-				elseif self.edit_type == 2 then
-					self._confirm_item[obj.item_id_num] = nil
+				if obj.item_id_num ~= nil then
+					if self.edit_type == 1 then
+						self._confirm_item[obj.item_id_num] = obj
+					elseif self.edit_type == 2 then
+						self._confirm_item[obj.item_id_num] = nil
+					end
 				end
 			end
 			self.edit_type = 0
