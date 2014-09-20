@@ -73,6 +73,7 @@ local ui = {
 	TOPICS_SET_LABEL_BY_ERR = 'xuanze/wen5',
 	TOPICS_SET_LABEL_EMPTY = 'xuanze/wen1',
 	TOPICS_EDIT_HOMEWORK_VIEW = 'zuoye',
+	TOPICS_EDIT_HOMEWORK_KEGUAN = 'zuoye/keguang',
 	TOPICS_EDIT_OBJ_NUM = 'zuoye/keguang/shul',
 	TOPICS_EDIT_OBJ_BUT = 'zuoye/keguang/bianji',
 	TOPICS_EDIT_OBJ_PIC = 'zuoye/keguang/ti1',
@@ -749,6 +750,8 @@ function TeacherList:set_homework_view( )
 	local item_obj_pic = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
 	local publish_but = uikits.child(self._release,ui.TOPICS_EDIT_PUBLISH_BUT)
 
+	item_obj_pic:setVisible(false)
+	
 	label_obj_num:setString(#self._confirm_item)
 	uikits.event(but_obj_edit,
 		function(sender,eventType)
@@ -805,10 +808,23 @@ function TeacherList:init()
 		else
 			set_label_empty:setVisible(false)
 			edit_homework_view:setVisible(true)
+			local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_KEGUAN)
+			for i=1 , 3 do
+				local cur_obj_pic = edit_homework_view:getChildByTag(10000+i)
+				if cur_obj_pic ~= nil then
+					edit_homework_view:removeChildByTag(10000+i)
+				end
+			end
 			local label_obj_num = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_NUM)
 			local num = 0
+			local num_show_pic = 1
+			topics.set_scale(0.3)
 			for i,obj in pairs(self._confirm_item) do
-				num = num +1
+				num = num+1
+				if num_show_pic < 4 and obj.item_type then
+					self:add_homewrk_exp(num_show_pic,obj)
+					num_show_pic = num_show_pic +1
+				end
 			end
 			label_obj_num:setString(num)
 		end
@@ -816,8 +832,43 @@ function TeacherList:init()
 	end
 end
 
-function TeacherList:release()
+function TeacherList:add_homewrk_exp(index,item_data)
+	print('index;;'..index)
+	local item_obj_pic_src = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
+	local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_KEGUAN)
+	local size_view = item_obj_pic_src:getContentSize()
+	local view_space = item_obj_pic_src:getPositionX()
+	local cur_obj_pic = item_obj_pic_src:clone()
+	cur_obj_pic:setPositionX(view_space*index+size_view.width*(index-1))
+	cur_obj_pic:setVisible(true)
+	edit_homework_view:addChild(cur_obj_pic,1,10000+index)
 	
+	local scrollView = ccui.ScrollView:create()
+    scrollView:setTouchEnabled(true)
+    scrollView:setContentSize(size_view)        
+    scrollView:setPosition(cc.p(0,0))
+	
+    cur_obj_pic:addChild(scrollView)
+	local data = {}
+
+	if item_data.item_type > 0 and item_data.item_type < 13 then
+		if topics.types[item_data.item_type].conv(item_data,data) then
+			data.eventInitComplate = function(layout,data)
+				local arraychildren = scrollView:getChildren()
+				for i=1,#arraychildren do 
+					arraychildren[i]:setEnabled(false)
+				end
+			end
+			cur_obj_pic:setEnabled(false)
+			topics.types[item_data.item_type].init(scrollView,data)
+		end		
+	end	
+	
+end
+
+function TeacherList:release()
+	local default_scale = topics.get_default_scale()
+	topics.set_scale(default_scale)
 end
 
 return TeacherList
