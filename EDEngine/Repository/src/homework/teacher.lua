@@ -71,8 +71,10 @@ local ui = {
 	TOPICS_SELECT_QUEREN = 'ys2/qr',
 	TOPICS_SET_BUTTON_BY_LES = 'xuanze/zz',
 	TOPICS_SET_BUTTON_BY_ERR = 'xuanze/ct',
+	TOPICS_SET_LABEL_BY_ERR = 'xuanze/wen5',
 	TOPICS_SET_LABEL_EMPTY = 'xuanze/wen1',
 	TOPICS_EDIT_HOMEWORK_VIEW = 'zuoye',
+	TOPICS_EDIT_HOMEWORK_KEGUAN = 'zuoye/keguang',
 	TOPICS_EDIT_OBJ_NUM = 'zuoye/keguang/shul',
 	TOPICS_EDIT_OBJ_BUT = 'zuoye/keguang/bianji',
 	TOPICS_EDIT_OBJ_PIC = 'zuoye/keguang/ti1',
@@ -83,6 +85,13 @@ local ui = {
 	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
 	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
 	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
+
+	TOPICS_SELECT_TITLE_COURSE = 'ys1/kemu',
+	TOPICS_SELECT_TITLE_BV = 'ys1/banben',
+	TOPICS_SELECT_TITLE_VOL = 'ys1/nianji',
+	TOPICS_SELECT_TITLE_UNIT = 'ys1/danyuan',
+	TOPICS_SELECT_TITLE_SECTION = 'ys1/kewen',
+
 	
 	ST_CAPTION = 'lesson1/text1',
 	ST_T_C = 'lesson1/text3',
@@ -696,9 +705,44 @@ end
 
 function TeacherList:set_homework_view( )
 	self:set_homework_ui(2)
-
+	
+	local label_course = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_COURSE)
+	local label_bv = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_BV)
+	local label_vol = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_VOL)
+	local label_unit = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_UNIT)
+	local label_section = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_SECTION)
+	
+	if self._selector[1] then
+		label_course:setString(self._selector[1].name)
+	else
+		label_course:setString("")
+	end
+	if self._selector[2] then
+		label_bv:setString(self._selector[2].name)
+	else
+		label_bv:setString("")
+	end
+	if self._selector[3] then
+		label_vol:setString(self._selector[3].name)
+	else
+		label_vol:setString("")
+	end
+	if self._selector[4] then
+		label_unit:setString(self._selector[4].name)
+	else
+		label_unit:setString("")
+	end
+	if self._selector[5] then
+		label_section:setString(self._selector[5].name)
+	else
+		label_section:setString("")
+	end
+	
 	local set_button_by_les = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_LES)
 	local set_button_by_err = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_ERR)
+	local set_label_by_err = uikits.child(self._release,ui.TOPICS_SET_LABEL_BY_ERR)
+	set_label_by_err:setVisible(false)
+	set_button_by_err:setVisible(false)
 	uikits.event(set_button_by_les,
 		function(sender,eventType)
 		self.edit_type = 1 --添加模式
@@ -717,6 +761,8 @@ function TeacherList:set_homework_view( )
 	local item_obj_pic = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
 	local publish_but = uikits.child(self._release,ui.TOPICS_EDIT_PUBLISH_BUT)
 
+	item_obj_pic:setVisible(false)
+	
 	label_obj_num:setString(#self._confirm_item)
 	uikits.event(but_obj_edit,
 		function(sender,eventType)
@@ -749,10 +795,12 @@ function TeacherList:init()
 		local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
 		if self.temp_items ~= {} then
 			for i,obj in pairs(self.temp_items) do
-				if self.edit_type == 1 then
-					self._confirm_item[obj.item_id_num] = obj
-				elseif self.edit_type == 2 then
-					self._confirm_item[obj.item_id_num] = nil
+				if obj.item_id_num ~= nil then
+					if self.edit_type == 1 then
+						self._confirm_item[obj.item_id_num] = obj
+					elseif self.edit_type == 2 then
+						self._confirm_item[obj.item_id_num] = nil
+					end
 				end
 			end
 			self.edit_type = 0
@@ -771,10 +819,23 @@ function TeacherList:init()
 		else
 			set_label_empty:setVisible(false)
 			edit_homework_view:setVisible(true)
+			local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_KEGUAN)
+			for i=1 , 3 do
+				local cur_obj_pic = edit_homework_view:getChildByTag(10000+i)
+				if cur_obj_pic ~= nil then
+					edit_homework_view:removeChildByTag(10000+i)
+				end
+			end
 			local label_obj_num = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_NUM)
 			local num = 0
+			local num_show_pic = 1
+			topics.set_scale(0.3)
 			for i,obj in pairs(self._confirm_item) do
-				num = num +1
+				num = num+1
+				if num_show_pic < 4 and obj.item_type then
+					self:add_homewrk_exp(num_show_pic,obj)
+					num_show_pic = num_show_pic +1
+				end
 			end
 			label_obj_num:setString(num)
 		end
@@ -782,8 +843,43 @@ function TeacherList:init()
 	end
 end
 
-function TeacherList:release()
+function TeacherList:add_homewrk_exp(index,item_data)
+	print('index;;'..index)
+	local item_obj_pic_src = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
+	local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_KEGUAN)
+	local size_view = item_obj_pic_src:getContentSize()
+	local view_space = item_obj_pic_src:getPositionX()
+	local cur_obj_pic = item_obj_pic_src:clone()
+	cur_obj_pic:setPositionX(view_space*index+size_view.width*(index-1))
+	cur_obj_pic:setVisible(true)
+	edit_homework_view:addChild(cur_obj_pic,1,10000+index)
 	
+	local scrollView = ccui.ScrollView:create()
+    scrollView:setTouchEnabled(true)
+    scrollView:setContentSize(size_view)        
+    scrollView:setPosition(cc.p(0,0))
+	
+    cur_obj_pic:addChild(scrollView)
+	local data = {}
+
+	if item_data.item_type > 0 and item_data.item_type < 13 then
+		if topics.types[item_data.item_type].conv(item_data,data) then
+			data.eventInitComplate = function(layout,data)
+				local arraychildren = scrollView:getChildren()
+				for i=1,#arraychildren do 
+					arraychildren[i]:setEnabled(false)
+				end
+			end
+			cur_obj_pic:setEnabled(false)
+			topics.types[item_data.item_type].init(scrollView,data)
+		end		
+	end	
+	
+end
+
+function TeacherList:release()
+	local default_scale = topics.get_default_scale()
+	topics.set_scale(default_scale)
 end
 
 return TeacherList

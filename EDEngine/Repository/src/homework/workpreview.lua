@@ -54,8 +54,8 @@ function Workpreview:init_ui_from_data()
 		for i,v in pairs(self._data) do
 			self:add_item( v )
 		end
-		self:set_current(1)
 		self:relayout()
+		self:set_current(1)
 	end
 end
 
@@ -75,25 +75,29 @@ function Workpreview:load_original_data_from_table( data )
 			kits.log('	value='..tostring(v))
 		end
 		for i,v in pairs(ds) do
-			local __data = {}
-			local scrollView = ccui.ScrollView:create()
-			scrollView:setTouchEnabled(true)
-			scrollView:setContentSize(self._pageview_size)        
-			scrollView:setPosition(cc.p(0,0))
-			if v.item_type > 0 and v.item_type < 13 then
-		--		print(topics.types[item_data.item_type])
-				if topics.types[v.item_type].conv(v,__data) then
-					__data.eventInitComplate = function(layout,__data)
-						local arraychildren = scrollView:getChildren()
-						for i=1,#arraychildren do 
-							arraychildren[i]:setEnabled(false)
+			if v.item_type ~= nil then
+				local __data = {}
+				local scrollView = ccui.ScrollView:create()
+				scrollView:setTouchEnabled(true)
+				scrollView:setContentSize(self._pageview_size)        
+				scrollView:setPosition(cc.p(0,0))
+				kits.log('v.item_type;;'..v.item_type)
+
+				if v.item_type > 0 and v.item_type < 13 then
+			--		print(topics.types[item_data.item_type])
+					if topics.types[v.item_type].conv(v,__data) then
+						__data.eventInitComplate = function(layout,__data)
+							local arraychildren = scrollView:getChildren()
+							for i=1,#arraychildren do 
+								arraychildren[i]:setEnabled(false)
+							end
 						end
-					end
-					topics.types[v.item_type].init(scrollView,__data)
-				end		
-			end	
-			scrollView.state = ui.STATE_UNFINISHED
-			res[#res+1] = scrollView
+						topics.types[v.item_type].init(scrollView,__data)
+					end		
+				end	
+				scrollView.state = ui.STATE_UNFINISHED
+				res[#res+1] = scrollView			
+			end
 		end
 		if b then
 			self._next_button:setVisible(false)
@@ -114,8 +118,7 @@ function Workpreview:optimization_scrollview()
 			local inner_x,inner_y = inner:getPosition()
 			local size = self._scrollview:getContentSize()
 			for i,v in pairs(childs) do
-				if v ~= self._item_current and v ~= self._item_finished and 
-					v ~= self._item_unfinished then
+				if v ~= self._item_current and v ~= self._item_unfinished then
 					local x,y = v:getPosition()
 					if x+inner_x < 0 or x+inner_x > size.width then
 						v:setVisible(false)
@@ -190,7 +193,7 @@ function Workpreview:init_gui()
 	self._item_size = self._item_current:getContentSize()
 	
 	
-	local x
+--[[	local x
 	x,self._item_y = self._item_current:getPosition()
 	if self._data then
 		for i,v in pairs(self._data) do
@@ -198,7 +201,7 @@ function Workpreview:init_gui()
 		end
 		self:set_current(1)
 		self:relayout()
-	end
+	end--]]
 	self._pageview:setTouchEnabled(false)
 end
 
@@ -206,23 +209,21 @@ function Workpreview:relayout()
 	if self._scrollview and #self._list > 0 then
 		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
 		for i,v in ipairs(self._list) do
+			print("iiii;;;"..i)
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
 		end
 	end
 end
 
 function Workpreview:set_item_state( i,ste )
+	print("set_item_state::")
 	if self._list[i] then
 		local item = self._list[i]
 		local num = uikits.child(item,ui.ITEM_NUM)
 		local s = num:getString()
 		local x,y = item:getPosition()
-		--3.2不能再其方法内部释放对象
-		--item:removeFromParent()
-		--延迟释放
+
 		item:setVisible(false)
-		self._remove_items = self._remove_items or {}
-		table.insert(self._remove_items,item)
 		
 		item = self:clone_item(ste)
 		local n = uikits.child(item,ui.ITEM_NUM )
@@ -237,6 +238,7 @@ function Workpreview:set_item_state( i,ste )
 end
 
 function Workpreview:clone_item( state )
+	print('	zy: clone_item state = '..tostring(state))
 	if state == ui.STATE_CURRENT then
 		return self._item_current:clone()
 	elseif state == ui.STATE_UNFINISHED then
@@ -268,6 +270,7 @@ function Workpreview:set_current( i )
 end
 
 function Workpreview:add_item( t )
+	print("add_item::")
 	t.state = t.state or ui.STATE_UNFINISHED
 	local item = self:clone_item( t.state )
 	if item then
@@ -278,13 +281,7 @@ function Workpreview:add_item( t )
 		self._scrollview:addChild(item)
 		local index = #self._list
 		uikits.event(item,function(sender) self:set_current( index ) end,'began')
-		--add page
-		local layout = uikits.scrollview{bgcolor=cc.c3b(255,255,255)}
-		layout:setContentSize(self._pageview_size)
-		--layout:addChild(uikits.text{caption='Page'..#self._list,fontSize=32})
-		self._pageview:addPage( layout )
-		--layout:setTouchEnabled(false)
-		--self:set_image( #self._list )
+		self._pageview:addPage( t )
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
 	end

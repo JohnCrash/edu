@@ -27,7 +27,7 @@ local ui = {
 	ITEM_PER_WRONG = 'ys/cwl',
 	ITEM_CHECKBOX_CONFIRM = 'ys/xz',
 	ITEM_QUESTION_VIEW = 'tu',
-	ITEM_NO_FOUND = 'nofound',
+--	ITEM_NO_FOUND = 'nofound',
 }
 
 local Sethwbyles = class("Sethwbyles")
@@ -99,8 +99,8 @@ function Sethwbyles:getdatabyurl()
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
 				if t.t == 0 then
-					local label_item_nofound = uikits.child(self._widget,ui.ITEM_NO_FOUND)
-					label_item_nofound:setVisible(true)
+				--	local label_item_nofound = uikits.child(self._widget,ui.ITEM_NO_FOUND)
+				--	label_item_nofound:setVisible(true)
 					loadbox:removeFromParent()
 					return
 				end
@@ -123,7 +123,6 @@ function Sethwbyles:getdatabyurl()
 				self.itemcount = t.t
 				self:updatepage()
 			else
-				--既没有网络也没有缓冲
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
 						self:init()
@@ -217,9 +216,7 @@ function Sethwbyles:updatepage()
 	local page_data = uikits.child(self._widget,ui.QUESTION_VIEW)				
 	local per_collectview = uikits.child(self._widget,ui.PER_QUESTION_VIEW)
 		
-	--计算行数，设置滚动层长度
 	if self.pageindex == 1 then
-		--计算行数，设置滚动层长度
 		local collect_title_num = table.getn(self.collect_items)
 		--print(collect_title_num)
 		local row_num
@@ -271,13 +268,13 @@ function Sethwbyles:init()
 	end
 	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._widget)
-	local label_item_nofound = uikits.child(self._widget,ui.ITEM_NO_FOUND)
+	--local label_item_nofound = uikits.child(self._widget,ui.ITEM_NO_FOUND)
 	local but_back = uikits.child(self._widget,ui.BUTTON_BACK)
 	local but_preview = uikits.child(self._widget,ui.BUTTON_PREVIEW)
 	local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
 	local label_num = uikits.child(self._widget,ui.LABEL_NUM)
 	
-	label_item_nofound:setVisible(false)
+	--label_item_nofound:setVisible(false)
 	label_num:setString(self.confirm_count)
 	uikits.event(but_back,
 		function(sender,eventType)
