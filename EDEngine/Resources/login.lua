@@ -14,8 +14,13 @@ local test_login =
 local selector = 2
 local g_cookie
 local g_uid
+
 local function set_cookie( cookie )
 	g_cookie = cookie
+end
+
+local function set_userid( uid )
+	g_uid = uid
 end
 
 local function get_name()
@@ -67,4 +72,5 @@ return {
 	set_selector = set_selector,
 	test_login = test_login,
 	set_cookie = set_cookie,
+	set_userid = set_userid,
 }

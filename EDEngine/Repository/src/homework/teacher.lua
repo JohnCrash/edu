@@ -29,6 +29,7 @@ local ui = {
 	STATISTICS_FILE_3_4 = 'homework/laoshizuoye/tongji43.json',
 	LESSON_LIST = 'lr1',
 	LESSON = 'lesson',
+	CLASS_BUTTON = 'banji/ban1',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
 	BACK = 'ding/back',
@@ -84,6 +85,9 @@ local ui = {
 	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
 	
 	ST_CAPTION = 'lesson1/text1',
+	ST_T_C = 'lesson1/text3',
+	ST_T_A = 'lesson1/text5',
+	ST_T_T = 'lesson1/text7',	
 	ST_SCROLLVIEW = 'lesson_view',
 	ST_MONTH = 'month',
 	ST_DATE = 'years',
@@ -264,6 +268,13 @@ function TeacherList:clone_statistics_item(v)
 		if v.course and course_icon[v.course] then
 			uikits.child(item,ui.ST_CAPTION):setString(course_icon[v.course].name )
 		end
+		uikits.child(item,ui.ST_T_C):setString(tostring(v.t_count))
+		if v.t_score and v.t_score>0 then
+			uikits.child(item,ui.ST_T_A):setString(tostring(v.t_score))
+		else
+			uikits.child(item,ui.ST_T_A):setString('-')
+		end
+		uikits.child(item,ui.ST_T_T):setString(tostring(v.t_times))
 		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
 		local idx = 1
 		local sitem
@@ -402,7 +413,7 @@ function TeacherList:init_gui()
 		self._statistics_item_height = size.height
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
-	
+	self._class_button = uikits.child(self._statistics_root,ui.CLASS_BUTTON)
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)
