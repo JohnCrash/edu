@@ -95,6 +95,18 @@ function StudentWatch:add_paper_item( topicType,topicID )
 								[ui.ITEM_DIFFICULTY] = t.buffer.difficulty_name,
 								[ui.ITEM_WRONG_RATE] = "0%"
 							})
+							local it = uikits.child(item,ui.ITEM_WRONG_RATE)
+							if it and t.detail and t.detail.class_id then
+								local u = 'http://new.www.lejiaolexue.com/exam/handler/examstatistic.ashx?q=stu_correct&t_id='
+								..self._args.tid..'&exam_id='..self._args.exam_id..'&c_id='..t.detail.class_id..'&item_id='..topicID
+								cache.request_json(u,function(t)
+									if t and type(t)=='number' and cc_isobj(it) then
+										uikits.set_item(it,tostring(100-t)..'%')
+									else
+										kits.log('WARNING : wrong rate = '..tostring(t))
+									end
+								end)
+							end
 						end
 						if t.detail and t.detail.isright then
 							if  t.detail.isright ~= 0 then
