@@ -252,13 +252,16 @@ function dopractice:showitemdata(item_data)
 				scrollView:setDirection(ccui.ScrollViewDir.horizontal)	
 				item_view:addChild(scrollView)
 				
-				local item_space = item_temp2:getPositionX()-item_temp1:getPositionX()
+				local per_item_size = item_temp1:getContentSize()
+				local item_space = item_temp2:getPositionX()-item_temp1:getPositionX()-per_item_size.width
+				local item_space_pos = item_temp2:getPositionX()-item_temp1:getPositionX()
+				topics.setEditSpace(item_space)
 				for i=1,12 do 
 					local per_item = item_temp1:clone()
 					local pos_x_src = per_item:getPositionX()
 					local label_index_item = uikits.child(per_item,ui.label_index)
 					label_index_item:setString(tostring(i))
-					per_item:setPositionX(pos_x_src+(i-1)*item_space)
+					per_item:setPositionX(pos_x_src+(i-1)*item_space_pos)
 					data._options[i] = per_item
 					scrollView:addChild(per_item)
 				end
