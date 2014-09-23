@@ -44,10 +44,9 @@ local ui = {
 	OPTION_YES = 'option_right',
 	OPTION_NO = 'option_wrong',
 	OPTION_NO_SUPPORT = 'option_not',
-	EDIT_1 = 'option_write_1',
-	EDIT_2 = 'option_write_2',
-	EDIT_3 = 'option_write_3',
-	EDIT_4 = 'option_write_4',
+	EDIT_TOPICS = 'edit_topics',
+	EDIT_TOPICS_ITEM = 'option_write_1',
+	EDIT_TOPICS_NUMBER = 'num',
 	LINK_TEXT = 'option_connection',
 	DRAG_TEXT = 'option_drag',
 	POSITION_TEXT = 'option_position',
@@ -764,12 +763,27 @@ function WorkFlow:init_anser_gui()
 	self._option_yes = uikits.child(a,ui.OPTION_YES)
 	self._option_no = uikits.child(a,ui.OPTION_NO)
 	self._option_not_support = uikits.child(a,ui.OPTION_NO_SUPPORT)
-	
+
+	self._option_edit_view = uikits.child(a,ui.EDIT_TOPICS)
 	self._option_edit = {}
-	self._option_edit[1] = uikits.child(a,ui.EDIT_1)
-	self._option_edit[2] = uikits.child(a,ui.EDIT_2)
-	self._option_edit[3] = uikits.child(a,ui.EDIT_3)
-	--self._option_edit[4] = uikits.child(a,ui.EDIT_4)
+	local ed = uikits.child(self._option_edit_view,ui.EDIT_TOPICS_ITEM)
+	table.insert(self._option_edit,ed)
+	local x,y = ed:getPosition()
+	for i=2,12 do
+		local op = ed:clone()
+		self._option_edit_view:addChild(op)
+		x = x + op:getContentSize().width + 32
+		op:setPosition(cc.p(x,y))
+		local num = uikits.child(op,ui.EDIT_TOPICS_NUMBER)
+		if num then
+			num:setString(tostring(i))
+		end
+		local e = uikits.child(op,ui.ANSWER_TEXT)
+		if e then
+			e:setPlaceHolder("请输入答案")
+		end
+		table.insert(self._option_edit,op)
+	end
 end
 
 function WorkFlow:clear_all_option_check()
@@ -789,6 +803,7 @@ function WorkFlow:set_anwser_field( i )
 			for i=1,6 do
 				self._option_img[i]:setVisible(false)
 			end
+			self._option_edit_view:setVisible(false)
 			for i=1,#self._option_edit do
 				self._option_edit[i]:setVisible(false)
 			end
@@ -828,6 +843,7 @@ function WorkFlow:set_anwser_field( i )
 					data._options[i] = self._option_img[i]
 				end
 			elseif t==5 then --填空
+				self._option_edit_view:setVisible(true)
 				data._options = {}
 				for i=1,#self._option_edit do
 					data._options[i] = self._option_edit[i]

@@ -65,6 +65,9 @@ local ui = {
 	SETTING = 4,
 	CLASS_TYPE = 'chinese',
 	ST_CAPTION = 'lesson1/text1',
+	ST_T_C = 'lesson1/text3',
+	ST_T_A = 'lesson1/text5',
+	ST_T_T = 'lesson1/text7',
 	ST_SCROLLVIEW = 'lesson_view',
 	ST_MONTH = 'month',
 	ST_DATE = 'years',
@@ -268,7 +271,7 @@ function WorkList:init_new_list()
 	self:show_statistics(false)
 	self:show_list(true)
 	self._setting:setVisible(false)
-	
+	self._mode = ui.NEW
 	if not self._scID then -- and not self._busy then
 		self._mode = nil
 		self:clear_all_item()
@@ -307,11 +310,20 @@ function WorkList:init_data_list()
 end
 
 function WorkList:clone_statistics_item(v)
+	self._statistics_item:setVisible(false)
 	local item = self._statistics_item:clone()
 	if item then
+		item:setVisible(true)
 		if v.course and course_icon[v.course] then
 			uikits.child(item,ui.ST_CAPTION):setString(course_icon[v.course].name )
 		end
+		uikits.child(item,ui.ST_T_C):setString(v.t_count)
+		if v.t_score and v.t_score>0 then
+			uikits.child(item,ui.ST_T_A):setString(v.t_score)
+		else
+			uikits.child(item,ui.ST_T_A):setString('-')
+		end
+		uikits.child(item,ui.ST_T_T):setString(v.t_times)
 		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
 		local idx = 1
 		local sitem
@@ -345,9 +357,11 @@ function WorkList:clone_statistics_item(v)
 				end
 			end
 			--排列
-			scrollview:setInnerContainerSize(cc.size(size.width*#list,size.height))
-			for i,t in pairs(list) do
-				t:setPosition(cc.p(ox+size.width*(i-1),oy))
+			if size then
+				scrollview:setInnerContainerSize(cc.size(size.width*#list,size.height))
+				for i,t in pairs(list) do
+					t:setPosition(cc.p(ox+size.width*(i-1),oy))
+				end
 			end
 		end
 		item:setVisible(true)
@@ -392,6 +406,88 @@ function WorkList:relayout_statistics()
 	end
 end
 
+function WorkList:date_conv(d)
+	if d and type(d)=='string' and string.len(d)==6 then
+		if string.sub(d,5,5)~='0' then
+			return string.sub(d,1,4)..'年'..string.sub(d,-2)..'月'
+		else
+			return string.sub(d,1,4)..'年'..string.sub(d,-1)..'月'
+		end
+	else
+		return tostring(d)
+	end
+end
+local function minsec(t)
+	local mins = math.floor(t/60)
+	local sec = t - mins*60
+	local result = ''
+	if mins ~= 0 then
+		result = result..mins..'分'
+	end
+	if sec ~= 0 then
+		result = result..sec..'秒'
+	end
+	if result == '' then
+		result = '-'
+	end
+	return result
+end
+function WorkList:statistics_data(t)
+	local idx = {}
+	for i,v in pairs(t) do
+		idx[v.course] = idx[v.course] or {}
+		idx[v.course].course = v.course
+		if not idx[v.course].t_times then
+			idx[v.course].t_times = 0
+		end
+		idx[v.course].t_times = idx[v.course].t_times + v.cnt_times
+		if not idx[v.course].t_count then
+			idx[v.course].t_count = 0
+		end
+		idx[v.course].t_count = idx[v.course].t_count + v.cnt_home_work
+		if not idx[v.course].t_score then
+			idx[v.course].t_score = 0
+		end		
+		idx[v.course].t_score = idx[v.course].t_score + v.success_percent
+		idx[v.course].pm = idx[v.course].pm or {}
+		local score = v.success_percent
+		if score and score == -1 then
+			score = '-'
+		end
+		table.insert(idx[v.course].pm,1,
+		{
+			date=self:date_conv(v.year_month),
+			count = v.cnt_home_work,
+			time = minsec(v.cnt_times),
+			scroe = tostring(score),
+		})
+	end
+	local result = {}
+	local i = 1
+	for k,v in pairs(idx) do
+		if v.pm and type(v.pm)=='table' and #v.pm>0 then
+			if v.t_score and type(v.t_score)=='number' then
+				v.t_score = v.t_score/#v.pm
+			end
+			v.t_times = minsec(v.t_times/#v.pm)
+		end	
+		result[i] = v
+		i = i + 1
+	end
+	return result
+end
+
+function WorkList:clear_statistics()
+	if self._statistics_list then
+		for i ,v in pairs(self._statistics_list) do
+			if v then
+				v:removeFromParent()
+			end
+		end
+		self._statistics_list = {}
+	end
+end
+
 function WorkList:init_statistics()
 	--if self._busy then return end
 	cache.request_cancel()
@@ -399,21 +495,22 @@ function WorkList:init_statistics()
 	self:show_statistics(true)
 	self:show_list(false)
 	self._setting:setVisible(false)
-	if not self._statistics_data then
-		local result = kits.read_cache('backup-2/statatics.json')
-		local msg
-		if result then
-			self._statistics_data,msg = json.decode(result)
+	self._mode = ui.STATIST
+	self:clear_statistics()
+	local loadbox = loadingbox.open(self)
+	local url = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx'
+	cache.request_json( url,function(t)
+		if not loadbox:removeFromParent() then
+			return
 		end
-		if self._statistics_data and type(self._statistics_data)=='table' then
+		if t and type(t)=='table' then
+			self._statistics_data = WorkList:statistics_data(t)
 			for i,v in pairs(self._statistics_data) do
 				self:clone_statistics_item(v)
-			end
-		else
-			kits.log('decode json error:'..tostring(msg))
-		end		
-	end
-	self:relayout_statistics()
+			end				
+			self:relayout_statistics()
+		end
+	end)
 	return true
 end
 
@@ -424,6 +521,7 @@ function WorkList:init_setting()
 	self:show_statistics(false)
 	self:show_list(false)
 	self._setting:setVisible(true)
+	self._mode = ui.SETTING
 	return true
 end
 

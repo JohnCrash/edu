@@ -79,13 +79,16 @@ listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_R
 local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
 directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
 
-local app,cookie = cc_launchparam()
+local app,cookie,uid = cc_launchparam()
 local scene
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
 else
 	login.set_selector(1) --学生
+end
+if uid and type(uid)=='string' and string.len(uid)>1 then
+	login.set_userid( uid )
 end
 
 resume.clearflag("launcher") --launcher isok

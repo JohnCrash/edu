@@ -29,6 +29,9 @@ local ui = {
 	STATISTICS_FILE_3_4 = 'homework/laoshizuoye/tongji43.json',
 	LESSON_LIST = 'lr1',
 	LESSON = 'lesson',
+	CLASSLIST = 'banji',
+	CLASS_BUTTON = 'ban1',
+	CLASS_NAME = 'banji',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
 	BACK = 'ding/back',
@@ -93,6 +96,9 @@ local ui = {
 
 	
 	ST_CAPTION = 'lesson1/text1',
+	ST_T_C = 'lesson1/text3',
+	ST_T_A = 'lesson1/text5',
+	ST_T_T = 'lesson1/text7',	
 	ST_SCROLLVIEW = 'lesson_view',
 	ST_MONTH = 'month',
 	ST_DATE = 'years',
@@ -273,12 +279,23 @@ function TeacherList:init_ready_history()
 	end
 	return true
 end
+
 function TeacherList:clone_statistics_item(v)
+	self._statistics_item:setVisible(false)
 	local item = self._statistics_item:clone()
+	
 	if item then
+		item:setVisible(true)
 		if v.course and course_icon[v.course] then
 			uikits.child(item,ui.ST_CAPTION):setString(course_icon[v.course].name )
 		end
+		uikits.child(item,ui.ST_T_C):setString(tostring(v.t_count))
+		if v.t_score and v.t_score>0 then
+			uikits.child(item,ui.ST_T_A):setString(tostring(v.t_score))
+		else
+			uikits.child(item,ui.ST_T_A):setString('-')
+		end
+		uikits.child(item,ui.ST_T_T):setString(tostring(v.t_times))
 		local scrollview = uikits.child(item,ui.ST_SCROLLVIEW)
 		local idx = 1
 		local sitem
@@ -325,6 +342,102 @@ function TeacherList:clone_statistics_item(v)
 	return item
 end
 
+function TeacherList:date_conv(d)
+	if d and type(d)=='string' and string.len(d)==6 then
+		if string.sub(d,5,5)~='0' then
+			return string.sub(d,1,4)..'年'..string.sub(d,-2)..'月'
+		else
+			return string.sub(d,1,4)..'年'..string.sub(d,-1)..'月'
+		end
+	else
+		return tostring(d)
+	end
+end
+local function minsec(t)
+	local mins = math.floor(t/60)
+	local sec = t - mins*60
+	local result = ''
+	if mins ~= 0 then
+		result = result..mins..'分'
+	end
+	if sec ~= 0 then
+		result = result..sec..'秒'
+	end
+	if result == '' then
+		result = '-'
+	end
+	return result
+end
+function TeacherList:statistics_data(t)
+	local idx = {}
+	for i,v in pairs(t) do
+		idx[v.course] = idx[v.course] or {}
+		idx[v.course].course = v.course
+		if not idx[v.course].t_times then
+			idx[v.course].t_times = 0
+		end
+		idx[v.course].t_times = idx[v.course].t_times + v.cnt_times
+		if not idx[v.course].t_count then
+			idx[v.course].t_count = 0
+		end
+		idx[v.course].t_count = idx[v.course].t_count + v.cnt_home_work
+		if not idx[v.course].t_score then
+			idx[v.course].t_score = 0
+		end		
+		idx[v.course].t_score = idx[v.course].t_score + 0--v.success_percent
+		idx[v.course].pm = idx[v.course].pm or {}
+		local score
+		if v.cnt_right and v.cnt_wrong then
+			local total = v.cnt_wrong+v.cnt_right
+			if total > 0 then
+				score = v.cnt_right/total
+			else
+				kits.log('WARNING : statistics_data total ='..total)
+			end
+		end
+		if score and score == -1 then
+			score = '-'
+		elseif not score then
+			score = '-'
+		end
+		table.insert(idx[v.course].pm,1,
+		{
+			date=self:date_conv(v.year_month),
+			count = v.cnt_home_work,
+			time = minsec(v.cnt_times),
+			scroe = tostring(score),
+		})
+	end
+	local result = {}
+	local i = 1
+	for k,v in pairs(idx) do
+		if v.pm and type(v.pm)=='table' and #v.pm>0 then
+			v.t_score = v.t_score/#v.pm
+			v.t_times = minsec(v.t_times/#v.pm)
+		end
+		result[i] = v
+		i = i + 1
+	end
+	return result
+end
+
+function TeacherList:class_statistics( cls )
+	local url = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsTeacher.ashx?c_id='..tostring(cls)
+	local loadbox = loadingbox.open(self)
+	cache.request_json(url,function(t)
+		self._statistics_root:setVisible(true)
+		if not loadbox:removeFromParent() then
+			return
+		end
+		if t and type(t)=='table' then
+			self._statistics_data = TeacherList:statistics_data(t)
+			for i,v in pairs(self._statistics_data) do
+				self:clone_statistics_item(v)
+			end				
+			self:relayout_statistics()			
+		end
+	end)
+end
 --统计
 function TeacherList:init_ready_statistics()
 	cache.request_cancel()
@@ -332,23 +445,42 @@ function TeacherList:init_ready_statistics()
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
-	self._statistics_root:setVisible(true)
-	self:show_statistics(true)
+	self._statistics_root:setVisible(false)
+	self:show_statistics(true)	
 	if not self._statistics_data then
-		local result = kits.read_cache('backup-2/statatics.json')
-		local msg
-		if result then
-			self._statistics_data,msg = json.decode(result)
-		end
-		if self._statistics_data and type(self._statistics_data)=='table' then
-			for i,v in pairs(self._statistics_data) do
-				self:clone_statistics_item(v)
+		local url = 'http://api.lejiaolexue.com/rest/user/'..login.uid()..'/zone/class'
+		local loadbox = loadingbox.open(self)
+		cache.request_json(url,function(t)
+			if not loadbox:removeFromParent() then
+				return
 			end
-		else
-			kits.log('decode json error:'..tostring(msg))
-		end		
-	end	
-	self:relayout_statistics()
+			if t and type(t)=='table' and t.result==0 and t.zone then
+				local first_id
+				local checks = {}
+				for i,v in pairs(t.zone) do
+					local item = self._classview:additem{[ui.CLASS_NAME] = v.zone_name}
+					uikits.event(item,function(sender,b)
+						self:clear_statistics()
+						for k,it in pairs(checks) do
+							it:setSelectedState(false)
+						end
+						sender:setSelectedState(true)
+						self:class_statistics(v.zone_id)
+					end)
+					if not first_id then
+						first_id = v.zone_id
+						item:setSelectedState(true)
+					end
+					table.insert(checks,item)
+				end
+				self:class_statistics(first_id)
+			else
+				kits.log('ERROR TeacherList:init_ready_statistics invalid request result')
+			end
+		end)
+	else
+		self._statistics_root:setVisible(true)
+	end
 	return true
 end
 
@@ -376,6 +508,16 @@ function TeacherList:relayout_statistics()
 	end
 end
 
+function TeacherList:clear_statistics()
+	if self._statistics_list then
+		for i ,v in pairs(self._statistics_list) do
+			if v then
+				v:removeFromParent()
+			end
+		end
+		self._statistics_list = {}
+	end
+end
 --设置
 function TeacherList:init_ready_setting()
 	cache.request_cancel()
@@ -417,7 +559,7 @@ function TeacherList:init_gui()
 		self._statistics_item_height = size.height
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
-	
+	self._classview = uikits.scroll(self._statistics_root,ui.CLASSLIST,ui.CLASS_BUTTON,true)
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)

@@ -106,7 +106,7 @@ local answer_abc = {}
 local answer_idx = {}
 local EditChildTag = 'answer_text'
 local max_options = 6
-local max_edit = 3
+local max_edit = 12
 local res_root = 'homework/'
 local g_default_scale
 
@@ -1908,7 +1908,18 @@ local function edit_topics(layout,data)
 								call_answer_event(layout,data)
 							end
 						end)	
-			end									
+			end
+			local innparent = _options[1]:getParent()
+			local parent
+			if innparent then
+				parent = innparent:getParent()
+			end
+			if parent and cc_type(parent)=='ccui.ScrollView' then
+				local w,h
+				h = _options[1]:getContentSize().height
+				w = ((_options[1]:getContentSize().width)+32)*data.options+64
+				parent:setInnerContainerSize(cc.size(w,h))
+			end
 		end	
 	end
 	cache_done(layout,data,relayout_topics)

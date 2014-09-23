@@ -4,7 +4,8 @@ USING_NS_CC;
  
 bool IsLittleEndian()
 {
-	return true;
+	int nTest=0x12345678;
+	return (*(char *)&nTest)==0x78;
 }
 
 static int nByteOrder=0;
