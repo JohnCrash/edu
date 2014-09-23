@@ -95,7 +95,17 @@ function Batch:add_paper_item( topicType,topicID )
 			[ui.TOPICS_TYPE] = topics.types[topicType].name,
 			[ui.TOPICS_DIFF] = '', --难度
 			[ui.TOPICS_AVG] = '', --平均错误率
-			[ui.TOPICS_RATE] = '', --班错误率
+			[ui.TOPICS_RATE] = function(child,item)
+					local u = 'http://new.www.lejiaolexue.com/exam/handler/examstatistic.ashx?q=stu_correct&t_id='
+					..self._args.teacher_id..'&exam_id='..self._args.exam_id..'&c_id='..self._args_class.class_id..'&item_id='..topicID
+					cache.request_json(u,function(t)
+						if t and type(t)=='number' and cc_isobj(child) then
+							uikits.set_item(child,tostring(100-t)..'%')
+						else
+							kits.log('WARNING : wrong rate = '..tostring(t))
+						end
+					end)
+				end, --班错误率
 			[ui.TOPICS_ITEM] = function(child,item)
 				--topics.types[topicType].canv(s,e)
 				--topics.types[topicType].init(child,e)
