@@ -241,14 +241,20 @@ end
 --布置
 function TeacherList:init_ready_release()
 	cache.request_cancel()
-	self._confirm_item = {}	
 	self._scrollview:setVisible(false)
 	self._release:setVisible(true)
 	self._setting:setVisible(false)
 	self._statistics_root:setVisible(false)
 
-	self:set_homework_ui(1)
-	self:release_select_list()	
+	if self._selector == nil then
+		self._confirm_item = {}	
+		local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
+		but_queren:setEnabled(false)
+		but_queren:setBright(false)
+		but_queren:setTouchEnabled(false)
+		self:set_homework_ui(1)
+		self:release_select_list()			
+	end
 	return true
 end
 --历史
@@ -520,6 +526,10 @@ function TeacherList:add_level_item( level,v )
 					self:level_clear(i)
 				end				
 				self:release_select_list( level + 1 )
+				local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
+				but_queren:setEnabled(false)
+				but_queren:setBright(false)
+				but_queren:setTouchEnabled(false)		
 			end)
 		end
 	elseif level == 2 then
@@ -551,6 +561,17 @@ function TeacherList:add_level_item( level,v )
 				if level <= 4 then
 					self:release_select_list( level + 1 )
 				end
+				local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
+				if level == 5 then
+					but_queren:setEnabled(true)
+					but_queren:setBright(true)
+					but_queren:setTouchEnabled(true)
+				else
+					but_queren:setEnabled(false)
+					but_queren:setBright(false)
+					but_queren:setTouchEnabled(false)					
+				end
+				
 			end)
 		end
 	end
@@ -610,6 +631,7 @@ function TeacherList:level_clear( level )
 	elseif level == 5 then
 		self._section:clear()
 	end
+	self._selector[level] = nil
 end
 
 function TeacherList:release_select_list( level )
@@ -657,7 +679,7 @@ function TeacherList:set_homework_ui(index)
 	local sel_homework_view = uikits.child(self._release,ui.TOPICS_SELECT_UI)
 	local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
 	local add_homework_view = uikits.child(self._release,ui.TOPICS_SELECT_BUTTON)
-	
+
 	if index == 1 then
 		sel_homework_title:setVisible(true)
 		sel_homework_view:setVisible(true)
@@ -700,9 +722,22 @@ function TeacherList:set_homework_view( )
 	local label_vol = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_VOL)
 	local label_unit = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_UNIT)
 	local label_section = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_SECTION)
+	local set_title_view = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_TITLE)
+	
+	local pos_x_src = label_course:getPositionX()
+	local size_title_view = set_title_view:getContentSize()
+	
+	
 	
 	if self._selector[1] then
+		
 		label_course:setString(self._selector[1].name)
+		local size = label_course:getContentSize()
+		size.width = 10
+		label_course:setContentSize(size)
+		size = label_course:getContentSize()
+		local len = string.len(self._selector[3].name)
+		print(self._selector[3].name..'::'..len)
 	else
 		label_course:setString("")
 	end
