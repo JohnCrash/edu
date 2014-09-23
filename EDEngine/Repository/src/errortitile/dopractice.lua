@@ -35,6 +35,7 @@ local ui = {
 	panduan_no_but = '2202/2215/2217',
 	tiankong_view = '2202/2218',
 	tiankong_input_1 = '2202/2218/2219',
+	label_index = '2220',
 	tiankong_input_2 = '2202/2218/2225',
 	tiankong_input_3 = '2202/2218/2237',
 	
@@ -234,17 +235,34 @@ function dopractice:showitemdata(item_data)
 			data._options = {}
 			local item_temp
 			if item_data.item_type == 5 then											--Ìî¿Õ
-				item_temp = uikits.child(self._widget,ui.tiankong_view)
-				item_temp:setVisible(true)	
-				item_temp = uikits.child(self._widget,ui.tiankong_input_1)
-				data._options[1] = item_temp
-				item_temp:setVisible(false)
-				item_temp = uikits.child(self._widget,ui.tiankong_input_2)
-				data._options[2] = item_temp
-				item_temp:setVisible(false)					
+				local item_view = uikits.child(self._widget,ui.tiankong_view)
+				item_view:setVisible(true)	
+				local item_view_size = item_view:getContentSize()
+				local item_temp1 = uikits.child(self._widget,ui.tiankong_input_1)
+				item_temp1:setVisible(false)
+				local item_temp2 = uikits.child(self._widget,ui.tiankong_input_2)
+				item_temp2:setVisible(false)					
 				item_temp = uikits.child(self._widget,ui.tiankong_input_3)
-				data._options[3] = item_temp
-				item_temp:setVisible(false)					
+				item_temp:setVisible(false)		
+				
+				local scrollView = ccui.ScrollView:create()
+				scrollView:setTouchEnabled(true)
+				scrollView:setContentSize(item_view_size)        
+				scrollView:setPosition(cc.p(0,0))			
+				scrollView:setDirection(ccui.ScrollViewDir.horizontal)	
+				item_view:addChild(scrollView)
+				
+				local item_space = item_temp2:getPositionX()-item_temp1:getPositionX()
+				for i=1,12 do 
+					local per_item = item_temp1:clone()
+					local pos_x_src = per_item:getPositionX()
+					local label_index_item = uikits.child(per_item,ui.label_index)
+					label_index_item:setString(tostring(i))
+					per_item:setPositionX(pos_x_src+(i-1)*item_space)
+					data._options[i] = per_item
+					scrollView:addChild(per_item)
+				end
+							
 			elseif item_data.item_type == 1 then											--ÅÐ¶Ï
 				item_temp = uikits.child(self._widget,ui.panduan_view)
 				item_temp:setVisible(true)	
