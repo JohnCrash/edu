@@ -1883,11 +1883,16 @@ local function single_select(layout,data)
 	cache_done(layout,data,relayout_topics)
 end
 
+local EditSpace = 32
+local function setEditSpace( d )
+	EditSpace = d
+end
+
 local function edit_topics(layout,data)
 	if data.options then
 		data.my_answer = data.my_answer or {}
+		local _options = data._options
 		for i = 1,data.options do
-			local _options = data._options
 			if _options and _options[i] then
 				_options[i]:setVisible(true)
 				local e = uikits.child(_options[i],EditChildTag)
@@ -1919,7 +1924,8 @@ local function edit_topics(layout,data)
 			if parent and cc_type(parent)=='ccui.ScrollView' then
 				local w,h
 				h = _options[1]:getContentSize().height
-				w = ((_options[1]:getContentSize().width)+32)*data.options+64
+				w = ((_options[1]:getContentSize().width)+EditSpace)*data.options
+				print("w::"..w)
 				parent:setInnerContainerSize(cc.size(w,h))
 			end
 		end		
@@ -2066,6 +2072,7 @@ return
 	course_icon = course_icon,
 	types = types,
 	setEditChildTag = set_EditChildTag,
+	setEditSpace = setEditSpace,
 	STATE_CURRENT = 1,
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
