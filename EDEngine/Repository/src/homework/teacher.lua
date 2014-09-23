@@ -872,34 +872,32 @@ function TeacherList:set_homework_view( )
 	
 	
 	if self._selector[1] then
-		
-		label_course:setString(self._selector[1].name)
-		local size = label_course:getContentSize()
-		size.width = 10
-		label_course:setContentSize(size)
-		size = label_course:getContentSize()
-		local len = string.len(self._selector[3].name)
-		print(self._selector[3].name..'::'..len)
+		local str_show = string.sub(self._selector[1].name,1,21)
+		label_course:setString(str_show)
 	else
 		label_course:setString("")
 	end
 	if self._selector[2] then
-		label_bv:setString(self._selector[2].name)
+		local str_show = string.sub(self._selector[2].name,1,21)
+		label_bv:setString(str_show)
 	else
 		label_bv:setString("")
 	end
 	if self._selector[3] then
-		label_vol:setString(self._selector[3].name)
+		local str_show = string.sub(self._selector[3].name,1,21)
+		label_vol:setString(str_show)
 	else
 		label_vol:setString("")
 	end
 	if self._selector[4] then
-		label_unit:setString(self._selector[4].name)
+		local str_show = string.sub(self._selector[4].name,1,21)
+		label_unit:setString(str_show)
 	else
 		label_unit:setString("")
 	end
 	if self._selector[5] then
-		label_section:setString(self._selector[5].name)
+		local str_show = string.sub(self._selector[5].name,1,21)
+		label_section:setString(str_show)
 	else
 		label_section:setString("")
 	end

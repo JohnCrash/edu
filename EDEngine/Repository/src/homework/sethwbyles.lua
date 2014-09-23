@@ -99,18 +99,12 @@ function Sethwbyles:getdatabyurl()
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
 				if t.t == 0 then
-				--	local label_item_nofound = uikits.child(self._widget,ui.ITEM_NO_FOUND)
-				--	label_item_nofound:setVisible(true)
 					loadbox:removeFromParent()
 					return
 				end
 				for i,obj in pairs(t.item) do
 					local is_exist = false
 					for j,v in pairs(self.parentview._confirm_item) do 
---[[						if t.item[i].item_id_num == self.parentview._confirm_item[j].item_id_num then
-							is_exist = true
-						end--]]
-					--	print("v.item_id_num::"..v.item_id_num.."::obj.item_id_num::"..obj.item_id_num)
 						if v.item_id_num == obj.item_id_num then
 							is_exist = true
 						end

@@ -96,11 +96,17 @@ local ui={
 }
 
 local TOPICS_SPACE = 16
+local ITEM_SPACE = 8
+local SORT_SPACE = 0
+local SORT_BORDER = 0
+local SORT_STYLE = 1
+local DRAG_STYLE = 1
+local DRAG_BORDER = 16
 local answer_abc = {}
 local answer_idx = {}
 local EditChildTag = 'answer_text'
 local max_options = 6
-local max_edit = 3
+local max_edit = 12
 local res_root = 'homework/'
 local g_default_scale
 
@@ -156,7 +162,15 @@ local function item_ui( t )
 	if t then
 		if t.type == 1 then --text
 			--kits.log('	#TEXT: '..t.text )
-			return uikits.text{caption=t.text,font=nil,fontSize=32,color=cc.c3b(0,0,0)}
+			local item = uikits.text{caption=t.text,font=nil,fontSize=32,color=cc.c3b(0,0,0),anchorX=0.5,anchorY=0.5}			
+			local size = item:getContentSize()
+			local t = uikits.layout{width=size.width+2*ITEM_SPACE,height=size.height+2*ITEM_SPACE}
+			size = t:getContentSize()
+			item:setPosition(cc.p(size.width/2,size.height/2))
+			--t:setOpacity(12)			
+			t:addChild( item )
+		
+			return t
 			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
 		elseif t.type == 2 then --image
 			--可能是.mp3
@@ -164,10 +178,17 @@ local function item_ui( t )
 			if t.image and type(t.image)=='string' and string.len(t.image)>4 then
 				local ex = string.lower( string.sub(t.image,-3) )
 				if ex == 'png' or ex == 'jpg' or ex == 'gif' then
-					local img = uikits.image{image=cache.get_name(t.image)}
-					img:setScaleX(g_scale)
-					img:setScaleY(g_scale)
-					return img
+					local item = uikits.image{image=cache.get_name(t.image),anchorX=0.5,anchorY=0.5}
+					--item:setScaleX(g_scale)
+					--item:setScaleY(g_scale)
+					local size = item:getContentSize()
+					local t = uikits.layout{width=size.width+2*ITEM_SPACE,height=size.height+2*ITEM_SPACE}
+					size = t:getContentSize()
+					item:setPosition(cc.p(size.width/2,size.height/2))
+					--t:setOpacity(12)
+					t:addChild( item )			
+
+					return t
 				elseif ex == 'mp3' then
 					kits.log('ERROR MP3 '..t.image )
 				else
@@ -519,7 +540,11 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 					if n >= #rs.urls then
 						--全部下载完毕
 						data._isdownload_ = true
-						rst.loading:removeFromParent() 
+						if rst.loading and cc_isobj(rst.loading) then
+							rst.loading:removeFromParent() 
+						else
+							return
+						end
 						rst.loading = nil 
 						if efunc and type(efunc)=='function' then
 							efunc(layout,data,param1,param2,param3)
@@ -662,7 +687,8 @@ local function relayout_link( layout,data )
 	local down_rect = nil
 	local answer = {}
 	local answer_links = {}
-	
+	local scale1 = 1
+	local scale2 = 1
 	local function add_line()
 		answer[up] = down
 		local x,y = dot1[up]:getPosition()
@@ -717,13 +743,16 @@ local function relayout_link( layout,data )
 	local function select_rect(item,b)
 		local x,y = item:getPosition()
 		local size = item:getContentSize()
-		size.width = size.width*g_scale
-		size.height = size.height*g_scale
+
 		if b then
+			size.width = size.width*g_scale*scale1
+			size.height = size.height*g_scale*scale1
 			if up_rect then up_rect:removeFromParent() end				
 			up_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.3)}	
 			layout:addChild(up_rect,30)
 		else
+			size.width = size.width*g_scale*scale2
+			size.height = size.height*g_scale*scale2
 			if down_rect then down_rect:removeFromParent() end				
 			down_rect = uikits.rect{x1=x,y1=y,x2=x+size.width,y2=y+size.height,fillColor=cc.c4f(1,0,0,0.3)}			
 			layout:addChild(down_rect,30)
@@ -768,26 +797,36 @@ local function relayout_link( layout,data )
 	local rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,TOPICS_SPACE,g_scale)
 	if layout_size.width-rect1.width > #ui2*4*TOPICS_SPACE then
 		rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,4*TOPICS_SPACE,g_scale)
+	elseif rect1.width > layout_size.width-2*TOPICS_SPACE then
+		scale2 = (layout_size.width-2*TOPICS_SPACE)/rect1.width
+		rect1 = uikits.relayout_h( ui2,0,2*TOPICS_SPACE,layout_size.width,TOPICS_SPACE,g_scale*scale2)
 	end
-	local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,TOPICS_SPACE,g_scale)
+	local linkHeight = 198 * g_scale
+	if rect1.height*3 < 198 * g_scale then
+		linkHeight = rect1.height*3
+	end
+	local rect2 = uikits.relayout_h( ui1,0,linkHeight,layout_size.width,TOPICS_SPACE,g_scale)
 	if layout_size.width-rect2.width > #ui1*4*TOPICS_SPACE then
-		local rect2 = uikits.relayout_h( ui1,0,rect1.height*3,layout_size.width,4*TOPICS_SPACE,g_scale)
+		rect2 = uikits.relayout_h( ui1,0,linkHeight,layout_size.width,4*TOPICS_SPACE,g_scale)
+	elseif rect2.width > layout_size.width-2*TOPICS_SPACE then
+		scale1 = (layout_size.width-2*TOPICS_SPACE)/rect2.width
+		rect2 = uikits.relayout_h( ui1,0,linkHeight,layout_size.width,TOPICS_SPACE,g_scale*scale1)
 	end	
 	for i,v in pairs(ui1) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
-		size.width = size.width*g_scale
+		size.width = size.width*g_scale *scale1
 		dot1[i]:setPosition( cc.p(x+size.width/2,y-TOPICS_SPACE ) )
 
 		--size.width = size.width * g_scale
-		size.height = size.height * g_scale
+		size.height = size.height * g_scale *scale1
 		layout:addChild(uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(1,0,0,0.1)})		
 	end
 	for i,v in pairs(ui2) do
 		local x,y = v:getPosition()
 		local size = v:getContentSize()
-		size.width = size.width*g_scale
-		size.height = size.height*g_scale
+		size.width = size.width*g_scale*scale2
+		size.height = size.height*g_scale*scale2
 		dot2[i]:setPosition( cc.p(x+size.width/2,y+size.height+TOPICS_SPACE ) )	
 
 		layout:addChild(uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(1,0,0,0.1)})				
@@ -840,6 +879,7 @@ local function relayout_sort( layout,data )
 	local orgp = {}
 	local place_rect = nil
 	local sorts = {}
+	local scale = 1
 	local function isin( item )
 		for i,v in pairs(sorts) do
 			if v == item then
@@ -873,8 +913,8 @@ local function relayout_sort( layout,data )
 		end
 	end
 	local function relayout( item,x,y )
-		local result = uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,TOPICS_SPACE,g_scale,item )
-		uikits.move( sorts,-result.x,TOPICS_SPACE)
+		local result = uikits.relayout_h( sorts,place_rect.x1,place_rect.y1,place_rect.x2-place_rect.x1,SORT_SPACE,g_scale*scale,item )
+		uikits.move( sorts,-result.x,SORT_SPACE)
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
@@ -918,8 +958,8 @@ local function relayout_sort( layout,data )
 					if eventType == ccui.TouchEventType.began then
 						local p = sender:getTouchBeganPosition()
 						sp = sender:convertToNodeSpace( p )
-						sp.x = sp.x * g_scale
-						sp.y = sp.y * g_scale
+						sp.x = sp.x * g_scale *scale
+						sp.y = sp.y * g_scale *scale
 						setEnabledParent(layout,false)
 						--if data._scrollParent then
 						--	data._scrollParent:setEnabled(false)
@@ -986,25 +1026,52 @@ local function relayout_sort( layout,data )
 					end
 				end)
 	end
-
 	local layout_size = layout:getContentSize()
-	local result = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale)
-	result.height = result.height + 2*TOPICS_SPACE
-	uikits.move( ui1,0,result.height + 4*TOPICS_SPACE )
-	place_rect = {x1=result.x-4,y1=2*TOPICS_SPACE,x2=result.x+result.width+4,y2=result.height + 2*TOPICS_SPACE}
+	local result = uikits.relayout_h( ui1,0,0,layout_size.width,SORT_SPACE,g_scale)
+	if result.width > layout_size.width-2*SORT_SPACE then
+		scale = (layout_size.width-2*SORT_SPACE)/result.width
+		result = uikits.relayout_h( ui1,0,0,layout_size.width,SORT_SPACE,g_scale*scale)
+	end
+	result.height = result.height + 2*SORT_SPACE
+	uikits.move( ui1,0,result.height + 4*SORT_SPACE )
+	place_rect = {x1=result.x-4,y1=2*SORT_SPACE,x2=result.x+result.width+4,y2=result.height + 2*SORT_SPACE}
 	
 	layout:addChild( uikits.line{x1=place_rect.x1,y1=place_rect.y1+result.height,x2=place_rect.x1+result.width+6,y2=place_rect.y1+result.height,color=cc.c4f(255,0,255,255),linewidth=3},10)	
 	
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,fillColor=cc.c4f(1,0,0,0.1),linewidth=2} )
 	place_rect.y1 = place_rect.y1 + 2 
-	for k,v in pairs( ui1 ) do
-		local size = v:getContentSize()
-		size.width = size.width * g_scale
-		size.height = size.height * g_scale
-		local x,y = v:getPosition()
-		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
-		layout:addChild( uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
-		orgp[v] = cc.p(x,y)
+	if SORT_STYLE== 0 then
+		--绘制多个矩形
+		for k,v in pairs( ui1 ) do
+			local size = v:getContentSize()
+			size.width = size.width * g_scale *scale
+			size.height = size.height * g_scale *scale
+			local x,y = v:getPosition()
+			orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+			layout:addChild( uikits.rect{x1=x-SORT_BORDER,y1=y-SORT_BORDER,x2=x+size.width+SORT_BORDER,y2=y+size.height+SORT_BORDER,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
+			orgp[v] = cc.p(x,y)
+		end
+	elseif  SORT_STYLE== 1 then
+		--合并为一个矩形
+		local rect = {x1=layout_size.width,y1=layout_size.height,x2=0,y2=0}
+		local function min_rect(x,y)
+			rect.x1 = math.min(rect.x1,x)
+			rect.x2 = math.max(rect.x2,x)
+			rect.y1 = math.min(rect.y1,y)
+			rect.y2 = math.max(rect.y2,y)
+		end
+		for k,v in pairs( ui1 ) do
+			local size = v:getContentSize()
+			size.width = size.width * g_scale *scale
+			size.height = size.height * g_scale *scale
+			local x,y = v:getPosition()
+			orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+			min_rect( x-SORT_BORDER,y-SORT_BORDER )
+			min_rect( x+size.width+SORT_BORDER,y+size.height+SORT_BORDER)
+--			layout:addChild( uikits.rect{x1=x-SORT_BORDER,y1=y-SORT_BORDER,x2=x+size.width+SORT_BORDER,y2=y+size.height+SORT_BORDER,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
+			orgp[v] = cc.p(x,y)
+		end		
+		layout:addChild( uikits.rect{x1=rect.x1,y1=rect.y1,x2=rect.x2,y2=rect.y2,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
 	end
 	set_topics_image( layout,data,0,result.height + 36 + result.height )
 	--恢复答案
@@ -1065,13 +1132,13 @@ local function relayout_sort_V( layout,data )
 		end
 	end
 	local function relayout( item,x,y )
-		local result = uikits.relayout_v( sorts,TOPICS_SPACE,g_scale*scale)
+		local result = uikits.relayout_v( sorts,SORT_SPACE,g_scale*scale)
 		local ox1,oy1
 		local layout_size = layout:getContentSize()
-		ox1 = layout_size.width/2 + TOPICS_SPACE
-		oy1 = TOPICS_SPACE
+		ox1 = layout_size.width/2 + SORT_SPACE
+		oy1 = SORT_SPACE
 		
-		uikits.move(sorts,ox1+TOPICS_SPACE,oy1-TOPICS_SPACE/2+place_rect.y2-result.height)		
+		uikits.move(sorts,ox1+SORT_SPACE,oy1-SORT_SPACE/2+place_rect.y2-result.height)		
 	end
 	local function place_item( item,x,y )
 		if x > place_rect.x1 and y > place_rect.y1 and x < place_rect.x2 and y < place_rect.y2 then
@@ -1180,34 +1247,57 @@ local function relayout_sort_V( layout,data )
 	end
 
 	local layout_size = layout:getContentSize()
-	local result = uikits.relayout_v( ui1,TOPICS_SPACE,g_scale)
+	local result = uikits.relayout_v( ui1,SORT_SPACE,g_scale)
 	local ox1,oy1
-	ox1 = layout_size.width/2 - result.width - TOPICS_SPACE
-	oy1 = TOPICS_SPACE
-	uikits.move(ui1,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2)
+	ox1 = layout_size.width/2 - result.width - SORT_SPACE
+	oy1 = SORT_SPACE
+	uikits.move(ui1,ox1+SORT_SPACE,oy1+SORT_SPACE/2)
 	--layout:addChild( uikits.rect{x1=ox1,y1=oy1,x2=ox1+result.width,y2=oy1+result.height,fillColor=cc.c4f(1,0,0,0.1)} )
-	if result.width > (layout_size.width-4*TOPICS_SPACE)/2 then
-		scale = (layout_size.width-4*TOPICS_SPACE)/2/result.width
-		result = uikits.relayout_v( ui1,TOPICS_SPACE,g_scale*scale)
-		ox1 = layout_size.width/2 - result.width - TOPICS_SPACE
-		oy1 = TOPICS_SPACE
-		uikits.move(ui1,ox1+TOPICS_SPACE,oy1+TOPICS_SPACE/2)		
+	if result.width > (layout_size.width-4*SORT_SPACE)/2 then
+		scale = (layout_size.width-4*SORT_SPACE)/2/result.width
+		result = uikits.relayout_v( ui1,SORT_SPACE,g_scale*scale)
+		ox1 = layout_size.width/2 - result.width - SORT_SPACE
+		oy1 = SORT_SPACE
+		uikits.move(ui1,ox1+SORT_SPACE,oy1+SORT_SPACE/2)		
 	end
 	local ox2,oy2
-	ox2 = layout_size.width/2 + TOPICS_SPACE
-	oy2 = TOPICS_SPACE
+	ox2 = layout_size.width/2 + SORT_SPACE
+	oy2 = SORT_SPACE
 	layout:addChild( uikits.line{x1=ox2,y1=oy2,x2=ox2,y2=oy2+result.height,color=cc.c4f(255,0,255,255),linewidth=3},10)
 	place_rect = {x1=ox2,y1=oy2,x2=ox2+result.width,y2=oy2+result.height}
 	layout:addChild( uikits.rect{x1=place_rect.x1,y1=place_rect.y1,x2=place_rect.x2,y2=place_rect.y2,fillColor=cc.c4f(1,0,0,0.1)} )
 	place_rect.y1 = place_rect.y1 + 2 
-	for k,v in pairs( ui1 ) do
-		local size = v:getContentSize()
-		size.width = size.width * g_scale * scale
-		size.height = size.height * g_scale* scale
-		local x,y = v:getPosition()
-		orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
-		layout:addChild( uikits.rect{x1=x-6,y1=y-6,x2=x+size.width+6,y2=y+size.height+6,fillColor=cc.c4f(0,0,1,0.1)} )
-		orgp[v] = cc.p(x,y)
+	if SORT_STYLE== 0 then
+		for k,v in pairs( ui1 ) do
+			local size = v:getContentSize()
+			size.width = size.width * g_scale * scale
+			size.height = size.height * g_scale* scale
+			local x,y = v:getPosition()
+			orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+			layout:addChild( uikits.rect{x1=x-SORT_BORDER,y1=y-SORT_BORDER,x2=x+size.width+SORT_BORDER,y2=y+size.height+SORT_BORDER,fillColor=cc.c4f(0,0,1,0.1)} )
+			orgp[v] = cc.p(x,y)
+		end
+	elseif  SORT_STYLE== 1 then
+		--合并为一个矩形
+		local rect = {x1=layout_size.width,y1=layout_size.height,x2=0,y2=0}
+		local function min_rect(x,y)
+			rect.x1 = math.min(rect.x1,x)
+			rect.x2 = math.max(rect.x2,x)
+			rect.y1 = math.min(rect.y1,y)
+			rect.y2 = math.max(rect.y2,y)
+		end
+		for k,v in pairs( ui1 ) do
+			local size = v:getContentSize()
+			size.width = size.width * g_scale *scale
+			size.height = size.height * g_scale *scale
+			local x,y = v:getPosition()
+			orgrcs[#orgrcs+1] = { x=x,y=y,width=size.width,height=size.height }
+			min_rect( x-SORT_BORDER,y-SORT_BORDER )
+			min_rect( x+size.width+SORT_BORDER,y+size.height+SORT_BORDER)
+--			layout:addChild( uikits.rect{x1=x-SORT_BORDER,y1=y-SORT_BORDER,x2=x+size.width+SORT_BORDER,y2=y+size.height+SORT_BORDER,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )
+			orgp[v] = cc.p(x,y)
+		end		
+		layout:addChild( uikits.rect{x1=rect.x1,y1=rect.y1,x2=rect.x2,y2=rect.y2,fillColor=cc.c4f(0,0,1,0.1),linewidth=2} )	
 	end
 	set_topics_image( layout,data,0,result.height + 36 )
 	--恢复答案
@@ -1318,24 +1408,27 @@ local function relayout_drag( layout,data,ismul )
 	bg:setScaleY(g_scale)
 
 	for k,v in pairs( data.drag_rects ) do
-		v.x1 = v.x1-TOPICS_SPACE
-		v.x2 = v.x2+TOPICS_SPACE
-		v.y1 = v.y1-TOPICS_SPACE
-		v.y2 = v.y2+TOPICS_SPACE		
+		v.x1 = v.x1-DRAG_BORDER
+		v.x2 = v.x2+DRAG_BORDER
+		v.y1 = v.y1-DRAG_BORDER
+		v.y2 = v.y2+DRAG_BORDER		
 	end	
---	for k,v in pairs( data.drag_rects ) do
-		--[[
-		local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
-		box:getAnimation():playWithIndex(0)
-		box:setPosition(cc.p((v.x2+v.x1)/2,bgsize.height-(v.y2+v.y1)/2))
-		local size = box:getContentSize()
-		box:setScaleX(math.abs(v.x2-v.x1)/size.width)
-		box:setScaleY(math.abs(v.y2-v.y1)/size.height)
-		--]]
-		--box:setOpacity (256)
-		--bg:addChild( box )
-		--bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
---	end
+	if DRAG_STYLE == 0 then
+		for k,v in pairs( data.drag_rects ) do
+			--[[
+			local box = uikits.animationFormJson("amouse/chong_zi/chong_zi.ExportJson",'chong_zi')
+			box:getAnimation():playWithIndex(0)
+			box:setPosition(cc.p((v.x2+v.x1)/2,bgsize.height-(v.y2+v.y1)/2))
+			local size = box:getContentSize()
+			box:setScaleX(math.abs(v.x2-v.x1)/size.width)
+			box:setScaleY(math.abs(v.y2-v.y1)/size.height)
+			--]]
+			--box:setOpacity (256)
+			bg:addChild( box )
+			bg:addChild( uikits.rect{x1=v.x1-DRAG_BORDER,y1=bgsize.height-v.y1-DRAG_BORDER,
+				x2=v.x2+DRAG_BORDER,y2=bgsize.height-v.y2+DRAG_BORDER,fillColor=cc.c4f(1,0,0,0.1)} )
+		end
+	end
 	local function get_index( item )
 		for i = 1,#ui1 do
 			if item == ui1[i] then return i end
@@ -1372,6 +1465,21 @@ local function relayout_drag( layout,data,ismul )
 		local cp  = {x = rc.x1 + offx,y = rc.y1+ offy } 
 		return cp
 	end
+	local function  xchange( i,j )
+		--source = j -> target = i
+		if i and j and drags[j] then
+			local target
+			target = drags[i]
+			drags[i] = drags[j]
+			drags[j] = target
+			if drags[i] and drags[i].item then
+				drags[i] .item:setPosition(get_pt_center(drags[i].item,i))
+			end
+			if drags[j] and drags[j].item then
+				drags[j] .item:setPosition(get_pt_center(drags[j].item,j))
+			end
+		end
+	end	
 	local function put_in( sender,x,y )
 		local xx,yy = bg:getPosition()
 		xx = xx - bg:getContentSize().width*g_scale/2
@@ -1392,37 +1500,26 @@ local function relayout_drag( layout,data,ismul )
 				local idx = get_index( sender )
 				if idx then
 					local it = search_drags( sender )
-					if it then
-						drags[it] = nil
+					if it and i then
+						xchange(i,it)
+					else
+						if it then
+							drags[it] = nil
+						end
+						if drags[i] then
+							drags[i].item:setScaleX(g_scale*scale)
+							drags[i].item:setScaleY(g_scale*scale)					
+							drags[i].item:setPosition( orgp[drags[i].item] )
+						end
+						sender:setScaleX(g_scale)
+						sender:setScaleY(g_scale)					
+						drags[i] = { idx = idx,item = sender }
 					end
-					if drags[i] then
-						drags[i].item:setScaleX(g_scale*scale)
-						drags[i].item:setScaleY(g_scale*scale)					
-						drags[i].item:setPosition( orgp[drags[i].item] )
-					end
-					sender:setScaleX(g_scale)
-					sender:setScaleY(g_scale)					
-					drags[i] = { idx = idx,item = sender }
 				end
 				return true
 			end
 		end
 		return false
-	end
-	local function  xchange( i,j )
-		--source = j -> target = i
-		if i and j and drags[j] then
-			local target
-			target = drags[i]
-			drags[i] = drags[j]
-			drags[j] = target
-			if drags[i] and drags[i].item then
-				drags[i] .item:setPosition(get_pt_center(drags[i].item,i))
-			end
-			if drags[j] and drags[j].item then
-				drags[j] .item:setPosition(get_pt_center(drags[j].item,j))
-			end
-		end
 	end
 	local function put_in_multi( sender,x,y )
 		local xx,yy = bg:getPosition()
@@ -1593,8 +1690,8 @@ local function relayout_drag( layout,data,ismul )
 	
 	local layout_size = layout:getContentSize()
 	local rc = uikits.relayout_h( ui1,0,0,layout_size.width,2*TOPICS_SPACE,g_scale)
-	if rc.width > layout_size.width then --如果太长，缩小重新排列
-		scale = layout_size.width/rc.width
+	if rc.width > layout_size.width-2*TOPICS_SPACE then --如果太长，缩小重新排列
+		scale = (layout_size.width-2*TOPICS_SPACE)/rc.width
 		rc = uikits.relayout_h( ui1,0,0,layout_size.width,TOPICS_SPACE,g_scale*scale)		
 	elseif rc.width < layout_size.width/2 then --太小，加大点间距重新排列
 		rc = uikits.relayout_h( ui1,0,0,layout_size.width,4*TOPICS_SPACE,g_scale)	
@@ -1811,8 +1908,21 @@ local function edit_topics(layout,data)
 								call_answer_event(layout,data)
 							end
 						end)	
-			end									
+			end
 		end	
+		if _options and type(_options)=='table' then
+			local innparent = _options[1]:getParent()
+			local parent
+			if innparent then
+				parent = innparent:getParent()
+			end
+			if parent and cc_type(parent)=='ccui.ScrollView' then
+				local w,h
+				h = _options[1]:getContentSize().height
+				w = ((_options[1]:getContentSize().width)+32)*data.options+64
+				parent:setInnerContainerSize(cc.size(w,h))
+			end
+		end		
 	end
 	cache_done(layout,data,relayout_topics)
 end
