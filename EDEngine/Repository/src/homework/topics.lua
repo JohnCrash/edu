@@ -1909,6 +1909,8 @@ local function edit_topics(layout,data)
 							end
 						end)	
 			end
+		end	
+		if _options and type(_options)=='table' then
 			local innparent = _options[1]:getParent()
 			local parent
 			if innparent then
@@ -1920,7 +1922,7 @@ local function edit_topics(layout,data)
 				w = ((_options[1]:getContentSize().width)+32)*data.options+64
 				parent:setInnerContainerSize(cc.size(w,h))
 			end
-		end	
+		end		
 	end
 	cache_done(layout,data,relayout_topics)
 end
