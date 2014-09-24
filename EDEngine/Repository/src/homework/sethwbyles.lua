@@ -82,10 +82,22 @@ end
 function Sethwbyles:getdatabyurl()
 	local base_url =  'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?paperId=0'
 	local send_course_data = '&course='..self.selector[1].id
-	local send_bv_data = '&bv='..self.selector[2].id
-	local send_vol_data = '&vol='..self.selector[3].id
-	local send_unit_data = '&unit='..self.selector[4].id
-	local send_section_data = '&section='..self.selector[5].id
+	local send_bv_data = ''
+	local send_vol_data = ''
+	local send_unit_data = ''
+	local send_section_data = ''
+	if self.selector[2] then
+		send_bv_data = '&bv='..self.selector[2].id
+	end
+	if self.selector[3] then
+		send_vol_data = '&vol='..self.selector[3].id
+	end
+	if self.selector[4] then
+		send_unit_data = '&vol='..self.selector[4].id
+	end
+	if self.selector[5] then
+		send_section_data = '&vol='..self.selector[5].id
+	end	
 	local send_page_data = '&p='..self.pageindex
 	
 	local send_url = base_url..send_course_data..send_bv_data..send_vol_data..send_unit_data..send_section_data..send_page_data

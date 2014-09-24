@@ -669,9 +669,9 @@ function TeacherList:add_level_item( level,v )
 				end				
 				self:release_select_list( level + 1 )
 				local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
-				but_queren:setEnabled(false)
-				but_queren:setBright(false)
-				but_queren:setTouchEnabled(false)		
+				but_queren:setEnabled(true)
+				but_queren:setBright(true)
+				but_queren:setTouchEnabled(true)		
 			end)
 		end
 	elseif level == 2 then
@@ -704,15 +704,9 @@ function TeacherList:add_level_item( level,v )
 					self:release_select_list( level + 1 )
 				end
 				local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
-				if level == 5 then
-					but_queren:setEnabled(true)
-					but_queren:setBright(true)
-					but_queren:setTouchEnabled(true)
-				else
-					but_queren:setEnabled(false)
-					but_queren:setBright(false)
-					but_queren:setTouchEnabled(false)					
-				end
+				but_queren:setEnabled(true)
+				but_queren:setBright(true)
+				but_queren:setTouchEnabled(true)
 				
 			end)
 		end

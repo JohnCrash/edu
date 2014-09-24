@@ -141,11 +141,19 @@ function Publishhw:format_publish_data()
 	ret = '?exam_name='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'
 	ret = ret..'&paper_id='..self._paperid
 	ret = ret..'&course='..self.tb_parent_view._selector[1].id
-	ret = ret..'&book_version='..self.tb_parent_view._selector[2].id
-	ret = ret..'&node_vol='..self.tb_parent_view._selector[3].id
-	ret = ret..'&node_unit='..self.tb_parent_view._selector[4].id
-	ret = ret..'&node_section='..self.tb_parent_view._selector[5].id
-	ret = ret..'&node_section_name='..self.tb_parent_view._selector[5].name
+	if self.tb_parent_view._selector[2] then
+		ret = ret..'&book_version='..self.tb_parent_view._selector[2].id
+	end
+	if self.tb_parent_view._selector[3] then
+		ret = ret..'&node_vol='..self.tb_parent_view._selector[3].id
+	end
+	if self.tb_parent_view._selector[4] then
+		ret = ret..'&node_unit='..self.tb_parent_view._selector[4].id
+	end
+	if self.tb_parent_view._selector[5] then
+		ret = ret..'&node_section='..self.tb_parent_view._selector[5].id
+		ret = ret..'&node_section_name='..self.tb_parent_view._selector[5].name
+	end
 	ret = ret..'&period=1&tag_solution=1&tag_selfcheck=1&comment=0&score_type=2&from=1&exam_type=11'
 	ret = ret..'&from_user_id='..login.uid()
 	ret = ret..'&items='..self._item_count
