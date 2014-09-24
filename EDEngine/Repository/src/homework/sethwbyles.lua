@@ -80,7 +80,7 @@ function Sethwbyles:SetButtonEnabled()
 end
 
 function Sethwbyles:getdatabyurl()
---[[	local base_url =  'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?paperId=0'
+	local base_url =  'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?paperId=0'
 	local send_course_data = '&course='..self.selector[1].id
 	local send_bv_data = '&bv='..self.selector[2].id
 	local send_vol_data = '&vol='..self.selector[3].id
@@ -88,11 +88,12 @@ function Sethwbyles:getdatabyurl()
 	local send_section_data = '&section='..self.selector[5].id
 	local send_page_data = '&p='..self.pageindex
 	
-	local send_url = base_url..send_course_data..send_bv_data..send_vol_data..send_unit_data..send_section_data..send_page_data--]]
+	local send_url = base_url..send_course_data..send_bv_data..send_vol_data..send_unit_data..send_section_data..send_page_data
 	
-	local base_url = 'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?course=10001&bv=0&vol=0&unit=0&section=0&type=0&diff=0&paperId=6d34229c768a4c7b87511b29a6b8c77f'
+	print('send_url::'..send_url)
+--[[	local base_url = 'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?course=10001&bv=0&vol=0&unit=0&section=0&type=0&diff=0&paperId=6d34229c768a4c7b87511b29a6b8c77f'
 	local send_page_data = '&p='..self.pageindex 
-	local send_url = base_url..send_page_data
+	local send_url = base_url..send_page_data--]]
 	
 	local loadbox = loadingbox.open(self)
 	is_loading = true
