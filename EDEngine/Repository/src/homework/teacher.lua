@@ -239,7 +239,7 @@ function TeacherList:init_ready_batch()
 		self._mode = ui.READYBATCH
 		self._scrollview:clear()
 		self._busy = true
-		self:init_batch_list(2)--待批阅
+		self:init_batch_list(2)--待批�?
 	end
 	return true
 end
@@ -316,7 +316,7 @@ function TeacherList:clone_statistics_item(v)
 					--次数
 					local ct = uikits.child(sitem,ui.ST_COUNT)
 					ct:setString(tostring(t.count))
-					--平均分
+					--平均�?
 					local av = uikits.child(sitem,ui.ST_AVERAGE)
 					av:setString(tostring(t.scroe))
 					--用时
@@ -345,9 +345,9 @@ end
 function TeacherList:date_conv(d)
 	if d and type(d)=='string' and string.len(d)==6 then
 		if string.sub(d,5,5)~='0' then
-			return string.sub(d,1,4)..'年'..string.sub(d,-2)..'月'
+			return string.sub(d,1,4)..'�?..string.sub(d,-2)..'�?
 		else
-			return string.sub(d,1,4)..'年'..string.sub(d,-1)..'月'
+			return string.sub(d,1,4)..'�?..string.sub(d,-1)..'�?
 		end
 	else
 		return tostring(d)
@@ -358,10 +358,10 @@ local function minsec(t)
 	local sec = t - mins*60
 	local result = ''
 	if mins ~= 0 then
-		result = result..mins..'分'
+		result = result..mins..'�?
 	end
 	if sec ~= 0 then
-		result = result..sec..'秒'
+		result = result..sec..'�?
 	end
 	if result == '' then
 		result = '-'
@@ -499,7 +499,7 @@ function TeacherList:relayout_statistics()
 		local offy = 0
 		local size = self._statistics_view:getContentSize()
 		if height < size.height then
-			offy = size.height - height --顶到顶
+			offy = size.height - height --顶到�?
 		end
 
 		for i = 1,#self._statistics_list do
@@ -533,7 +533,7 @@ function TeacherList:init_gui()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	
-	--设置页
+	--设置�?
 	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	local cs = uikits.child(self._setting,ui.MORE_SOUND)
@@ -560,7 +560,7 @@ function TeacherList:init_gui()
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
 	self._classview = uikits.scroll(self._statistics_root,ui.CLASSLIST,ui.CLASS_BUTTON,true)
-	--发布页
+	--发布�?
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)
 	--选择科目
@@ -569,7 +569,7 @@ function TeacherList:init_gui()
 	--选择版本
 	self._version = uikits.scroll(self._release,ui.TOPICS_SELECT_VERSION,ui.TOPICS_SELECT_VERSION_ITEM,true)
 
-	--选择章
+	--选择�?
 	self._volume = uikits.scroll(self._release,ui.TOPICS_SELECT_VOLUME,ui.TOPICS_SELECT_VOLUME_ITEM,true)
 
 	--选择单元
