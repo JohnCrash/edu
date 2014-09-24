@@ -136,6 +136,8 @@ function dopractice:resetview()
 	item_temp:setVisible(false)	
 	item_temp = uikits.child(self._widget,ui.tiankong_view)
 	item_temp:setVisible(false)	
+	item_temp:removeChildByTag(10000)
+	
 	item_temp = uikits.child(self._widget,ui.question_type_lianxian)
 	item_temp:setVisible(false)	
 	item_temp = uikits.child(self._widget,ui.question_type_xuanze)
@@ -250,7 +252,8 @@ function dopractice:showitemdata(item_data)
 				scrollView:setContentSize(item_view_size)        
 				scrollView:setPosition(cc.p(0,0))			
 				scrollView:setDirection(ccui.ScrollViewDir.horizontal)	
-				item_view:addChild(scrollView)
+				item_view:addChild(scrollView,1,10000)
+				--item_view:addChild(scrollView)
 				
 				local per_item_size = item_temp1:getContentSize()
 				local item_space = item_temp2:getPositionX()-item_temp1:getPositionX()-per_item_size.width
