@@ -145,8 +145,8 @@ int MakeDir(const char *pszDir)
 	nRet=_mkdir(pszDir);
 #endif
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-	chmod(pszDir,0x777);
 	nRet=mkdir(pszDir,S_IRWXU | S_IRWXG | S_IRWXO);
+	chmod(pszDir,0x777);
 #endif
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 	nRet=mkdir(pszDir,0xffff);
@@ -385,6 +385,7 @@ bool CDirMng::Init(const char *pszAppName)
 
 	m_strAppDir=m_strDataDir+m_strAppName.c_str();
 	m_strAppDir+="/";
+	MakeFullDir(m_strAppDir.c_str()); //´´½¨Ä¿Â¼
 	m_strAppDataDir=m_strAppDir+"data/";
 	m_strAppTmpDir=m_strAppDir+"tmp/";
 

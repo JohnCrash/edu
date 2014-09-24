@@ -104,4 +104,7 @@
   <ItemGroup>
     <None Include="..\..\..\cocos2d-x\cocos\ui\proj.win32\libGUI.vcxproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\game.ico" />
+  </ItemGroup>
 </Project>

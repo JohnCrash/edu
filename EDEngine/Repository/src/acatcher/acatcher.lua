@@ -3,7 +3,7 @@ kits = require "kits"
 
 require "AudioEngine"
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()..'res/'
+local local_dir = kits.get_local_directory()..'res/'
 
 local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)

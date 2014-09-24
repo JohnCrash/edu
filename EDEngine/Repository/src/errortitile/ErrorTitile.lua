@@ -7,7 +7,7 @@ cur_child_id = nil
 local ErrorTitile = class("ErrorTitile")
 ErrorTitile.__index = ErrorTitile
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()..'res/errortitile/'
+local local_dir = kits.get_local_directory()..'res/errortitile/'
 
 local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)

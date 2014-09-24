@@ -48,6 +48,7 @@ private:
 	void initLuaEngine();
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 	void InitForDebugMode();
+	std::string getExeDir();
 #endif
 	/*
 	bool initInternalLuaEngine();

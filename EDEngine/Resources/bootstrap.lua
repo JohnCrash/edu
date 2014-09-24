@@ -4,7 +4,7 @@ local lxp = require "lom"
 local kits = require "kits"
 local md5 = require "md5"
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local local_dir = kits.get_local_directory()
 
 local cclog = function(...)
     print(string.format(...))
