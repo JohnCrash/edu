@@ -36,6 +36,7 @@ local ui = {
 	tiankong_view = '2202/2218',
 	tiankong_input_1 = '2202/2218/2219',
 	label_index = '2220',
+	txt_input = '2221',
 	tiankong_input_2 = '2202/2218/2225',
 	tiankong_input_3 = '2202/2218/2237',
 	
@@ -50,22 +51,22 @@ local ui = {
 	question_type_tiankong = '2202/2203/2918',
 }
 local tb_question_type = {
-{1,"ÅĞ¶Ï",ui.question_type_panduan,},
-{2,"µ¥Ñ¡",ui.question_type_danxuan},
-{3,"¶àÑ¡",ui.question_type_duoxuan},
-{4,"Á¬Ïß",ui.question_type_lianxian},
-{5,"Ìî¿Õ",ui.question_type_tiankong},
-{6,"Ñ¡Ôñ",ui.question_type_xuanze},
-{7,"ºáÅÅĞò",ui.question_type_paixu},
-{8,"ÊúÅÅĞò",ui.question_type_paixu},
-{9,"µãÍ¼µ¥Ñ¡",ui.question_type_danxuan},
-{10,"µãÍ¼¶àÑ¡",ui.question_type_duoxuan},
-{11,"µ¥ÍÏ·Å",ui.question_type_tuofang},
-{12,"¶àÍÏ·Å",ui.question_type_tuofang},
-{13,"ÍêĞÎ",""},
-{14,"¸´ºÏ",""},
-{15,"Ö÷¹ÛÓĞ´ğ°¸",""},
-{16,"Ö÷¹ÛÎŞ´ğ°¸",""}
+{1,"åˆ¤æ–­",ui.question_type_panduan,},
+{2,"å•é€‰",ui.question_type_danxuan},
+{3,"å¤šé€‰",ui.question_type_duoxuan},
+{4,"è¿çº¿",ui.question_type_lianxian},
+{5,"å¡«ç©º",ui.question_type_tiankong},
+{6,"é€‰æ‹©",ui.question_type_xuanze},
+{7,"æ¨ªæ’åº",ui.question_type_paixu},
+{8,"ç«–æ’åº",ui.question_type_paixu},
+{9,"ç‚¹å›¾å•é€‰",ui.question_type_danxuan},
+{10,"ç‚¹å›¾å¤šé€‰",ui.question_type_duoxuan},
+{11,"å•æ‹–æ”¾",ui.question_type_tuofang},
+{12,"å¤šæ‹–æ”¾",ui.question_type_tuofang},
+{13,"å®Œå½¢",""},
+{14,"å¤åˆ",""},
+{15,"ä¸»è§‚æœ‰ç­”æ¡ˆ",""},
+{16,"ä¸»è§‚æ— ç­”æ¡ˆ",""}
 }
 --local item_index
 local function loadArmature( name )
@@ -236,7 +237,7 @@ function dopractice:showitemdata(item_data)
 			end
 			data._options = {}
 			local item_temp
-			if item_data.item_type == 5 then											--Ìî¿Õ
+			if item_data.item_type == 5 then											--å¡«ç©º
 				local item_view = uikits.child(self._widget,ui.tiankong_view)
 				item_view:setVisible(true)	
 				local item_view_size = item_view:getContentSize()
@@ -265,11 +266,13 @@ function dopractice:showitemdata(item_data)
 					local label_index_item = uikits.child(per_item,ui.label_index)
 					label_index_item:setString(tostring(i))
 					per_item:setPositionX(pos_x_src+(i-1)*item_space_pos)
+					local txt_input = uikits.child(per_item,ui.txt_input)
+					txt_input:setPlaceHolder("è¯·è¾“å…¥ç­”æ¡ˆ")
 					data._options[i] = per_item
 					scrollView:addChild(per_item)
 				end
 							
-			elseif item_data.item_type == 1 then											--ÅĞ¶Ï
+			elseif item_data.item_type == 1 then											--åˆ¤æ–­
 				item_temp = uikits.child(self._widget,ui.panduan_view)
 				item_temp:setVisible(true)	
 				item_temp = uikits.child(self._widget,ui.panduan_yes_but)
@@ -278,7 +281,7 @@ function dopractice:showitemdata(item_data)
 				item_temp = uikits.child(self._widget,ui.panduan_no_but)
 				data._options[2] = item_temp
 				item_temp:setVisible(false)	
-			elseif item_data.item_type == 2 or item_data.item_type == 3 or item_data.item_type == 6 then --Ñ¡Ôñ
+			elseif item_data.item_type == 2 or item_data.item_type == 3 or item_data.item_type == 6 then --é€‰æ‹©
 				item_temp = uikits.child(self._widget,ui.xuanze_view)
 				item_temp:setVisible(true)					
 				item_temp = uikits.child(self._widget,ui.xuanze_a_but)
@@ -299,16 +302,16 @@ function dopractice:showitemdata(item_data)
 				item_temp = uikits.child(self._widget,ui.xuanze_f_but)
 				data._options[6] = item_temp
 				item_temp:setVisible(false)		
-			elseif item_data.item_type == 11 or item_data.item_type == 12 then 						--ÍÏ·Å
+			elseif item_data.item_type == 11 or item_data.item_type == 12 then 						--æ‹–æ”¾
 					item_temp = uikits.child(self._widget,ui.tuofang_txt)
 					item_temp:setVisible(true)
-			elseif item_data.item_type == 9 or item_data.item_type == 10 then 						--µãÍ¼Ñ¡Ôñ
+			elseif item_data.item_type == 9 or item_data.item_type == 10 then 						--ç‚¹å›¾é€‰æ‹©
 					item_temp = uikits.child(self._widget,ui.weizhi_txt)
 					item_temp:setVisible(true)
-			elseif item_data.item_type == 4 then 														--Á¬Ïß
+			elseif item_data.item_type == 4 then 														--è¿çº¿
 					item_temp = uikits.child(self._widget,ui.lianxian_txt)
 					item_temp:setVisible(true)	
-			elseif item_data.item_type == 7 or item_data.item_type == 8 then 							--ÅÅĞò		
+			elseif item_data.item_type == 7 or item_data.item_type == 8 then 							--æ’åº		
 					item_temp = uikits.child(self._widget,ui.paixu_txt)
 					item_temp:setVisible(true)
 			else
