@@ -10,6 +10,22 @@
 #include "AppleBundle.h"
 #endif
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+std::string toUTF8( const std::wstring& wstr )
+{
+	std::string str;
+	int len = WideCharToMultiByte(CP_UTF8,0,wstr.c_str(),-1,NULL,NULL,NULL,NULL); 
+	if( len == 0 )
+	{
+		return "";
+	}
+	str.resize( len );
+	len = WideCharToMultiByte(CP_UTF8,0,wstr.c_str(),-1,&str[0],str.size(),NULL,NULL);
+	if( str.back()==0 )
+		str.pop_back();
+	return str;
+}
+#endif
 AppDelegate::AppDelegate()
 {
 
@@ -26,13 +42,17 @@ bool AppDelegate::applicationDidFinishLaunching()
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
     if(!glview) {
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+		glview = GLView::create(toUTF8(TEXT("ÀÖ½ÌÀÖÑ§")));
+#else
 		glview = GLView::create("EDEngine");
+#endif
         director->setOpenGLView(glview);
     }
 
 #ifdef USE_WIN32_CONSOLE
     // turn on display FPS
-    //director->setDisplayStats(true);
+    director->setDisplayStats(true);
 #endif
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
@@ -51,7 +71,27 @@ void AppDelegate::initLuaEngine()
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+#ifndef _DEBUG
+#ifdef _WIN32
+	HWND hwnd = GetDesktopWindow();
+	RECT rect;
+	GetClientRect(hwnd,&rect);
+	int borderHeight = 64;//GetSystemMetrics(SM_CYBORDER);
+	int width = rect.right-rect.left-2*borderHeight;
+	int height;
+	float v = (rect.bottom-rect.top)/(rect.right-rect.left);
+	if( abs(v -9/16) > abs(v-3/4) )
+	{
+		glview->setFrameSize(width,width*3/4);
+	}
+	else
+	{
+		glview->setFrameSize(width,width*9/16);
+	}
+#endif
+#else
 	glview->setFrameSize(1024,576);
+#endif
 	//glview->setFrameSize(1920,1080);
 #endif	
     auto screenSize = glview->getFrameSize();
@@ -81,18 +121,39 @@ void AppDelegate::initLuaEngine()
     
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-	std::string wpath = pFileUtils->getWritablePath();
-	pFileUtils->addSearchPath(wpath+"src/luacore");
-	pFileUtils->addSearchPath(wpath+"luacore");
+#ifndef _DEBUG
+	InitEngineDirectory();
+	std::string wpath = getLjShellDirectory(App_DIRECTORY);
+	pFileUtils->addSearchPath(wpath+"src/luacore",true);
+	pFileUtils->addSearchPath(wpath+"res/luacore",true);
 	pFileUtils->addSearchPath(wpath+"src");
-    pFileUtils->addSearchPath(wpath+"res");
+	pFileUtils->addSearchPath(wpath+"res");
+	pFileUtils->addSearchPath(wpath+"cache");
+	pFileUtils->addSearchPath(wpath);
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	std::string exe = getExeDir();
+	pFileUtils->addSearchPath(exe);
+	pFileUtils->addSearchPath(exe+"luacore");
+	pFileUtils->addSearchPath(exe+"luacore/res");
+	pFileUtils->addSearchPath(exe+"src");
+    pFileUtils->addSearchPath(exe+"res");	
 #else
-	std::string wpath = pFileUtils->getWritablePath();
-	pFileUtils->addSearchPath(wpath+"src/luacore");
 	pFileUtils->addSearchPath("luacore");
+	pFileUtils->addSearchPath("luacore/res");
 	pFileUtils->addSearchPath("src");
     pFileUtils->addSearchPath("res");
+#endif
+#else
+	InitEngineDirectory();
+	std::string wpath = getLjShellDirectory(App_DIRECTORY);
+	pFileUtils->addSearchPath(wpath+"cache");
+	pFileUtils->addSearchPath(wpath);
+	std::string exe = getExeDir();
+	pFileUtils->addSearchPath(exe);
+	pFileUtils->addSearchPath(exe+"luacore");
+	pFileUtils->addSearchPath(exe+"luacore/res");
+	pFileUtils->addSearchPath(exe+"src");
+    pFileUtils->addSearchPath(exe+"res");	
 #endif
     
     auto pEngine = LuaEngine::getInstance();
@@ -108,6 +169,20 @@ void AppDelegate::initLuaEngine()
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+std::string AppDelegate::getExeDir()
+{
+	TCHAR cur[256];
+	GetModuleFileName(GetModuleHandle(NULL),cur,256);
+	std::string exe = toUTF8( cur );
+	std::string::size_type pos = exe.find_last_of('\\');
+	if( pos != std::string::npos )
+	{
+		return exe.substr(0,pos+1);
+	}
+	else
+		return exe;
+}
+
 void AppDelegate::InitForDebugMode()
 {
 	TCHAR cur[256];

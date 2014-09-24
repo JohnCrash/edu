@@ -2,8 +2,15 @@
 #include "Files.h"
 #include "MD5.h"
 
+USING_NS_CC;
+
 CDirMng g_DirMng;
 
+void InitEngineDirectory()
+{
+	CCLog("InitEngineDirectory EDEngine");
+	g_DirMng.Init("EDEngine");
+}
 std::string getLjShellDirectory(LJDirectory edd)
 {
 	switch(edd)

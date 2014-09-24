@@ -3,15 +3,13 @@ local curl = require "curl"
 local socket = require "socket"
 local http = require "socket.http"
 local json = require "json-c"
+require "ljshellDeprecated"
+local ljshell = require "ljshell"
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
-local cache_dir
+local local_dir = ljshell.getDirectory(ljshell.AppDir)
 local platform = CCApplication:getInstance():getTargetPlatform()
-if platform == kTargetWindows then
-	cache_dir = local_dir.."cache/"
-else
-	cache_dir = local_dir.."test/"
-end
+local cache_dir = local_dir.."cache/"
+
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
@@ -446,6 +444,10 @@ local function quit()
 	cc.Director:getInstance():endToLua()
 end
 
+local function get_local_directory()
+	return local_dir
+end
+
 local function get_cache_path()
 	return cache_dir
 end
@@ -485,6 +487,7 @@ local exports = {
 	quit = quit,
 	rename_file = rename_file,
 	exists_file = exists_file,
+	get_local_directory = get_local_directory,
 	get_cache_path = get_cache_path,
 }
 

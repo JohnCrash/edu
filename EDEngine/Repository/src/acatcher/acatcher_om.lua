@@ -12,7 +12,7 @@ ACatcherScene._widget = nil
 ACatcherScene._sceneTitle = nil
 
 --本地支援缓冲区
-local local_dir = cc.FileUtils:getInstance():getWritablePath()..'res/'
+local local_dir = kits.get_local_directory()..'res/'
 local SND_UI_CLICK = 0
 local SND_CLICK = 1
 local SND_MISS = 2

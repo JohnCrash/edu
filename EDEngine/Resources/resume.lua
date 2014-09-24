@@ -1,5 +1,8 @@
 local json = require "json-c"
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
+require "ljshellDeprecated"
+local ljshell = require "ljshell"
+
+local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
 local function exists_file( file )
   local f = io.open(file, "rb")
@@ -27,7 +30,7 @@ local function write_file( name,buf )
 	return true
   else
      --local file error?
-     my_log('Can not write file '..filename)
+     print('Can not write file '..filename)
 	 return false
   end
 end

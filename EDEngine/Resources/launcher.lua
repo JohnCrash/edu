@@ -11,21 +11,31 @@ crash.open("launcher",1)
 
 uikits.muteSound( kits.config("mute","get") )
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
 
 --require("mobdebug").start("192.168.2.182")
-
+local cache_dir = kits.get_cache_path()
+if not kits.directory_exists(cache_dir) then
+	kits.make_directory(cache_dir)
+end
+		
 local function init_test_resource()
   local pfu = cc.FileUtils:getInstance()
   if platform == kTargetWindows then
 		pfu:addSearchPath(local_dir..'src/')
 		pfu:addSearchPath(local_dir..'res/')	
-		pfu:addSearchPath(local_dir..'cache/')
+
+		local cache_dir = kits.get_cache_path()
+		if not kits.directory_exists(cache_dir) then
+			kits.make_directory(cache_dir)
+		end
+		pfu:addSearchPath(cache_dir)
+
 		pfu:addSearchPath(local_dir)
 		pfu:addSearchPath(local_dir..'luacore/')
 		--默认资源
-		pfu:addSearchPath(local_dir..'luacore/res')
+		pfu:addSearchPath('luacore/res')
 	else --android,ios
 		--先搜索跟新目录
 		pfu:addSearchPath(local_dir..'src/')
@@ -42,11 +52,11 @@ local function init_test_resource()
 		end
 		pfu:addSearchPath(cache_dir)
 		--默认资源
-		pfu:addSearchPath('luacore/res')		
+		pfu:addSearchPath('luacore/res')
 	end
 end
 
-init_test_resource()
+--init_test_resource()
 
 if uikits.get_factor() == uikits.FACTOR_9_16 then
 	uikits.initDR{width=1920,height=1080}

@@ -6,7 +6,7 @@ local md5 = require "md5"
 local json = require "json-c"
 local resume = require "resume"
 
-local local_dir = cc.FileUtils:getInstance():getWritablePath()
+local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v2/'
@@ -133,6 +133,7 @@ end
 function UpdateProgram.create(t)
 	if t and type(t)=='table' and t.updates and t.run 
 	and type(t.updates)=='table' and type(t.run)=='function' then
+		--[[
 		if platform==kTargetWindows then
 			resume.clearflag("update") --update isok
 			local scene = t.run()
@@ -142,7 +143,8 @@ function UpdateProgram.create(t)
 			else
 				kits.log('ERROR UpdateProgram:init run return nil')
 			end		
-		end
+		end --]]
+		
 		--需要跟新,打开启动界面
 		local scene = cc.Scene:create()
 		local layer = uikits.extend(cc.Layer:create(),UpdateProgram)

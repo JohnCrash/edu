@@ -33,4 +33,6 @@ enum LJDirectory
 };
 
 std::string getLjShellDirectory(LJDirectory edd);
+void InitEngineDirectory();
+
 #endif
