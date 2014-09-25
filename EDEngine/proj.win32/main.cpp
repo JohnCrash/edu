@@ -10,6 +10,7 @@ bool g_Quit = true;
 std::string g_Cookie;
 std::string g_Launch;
 std::string g_Userid;
+std::string g_Mode;
 std::string toUTF8( const std::wstring& wstr );
 
 std::wstring getParam(const std::wstring& cmd,const std::wstring& key)
@@ -36,6 +37,7 @@ void ParseCommand(LPTSTR lpCmdLine)
 	g_Cookie = toUTF8(getParam(cmd,TEXT("cookie=")));
 	g_Launch = toUTF8(getParam(cmd,TEXT("launch=")));
 	g_Userid = toUTF8(getParam(cmd,TEXT("userid=")));
+	g_Mode = toUTF8(getParam(cmd,TEXT("mode=")));
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,

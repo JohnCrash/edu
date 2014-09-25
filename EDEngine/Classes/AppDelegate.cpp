@@ -36,6 +36,8 @@ AppDelegate::~AppDelegate()
 	//releaseInternalLuaEngine();
 }
 
+extern std::string g_Mode;
+
 bool AppDelegate::applicationDidFinishLaunching() 
 {
     // initialize director
@@ -43,7 +45,16 @@ bool AppDelegate::applicationDidFinishLaunching()
     auto glview = director->getOpenGLView();
     if(!glview) {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#ifndef _DEBUG
+		if( g_Mode == "fullscreen" )
+			glview = GLView::createWithFullScreen(toUTF8(TEXT("乐教乐学")));
+		else if( g_Mode == "window" )
+			glview = GLView::create(toUTF8(TEXT("乐教乐学")));
+		else
+			glview = GLView::createWithFullScreen(toUTF8(TEXT("乐教乐学")));
+#else
 		glview = GLView::create(toUTF8(TEXT("乐教乐学")));
+#endif
 #else
 		glview = GLView::create("EDEngine");
 #endif
@@ -73,20 +84,23 @@ void AppDelegate::initLuaEngine()
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 #ifndef _DEBUG
 #ifdef _WIN32
-	HWND hwnd = GetDesktopWindow();
-	RECT rect;
-	GetClientRect(hwnd,&rect);
-	int borderHeight = 64;//GetSystemMetrics(SM_CYBORDER);
-	int width = rect.right-rect.left-2*borderHeight;
-	int height;
-	float v = (rect.bottom-rect.top)/(rect.right-rect.left);
-	if( abs(v -9/16) > abs(v-3/4) )
+	if(g_Mode=="window")
 	{
-		glview->setFrameSize(width,width*3/4);
-	}
-	else
-	{
-		glview->setFrameSize(width,width*9/16);
+		HWND hwnd = GetDesktopWindow();
+		RECT rect;
+		GetClientRect(hwnd,&rect);
+		int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
+		int width = rect.right-rect.left-2*borderHeight;
+		int height;
+		float v = (rect.bottom-rect.top)/(rect.right-rect.left);
+		if( abs(v -9/16) > abs(v-3/4) )
+		{
+			glview->setFrameSize(width,width*3/4);
+		}
+		else
+		{
+			glview->setFrameSize(width,width*9/16);
+		}
 	}
 #endif
 #else
