@@ -850,21 +850,99 @@ function TeacherList:set_homework_ui(index)
 	end,"click")
 end
 
+local space_title = 50
+
 function TeacherList:set_homework_view( )
 	self:set_homework_ui(2)
-	
+		
 	local label_course = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_COURSE)
 	local label_bv = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_BV)
 	local label_vol = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_VOL)
 	local label_unit = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_UNIT)
 	local label_section = uikits.child(self._release,ui.TOPICS_SELECT_TITLE_SECTION)
 	local set_title_view = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_TITLE)
-	
+	label_course:setVisible(false)
+	label_bv:setVisible(false)
+	label_vol:setVisible(false)
+	label_unit:setVisible(false)
+	label_section:setVisible(false)
+	--local scrollview = uikits.child(set_title_view,10000)
+	--if scrollview == nil then
+		set_title_view:removeChildByTag(10000)
+		scrollView = ccui.ScrollView:create()
+		scrollView:setTouchEnabled(true)      
+		scrollView:setPosition(cc.p(0,0))			
+		scrollView:setDirection(ccui.ScrollViewDir.horizontal)	
+		set_title_view:addChild(scrollView,1,10000)
+	--end
 	local pos_x_src = label_course:getPositionX()
 	local size_title_view = set_title_view:getContentSize()
+	local but_xiugai = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_XIUGAI)
+	local size_xiugai = but_xiugai:getContentSize()
+	size_title_view.width = size_title_view.width - size_xiugai.width*2 
+	scrollView:setContentSize(size_title_view) 
 	
+	local label_course_scroll = label_course:clone()
+	if self._selector[1] then
+		label_course_scroll:setString(self._selector[1].name)
+		label_course_scroll:setVisible(true)
+		scrollView:addChild(label_course_scroll)
+		local label_size = label_course_scroll:getContentSize()
+		pos_x_src = pos_x_src+label_size.width+space_title
+	else
+		label_course_scroll:setString("")
+	end
 	
+	local label_bv_scroll = label_course:clone()
+	if self._selector[2] then
+		label_bv_scroll:setString(self._selector[2].name)
+		label_bv_scroll:setVisible(true)
+		scrollView:addChild(label_bv_scroll)
+		label_bv_scroll:setPositionX(pos_x_src)
+		local label_size = label_bv_scroll:getContentSize()
+		pos_x_src = pos_x_src+label_size.width+space_title
+	else
+		label_bv_scroll:setString("")
+	end
+
+	local label_vol_scroll = label_course:clone()
+	if self._selector[3] then
+		label_vol_scroll:setString(self._selector[3].name)
+		label_vol_scroll:setVisible(true)
+		scrollView:addChild(label_vol_scroll)
+		label_vol_scroll:setPositionX(pos_x_src)
+		local label_size = label_vol_scroll:getContentSize()
+		pos_x_src = pos_x_src+label_size.width+space_title
+	else
+		label_vol_scroll:setString("")
+	end
+		
+	local label_unit_scroll = label_course:clone()
+	if self._selector[4] then
+		label_unit_scroll:setString(self._selector[4].name)
+		label_unit_scroll:setVisible(true)
+		scrollView:addChild(label_unit_scroll)
+		label_unit_scroll:setPositionX(pos_x_src)
+		local label_size = label_unit_scroll:getContentSize()
+		pos_x_src = pos_x_src+label_size.width+space_title
+	else
+		label_unit_scroll:setString("")
+	end
 	
+	local label_section_scroll = label_course:clone()
+	if self._selector[5] then
+		label_section_scroll:setString(self._selector[5].name)
+		label_section_scroll:setVisible(true)
+		scrollView:addChild(label_section_scroll)
+		label_section_scroll:setPositionX(pos_x_src)
+		local label_size = label_section_scroll:getContentSize()
+		pos_x_src = pos_x_src+label_size.width+space_title
+	else
+		label_section_scroll:setString("")
+	end
+	size_title_view.width = pos_x_src
+	scrollView:setInnerContainerSize(size_title_view)
+--[[	
 	if self._selector[1] then
 		local str_show = string.sub(self._selector[1].name,1,21)
 		label_course:setString(str_show)
@@ -894,7 +972,7 @@ function TeacherList:set_homework_view( )
 		label_section:setString(str_show)
 	else
 		label_section:setString("")
-	end
+	end--]]
 	
 	local set_button_by_les = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_LES)
 	local set_button_by_err = uikits.child(self._release,ui.TOPICS_SET_BUTTON_BY_ERR)
