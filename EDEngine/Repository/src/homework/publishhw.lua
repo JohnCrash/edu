@@ -176,7 +176,65 @@ end
 function Publishhw:publish_homework()
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
 	local send_url = new_homework_url..send_data_course
-	local result = kits.http_get(send_url,login.cookie(),1)
+
+	local loadbox = loadingbox.open( self )
+	local ret = cache.request( send_url,function(b)
+				--loadbox:removeFromParent()
+				if b then
+					local result = cache.get_data( send_url )
+					if result and type(result) == 'string' then
+						self._paperid = result
+						local send_data_pid = '?pid='..self._paperid
+						local tb_para = self:format_item_list()
+						local send_data_para = '&para='..json.encode(tb_para)
+						send_url = add_homework_item_url..send_data_pid..send_data_para
+						local ret = cache.request( send_url,function(b)
+									loadbox:removeFromParent()
+									if b then
+										local result = cache.get_data( send_url )
+										if result and result == 'True' then
+											local send_data = self:format_publish_data()
+											send_url = publish_homework_url..send_data
+											result = kits.http_get(send_url,login.cookie(),1)
+											if result == '' then
+												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+											else
+												loadbox:removeFromParent()
+												kits.log('add_homework_item  error')
+												return
+											end
+--[[											local send_data = self:format_publish_data()
+											send_url = publish_homework_url..send_data
+											local ret = cache.request( send_url,function(b)
+														if b then
+															local result = cache.get_data( send_url )
+															if result == '' then
+																loadbox:removeFromParent()
+																uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+															else
+																loadbox:removeFromParent()
+																kits.log('add_homework_item  error')
+																return
+															end
+														end
+													end)--]]
+													
+										else
+											loadbox:removeFromParent()
+											kits.log('add_homework_item  error')
+											return
+										end
+									end
+								end)
+					else
+						loadbox:removeFromParent()
+						kits.log('new_homework  error')
+						return	
+					end
+				end
+			end)
+			
+--[[	local result = kits.http_get(send_url,login.cookie(),1)
 	if type(result)=='string' then
 		self._paperid = result
 	else
@@ -205,7 +263,7 @@ function Publishhw:publish_homework()
 	else
 		kits.log('add_homework_item  error')
 		return
-	end
+	end--]]
 --[[	local loadbox = loadingbox.open(self)
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
