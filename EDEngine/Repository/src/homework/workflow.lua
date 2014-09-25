@@ -179,7 +179,7 @@ function WorkFlow:commit_topics( v )
 									answer.commit_faild = v.commit_faild
 									kits.log('	commit '..url..' success!')
 								else
-									kits.log('ERROR commit time out success!')
+									kits.log('ERROR commit time out!')
 								end
 							else
 								v.commit_faild = true

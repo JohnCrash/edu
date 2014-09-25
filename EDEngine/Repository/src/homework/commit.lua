@@ -84,6 +84,8 @@ local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/Submit
 local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
 local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
 local commit_list_url = 'http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx'
+local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
+
 local WorkCommit = class("WorkCommit")
 WorkCommit.__index = WorkCommit
 
@@ -277,38 +279,59 @@ function WorkCommit:init_commit_list()
 	end
 end
 
+function WorkCommit:init_student_page()
+	local but1
+	local but2
+	--if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item <=self._args.cnt_item_finish and 
+	--只要已经提交就不能进入做作业了
+	if self._args.status == 10 or self._args.status == 11 then
+		uikits.child(self._root,ui.WORKFLOW):setVisible(false)
+		but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
+	else
+		but1 = uikits.child(self._root,ui.WORKFLOW)
+		 uikits.child(self._root,ui.WORKFLOW_COMPLETE):setVisible(false)
+	end
+	but2 = uikits.child(self._root,ui.WORKFLOW2)
+	uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)
+	but1:setVisible(true)
+	but2:setVisible(true)
+	if self._args.status == 10 or self._args.status == 11 then --提交状态,0,1未提交,10,11已经提交
+		uikits.event(but1,
+						function(sender)
+							uikits.pushScene(StudentWatch.create(self._args))
+						end,'click')		
+	else
+		uikits.event(but1,
+						function(sender)
+							uikits.pushScene(WorkFlow.create(self._args))
+						end,'click')
+	end
+	uikits.event(but2,
+					function(sender)
+						uikits.pushScene(Subjective.create(self._args.url2))
+					end,'click')		
+end
+
+function WorkCommit:init_parents_page()
+	local but1
+	uikits.child(self._root,ui.WORKFLOW):setVisible(false)
+	but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
+	uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)
+	but1:setVisible(true)
+	uikits.event(but1,
+					function(sender)
+						uikits.pushScene(StudentWatch.create(self._args))
+					end,'click')		
+end
+
 function WorkCommit:init_commit_page()
 	if self._args then
-		local but1
-		local but2
-		--if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item <=self._args.cnt_item_finish and 
-		--只要已经提交就不能进入做作业了
-		if self._args.status == 10 or self._args.status == 11 then
-			uikits.child(self._root,ui.WORKFLOW):setVisible(false)
-			but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
+		if self._args._user_type and type(self._args._user_type)=='table' and self._args._user_type.result==0 and 
+			self._args._user_type.uig and (self._args._user_type.uig[1].user_role==2 or self._args._user_type.uig[1].user_role==3) then
+			self:init_parents_page()
 		else
-			but1 = uikits.child(self._root,ui.WORKFLOW)
-			 uikits.child(self._root,ui.WORKFLOW_COMPLETE):setVisible(false)
+			self:init_student_page()
 		end
-		but2 = uikits.child(self._root,ui.WORKFLOW2)
-		uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)
-		but1:setVisible(true)
-		but2:setVisible(true)
-		if self._args.status == 10 or self._args.status == 11 then --提交状态,0,1未提交,10,11已经提交
-			uikits.event(but1,
-							function(sender)
-								uikits.pushScene(StudentWatch.create(self._args))
-							end,'click')		
-		else
-			uikits.event(but1,
-							function(sender)
-								uikits.pushScene(WorkFlow.create(self._args))
-							end,'click')
-		end
-		uikits.event(but2,
-						function(sender)
-							uikits.pushScene(Subjective.create(self._args.url2))
-						end,'click')		
 		local caption = uikits.child(self._root,ui.CAPTION)
 		if self._args.caption then
 			caption:setString( self._args.caption )
@@ -427,13 +450,15 @@ function WorkCommit:init()
 	kits.log('WorkCommit:init request :'..url_topics )
 	local loadbox = loadingbox.open( self )
 	local ret = cache.request_json( url_topics,function(t)
-				loadbox:removeFromParent()
+				if not loadbox:removeFromParent() then
+					return
+				end
 				if t then
 					self._args._exam_table = t
 					self._args.url_topics = url_topics
 					--统计能做的客观题数量
 					self._args.cnt_item = self:calc_objective_num(t)
-					self:init_commit_page()
+					self:init_user_type()
 				else
 					--既没有网络也没有缓冲
 					messagebox.open(self,function(e)
@@ -445,6 +470,20 @@ function WorkCommit:init()
 					end,messagebox.RETRY)					
 				end
 			end)	
+end
+
+function WorkCommit:init_user_type()
+	local url = get_uesr_info_url
+	local loadbox = loadingbox.open( self )
+	cache.request_json( url,function(t)
+		if not loadbox:removeFromParent() then
+			return
+		end
+		if t then
+			self._args._user_type = t
+		end
+		self:init_commit_page()
+	end)
 end
 
 --计算客观题数量

@@ -429,6 +429,7 @@ function TeacherList:class_statistics( cls )
 		if not loadbox:removeFromParent() then
 			return
 		end
+
 		if t and type(t)=='table' then
 			self._statistics_data = TeacherList:statistics_data(t)
 			for i,v in pairs(self._statistics_data) do
@@ -473,6 +474,7 @@ function TeacherList:init_ready_statistics()
 					end
 					table.insert(checks,item)
 				end
+				self:clear_statistics()
 				self:class_statistics(first_id)
 			else
 				kits.log('ERROR TeacherList:init_ready_statistics invalid request result')
@@ -509,6 +511,7 @@ function TeacherList:relayout_statistics()
 end
 
 function TeacherList:clear_statistics()
+	self._statistics_item:setVisible(false)
 	if self._statistics_list then
 		for i ,v in pairs(self._statistics_list) do
 			if v then
@@ -1002,7 +1005,6 @@ function TeacherList:init()
 end
 
 function TeacherList:add_homewrk_exp(index,item_data)
-	print('index;;'..index)
 	local item_obj_pic_src = uikits.child(self._release,ui.TOPICS_EDIT_OBJ_PIC)
 	local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_KEGUAN)
 	local size_view = item_obj_pic_src:getContentSize()
