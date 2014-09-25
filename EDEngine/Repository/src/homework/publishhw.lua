@@ -47,12 +47,12 @@ end
 
 function Publishhw:SetButtonEnabled(but)
 	if banji_sel_num  ~= 0 then
-		but:setEnabled(true);
-		but:setBright(true);
+		but:setEnabled(true)
+		but:setBright(true)
 		but:setTouchEnabled(true)
 	else
-		but:setEnabled(false);
-		but:setBright(false);
+		but:setEnabled(false)
+		but:setBright(false)
 		but:setTouchEnabled(false)	
 	end
 end
@@ -176,7 +176,10 @@ end
 function Publishhw:publish_homework()
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
 	local send_url = new_homework_url..send_data_course
-
+	local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
+	but_confirm:setEnabled(false)
+	but_confirm:setBright(false)
+	but_confirm:setTouchEnabled(false)	
 	local loadbox = loadingbox.open( self )
 	local ret = cache.request( send_url,function(b)
 				--loadbox:removeFromParent()
@@ -196,10 +199,13 @@ function Publishhw:publish_homework()
 											local send_data = self:format_publish_data()
 											send_url = publish_homework_url..send_data
 											result = kits.http_get(send_url,login.cookie(),1)
+											loadbox:removeFromParent()
+											but_confirm:setEnabled(true)
+											but_confirm:setBright(true)
+											but_confirm:setTouchEnabled(true)	
 											if result == '' then
 												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
 											else
-												loadbox:removeFromParent()
 												kits.log('add_homework_item  error')
 												return
 											end
@@ -221,9 +227,24 @@ function Publishhw:publish_homework()
 													
 										else
 											loadbox:removeFromParent()
+											but_confirm:setEnabled(true)
+											but_confirm:setBright(true)
+											but_confirm:setTouchEnabled(true)	
 											kits.log('add_homework_item  error')
 											return
 										end
+									else
+										loadbox:removeFromParent()
+										but_confirm:setEnabled(true)
+										but_confirm:setBright(true)
+										but_confirm:setTouchEnabled(true)	
+										messagebox.open(self,function(e)
+											if e == messagebox.TRY then
+												self:publish_homework()
+											elseif e == messagebox.CLOSE then
+												uikits.popScene()
+											end
+										end,messagebox.RETRY)										
 									end
 								end)
 					else
@@ -231,6 +252,15 @@ function Publishhw:publish_homework()
 						kits.log('new_homework  error')
 						return	
 					end
+				else
+					loadbox:removeFromParent()
+					messagebox.open(self,function(e)
+						if e == messagebox.TRY then
+							self:publish_homework()
+						elseif e == messagebox.CLOSE then
+							uikits.popScene()
+						end
+					end,messagebox.RETRY)	
 				end
 			end)
 			
