@@ -9,9 +9,9 @@ local resume = require "resume"
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v2/'
-local local_server = 'http://192.168.2.211:81/lgh/v2/'
-local update_server = local_server
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v3/'
+local local_server = 'http://192.168.2.211:81/lgh/v3/'
+local update_server =liexue_server -- local_server
 
 local ui = {
 	FILE = 'loadscreen/jiazhan.json',
@@ -355,8 +355,9 @@ function UpdateProgram:check_update(t)
 				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
 			end
 		end
+		self._text:setText("正在加载请稍等...")
 	else
-		self._text:setText("Update from 192.168.2.211...")
+		self._text:setText("正在加载请稍候...")
 	end
 	return not (#t.need_updates == 0)
 end
