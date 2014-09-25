@@ -16,22 +16,16 @@ static void pathsp(std::string& path)
 		}
 }
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 extern std::string g_Cookie;
 extern std::string g_Launch;
 extern std::string g_Userid;
-#endif
 
 static int cc_launchparam(lua_State* L)
 {
-	#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 	lua_pushstring(L,g_Launch.c_str());
 	lua_pushstring(L,g_Cookie.c_str());
 	lua_pushstring(L,g_Userid.c_str());
 	return 3;
-	#else
-	return 0;
-	#endif
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32

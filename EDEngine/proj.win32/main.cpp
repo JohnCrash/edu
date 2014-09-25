@@ -7,6 +7,37 @@ USING_NS_CC;
 bool g_Quit = true;
 #endif
 
+std::string g_Cookie;
+std::string g_Launch;
+std::string g_Userid;
+std::string toUTF8( const std::wstring& wstr );
+
+std::wstring getParam(const std::wstring& cmd,const std::wstring& key)
+{
+		std::wstring::size_type pos = cmd.find(key,0);
+		if( pos != std::wstring::npos )
+		{
+			std::wstring::size_type epos = cmd.find(TEXT(" "),pos);
+			if( epos != std::wstring::npos )
+			{
+				return cmd.substr(pos+key.length(),epos-pos-key.length());
+			}
+			else
+			{
+				return cmd.substr(pos+key.length());
+			}
+		}else
+			return std::wstring();
+}
+
+void ParseCommand(LPTSTR lpCmdLine)
+{
+	std::wstring cmd(lpCmdLine);
+	g_Cookie = toUTF8(getParam(cmd,TEXT("cookie=")));
+	g_Launch = toUTF8(getParam(cmd,TEXT("launch=")));
+	g_Userid = toUTF8(getParam(cmd,TEXT("userid=")));
+}
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
@@ -14,7 +45,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-	
+	ParseCommand(lpCmdLine);
 #ifdef USE_WIN32_CONSOLE
     AllocConsole();
     freopen("CONIN$", "r", stdin);
