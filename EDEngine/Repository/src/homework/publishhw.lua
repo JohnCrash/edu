@@ -141,11 +141,19 @@ function Publishhw:format_publish_data()
 	ret = '?exam_name='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'
 	ret = ret..'&paper_id='..self._paperid
 	ret = ret..'&course='..self.tb_parent_view._selector[1].id
-	ret = ret..'&book_version='..self.tb_parent_view._selector[2].id
-	ret = ret..'&node_vol='..self.tb_parent_view._selector[3].id
-	ret = ret..'&node_unit='..self.tb_parent_view._selector[4].id
-	ret = ret..'&node_section='..self.tb_parent_view._selector[5].id
-	ret = ret..'&node_section_name='..self.tb_parent_view._selector[5].name
+	if self.tb_parent_view._selector[2] then
+		ret = ret..'&book_version='..self.tb_parent_view._selector[2].id
+	end
+	if self.tb_parent_view._selector[3] then
+		ret = ret..'&node_vol='..self.tb_parent_view._selector[3].id
+	end
+	if self.tb_parent_view._selector[4] then
+		ret = ret..'&node_unit='..self.tb_parent_view._selector[4].id
+	end
+	if self.tb_parent_view._selector[5] then
+		ret = ret..'&node_section='..self.tb_parent_view._selector[5].id
+		ret = ret..'&node_section_name='..self.tb_parent_view._selector[5].name
+	end
 	ret = ret..'&period=1&tag_solution=1&tag_selfcheck=1&comment=0&score_type=2&from=1&exam_type=11'
 	ret = ret..'&from_user_id='..login.uid()
 	ret = ret..'&items='..self._item_count
@@ -168,7 +176,65 @@ end
 function Publishhw:publish_homework()
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
 	local send_url = new_homework_url..send_data_course
-	local result = kits.http_get(send_url,login.cookie(),1)
+
+	local loadbox = loadingbox.open( self )
+	local ret = cache.request( send_url,function(b)
+				--loadbox:removeFromParent()
+				if b then
+					local result = cache.get_data( send_url )
+					if result and type(result) == 'string' then
+						self._paperid = result
+						local send_data_pid = '?pid='..self._paperid
+						local tb_para = self:format_item_list()
+						local send_data_para = '&para='..json.encode(tb_para)
+						send_url = add_homework_item_url..send_data_pid..send_data_para
+						local ret = cache.request( send_url,function(b)
+									loadbox:removeFromParent()
+									if b then
+										local result = cache.get_data( send_url )
+										if result and result == 'True' then
+											local send_data = self:format_publish_data()
+											send_url = publish_homework_url..send_data
+											result = kits.http_get(send_url,login.cookie(),1)
+											if result == '' then
+												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+											else
+												loadbox:removeFromParent()
+												kits.log('add_homework_item  error')
+												return
+											end
+--[[											local send_data = self:format_publish_data()
+											send_url = publish_homework_url..send_data
+											local ret = cache.request( send_url,function(b)
+														if b then
+															local result = cache.get_data( send_url )
+															if result == '' then
+																loadbox:removeFromParent()
+																uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+															else
+																loadbox:removeFromParent()
+																kits.log('add_homework_item  error')
+																return
+															end
+														end
+													end)--]]
+													
+										else
+											loadbox:removeFromParent()
+											kits.log('add_homework_item  error')
+											return
+										end
+									end
+								end)
+					else
+						loadbox:removeFromParent()
+						kits.log('new_homework  error')
+						return	
+					end
+				end
+			end)
+			
+--[[	local result = kits.http_get(send_url,login.cookie(),1)
 	if type(result)=='string' then
 		self._paperid = result
 	else
@@ -197,7 +263,7 @@ function Publishhw:publish_homework()
 	else
 		kits.log('add_homework_item  error')
 		return
-	end
+	end--]]
 --[[	local loadbox = loadingbox.open(self)
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
