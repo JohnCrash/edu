@@ -198,15 +198,17 @@ function Publishhw:publish_homework()
 										if result and result == 'True' then
 											local send_data = self:format_publish_data()
 											send_url = publish_homework_url..send_data
+											--print('send_url::'..send_url)
 											result = kits.http_get(send_url,login.cookie(),1)
 											loadbox:removeFromParent()
 											but_confirm:setEnabled(true)
 											but_confirm:setBright(true)
 											but_confirm:setTouchEnabled(true)	
-											if result == '' then
+											--print(result)
+											if result and type(result) == 'string' then
 												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
 											else
-												kits.log('add_homework_item  error')
+												kits.log('publish_homework  error')
 												return
 											end
 --[[											local send_data = self:format_publish_data()
