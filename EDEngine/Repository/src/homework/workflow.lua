@@ -52,6 +52,7 @@ local ui = {
 	POSITION_TEXT = 'option_position',
 	POSITION_SORT = 'option_sort',
 	ANSWER_TEXT = 'answer_text',
+	TOPICS_NUM = 'topics_num',
 }
 
 local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
@@ -462,7 +463,7 @@ function WorkFlow:load_original_data_from_table( data )
 				b = false
 			end
 			k.item_id = v.item_id
-			
+			k.item_id_num = v.item_id_num
 			if topics.types and topics.types[k.item_type] and
 				topics.types[k.item_type].conv then
 				kits.log( topics.types[k.item_type].name )
@@ -784,6 +785,12 @@ function WorkFlow:init_anser_gui()
 		end
 		table.insert(self._option_edit,op)
 	end
+	
+	self._topics_num = uikits.child(self._root,ui.TOPICS_NUM)
+	if self._topics_num then
+		self._topics_num:setVisible(true)
+		self._topics_num:setString("")
+	end
 end
 
 function WorkFlow:clear_all_option_check()
@@ -794,6 +801,11 @@ end
 
 function WorkFlow:set_anwser_field( i )
 	if self._data[i] then
+		if self._topics_num then
+			if self._data[i].item_id_num then
+				self._topics_num:setString(tostring(self._data[i].item_id_num)..'-'..tostring(self._data[i].item_id))
+			end
+		end
 		if self._answer_items then
 			for i,v in pairs(self._answer_items) do
 				v:removeFromParent()
