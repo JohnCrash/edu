@@ -93,10 +93,10 @@ function Sethwbyles:getdatabyurl()
 		send_vol_data = '&vol='..self.selector[3].id
 	end
 	if self.selector[4] then
-		send_unit_data = '&vol='..self.selector[4].id
+		send_unit_data = '&unit='..self.selector[4].id
 	end
 	if self.selector[5] then
-		send_section_data = '&vol='..self.selector[5].id
+		send_section_data = '&section='..self.selector[5].id
 	end	
 	local send_page_data = '&p='..self.pageindex
 	
@@ -128,6 +128,7 @@ function Sethwbyles:getdatabyurl()
 				end		
 				self.loaded_item_num = self.loaded_item_num + #t.item
 				self.itemcount = t.t
+				print("self.itemcount::"..self.itemcount)
 				self:updatepage()
 			else
 				messagebox.open(self,function(e)
@@ -140,7 +141,7 @@ function Sethwbyles:getdatabyurl()
 			end
 			is_loading = false
 			loadbox:removeFromParent()
-		end,'NC')
+		end,'N')
 end
 
 
@@ -150,6 +151,7 @@ function Sethwbyles:addcollectitem(index,collectitem,page,src_collect_view)
 	local pos_x
 	local pos_y		
 	
+	print("collectitem.item_id_num::"..collectitem.item_id_num)
 	local collect_view = src_collect_view:clone()
 	local size  = collect_view:getContentSize()
 
