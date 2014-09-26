@@ -106,7 +106,23 @@ function Sethwbyles:getdatabyurl()
 --[[	local base_url = 'http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?course=10001&bv=0&vol=0&unit=0&section=0&type=0&diff=0&paperId=6d34229c768a4c7b87511b29a6b8c77f'
 	local send_page_data = '&p='..self.pageindex 
 	local send_url = base_url..send_page_data--]]
-	
+--[[	result = kits.http_get(send_url,login.cookie(),1)
+	local t = json.decode(result)
+	for i,obj in pairs(t.item) do
+		local is_exist = false
+		for j,v in pairs(self.parentview._confirm_item) do 
+			if v.item_id_num == obj.item_id_num then
+				is_exist = true
+			end
+		end
+		if is_exist == false then
+			self.collect_items[#self.collect_items+1] = t.item[i]
+		end
+	end		
+	self.loaded_item_num = self.loaded_item_num + #t.item
+	self.itemcount = t.t
+	print("self.itemcount::"..self.itemcount)
+	self:updatepage()--]]
 	local loadbox = loadingbox.open(self)
 	is_loading = true
 	cache.request_json( send_url,function(t)
@@ -141,7 +157,7 @@ function Sethwbyles:getdatabyurl()
 			end
 			is_loading = false
 			loadbox:removeFromParent()
-		end,'N')
+		end,'NC')
 end
 
 
@@ -218,7 +234,7 @@ function Sethwbyles:addcollectitem(index,collectitem,page,src_collect_view)
 						end
 					end)
 					
-	page:addChild(collect_view,1,1000+index)		
+	page:addChild(collect_view,1,10000+index)		
 end
 
 function Sethwbyles:updatepage()
@@ -243,22 +259,33 @@ function Sethwbyles:updatepage()
 		local collect_title_num = table.getn(self.collect_items)
 		local row_num
 		row_num = collect_title_num	
-		
+		print("row_num::"..row_num)
 		local size  = per_collectview:getContentSize()	
 		
 		local size_old = page_data:getInnerContainerSize()
 		local count_old = page_data:getChildrenCount()-1
-		page_data:setInnerContainerSize(cc.size(size_old.width,size_old.height+(size.height+collect_space)*row_num))
+		page_data:setInnerContainerSize(cc.size(size_old.width,(size.height+collect_space)*row_num))
 		
 		local collectview = page_data:getChildren()
+		local show_num = 1
 		for i,obj in pairs(collectview) do
-			local per_size_old_x = collectview[i]:getPositionX()
-			local per_size_old_y = collectview[i]:getPositionY()+(size.height+collect_space)*row_num
-			collectview[i]:setPosition(cc.p(per_size_old_x,per_size_old_y))
+			local cur_tag = collectview[i]:getTag()
+			if cur_tag > 10000 then
+				print('i::'..i)
+				local per_size_old_x = collectview[i]:getPositionX()
+				local per_size_old_y = (size.height+collect_space)*(row_num - show_num)
+		--		pos_y = page:getInnerContainerSize().height-(size.height+ collect_space)*row_num	
+				collectview[i]:setPosition(cc.p(per_size_old_x,per_size_old_y))
+				show_num = show_num+1
+			end
+
+
 		end
 		
 		for i,obj in pairs(self.collect_items) do
-			self:addcollectitem(i+count_old,self.collect_items[i],page_data,per_collectview)
+			if i >count_old then
+				self:addcollectitem(i,self.collect_items[i],page_data,per_collectview)				
+			end
 		end					
 	end
 end
@@ -317,7 +344,7 @@ end
 
 function Sethwbyles:updatecollectview()
 	
-	if self.loaded_item_num == self.itemcount then
+	if self.pageindex == self.itemcount then
 		return
 	end
 	self.pageindex = self.pageindex+1
