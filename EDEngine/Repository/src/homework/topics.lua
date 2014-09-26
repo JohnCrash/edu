@@ -1383,8 +1383,12 @@ local function relayout_click( layout,data,ismulti )
 			if s then
 				local k = answer_idx[s]
 				local rc = rects[k]
-				rect_node[k] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
-				bg:addChild( rect_node[k] )
+				if rc then
+					rect_node[k] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+					bg:addChild( rect_node[k] )
+				else
+					kits.log("WARNING : relayout_click rects["..tostring(k).."] = nil")
+				end
 			end
 		end
 	else
@@ -1451,6 +1455,10 @@ local function relayout_drag( layout,data,ismul )
 	local function get_pt_center( item,i )
 		local xx,yy = bg:getPosition()
 		local v = data.drag_rects[i]
+		if not v then
+			kits.log("WARNING : get_pt_center data.drag_rects["..tostring(i).."] = nil")
+			return {x=0,y=0}
+		end
 		xx = xx - bg:getContentSize().width*g_scale/2
 		local rc =  {
 				x1 = xx + v.x1 * g_scale,

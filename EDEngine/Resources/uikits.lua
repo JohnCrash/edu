@@ -524,7 +524,12 @@ local function child( root,path )
 			if w then
 				local wt
 				wt = w:getChildByName( v )
-				if not wt then wt = w:getChildByTag( v ) end
+				if not wt then
+					local d = tonumber(v)
+					if d then
+						wt = w:getChildByTag( d ) 
+					end
+				end
 				w = wt
 			end
 		end
