@@ -201,9 +201,9 @@ function Publishhw:publish_homework()
 											--print('send_url::'..send_url)
 											result = kits.http_get(send_url,login.cookie(),1)
 											loadbox:removeFromParent()
-											but_confirm:setEnabled(true)
+--[[											but_confirm:setEnabled(true)
 											but_confirm:setBright(true)
-											but_confirm:setTouchEnabled(true)	
+											but_confirm:setTouchEnabled(true)	--]]
 											--print(result)
 											if result and type(result) == 'string' then
 												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
@@ -338,14 +338,12 @@ function Publishhw:init()
 
 	uikits.event(but_confirm,
 		function(sender,eventType)
+		print('1111111')
 		--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
 		self:publish_homework()
 	end,"click")	
-
 	banji_sel_num = 0
 	self:SetButtonEnabled(but_confirm)
-	
-	
 	local banji_view = uikits.child(self._widget,ui.BANJI_VIEW)
 	banji_view:setDirection(ccui.ScrollViewDir.horizontal)
 	local per_banji_view = uikits.child(self._widget,ui.PER_BANJI_VIEW)
