@@ -103,7 +103,7 @@ function Publishhw:getdatabyurl()
 		end,'NC')
 end
 
-local new_homework_url = 'http://new.www.lejiaolexue.com/paper/handler/AddPaper.ashx?idx=1&title=1'
+local new_homework_url = 'http://new.www.lejiaolexue.com/paper/handler/AddPaper.ashx?idx=1&'
 local add_homework_item_url = 'http://new.www.lejiaolexue.com/paper/handler/ManuallyItem.ashx'
 local publish_homework_url = 'http://new.www.lejiaolexue.com/exam/handler/pubexam.ashx'
 local finish_days = {
@@ -179,8 +179,9 @@ function Publishhw:format_publish_data()
 end
 
 function Publishhw:publish_homework()
+	local tb_data = os.date("*t",data_cur_sec )
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
-	local send_url = new_homework_url..send_data_course
+	local send_url = new_homework_url..'title='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'..send_data_course
 	local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
 	but_confirm:setEnabled(false)
 	but_confirm:setBright(false)
