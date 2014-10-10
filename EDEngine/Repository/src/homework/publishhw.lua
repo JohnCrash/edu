@@ -69,7 +69,7 @@ function Publishhw:showbanjilist(tb_banji)
 		local size_view = cur_banji_view:getContentSize()
 		local pos_x_cur = pos_x_src + (i-1)*(size_view.width+banji_space)
 		cur_banji_view:setPositionX(pos_x_cur)
-		banji_view:addChild(cur_banji_view)
+		banji_view:addChild(cur_banji_view,1,obj.zone_id)
 	end
 	local size_banji_view = banji_view:getContentSize()
 	local size_view = src_per_banji_view:getContentSize()
@@ -103,7 +103,7 @@ function Publishhw:getdatabyurl()
 		end,'NC')
 end
 
-local new_homework_url = 'http://new.www.lejiaolexue.com/paper/handler/AddPaper.ashx?idx=1&title=1'
+local new_homework_url = 'http://new.www.lejiaolexue.com/paper/handler/AddPaper.ashx?idx=1&'
 local add_homework_item_url = 'http://new.www.lejiaolexue.com/paper/handler/ManuallyItem.ashx'
 local publish_homework_url = 'http://new.www.lejiaolexue.com/exam/handler/pubexam.ashx'
 local finish_days = {
@@ -160,22 +160,28 @@ function Publishhw:format_publish_data()
 	ret = ret..'&open_time='..os.date("%Y-%m-%d %X",data_cur_sec )
 	ret = ret..'&finish_time='..os.date("%Y-%m-%d %X",data_finish )
 	
+	local banji_view = uikits.child(self._widget,ui.BANJI_VIEW)
+	local banji_list = banji_view:getChildren()
 	local classdata = {}
-	for i,v in pairs(self.tb_banji) do
-		local per_classdata = {}
-		per_classdata.class_id = v.zone_id
-		per_classdata.group_id = ''
-		classdata[#classdata+1] = per_classdata
+	for i,v in pairs(banji_list) do
+		if v:getSelectedState() == true then
+			local per_classdata = {}
+			per_classdata.class_id = v:getTag()
+			per_classdata.group_id = ''
+			classdata[#classdata+1] = per_classdata		
+		end
 	end
 	local tb_class = {}
 	tb_class.result = classdata
 	ret = ret..'&classandgroup='..json.encode(tb_class)
+	--print("classandgroup::"..json.encode(tb_class))
 	return ret
 end
 
 function Publishhw:publish_homework()
+	local tb_data = os.date("*t",data_cur_sec )
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
-	local send_url = new_homework_url..send_data_course
+	local send_url = new_homework_url..'title='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'..send_data_course
 	local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
 	but_confirm:setEnabled(false)
 	but_confirm:setBright(false)
@@ -201,9 +207,9 @@ function Publishhw:publish_homework()
 											--print('send_url::'..send_url)
 											result = kits.http_get(send_url,login.cookie(),1)
 											loadbox:removeFromParent()
-											but_confirm:setEnabled(true)
+--[[											but_confirm:setEnabled(true)
 											but_confirm:setBright(true)
-											but_confirm:setTouchEnabled(true)	
+											but_confirm:setTouchEnabled(true)	--]]
 											--print(result)
 											if result and type(result) == 'string' then
 												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
@@ -338,14 +344,12 @@ function Publishhw:init()
 
 	uikits.event(but_confirm,
 		function(sender,eventType)
+		print('1111111')
 		--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
 		self:publish_homework()
 	end,"click")	
-
 	banji_sel_num = 0
 	self:SetButtonEnabled(but_confirm)
-	
-	
 	local banji_view = uikits.child(self._widget,ui.BANJI_VIEW)
 	banji_view:setDirection(ccui.ScrollViewDir.horizontal)
 	local per_banji_view = uikits.child(self._widget,ui.PER_BANJI_VIEW)
