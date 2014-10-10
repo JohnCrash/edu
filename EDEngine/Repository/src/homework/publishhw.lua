@@ -69,7 +69,7 @@ function Publishhw:showbanjilist(tb_banji)
 		local size_view = cur_banji_view:getContentSize()
 		local pos_x_cur = pos_x_src + (i-1)*(size_view.width+banji_space)
 		cur_banji_view:setPositionX(pos_x_cur)
-		banji_view:addChild(cur_banji_view)
+		banji_view:addChild(cur_banji_view,1,obj.zone_id)
 	end
 	local size_banji_view = banji_view:getContentSize()
 	local size_view = src_per_banji_view:getContentSize()
@@ -160,16 +160,21 @@ function Publishhw:format_publish_data()
 	ret = ret..'&open_time='..os.date("%Y-%m-%d %X",data_cur_sec )
 	ret = ret..'&finish_time='..os.date("%Y-%m-%d %X",data_finish )
 	
+	local banji_view = uikits.child(self._widget,ui.BANJI_VIEW)
+	local banji_list = banji_view:getChildren()
 	local classdata = {}
-	for i,v in pairs(self.tb_banji) do
-		local per_classdata = {}
-		per_classdata.class_id = v.zone_id
-		per_classdata.group_id = ''
-		classdata[#classdata+1] = per_classdata
+	for i,v in pairs(banji_list) do
+		if v:getSelectedState() == true then
+			local per_classdata = {}
+			per_classdata.class_id = v:getTag()
+			per_classdata.group_id = ''
+			classdata[#classdata+1] = per_classdata		
+		end
 	end
 	local tb_class = {}
 	tb_class.result = classdata
 	ret = ret..'&classandgroup='..json.encode(tb_class)
+	--print("classandgroup::"..json.encode(tb_class))
 	return ret
 end
 
