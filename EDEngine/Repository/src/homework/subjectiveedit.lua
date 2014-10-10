@@ -201,6 +201,25 @@ function SubjectiveEdit:init()
 	self._list_deletes = {}
 	self:index_clear()
 	self:scroll_relayout()
+	self:init_event()
+end
+
+function SubjectiveEdit:init_event()
+	if self._record_button then --插入录音
+		uikits.event(self._record_button,function(sender)
+			
+		end)
+	end
+	if self._cam_button then --插入照片
+		uikits.event(self._cam_button,function(sender)
+			
+		end)	
+	end
+	if self._photo_button then --从图库插入照片
+		uikits.event(self._photo_button,function(sender)
+			
+		end)	
+	end	
 end
 
 function SubjectiveEdit:release()

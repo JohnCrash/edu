@@ -238,9 +238,9 @@ function Batch:init_topics_statics(t)
 				[ui.HIGH_SCORE] = math.floor(t.high),
 				[ui.LOW_SCORE] = math.floor(t.low),
 				[ui.AVG_SCORE] = math.floor(t.avg),
-				[ui.HIGH_TIME] = kits.time_to_string(t.high_time,true),
-				[ui.LOW_TIME] = kits.time_to_string(t.low_time,true),
-				[ui.AVG_TIME] = kits.time_to_string(t.avg_time,true),
+				[ui.HIGH_TIME] = kits.time_to_string_simple(t.high_time,true),
+				[ui.LOW_TIME] = kits.time_to_string_simple(t.low_time,true),
+				[ui.AVG_TIME] = kits.time_to_string_simple(t.avg_time,true),
 			}
 		)
 	end

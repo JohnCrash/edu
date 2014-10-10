@@ -65,16 +65,16 @@ function Score:init()
 			local end_time = self._args.finish_time_unix
 			local dt = self._args.finish_time_unix - os.time()
 			if dt > 0 then
-				end_date:setString( kits.time_to_string(dt))
+				end_date:setString( kits.time_to_string_simple(dt))
 				local function timer_func()
 					dt = end_time - os.time()
 					if dt > 0 then
-						end_date:setString(kits.time_to_string(dt))
+						end_date:setString(kits.time_to_string_simple(dt))
 					else
 						--过期
 						local txt = uikits.child( self._root,ui.TIMELABEL )
 						if txt then txt:setString('已过期:') end
-						end_date:setString(kits.time_to_string(-dt))
+						end_date:setString(kits.time_to_string_simple(-dt))
 						scheduler:unscheduleScriptEntry(self._scID)
 						self._scID = nil
 					end		
@@ -84,7 +84,7 @@ function Score:init()
 				--过期
 				local txt = uikits.child( self._root,ui.TIMELABEL )
 				if txt then txt:setString('已过期:') end
-				end_date:setString(kits.time_to_string(-dt))				
+				end_date:setString(kits.time_to_string_simple(-dt))				
 			end
 		end
 
@@ -94,12 +94,18 @@ function Score:init()
 			obj_num:setString(tostring(self._args.cnt_item))
 		end	
 		--客观题数
-
 		local subj_num = uikits.child(self._root,ui.SUBJECTIVE_NUM)
 		if self._args.subjective_num then
 			subj_num:setString(tostring(self._args.subjective_num))
 		end		
-	
+		--设置金币
+		uikits.child(self._root,ui.EXP):setString('0')
+		uikits.child(self._root,ui.SILVER):setString('0')
+		uikits.child(self._root,ui.GOLD):setString('0')
+		local time_item = uikits.child(self._root,ui.GOLD)
+		if item_item then
+			
+		end
 		--到错题本
 		local wrong = uikits.child(self._root,ui.GO_WRONG)
 		if wrong then

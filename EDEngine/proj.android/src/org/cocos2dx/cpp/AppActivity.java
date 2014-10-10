@@ -44,7 +44,9 @@ public class AppActivity extends Cocos2dxActivity {
 		Intent mIntent = this.getIntent();  
 		String launch = mIntent.getStringExtra("launch");
 		String cookie = mIntent.getStringExtra("cookie");
-		String uid =  mIntent.getStringExtra("userid");
+		int userid =  mIntent.getIntExtra("userid",0);
+		String uid;
+		uid = Integer.toString(userid);
 		String path = Environment.getExternalStorageDirectory().getPath();
 		if( path.length()>0 && path.charAt(path.length()-1)!='/')
 			path += '/';

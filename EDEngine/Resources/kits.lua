@@ -391,6 +391,25 @@ local function time_to_string( d,expet_sec )
 	end
 end
 
+local function time_to_string_simple( d,expet_sec )
+	if d then
+		local day = math.floor( d /(3600*24) )
+		local hours = math.floor( (d - day*3600*24)/3600 )
+		local mins = math.floor( (d - day*3600*24 - hours*3600)/60 )
+		local sec = math.floor( d - day*3600*24 - hours*3600-mins*60 )
+		if day > 0 then
+			return day..'天'
+		elseif hours > 0 then
+			return hours..'小时'
+		elseif mins > 0 then
+			return mins..'分'
+		elseif sec >= 0 then
+			return sec..'秒'
+		end
+	end
+	return '-'
+end
+
 local function check_table(t,...)
 	if t and type(t)=='table' then
 		for i = 1,select('#',...) do
@@ -476,6 +495,7 @@ local exports = {
 	decode_json = decode_json,
 	unix_date_by_string = unix_date_by_string,
 	time_to_string = time_to_string,
+	time_to_string_simple = time_to_string_simple,
 	log = my_log,
 	check = check_table,
 	write_file = write_file,

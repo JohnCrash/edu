@@ -53,7 +53,7 @@ function StudentWatch:init_data()
 		uikits.set(self._root,{
 			[ui.CAPTION] = self._args.caption or "",
 			[ui.OBJECTIVE_RATE] = self._args.cnt_item_finish.."/"..self._args.cnt_item,
-			[ui.OBJECTIVE_TIME] = kits.time_to_string(self._args.total_time),
+			[ui.OBJECTIVE_TIME] = kits.time_to_string_simple(self._args.total_time),
 			[ui.OBJECTIVE_FEN] = (self._args.real_score or "0").."分",
 		})
 		

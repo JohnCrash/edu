@@ -70,7 +70,6 @@ local ui = {
 --[[
 	作业提交
 --]]
-local commit_url = ''
 --[[
 	取得提交顺序
 --]]
@@ -179,7 +178,7 @@ function WorkCommit:addCommitStudent( id,na,ti )
 		local commit_time = uikits.child(item,ui.TIME)
 		if commit_time and ti and type(ti)=='string' then
 			local d = os.time()-kits.unix_date_by_string(ti)
-			commit_time:setString(kits.time_to_string(d))
+			commit_time:setString(kits.time_to_string_simple(d))
 		end
 		local photo = uikits.child(item,ui.PHOTO)
 		if photo then
@@ -342,16 +341,16 @@ function WorkCommit:init_commit_page()
 			local end_time = self._args.finish_time_unix
 			local dt = self._args.finish_time_unix - os.time()
 			if dt > 0 then
-				end_date:setString( kits.time_to_string(dt))
+				end_date:setString( kits.time_to_string_simple(dt))
 				local function timer_func()
 					dt = end_time - os.time()
 					if dt > 0 then
-						end_date:setString(kits.time_to_string(dt))
+						end_date:setString(kits.time_to_string_simple(dt))
 					else
 						--过期
 						local txt = uikits.child( self._root,ui.TIMELABEL )
 						if txt then txt:setString('已过期:') end
-						end_date:setString(kits.time_to_string(-dt))
+						end_date:setString(kits.time_to_string_simple(-dt))
 						scheduler:unscheduleScriptEntry(self._scID)
 						self._scID = nil
 					end		
@@ -361,7 +360,7 @@ function WorkCommit:init_commit_page()
 				--过期
 				local txt = uikits.child( self._root,ui.TIMELABEL )
 				if txt then txt:setString('已过期:') end
-				end_date:setString(kits.time_to_string(-dt))				
+				end_date:setString(kits.time_to_string_simple(-dt))				
 			end
 		end
 		local obj_num = uikits.child(self._root,ui.OBJECTIVE_NUM)

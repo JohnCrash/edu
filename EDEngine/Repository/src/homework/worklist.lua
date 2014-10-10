@@ -734,17 +734,17 @@ function WorkList:add_item( t )
 			local end_time = t.finish_time_unix
 			local dt = end_time - os.time()
 			if dt > 0 then
-				u:setString(kits.time_to_string(dt))
+				u:setString(kits.time_to_string_simple(dt))
 			end
 			local function timer_func()
 				dt = end_time - os.time()
 				if dt > 0 then
-					u:setString(kits.time_to_string(dt))
+					u:setString(kits.time_to_string_simple(dt))
 				else
 					--过期
 					local txt = uikits.child( item,ui.TIMELABEL )
 					if txt then txt:setString('已过期:') end
-					u:setString(kits.time_to_string(-dt))
+					u:setString(kits.time_to_string_simple(-dt))
 					scheduler:unscheduleScriptEntry(u._scID)
 					u._scID = nil
 				end
@@ -755,7 +755,7 @@ function WorkList:add_item( t )
 			local dt = t.finish_time_unix - os.time()
 			local txt = uikits.child( item,ui.TIMELABEL )
 			if txt then txt:setString('已过期:') end
-			u:setString(kits.time_to_string(-dt))		
+			u:setString(kits.time_to_string_simple(-dt))		
 		end
 	end
 

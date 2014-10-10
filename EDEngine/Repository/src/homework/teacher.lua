@@ -148,7 +148,7 @@ function TeacherList:add_batch_item( v )
 					local end_time = kits.unix_date_by_string( v.finish_time )
 					local dt = end_time - os.time()
 					if dt > 0 then
-						child:setString( kits.time_to_string(dt) )
+						child:setString( kits.time_to_string_simple(dt) )
 					else
 						child:setString('已过')
 					end
@@ -318,7 +318,15 @@ function TeacherList:clone_statistics_item(v)
 					ct:setString(tostring(t.count))
 					--平均分
 					local av = uikits.child(sitem,ui.ST_AVERAGE)
-					av:setString(tostring(t.scroe))
+					if t.scroe then
+						local num = tonumber(t.scroe)
+						if num then
+							local sv = math.floor(num*100)
+							av:setString(tostring(sv)..'%')
+						else
+							av:setString('-')
+						end
+					end
 					--用时
 					local ti = uikits.child(sitem,ui.ST_TIME)
 					ti:setString(tostring(t.time))
@@ -474,6 +482,7 @@ function TeacherList:init_ready_statistics()
 					end
 					table.insert(checks,item)
 				end
+				self._classview:relayout()
 				self:clear_statistics()
 				self:class_statistics(first_id)
 			else
@@ -562,7 +571,7 @@ function TeacherList:init_gui()
 		self._statistics_item_height = size.height
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
-	self._classview = uikits.scroll(self._statistics_root,ui.CLASSLIST,ui.CLASS_BUTTON,true)
+	self._classview = uikits.scroll(self._statistics_root,ui.CLASSLIST,ui.CLASS_BUTTON,true,16)
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)
