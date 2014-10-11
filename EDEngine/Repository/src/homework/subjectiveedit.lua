@@ -1,5 +1,6 @@
 local uikits = require "uikits"
 local cache = require "cache"
+local FileUtils = cc.FileUtils:getInstance()
 local ui = {
 	FILE = 'homework/laoshizuoye/gexinghua.json',
 	FILE_3_4 = 'homework/laoshizuoye/gexinghua43.json',
@@ -19,8 +20,8 @@ local ui = {
 	DELETE_BUTTON = 'leirong/shancu',
 	INPUT_AREANA = 'leirong/ys',
 	INPUT_TEXT = 'wenzi',
-	AUDIO_ITEM = 'chat',
-	IMG_ITEM = 'pic',
+	AUDIO_ITEM = 'leirong/chat',
+	IMG_ITEM = 'leirong/pic',
 }
 local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
@@ -113,12 +114,14 @@ function SubjectiveEdit:initpage()
 			v:removeFromParent()
 		end
 		self._items = {}
-		if self._data[self.__current].sounds then
-			for i,v in pairs(self._data[self.__current].sounds) do
+		if self._data[self._current].sounds then
+			for i,v in pairs(self._data[self._current].sounds) do
+				self:addsound(v.file)
 			end
 		end
-		if self._data[self.__current].imags then
-			for i,v in pairs(self._data[self.__current].imags) do
+		if self._data[self._current].imags then
+			for i,v in pairs(self._data[self._current].imags) do
+				self:addphoto(v.file)
 			end		
 		end
 		self:scroll_relayout()
@@ -151,36 +154,122 @@ function SubjectiveEdit:index_delete(i)
 end
 
 function SubjectiveEdit:addsound( name )
+	local item = self._audio_item:clone()
+	if item then
+		item:setVisible(true)
+		uikits.event(item,function(sender)
+			uikits.playSound(name)
+		end,"click")
+		local delbut = uikits.child(item,'sc1')
+		if delbut then
+			uikits.event( delbut,function(sender)
+				item:setVisible(false)
+				self:delsound_todata( name )
+				self:scroll_relayout()
+			end,"click" )
+		else
+			kits.log("ERROR : SubjectiveEdit:addsound delete button no found")
+		end
+		local timetxt = uikits.child(item,'shijian')
+		if timetxt then
+			timetxt:setVisible(false)
+		else
+			kits.log("ERROR : SubjectiveEdit:addsound time label no found")
+		end
+		table.insert( self._items,item)
+		self._scroll:addChild(item)
+	end
+end
+
+function SubjectiveEdit:addsound_todata( name )
 	if name and self._current and self._data[self._current] then
 		self._data[self._current].sounds = self._data[self._current].sounds or {}
 		table.insert(self._data[self._current].sounds,{file=name,length=0})
+	end	
+end
+
+function SubjectiveEdit:delsound_todata( name )
+	if name and self._current and self._data[self._current] and self._data[self._current].sounds then
+		for k,v in pairs(self._data[self._current].sounds) do
+			if v.file == name then
+				table.remove(self._data[self._current].sounds,k)
+				return
+			end
+		end
 	end
 end
 
 function SubjectiveEdit:addphoto( name )
+	local item = self._img_item:clone()
+	if item then
+		item:setVisible(true)
+		if FileUtils:isFileExist(name) then
+			item:loadTexture(name)
+		else
+			kits.log("ERROR : SubjectiveEdit:addphoto "..tostring(name).." is not exist")
+		end
+		local delbut = uikits.child(item,'sc2')
+		if delbut then
+			local s = item:getContentSize()
+			local bs = delbut:getContentSize()
+			delbut:setPosition(cc.p(s.width+16+bs.width/2,s.height/2))
+			uikits.event( delbut,function(sender)
+				item:setVisible(false)
+				self:delphoto_todata( name )
+				self:scroll_relayout()
+			end,"click" )
+		else
+			kits.log("ERROR : SubjectiveEdit:addphoto delete button no found")
+		end
+		table.insert( self._items,item)
+		self._scroll:addChild(item)
+	end
+end
+
+function SubjectiveEdit:addphote_todata( name )
 	if name and self._current and self._data[self._current] then
 		self._data[self._current].imags = self._data[self._current].imags or {}
 		table.insert(self._data[self._current].imags,{file=name,width=0,height=0})
+	end	
+end
+
+function SubjectiveEdit:delphoto_todata( name )
+	if name and self._current and self._data[self._current] and self._data[self._current].imags then
+		for k,v in pairs(self._data[self._current].imags) do
+			if v.file == name then
+				table.remove(self._data[self._current].imags,k)
+				return
+			end
+		end
 	end
 end
 
 function SubjectiveEdit:scroll_relayout()
-	local width,height
-	width = self._scroll:getContentSize().width
-	height = 2*self._tops_space + self._tops:getContentSize().height +
-		self._tops_space + self._delete_button:getContentSize().height
-	self._scroll:setInnerContainerSize(cc.size(width,height))
-	self._tops:setPosition(cc.p(self._tops_ox,
-		height-self._tops_space-self._tops:getContentSize().height))
 	--计算高度
+	local uis = {}
 	local ts = self._tops:getContentSize()
 	local cs = self._scroll:getContentSize()
 	local ds = self._delete_button:getContentSize()
-	local vh = 3*self._space + ts.height + ds.height
-	if self._data[self._current] and self._data[self._current].items then
-		for i,v in pairs(self._data[self._current].items) do
-			
+	local x,y = self._delete_button:getPosition()
+	y = self._space
+	self._delete_button:setPosition(cc.p(x,y))
+	y = y + ds.height + self._space
+	for i,v in pairs(self._items) do
+		if v:isVisible() then
+			local xx,yy = v:getPosition()
+			v:setPosition( cc.p(xx,y) )
+			y = y + v:getContentSize().height + self._space
+			table.insert(uis,v)
 		end
+	end
+	local xx,yy = self._tops:getPosition()
+	self._tops:setPosition(cc.p(xx,y))
+	y = y + ts.height + self._space
+	self._scroll:setInnerContainerSize(cc.size(cs.width,y))
+	table.insert(uis,self._tops)
+	table.insert(uis,self._delete_button)
+	if y < cs.height then
+		uikits.move( uis,0,cs.height-y)
 	end
 end
 
@@ -204,8 +293,12 @@ function SubjectiveEdit:init()
 	self._scroll = uikits.child(self._root,ui.LIST)
 	self._audio_item = uikits.child(self._root,ui.AUDIO_ITEM)
 	self._img_item = uikits.child(self._root,ui.IMG_ITEM)
+	self._audio_item:setVisible(false)
+	self._img_item:setVisible(false)
 	self._scroll_list = {}
 	self._data = {}
+	self._items = {}
+	self._remove_items = {}
 	self._tops = uikits.child(self._root,ui.INPUT_AREANA)
 	local cs = self._scroll:getContentSize()
 	local ts = self._tops:getContentSize()
@@ -247,28 +340,37 @@ function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
 		uikits.event(self._record_button,function(sender)
 			math.randomseed(os.time())
-			self:addsound( "backup-2/"..test_audio[math.random(1,#test_audio)] )
+			local file = "backup-2/"..test_audio[math.random(1,#test_audio)]
+			self:addsound( file )
+			self:addsound_todata( file )
 			self:scroll_relayout()
 		end)
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)
 			math.randomseed(os.time())
-			self:addphoto( "backup-2/"..test_img[math.random(1,#test_img)] )
+			local file = "backup-2/"..test_img[math.random(1,#test_img)]
+			self:addphoto( file )
+			self:addphote_todata( file )
 			self:scroll_relayout()
 		end)	
 	end
 	if self._photo_button then --从图库插入照片
 		uikits.event(self._photo_button,function(sender)
 			math.randomseed(os.time())
-			self:addphoto( "backup-2/"..test_img[math.random(1,#test_img)] )
+			local file = "backup-2/"..test_img[math.random(1,#test_img)]
+			self:addphoto( file )
+			self:addphote_todata( file )
 			self:scroll_relayout()
 		end)	
 	end	
 end
 
 function SubjectiveEdit:release()
-	
+	for i,v in pairs(self._items) do
+		v:removeFromParent()
+	end
+	self._items = {}
 end
 
 return SubjectiveEdit
