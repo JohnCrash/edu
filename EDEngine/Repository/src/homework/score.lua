@@ -102,9 +102,17 @@ function Score:init()
 		uikits.child(self._root,ui.EXP):setString('0')
 		uikits.child(self._root,ui.SILVER):setString('0')
 		uikits.child(self._root,ui.GOLD):setString('0')
-		local time_item = uikits.child(self._root,ui.GOLD)
-		if item_item then
-			
+		local order = uikits.child(self._root,ui.RANK)
+		if order and self._args.commit_order then
+			order:setString( tostring(self._args.commit_order) )
+		elseif order then
+			order:setString( '-' )
+		end
+		local times = uikits.child(self._root,ui.USE_TIME)
+		if times and self._args.workflow_time then
+			times:setString( kits.time_to_string(self._args.workflow_time) )
+		elseif times then
+			times:setString( '-' )
 		end
 		--到错题本
 		local wrong = uikits.child(self._root,ui.GO_WRONG)

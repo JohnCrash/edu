@@ -161,7 +161,8 @@ function WorkFlow:commit_topics( v )
 	end
 	
 	v.user_time = v.user_time or 0
-	local dt = math.floor(os.time()-self._topics_begin_time) --做题题目计时器
+	local cur_time = os.time()
+	local dt = cur_time-self._topics_begin_time --做题题目计时器
 	v.user_time = v.user_time + dt
 	local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 	..'&itemId='..tostring(v.item_id)
@@ -842,7 +843,9 @@ function WorkFlow:set_anwser_field( i )
 				self._option_drag:setVisible(true)
 			end
 			local layout = self._pageview:getPage( i-1 )
-			self._topics_begin_time = os.time()--开始计时
+			if not self._topics_begin_time then
+				self._topics_begin_time = os.time()--开始计时
+			end
 			local data = self._data[i]
 			--设置答题区控件
 			if t==1 then --判断
@@ -891,6 +894,7 @@ function WorkFlow:set_anwser_field( i )
 			end
 			layout_scroll_arrow(layout,data)
 			topics.types[t].init(layout,data)
+			self._topics_begin_time = os.time()--开始计时
 		else
 			--不支持的类型
 			if  topics.types[t] and topics.types[t].name then

@@ -81,7 +81,8 @@ local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperIte
 local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
 local commit_answer_url = 'http://new.www.lejiaolexue.com/student/handler/SubmitAnswer.ashx'
 local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
-local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
+--local commit_url = 'http://new.www.lejiaolexue.com/student/SubmitPaper.aspx'
+local commit_url = 'http://new.www.lejiaolexue.com/student/handler/submitpaper.ashx'
 local commit_list_url = 'http://new.www.lejiaolexue.com/student/handler/GetSubmitPaperSequence.ashx'
 local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 
@@ -597,11 +598,13 @@ function WorkCommit:commit()
 			close_scheduler()
 			local loadbox = loadingbox.open( self )
 			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
-			cache.request(url,
-				function(b)
+			cache.request_json(url,
+				function(t)
 					loadbox:removeFromParent()
-					if b then
+					if t then
 						self._args.status = 10 --标记已经提交
+						self._args.commit_order = t.num
+						self._args.workflow_time = t.times
 						uikits.pushScene( Score.create(self._args) )
 					else
 						--加入提交失败的对话框
