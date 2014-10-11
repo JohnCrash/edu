@@ -19,6 +19,8 @@ local ui = {
 	DELETE_BUTTON = 'leirong/shancu',
 	INPUT_AREANA = 'leirong/ys',
 	INPUT_TEXT = 'wenzi',
+	AUDIO_ITEM = 'chat',
+	IMG_ITEM = 'pic',
 }
 local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
@@ -107,6 +109,19 @@ end
 function SubjectiveEdit:initpage()
 	if self._current and self._data[self._current] then
 		self._input_text:setText(self._data[self._current].text)
+		for i,v in pairs(self._items) do
+			v:removeFromParent()
+		end
+		self._items = {}
+		if self._data[self.__current].sounds then
+			for i,v in pairs(self._data[self.__current].sounds) do
+			end
+		end
+		if self._data[self.__current].imags then
+			for i,v in pairs(self._data[self.__current].imags) do
+			end		
+		end
+		self:scroll_relayout()
 	end
 end
 
@@ -137,20 +152,15 @@ end
 
 function SubjectiveEdit:addsound( name )
 	if name and self._current and self._data[self._current] then
-		self._data[self._current].imags = self._data[self._current].imags or {}
-		table.insert(self._data[self._current].imags,name)
+		self._data[self._current].sounds = self._data[self._current].sounds or {}
+		table.insert(self._data[self._current].sounds,{file=name,length=0})
 	end
 end
 
 function SubjectiveEdit:addphoto( name )
 	if name and self._current and self._data[self._current] then
 		self._data[self._current].imags = self._data[self._current].imags or {}
-		for i,v in pairs(self._data[self._current].imags) do
-			if v then
-				
-			end
-		end
-		table.insert(self._data[self._current].imags,name)
+		table.insert(self._data[self._current].imags,{file=name,width=0,height=0})
 	end
 end
 
@@ -162,6 +172,16 @@ function SubjectiveEdit:scroll_relayout()
 	self._scroll:setInnerContainerSize(cc.size(width,height))
 	self._tops:setPosition(cc.p(self._tops_ox,
 		height-self._tops_space-self._tops:getContentSize().height))
+	--计算高度
+	local ts = self._tops:getContentSize()
+	local cs = self._scroll:getContentSize()
+	local ds = self._delete_button:getContentSize()
+	local vh = 3*self._space + ts.height + ds.height
+	if self._data[self._current] and self._data[self._current].items then
+		for i,v in pairs(self._data[self._current].items) do
+			
+		end
+	end
 end
 
 function SubjectiveEdit:init()
@@ -182,9 +202,15 @@ function SubjectiveEdit:init()
 	self._cam_button = uikits.child(self._root,ui.CAM_BUTTON)
 	self._photo_button = uikits.child(self._root,ui.PHOTO_BUTTON)
 	self._scroll = uikits.child(self._root,ui.LIST)
+	self._audio_item = uikits.child(self._root,ui.AUDIO_ITEM)
+	self._img_item = uikits.child(self._root,ui.IMG_ITEM)
 	self._scroll_list = {}
 	self._data = {}
 	self._tops = uikits.child(self._root,ui.INPUT_AREANA)
+	local cs = self._scroll:getContentSize()
+	local ts = self._tops:getContentSize()
+	local tx,ty = self._tops:getPosition()
+	self._space = cs.height-ty-ts.height
 	self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
 	local x,y = self._tops:getPosition()
 	self._tops_space = y-self._tops:getContentSize().height
@@ -203,21 +229,40 @@ function SubjectiveEdit:init()
 	self:scroll_relayout()
 	self:init_event()
 end
-
+local test_img = {
+	"635481928825042118.jpg",
+	"635485364524844606.jpg",
+	"635485520515758589.jpg",
+	"Lighthouse.jpg",
+	"Penguins.jpg",
+	"Tulips.jpg"
+}
+local test_audio={
+	"84eba7b9bbab29c5fe429495373f387f.mp3",
+	"396e8aa7c4fb57ba9d1093d6e16960fd.mp3",
+	"840ec391c218ebb3bc89280de994f3ff.mp3",
+	"ac848ecb0764e0b75463cd03d8179ac0.mp3"
+}
 function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
 		uikits.event(self._record_button,function(sender)
-			
+			math.randomseed(os.time())
+			self:addsound( "backup-2/"..test_audio[math.random(1,#test_audio)] )
+			self:scroll_relayout()
 		end)
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)
-			
+			math.randomseed(os.time())
+			self:addphoto( "backup-2/"..test_img[math.random(1,#test_img)] )
+			self:scroll_relayout()
 		end)	
 	end
 	if self._photo_button then --从图库插入照片
 		uikits.event(self._photo_button,function(sender)
-			
+			math.randomseed(os.time())
+			self:addphoto( "backup-2/"..test_img[math.random(1,#test_img)] )
+			self:scroll_relayout()
 		end)	
 	end	
 end

@@ -555,6 +555,7 @@ topics.lua 和题相关的缓冲
 
 		
 提交作业
+	http://new.www.lejiaolexue.com/student/handler/submitpaper.ashx
 	http://new.www.lejiaolexue.com/student/SubmitPaper.aspx
 	参数:
 		examId=82b050ed3f4c44c3b76c92e5eb7e0c5c
