@@ -1,3 +1,4 @@
+local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local FileUtils = cc.FileUtils:getInstance()
@@ -104,7 +105,7 @@ function SubjectiveEdit:set_current( i )
 end
 
 function SubjectiveEdit:savepage()
-	if self._current and self._data[self._current] then
+	if self._current and self._data[self._current] then		
 		self._data[self._current].text = self._input_text:getStringValue()
 	end
 end
@@ -351,7 +352,6 @@ function SubjectiveEdit:init()
 	if #self._data == 0 then
 		self:index_add()
 	else
-		self._current = 1
 		for i=1,#self._data do
 			self:index_add(true)
 		end

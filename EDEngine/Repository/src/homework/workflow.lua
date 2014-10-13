@@ -522,8 +522,7 @@ function WorkFlow:optimization_scrollview()
 			local inner_x,inner_y = inner:getPosition()
 			local size = self._scrollview:getContentSize()
 			for i,v in pairs(childs) do
-				if v ~= self._item_current and v ~= self._item_finished and 
-					v ~= self._item_unfinished then
+				if v._isclone then
 					local x,y = v:getPosition()
 					if x+inner_x < 0 or x+inner_x > size.width then
 						v:setVisible(false)
@@ -535,6 +534,11 @@ function WorkFlow:optimization_scrollview()
 		end
 	end
 	optimization_scroll()
+	if self._remove_items and #self._remove_items>0 then
+		for i,v in pairs(self._remove_items) do
+			v:setVisible(false)
+		end
+	end
 	uikits.event( self._scrollview,function(sender,eventType)
 			optimization_scroll()
 		end)
@@ -685,12 +689,19 @@ function WorkFlow:set_item_state( i,ste )
 end
 
 function WorkFlow:clone_item( state )
+	local item
 	if state == ui.STATE_CURRENT then
-		return self._item_current:clone()
+		item = self._item_current:clone()
+		item._isclone = true
+		return item
 	elseif state == ui.STATE_FINISHED then
-		return self._item_finished:clone()
+		item = self._item_finished:clone()
+		item._isclone = true
+		return item
 	elseif state == ui.STATE_UNFINISHED then
-		return self._item_unfinished:clone()
+		item = self._item_unfinished:clone()
+		item._isclone = true
+		return item
 	else
 		kits.log( '	ERROR: clone_item state = '..tostring(state) )
 		return self._item_unfinished:clone()
