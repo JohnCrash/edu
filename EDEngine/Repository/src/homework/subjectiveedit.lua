@@ -5,6 +5,7 @@ local ui = {
 	FILE = 'homework/laoshizuoye/gexinghua.json',
 	FILE_3_4 = 'homework/laoshizuoye/gexinghua43.json',
 	BACK = 'ding/back',
+	OK = 'ding/qr',
 	LIST = 'leirong',
 	TEXT = 'leirong/ys/wenzi',
 	INDEX_LIST = 'sl',
@@ -27,7 +28,7 @@ local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
 SubjectiveEdit.__index = SubjectiveEdit
 
-function SubjectiveEdit.create()
+function SubjectiveEdit.create( arg )
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),SubjectiveEdit)
 	
@@ -35,6 +36,7 @@ function SubjectiveEdit.create()
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
+			layer._data = arg
 			layer:init()
 		elseif "exit" == event then
 			layer:release()
@@ -114,27 +116,31 @@ function SubjectiveEdit:initpage()
 			v:removeFromParent()
 		end
 		self._items = {}
-		if self._data[self._current].sounds then
-			for i,v in pairs(self._data[self._current].sounds) do
-				self:addsound(v.file)
+		if self._data[self._current].items then
+			for i,v in pairs(self._data[self._current].items) do
+				if v.type==1 then
+					self:addsound(v.file)
+				elseif v.type==2 then
+					self:addphoto(v.file)
+				end
 			end
 		end
-		if self._data[self._current].imags then
-			for i,v in pairs(self._data[self._current].imags) do
-				self:addphoto(v.file)
-			end		
-		end
 		self:scroll_relayout()
+		self._scroll:scrollToTop(0.5,true)
 	end
 end
 
-function SubjectiveEdit:index_add()
+function SubjectiveEdit:index_add( b )
 	local item = self._index_item_current:clone()
 	item:setVisible(true)
 	self._indexs:addChild(item)
 	table.insert(self._list,item)
-	table.insert(self._data,{})
+	if not b then
+		table.insert(self._data,{})
+	end
 	self:set_current( #self._list )
+	self._delete_button:setVisible(true)
+	self._tops:setVisible(true)
 end
 
 function SubjectiveEdit:index_delete(i)
@@ -148,6 +154,14 @@ function SubjectiveEdit:index_delete(i)
 			self:set_current(i)
 		elseif self._list[i-1] then
 			self:set_current(i-1)
+		else
+			self._input_text:setText('')
+			for i,v in pairs(self._items) do
+				v:removeFromParent()
+			end
+			self._items = {}
+			self._delete_button:setVisible(false)
+			self._tops:setVisible(false)
 		end
 		self:index_relayout()
 	end
@@ -183,16 +197,16 @@ end
 
 function SubjectiveEdit:addsound_todata( name )
 	if name and self._current and self._data[self._current] then
-		self._data[self._current].sounds = self._data[self._current].sounds or {}
-		table.insert(self._data[self._current].sounds,{file=name,length=0})
+		self._data[self._current].items = self._data[self._current].items or {}
+		table.insert(self._data[self._current].items,{file=name,type=1})
 	end	
 end
 
 function SubjectiveEdit:delsound_todata( name )
-	if name and self._current and self._data[self._current] and self._data[self._current].sounds then
-		for k,v in pairs(self._data[self._current].sounds) do
-			if v.file == name then
-				table.remove(self._data[self._current].sounds,k)
+	if name and self._current and self._data[self._current] and self._data[self._current].items then
+		for k,v in pairs(self._data[self._current].items) do
+			if v.file == name and v.type==1 then
+				table.remove(self._data[self._current].items,k)
 				return
 			end
 		end
@@ -212,6 +226,11 @@ function SubjectiveEdit:addphoto( name )
 		if delbut then
 			local s = item:getContentSize()
 			local bs = delbut:getContentSize()
+			if s.width > 1280 then
+				local v = 1280/s.width
+				item:setScaleX(v)
+				item:setScaleY(v)
+			end
 			delbut:setPosition(cc.p(s.width+16+bs.width/2,s.height/2))
 			uikits.event( delbut,function(sender)
 				item:setVisible(false)
@@ -228,16 +247,16 @@ end
 
 function SubjectiveEdit:addphote_todata( name )
 	if name and self._current and self._data[self._current] then
-		self._data[self._current].imags = self._data[self._current].imags or {}
-		table.insert(self._data[self._current].imags,{file=name,width=0,height=0})
+		self._data[self._current].items = self._data[self._current].items or {}
+		table.insert(self._data[self._current].items,{file=name,type=2})
 	end	
 end
 
 function SubjectiveEdit:delphoto_todata( name )
-	if name and self._current and self._data[self._current] and self._data[self._current].imags then
-		for k,v in pairs(self._data[self._current].imags) do
-			if v.file == name then
-				table.remove(self._data[self._current].imags,k)
+	if name and self._current and self._data[self._current] and self._data[self._current].items then
+		for k,v in pairs(self._data[self._current].items) do
+			if v.file == name and v.type==2 then
+				table.remove(self._data[self._current].items,k)
 				return
 			end
 		end
@@ -258,7 +277,7 @@ function SubjectiveEdit:scroll_relayout()
 		if v:isVisible() then
 			local xx,yy = v:getPosition()
 			v:setPosition( cc.p(xx,y) )
-			y = y + v:getContentSize().height + self._space
+			y = y + v:getContentSize().height*v:getScaleY() + self._space
 			table.insert(uis,v)
 		end
 	end
@@ -278,8 +297,15 @@ function SubjectiveEdit:init()
 	self:addChild(self._root)
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,function(sender)
+		self:savepage()
 		cache.request_cancel()
 		uikits.popScene()end)
+	local ok = uikits.child(self._root,ui.OK)
+	uikits.event(ok,function(sender)
+		self:savepage()
+		cache.request_cancel()
+		uikits.popScene()		
+	end)
 	self._indexs = uikits.child(self._root,ui.INDEX_LIST)
 	self._index_item = uikits.child(self._indexs,ui.INDEX_ITEM)
 	self._index_item_current = uikits.child(self._indexs,ui.INDEX_ITEM_CURRENT)
@@ -296,7 +322,6 @@ function SubjectiveEdit:init()
 	self._audio_item:setVisible(false)
 	self._img_item:setVisible(false)
 	self._scroll_list = {}
-	self._data = {}
 	self._items = {}
 	self._remove_items = {}
 	self._tops = uikits.child(self._root,ui.INPUT_AREANA)
@@ -315,12 +340,23 @@ function SubjectiveEdit:init()
 	uikits.event(self._delete_button,function()
 		self:index_delete(self._current)
 	end)
+	self._delete_button:setVisible(false)
+	self._tops:setVisible(false)		
 	self._current = 0
 	self._list = {}
 	self._list_deletes = {}
 	self:index_clear()
 	self:scroll_relayout()
 	self:init_event()
+	if #self._data == 0 then
+		self:index_add()
+	else
+		self._current = 1
+		for i=1,#self._data do
+			self:index_add(true)
+		end
+		self:initpage()
+	end
 end
 local test_img = {
 	"635481928825042118.jpg",
@@ -328,7 +364,9 @@ local test_img = {
 	"635485520515758589.jpg",
 	"Lighthouse.jpg",
 	"Penguins.jpg",
-	"Tulips.jpg"
+	"Tulips.jpg",
+	"140607978828.jpg",
+	"1401087060796.jpg",
 }
 local test_audio={
 	"84eba7b9bbab29c5fe429495373f387f.mp3",

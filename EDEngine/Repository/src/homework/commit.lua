@@ -549,7 +549,7 @@ function WorkCommit:commit_topics()
 	--做题的时候有可能没有正确提交答案，这里再次检查。
 	self._faild_commit_count = 0
 	self._faild_commit_flag = false
-	if self._topics_table then
+	if self._topics_table and  self._topics_table.answers then
 		for k,v in pairs(self._topics_table.answers) do
 			if v.commit_faild then --做题过程中没有正确提交
 				self._faild_commit_count = self._faild_commit_count+1
@@ -557,7 +557,7 @@ function WorkCommit:commit_topics()
 			end
 		end
 	else
-		kit.log('ERROR WorkCommit:commit self._topics_table = nil')
+		kits.log('ERROR WorkCommit:commit self._topics_table = nil')
 		return
 	end
 end

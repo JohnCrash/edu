@@ -87,7 +87,8 @@ local ui = {
 	TOPICS_LVL_CHECKBOX3 = 'xuan/xia3',
 	TOPICS_LVL_CHECKBOX4 = 'xuan/xia4',
 	SUBJECTIVE_EDIT_BUTTON = 'xuanze/gx',
-
+	SUBJECTIVE_EDIT_BUTTON2 = 'zuoye/zhuguang/bianji', 
+	SUBJECTIVE_EDIT_NUMBER = 'zuoye/zhuguang/shul',
 	TOPICS_SELECT_TITLE_COURSE = 'ys1/kemu',
 	TOPICS_SELECT_TITLE_BV = 'ys1/banben',
 	TOPICS_SELECT_TITLE_VOL = 'ys1/nianji',
@@ -597,7 +598,16 @@ function TeacherList:init_gui()
 	
 	self._subjective_button = uikits.child(self._release,ui.SUBJECTIVE_EDIT_BUTTON)
 	uikits.event(self._subjective_button,function(sender)
-			uikits.pushScene( subjectiveedit.create() )
+			self._issubjectiveedit = true
+			self._subjective_data = self._subjective_data or {}
+			uikits.pushScene( subjectiveedit.create(self._subjective_data) )
+		end
+	)
+	local subjective_button = uikits.child(self._release,ui.SUBJECTIVE_EDIT_BUTTON2)
+	uikits.event(subjective_button,function(sender)
+			self._issubjectiveedit = true
+			self._subjective_data = self._subjective_data or {}
+			uikits.pushScene( subjectiveedit.create(self._subjective_data) )
 		end
 	)
 	--返回按钮
@@ -820,7 +830,6 @@ function TeacherList:release_select_list( level )
 		end)
 end
 
-	
 function TeacherList:set_homework_ui(index)
 	local edit_homework_title = uikits.child(self._release,ui.TOPICS_SET_HOMEWORK_TITLE)
 	local sel_homework_title = uikits.child(self._release,ui.TOPICS_SELECT)
@@ -1027,6 +1036,20 @@ function TeacherList:set_homework_view( )
 end
 
 function TeacherList:init()
+	if self._issubjectiveedit then
+		self._issubjectiveedit = nil
+		local set_label_empty = uikits.child(self._release,ui.TOPICS_SET_LABEL_EMPTY)
+		local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
+		local num = uikits.child(self._release,ui.SUBJECTIVE_EDIT_NUMBER)
+		edit_homework_view:setVisible(true)
+		set_label_empty:setVisible(false)
+		local n = 0
+		if self._subjective_data then
+			n = #self._subjective_data
+		end
+		num:setString( tostring(n) )
+		return
+	end
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
 	else
