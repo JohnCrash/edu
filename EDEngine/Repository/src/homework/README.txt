@@ -959,3 +959,45 @@ http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx
 
 老师统计 c_id 班级ID
 http://new.www.lejiaolexue.com/paper/handler/GetStatisticsTeacher.ashx?c_id=141799
+
+增加题型
+==============================
+Remote Address:211.154.173.152:80
+Request URL:http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx?item_id=&content=%3Cp%3E%0A%09fghfghf%3Cimg+src%3D%22aecf086f614241b18f0429868b4dd649.jpg%22%3E%3C%2Fp%3E%0A&content_fenxi=&diff=50&course=10001&version=0&vol=0&unit=0&section=0&attach=%5B%7B%22src%22%3A%22d19367f469a94312bc5f6f069f49a077.jpg%22%2C%22name%22%3A%22QQ%E5%9B%BE%E7%89%8720140723113535.jpg%22%7D%2C%7B%22src%22%3A%22fad2efe87eed488a9d37ef07d6eb1970.jpg%22%2C%22name%22%3A%22QQ%E5%9B%BE%E7%89%8720140723113535.jpg%22%7D%5D&type=1&answerCark=%5B%7B%22item_type%22%3A1%2C%22option_cnt%22%3A2%2C%22answer%22%3A%22A%22%2C%22oper%22%3A%22%22%2C%22char_num%22%3A0%7D%5D&resList=%22aecf086f614241b18f0429868b4dd649_1%7C%22aecf086f614241b18f0429868b4dd649_2%7Cd19367f469a94312bc5f6f069f49a077%7Cfad2efe87eed488a9d37ef07d6eb1970%7C
+Request Method:GET
+Status Code:200 OK
+Request Headersview source
+Accept:*/*
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:zh-CN,zh;q=0.8
+Connection:keep-alive
+Cookie:ASP.NET_SessionId=412tyr3fl0ap4j1foawz22gu; sc1=FBEE62D6BD4342E8E10DB8354ADD1DF7C4AA3B39akl%2bNQfmBYOcjnsDJUFvu0V%2fYwv3ZxjisEzUh8KSvFYpFEjPwGlmazC%2bqAqQqkbvS7H2mdwfxGLdiSAZpHVbaewlwrbp3A%3d%3d
+Host:new.www.lejiaolexue.com
+Referer:http://new.www.lejiaolexue.com/paper/AddSelfItem.aspx?pid=3ebdd401ceab4980acf59100359bd767
+User-Agent:Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36
+X-Requested-With:XMLHttpRequest
+Query String Parametersview sourceview URL encoded
+item_id:
+content:<p>
+	fghfghf<img src="aecf086f614241b18f0429868b4dd649.jpg"></p>
+content_fenxi:
+diff:50
+course:10001
+version:0
+vol:0
+unit:0
+section:0
+attach:[{"src":"d19367f469a94312bc5f6f069f49a077.jpg","name":"QQ图片20140723113535.jpg"},{"src":"fad2efe87eed488a9d37ef07d6eb1970.jpg","name":"QQ图片20140723113535.jpg"}]
+type:1
+answerCark:[{"item_type":1,"option_cnt":2,"answer":"A","oper":"","char_num":0}]
+resList:"aecf086f614241b18f0429868b4dd649_1|"aecf086f614241b18f0429868b4dd649_2|d19367f469a94312bc5f6f069f49a077|fad2efe87eed488a9d37ef07d6eb1970|
+Response Headersview source
+Cache-Control:private
+Content-Length:32
+Content-Type:text/html; charset=utf-8
+Date:Mon, 13 Oct 2014 08:27:41 GMT
+Server:Microsoft-IIS/7.5
+X-AspNet-Version:4.0.30319
+X-Powered-By:ASP.NET
+ConsoleSearchEmulationRendering
+==============================

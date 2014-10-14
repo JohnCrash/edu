@@ -1,6 +1,7 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
+local loadingbox = require "loadingbox"
 local FileUtils = cc.FileUtils:getInstance()
 local ui = {
 	FILE = 'homework/laoshizuoye/gexinghua.json',
@@ -374,6 +375,7 @@ local test_audio={
 	"840ec391c218ebb3bc89280de994f3ff.mp3",
 	"ac848ecb0764e0b75463cd03d8179ac0.mp3"
 }
+			
 function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
 		uikits.event(self._record_button,function(sender)

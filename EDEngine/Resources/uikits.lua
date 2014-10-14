@@ -636,6 +636,35 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 	end
 end
 
+local function sequence_call( t )
+	local seqs = {}
+	seqs._obj = target
+	if not target then
+		seqs._obj = cc.Director:getInstance() --如果没有对象，使用全局对象
+	end
+	if seqs._obj and t then
+		seqs._funcs = t
+		 seqs._scheduler = seqs._obj:getScheduler()
+		 seqs._i = 1
+		 local function sequence_call_func()
+			local func = t[seqs._i]
+			if func.func(func.param) then
+				if seqs._i < funcs.count then
+					seqs._i = seqs._i + 1
+				else
+					if funcs.event then
+						funcs.event(COMPLATE)
+					end
+				end
+			else
+				funcs.event(ERROR)
+			end
+		end
+		seqs._schedulerID = seqs._scheduler:scheduleScriptFunc(sequence_call_func,0,false)	
+	end
+	return seqs
+end
+
 local function timer( obj,func,delay,param1,param2,param3)
 	if obj and func and delay then
 		 local scheduler = obj:getScheduler()
@@ -1126,4 +1155,5 @@ return {
 	muteSound = muteSound,
 	playClickSound = playClickSound,
 	animationFormJson = animationFormJson,
+	sequence_call = sequence_call,
 }

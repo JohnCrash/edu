@@ -321,6 +321,53 @@ function Publishhw:publish_homework()
 		end,'NC')--]]
 end
 
+--上传题的附件数据
+function Publishhw:upload( file )
+	local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
+	local local_file = kits.get_cache_path()..file
+	local data = kits.read_file( local_file )
+	if data then
+		local loadbox = loadingbox.open(self)
+		cache.upload( url,file,data,
+			function(b,t)
+				if not loadbox:removeFromParent() then
+					return
+				end
+				if b then
+					kits.log("Publishhw:upload success")
+					kits.log("src="..tostring(t.src))
+					kits.log("mini_src="..tostring(t.mini_src))
+				else
+					kits.log("ERROR :  Publishhw:upload failed")
+				end
+			end)
+	else
+		kits.log("ERROR : Publishhw:upload can't open file "..local_file)
+	end
+end
+
+--加入一个题
+function Publishhw:add_topics_item( t )
+	local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx"..kits.encode_url( t )
+	cache.request_json(url,function(t)
+			if t then
+				
+			else
+				kits.log("ERROR : Publishhw:add_topics_item failed")
+			end
+		end)
+end
+
+function Publishhw:publish_topics()
+	if self.tb_parent_view and self.tb_parent_view._subjective_data then
+		--upload all attachments
+		local data = self.tb_parent_view._subjective_data
+		--add topics items
+	else
+		kits.log("ERROR : Publishhw:publish_topics invalid paramter")
+	end
+end
+
 function Publishhw:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}

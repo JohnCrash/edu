@@ -98,13 +98,37 @@ local function download_http_by_curl(url,tout)
 end
 
 --编码url参数表
---例如app_id=2001&game_id=agcn3nanf&stage_id=2&
-local function encode_url( p )
-	local s = ''
-	for k,v in pairs(p) do
-		s = s..k..'='..v..'&'
+--例如app_id=2001&game_id=agcn3nanf&stage_id=2
+local function encode_str( s )
+	local length = string.len(s)
+	local t = {}
+	for i=1,length do
+		local ch = string.byte(s,i)
+		local hex = string.format('%X',ch)
+		local l = string.len(hex)
+		if l<2 then
+			if l == 1 then
+				hex = '0'..hex
+			else
+				hex = '00'..hex
+			end
+		elseif l>2 then
+			hex = string.sub(hex,-2)
+		end
+		table.insert(t,hex)
 	end
-	return s
+	return table.concat(t,'%')
+end
+local function encode_url( p )
+	if p and type(p)=='table' then
+		local s = '&'
+		for k,v in pairs(p) do
+			s = s..tostring(k)..'='..encode_str(tostring(v))
+		end
+		return s
+	elseif p and type(p)=='string' then
+		return encode_str( p )
+	end
 end
 
 local function http_post(url,text,cookie,to)

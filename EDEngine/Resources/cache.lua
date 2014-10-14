@@ -227,8 +227,8 @@ local function upload(url,filename,data,func,progress_func)
 			if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 				if obj.state == 'OK' and obj.data then
 					local t = json.decode(obj.data)
-					if t and type(t)=='table' and t.md5 and type(t.md5)=='string' and string.len(t.md5)>0 then
-						func(true,t.md5)
+					if t and type(t)=='table' then
+						func(true,t)
 						return
 					end
 				end
