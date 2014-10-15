@@ -162,14 +162,25 @@ function AppEntry:init()
 			end}
 		end}
 		
-	local epbutton = uikits.button{caption='parenterrortitle',x=64*scale,y = 64*scale + 6*item_h,
+	local epbutton = uikits.button{caption='家长错题本',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			update.create{name='parenterrortitle',updates={'homework','errortitile','luacore'},
 				run=function()
-				login.set_selector(3) --学生
+				login.set_selector(3) --家长
 				local Loading = require "errortitile/Loading"
 				return Loading.create()
+			end}
+		end}
+		
+	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name='parenthw',updates={'homework','errortitile','luacore'},
+				run=function()
+				login.set_selector(3) --家长
+				local selstudent = require "homework/selstudent.lua"
+				return selstudent.create()
 			end}
 		end}
 
@@ -183,7 +194,7 @@ function AppEntry:init()
 		x=320*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale
 	}
-	debugip:setText("192.168.2.182")
+	debugip:setText("192.168.2.109")
 	local isopen = false
 	local debugbutton = uikits.button{caption='调试...',x=320*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,
@@ -200,6 +211,7 @@ function AppEntry:init()
 	bg:addChild(sbutton)
 	bg:addChild(ebutton)
 	bg:addChild(epbutton)
+	bg:addChild(pbutton)
 	bg:addChild(exitbutton)
 	self:addChild(bg)
 	resume.clearflag("update") --update isok
