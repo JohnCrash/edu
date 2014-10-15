@@ -7,6 +7,7 @@ local login = require "login"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
+local messagebox = require "messagebox"
 
 crash.open("homework",1)
 
@@ -19,7 +20,8 @@ timer:-1
 type:-1
 p:1
 --]]
-local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
+--local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/APIWorkList.ashx'
+local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/APIWorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
 
@@ -762,24 +764,30 @@ function WorkList:add_item( t )
 	uikits.event(item,
 			function(sender)
 				--if not self._busy then
-					cache.request_cancel()
-					uikits.pushScene(WorkCommit.create{
-						pid=t.paper_id,
-						tid=t.teacher_id,
-						caption=t.exam_name,
-						cnt_item = t.cnt_item,
-						cnt_item_finish = t.cnt_item_finish,
-						finish_time = t.finish_time,
-						in_time = t.in_time,
-						status = t.status,
-						course_name = t.course_name,
-						course_id = t.course,
-						finish_time_unix = t.finish_time_unix,
-						exam_id = t.exam_id,
-						real_score = t.real_score,
-						total_time = t.total_time,
-						uid = login.uid(),
-						})
+					if t.is_res and t.is_res == 1 then
+						--一键导入题，提示不能做
+						messagebox.open(self,function()end,
+						messagebox.MESSAGE,"提示",'“一键导入作业”请到电脑上作答！')
+					else
+						cache.request_cancel()
+						uikits.pushScene(WorkCommit.create{
+							pid=t.paper_id,
+							tid=t.teacher_id,
+							caption=t.exam_name,
+							cnt_item = t.cnt_item,
+							cnt_item_finish = t.cnt_item_finish,
+							finish_time = t.finish_time,
+							in_time = t.in_time,
+							status = t.status,
+							course_name = t.course_name,
+							course_id = t.course,
+							finish_time_unix = t.finish_time_unix,
+							exam_id = t.exam_id,
+							real_score = t.real_score,
+							total_time = t.total_time,
+							uid = login.uid(),
+							})
+					end
 				--end
 			end,'click')
 

@@ -634,7 +634,9 @@ http://image.lejiaolexue.com/ulogo/seg1/seg2/userId_type.jpg
 				"tag_parentcheck": 0,
 				"tag_selfcheck": 1,
 				"tag_solution": 1,
-				"teacher_id": 122097
+				"teacher_id": 122097,
+				"is_res":1, -- 0 正常题,1 一键导入题
+				"commit_num":1, --提交人数
 			},
 		],
 		...
