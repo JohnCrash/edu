@@ -143,7 +143,8 @@ function TeacherList:add_batch_item( v )
 	if v and type(v)=='table' then
 		local item = self._scrollview:additem{
 			[ui.ITEM_CAPTION] = v.exam_name,
-			[ui.ITEM_TOPICS_NUM] = v.items,
+			[ui.ITEM_TOPICS_NUM] = v.items or '-',
+			[ui.ITEM_COMMIT_NUM] = v.commit_num or '-',
 			[ui.ITEM_CLOSE_TIME] = function(child,item)
 				if v.finish_time and type(v.finish_time)=='string' then
 					local end_time = kits.unix_date_by_string( v.finish_time )

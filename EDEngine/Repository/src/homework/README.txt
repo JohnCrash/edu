@@ -1001,3 +1001,9 @@ X-AspNet-Version:4.0.30319
 X-Powered-By:ASP.NET
 ConsoleSearchEmulationRendering
 ==============================
+
+
+http://new.www.lejiaolexue.com/paper/handler/GetStatisticsTeacher.ashx
+老师端统计
+http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx
+学生端统计

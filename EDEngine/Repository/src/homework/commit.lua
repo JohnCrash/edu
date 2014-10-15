@@ -572,7 +572,7 @@ function WorkCommit:commit()
 		if self._commitSCID then
 			self:getScheduler():unscheduleScriptEntry(self._commitSCID)
 			self._commitSCID = nil
-		end	
+		end
 	end
 	local function commit_func(dt)
 		if step==0 then

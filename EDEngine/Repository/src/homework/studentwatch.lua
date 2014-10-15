@@ -52,7 +52,7 @@ function StudentWatch:init_data()
 	if self._args and self._args._exam_table then
 		uikits.set(self._root,{
 			[ui.CAPTION] = self._args.caption or "",
-			[ui.OBJECTIVE_RATE] = self._args.cnt_item_finish.."/"..self._args.cnt_item,
+			[ui.OBJECTIVE_RATE] = "0/"..self._args.cnt_item,
 			[ui.OBJECTIVE_TIME] = kits.time_to_string_simple(self._args.total_time),
 			[ui.OBJECTIVE_FEN] = (self._args.real_score or "0").."分",
 		})
@@ -112,6 +112,11 @@ function StudentWatch:add_paper_item( topicType,topicID )
 							if  t.detail.isright ~= 0 then
 								uikits.child(item,ui.ITEM_WRONG):setVisible(false)
 								uikits.child(item,ui.ITEM_RIGHT):setVisible(true)
+								self._args.right_num = self._args.right_num or 0
+								self._args.right_num = self._args.right_num + 1
+								uikits.set(self._root,{
+									[ui.OBJECTIVE_RATE] = tostring(self._args.right_num).."/"..self._args.cnt_item,
+								})								
 							else
 								uikits.child(item,ui.ITEM_WRONG):setVisible(true)
 								uikits.child(item,ui.ITEM_RIGHT):setVisible(false)
