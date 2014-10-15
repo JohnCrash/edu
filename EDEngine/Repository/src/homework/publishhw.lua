@@ -354,7 +354,6 @@ function Publishhw:publish_topics()
 				content = tostring(item.text),
 				content_fenxi = '',
 				diff = 60,
-				
 			}
 			local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx"..kits.encode_url( t )
 			cache.request_json(url,function(t)
@@ -413,7 +412,7 @@ function Publishhw:publish_topics()
 					end
 					return s
 				end
-			end
+			end,
 			event=function(self,s)
 				if s==uikits.BEGIN then
 				elseif s==uikits.END then

@@ -145,6 +145,13 @@ function TeacherList:add_batch_item( v )
 			[ui.ITEM_CAPTION] = v.exam_name,
 			[ui.ITEM_TOPICS_NUM] = v.items or '-',
 			[ui.ITEM_COMMIT_NUM] = v.commit_num or '-',
+			[ui.ITEM_COMMIT_PERCENT] = function(child,item)
+				local p = 0
+				if v.commit_num and v.cnt_student then
+					p = (v.commit_num/v.cnt_student)*100
+				end
+				child:setPercent( p )
+			end,
 			[ui.ITEM_CLOSE_TIME] = function(child,item)
 				if v.finish_time and type(v.finish_time)=='string' then
 					local end_time = kits.unix_date_by_string( v.finish_time )

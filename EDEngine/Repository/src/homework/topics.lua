@@ -2,6 +2,7 @@ local kits = require 'kits'
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
+local login = require "login"
 local loadingbox = require "loadingbox"
 
 local course={
@@ -206,7 +207,7 @@ local function item_ui( t )
 end
 
 local function read_topics_cache( pid )
-	local result = kits.read_cache( pid )
+	local result = kits.read_cache( pid..tostring(login.uid()) )
 	if result then
 		local t = json.decode(result)
 		if t then
@@ -222,7 +223,7 @@ end
 local function write_topics_cache( pid,t )
 	local result = json.encode( t,2 )
 	if result then
-		kits.write_cache( pid,result )
+		kits.write_cache( pid..tostring(login.uid()),result )
 	else
 		kits.log('error : result = nil, write_topics_cache pid = '..tostring(pid))
 	end

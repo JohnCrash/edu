@@ -52,15 +52,15 @@ local ui = {
 	NUMBER = 'number_1',
 	ITEM = 'top_view/top_1',
 	TOPICS = 'red_case',
-	WORKFLOW = 'objective_item2/start_objective',
-	WORKFLOW_COMPLETE = 'objective_item2/completed_objective',
+	WORKFLOW = 'objective_item/start_objective',
+	WORKFLOW_COMPLETE = 'objective_item/completed_objective',
 	WORKFLOW2 = 'subjective_item/start_subjective',
 	WORKFLOW2_COMPLETE = 'subjective_item/completed_subjective',
 	COMMIT = 'submit',
-	OBJECTIVE_NUM = 'objective_item2/objective_no',
-	SUBJECTIVE_NUM = 'objective_item2/subjective_no',
-	WHITE_STAR = 'objective_item2/white_star_',
-	RED_STAR = 'objective_item2/red_star_',
+	OBJECTIVE_NUM = 'objective_item/objective_no',
+	SUBJECTIVE_NUM = 'objective_item/subjective_no',
+	WHITE_STAR = 'objective_item/white_star_',
+	RED_STAR = 'objective_item/red_star_',
 	WHITE_STAR2 = 'subjective_item/white_star_',
 	RED_STAR2 = 'subjective_item/red_star_',	
 	TYPE_TEXT = 'account_information/lesson_text',
@@ -289,7 +289,7 @@ function WorkCommit:init_student_page()
 		but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
 	else
 		but1 = uikits.child(self._root,ui.WORKFLOW)
-		 uikits.child(self._root,ui.WORKFLOW_COMPLETE):setVisible(false)
+		uikits.child(self._root,ui.WORKFLOW_COMPLETE):setVisible(false)
 	end
 	but2 = uikits.child(self._root,ui.WORKFLOW2)
 	uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)

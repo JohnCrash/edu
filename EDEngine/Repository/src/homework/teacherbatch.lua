@@ -100,7 +100,7 @@ function Batch:add_paper_item( topicType,topicID )
 					..self._args.teacher_id..'&exam_id='..self._args.exam_id..'&c_id='..self._args_class.class_id..'&item_id='..topicID
 					cache.request_json(u,function(t)
 						if t and type(t)=='number' and cc_isobj(child) then
-							uikits.set_item(child,tostring(100-t)..'%')
+							uikits.set_item(child,tostring(math.floor(100-t))..'%')
 						else
 							kits.log('WARNING : wrong rate = '..tostring(t))
 						end
