@@ -636,31 +636,68 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 	end
 end
 
+--[[
+	sequence_call 
+]]--
+local FAIL = 0
+local OK = 1
+local RUN = 2
+local STATE = 3
+local BEGIN = 4
+local END = 5
+local NEXT = 6
 local function sequence_call( t )
 	local seqs = {}
-	seqs._obj = target
-	if not target then
-		seqs._obj = cc.Director:getInstance() --如果没有对象，使用全局对象
-	end
+	seqs._obj = cc.Director:getInstance() --如果没有对象，使用全局对象
 	if seqs._obj and t then
 		seqs._funcs = t
 		 seqs._scheduler = seqs._obj:getScheduler()
-		 seqs._i = 1
+		 local i = 1
+		 local state
+		 local function close_func()
+		 	seqs._scheduler:unscheduleScriptEntry(seqs._schedulerID)	
+			seqs._schedulerID = nil
+		 end
+		 seqs.close = close_func
+		 local ispause
+		 seqs.pause=function()
+			ispause = true
+		 end
+		 seqs.continue=function()
+			ispause=nil
+		 end
+		 local function event_func(s)
+			if t.event then
+				if not t.event(seqs,s) then
+					close_func()
+				end
+			elseif s == FAIL then
+				close_func()
+			end
+		 end
 		 local function sequence_call_func()
-			local func = t[seqs._i]
-			if func.func(func.param) then
-				if seqs._i < funcs.count then
-					seqs._i = seqs._i + 1
+			if ispause then return end
+			if t[i] then
+				if not state then
+					state = t[i](RUN)
 				else
-					if funcs.event then
-						funcs.event(COMPLATE)
+					local s = t[i](STATE)
+					if s == OK then
+						i = i + 1
+						state = nil
+						event_func(NEXT)
+					elseif s == FAIL then
+						state =  nil
+						event_func(FAIL)
 					end
 				end
 			else
-				funcs.event(ERROR)
+				event_func(END)
+				close_func()
 			end
 		end
-		seqs._schedulerID = seqs._scheduler:scheduleScriptFunc(sequence_call_func,0,false)	
+		event_func(BEGIN)
+		seqs._schedulerID = seqs._scheduler:scheduleScriptFunc(sequence_call_func,t.delay or 0.01,false)	
 	end
 	return seqs
 end
@@ -1156,4 +1193,11 @@ return {
 	playClickSound = playClickSound,
 	animationFormJson = animationFormJson,
 	sequence_call = sequence_call,
+	FAIL = FAIL,
+	OK = OK,
+	RUN = RUN,
+	STATE = STATE,
+	BEGIN = BEGIN,
+	END = END,
+	NEXT = NEXT,
 }

@@ -321,47 +321,109 @@ function Publishhw:publish_homework()
 		end,'NC')--]]
 end
 
---上传题的附件数据
-function Publishhw:upload( file )
-	local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
-	local local_file = kits.get_cache_path()..file
-	local data = kits.read_file( local_file )
-	if data then
-		local loadbox = loadingbox.open(self)
-		cache.upload( url,file,data,
-			function(b,t)
-				if not loadbox:removeFromParent() then
-					return
-				end
-				if b then
-					kits.log("Publishhw:upload success")
-					kits.log("src="..tostring(t.src))
-					kits.log("mini_src="..tostring(t.mini_src))
-				else
-					kits.log("ERROR :  Publishhw:upload failed")
-				end
-			end)
-	else
-		kits.log("ERROR : Publishhw:upload can't open file "..local_file)
-	end
-end
-
---加入一个题
-function Publishhw:add_topics_item( t )
-	local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx"..kits.encode_url( t )
-	cache.request_json(url,function(t)
-			if t then
-				
-			else
-				kits.log("ERROR : Publishhw:add_topics_item failed")
-			end
-		end)
-end
-
 function Publishhw:publish_topics()
 	if self.tb_parent_view and self.tb_parent_view._subjective_data then
-		--upload all attachments
+		local function upload(item) --upload attachments
+			local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
+			local local_file = kits.get_cache_path()..item.file
+			local data = kits.read_file( local_file )
+			if data then
+				cache.upload( url,item.file,data,
+					function(b,t)
+						if b then
+							if t.src and t.mini_src then
+								item.src = t.src
+								item.mini_src = t.mini_src
+								kits.log("INFO : upload "..tostring(item.mini_src))
+							else
+								item.err = 'result'
+								kits.log("ERROR : Publishhw:publish_topics upload result invalid")
+							end
+						else
+							item.err = 'upload'
+							kits.log("ERROR :  Publishhw:publish_topics upload failed")
+						end
+					end)
+			else
+				item.err = 'read'
+				kits.log("ERROR : Publishhw:publish_topics upload can't open file "..local_file)
+			end
+		end
+		local function additem(item) --add topics item
+			local t = {
+				content = tostring(item.text),
+				content_fenxi = '',
+				diff = 60,
+				
+			}
+			local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx"..kits.encode_url( t )
+			cache.request_json(url,function(t)
+				if t then
+					item.id = t
+				else
+					item.err = 'fail'
+					kits.log("ERROR : Publishhw:add_topics_item failed")
+				end
+			end)
+		end
+		
 		local data = self.tb_parent_view._subjective_data
+		local loadbox = loadingbox.open(self)
+		uikits.sequence_call{
+			function(state) --upload all attachments
+				if state==uikits.RUN then
+					for i,v in pairs(data) do
+						if v.items then
+							for k,item in pairs(v.items) do
+								upload( item )
+							end
+						end
+					end
+					return true
+				elseif state==uikits.STATE then
+					local s = uikits.OK
+					for i,v in pairs(data) do
+						if v.items then
+							for k,item in pairs(v.items) do
+								if item.err then
+									return uikits.FAIL
+								elseif not item.src then
+									s = uikits.RUN
+								end
+							end						
+						end
+					end
+					return s
+				end
+			end,
+			function(state) --add topics
+				if state==uikits.RUN then
+					for i,v in pairs(data) do
+						additem(v)
+					end
+					return true					
+				elseif state==uikits.STATE then
+					local s=uikits.OK
+					for i,v in pairs(data) do
+						if v.err then
+							return uikits.FAIL
+						elseif not v.id then
+							s=uikits.RUN
+						end
+					end
+					return s
+				end
+			end
+			event=function(self,s)
+				if s==uikits.BEGIN then
+				elseif s==uikits.END then
+					loadbox:removeFromParent()
+				elseif s==uikits.NEXT then
+				elseif s==uikits.FAIL then
+				end
+				return true
+			end
+		}
 		--add topics items
 	else
 		kits.log("ERROR : Publishhw:publish_topics invalid paramter")
@@ -393,7 +455,8 @@ function Publishhw:init()
 		function(sender,eventType)
 		print('1111111')
 		--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
-		self:publish_homework()
+		--self:publish_homework()
+		self:publish_topics()
 	end,"click")	
 	banji_sel_num = 0
 	self:SetButtonEnabled(but_confirm)

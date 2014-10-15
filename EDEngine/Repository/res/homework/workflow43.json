@@ -20,7 +20,7 @@
     "moer_1.png",
     "home_wrok.png",
     "redline.jpg",
-    "chinese1.jpg",
+    "chinese.jpg",
     "progress_bar_1.png",
     "progress_bar_2.png",
     "has_submitted.png",
@@ -172,7 +172,7 @@
     "moer_1.png",
     "home_wrok.png",
     "redline.jpg",
-    "chinese1.jpg",
+    "GUI/image.png",
     "progress_bar_1.png",
     "progress_bar_2.png",
     "has_submitted.png",
@@ -1381,8 +1381,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_a.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1453,8 +1453,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_b.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1525,8 +1525,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_c.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1597,8 +1597,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_d.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1669,8 +1669,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_e.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1741,8 +1741,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_f.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1813,8 +1813,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_rightx.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
@@ -1885,8 +1885,8 @@
               },
               "backGroundBoxSelected": null,
               "backGroundBoxSelectedData": {
-                "path": null,
-                "plistFile": null,
+                "path": "option_wrongx.png",
+                "plistFile": "",
                 "resourceType": 0
               },
               "frontCross": null,
