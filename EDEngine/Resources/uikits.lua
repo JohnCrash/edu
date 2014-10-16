@@ -869,6 +869,7 @@ local function popScene()
 		_pushNum = _pushNum - 1
 	else
 		kits.log("ERROR popScene")
+		Director:endToLua()
 	end
 end
 
