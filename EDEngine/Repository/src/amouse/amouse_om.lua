@@ -6,6 +6,7 @@ curl = require 'curl'
 uikits = require "uikits"
 login = require "login"
 cache = require "cache"
+loadingbox = require "loadingbox"
 
 local AMouseScene = class("AMouseScene")
 AMouseScene.__index = AMouseScene
@@ -391,8 +392,10 @@ end
 --访问服务器下载top rank并且设置
 function AMouseScene:set_top_list( url )
 	local my_url = url.."&zone_id="..tostring(self._zoneid)
+	--local loadbox = loadingbox.open( self._uiLayer )
 	--local result = kits.http_get( my_url,cookie,10 ) --time out 1s
 	cache.request(my_url,function(b)
+		--loadbox:removeFromParent()
 		local result = cache.get_data(my_url)
 		if result and type(result)== 'string' and string.sub(result,1,1) == '{' then
 			local tops = json.decode(result)
@@ -1388,7 +1391,6 @@ function AMouseScene:init()
 	if not self._ss then
 		if not self._zoneid then
 			self:get_zone_id()
-			--self:upload_rank(1,3889)
 		end
 		self._ss = cc.Director:getInstance():getVisibleSize()
 		local radio = self._ss.width/self._ss.height
