@@ -565,8 +565,8 @@ function AMouseScene:game_start_Dialog()
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
 			self:stop_music()
+			self:play_sound( SND_UI_CLICK )		
 			backMain()		
-			self:play_sound( SND_UI_CLICK )						
 		end
 	end
 	
@@ -608,8 +608,8 @@ function AMouseScene:game_end_Dialog()
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
 			self:stop_music()
-			backMain()
 			self:play_sound( SND_UI_CLICK )						
+			backMain()
 		end
 	end
 	local function nextStage(sender,eventType)

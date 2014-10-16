@@ -715,14 +715,6 @@ local function timer( obj,func,delay,param1,param2,param3)
 	end
 end
 
-local function pushScene( scene,transition,t )
-	if transition then
-		Director:pushScene( transition:create(t or 1,scene) )
-	else
-		Director:pushScene( scene )
-	end
-end
-
 --ºáÏò²¼¾Ö,
 local function relayout_h( items,xx,y,width,space,scale,expet )
 	local w
@@ -861,8 +853,23 @@ local function rect(t)
 	end
 end
 
+local _pushNum = 0
+local function pushScene( scene,transition,t )
+	if transition then
+		Director:pushScene( transition:create(t or 1,scene) )
+	else
+		Director:pushScene( scene )
+	end
+	_pushNum = _pushNum + 1
+end
+
 local function popScene()
-	Director:popScene()
+	if _pushNum and _pushNum > 0 then
+		Director:popScene()
+		_pushNum = _pushNum - 1
+	else
+		kits.log("ERROR popScene")
+	end
 end
 
 local function set_item(c,v)
