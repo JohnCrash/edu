@@ -6,11 +6,13 @@ local ui = {
 	LOADING = 'load/load.ExportJson',
 	FILE = 'homework/networkbox.json', --网络错误
 	FILE2 = 'homework/repairbox.json', --系统维护500
+	FILE3 = 'homework/tanchu.json',
 	EXIT = 'red_in/out',
 	TRY = 'red_in/again',
+	OK = 'qr',
 }
 local g_scale = 2
-local function messagebox( parent,func,dt )
+local function messagebox( parent,func,dt,caption,text )
 	local s
 	if not parent then return end
 	if not cc_isobj(parent) then return end
@@ -20,6 +22,16 @@ local function messagebox( parent,func,dt )
 		s = uikits.fromJson{file=ui.FILE}
 	elseif dt == 3 then
 		s = uikits.fromJson{file=ui.FILE2}
+	elseif dt == 6 then --message
+		s = uikits.fromJson{file=ui.FILE3}
+		local tt = uikits.child(s,'text_0')
+		local label = uikits.child(s,'Label_10')
+		if tt and caption then
+			tt:setString( caption )
+		end
+		if label and text then
+			label:setString( text )
+		end
 	else
 		s = uikits.fromJson{file=ui.LOADBOX}
 	end
@@ -49,6 +61,21 @@ local function messagebox( parent,func,dt )
 	if func then
 		local quit = uikits.child(s,ui.EXIT)
 		local try = uikits.child(s,ui.TRY)
+		local ok = uikits.child(s,ui.OK)
+		if ok then
+			if parent.setKeyboardEnabled then
+				parent:setKeyboardEnabled(false)
+			end
+			uikits.event( ok,function(sender)
+											if parent.setKeyboardEnabled then
+												parent:setKeyboardEnabled(true)
+											end
+											uikits.delay_call(parent,function()
+												s:removeFromParent()
+											end,0)
+											func( 5 )
+										end,'click')			
+		end
 		if quit then
 			uikits.event( quit,function(sender)
 											uikits.delay_call(parent,function()
@@ -76,5 +103,6 @@ return
 	REPAIR = 3,
 	TRY = 4,
 	CLOSE = 5,
+	MESSAGE = 6,
 	open = messagebox,
 }

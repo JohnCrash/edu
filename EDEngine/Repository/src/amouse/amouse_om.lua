@@ -1,10 +1,11 @@
 require "AudioEngine" 
 lxp = require "lom"
 kits = require "kits"
-json = require "json"
+json = require "json-c"
 curl = require 'curl'
 uikits = require "uikits"
 login = require "login"
+cache = require "cache"
 
 local AMouseScene = class("AMouseScene")
 AMouseScene.__index = AMouseScene
@@ -46,8 +47,8 @@ local s_all_rank_url = 'http://192.168.2.120/ourgame/api/rank/top.ashx?app_id=20
 local s_week_rank_url = 'http://192.168.2.120/ourgame/api/rank/top.ashx?app_id=20001&zone_id=141442&period=0'
 local s_upload_url = 'http://192.168.2.120/ourgame/api/score/submit.ashx'
 --]]
-local s_all_rank_url = 'http://app.lejiaolexue.com/ourgame/api/rank/top.ashx?app_id=20001&zone_id=141442&period=0'
-local s_week_rank_url = 'http://app.lejiaolexue.com/ourgame/api/rank/top.ashx?app_id=20001&zone_id=141442&period=0'
+local s_all_rank_url = 'http://app.lejiaolexue.com/ourgame/api/rank/top.ashx?app_id=1004&period=0'
+local s_week_rank_url = 'http://app.lejiaolexue.com/ourgame/api/rank/top.ashx?app_id=1004&period=1'
 local s_upload_url = 'http://app.lejiaolexue.com/ourgame/api/score/submit.ashx'
 
 local function test_server()
@@ -80,7 +81,7 @@ end
 --test_server()
 --上传玩家积分
 function AMouseScene:upload_rank( stage,scor )
-	local text = kits.encode_url{ app_id = 20001,game_id='amouse', stage_id = stage,score = scor,rid = 3,chk = '21342342424323421345235' }
+	local text = kits.encode_url{ app_id = 1004,game_id='amouse', stage_id = stage,score = scor,rid = 3,chk = '21342342424323421345235' }
 	local reslut = kits.http_post( s_upload_url,text,cookie,10 )
 	if reslut and type(reslut) == 'string' and string.sub(reslut,1,1) == '{' then
 		kits.log('upload : '..tostring(reslut) )
@@ -350,43 +351,67 @@ function AMouseScene:game_setting_Dialog( where )
 	end
 end
 
---访问服务器下载top rank并且设置
-function AMouseScene:set_top_list( url )
-	local result = kits.http_get( url,cookie,10 ) --time out 1s
-	if result and type(result)== 'string' and string.sub(result,1,1) == '{' then
-		local tops = json.decode(result)
-		local i = 1
-		kits.log( result )
-		if tops and tops.users and type(tops.users)=='table' then
-			for k,v in pairs(tops.users) do
-				kits.log( "table:"..k )
-				if type(v)=='table' then
-					for n,s in pairs(v) do
-						kits.log( "	"..n..":"..s )
-						if n == 'uname' and type(s)=='string' then
-							self._top_lists[i]:getChildByName('Label_name'):setString(s)
-						elseif n == 'score' and type(s)=='number' then
-							self._top_lists[i]:getChildByName('Label_fen'):setString(tostring(s))
-						elseif n == 'school' and type(s)=='string' then
-							self._top_lists[i]:getChildByName('Label_school'):setString(s)
-						end
-					end
-					--v = { uname='user name',user_id=1220423,score=1223}
+function AMouseScene:get_zone_id()
+	local url = 'http://api.lejiaolexue.com/rest/user/'..login.uid()..'/zone/class'
+	cache.request_json(url,function(t)
+			if t and type(t)=='table' and t.result==0 and t.zone then
+				if t.zone[1] and t.zone[1].zone_id then
+					self._zoneid = t.zone[1].zone_id
+					kits.log('INFO : zone_id '..tostring(self._zoneid))
+				else
+					kits.log('ERROR AMouseScene:get_zone_id result invaild')
 				end
-				i = i + 1
-				if i > 5 then
-					break
+			else
+				kits.log('ERROR AMouseScene:get_zone_id')
+				if not t then
+					kits.log('WARNING : get_zone_id again')
+					self:get_zone_id()
 				end
 			end
+		end)
+end
+
+--访问服务器下载top rank并且设置
+function AMouseScene:set_top_list( url )
+	local my_url = url.."&zone_id="..tostring(self._zoneid)
+	--local result = kits.http_get( my_url,cookie,10 ) --time out 1s
+	cache.request(my_url,function(b)
+		local result = cache.get_data(url)
+		if result and type(result)== 'string' and string.sub(result,1,1) == '{' then
+			local tops = json.decode(result)
+			local i = 1
+			kits.log( result )
+			if tops and tops.users and type(tops.users)=='table' then
+				for k,v in pairs(tops.users) do
+					kits.log( "table:"..k )
+					if type(v)=='table' then
+						for n,s in pairs(v) do
+							kits.log( "	"..n..":"..s )
+							if n == 'uname' and type(s)=='string' then
+								self._top_lists[i]:getChildByName('Label_name'):setString(s)
+							elseif n == 'score' and type(s)=='number' then
+								self._top_lists[i]:getChildByName('Label_fen'):setString(tostring(s))
+							elseif n == 'school' and type(s)=='string' then
+								self._top_lists[i]:getChildByName('Label_school'):setString(s)
+							end
+						end
+						--v = { uname='user name',user_id=1220423,score=1223}
+					end
+					i = i + 1
+					if i > 5 then
+						break
+					end
+				end
+			else
+				kits.log("players rank table error!")
+			end
 		else
-			kits.log("players rank table error!")
-		end
-	else
-		kits.log("get players rank error!")
-		if result then 
-			kits.log(string.sub(result,1,128)) 
-		end
-	end
+			kits.log("get players rank error!")
+			if result then 
+				kits.log(string.sub(result,1,128)) 
+			end
+		end		
+	end)
 end
 
 --清空积分表
@@ -565,8 +590,8 @@ function AMouseScene:game_start_Dialog()
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
 			self:stop_music()
+			self:play_sound( SND_UI_CLICK )		
 			backMain()		
-			self:play_sound( SND_UI_CLICK )						
 		end
 	end
 	
@@ -608,8 +633,8 @@ function AMouseScene:game_end_Dialog()
 		if eventType == ccui.TouchEventType.ended then
 			self:close_Dialog()
 			self:stop_music()
-			backMain()
 			self:play_sound( SND_UI_CLICK )						
+			backMain()
 		end
 	end
 	local function nextStage(sender,eventType)
@@ -1344,6 +1369,9 @@ end
 function AMouseScene:init()
 	--游戏基本变量初始化
 	if not self._ss then
+		if not self._zoneid then
+			self:get_zone_id()
+		end
 		self._ss = cc.Director:getInstance():getVisibleSize()
 		local radio = self._ss.width/self._ss.height
 		kits.log("radio = "..radio )

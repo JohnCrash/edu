@@ -11,6 +11,7 @@ local Sethwbyles = require "homework/sethwbyles"
 local Sethwbyerr = require "homework/sethwbyerr"
 local Edithwbyobj = require "homework/edithwbyobj"
 local Publishhw = require "homework/publishhw"
+local messagebox = require "messagebox"
 
 local topics_course = topics.course_icon
 local res_local = "homework/"
@@ -172,7 +173,13 @@ function TeacherList:add_batch_item( v )
 						if class and type(class)=='table' and class[1] and class[1].class_name then
 							child:setString( class[1].class_name )
 							uikits.event(item,function(sender)
-								uikits.pushScene(TeacherBatch.create(v,class[1]))
+								if v.is_res and v.is_res==1 then
+								--一键导入题，提示不能做
+									messagebox.open(self,function()end,
+									messagebox.MESSAGE,"提示",'“一键导入作业”请到电脑上批改！')
+								else
+									uikits.pushScene(TeacherBatch.create(v,class[1]))
+								end
 							end,'click')
 							return
 						end

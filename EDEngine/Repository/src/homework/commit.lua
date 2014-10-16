@@ -387,8 +387,13 @@ function WorkCommit:init_commit_page()
 					uikits.pushScene( Score.create(self._args) )
 				end,'click')				
 		else
-			commit:setEnabled(true)
-			commit:setBright(true)
+			if self._args.cnt_item_finish>=self._args.cnt_item then
+				commit:setEnabled(true)
+				commit:setBright(true)
+			else
+				commit:setEnabled(false)
+				commit:setBright(false)			
+			end
 			commit:setVisible(true)
 			commit:setHighlighted(true)
 			uikits.event(commit,function(sender)

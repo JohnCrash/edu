@@ -7,6 +7,7 @@ local login = require "login"
 local WorkCommit = require "homework/commit"
 local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
+local messagebox = require "messagebox"
 
 crash.open("homework",1)
 
@@ -19,7 +20,8 @@ timer:-1
 type:-1
 p:1
 --]]
-local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/WorkList.ashx'
+--local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/APIWorkList.ashx'
+local worklist_url = 'http://new.www.lejiaolexue.com/student/handler/APIWorkList.ashx'
 local ERR_DATA = 1
 local ERR_NOTCONNECT = 2
 
@@ -557,14 +559,36 @@ function WorkList:getdatabyurl()
 		--local tb_uig = json.decode(tb_result.uig)
 		self.childinfo = tb_result.uis
 	end	
+--[[	local loadbox = loadingbox.open(self)
+	cache.request_json( get_child_info_url,function(t)
+			if t and type(t)=='table' then
+				if t.result ~= 0 then
+					loadbox:removeFromParent()
+					return false
+				else
+					self.childinfo = t.uis
+					self:show_children()
+				end
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:getdatabyurl()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+			end
+			loadbox:removeFromParent()
+		end,'N')
+	return true--]]
 end
 
 function WorkList:show_children()
 	self:getdatabyurl()
-	print('11111111')
-	local student_view = uikits.child(self._setting_root,ui.student_view)
+	local student_view = uikits.child(self._setting,ui.student_view)
 	student_view:setVisible(true)
-	local src_student_view = uikits.child(self._setting_root,ui.per_student_view)
+	local src_student_view = uikits.child(self._setting,ui.per_student_view)
 	src_student_view:setVisible(false)
 	local size_student_view = student_view:getContentSize()
 	local size_per_student_view = src_student_view:getContentSize()
@@ -574,20 +598,23 @@ function WorkList:show_children()
 	local function selectedEvent(sender,eventType)
 		local checkBox = sender
 		if eventType == ccui.CheckBoxEventType.selected then
-			if _G.cur_child_id == checkBox.uid then
+			if _G.hw_cur_child_id == checkBox.uid then
 				return
 			end
-			_G.cur_child_id = checkBox.uid			
+			_G.hw_cur_child_id = checkBox.uid			
 			--local parent_view = checkBox:getParent()
 			local parent_view = checkBox.parentview
 			local tb_all_student = parent_view:getChildren()
 			for i=1,#tb_all_student do 
 				local checkBox_temp = uikits.child(tb_all_student[i],ui.student_checkbox)
+				if checkBox.uid ~= checkBox_temp.uid then
+					checkBox_temp:setSelectedState(false)
+				end
 			end
 			self:init()				
 		end
 		if eventType == ccui.CheckBoxEventType.unselected then
-			if _G.cur_child_id == checkBox.uid	then
+			if _G.hw_cur_child_id == checkBox.uid	then
 				checkBox:setSelectedState(true)
 			end
 		end
@@ -601,7 +628,7 @@ function WorkList:show_children()
 		local student_name = uikits.child(cur_student_view,ui.student_name)
 		local checkBox = uikits.child(cur_student_view,ui.student_checkbox)
 		student_name:setString(self.childinfo[i].uname)
-		if _G.cur_child_id == self.childinfo[i].uid then
+		if _G.hw_cur_child_id == self.childinfo[i].uid then
 			checkBox:setSelectedState(true)
 		else
 			checkBox:setSelectedState(false)
@@ -621,12 +648,12 @@ function WorkList:init_gui()
 	self._statistics_root:setVisible(false)
 	if _G.hw_cur_child_id == 0 then
 		self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
+		self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	else
 		self._setting_root = uikits.fromJson{file_9_16=ui.MORE2,file_3_4=ui.MORE2_3_4}
-		self:show_children()
+		self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
+		self:show_children()		
 	end
-	
-	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	
 	local cs = uikits.child(self._setting,ui.MORE_SOUND)
 	if cs then
@@ -843,24 +870,30 @@ function WorkList:add_item( t )
 	uikits.event(item,
 			function(sender)
 				--if not self._busy then
-					cache.request_cancel()
-					uikits.pushScene(WorkCommit.create{
-						pid=t.paper_id,
-						tid=t.teacher_id,
-						caption=t.exam_name,
-						cnt_item = t.cnt_item,
-						cnt_item_finish = t.cnt_item_finish,
-						finish_time = t.finish_time,
-						in_time = t.in_time,
-						status = t.status,
-						course_name = t.course_name,
-						course_id = t.course,
-						finish_time_unix = t.finish_time_unix,
-						exam_id = t.exam_id,
-						real_score = t.real_score,
-						total_time = t.total_time,
-						uid = login.uid(),
-						})
+					if t.is_res and t.is_res == 1 then
+						--一键导入题，提示不能做
+						messagebox.open(self,function()end,
+						messagebox.MESSAGE,"提示",'“一键导入作业”请到电脑上作答！')
+					else
+						cache.request_cancel()
+						uikits.pushScene(WorkCommit.create{
+							pid=t.paper_id,
+							tid=t.teacher_id,
+							caption=t.exam_name,
+							cnt_item = t.cnt_item,
+							cnt_item_finish = t.cnt_item_finish,
+							finish_time = t.finish_time,
+							in_time = t.in_time,
+							status = t.status,
+							course_name = t.course_name,
+							course_id = t.course,
+							finish_time_unix = t.finish_time_unix,
+							exam_id = t.exam_id,
+							real_score = t.real_score,
+							total_time = t.total_time,
+							uid = login.uid(),
+							})
+					end
 				--end
 			end,'click')
 

@@ -88,7 +88,9 @@ local function report_export( errmsg,stack_level )
 			bugs.log = table.concat(ca,'\n')
 			kits.log( bugs.log)
 		end
-		report_bug{ appid = 1,key = md5.sumhexa( t.source..tostring(t.currentline) ),value=bugs}
+		local curt = math.floor(os.time()/(24*3600))
+		
+		report_bug{ appid = 1,key = md5.sumhexa( t.source..tostring(t.currentline)..tostring(curt) ),value=bugs}
 		last_source = t.source
 		last_line = t.currentline
 	elseif t then
