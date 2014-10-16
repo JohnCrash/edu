@@ -4,7 +4,7 @@ local update = require "update"
 local login = require "login"
 local resume = require "resume"
 require "ljshellDeprecated"
-
+hw_cur_child_id = 0
 local ui = {
 }
 

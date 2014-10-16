@@ -3,12 +3,15 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
+local worklist = require "homework/worklist"
 --local selstudent = require "errortitile/selstudent"
 --local WrongSubjectList = require "errortitile/WrongSubjectList"
 local selstudent = class("selstudent")
 selstudent.__index = selstudent
 
 local ui = {
+	FILE = 'homework/xuanze.json',
+	FILE_3_4 = 'homework/xuanze43.json',
 	student_view = '4770',
 	per_student_view = '4770/4771',
 	student_name = '4773',
@@ -60,14 +63,9 @@ end
 
 function selstudent:init()	
 --	loadArmature("errortitile/silver/Export/NewAnimation/NewAnimation.ExportJson")	
-
-	if _G.screen_type == 1 then
-		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/xuanze.json")		
-	else
-		self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/xuanze43.json")		
-	end
+	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._widget)
-	uikits.initDR(design)
+--	uikits.initDR(design)
 	self:getdatabyurl()
 	local student_view = uikits.child(self._widget,ui.student_view)
 	local src_student_view = uikits.child(self._widget,ui.per_student_view)
@@ -80,9 +78,9 @@ function selstudent:init()
     local function selectedEvent(sender,eventType)
 		local checkBox = sender
         if eventType == ccui.CheckBoxEventType.selected then
-            _G.cur_child_id = checkBox.uid
-			local worklist = require "homework/worklist"
-			return worklist.create()
+            _G.hw_cur_child_id = checkBox.uid
+			local scene_next = worklist.create()								
+			cc.Director:getInstance():replaceScene(scene_next)			
         end
     end  
 

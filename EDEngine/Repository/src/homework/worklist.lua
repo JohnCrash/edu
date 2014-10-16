@@ -34,6 +34,8 @@ local ui = {
 	LOADING_FILE_3_4 = 'homework/studentloading43.json',	
 	MORE = 'homework/more.json',
 	MORE_3_4 = 'homework/more43.json',
+	MORE2 = 'homework/more2.json',
+	MORE2_3_4 = 'homework/more243.json',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
 	LESSON = 'lesson',
@@ -80,6 +82,11 @@ local ui = {
 	ST_COUNT_TEXT='text_no',
 	ST_AVERAGE_TEXT='text_av',
 	ST_TIME_TEXT='text_ti',
+	
+	student_view = 'haizi',
+	per_student_view = 'haizi/hz1',
+	student_name = 'mingzi',
+	student_checkbox = 'CheckBox_22',
 }
 --[[ home_work_cache json
 	{"uri","title","class","data","num","num2","num3","homework"}
@@ -537,14 +544,88 @@ function WorkList:SwapButton(s)
 	end
 end
 
+local student_space = 40
+local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
+
+function WorkList:getdatabyurl()
+	local result = kits.http_get(get_child_info_url,login.cookie(),1)
+	print(result)
+	local tb_result = json.decode(result)
+	if 	tb_result.result ~= 0 then				
+		print(tb_result.result.." : "..tb_result.message)			
+	else
+		--local tb_uig = json.decode(tb_result.uig)
+		self.childinfo = tb_result.uis
+	end	
+end
+
+function WorkList:show_children()
+	self:getdatabyurl()
+	print('11111111')
+	local student_view = uikits.child(self._setting_root,ui.student_view)
+	student_view:setVisible(true)
+	local src_student_view = uikits.child(self._setting_root,ui.per_student_view)
+	src_student_view:setVisible(false)
+	local size_student_view = student_view:getContentSize()
+	local size_per_student_view = src_student_view:getContentSize()
+	local all_student_width = (size_per_student_view.width * (#self.childinfo)) + (student_space*(#self.childinfo-1))
+	local pos_x_start = (size_student_view.width - all_student_width)/2
+
+	local function selectedEvent(sender,eventType)
+		local checkBox = sender
+		if eventType == ccui.CheckBoxEventType.selected then
+			if _G.cur_child_id == checkBox.uid then
+				return
+			end
+			_G.cur_child_id = checkBox.uid			
+			--local parent_view = checkBox:getParent()
+			local parent_view = checkBox.parentview
+			local tb_all_student = parent_view:getChildren()
+			for i=1,#tb_all_student do 
+				local checkBox_temp = uikits.child(tb_all_student[i],ui.student_checkbox)
+			end
+			self:init()				
+		end
+		if eventType == ccui.CheckBoxEventType.unselected then
+			if _G.cur_child_id == checkBox.uid	then
+				checkBox:setSelectedState(true)
+			end
+		end
+	end  
+
+	for i = 1,#self.childinfo do 
+		local cur_student_view = src_student_view:clone()
+		cur_student_view:setVisible(true)
+		student_view:addChild(cur_student_view)
+		cur_student_view:setPositionX(pos_x_start)
+		local student_name = uikits.child(cur_student_view,ui.student_name)
+		local checkBox = uikits.child(cur_student_view,ui.student_checkbox)
+		student_name:setString(self.childinfo[i].uname)
+		if _G.cur_child_id == self.childinfo[i].uid then
+			checkBox:setSelectedState(true)
+		else
+			checkBox:setSelectedState(false)
+		end
+		checkBox.uid = self.childinfo[i].uid
+		checkBox.parentview = student_view
+		checkBox:addEventListener(selectedEvent)  
+		pos_x_start = pos_x_start+size_per_student_view.width+student_space
+	end			
+end
+
 function WorkList:init_gui()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	
 	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
 	self:addChild(self._statistics_root)
 	self._statistics_root:setVisible(false)
+	if _G.hw_cur_child_id == 0 then
+		self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
+	else
+		self._setting_root = uikits.fromJson{file_9_16=ui.MORE2,file_3_4=ui.MORE2_3_4}
+		self:show_children()
+	end
 	
-	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	
 	local cs = uikits.child(self._setting,ui.MORE_SOUND)
