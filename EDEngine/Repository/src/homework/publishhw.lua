@@ -179,6 +179,7 @@ function Publishhw:format_publish_data()
 end
 
 function Publishhw:publish_homework()
+	local data_cur_sec = os.time()
 	local tb_data = os.date("*t",data_cur_sec )
 	local send_data_course = '&course='..self.tb_parent_view._selector[1].id
 	local send_url = new_homework_url..'title='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'..send_data_course
@@ -204,35 +205,14 @@ function Publishhw:publish_homework()
 										if result and result == 'True' then
 											local send_data = self:format_publish_data()
 											send_url = publish_homework_url..send_data
-											--print('send_url::'..send_url)
 											result = kits.http_get(send_url,login.cookie(),1)
 											loadbox:removeFromParent()
---[[											but_confirm:setEnabled(true)
-											but_confirm:setBright(true)
-											but_confirm:setTouchEnabled(true)	--]]
-											--print(result)
 											if result and type(result) == 'string' then
 												uikits.pushScene(Publishhwret.create(self.tb_parent_view))
 											else
 												kits.log('publish_homework  error')
 												return
 											end
---[[											local send_data = self:format_publish_data()
-											send_url = publish_homework_url..send_data
-											local ret = cache.request( send_url,function(b)
-														if b then
-															local result = cache.get_data( send_url )
-															if result == '' then
-																loadbox:removeFromParent()
-																uikits.pushScene(Publishhwret.create(self.tb_parent_view))
-															else
-																loadbox:removeFromParent()
-																kits.log('add_homework_item  error')
-																return
-															end
-														end
-													end)--]]
-													
 										else
 											loadbox:removeFromParent()
 											but_confirm:setEnabled(true)
@@ -271,58 +251,12 @@ function Publishhw:publish_homework()
 					end,messagebox.RETRY)	
 				end
 			end)
-			
---[[	local result = kits.http_get(send_url,login.cookie(),1)
-	if type(result)=='string' then
-		self._paperid = result
-	else
-		kits.log('new_homework  error')
-		return
-	end
-
-	local send_data_pid = '?pid='..self._paperid
-	local tb_para = self:format_item_list()
-	local send_data_para = '&para='..json.encode(tb_para)
-	
-	send_url = add_homework_item_url..send_data_pid..send_data_para
-	result = kits.http_get(send_url,login.cookie(),1)
-	if result == 'True' then
-		
-	else
-		kits.log('add_homework_item  error')
-		return
-	end
-	
-	local send_data = self:format_publish_data()
-	send_url = publish_homework_url..send_data
-	result = kits.http_get(send_url,login.cookie(),1)
-	if result == '' then
-		uikits.pushScene(Publishhwret.create(self.tb_parent_view))
-	else
-		kits.log('add_homework_item  error')
-		return
-	end--]]
---[[	local loadbox = loadingbox.open(self)
-	cache.request_json( send_url,function(t)
-			if t and type(t)=='table' then
-				
-			else
-				--既没有网络也没有缓冲
-				messagebox.open(self,function(e)
-					if e == messagebox.TRY then
-						self:init()
-					elseif e == messagebox.CLOSE then
-						uikits.popScene()
-					end
-				end,messagebox.RETRY)	
-			end
-			is_loading = false
-			loadbox:removeFromParent()
-		end,'NC')--]]
 end
 
 function Publishhw:publish_topics()
 	if self.tb_parent_view and self.tb_parent_view._subjective_data then
+		local data = self.tb_parent_view._subjective_data
+		local selector = self.tb_parent_view._selector	
 		local function upload(item) --upload attachments
 			local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
 			local local_file = kits.get_cache_path()..item.file
@@ -354,19 +288,105 @@ function Publishhw:publish_topics()
 				content = tostring(item.text),
 				content_fenxi = '',
 				diff = 60,
+				type = 93,
+				attach='',
+				answerCark='[{"item_type":93}]',
 			}
-			local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx"..kits.encode_url( t )
-			cache.request_json(url,function(t)
-				if t then
-					item.id = t
+			if selector then
+				for i=1,5 do
+					if selector[i] then
+						if i==1 then
+							t.course = selector[i].id
+						elseif i==2 then
+							t.version = selector[i].id
+						elseif i==3 then
+							t.vol = selector[i].id
+						elseif i==4 then
+							t.unit = selector[i].id
+						elseif i==5 then
+							t.section = selector[i].id
+						end
+					end
+				end
+			else
+				kits.log('WARNING : Publishhw:publish_topics selector = nil')
+			end
+			local url = "http://new.www.lejiaolexue.com/paper/handler/AddItem.ashx?"..kits.encode_url( t )
+			cache.request(url,function(b)
+				if b then
+					item.id = cache.get_data(url)
+					if item.id then
+						kits.log('Add success :'..tostring(item.id))
+					else
+						item.err = 'fail'
+						kits.log("ERROR : Publishhw:add_topics_item failed 2")
+					end
 				else
 					item.err = 'fail'
-					kits.log("ERROR : Publishhw:add_topics_item failed")
+					kits.log("ERROR : Publishhw:add_topics_item failed 1")				
 				end
 			end)
 		end
-		
-		local data = self.tb_parent_view._subjective_data
+		local create_paper_isdone = false
+		local paper_id = nil
+		local function create_paper()
+			local data_cur_sec = os.time()
+			local tb_data = os.date("*t",data_cur_sec )
+			local send_data_course = '&course='..selector[1].id
+			local send_url = new_homework_url..'title='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..selector[1].name..'作业'..send_data_course
+			local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
+			but_confirm:setEnabled(false)
+			but_confirm:setBright(false)
+			but_confirm:setTouchEnabled(false)	
+			local loadbox = loadingbox.open( self )
+			cache.request( send_url,function(b)
+				loadbox:removeFromParent()
+				if b then
+					local result = cache.get_data( send_url )
+					if result and type(result)=='string' then
+						create_paper_isdone = 1
+						paper_id = result
+					else
+						create_paper_isdone = 0
+					end
+				else
+					create_paper_isdone = 0
+				end
+			end)
+		end
+		local publish_paper_isdone = false
+		local function publish_paper()
+			self._paperid = paper_id
+			local send_data_pid = '?pid='..self._paperid
+			local tb_para = self:format_item_list()
+			local send_data_para = '&para='..json.encode(tb_para)
+			send_url = add_homework_item_url..send_data_pid..send_data_para
+			local ret = cache.request( send_url,function(b)
+					if b then
+						local result = cache.get_data( send_url )
+						if result and result == 'True' then
+							publish_paper_isdone = 1
+							local send_data = self:format_publish_data()
+							send_url = publish_homework_url..send_data
+							result = kits.http_get(send_url,login.cookie(),1)
+							loadbox:removeFromParent()
+							if result and type(result) == 'string' then
+								--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+							else
+								publish_paper_isdone = 0
+								kits.log('ERROR : publish_paper  error2')
+								return
+							end
+						else
+							publish_paper_isdone = 0
+							kits.log('ERROR : publish_paper  error1')
+							return
+						end						
+					else
+						
+					end
+				end)
+		end
 		local loadbox = loadingbox.open(self)
 		uikits.sequence_call{
 			function(state) --upload all attachments
@@ -413,6 +433,21 @@ function Publishhw:publish_topics()
 					return s
 				end
 			end,
+			function(state) --create paper
+				if state==uikits.RUN then
+					create_paper()
+				elseif state==uikits.STATE then
+					if create_paper_isdone then
+						if create_paper_isdone==0 then
+							return uikits.FAIL
+						else
+							return uikits.OK
+						end
+					else
+						return uikits.RUN
+					end
+				end
+			end,
 			event=function(self,s)
 				if s==uikits.BEGIN then
 				elseif s==uikits.END then
@@ -454,8 +489,8 @@ function Publishhw:init()
 		function(sender,eventType)
 		print('1111111')
 		--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
-		self:publish_homework()
-		--self:publish_topics()
+		--self:publish_homework()
+		self:publish_topics()
 	end,"click")	
 	banji_sel_num = 0
 	self:SetButtonEnabled(but_confirm)

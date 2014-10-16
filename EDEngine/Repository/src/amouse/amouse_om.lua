@@ -83,7 +83,7 @@ end
 --上传玩家积分
 function AMouseScene:upload_rank( stage,scor )
 	local text = kits.encode_url{ app_id = 1004,game_id='amouse', stage_id = stage,score = scor,rid = 3,chk = '21342342424323421345235' }
-	local url = s_upload_url..text
+	local url = s_upload_url..'?'..text
 	kits.log('request '..url)
 	kits.log('score='..tostring(scor)..' stage='..tostring(stage))
 	cache.request( url,function(b)

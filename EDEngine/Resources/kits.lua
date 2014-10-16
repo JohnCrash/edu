@@ -126,7 +126,7 @@ local function encode_url( p )
 			if s then
 				s = s..'&'..tostring(k)..'='..tostring(v)
 			else
-				s = '?'..tostring(k)..'='..tostring(v)
+				s = tostring(k)..'='..tostring(v)
 			end
 		end
 		return s
