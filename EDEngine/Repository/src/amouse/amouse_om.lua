@@ -82,6 +82,22 @@ end
 --上传玩家积分
 function AMouseScene:upload_rank( stage,scor )
 	local text = kits.encode_url{ app_id = 1004,game_id='amouse', stage_id = stage,score = scor,rid = 3,chk = '21342342424323421345235' }
+	local url = s_upload_url..text
+	kits.log('request '..url)
+	kits.log('score='..tostring(scor)..' stage='..tostring(stage))
+	cache.request( url,function(b)
+			if b then
+				local reslut = cache.get_data(url)
+				if reslut and type(reslut) == 'string' and string.sub(reslut,1,1) == '{' then
+					kits.log('upload : '..tostring(reslut) )
+					local ret = json.decode(reslut)
+				else
+					kits.log('upload error:')
+					kits.log( tostring(reslut) )
+				end				
+			end
+		end)
+--[[	
 	local reslut = kits.http_post( s_upload_url,text,cookie,10 )
 	if reslut and type(reslut) == 'string' and string.sub(reslut,1,1) == '{' then
 		kits.log('upload : '..tostring(reslut) )
@@ -90,6 +106,7 @@ function AMouseScene:upload_rank( stage,scor )
 		kits.log('upload error:')
 		kits.log( reslut )
 	end
+--]]	
 end
 
 --产生一个xml文档报告游戏体验结果
@@ -368,7 +385,7 @@ function AMouseScene:get_zone_id()
 					self:get_zone_id()
 				end
 			end
-		end)
+		end)	
 end
 
 --访问服务器下载top rank并且设置
@@ -376,7 +393,7 @@ function AMouseScene:set_top_list( url )
 	local my_url = url.."&zone_id="..tostring(self._zoneid)
 	--local result = kits.http_get( my_url,cookie,10 ) --time out 1s
 	cache.request(my_url,function(b)
-		local result = cache.get_data(url)
+		local result = cache.get_data(my_url)
 		if result and type(result)== 'string' and string.sub(result,1,1) == '{' then
 			local tops = json.decode(result)
 			local i = 1
@@ -506,9 +523,9 @@ function AMouseScene:close_Dialog()
 	if self._uiLayer then
 		local layer = self._uiLayer
 		layer:setVisible(false)
-		uikits.delay_call(self,function() 
+		uikits.delay_call(nil,function() 
 			layer:removeFromParent()
-			layer = nil end,0)
+			layer = nil end,0.01)
 		--self._uiLayer:removeFromParent()
 		self._widget = nil
 		self._uiLayer = nil
@@ -1120,8 +1137,8 @@ end
 function AMouseScene:init_data( i )
 	i = i or 1
 	local filename = 'res/amouse/data/'..tostring(i)..'.xml'
-	filename = cc.FileUtils:getInstance():fullPathForFilename(filename)
-	local promble_xml = kits.read_file(filename)
+	--filename = cc.FileUtils:getInstance():fullPathForFilename(filename)
+	local promble_xml = kits.read_local_file(filename)
 	self._words = {} --全部词语
 	self._time_limit = 60 --时限
 	self._word_num = 40 --词数
@@ -1144,7 +1161,7 @@ function AMouseScene:init_data( i )
 			end
 	  end
 	else
-		kits.log("Can\'t open resource file : res/amouse/data/.xml")
+		kits.log("Can\'t open resource file : "..tostring(filename))
 	end
 	--一次加载全部的词，然后随机挑出_word_num个词
 	if self._word_num <= #self._words then
@@ -1371,6 +1388,7 @@ function AMouseScene:init()
 	if not self._ss then
 		if not self._zoneid then
 			self:get_zone_id()
+			--self:upload_rank(1,3889)
 		end
 		self._ss = cc.Director:getInstance():getVisibleSize()
 		local radio = self._ss.width/self._ss.height
