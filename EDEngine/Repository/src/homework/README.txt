@@ -955,6 +955,28 @@ http://new.www.lejiaolexue.com/paper/handler/GetOfficialItem.ashx?
 
 获取班级接口，125907是用户的user_id，调用时换成相应的值即可
 http://api.lejiaolexue.com/rest/user/125907/zone/class
+返回
+{
+    "msg": "成功",
+    "result": 0,
+    "zone": [
+        {
+            "admit_time": 1376930755,
+            "apply_time": 1376930755,
+            "edu_role": 1,
+            "is_primary": 1,
+            "mode_born": 1,
+            "mode_form": 201,
+            "parent_zone_id": 126453,
+            "role": 0,
+            "status": 200,
+            "update_time": 1376915618,
+            "user_id": 125907,
+            "zone_id": 141442,
+            "zone_name": "四年级三班"
+        }
+    ]
+}
 
 学生统计
 http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx
@@ -1009,3 +1031,34 @@ http://new.www.lejiaolexue.com/paper/handler/GetStatisticsTeacher.ashx
 老师端统计
 http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx
 学生端统计
+
+题型映射
+http://api.lejiaolexue.com/meta/itemtypedesc.ashx
+可能返回
+[
+    {
+        "answer": 3,
+        "answer_mime": "",
+        "answer_oper": "\r\n </oper>\r\n </oper>\r\n </oper>\r\n</root>",
+        "exclusive": 0,
+        "interact_type": 4,
+        "item_type": 1,
+        "prop1": 20,
+        "prop2": 0,
+        "prop_com": 3,
+        "tag": 2
+    },
+    {
+        "answer": 1,
+        "answer_mime": "",
+        "answer_oper": "\r\n </oper>\r\n </oper>\r\n </oper>\r\n</root>",
+        "exclusive": 0,
+        "interact_type": 1,
+        "item_type": 2,
+        "prop1": 20,
+        "prop2": 0,
+        "prop_com": 3,
+        "tag": 2
+    },
+	...
+]
