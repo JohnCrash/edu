@@ -119,7 +119,6 @@ function WorkList:init_data_by_cache()
 	else
 		result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
 	end
-	print('result::::'..result)
 	if result then
 		self._data = json.decode( result )
 		self:init_data_list()
@@ -154,7 +153,6 @@ function WorkList:add_page_from_cache( idx,last )
 	end
 	--local url = worklist_url..'?p='..idx
 	local result = cache.get_data( url )
-	print('result::'..result)
 	local need_continue = false
 	if result then
 		local data = kits.decode_json( result )

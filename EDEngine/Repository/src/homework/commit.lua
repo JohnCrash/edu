@@ -10,7 +10,6 @@ local StudentWatch = require "homework/studentwatch"
 local cache = require "cache"
 local login = require "login"
 local messagebox = require "messagebox"
---[[
 local ui = {
 	FILE = 'homework/commit.json',
 	FILE_3_4 = 'homework/commit43.json',
@@ -30,7 +29,7 @@ local ui = {
 	WORKFLOW2_COMPLETE = 'subjective_item/completed_subjective',
 	COMMIT = 'submit',
 	OBJECTIVE_NUM = 'objective_item/objective_no',
-	SUBJECTIVE_NUM = 'objective_item/subjective_no',
+	SUBJECTIVE_NUM = 'subjective_item/subjective_no',
 	WHITE_STAR = 'objective_item/white_star_',
 	RED_STAR = 'objective_item/red_star_',
 	WHITE_STAR2 = 'subjective_item/white_star_',
@@ -38,35 +37,6 @@ local ui = {
 	TYPE_TEXT = 'account_information/lesson_text',
 	TIMELABEL = 'white/text',
 }
---]]
-local ui = {
-	FILE = 'homework/commit.json',
-	FILE_3_4 = 'homework/commit43.json',
-	BACK = 'white/back',
-	CAPTION = 'white/lesson_name',
-	END_DATE = 'white/time_over',
-	LIST = 'top_view',
-	NAME = 'name',
-	PHOTO = 'student_logo_1',
-	TIME = 'time_student',
-	NUMBER = 'number_1',
-	ITEM = 'top_view/top_1',
-	TOPICS = 'red_case',
-	WORKFLOW = 'objective_item/start_objective',
-	WORKFLOW_COMPLETE = 'objective_item/completed_objective',
-	WORKFLOW2 = 'subjective_item/start_subjective',
-	WORKFLOW2_COMPLETE = 'subjective_item/completed_subjective',
-	COMMIT = 'submit',
-	OBJECTIVE_NUM = 'objective_item/objective_no',
-	SUBJECTIVE_NUM = 'objective_item/subjective_no',
-	WHITE_STAR = 'objective_item/white_star_',
-	RED_STAR = 'objective_item/red_star_',
-	WHITE_STAR2 = 'subjective_item/white_star_',
-	RED_STAR2 = 'subjective_item/red_star_',	
-	TYPE_TEXT = 'account_information/lesson_text',
-	TIMELABEL = 'white/text',
-}
-
 --[[
 	作业提交
 --]]
@@ -342,6 +312,7 @@ function WorkCommit:init_commit_page()
 			local end_time = self._args.finish_time_unix
 			local dt = self._args.finish_time_unix - os.time()
 			if dt > 0 then
+				end_date:setVisible(true)
 				end_date:setString( kits.time_to_string_simple(dt))
 				local function timer_func()
 					dt = end_time - os.time()
@@ -365,12 +336,23 @@ function WorkCommit:init_commit_page()
 			end
 		end
 		local obj_num = uikits.child(self._root,ui.OBJECTIVE_NUM)
-		if self._args.cnt_item then
+		if obj_num and self._args.cnt_item then
 			obj_num:setString(tostring(self._args.cnt_item))
+			self:setPercent2(0)
+			if self._args.cnt_item == 0 then
+				local button = uikits.child(self._root,ui.WORKFLOW)
+				button:setHighlighted(false)
+				button:setBright(false)
+			end
 		end
 		local subj_num = uikits.child(self._root,ui.SUBJECTIVE_NUM)
-		if self._args.subjective_num then
+		if subj_num and self._args.subjective_num then
 			subj_num:setString(tostring(self._args.subjective_num))
+			if self._args.subjective_num == 0 then
+				local button = uikits.child(self._root,ui.WORKFLOW2)
+				button:setHighlighted(false)
+				button:setBright(false)
+			end			
 		end
 		local type_txt = uikits.child(self._root,ui.TYPE_TEXT)
 		if type_txt and self._args.course_name then
@@ -436,7 +418,14 @@ function WorkCommit:init()
 	end						
 	--加载作业,然后计算出客观题和主观题数量
 	--做作业时也使用该数据.
-	
+	local end_date = uikits.child(self._root,ui.END_DATE)
+	if end_date then
+		end_date:setVisible(false)
+	end
+	local commit = uikits.child(self._root,ui.COMMIT)
+	if commit then
+		commit:setVisible(false)
+	end
 	local url_topics
 	if self._args.exam_id then
 		--取作业
@@ -463,6 +452,7 @@ function WorkCommit:init()
 					self._args.url_topics = url_topics
 					--统计能做的客观题数量
 					self._args.cnt_item = self:calc_objective_num(t)
+					self._args.subjective_num = self:calc_subjective_num(t)
 					self:init_user_type()
 				else
 					--既没有网络也没有缓冲
@@ -503,6 +493,24 @@ function WorkCommit:calc_objective_num(t)
 	if ds then
 		for i,v in pairs(ds) do
 			if v.item_type and topics.types[v.item_type] then
+				count = count + 1
+			end
+		end
+	end
+	return count
+end
+
+function WorkCommit:calc_subjective_num(t)
+	local ds
+	if t.item and type(t.item)=='table' then
+		ds = t.item
+	else
+		ds = t
+	end
+	local count = 0
+	if ds then
+		for i,v in pairs(ds) do
+			if v.item_type == 93 then
 				count = count + 1
 			end
 		end

@@ -117,7 +117,7 @@ local function encode_str( s )
 		end
 		table.insert(t,hex)
 	end
-	return table.concat(t,'%')
+	return '%'..table.concat(t,'%')
 end
 local function encode_url( p )
 	if p and type(p)=='table' then

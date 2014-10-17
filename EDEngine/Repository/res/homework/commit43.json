@@ -1995,7 +1995,7 @@
               "touchAble": true,
               "useMergedTexture": false,
               "visible": true,
-              "width": 52,
+              "width": 26,
               "x": 338,
               "y": 200,
               "areaHeight": 0,
@@ -2004,7 +2004,7 @@
               "fontName": "微软雅黑",
               "fontSize": 44,
               "hAlignment": 0,
-              "text": "12",
+              "text": "0",
               "touchScaleEnable": false,
               "vAlignment": 0
             }
@@ -2876,7 +2876,7 @@
               "fontName": "微软雅黑",
               "fontSize": 44,
               "hAlignment": 0,
-              "text": "1",
+              "text": "0",
               "touchScaleEnable": false,
               "vAlignment": 0
             }

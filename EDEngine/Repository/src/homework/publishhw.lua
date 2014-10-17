@@ -293,12 +293,16 @@ function Publishhw:publish_topics()
 		end
 		local function additem(item) --add topics item
 			kits.log('>>>ADD ATTACHMENTS')
+			local att = {}
+			for i,v in pairs(item.items) do
+				table.insert(att,{src=v.mini_src,name=v.mini_src})
+			end
 			local t = {
-				content = tostring(item.text),
+				content = kits.encode_str(tostring(item.text)),
 				content_fenxi = '',
 				diff = 60,
 				type = 93,
-				attach='',
+				attach=json.encode(att),
 				answerCark='[{"item_type":93}]',
 			}
 			if selector then
@@ -362,25 +366,29 @@ function Publishhw:publish_topics()
 		local add_paper_item_isdone = uikits.RUN
 		local function add_paper_item() --add_item
 			kits.log('>>>ADD ITEM')
-			self._paperid = paper_id
-			local send_data_pid = '?pid='..self._paperid
-			local tb_para = self:format_item_list()
-			local send_data_para = '&para='..json.encode(tb_para)
-			local send_url = add_homework_item_url..send_data_pid..send_data_para
-			cache.request( send_url,function(b)
-					if b then
-						local result = cache.get_data( send_url )
-						if result then
-							add_paper_item_isdone = uikits.OK
+			if self.tb_parent_view._confirm_item and #self.tb_parent_view._confirm_item>0 then
+				self._paperid = paper_id
+				local send_data_pid = '?pid='..self._paperid
+				local tb_para = self:format_item_list()
+				local send_data_para = '&para='..json.encode(tb_para)
+				local send_url = add_homework_item_url..send_data_pid..send_data_para
+				cache.request( send_url,function(b)
+						if b then
+							local result = cache.get_data( send_url )
+							if result then
+								add_paper_item_isdone = uikits.OK
+							else
+								add_paper_item_isdone = uikits.FAIL
+								kits.log('ERROR : add_paper_item  error1')
+							end						
 						else
 							add_paper_item_isdone = uikits.FAIL
-							kits.log('ERROR : add_paper_item  error1')
-						end						
-					else
-						add_paper_item_isdone = uikits.FAIL
-						kits.log('ERROR : add_paper_item error0')
-					end
-				end)
+							kits.log('ERROR : add_paper_item error0')
+						end
+					end)
+			else
+				add_paper_item_isdone = uikits.OK
+			end
 		end
 		local add_paper_custom_item_isdone = uikits.RUN
 		local function add_paper_custom_item() --add custom item
@@ -396,6 +404,8 @@ function Publishhw:publish_topics()
 				per_item_info.sort = 100
 				tb_para[#tb_para+1] = per_item_info
 			end
+			self._item_count = self._item_count or 0
+			self._item_count = self._item_count  + #tb_para
 			local send_data_para = '&para='..json.encode(tb_para)
 			local send_url = add_homework_item_url..send_data_pid..send_data_para
 			cache.request( send_url,function(b)
