@@ -121,9 +121,13 @@ local function encode_str( s )
 end
 local function encode_url( p )
 	if p and type(p)=='table' then
-		local s = '&'
+		local s
 		for k,v in pairs(p) do
-			s = s..tostring(k)..'='..encode_str(tostring(v))
+			if s then
+				s = s..'&'..tostring(k)..'='..tostring(v)
+			else
+				s = tostring(k)..'='..tostring(v)
+			end
 		end
 		return s
 	elseif p and type(p)=='string' then

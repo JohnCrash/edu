@@ -194,7 +194,7 @@ function AppEntry:init()
 		x=320*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale
 	}
-	debugip:setText("192.168.2.109")
+	debugip:setText("192.168.2.182")
 	local isopen = false
 	local debugbutton = uikits.button{caption='调试...',x=320*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,

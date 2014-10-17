@@ -24,7 +24,11 @@ std::string getLjShellDirectory(LJDirectory edd)
 	case Download_DIRECTORY:
 		return g_DirMng.GetDownloadDir();
 	case App_DIRECTORY:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+		return FileUtils::getInstance()->getWritablePath();
+#else
 		return g_DirMng.GetAppDir();
+#endif
 	case AppData_DIRECTORY:
 		return g_DirMng.GetAppDataDir();
 	case AppTmp_DIRECTORY:
