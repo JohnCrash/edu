@@ -121,6 +121,9 @@ local function request_nc( url,func,filename ) --网络优先，然后缓存
 							if obj.state == 'FAILED' then
 								kits.log('INFO : reason: obj.state = FAILED '..tostring(get_name(url)))
 								kits.log('INFO : reason: errcode='..tostring(obj.errcode)..' errmsg='..tostring(obj.errmsg) )
+								kits.log('=====obj.data=====')
+								kits.log(tostring(obj.data))
+								kits.log('==================')
 							else
 								kits.log('	reason: is_done return false : '..tostring(get_name(url)))
 							end

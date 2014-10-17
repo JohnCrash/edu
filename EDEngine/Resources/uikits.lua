@@ -624,7 +624,7 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 	if not target then
 		obj = cc.Director:getInstance() --如果没有对象，使用全局对象
 	end
-	if obj and func and delay then
+	if obj and func then
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
 		 local function delay_call_func()
@@ -632,7 +632,7 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 			schedulerID = nil		
 			func(param1,param2,param3)
 		end
-		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay,false)	
+		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)	
 	end
 end
 
@@ -658,7 +658,6 @@ local function sequence_call( t )
 		 	seqs._scheduler:unscheduleScriptEntry(seqs._schedulerID)	
 			seqs._schedulerID = nil
 		 end
-		 seqs.close = close_func
 		 local ispause
 		 seqs.pause=function()
 			ispause = true
@@ -674,6 +673,10 @@ local function sequence_call( t )
 			elseif s == FAIL then
 				close_func()
 			end
+		 end
+		 seqs.close=function()
+			event_func(END)
+			close_func()
 		 end
 		 local function sequence_call_func()
 			if ispause then return end

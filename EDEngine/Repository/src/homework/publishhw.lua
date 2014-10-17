@@ -8,6 +8,8 @@ local loadingbox = require "loadingbox"
 local TeacherBatch = require "homework/teacherbatch"
 local topics = require "homework/topics"
 local Publishhwret = require "homework/publishhwret"
+local messagebox = require "messagebox"
+
 local ui = {
 	FILE = 'homework/laoshizuoye/fabu.json',
 	FILE_3_4 = 'homework/laoshizuoye/fabu43.json',
@@ -138,7 +140,7 @@ function Publishhw:format_publish_data()
 	local data_cur_begain = data_cur_sec - tb_data.hour*60*60 - tb_data.min*60 - tb_data.sec
 	local data_finish = data_cur_begain + finish_days[day_index_seled]*24*60*60 + 6*60*60
 	local tb_data_finish = os.date("*t",data_finish )
-	ret = '?exam_name='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'
+	ret = '?exam_name='..tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..self.tb_parent_view._selector[1].name..'作业'
 	ret = ret..'&paper_id='..self._paperid
 	ret = ret..'&course='..self.tb_parent_view._selector[1].id
 	if self.tb_parent_view._selector[2] then
@@ -254,10 +256,16 @@ function Publishhw:publish_homework()
 end
 
 function Publishhw:publish_topics()
-	if self.tb_parent_view and self.tb_parent_view._subjective_data then
+	if self.tb_parent_view then
+		local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
+		but_confirm:setEnabled(false)
+		but_confirm:setBright(false)
+		but_confirm:setTouchEnabled(false)
+		local custom_items = {}
 		local data = self.tb_parent_view._subjective_data
 		local selector = self.tb_parent_view._selector	
 		local function upload(item) --upload attachments
+			kits.log('>>>UPLOAD')
 			local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
 			local local_file = kits.get_cache_path()..item.file
 			local data = kits.read_file( local_file )
@@ -284,6 +292,7 @@ function Publishhw:publish_topics()
 			end
 		end
 		local function additem(item) --add topics item
+			kits.log('>>>ADD ATTACHMENTS')
 			local t = {
 				content = tostring(item.text),
 				content_fenxi = '',
@@ -317,6 +326,7 @@ function Publishhw:publish_topics()
 					item.id = cache.get_data(url)
 					if item.id then
 						kits.log('Add success :'..tostring(item.id))
+						table.insert(custom_items,{item_id=item.id,item_type=93})
 					else
 						item.err = 'fail'
 						kits.log("ERROR : Publishhw:add_topics_item failed 2")
@@ -327,89 +337,132 @@ function Publishhw:publish_topics()
 				end
 			end)
 		end
-		local create_paper_isdone = false
+		local create_paper_isdone = uikits.RUN
 		local paper_id = nil
 		local function create_paper()
+			kits.log('>>>CREATE PAPER')
 			local data_cur_sec = os.time()
 			local tb_data = os.date("*t",data_cur_sec )
 			local send_data_course = '&course='..selector[1].id
 			local send_url = new_homework_url..'title='.. tb_data.year..'年'..tb_data.month..'月'..tb_data.day..'日'..selector[1].name..'作业'..send_data_course
-			local but_confirm = uikits.child(self._widget,ui.BUTTON_CONFIRM)
-			but_confirm:setEnabled(false)
-			but_confirm:setBright(false)
-			but_confirm:setTouchEnabled(false)	
-			local loadbox = loadingbox.open( self )
 			cache.request( send_url,function(b)
-				loadbox:removeFromParent()
 				if b then
 					local result = cache.get_data( send_url )
 					if result and type(result)=='string' then
-						create_paper_isdone = 1
+						create_paper_isdone = uikits.OK
 						paper_id = result
 					else
-						create_paper_isdone = 0
+						create_paper_isdone = uikits.FAIL
 					end
 				else
-					create_paper_isdone = 0
+					create_paper_isdone = uikits.FAIL
 				end
 			end)
 		end
-		local publish_paper_isdone = false
-		local function publish_paper()
+		local add_paper_item_isdone = uikits.RUN
+		local function add_paper_item() --add_item
+			kits.log('>>>ADD ITEM')
 			self._paperid = paper_id
 			local send_data_pid = '?pid='..self._paperid
 			local tb_para = self:format_item_list()
 			local send_data_para = '&para='..json.encode(tb_para)
-			send_url = add_homework_item_url..send_data_pid..send_data_para
-			local ret = cache.request( send_url,function(b)
+			local send_url = add_homework_item_url..send_data_pid..send_data_para
+			cache.request( send_url,function(b)
 					if b then
 						local result = cache.get_data( send_url )
-						if result and result == 'True' then
-							publish_paper_isdone = 1
-							local send_data = self:format_publish_data()
-							send_url = publish_homework_url..send_data
-							result = kits.http_get(send_url,login.cookie(),1)
-							loadbox:removeFromParent()
-							if result and type(result) == 'string' then
-								--uikits.pushScene(Publishhwret.create(self.tb_parent_view))
-							else
-								publish_paper_isdone = 0
-								kits.log('ERROR : publish_paper  error2')
-								return
-							end
+						if result then
+							add_paper_item_isdone = uikits.OK
 						else
-							publish_paper_isdone = 0
-							kits.log('ERROR : publish_paper  error1')
-							return
+							add_paper_item_isdone = uikits.FAIL
+							kits.log('ERROR : add_paper_item  error1')
 						end						
 					else
-						
+						add_paper_item_isdone = uikits.FAIL
+						kits.log('ERROR : add_paper_item error0')
 					end
 				end)
 		end
+		local add_paper_custom_item_isdone = uikits.RUN
+		local function add_paper_custom_item() --add custom item
+			kits.log('>>>ADD CUSTOM ITEM')
+			self._paperid = paper_id
+			local send_data_pid = '?pid='..self._paperid
+			local tb_para = {}
+			for i,v in pairs(custom_items) do
+				local per_item_info = {}
+				per_item_info.item_id = v.item_id
+				per_item_info.item_type = v.item_type
+				per_item_info.origin = 2
+				per_item_info.sort = 100
+				tb_para[#tb_para+1] = per_item_info
+			end
+			local send_data_para = '&para='..json.encode(tb_para)
+			local send_url = add_homework_item_url..send_data_pid..send_data_para
+			cache.request( send_url,function(b)
+					if b then
+						local result = cache.get_data( send_url )
+						if result then
+							add_paper_custom_item_isdone = uikits.OK
+						else
+							add_paper_custom_item_isdone = uikits.FAIL
+							kits.log('ERROR : add_paper_item  error1')
+						end						
+					else
+						add_paper_custom_item_isdone = uikits.FAIL
+						kits.log('ERROR : add_paper_item error0')
+					end
+				end)		
+		end
+		local publish_paper_isdone = uikits.RUN
+		local function publish_paper()
+			kits.log('>>>PUBLISH')
+			local send_data = self:format_publish_data()
+			local send_url = kits.encode_space(publish_homework_url..send_data)
+			cache.request( send_url,function(b)
+						if b then
+							local result = cache.get_data( send_url )
+							if result then
+								publish_paper_isdone = uikits.OK
+								kits.log('>>>COMPLETE')
+								uikits.pushScene(Publishhwret.create(self.tb_parent_view))
+							else
+								publish_paper_isdone = uikits.FAIL
+								kits.log('ERROR : publish_paper error1')
+							end
+						else
+							publish_paper_isdone = uikits.FAIL
+							kits.log('ERROR : publish_paper error0')
+						end
+					end)
+		end
+		local wnd = self
 		local loadbox = loadingbox.open(self)
 		uikits.sequence_call{
 			function(state) --upload all attachments
 				if state==uikits.RUN then
-					for i,v in pairs(data) do
-						if v.items then
-							for k,item in pairs(v.items) do
-								upload( item )
+					if data then
+						for i,v in pairs(data) do
+							if v.items then
+								for k,item in pairs(v.items) do
+									upload( item )
+								end
 							end
 						end
 					end
 					return true
 				elseif state==uikits.STATE then
 					local s = uikits.OK
-					for i,v in pairs(data) do
-						if v.items then
-							for k,item in pairs(v.items) do
-								if item.err then
-									return uikits.FAIL
-								elseif not item.src then
-									s = uikits.RUN
-								end
-							end						
+					if data then
+						for i,v in pairs(data) do
+							if v.items then
+								for k,item in pairs(v.items) do
+									if item.err then
+										return uikits.FAIL
+									elseif not item.src then
+										s = uikits.RUN
+									end
+								end						
+							end
 						end
 					end
 					return s
@@ -417,17 +470,21 @@ function Publishhw:publish_topics()
 			end,
 			function(state) --add topics
 				if state==uikits.RUN then
-					for i,v in pairs(data) do
-						additem(v)
+					if data then
+						for i,v in pairs(data) do
+							additem(v)
+						end
 					end
 					return true					
 				elseif state==uikits.STATE then
 					local s=uikits.OK
-					for i,v in pairs(data) do
-						if v.err then
-							return uikits.FAIL
-						elseif not v.id then
-							s=uikits.RUN
+					if data then
+						for i,v in pairs(data) do
+							if v.err then
+								return uikits.FAIL
+							elseif not v.id then
+								s=uikits.RUN
+							end
 						end
 					end
 					return s
@@ -436,24 +493,54 @@ function Publishhw:publish_topics()
 			function(state) --create paper
 				if state==uikits.RUN then
 					create_paper()
+					return true
 				elseif state==uikits.STATE then
-					if create_paper_isdone then
-						if create_paper_isdone==0 then
-							return uikits.FAIL
-						else
-							return uikits.OK
-						end
-					else
-						return uikits.RUN
-					end
+					return create_paper_isdone
 				end
+			end,
+			function(state) --add paper item
+				if state==uikits.RUN then
+					add_paper_item()
+					return true
+				elseif state==uikits.STATE then
+					return add_paper_item_isdone
+				end			
+			end,
+			function(state) --add custom item
+				if state==uikits.RUN then
+					add_paper_custom_item()
+					return true
+				elseif state==uikits.STATE then
+					return add_paper_custom_item_isdone
+				end						
+			end,
+			function(state) --publish paper
+				if state==uikits.RUN then
+					publish_paper()
+					return true
+				elseif state==uikits.STATE then
+					return publish_paper_isdone
+				end			
 			end,
 			event=function(self,s)
 				if s==uikits.BEGIN then
+					kits.log('BEGIN')
 				elseif s==uikits.END then
+					kits.log('END')
 					loadbox:removeFromParent()
 				elseif s==uikits.NEXT then
+					kits.log('NEXT STEP')
 				elseif s==uikits.FAIL then
+					kits.log('FAIL')
+					self:pause()
+					messagebox.open(wnd,function(e)
+							if e == messagebox.TRY then
+								self:continue()
+							elseif e == messagebox.CLOSE then
+								self:close()
+								uikits.delay_call(nil,function()uikits.popScene() end)
+							end
+						end,messagebox.RETRY)
 				end
 				return true
 			end
