@@ -113,7 +113,13 @@ function WorkList.create()
 end
 
 function WorkList:init_data_by_cache()
-	local result = kits.read_cache(cache.get_name(worklist_url))
+	local result
+	if _G.hw_cur_child_id == 0 then
+		result = kits.read_cache(cache.get_name(worklist_url))
+	else
+		result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
+	end
+	print('result::::'..result)
 	if result then
 		self._data = json.decode( result )
 		self:init_data_list()
@@ -123,7 +129,13 @@ function WorkList:init_data_by_cache()
 end
 
 function WorkList:get_page( i,func )
-	local url = worklist_url..'?p='..i
+	local url
+	if _G.hw_cur_child_id == 0 then
+		url = worklist_url..'?p='..i
+	else
+		url = worklist_url..'?p='..i..'&uid='.._G.hw_cur_child_id
+		--result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
+	end
 	--先尝试下载
 	cache.request(url,
 		function(b)
@@ -134,8 +146,15 @@ end
 local WEEK = 0--7*24*3600
 
 function WorkList:add_page_from_cache( idx,last )
-	local url = worklist_url..'?p='..idx
+	local url
+	if _G.hw_cur_child_id == 0 then
+		url = worklist_url..'?p='..idx
+	else
+		url = worklist_url..'?p='..idx..'&uid='.._G.hw_cur_child_id
+	end
+	--local url = worklist_url..'?p='..idx
 	local result = cache.get_data( url )
+	print('result::'..result)
 	local need_continue = false
 	if result then
 		local data = kits.decode_json( result )
@@ -291,12 +310,19 @@ end
 
 function WorkList:init_data()
 	local loadbox = loadingbox.open( self )
-	cache.request( worklist_url,
+	local send_url
+	if _G.hw_cur_child_id == 0 then
+		send_url = worklist_url
+	else
+		send_url = worklist_url..'?uid='.._G.hw_cur_child_id
+	end	
+	cache.request( send_url,
 		function(b)
 			if b then
+				print("11111111")
 				self:init_data_by_cache()
 			else
-				kits.log('Connect faild : '..worklist_url )
+				kits.log('Connect faild : '..send_url )
 			end
 		end)
 end
@@ -508,7 +534,13 @@ function WorkList:init_statistics()
 	self:clear_statistics()
 	local loadbox = loadingbox.open(self)
 	local url = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx'
-	cache.request_json( url,function(t)
+	local send_url
+	if _G.hw_cur_child_id == 0 then
+		send_url = url
+	else
+		send_url = url..'?uid='.._G.hw_cur_child_id
+	end		
+	cache.request_json( send_url,function(t)
 		if not loadbox:removeFromParent() then
 			return
 		end
