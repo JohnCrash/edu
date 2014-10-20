@@ -1,6 +1,8 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local json = require "json-c"
+local loadingbox = require "loadingbox"
+local cache = require "cache"
 
 local ui = {
 	FILE = 'homework/subjective.json',
@@ -37,12 +39,12 @@ local ui = {
 local Subjective = class("Subjective")
 Subjective.__index = Subjective
 
-function Subjective.create()
+function Subjective.create( args )
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),Subjective)
 	
 	scene:addChild(layer)
-	
+	layer._args = args
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -55,14 +57,22 @@ function Subjective.create()
 end
 
 function Subjective:clone_item( state )
+	local item
 	if state == ui.STATE_CURRENT then
-		return self._item_current:clone()
+		item = self._item_current:clone()
+		item._isclone = true
+		return item
 	elseif state == ui.STATE_FINISHED then
-		return self._item_finished:clone()
+		item = self._item_finished:clone()
+		item._isclone = true
+		return item
 	elseif state == ui.STATE_UNFINISHED then
-		return self._item_unfinished:clone()
+		item = self._item_unfinished:clone()
+		item._isclone = true
+		return item
 	else
 		kits.log( '	ERROR: clone_item state = '..tostring(state) )
+		return self._item_unfinished:clone()
 	end
 end
 
@@ -152,25 +162,14 @@ end
 function Subjective:relayout()
 	if self._scrollview and #self._list > 0 then
 		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
-		
 		for i,v in ipairs(self._list) do
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
 		end
-		
-		local b = true
-		for i,v in ipairs(self._data) do
-			if v.state == ui.STATE_UNFINISHED then
-				b = false
-			end
-		end
-		if b then
-			self._next_button:setVisible(false)
-			self._finish_button:setVisible(true)
-		else
-			self._next_button:setVisible(true)
-			self._finish_button:setVisible(false)		
-		end
 	end
+end
+
+function Subjective:add_topics(t)
+	self:add_item{topics=t.content}
 end
 
 function Subjective:next_item()
@@ -183,20 +182,47 @@ function Subjective:save()
 end
 
 function Subjective:init()
-	self:init_data()
 	self:init_gui()
 	self:init_delay_release()
+	self:init_data()
 end
 
+local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
+local loadextam_url = "http://new.www.lejiaolexue.com/student/handler/GetStudentItemList.ashx"
+
 function Subjective:init_data()
-	if self._args and self._args.pid then
+	if self._args then
+		local url_topics
+		if self._args.exam_id then
+			--取作业
+			url_topics = loadextam_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
+			--取得以前做的答案
+			--self._topics_table = topics.read( self._args.exam_id ) or {}
+		elseif self._args.pid then
+			--取卷面
+			url_topics = loadpaper_url..'?pid='..self._args.pid..'&uid='..self._args.uid
+			--取得以前做的答案
+			--self._topics_table = topics.read( self._args.pid ) or {}
+		else
+			--self._topics_table = {}
+			kits.log('error : Subjective:init_data exam_id=nil and pid=nil')
+			return
+		end
+		kits.log('Subjective:init_data request :'..url_topics )
+		local loadbox = loadingbox.open(self)
+		cache.request_json( url_topics,function(t)
+				loadbox:removeFromParent()
+				if t then
+					self:load_subjective_from_table(t)
+				else
+					kits.log('ERROR Subjective:init_data request failed')
+				end			
+		end)
 	else
 		local res = kits.read_cache('sujective.json')
 		if res then
-			print( res )
 			local t = json.decode(res)
 			if t and type(t)=='table' then
-				print( 'decode ok' )
 				for i,v in pairs(t) do
 					print( v.topics )
 				end
@@ -204,6 +230,25 @@ function Subjective:init_data()
 			end
 		end
 		kits.log('载入模拟数据..')
+	end
+end
+
+function Subjective:load_subjective_from_table(data)
+	if data then
+		local ds
+		if data.item and type(data.item)=='table' then
+			ds = data.item
+		else
+			ds = data
+		end
+		self._data = ds --保存副本
+		for i,v in ipairs(ds) do
+			if v.item_type==93 then --自定义题
+				self:add_topics( v )
+			end
+		end	
+		self:set_current(1)
+		self:relayout()
 	end
 end
 
@@ -249,11 +294,7 @@ function Subjective:init_gui()
 			anchorX = anp.x,
 			anchorY = anp.y,
 			width=self._contentview_size.width,
-			height=self._contentview_size.height}
-		print('x_='..x_)
-		print('y_='..y_)
-		print('anp.x='..anp.x)
-		print('anp.y='..anp.y)		
+			height=self._contentview_size.height}	
 		self._contentview:setVisible(false)
 		self._root:addChild( self._pageview )
 		

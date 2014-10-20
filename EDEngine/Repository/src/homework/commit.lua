@@ -278,7 +278,7 @@ function WorkCommit:init_student_page()
 	end
 	uikits.event(but2,
 					function(sender)
-						uikits.pushScene(Subjective.create(self._args.url2))
+						uikits.pushScene(Subjective.create(self._args))
 					end,'click')		
 end
 
