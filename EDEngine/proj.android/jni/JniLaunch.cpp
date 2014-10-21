@@ -2,6 +2,8 @@
 #include <string>
 #include "JniHelper.h"
 
+using namespace cocos2d;
+
 std::string g_Launch;
 std::string g_Cookie;
 std::string g_Userid;
@@ -18,4 +20,18 @@ extern "C" {
 	{
 		g_ExternalStorageDirectory = cocos2d::JniHelper::jstring2string(dir);
     }	
+}
+#define  CLASS_NAME "org/cocos2dx/lib/AppActivity"
+std::string takeResourceFromAndroid( int mode )
+{
+	std::string ret("");
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "takeResource", "(I)Ljava/lang/String;")) 
+	{
+		jstring str = (jstring)t.env->CallStaticObjectMethod(t.classID,t.methodID,mode);
+        t.env->DeleteLocalRef(t.classID);
+        ret = JniHelper::jstring2string(str);
+		t.env->DeleteLocalRef(str);
+	}
+	return ret;
 }

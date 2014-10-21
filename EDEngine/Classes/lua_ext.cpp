@@ -2,6 +2,7 @@
 #include "lua_thread_curl.h"
 #include "tolua++.h"
 #include "cocos2d.h"
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
 #endif
@@ -198,6 +199,33 @@ static int cc_directory(lua_State *L)
     return 1;
 }
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+	extern std::string takeResourceFromAndroid( int mode );
+#endif
+
+static int cc_takeResource(lua_State *L)
+{
+	if( lua_isnumber(L,1))
+	{
+		int i = (int)lua_tonumber(L, 1);
+        std::string path;
+        switch(i)
+		{
+		case 1: //Camera
+		case 2: //Photo library
+		case 3: //Record audio
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+			path = takeResourceFromAndroid(i);
+#endif
+			lua_pushstring(L,path.c_str());
+			return 1;
+		}
+	}
+	lua_pushnil(L);
+	lua_pushstring(L,"invalid paramter");
+	return 2;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -207,7 +235,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register( L,"cc_isobj",cc_isobj);
     lua_register( L,"cc_directory",cc_directory);
 	lua_register( L,"cc_launchparam",cc_launchparam);
-
+	lua_register( L,"cc_takeResource",cc_takeResource);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)
