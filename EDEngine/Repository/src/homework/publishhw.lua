@@ -261,6 +261,7 @@ function Publishhw:publish_topics()
 		but_confirm:setEnabled(false)
 		but_confirm:setBright(false)
 		but_confirm:setTouchEnabled(false)
+		self._item_count = 0
 		local custom_items = {}
 		local data = self.tb_parent_view._subjective_data
 		local selector = self.tb_parent_view._selector	

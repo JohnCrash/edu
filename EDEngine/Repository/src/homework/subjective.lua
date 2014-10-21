@@ -16,9 +16,9 @@ local ui = {
 	FINISH_BUTTON = 'finish_5',
 	TEACHER_VIEW = 'teacher_view',
 	TOPICS = 'teacher_view/homework_text',
-	RECORD_BUTTON = 'white_3/recording',
-	CAM_BUTTON = 'white_3/photograph',
-	PHOTO_BUTTON = 'white_3/photo',
+	RECORD_BUTTON = 'write_view/white_3/recording',
+	CAM_BUTTON = 'write_view/white_3/photograph',
+	PHOTO_BUTTON = 'write_view/white_3/photo',
 	
 	AUDIO_VIEW = 'chat_view',
 	AUDIO_BUTTON = 'chat',
@@ -141,19 +141,52 @@ function Subjective:add_item( t )
 		local index = #self._list
 		uikits.event(item,function(sender) self:set_current( index ) end,'click')
 		--add page
-		local layout = self._contentview:clone()
+		local layout = self._scroll:clone()
 
 		layout:setVisible(true)
 		local topics = uikits.child(layout,ui.TOPICS)
-		topics:setString( t.topics )
+		topics:setString( t.content )
 		
 		local audio_view = uikits.child(layout,ui.AUDIO_VIEW)
 		audio_view:setVisible(false)
 		
 		local picture_view = uikits.child(layout,ui.PICTURE_VIEW)
 		picture_view:setVisible(false)
-		
+		--add loading circle
+		--load attachments
+		local rtable = {}
+		rtable.urls = {}
+		if t.attachment then
+			local atts = json.decode(t.attachment)
+			if atts and atts.attachments then
+				for i,v in pairs(atts.attachments) do
+					if v.value then
+						table.insert(rtable.urls,{url=v.value,filename=v.name})
+					end
+				end
+			end
+		end
+		local n = 0
 		self._pageview:addPage( layout )
+		rtable.loading = loadingbox.circle(layout)
+		cache.request_resources( rtable,
+			function(rs,i,b)
+				n = n + 1
+				if b and rs.urls[i] then
+					kits.log('download -> '..rs.urls[i].url )
+					kits.log('cahce ->' ..rs.urls[i].filename)
+					kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
+				end
+				if n >= #rs.urls then --complete
+					if rs.loading and cc_isobj(rs.loading) then
+						rs.loading:removeFromParent() 
+					else
+						return
+					end
+					--done
+					kits.log('DONE')
+				end
+			end)
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
 	end
@@ -166,10 +199,6 @@ function Subjective:relayout()
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
 		end
 	end
-end
-
-function Subjective:add_topics(t)
-	self:add_item{topics=t.content}
 end
 
 function Subjective:next_item()
@@ -244,11 +273,40 @@ function Subjective:load_subjective_from_table(data)
 		self._data = ds --保存副本
 		for i,v in ipairs(ds) do
 			if v.item_type==93 then --自定义题
-				self:add_topics( v )
+				self:add_item( v )
 			end
 		end	
 		self:set_current(1)
 		self:relayout()
+	end
+end
+
+function Subjective:scroll_relayout()
+	--计算高度
+	local uis = {}
+	local ts = self._tops:getContentSize()
+	local cs = self._scroll:getContentSize()
+	local ds = {height=0,width=0}--self._delete_button:getContentSize()
+	local x,y = 0,0 --self._delete_button:getPosition()
+	y = self._space
+	--self._delete_button:setPosition(cc.p(x,y))
+	y = y + ds.height + self._space
+	for i,v in pairs(self._items) do
+		if v:isVisible() then
+			local xx,yy = v:getPosition()
+			v:setPosition( cc.p(xx,y) )
+			y = y + v:getContentSize().height*v:getScaleY() + self._space
+			table.insert(uis,v)
+		end
+	end
+	local xx,yy = self._tops:getPosition()
+	self._tops:setPosition(cc.p(xx,y))
+	y = y + ts.height + self._space
+	self._scroll:setInnerContainerSize(cc.size(cs.width,y))
+	table.insert(uis,self._tops)
+	--table.insert(uis,self._delete_button)
+	if y < cs.height then
+		uikits.move( uis,0,cs.height-y)
 	end
 end
 
@@ -264,40 +322,43 @@ function Subjective:init_gui()
 		self:addChild(self._root)
 		
 		self._scrollview = uikits.child(self._root,ui.LIST)
-		self._contentview = uikits.child(self._root,ui.PAGE_VIEW)
-		self._contentview_size = self._contentview:getContentSize()
-		self._teacher_view = uikits.child(self._contentview,ui.TEACHER_VIEW)
-		self._teacher_view:setEnabled(false) --有点印象翻页,关闭它
+		self._scroll = uikits.child(self._root,ui.PAGE_VIEW)
+		self._scroll_size = self._scroll:getContentSize()
 		
-		self._record_but = uikits.child(self._contentview,ui.RECORD_BUTTON)
-		self._cam_but = uikits.child(self._contentview,ui.CAM_BUTTON)
-		self._photo_but = uikits.child(self._contentview,ui.PHOTO_BUTTON)
-		uikits.event( self._record_but,
-			function(sender)
-				print('record audio')
-			end)
-		uikits.event( self._cam_but,
-			function(sender)
-				print('open camer')
-			end)
-		uikits.event( self._photo_but,
-			function(sender)
-				print('open photo directory' )
-			end)
-			
-		local x_,y_ = self._contentview:getPosition()
-		local anp = self._contentview:getAnchorPoint()
+		self._tops = uikits.child(self._scroll,ui.TEACHER_VIEW)
+		local cs = self._scroll:getContentSize()
+		local ts = self._tops:getContentSize()
+		local tx,ty = self._tops:getPosition()
+		self._space = cs.height-ty-ts.height
+		self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
+		local x,y = self._tops:getPosition()
+		self._tops_space = y-self._tops:getContentSize().height
+		self._tops_ox = x
+	
+		self._record_button = uikits.child(self._tops,ui.RECORD_BUTTON)
+		self._cam_button = uikits.child(self._tops,ui.CAM_BUTTON)
+		self._photo_button = uikits.child(self._tops,ui.PHOTO_BUTTON)
+
+		self._audio_item = uikits.child(self._scroll,ui.AUDIO_VIEW)
+		self._img_item = uikits.child(self._scroll,ui.PICTURE_VIEW)
+		self._audio_item:setVisible(false)
+		self._img_item:setVisible(false)
+		self._scroll_list = {}
+		self._items = {}
+		self._remove_items = {}
+		
+		local x_,y_ = self._scroll:getPosition()
+		local anp = self._scroll:getAnchorPoint()
 		self._pageview = uikits.pageview{
 			bgcolor=self._root:getBackGroundColor(),
 			x = x_,
 			y = y_,
 			anchorX = anp.x,
 			anchorY = anp.y,
-			width=self._contentview_size.width,
-			height=self._contentview_size.height}	
-		self._contentview:setVisible(false)
+			width=self._scroll_size.width,
+			height=self._scroll_size.height}	
+		self._scroll:setVisible(false)
 		self._root:addChild( self._pageview )
-		
 		uikits.event(self._pageview,
 			function(sender,eventType)
 				if eventType == ccui.PageViewEventType.turning then
