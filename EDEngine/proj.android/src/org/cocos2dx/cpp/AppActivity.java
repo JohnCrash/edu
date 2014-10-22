@@ -39,11 +39,14 @@ import java.io.File;
 import java.lang.System;
 
 import android.net.Uri;
+import android.app.Activity;
 import android.app.AlertDialog;
 
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.lib.Cocos2dxHelper;
+import android.graphics.Bitmap;
+import android.os.Build;
 
 //import org.cocos2dx.cpp.CrashHandler;
 
@@ -51,30 +54,71 @@ public class AppActivity extends Cocos2dxActivity {
 	private static native void launchParam(final String launch,final String cookie,final String uid);
 	private static native void setExternalStorageDirectory(final String sd);
 	
-	static final int TAKE_PICTURE = 1;
+	private static final int TAKE_PICTURE = 1;
+	private static final int PICK_PICTURE = 2;
+	private static AppActivity myActivity;
 	
-	public static String takePictrue(int from)
+	public static String takeResource(int from)
 	{
-		String storageState = Environment.getExternalStorageState();
-		if(storageState.equals(Environment.MEDIA_MOUNTED) )
+		if( from == 1 )
 		{
-			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			long ct = System.currentTimeMillis();
-			String path = Environment.getExternalStorageDirectory().getName() + File.separatorChar + "ijdata/EDEngine/" + ct + ".jpg";
-			File file = new File(path);
-			Uri outputFileUri = Uri.fromFile(file);
-			intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri);
-			Cocos2dxHelper.getActivity().startActivityForResult(intent,TAKE_PICTURE);
-			return path;
-		}
-		else
+			String storageState = Environment.getExternalStorageState();
+			if(storageState.equals(Environment.MEDIA_MOUNTED) )
+			{
+				Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				long ct = System.currentTimeMillis();
+				String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + "ljdata/EDEngine/" + ct + ".jpg";
+				File file = new File(path);
+				file.setWritable(true);
+				Uri fileUri = Uri.fromFile(file);
+				intent.putExtra( MediaStore.EXTRA_OUTPUT, fileUri);
+				intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+				myActivity.startActivityForResult(intent,TAKE_PICTURE);
+				return path;
+			}
+			else
+			{
+				new AlertDialog.Builder(myActivity)
+	            .setMessage("External Storeage (SD Card) is required.\n\nCurrent state: " + storageState)
+	            .setCancelable(true).create().show();			
+			}
+		}else if(from==2)
 		{
-			new AlertDialog.Builder(Cocos2dxHelper.getActivity())
-            .setMessage("External Storeage (SD Card) is required.\n\nCurrent state: " + storageState)
-            .setCancelable(true).create().show();			
+			Intent intent=new Intent();
+			if (Build.VERSION.SDK_INT<19)
+			{
+				intent.setAction(Intent.ACTION_GET_CONTENT);
+				intent.setType("image/*");
+			}
+			else
+			{
+				intent.setAction(Intent.ACTION_PICK);
+				intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+			}
+			myActivity.startActivityForResult(intent,PICK_PICTURE);			
+		}else if(from==3)
+		{
+			//record audio
 		}
 		return "";
 	}
+@Override
+	public void onActivityResult(int requestCode,int resultCode,Intent data)
+	{
+		if(resultCode == TAKE_PICTURE && resultCode==Activity.RESULT_OK )
+		{
+	          try {  
+	               // Bundle extra = data.getExtras(); 
+	          }
+	          catch(Exception e)
+	          {
+	        	  e.printStackTrace(); 
+	          }
+	          return;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	public void getParameterByIntent() {
 		Intent mIntent = this.getIntent();  
 		String launch = mIntent.getStringExtra("launch");
@@ -105,6 +149,7 @@ public class AppActivity extends Cocos2dxActivity {
     public Cocos2dxGLSurfaceView onCreateView() {
 		//CrashHandler crashHandler = CrashHandler.getInstance();  
         //crashHandler.init(getApplicationContext());
+    	myActivity = this;
     	getParameterByIntent(); //取启动参数
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         // TestCpp should create stencil buffer

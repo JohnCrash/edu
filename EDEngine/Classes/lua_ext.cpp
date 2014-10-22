@@ -200,7 +200,7 @@ static int cc_directory(lua_State *L)
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-	extern std::string takeResourceFromAndroid( int mode );
+std::string takeResourceFromAndroid( int mode );
 #endif
 
 static int cc_takeResource(lua_State *L)

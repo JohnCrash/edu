@@ -108,6 +108,12 @@ if app == 'studenthw' then
 		local worklist = require "homework/worklist"
 		return worklist.create()
 	end}
+elseif  app == 'studenthw2' then
+	update.create{name=app,updates={'homework','luacore','errortitile'},
+		run=function()
+		local selstudent = require "homework/selstudent"
+		return selstudent.create()
+	end}
 elseif app == 'amouse' then
 	update.create{name=app,updates={'amouse','luacore'},
 		run=function()
@@ -127,6 +133,12 @@ elseif app == 'exerbook' then
 		local WrongSubjectList = require "errortitile/WrongSubjectList"
 		return WrongSubjectList.create()
 	end}
+elseif app == 'exerbook2' then
+	update.create{name=app,updates={'homework','errortitile','luacore'},
+		run=function()
+		local WrongLoading = require "errortitile/Loading"
+		return WrongLoading.create()
+	end}	
 elseif app and string.len(app)>0 then
 	--任意启动
 	update.create{name=app,updates={app,'luacore'},
