@@ -2,6 +2,9 @@
 #include "lua_thread_curl.h"
 #include "tolua++.h"
 #include "cocos2d.h"
+#include "CCLuaStack.h"
+#include "CCLuaEngine.h"
+#include "Platform.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
@@ -199,31 +202,101 @@ static int cc_directory(lua_State *L)
     return 1;
 }
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-std::string takeResourceFromAndroid( int mode );
-#endif
-
+static int g_callref=LUA_REFNIL;
 static int cc_takeResource(lua_State *L)
 {
 	if( lua_isnumber(L,1))
 	{
 		int i = (int)lua_tonumber(L, 1);
-        std::string path;
         switch(i)
 		{
 		case 1: //Camera
 		case 2: //Photo library
 		case 3: //Record audio
-#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-			path = takeResourceFromAndroid(i);
-#endif
-			lua_pushstring(L,path.c_str());
+			if( lua_isfunction(L,2) )
+			{
+				lua_pushvalue(L,-1);
+				if( g_callref != LUA_REFNIL )
+					lua_unref(L,g_callref);
+				g_callref = luaL_ref(L,LUA_REGISTRYINDEX);
+			}
+			else
+			{
+				g_callref = LUA_REFNIL;
+			}
+			takeResource(i);
 			return 1;
 		}
 	}
 	lua_pushnil(L);
-	lua_pushstring(L,"invalid paramter");
 	return 2;
+}
+
+struct TRS
+{
+	std::string path;
+	int result;
+	int type;
+	TRS( int t,int r,std::string s ):type(t),result(r),path(s){}
+};
+
+static void takeResource_progressFunc(void *ptrs)
+{
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if( pEngine )
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if( pLuaStack )
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if( L && g_callref != LUA_REFNIL && ptrs )
+			{
+				TRS *trs = (TRS*)ptrs;
+				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callref);
+				lua_pushinteger(L,trs->type);
+				lua_pushinteger(L,trs->result);
+				lua_pushstring(L,trs->path.c_str());
+				pLuaStack->executeFunction(3);
+				delete trs;
+				lua_unref(L,g_callref);
+				g_callref = LUA_REFNIL;
+			}
+		}
+	}
+}
+
+void takeResource_callback(std::string resource,int typeCode,int resultCode)
+{
+	//call lua progress function
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if( pDirector )
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if( scheduler )
+		{
+			scheduler->performFunctionInCocosThread_ext(takeResource_progressFunc,(void*)new TRS(typeCode,resultCode,resource));
+		}
+	}
+}
+
+int cc_startRecordVoice(lua_State *L)
+{
+	if( lua_isstring(L,1) )
+	{
+		std::string file = lua_tostring(L,1);
+		//Æô¶¯Â¼Òô
+		int ret = startRecord( file );
+		lua_pushinteger(L,ret);
+		return 1;
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+int cc_stopRecordVoice(lua_State *L)
+{
+	stopRecord();
+	return 0;
 }
 
 void luaopen_lua_exts(lua_State *L)
@@ -236,6 +309,8 @@ void luaopen_lua_exts(lua_State *L)
     lua_register( L,"cc_directory",cc_directory);
 	lua_register( L,"cc_launchparam",cc_launchparam);
 	lua_register( L,"cc_takeResource",cc_takeResource);
+	lua_register( L,"cc_startRecordVoice",cc_startRecordVoice);
+	lua_register( L,"cc_stopRecordVoice",cc_stopRecordVoice);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)
