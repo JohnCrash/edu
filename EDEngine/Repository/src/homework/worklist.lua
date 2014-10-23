@@ -557,6 +557,9 @@ function WorkList:init_setting()
 	--if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.SETTING )
+	if _G.hw_cur_child_id ~= 0 and self.has_download_children == false then
+		self:getdatabyurl()	
+	end
 	self:show_statistics(false)
 	self:show_list(false)
 	self._setting:setVisible(true)
@@ -580,7 +583,7 @@ local student_space = 40
 local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
 
 function WorkList:getdatabyurl()
-	local result = kits.http_get(get_child_info_url,login.cookie(),1)
+--[[	local result = kits.http_get(get_child_info_url,login.cookie(),1)
 	print(result)
 	local tb_result = json.decode(result)
 	if 	tb_result.result ~= 0 then				
@@ -588,8 +591,8 @@ function WorkList:getdatabyurl()
 	else
 		--local tb_uig = json.decode(tb_result.uig)
 		self.childinfo = tb_result.uis
-	end	
---[[	local loadbox = loadingbox.open(self)
+	end	--]]
+	local loadbox = loadingbox.open(self)
 	cache.request_json( get_child_info_url,function(t)
 			if t and type(t)=='table' then
 				if t.result ~= 0 then
@@ -598,6 +601,7 @@ function WorkList:getdatabyurl()
 				else
 					self.childinfo = t.uis
 					self:show_children()
+					self.has_download_children = true
 				end
 			else
 				--既没有网络也没有缓冲
@@ -611,11 +615,11 @@ function WorkList:getdatabyurl()
 			end
 			loadbox:removeFromParent()
 		end,'N')
-	return true--]]
+	return true
 end
 
 function WorkList:show_children()
-	self:getdatabyurl()
+	--self:getdatabyurl()
 	local student_view = uikits.child(self._setting,ui.student_view)
 	student_view:setVisible(true)
 	local src_student_view = uikits.child(self._setting,ui.per_student_view)
@@ -682,7 +686,8 @@ function WorkList:init_gui()
 	else
 		self._setting_root = uikits.fromJson{file_9_16=ui.MORE2,file_3_4=ui.MORE2_3_4}
 		self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
-		self:show_children()		
+		--self:show_children()	
+		self.has_download_children = false
 	end
 	
 	local cs = uikits.child(self._setting,ui.MORE_SOUND)

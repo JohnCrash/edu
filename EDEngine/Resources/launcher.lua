@@ -105,12 +105,14 @@ resume.clearflag("launcher") --launcher isok
 if app == 'studenthw' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
+		hw_cur_child_id = 0
 		local worklist = require "homework/worklist"
 		return worklist.create()
 	end}
 elseif  app == 'studenthw2' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
+		hw_cur_child_id = 0
 		local selstudent = require "homework/selstudent"
 		return selstudent.create()
 	end}

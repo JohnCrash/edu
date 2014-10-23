@@ -483,31 +483,34 @@ function persubject:getdatabyurl()
 	end
 	cache.request_json( send_url..send_data,function(t)	
 			if t and type(t)=='table' then
-				self.totalpagecount = t.page_total
-				self.wrongtitleitems = t.exerbook_user_items	
-				self.has_correct = t.has_correct
-				local tab_json = {}
-				for i,obj in pairs(self.wrongtitleitems) do
-					tab_json[i] = self.wrongtitleitems[i].item_id
-				end
-				local json_data = {}
-				json_data.item_id = tab_json
-				send_data = json.encode(json_data)
-				local base_url
-				if t_nextview then
-					base_url = t_nextview[8].url 
-				else
-					base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx"
-				end				
-				result = kits.http_post(base_url,send_data,login.cookie(),1)
-				local tb_result = json.decode(result)
-				if tb_result.result == 0 then
-					local tb_perwrong = tb_result.exer_book_stat
-					for i,obj in pairs(tb_perwrong) do
-						self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
+				if t.exerbook_user_items then
+					self.totalpagecount = t.page_total
+					self.wrongtitleitems = t.exerbook_user_items	
+					self.has_correct = t.has_correct
+					local tab_json = {}
+					for i,obj in pairs(self.wrongtitleitems) do
+						tab_json[i] = self.wrongtitleitems[i].item_id
 					end
+					local json_data = {}
+					json_data.item_id = tab_json
+					send_data = json.encode(json_data)
+					local base_url
+					if t_nextview then
+						base_url = t_nextview[8].url 
+					else
+						base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx"
+					end				
+					result = kits.http_post(base_url,send_data,login.cookie(),1)
+					local tb_result = json.decode(result)
+					if tb_result.result == 0 then
+						local tb_perwrong = tb_result.exer_book_stat
+						for i,obj in pairs(tb_perwrong) do
+							self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
+						end
+					end
+					self:updatepage()				
 				end
-				self:updatepage()
+
 			else
 				--既没有网络也没有缓冲
 				messagebox.open(self,function(e)
