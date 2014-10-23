@@ -356,7 +356,9 @@ function WrongSubjectList:getdatabyurl()
 					end
 				else
 				--	print("t.exer_book_stat:"..t.exer_book_stat)
-					self:format_listdata(t.exer_book_stat)
+					if t.exer_book_stat then
+						self:format_listdata(t.exer_book_stat)					
+					end
 				end
 				self:updatepage()
 			else

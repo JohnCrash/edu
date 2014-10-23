@@ -268,7 +268,7 @@ function TeacherList:init_ready_release()
 	self._setting:setVisible(false)
 	self._statistics_root:setVisible(false)
 
-	if self._selector == nil then
+	if self._selector == nil or self._selector[1] == nil then
 		self._confirm_item = {}	
 		local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
 		but_queren:setEnabled(false)

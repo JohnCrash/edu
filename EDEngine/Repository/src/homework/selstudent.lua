@@ -4,6 +4,7 @@ local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
 local worklist = require "homework/worklist"
+local loadingbox = require "loadingbox"
 --local selstudent = require "errortitile/selstudent"
 --local WrongSubjectList = require "errortitile/WrongSubjectList"
 local selstudent = class("selstudent")
@@ -19,11 +20,6 @@ local ui = {
 }
 local student_space = 40
 local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
-
-local function loadArmature( name )
-		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)
-		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
-end
 
 function create()
 	local scene = cc.Scene:create()				
@@ -45,11 +41,7 @@ end
 --local cookie_1 = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 
 function selstudent:getdatabyurl()
---	local send_data
---	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
-	
---	local send_url = t_nextview[2].url..send_data
-	local result = kits.http_get(get_child_info_url,login.cookie(),1)
+--[[	local result = kits.http_get(get_child_info_url,login.cookie(),1)
 	print(result)
 	local tb_result = json.decode(result)
 	if 	tb_result.result ~= 0 then				
@@ -57,16 +49,34 @@ function selstudent:getdatabyurl()
 	else
 		--local tb_uig = json.decode(tb_result.uig)
 		self.childinfo = tb_result.uis
-	end	
+	end	--]]
+	local loadbox = loadingbox.open(self)
+	cache.request_json( get_child_info_url,function(t)
+			if t and type(t)=='table' then
+				if t.result ~= 0 then
+					loadbox:removeFromParent()
+					return false
+				else
+					self.childinfo = t.uis
+					self:show_children()
+				end
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:getdatabyurl()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+			end
+			loadbox:removeFromParent()
+		end,'N')
+	return true
 	
 end
 
-function selstudent:init()	
---	loadArmature("errortitile/silver/Export/NewAnimation/NewAnimation.ExportJson")	
-	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
-	self:addChild(self._widget)
---	uikits.initDR(design)
-	self:getdatabyurl()
+function selstudent:show_children()	
 	local student_view = uikits.child(self._widget,ui.student_view)
 	local src_student_view = uikits.child(self._widget,ui.per_student_view)
 	src_student_view:setVisible(false)
@@ -95,11 +105,15 @@ function selstudent:init()
 		checkBox.uid = self.childinfo[i].uid
 		checkBox:addEventListener(selectedEvent)  
 		pos_x_start = pos_x_start+size_per_student_view.width+student_space
-	end
---	local loadbox = selstudentbox.open(self)
---	local scene_next = WrongSubjectList.create()								
---	cc.Director:getInstance():replaceScene(scene_next)	
+	end	
+end
 
+function selstudent:init()	
+--	loadArmature("errortitile/silver/Export/NewAnimation/NewAnimation.ExportJson")	
+	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
+	self:addChild(self._widget)
+--	uikits.initDR(design)
+	self:getdatabyurl()
 end
 
 function selstudent:release()
