@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/MD5.cpp \
 				   ../../Classes/Files.cpp \
 				   ../../Classes/Platform.cpp \
+				   ../../Classes/PlatformAndroid.cpp \
 				   JniLaunch.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \

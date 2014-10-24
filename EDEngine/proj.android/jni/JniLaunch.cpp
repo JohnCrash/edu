@@ -13,6 +13,55 @@ std::string g_Cookie;
 std::string g_Userid;
 std::string g_ExternalStorageDirectory;
 std::string g_RecordFile;
+	
+void takeResource( int mode )
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "takeResource", "(I)V")) 
+	{
+		t.env->CallStaticVoidMethod(t.classID,t.methodID,mode);
+		t.env->DeleteLocalRef(t.classID);
+	}
+}
+	
+bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
+{
+	if (m_pEncoder)
+	{
+		m_pEncoder->AddEncoderBuf(pBuf,len,nRate);
+	}
+	return true;
+}
+
+bool CVoiceRecord::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
+{
+	if (!CVoiceRecordBase::StartRecord(cnChannel,nRate,cnBitPerSample)) return false;
+
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStartRecord","(III)I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID,cnChannel,nRate,cnBitPerSample);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+	return nRet==1;
+}
+
+bool CVoiceRecord::StopRecord(char *pszSaveFile)
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopRecord","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+	if (nRet!=1) return false;
+
+	return CVoiceRecordBase::StopRecord(pszSaveFile);
+}
 
 extern "C" {
     JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid) 
@@ -32,43 +81,7 @@ extern "C" {
 		std::string df = JniHelper::jstring2string(res);
 		takeResource_callback(df,t,r);
 	}
-
-	void takeResource( int mode )
-	{
-		JniMethodInfo t;
-		if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "takeResource", "(I)V")) 
-		{
-			t.env->CallStaticVoidMethod(t.classID,t.methodID,mode);
-			t.env->DeleteLocalRef(t.classID);
-		}
-	}
-	
-	int startRecord( std::string file,int cnChannel,int nRate,int cnBitPerSample )
-	{
-		g_RecordFile = file;
-		JniMethodInfo t;
-		int nRet = 0;
-		if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "VoiceStartRecord", "(III)I")) 
-		{
-			initAMREncoder(cnChannel,nRate,cnBitPerSample);
-			nRet=t.env->CallStaticIntMethod(t.classID,t.methodID,cnChannel,nRate,cnBitPerSample);
-			t.env->DeleteLocalRef(t.classID);
-		}
-		return nRet;
-	}
-	
-	void stopRecord()
-	{
-		JniMethodInfo jmi;
-		int nRet=0;
-		if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopRecord","()I"))
-		{
-			nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
-			jmi.env->DeleteLocalRef(jmi.classID);
-		}
-		return nRet;
-	}
-	
+		
 	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_sendVoiceRecordData(JNIEnv* env,jobject thiz,int len,int rate,jobject data)
 	{
 	}

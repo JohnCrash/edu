@@ -10,6 +10,55 @@
 #include "AppleBundle.h"
 #endif
 
+static int g_callref=LUA_REFNIL;
+
+struct TRS
+{
+	std::string path;
+	int result;
+	int type;
+	TRS( int t,int r,std::string s ):type(t),result(r),path(s){}
+};
+
+static void takeResource_progressFunc(void *ptrs)
+{
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if( pEngine )
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if( pLuaStack )
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if( L && g_callref != LUA_REFNIL && ptrs )
+			{
+				TRS *trs = (TRS*)ptrs;
+				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callref);
+				lua_pushinteger(L,trs->type);
+				lua_pushinteger(L,trs->result);
+				lua_pushstring(L,trs->path.c_str());
+				pLuaStack->executeFunction(3);
+				delete trs;
+				lua_unref(L,g_callref);
+				g_callref = LUA_REFNIL;
+			}
+		}
+	}
+}
+
+void takeResource_callback(std::string resource,int typeCode,int resultCode)
+{
+	//call lua progress function
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if( pDirector )
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if( scheduler )
+		{
+			scheduler->performFunctionInCocosThread_ext(takeResource_progressFunc,(void*)new TRS(typeCode,resultCode,resource));
+		}
+	}
+}
+
 static void pathsp(std::string& path)
 {
 	if( path.length() > 0 )
@@ -202,7 +251,6 @@ static int cc_directory(lua_State *L)
     return 1;
 }
 
-static int g_callref=LUA_REFNIL;
 static int cc_takeResource(lua_State *L)
 {
 	if( lua_isnumber(L,1))
@@ -232,60 +280,14 @@ static int cc_takeResource(lua_State *L)
 	return 2;
 }
 
-struct TRS
-{
-	std::string path;
-	int result;
-	int type;
-	TRS( int t,int r,std::string s ):type(t),result(r),path(s){}
-};
-
-static void takeResource_progressFunc(void *ptrs)
-{
-	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
-	if( pEngine )
-	{
-		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
-		if( pLuaStack )
-		{
-			lua_State *L = pLuaStack->getLuaState();
-			if( L && g_callref != LUA_REFNIL && ptrs )
-			{
-				TRS *trs = (TRS*)ptrs;
-				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callref);
-				lua_pushinteger(L,trs->type);
-				lua_pushinteger(L,trs->result);
-				lua_pushstring(L,trs->path.c_str());
-				pLuaStack->executeFunction(3);
-				delete trs;
-				lua_unref(L,g_callref);
-				g_callref = LUA_REFNIL;
-			}
-		}
-	}
-}
-
-void takeResource_callback(std::string resource,int typeCode,int resultCode)
-{
-	//call lua progress function
-	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
-	if( pDirector )
-	{
-		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
-		if( scheduler )
-		{
-			scheduler->performFunctionInCocosThread_ext(takeResource_progressFunc,(void*)new TRS(typeCode,resultCode,resource));
-		}
-	}
-}
-
 int cc_startRecordVoice(lua_State *L)
 {
 	if( lua_isstring(L,1) )
 	{
 		std::string file = lua_tostring(L,1);
 		//Æô¶¯Â¼Òô
-		int ret = startRecord( file );
+		//int ret = startRecord( file );
+		int ret;
 		lua_pushinteger(L,ret);
 		return 1;
 	}
@@ -295,7 +297,7 @@ int cc_startRecordVoice(lua_State *L)
 
 int cc_stopRecordVoice(lua_State *L)
 {
-	stopRecord();
+	//stopRecord();
 	return 0;
 }
 
