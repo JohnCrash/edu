@@ -12,6 +12,7 @@ std::string g_Launch;
 std::string g_Userid;
 std::string g_Mode;
 std::string toUTF8( const std::wstring& wstr );
+HANDLE g_hFileMap;
 
 std::wstring getParam(const std::wstring& cmd,const std::wstring& key)
 {
@@ -58,6 +59,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // create the application instance
     AppDelegate app;
     int ret;
+
+	std::wstring uri = TEXT("com.edengine.luacore.") + getParam(lpCmdLine, TEXT("launch="));
+	g_hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(APPFILEMAPINFO), uri.c_str());
+	//ÒÑ¾­´æÔÚ
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+		return false;
 
 #ifdef USE_WIN32_CONSOLE
 	while(g_Quit)

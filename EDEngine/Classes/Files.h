@@ -32,6 +32,10 @@ bool EraseFile(const char *pszPathName);
 void GeneUniqueName(const char *pData,int len,char *pszUniqueName);
 bool GeneUniqueName(const char *pszPathName,char *pszUniqueName);
 
+std::string genUniqueName(); //产生一个随机的文件名称，确保不重复
+std::string allocTmpFile( std::string suffix );
+void releaseTmpFile( std::string file );
+
 class CDirMng
 {
 public:

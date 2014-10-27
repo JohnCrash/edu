@@ -12,6 +12,7 @@ USING_NS_CC;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 #include "sys/types.h"
 #include "sys/stat.h"
+#include "sys/time.h"
 #include "fcntl.h"
 #include <dirent.h>
 
@@ -349,6 +350,39 @@ CDirMng::~CDirMng()
 
 static CDirMng *s_pDirMng=NULL;
 
+std::string genUniqueName()
+{
+	char unqstr[256];
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+		DWORD dt = GetTickCount();
+		GeneUniqueName( (const char*)&dt,sizeof(dt),unqstr);
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+		timeval tv;
+		gettimeofday(&tv,NULL);
+		GeneUniqueName( (const char*)&tv.tv_usec,sizeof(tv.tv_usec),unqstr );
+#endif
+	return std::string( unqstr );
+}
+
+std::string allocTmpFile( std::string suffix )
+{
+	std::string result;
+	if( s_pDirMng )
+	{
+		result = s_pDirMng->GetDataDir() + "EDEngine/tmp/" + genUniqueName() + suffix;
+	}
+	else
+	{
+		CCLOG("allocTmpFile s_pDirMng = NULL");
+	}
+	return result;
+}
+
+void releaseTmpFile( std::string file )
+{
+	EraseFile( file.c_str() );
+}
+
 bool CDirMng::Init(const char *pszAppName)
 {
 	m_strAppName=pszAppName;
@@ -387,8 +421,10 @@ bool CDirMng::Init(const char *pszAppName)
 	m_strAppDir+="/";
 	MakeFullDir(m_strAppDir.c_str()); //创建目录
 	m_strAppDataDir=m_strAppDir+"data/";
+	MakeFullDir(m_strAppTmpDir.c_str()); //创建数据目录
 	m_strAppTmpDir=m_strAppDir+"tmp/";
-
+	MakeFullDir(m_strAppTmpDir.c_str()); //创建临时目录
+	
 	m_strIDNamePathName=m_strShareDir+"IDName.json";
 	m_strShareSettingsPathName=m_strShareDir+"ShareSettings.json";
 
