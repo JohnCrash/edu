@@ -661,6 +661,10 @@ local function set_topics_image( layout,data,x,y )
 			img:setScaleX(g_scale)
 			img:setScaleY(g_scale)
 			layout:addChild(img)
+			local is = img:getContentSize()
+			if y < 4*TOPICS_SPACE and is.height+y < size.height then --题干纵向居中放置
+				y = (size.height - y - is.height)/2 + y
+			end
 			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,g_scale)
 			height = height+img:getContentSize().height*g_scale 
 		end
