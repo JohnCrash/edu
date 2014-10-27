@@ -7,6 +7,12 @@
 #include <mutex>
 
 #define RETURN_TYPE_RECORDDATA 10
+#define TAKE_PICTURE 1
+#define PICK_PICTURE 2
+
+#define RESULT_OK (-1)
+#define RESULT_CANCEL (0)
+#define RESULT_ERROR (-2)
 
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
@@ -113,6 +119,41 @@ public:
 };
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "mmsystem.h"
+#include "vfw.h"
+
+class CCameraWin
+{
+public:
+	CCameraWin();
+	~CCameraWin();
+
+public:
+	bool Open(int nID, HWND hwndParent = NULL);
+	void Close();
+	LRESULT OnWndProc(UINT Msg, WPARAM wParam, LPARAM lParam);
+	LRESULT OnCameraCallback(LPVIDEOHDR lpVHdr);
+
+protected:
+	HWND CreateButton(const wchar_t *pwszText, int x, int y, int w, int h);
+	void OnTakePhoto();
+	void OnFinish();
+
+protected:
+	int m_nID;
+	int m_nCameraID;
+
+	HINSTANCE m_hInstance;
+	HWND m_hwnd;
+	HWND m_hCamera;
+	HWND m_hTakePhoto;
+	HWND m_hFinish;
+
+	int m_nSaveWidth;
+	int m_nSaveHeight;
+
+	char *m_pImageBuf;
+	bool m_bCaptured;
+};
 
 #define LEN_VOICE_BUF		2048
 #define	COUNT_VOICE_BUF		3

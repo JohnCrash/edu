@@ -183,7 +183,56 @@ function AppEntry:init()
 				return selstudent.create()
 			end}
 		end}
-
+	local record =  uikits.button{caption='录音',x=264*scale,y = 64*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+	}
+	record:addTouchEventListener( 
+		function(sender,eventType) 
+			if eventType == ccui.TouchEventType.ended then
+				local b,str = cc_stopRecordVoice()
+				if b then
+					kits.log('stopRecordVoice '..tostring(str) )
+				else
+					kits.log('stopRecordVoice fail')
+				end
+			elseif eventType == ccui.TouchEventType.began then
+				kits.log('startRecordVoice..')
+				if cc_startRecordVoice() then
+					kits.log('startRecordVoice success')
+				else
+					kits.log('startRecordVoice fail')
+				end
+				kits.log('startRecordVoice end')
+			end
+		end)	
+				
+	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			kits.log("cam")
+			cc_takeResource(TAKE_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						--file = res
+					else
+						kits.log("cc_takeResource return fail")
+					end
+				end)
+			end}
+	local photo =   uikits.button{caption='图库',x=664*scale,y = 64*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			kits.log("photo")
+			cc_takeResource(PICK_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						--file = res
+					else
+						kits.log("cc_takeResource return fail")
+					end
+				end)
+			end}
+		
 	local exitbutton = uikits.button{caption='退出',x=64*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -213,6 +262,9 @@ function AppEntry:init()
 	bg:addChild(epbutton)
 	bg:addChild(pbutton)
 	bg:addChild(exitbutton)
+	bg:addChild(record)
+	bg:addChild(cam)
+	bg:addChild(photo)
 	self:addChild(bg)
 	resume.clearflag("update") --update isok
 end

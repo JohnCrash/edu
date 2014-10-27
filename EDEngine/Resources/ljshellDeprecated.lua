@@ -12,4 +12,11 @@ ljshell.AppUserDir = 9
 ljshell.IdNameFile = 10
 ljshell.ShareSettingFile = 11
 ljshell.UserSettingFile = 12
+
+RESULT_OK = -1
+RESULT_CANCEL = 0
+RESULT_ERROR = -2
+TAKE_PICTURE = 1
+PICK_PICTURE = 2
+
 ljshell.initApp("EDEngine")

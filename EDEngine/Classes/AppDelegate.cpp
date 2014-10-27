@@ -15,6 +15,8 @@
 #endif
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+HWND g_hMainWnd = NULL;
+
 std::string toUTF8( const std::wstring& wstr )
 {
 	std::string str;
@@ -91,9 +93,14 @@ void AppDelegate::initLuaEngine()
 	{
 		PAPPFILEMAPINFO pInfo = (PAPPFILEMAPINFO)MapViewOfFile(g_hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 		pInfo->size = sizeof(APPFILEMAPINFO);
-		HWND hwnd = glfwGetWin32Window(glview->getWindow());
-		pInfo->hwnd = hwnd;
+		g_hMainWnd = glfwGetWin32Window(glview->getWindow());
+		pInfo->hwnd = g_hMainWnd;
 		UnmapViewOfFile(pInfo);
+	}
+	else
+	{
+		g_hMainWnd = NULL;
+		CCLOG("ERROR g_hMainWnd = NULL");
 	}
 #endif
 

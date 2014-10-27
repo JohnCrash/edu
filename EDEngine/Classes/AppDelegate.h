@@ -19,6 +19,7 @@ typedef struct
 }APPFILEMAPINFO, *PAPPFILEMAPINFO;
 
 extern HANDLE g_hFileMap;
+extern HWND g_hMainWnd;
 #endif
 
 /**
