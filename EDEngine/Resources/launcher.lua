@@ -132,14 +132,24 @@ elseif app == 'teacherhw' then
 elseif app == 'exerbook' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
+		user_status = 1	
+		cur_child_id = 0
 		local WrongSubjectList = require "errortitile/WrongSubjectList"
 		return WrongSubjectList.create()
 	end}
 elseif app == 'exerbook2' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
+		user_status = 1	
+		cur_child_id = 0
 		local WrongLoading = require "errortitile/Loading"
 		return WrongLoading.create()
+	end}	
+elseif app == 'suggestion' then
+	update.create{name=app,updates={'suggestion','homework','errortitile','luacore'},
+		run=function()
+			local suggestion = require "suggestion/SuggestionView.lua"
+			return suggestion.create()
 	end}	
 elseif app and string.len(app)>0 then
 	--任意启动
