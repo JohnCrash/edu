@@ -1,5 +1,6 @@
 #include "Platform.h"
 #include "cocos2d.h"
+#include "Files.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,17 +15,6 @@ extern "C" {
 #define AMR_MAGIC_NUMBER "#!AMR\n"
 static CVoiceRecord *s_pVoiceRecord=NULL;
 
-static void releaseTmpFile( std::string file )
-{
-}
-static std::string allocTmpFile( std::string suffix )
-{
-	return suffix;
-}
-static char *ReadDataFile(const char * filename,uint32_t *plen)
-{
-	return NULL;
-}
 static bool IsValidParam(int cnChannel,int nRate,int cnBitPerSample)
 {
 	static int s_nValidRateList[]={11025,12000,8000,22050,44100,48000,32000,0};
@@ -310,11 +300,19 @@ void CDynaAMREncoder::ThreadFunc()
 bool CDynaAMREncoder::InitEncoder(int cnChannel,int nRate,int cnBitPerSample,int nMode)
 {
 	//检查参数是否正确
-	if (!IsValidParam(cnChannel,nRate,cnBitPerSample)) return false;
+	if (!IsValidParam(cnChannel,nRate,cnBitPerSample))
+	{
+		CCLOG("ERROR InitEncoder IsValidParam return fail");
+		return false;
+	}
 
 	//压缩率选择
 	m_nMode=GetModeIndex(nMode);
-	if (m_nMode<0) return false;
+	if (m_nMode<0)
+	{
+		CCLOG("ERROR InitEncoder GetModeIndex < 0 ");
+		return false;
+	}
 
 	m_cnChannel=cnChannel;
 	m_nRate=nRate;
@@ -325,7 +323,11 @@ bool CDynaAMREncoder::InitEncoder(int cnChannel,int nRate,int cnBitPerSample,int
 	m_nVolumeSum=0;
 	m_cnVolumeValue=0;
 
-	if (!CloseEncoder()) return false;
+	if (!CloseEncoder()) 
+	{
+		CCLOG("ERROR InitEncoder CloseEncoder error");
+		return false;
+	}
 
 	if (m_strTmpFile.empty())
 	{
@@ -336,7 +338,11 @@ bool CDynaAMREncoder::InitEncoder(int cnChannel,int nRate,int cnBitPerSample,int
 	}
 	m_pInterfaceEncoder=Encoder_Interface_init(0);
 	m_fpEncoder=fopen(m_strTmpFile.c_str(),"wb");
-	if (m_fpEncoder==NULL) return false;
+	if (m_fpEncoder==NULL)
+	{
+		CCLOG("ERROR InitEncoder m_fpEncoder==NULL");
+		return false;
+	}
 
 	//文件头
 	fwrite(AMR_MAGIC_NUMBER, sizeof(char),strlen(AMR_MAGIC_NUMBER),m_fpEncoder);
@@ -359,8 +365,9 @@ bool CDynaAMREncoder::InitEncoder(int cnChannel,int nRate,int cnBitPerSample,int
 	//启动压缩线程
 	m_pThread = new std::thread(_EncoderThreadFunc,this);
 	//if (!NewThread(_EncoderThreadFunc,this))
-	if( m_pThread )
+	if( !m_pThread )
 	{
+		CCLOG("ERROR InitEncoder m_pThread");
 		m_bRunning=false;
 		return false;
 	}
@@ -469,12 +476,15 @@ bool CVoiceRecordBase::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 		m_pEncoder=new CDynaAMREncoder;
 		if (m_pEncoder==NULL) return false;
 	}
+	CCLOG("CVoiceRecordBase::StartRecord");
 	if (!m_pEncoder->CloseEncoder() || !m_pEncoder->InitEncoder(cnChannel,nRate,cnBitPerSample,m_nMode))
 	{
+		CCLOG("CVoiceRecordBase::StartRecord fail");	
 		delete m_pEncoder;
 		m_pEncoder=NULL;
 		return false;
 	}
+	CCLOG("CVoiceRecordBase::StartRecord OK");	
 	return true;
 }
 
@@ -515,7 +525,9 @@ static bool NewVoice()
 //-------------------------------------------------------------------------------------------------------------------------------------
 bool VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
 {
+	CCLOG("VoiceStartRecord in");
 	if (!NewVoice()) return false;
+	CCLOG("VoiceStartRecord NewVoice OK");
 	return s_pVoiceRecord->StartRecord(cnChannel,nRate,cnBitPerSample);
 }
 
@@ -535,3 +547,39 @@ bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume)
 	if (s_pVoiceRecord==NULL) return false;
 	return s_pVoiceRecord->GetRecordInfo(fDuration,nCurVolume);
 }
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	OnJavaReturnBuf
+//
+//	called from native
+//-------------------------------------------------------------------------------------------------------------------------------------
+void OnJavaReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf)
+{
+	if (nType==RETURN_TYPE_RECORDDATA)
+	{
+		if (s_pVoiceRecord) s_pVoiceRecord->OnRecordData(pBuf,lenBuf,nParam1);
+		return;
+	}
+	//g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,lenBuf,pBuf);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	OnJavaReturn
+//
+//	called from native
+//-------------------------------------------------------------------------------------------------------------------------------------
+void OnJavaReturn(int nType,int nID,int nParam1,int nParam2)
+{
+	/*
+	if (nType==RETURN_TYPE_TAKEPICTURE && nParam1!=0)
+	{
+		//照片存放在临时文件中
+		std::string strTmpPathName=g_pTheApp->GetAppTmpDir()+"takephoto.jpg";
+		g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,strTmpPathName.length()+1,(char *)strTmpPathName.c_str());
+		return;
+	}
+	*/
+	//g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
+}
+#endif

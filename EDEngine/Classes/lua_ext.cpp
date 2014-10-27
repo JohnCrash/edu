@@ -282,23 +282,33 @@ static int cc_takeResource(lua_State *L)
 
 int cc_startRecordVoice(lua_State *L)
 {
-	if( lua_isstring(L,1) )
-	{
-		std::string file = lua_tostring(L,1);
-		//Æô¶¯Â¼Òô
-		//int ret = startRecord( file );
-		int ret;
-		lua_pushinteger(L,ret);
-		return 1;
-	}
-	lua_pushnil(L);
+	//1,8000,16
+	int channel = 1;
+	int rate = 8000;
+	int samples = 16;
+	
+	if( lua_isnumber(L,1) )
+		channel = lua_tointeger(L,1);
+	if( lua_isnumber(L,2) )
+		rate = lua_tointeger(L,2);
+	if( lua_isnumber(L,3) )
+		samples = lua_tointeger(L,3);
+	CCLOG("VoiceStartRecord %d,%d,%d",channel,rate,samples);
+	bool b = VoiceStartRecord(channel,rate,samples);
+	CCLOG("VoiceStartRecord return %s",b?"true":"false");
+	lua_pushboolean(L,b);
 	return 1;
 }
 
 int cc_stopRecordVoice(lua_State *L)
 {
-	//stopRecord();
-	return 0;
+	char pszSaveFile[256];
+	CCLOG("VoiceStopRecord");
+	bool b = VoiceStopRecord( pszSaveFile );
+	CCLOG("VoiceStopRecord return %s,%s",b?"true":"false",pszSaveFile);
+	lua_pushboolean(L,b);
+	lua_pushstring(L,pszSaveFile);
+	return 2;
 }
 
 void luaopen_lua_exts(lua_State *L)

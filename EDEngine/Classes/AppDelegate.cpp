@@ -6,6 +6,10 @@
 #include "luaDebug.h"
 #include "AssetsManager.h"
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include "win32/glfw3native.h"
+#endif
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
 #endif
@@ -81,6 +85,18 @@ void AppDelegate::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
+
+#if  (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+	if(g_hFileMap)
+	{
+		PAPPFILEMAPINFO pInfo = (PAPPFILEMAPINFO)MapViewOfFile(g_hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+		pInfo->size = sizeof(APPFILEMAPINFO);
+		HWND hwnd = glfwGetWin32Window(glview->getWindow());
+		pInfo->hwnd = hwnd;
+		UnmapViewOfFile(pInfo);
+	}
+#endif
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 #ifndef _DEBUG
 #ifdef _WIN32

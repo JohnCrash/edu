@@ -11,6 +11,16 @@ USING_NS_CC;
 
 extern bool g_Quit;
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+typedef struct
+{
+	int size;
+	HWND hwnd;
+}APPFILEMAPINFO, *PAPPFILEMAPINFO;
+
+extern HANDLE g_hFileMap;
+#endif
+
 /**
 @brief    The cocos2d Application.
 

@@ -64,10 +64,11 @@ public class AppActivity extends Cocos2dxActivity {
 	private static native void launchParam(final String launch,final String cookie,final String uid);
 	private static native void setExternalStorageDirectory(final String sd);
 	private static native void sendTakeResourceResult(int resultCode,int typeCode,final String res); 
-	private static native void sendVoiceRecordData(int len,int nRate,byte data[]);
+	private static native void sendVoiceRecordData(final int nType,final int nID,final int nParam1,final int nParam2,final int len,final byte[] pBytes);
 	//======================
 	// 拍照和取图库
 	//======================
+	private static final int RETURN_TYPE_RECORDDATA = 10;
 	private static final int TAKE_PICTURE = 1;
 	private static final int PICK_PICTURE = 2;
 	private static AppActivity myActivity;
@@ -227,7 +228,7 @@ public class AppActivity extends Cocos2dxActivity {
 				s_bRecording=false;
 				return;
 			}
-			myActivity.sendVoiceRecordData(bufferSize,s_nRate,buffer);
+			myActivity.sendVoiceRecordData(RETURN_TYPE_RECORDDATA,0,s_nRate,0,bufferReadResult,buffer);
 			//Cocos2dxHelper.SendJavaReturnBufDirectly(RETURN_TYPE_RECORDDATA,0,s_nRate,0,bufferReadResult,buffer);
 		}
 		//停止录音
@@ -276,7 +277,7 @@ public class AppActivity extends Cocos2dxActivity {
 	public static int VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
 	{
 		//if (CheckRecordPrivilege()==0) return 0;
-		
+		Log.d("test"," j_VoiceStartRecord ");
 		if (s_bRecording)
 		{
 			//如果正在录音，先要求停止
@@ -292,6 +293,7 @@ public class AppActivity extends Cocos2dxActivity {
 		//每次采样的数据位数，8或16
 		s_cnBitPerSample=cnBitPerSample;
 	
+		Log.d("test"," j_VoiceStartRecord new thread");
 		//由独立线程录制
 		s_thread=new Thread(new Runnable()
 		{

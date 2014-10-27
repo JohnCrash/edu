@@ -6,6 +6,8 @@
 #include <thread>
 #include <mutex>
 
+#define RETURN_TYPE_RECORDDATA 10
+
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
 
@@ -13,6 +15,8 @@ bool VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample=16);			//开始录
 bool VoiceStopRecord(char *pszSaveFile);										//停止录音，并把数据保存到指定文件
 bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume);						//读取当前录音数据，fDuration是时长，nCurVolume是当前的音量
 
+void OnJavaReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
+void OnJavaReturn(int nType,int nID,int nParam1,int nParam2);
 //	mode	MR475, MR515, MR59, MR67, MR74, MR795, MR102, MR122
 bool AMREncoder(int cnChannel,int nRate,int cnBitPerSample,char *pBuf,int len,const char *pszPathName,int nMode);
 char *AMRDecoder(const char *pszPathName,int &len);

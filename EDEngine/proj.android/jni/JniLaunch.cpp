@@ -28,6 +28,7 @@ bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
 {
 	if (m_pEncoder)
 	{
+		CCLOG("CVoiceRecord::OnRecordData ");
 		m_pEncoder->AddEncoderBuf(pBuf,len,nRate);
 	}
 	return true;
@@ -35,14 +36,18 @@ bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
 
 bool CVoiceRecord::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 {
+	CCLOG("CVoiceRecord::StartRecord ");
 	if (!CVoiceRecordBase::StartRecord(cnChannel,nRate,cnBitPerSample)) return false;
 
+	CCLOG(" after CVoiceRecordBase::StartRecord ");
 	JniMethodInfo jmi;
 
 	int nRet=0;
 	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStartRecord","(III)I"))
 	{
+		CCLOG(" call java.VoiceStartRecord ");
 		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID,cnChannel,nRate,cnBitPerSample);
+		CCLOG(" after java.VoiceStartRecord ");
 		jmi.env->DeleteLocalRef(jmi.classID);
     }
 	return nRet==1;
@@ -55,7 +60,9 @@ bool CVoiceRecord::StopRecord(char *pszSaveFile)
 	int nRet=0;
 	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopRecord","()I"))
 	{
+		CCLOG(" call java.VoiceStopRecord ");
 		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		CCLOG(" after java.VoiceStopRecord ");
 		jmi.env->DeleteLocalRef(jmi.classID);
     }
 	if (nRet!=1) return false;
@@ -82,8 +89,30 @@ extern "C" {
 		takeResource_callback(df,t,r);
 	}
 		
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_sendVoiceRecordData(JNIEnv* env,jobject thiz,int len,int rate,jobject data)
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_sendVoiceRecordData(JNIEnv *env,jobject thiz,jint nType,jint nID,jint nParam1,jint nParam2,jint len,jbyteArray buf)
 	{
+		int lenBuf=len;
+		if (lenBuf==0)
+		{
+			OnJavaReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
+		}
+		else
+		{
+/*			jbyte *data=(jbyte *)env->GetByteArrayElements(buf,0);
+			char *pBuf=(char*)malloc(lenBuf+1);
+			if (pBuf!=NULL)
+			{
+				memcpy(pBuf,data,lenBuf);
+				pBuf[lenBuf]=0;
+	    		OnJavaReturnBuf(nType,nID,nParam1,nParam2,lenBuf,pBuf);
+				free(pBuf);
+            }
+			env->ReleaseByteArrayElements(buf,data,0);
+*/
+    		char *pBuf=(char *)env->GetByteArrayElements(buf,0);
+    		OnJavaReturnBuf(nType,nID,nParam1,nParam2,len,pBuf);
+    		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
+    	}
 	}
 }
 
