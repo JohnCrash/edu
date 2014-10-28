@@ -60,16 +60,69 @@ bool CVoiceRecord::StopRecord(char *pszSaveFile)
 	int nRet=0;
 	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopRecord","()I"))
 	{
-		CCLOG(" call java.VoiceStopRecord ");
+		CCLOG(" call java.VoiceStopRecord ..");
 		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
-		CCLOG(" after java.VoiceStopRecord ");
+		CCLOG(" after java.VoiceStopRecord --");
 		jmi.env->DeleteLocalRef(jmi.classID);
     }
+	CCLOG(" after java.VoiceStopRecord 2");
 	if (nRet!=1) return false;
-
-	return CVoiceRecordBase::StopRecord(pszSaveFile);
+	CCLOG(" after java.VoiceStopRecord 3");
+	bool b = CVoiceRecordBase::StopRecord(pszSaveFile);
+	CCLOG(" after java.VoiceStopRecord 4");
+	return b;
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceStartPlay
+//-------------------------------------------------------------------------------------------------------------------------------------
+bool VoiceStartPlay(const char *pszPathName)
+{
+	JniMethodInfo jmi;
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStartPlay","(Ljava/lang/String;)I"))
+	{
+		jstring jstrPathName=jmi.env->NewStringUTF(pszPathName);
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID,jstrPathName);
+		jmi.env->DeleteLocalRef(jmi.classID);
+		jmi.env->DeleteLocalRef(jstrPathName);
+    }
+	return nRet ? true : false;
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceStopPlay
+//-------------------------------------------------------------------------------------------------------------------------------------
+void VoiceStopPlay()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopPlay","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceIsPlaying
+//-------------------------------------------------------------------------------------------------------------------------------------
+bool VoiceIsPlaying(const char *pszPathName)
+{
+	JniMethodInfo jmi;
+
+	if (pszPathName==NULL) pszPathName="";
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceIsPlaying","(Ljava/lang/String;)I"))
+	{
+		jstring jstrPathName=jmi.env->NewStringUTF(pszPathName);
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID,jstrPathName);
+		jmi.env->DeleteLocalRef(jmi.classID);
+		jmi.env->DeleteLocalRef(jstrPathName);
+    }
+	return nRet ? true : false;
+}
 extern "C" {
     JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid) 
 	{
@@ -113,6 +166,6 @@ extern "C" {
     		OnJavaReturnBuf(nType,nID,nParam1,nParam2,len,pBuf);
     		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
     	}
-	}
+	}	
 }
 

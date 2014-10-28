@@ -221,6 +221,7 @@ public class AppActivity extends Cocos2dxActivity {
 	
 			if (bufferReadResult<0)
 			{
+				Log.w("stop","RecordThreadFunc stop");
 				//停止录音
 				audioRecord.stop();
 				audioRecord.release();
@@ -323,7 +324,7 @@ public class AppActivity extends Cocos2dxActivity {
 	{
 		//停止录音标志，线程循环时看到会停止
 		s_bRecording=false;
-	
+		Log.w("stop","VoiceStopRecord");
 		//最多等待100毫秒，让线程自己终止
 		for (int i=0;i<50;i++)
 		{
@@ -342,6 +343,7 @@ public class AppActivity extends Cocos2dxActivity {
 				break;
 			}
 		}
+		Log.w("stop","VoiceStopRecord 2");
 		//有错误，也有可能是线程设置的
 		if (s_nRecordState<=0)
 		{
@@ -349,8 +351,76 @@ public class AppActivity extends Cocos2dxActivity {
 			return 0;
 		}
 	
+		Log.w("stop","VoiceStopRecord 3");
 		return 1;
 	}
+	//========================
+	// VoiceStartPlay
+	//========================
+	private static String s_strPathNamePlaying;
+	private static MediaPlayer s_mediaPlayer;
+	private static boolean s_bPlaying=false;
+
+	public static int VoiceStartPlay(String strPathName)
+	{
+		if (s_bPlaying)
+		{
+			s_mediaPlayer.stop();
+			s_mediaPlayer.release();
+			s_bPlaying=false;
+		}
+		s_strPathNamePlaying=strPathName;
+		s_mediaPlayer=new MediaPlayer();
+		
+		try
+		{
+			s_mediaPlayer.setDataSource(strPathName);
+			s_mediaPlayer.prepare();
+			s_mediaPlayer.start();
+		}
+		catch(Exception e)
+		{
+			s_mediaPlayer.stop();
+			s_mediaPlayer.release();
+
+			return 0;
+		}
+		s_bPlaying=true;
+
+		s_mediaPlayer.setOnCompletionListener(new OnCompletionListener()
+		{  
+            public void onCompletion(MediaPlayer mp)
+            {
+            	mp.stop();
+                mp.release();  
+                s_bPlaying=false;
+            }  
+        });
+		
+		return 1;
+	}
+
+	public static int VoiceIsPlaying(String strPathName)
+	{
+		if (!s_bPlaying) return 0;
+		
+		if (strPathName.length()==0) return 1;
+		if (strPathName.equals(s_strPathNamePlaying)) return 1;
+		
+		return 0;
+	}
+	
+	public static int VoiceStopPlay()
+	{
+		if (s_bPlaying)
+		{
+			s_mediaPlayer.stop();
+			s_mediaPlayer.release();
+			s_bPlaying=false;
+		}
+		return 1;
+	}
+	
 	//========================
 	// 传递参数
 	//========================

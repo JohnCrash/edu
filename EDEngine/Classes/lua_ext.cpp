@@ -319,6 +319,12 @@ int cc_playVoice(lua_State *L)
 	return 1;
 }
 
+int cc_stopVoice(lua_State *L)
+{
+	VoiceStopPlay();
+	return 0; 
+}
+
 int cc_getVoiceLength(lua_State *L)
 {
 	if (lua_isstring(L, 1))
@@ -357,6 +363,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register( L,"cc_startRecordVoice",cc_startRecordVoice);
 	lua_register( L,"cc_stopRecordVoice",cc_stopRecordVoice);
 	lua_register(L, "cc_playVoice", cc_playVoice);
+	lua_register(L, "cc_stopVoice", cc_stopVoice);
 	lua_register(L, "cc_getVoiceLength", cc_getVoiceLength);
 	lua_register(L, "cc_isVoicePlaying", cc_isVoicePlaying);
     lua_getglobal(L, "package");

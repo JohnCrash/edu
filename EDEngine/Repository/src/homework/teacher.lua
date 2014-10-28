@@ -831,7 +831,7 @@ function TeacherList:release_select_list( level )
 						self:level_clear(level)
 						local tt = {}
 						for k,v in pairs(t) do
-							tt[#t-k-1] = v
+							tt[#t-k+1] = v
 						end
 						for k,v in pairs(tt) do
 							if v and v.name then

@@ -183,6 +183,7 @@ function AppEntry:init()
 				return selstudent.create()
 			end}
 		end}
+	local g_last
 	local record =  uikits.button{caption='录音',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
@@ -191,7 +192,9 @@ function AppEntry:init()
 			if eventType == ccui.TouchEventType.ended then
 				local b,str = cc_stopRecordVoice()
 				if b then
+					g_last = str
 					kits.log('stopRecordVoice '..tostring(str) )
+					kits.log('record time = '..tostring(cc_getVoiceLength(str)))
 				else
 					kits.log('stopRecordVoice fail')
 				end
@@ -205,7 +208,16 @@ function AppEntry:init()
 				kits.log('startRecordVoice end')
 			end
 		end)	
-				
+	local playsound = uikits.button{caption='播放',x=464*scale,y = 164*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+				kits.log("play "..tostring(g_last))
+				if cc_playVoice(g_last) then
+					kits.log('play success')
+				else
+					kits.log('play fail')
+				end
+			end}	
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -253,6 +265,7 @@ function AppEntry:init()
 				isopen = true
 			end
 		end}	
+	bg:addChild(playsound)
 	bg:addChild(debugip)
 	bg:addChild(debugbutton)
 	bg:addChild(amouse)

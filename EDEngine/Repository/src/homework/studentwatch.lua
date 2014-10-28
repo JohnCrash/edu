@@ -56,7 +56,9 @@ function StudentWatch:init_data()
 			[ui.OBJECTIVE_TIME] = kits.time_to_string_simple(self._args.total_time),
 			[ui.OBJECTIVE_FEN] = (self._args.real_score or "0").."分",
 		})
-		
+		if self._args and type(self._args)=='table' then
+			self._args.right_num = 0
+		end
 		self:init_paper_list_by_table(self._args._exam_table)
 	else
 		kits.log('ERROR StudentWatch:init_data invalid arguments')

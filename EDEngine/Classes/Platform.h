@@ -22,6 +22,7 @@ bool VoiceStopRecord(char *pszSaveFile);										//停止录音，并把数据保存到指定
 bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume);						//读取当前录音数据，fDuration是时长，nCurVolume是当前的音量
 
 bool VoiceStartPlay(const char *filename);
+void VoiceStopPlay();
 bool VoiceIsPlaying(const char *pszPathName);
 double VoiceLongth(const char *filename);
 
