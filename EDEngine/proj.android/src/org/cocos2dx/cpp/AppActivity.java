@@ -221,7 +221,7 @@ public class AppActivity extends Cocos2dxActivity {
 	
 			if (bufferReadResult<0)
 			{
-				Log.w("stop","RecordThreadFunc stop");
+				//Log.w("stop","RecordThreadFunc stop");
 				//停止录音
 				audioRecord.stop();
 				audioRecord.release();
@@ -324,7 +324,7 @@ public class AppActivity extends Cocos2dxActivity {
 	{
 		//停止录音标志，线程循环时看到会停止
 		s_bRecording=false;
-		Log.w("stop","VoiceStopRecord");
+		//Log.w("stop","VoiceStopRecord");
 		//最多等待100毫秒，让线程自己终止
 		for (int i=0;i<50;i++)
 		{
@@ -343,7 +343,7 @@ public class AppActivity extends Cocos2dxActivity {
 				break;
 			}
 		}
-		Log.w("stop","VoiceStopRecord 2");
+		//Log.w("stop","VoiceStopRecord 2");
 		//有错误，也有可能是线程设置的
 		if (s_nRecordState<=0)
 		{
@@ -351,7 +351,7 @@ public class AppActivity extends Cocos2dxActivity {
 			return 0;
 		}
 	
-		Log.w("stop","VoiceStopRecord 3");
+		//Log.w("stop","VoiceStopRecord 3");
 		return 1;
 	}
 	//========================

@@ -174,7 +174,6 @@ char *AMRDecoder(const char *pszPathName,int &len)
 	int lenAlloc=0;
 	char *pBuf=NULL;
 
-	CCLOG("AMRDecoder: %s",pszPathName);
 
 	uint32_t lenSrc;
 	char *pSrcBuf=ReadDataFile(pszPathName,&lenSrc);
@@ -270,7 +269,7 @@ void CDynaAMREncoder::ThreadFunc()
 		if (m_lenBuf-m_nPos<lenBlock)
 		{
 			//没有足够数据
-			CCLOG("CDynaAMREncoder::ThreadFunc not data,m_bStoping=%s",m_bStoping?"true":"false");
+			//CCLOG("CDynaAMREncoder::ThreadFunc not data,m_bStoping=%s",m_bStoping?"true":"false");
 			Unlock();
 			Sleep(10);
 			continue;
@@ -295,7 +294,6 @@ void CDynaAMREncoder::ThreadFunc()
 	}
 	//已经没有在压缩了
 	m_bRunning=false;
-	CCLOG("CDynaAMREncoder::ThreadFunc exit m_bRunning=false");
 }
 
 //初始化
@@ -426,9 +424,10 @@ bool CDynaAMREncoder::CloseEncoder()
 {
 	//如果线程还在运行，需要先停止它
 	m_bStoping=true;
-	CCLOG("CDynaAMREncoder::CloseEncoder m_bStoping=%s",m_bStoping?"true":"false");
-	while (m_bRunning) Sleep(10);
-	CCLOG("CDynaAMREncoder::CloseEncoder m_bRunning = false");
+	while (m_bRunning)
+	{	
+		Sleep(10);
+	}
 	m_bStoping=false;
 	
 	if (m_pInterfaceEncoder!=NULL)
@@ -436,13 +435,11 @@ bool CDynaAMREncoder::CloseEncoder()
 		Encoder_Interface_exit(m_pInterfaceEncoder);
 		m_pInterfaceEncoder=NULL;
 	}
-	CCLOG("CDynaAMREncoder::CloseEncoder Encoder_Interface_exit");
 	if (m_fpEncoder!=NULL)
 	{
 		fclose(m_fpEncoder);
 		m_fpEncoder=NULL;
 	}
-	CCLOG("CDynaAMREncoder::CloseEncoder fclose");
 	return true;
 }
 
@@ -495,9 +492,7 @@ bool CVoiceRecordBase::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 bool CVoiceRecordBase::StopRecord(char *pszSaveFile)
 {
 	if (pszSaveFile!=NULL) *pszSaveFile=0;
-	CCLOG("CVoiceRecordBase::StopRecord");
 	Close();
-	CCLOG("CVoiceRecordBase::StopRecord Close");
 	if (pszSaveFile!=NULL && m_pEncoder) 
 		strcpy(pszSaveFile,m_pEncoder->GetEncoderedPathName());
 	return true;

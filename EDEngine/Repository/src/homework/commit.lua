@@ -291,7 +291,13 @@ function WorkCommit:init_parents_page()
 	uikits.event(but1,
 					function(sender)
 						uikits.pushScene(StudentWatch.create(self._args))
-					end,'click')		
+					end,'click')	
+	if self._args.status == 10 or self._args.status == 11 then --提交状态,0,1未提交,10,11已经提交						
+	else
+		but1:setEnabled(false);
+		but1:setHighlighted(false);
+		but1:setBright(false);
+	end
 end
 
 function WorkCommit:init_commit_page()

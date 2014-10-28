@@ -28,7 +28,7 @@ bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
 {
 	if (m_pEncoder)
 	{
-		CCLOG("CVoiceRecord::OnRecordData ");
+//		CCLOG("CVoiceRecord::OnRecordData ");
 		m_pEncoder->AddEncoderBuf(pBuf,len,nRate);
 	}
 	return true;
@@ -36,18 +36,18 @@ bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
 
 bool CVoiceRecord::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 {
-	CCLOG("CVoiceRecord::StartRecord ");
+	//CCLOG("CVoiceRecord::StartRecord ");
 	if (!CVoiceRecordBase::StartRecord(cnChannel,nRate,cnBitPerSample)) return false;
 
-	CCLOG(" after CVoiceRecordBase::StartRecord ");
+	//CCLOG(" after CVoiceRecordBase::StartRecord ");
 	JniMethodInfo jmi;
 
 	int nRet=0;
 	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStartRecord","(III)I"))
 	{
-		CCLOG(" call java.VoiceStartRecord ");
+		//CCLOG(" call java.VoiceStartRecord ");
 		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID,cnChannel,nRate,cnBitPerSample);
-		CCLOG(" after java.VoiceStartRecord ");
+		//CCLOG(" after java.VoiceStartRecord ");
 		jmi.env->DeleteLocalRef(jmi.classID);
     }
 	return nRet==1;
@@ -60,16 +60,16 @@ bool CVoiceRecord::StopRecord(char *pszSaveFile)
 	int nRet=0;
 	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"VoiceStopRecord","()I"))
 	{
-		CCLOG(" call java.VoiceStopRecord ..");
+		//CCLOG(" call java.VoiceStopRecord ..");
 		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
-		CCLOG(" after java.VoiceStopRecord --");
+		//CCLOG(" after java.VoiceStopRecord --");
 		jmi.env->DeleteLocalRef(jmi.classID);
     }
-	CCLOG(" after java.VoiceStopRecord 2");
+	//CCLOG(" after java.VoiceStopRecord 2");
 	if (nRet!=1) return false;
-	CCLOG(" after java.VoiceStopRecord 3");
+	//CCLOG(" after java.VoiceStopRecord 3");
 	bool b = CVoiceRecordBase::StopRecord(pszSaveFile);
-	CCLOG(" after java.VoiceStopRecord 4");
+	//CCLOG(" after java.VoiceStopRecord 4");
 	return b;
 }
 

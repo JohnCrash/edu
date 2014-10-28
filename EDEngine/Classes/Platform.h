@@ -5,7 +5,9 @@
 #include <string>
 #include <thread>
 #include <mutex>
-
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+#include <unistd.h>
+#endif
 #define RETURN_TYPE_RECORDDATA 10
 #define TAKE_PICTURE 1
 #define PICK_PICTURE 2
@@ -48,6 +50,12 @@ public:
 	}
 	void Sleep( int m )
 	{
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+		usleep(m);
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+		Sleep(m);
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+#endif
 	}
 protected:
 	std::mutex m_Mutex;
