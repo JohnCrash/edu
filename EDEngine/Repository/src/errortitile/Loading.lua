@@ -37,18 +37,38 @@ end
 --local cookie_1 = "sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d"
 
 function Loading:getdatabyurl()
-
+--	local send_data
+--	send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
+	
+--	local send_url = t_nextview[2].url..send_data
+--[[	local result = kits.http_get(get_uesr_info_url,login.cookie(),1)
+	kits.log('ERROR--result:::'..result )
+	local tb_result = json.decode(result)
+	if 	tb_result.result ~= 0 then				
+		print(tb_result.result.." : "..tb_result.message)			
+	else
+		--local tb_uig = json.decode(tb_result.uig)
+		if tb_result.uig[1].user_role == 1 then	--?¡ì¨¦¨²
+			_G.user_status = 1
+			local scene_next = WrongSubjectList.create()								
+			cc.Director:getInstance():replaceScene(scene_next)	
+		elseif tb_result.uig[1].user_role == 2 then	--?¨°3¡è
+			_G.user_status = 2
+			local scene_next = selstudent.create()								
+			cc.Director:getInstance():replaceScene(scene_next)				
+		end
+	end	--]]
 	cache.request_json( get_uesr_info_url,function(t)
 		if t and type(t)=='table' then
 			if 	t.result ~= 0 then				
 				print(t.result.." : "..t.message)			
 			else
 				--local tb_uig = json.decode(tb_result.uig)
-				if t.uis[1].user_role == 1 then	--?¡ì¨¦¨²
+				if t.uig[1].user_role == 1 then	--?¡ì¨¦¨²
 					_G.user_status = 1
 					local scene_next = WrongSubjectList.create()								
 					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uis[1].user_role == 2 then	--?¨°3¡è
+				elseif t.uig[1].user_role == 2 then	--?¨°3¡è
 					_G.user_status = 2
 					local scene_next = selstudent.create()								
 					cc.Director:getInstance():replaceScene(scene_next)				
