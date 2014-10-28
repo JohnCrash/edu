@@ -476,7 +476,6 @@ bool CVoiceRecordBase::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 		m_pEncoder=new CDynaAMREncoder;
 		if (m_pEncoder==NULL) return false;
 	}
-	CCLOG("CVoiceRecordBase::StartRecord");
 	if (!m_pEncoder->CloseEncoder() || !m_pEncoder->InitEncoder(cnChannel,nRate,cnBitPerSample,m_nMode))
 	{
 		CCLOG("CVoiceRecordBase::StartRecord fail");	
@@ -484,7 +483,6 @@ bool CVoiceRecordBase::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 		m_pEncoder=NULL;
 		return false;
 	}
-	CCLOG("CVoiceRecordBase::StartRecord OK");	
 	return true;
 }
 
@@ -525,9 +523,7 @@ static bool NewVoice()
 //-------------------------------------------------------------------------------------------------------------------------------------
 bool VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
 {
-	CCLOG("VoiceStartRecord in");
 	if (!NewVoice()) return false;
-	CCLOG("VoiceStartRecord NewVoice OK");
 	return s_pVoiceRecord->StartRecord(cnChannel,nRate,cnBitPerSample);
 }
 
@@ -546,6 +542,21 @@ bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume)
 {
 	if (s_pVoiceRecord==NULL) return false;
 	return s_pVoiceRecord->GetRecordInfo(fDuration,nCurVolume);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceLongth
+//-------------------------------------------------------------------------------------------------------------------------------------
+double VoiceLongth(const char *filename)
+{
+	int len;
+	char *buf = AMRDecoder(filename, len);
+	if (buf)
+	{
+		free(buf);
+		return (double)(len - 6) / (2 * 8000);
+	}
+	return 0;
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID

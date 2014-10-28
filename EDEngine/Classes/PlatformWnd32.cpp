@@ -498,7 +498,7 @@ bool CVoiceRecord::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
 	m_bRunning=true;
 	m_pThread = new std::thread(_VoiceRecordThreadFunc,this);
 	//if (!NewThread(_VoiceRecordThreadFunc,this))
-	if( m_pThread )
+	if( !m_pThread )
 	{
 		m_bRunning=false;
 		Close();
@@ -531,5 +531,188 @@ bool CVoiceRecord::Close()
 
 	CVoiceRecordBase::Close();
 	return true;
+}
+
+//=============================================
+//	CVoicePlay
+//=============================================
+#define min(a,b) (a>b?b:a)
+
+CVoicePlay::CVoicePlay()
+{
+	m_bPlaying = false;
+
+	m_hWave = NULL;
+	m_pBuf = NULL;
+	m_lenBuf = 0;
+	InitializeCriticalSection(&m_cs);
+}
+
+CVoicePlay::~CVoicePlay()
+{
+	CloseWave();
+	if (m_pBuf != NULL) free(m_pBuf);
+}
+
+bool CVoicePlay::CloseWave()
+{
+	if (m_hWave == NULL) return true;
+
+	m_bStoping = true;
+	while (m_bPlaying) Sleep(10);
+
+	waveOutReset(m_hWave);
+	if (m_hdr1.IsPrepared()) waveOutUnprepareHeader(m_hWave, &m_hdr1.m_hdr, sizeof(WAVEHDR));
+	if (m_hdr2.IsPrepared()) waveOutUnprepareHeader(m_hWave, &m_hdr2.m_hdr, sizeof(WAVEHDR));
+	waveOutClose(m_hWave);
+	m_hWave = NULL;
+
+	free(m_pBuf);
+	m_pBuf = NULL;
+	m_lenBuf = 0;
+	m_lenPlayed = 0;
+
+	return true;
+}
+
+static void CALLBACK _waveOutProc(HWAVEOUT hWave, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
+{
+	CVoicePlay *p = (CVoicePlay *)dwInstance;
+	p->waveOutProc(uMsg, dwParam1, dwParam2);
+}
+
+bool CVoicePlay::Init()
+{
+	//amr解压后，固定的8K，16bits，单声道
+	WAVEFORMATEX wfx;
+	wfx.nSamplesPerSec = 8000;
+	wfx.wBitsPerSample = 16;
+	wfx.nChannels = 1;
+	wfx.cbSize = 0;
+	wfx.wFormatTag = WAVE_FORMAT_PCM;
+	wfx.nBlockAlign = wfx.wBitsPerSample*wfx.nChannels / 8;
+	wfx.nAvgBytesPerSec = wfx.nBlockAlign*wfx.nSamplesPerSec;
+
+	//打开默认播放设备
+	if (waveOutOpen(&m_hWave, WAVE_MAPPER, &wfx, (DWORD_PTR)_waveOutProc, (DWORD_PTR)this, CALLBACK_FUNCTION) != MMSYSERR_NOERROR) return false;
+
+	return true;
+}
+
+void CVoicePlay::waveOutProc(UINT uMsg, DWORD dwParam1, DWORD dwParam2)
+{
+	if (uMsg != WOM_DONE) return;
+
+	LPWAVEHDR phdr = (LPWAVEHDR)dwParam1;
+	Lock();
+	phdr->dwUser = (DWORD_PTR)1;
+	Unlock();
+}
+
+static void *_VoicePlayThreadFunc(void *pParam)
+{
+	CVoicePlay *p = (CVoicePlay *)pParam;
+	p->ThreadFunc();
+	return NULL;
+}
+
+void CVoicePlay::ThreadFunc()
+{
+	m_hdr1.m_hdr.dwUser = (DWORD_PTR)1;
+	m_hdr2.m_hdr.dwUser = (DWORD_PTR)1;
+
+	CVoiceRecordHdr *phdr;
+
+	while (!m_bStoping && m_lenPlayed<m_lenBuf)
+	{
+		Lock();
+		if (m_hdr1.m_hdr.dwUser == NULL && m_hdr2.m_hdr.dwUser == NULL)
+		{
+			Unlock();
+			Sleep(10);
+			continue;
+		}
+		int len = min(m_lenBuf - m_lenPlayed, LEN_VOICE_BUF);
+
+		if (m_hdr1.m_hdr.dwUser) phdr = &m_hdr1;
+		else phdr = &m_hdr2;
+
+		if (phdr->IsPrepared()) waveOutUnprepareHeader(m_hWave, &phdr->m_hdr, sizeof(WAVEHDR));
+		phdr->m_hdr.dwUser = NULL;
+
+		memmove(phdr->m_chBuf, m_pBuf + m_lenPlayed, len);
+		phdr->m_hdr.dwBufferLength = len;
+		waveOutPrepareHeader(m_hWave, &phdr->m_hdr, sizeof(WAVEHDR));
+		waveOutWrite(m_hWave, &phdr->m_hdr, sizeof(WAVEHDR));
+
+		m_lenPlayed += len;
+		Unlock();
+	}
+	m_bPlaying = false;
+}
+
+bool CVoicePlay::StartPlay(const char *pszPathName)
+{
+	CloseWave();
+	if (!Init()) return false;
+
+	m_pBuf = AMRDecoder(pszPathName, m_lenBuf);
+	if (m_pBuf == NULL)
+	{
+		CloseWave();
+		return false;
+	}
+	m_strPathName = pszPathName;
+	m_lenPlayed = 0;
+
+	m_bStoping = false;
+	m_bPlaying = true;
+	//if (!NewThread(_VoicePlayThreadFunc, this))
+	m_pThread = new std::thread(_VoicePlayThreadFunc, this);
+	if (!m_pThread)
+	{
+		m_bPlaying = false;
+		CloseWave();
+		return false;
+	}
+	return true;
+}
+
+bool CVoicePlay::IsPlaying(const char *pszPathName)
+{
+	if (pszPathName != NULL && strcmp(pszPathName, m_strPathName.c_str()) != 0) return false;
+	if (m_lenPlayed<m_lenBuf) return true;
+
+	return false;
+}
+
+bool CVoicePlay::StopPlay()
+{
+	CloseWave();
+	return true;
+}
+
+CVoicePlay *s_pVoicePlay = NULL;
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceStartPlay
+//-------------------------------------------------------------------------------------------------------------------------------------
+bool VoiceStartPlay(const char *pszPathName)
+{
+	if (s_pVoicePlay == NULL)
+	{
+		s_pVoicePlay = new CVoicePlay;
+		if (s_pVoicePlay == NULL) return false;
+	}
+	return s_pVoicePlay->StartPlay(pszPathName);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	VoiceIsPlaying
+//-------------------------------------------------------------------------------------------------------------------------------------
+bool VoiceIsPlaying(const char *pszPathName)
+{
+	if (s_pVoicePlay == NULL) return false;
+	return s_pVoicePlay->IsPlaying(pszPathName);
 }
 #endif

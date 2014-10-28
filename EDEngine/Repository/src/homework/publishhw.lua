@@ -394,35 +394,43 @@ function Publishhw:publish_topics()
 		local add_paper_custom_item_isdone = uikits.RUN
 		local function add_paper_custom_item() --add custom item
 			kits.log('>>>ADD CUSTOM ITEM')
-			self._paperid = paper_id
-			local send_data_pid = '?pid='..self._paperid
-			local tb_para = {}
-			for i,v in pairs(custom_items) do
-				local per_item_info = {}
-				per_item_info.item_id = v.item_id
-				per_item_info.item_type = v.item_type
-				per_item_info.origin = 2
-				per_item_info.sort = 100
-				tb_para[#tb_para+1] = per_item_info
-			end
-			self._item_count = self._item_count or 0
-			self._item_count = self._item_count  + #tb_para
-			local send_data_para = '&para='..json.encode(tb_para)
-			local send_url = add_homework_item_url..send_data_pid..send_data_para
-			cache.request( send_url,function(b)
-					if b then
-						local result = cache.get_data( send_url )
-						if result then
-							add_paper_custom_item_isdone = uikits.OK
+			if #custom_items <= 0 then
+				--没有跳过
+				self._paperid = paper_id
+				kits.log("	CUSTOM ITEM EMPTY")
+				add_paper_custom_item_isdone = uikits.OK
+			else
+				--有主观题
+				self._paperid = paper_id
+				local send_data_pid = '?pid='..self._paperid
+				local tb_para = {}
+				for i,v in pairs(custom_items) do
+					local per_item_info = {}
+					per_item_info.item_id = v.item_id
+					per_item_info.item_type = v.item_type
+					per_item_info.origin = 2
+					per_item_info.sort = 100
+					tb_para[#tb_para+1] = per_item_info
+				end
+				self._item_count = self._item_count or 0
+				self._item_count = self._item_count  + #tb_para
+				local send_data_para = '&para='..json.encode(tb_para)
+				local send_url = add_homework_item_url..send_data_pid..send_data_para
+				cache.request( send_url,function(b)
+						if b then
+							local result = cache.get_data( send_url )
+							if result then
+								add_paper_custom_item_isdone = uikits.OK
+							else
+								add_paper_custom_item_isdone = uikits.FAIL
+								kits.log('ERROR : add_paper_item  error1')
+							end						
 						else
 							add_paper_custom_item_isdone = uikits.FAIL
-							kits.log('ERROR : add_paper_item  error1')
-						end						
-					else
-						add_paper_custom_item_isdone = uikits.FAIL
-						kits.log('ERROR : add_paper_item error0')
-					end
-				end)		
+							kits.log('ERROR : add_paper_item error0')
+						end
+					end)		
+			end
 		end
 		local publish_paper_isdone = uikits.RUN
 		local function publish_paper()

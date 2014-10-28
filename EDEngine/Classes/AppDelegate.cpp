@@ -181,6 +181,22 @@ void AppDelegate::initLuaEngine()
     pFileUtils->addSearchPath("res");
 #endif
 #else
+#ifdef _PROGRAMFILES_DEBUG_
+	InitEngineDirectory();
+	std::string wpath = getLjShellDirectory(App_DIRECTORY);
+	pFileUtils->addSearchPath(wpath + "src/luacore", true);
+	pFileUtils->addSearchPath(wpath + "res/luacore", true);
+	pFileUtils->addSearchPath(wpath + "src");
+	pFileUtils->addSearchPath(wpath + "res");
+	pFileUtils->addSearchPath(wpath + "cache");
+	pFileUtils->addSearchPath(wpath);
+	std::string exe = getExeDir();
+	pFileUtils->addSearchPath(exe);
+	pFileUtils->addSearchPath(exe + "luacore");
+	pFileUtils->addSearchPath(exe + "luacore/res");
+	pFileUtils->addSearchPath(exe + "src");
+	pFileUtils->addSearchPath(exe + "res");
+#else
 	InitEngineDirectory();
 	std::string wpath = getLjShellDirectory(App_DIRECTORY);
 	pFileUtils->addSearchPath(wpath+"cache");
@@ -191,6 +207,7 @@ void AppDelegate::initLuaEngine()
 	pFileUtils->addSearchPath(exe+"luacore/res");
 	pFileUtils->addSearchPath(exe+"src");
     pFileUtils->addSearchPath(exe+"res");	
+#endif
 #endif
     
     auto pEngine = LuaEngine::getInstance();
@@ -234,6 +251,7 @@ void AppDelegate::InitForDebugMode()
 		SetCurrentDirectory( wp.c_str() );
 	}
 }
+
 #endif
 
 void AppDelegate::registerHotkey()

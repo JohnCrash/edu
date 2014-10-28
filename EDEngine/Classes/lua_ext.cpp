@@ -293,9 +293,7 @@ int cc_startRecordVoice(lua_State *L)
 		rate = lua_tointeger(L,2);
 	if( lua_isnumber(L,3) )
 		samples = lua_tointeger(L,3);
-	CCLOG("VoiceStartRecord %d,%d,%d",channel,rate,samples);
 	bool b = VoiceStartRecord(channel,rate,samples);
-	CCLOG("VoiceStartRecord return %s",b?"true":"false");
 	lua_pushboolean(L,b);
 	return 1;
 }
@@ -303,12 +301,47 @@ int cc_startRecordVoice(lua_State *L)
 int cc_stopRecordVoice(lua_State *L)
 {
 	char pszSaveFile[256];
-	CCLOG("VoiceStopRecord");
 	bool b = VoiceStopRecord( pszSaveFile );
-	CCLOG("VoiceStopRecord return %s,%s",b?"true":"false",pszSaveFile);
 	lua_pushboolean(L,b);
 	lua_pushstring(L,pszSaveFile);
 	return 2;
+}
+
+int cc_playVoice(lua_State *L)
+{
+	if (lua_isstring(L,1))
+	{
+		const char *amr = lua_tostring(L, 1);
+		lua_pushboolean(L, VoiceStartPlay(amr));
+		return 1;
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+int cc_getVoiceLength(lua_State *L)
+{
+	if (lua_isstring(L, 1))
+	{
+		const char *amr = lua_tostring(L, 1);
+		double d = VoiceLongth(amr);
+		lua_pushnumber(L, d);
+		return 1;
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+int cc_isVoicePlaying(lua_State *L)
+{
+	if (lua_isstring(L, 1))
+	{
+		const char *amr = lua_tostring(L, 1);
+		lua_pushboolean(L,VoiceIsPlaying(amr));
+		return 1;
+	}
+	lua_pushnil(L);
+	return 1;
 }
 
 void luaopen_lua_exts(lua_State *L)
@@ -323,6 +356,9 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register( L,"cc_takeResource",cc_takeResource);
 	lua_register( L,"cc_startRecordVoice",cc_startRecordVoice);
 	lua_register( L,"cc_stopRecordVoice",cc_stopRecordVoice);
+	lua_register(L, "cc_playVoice", cc_playVoice);
+	lua_register(L, "cc_getVoiceLength", cc_getVoiceLength);
+	lua_register(L, "cc_isVoicePlaying", cc_isVoicePlaying);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

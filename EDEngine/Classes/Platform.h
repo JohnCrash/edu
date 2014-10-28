@@ -21,6 +21,10 @@ bool VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample=16);			//开始录
 bool VoiceStopRecord(char *pszSaveFile);										//停止录音，并把数据保存到指定文件
 bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume);						//读取当前录音数据，fDuration是时长，nCurVolume是当前的音量
 
+bool VoiceStartPlay(const char *filename);
+bool VoiceIsPlaying(const char *pszPathName);
+double VoiceLongth(const char *filename);
+
 void OnJavaReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
 void OnJavaReturn(int nType,int nID,int nParam1,int nParam2);
 //	mode	MR475, MR515, MR59, MR67, MR74, MR795, MR102, MR122
@@ -190,6 +194,46 @@ protected:
 	bool m_bRunning;
 	std::thread * m_pThread;
 };
+
+//=============================================
+//	CVoicePlay
+//=============================================
+class CVoicePlay
+{
+public:
+	CVoicePlay();
+	~CVoicePlay();
+
+	bool Init();
+	void waveOutProc(UINT uMsg, DWORD dwParam1, DWORD dwParam2);
+	bool StartPlay(const char *pszPathName);
+	bool IsPlaying(const char *pszPathName);
+	bool StopPlay();
+
+	void ThreadFunc();
+
+protected:
+	void Lock(){ EnterCriticalSection(&m_cs); }
+	void Unlock(){ LeaveCriticalSection(&m_cs); }
+
+	bool CloseWave();
+
+protected:
+	CRITICAL_SECTION m_cs;
+
+	HWAVEOUT m_hWave;
+	bool m_bPlaying;
+	bool m_bStoping;
+
+	CVoiceRecordHdr m_hdr1, m_hdr2;
+
+	char *m_pBuf;
+	int m_lenBuf;
+	int m_lenPlayed;
+	std::thread *m_pThread;
+	std::string m_strPathName;
+};
+
 #else
 #endif
 
