@@ -84,12 +84,10 @@ function Publishhw:getdatabyurl()
 	cache.request_json( send_url,function(t)
 			if t and type(t)=='table' then
 				if t.result == 0 then
-					self.tb_banji = t.zone
---[[					local tb_banji = {}
-					for i=1,10 do 
-						tb_banji[i] = t.zone[1]
-					end--]]
-					self:showbanjilist(self.tb_banji)
+					if t.zone and type(t.zone)=='table' then
+						self.tb_banji = t.zone
+						self:showbanjilist(self.tb_banji)						
+					end
 				end
 			else
 				--既没有网络也没有缓冲

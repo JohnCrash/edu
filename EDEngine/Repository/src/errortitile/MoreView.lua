@@ -70,7 +70,6 @@ function MoreView:getdatabyurl()
 	if 	tb_result.result ~= 0 then				
 		print(tb_result.result.." : "..tb_result.message)			
 	else
-		--local tb_uig = json.decode(tb_result.uig)
 		self.childinfo = tb_result.uis
 	end	
 end
