@@ -95,6 +95,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	local label_myanswer
 	local questions_view
 	local label_type
+	local label_wrong_per
 	
 	wrong_view = src_wrongview:clone()
 	self.main_wrongview:addChild(wrong_view,1,1000+index)
@@ -121,6 +122,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 		infomation_view = wrong_view:getChildByTag(374)
 		but_more = infomation_view:getChildByTag(375)
 		label_difficulty = infomation_view:getChildByTag(378)
+		label_wrong_per = infomation_view:getChildByTag(379)
 		wrong_per = infomation_view:getChildByTag(380)
 		label_type = infomation_view:getChildByTag(376)
 		tag_collect = wrong_view:getChildByTag(399)
@@ -133,6 +135,7 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 		infomation_view = wrong_view:getChildByTag(321)
 		but_more = infomation_view:getChildByTag(331)
 		label_difficulty = infomation_view:getChildByTag(326)
+		label_wrong_per = infomation_view:getChildByTag(328)
 		wrong_per = infomation_view:getChildByTag(330)
 		label_type = infomation_view:getChildByTag(322)
 		tag_collect = wrong_view:getChildByTag(397)
@@ -141,6 +144,8 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 		questions_view = wrong_view:getChildByTag(333)
 	end
 	
+	label_wrong_per:setVisible(false)
+	wrong_per:setVisible(false)
 	-- 测试题干显示
 	local size_questions_view = questions_view:getContentSize()
 	local scrollView = ccui.ScrollView:create()
