@@ -365,11 +365,12 @@ function Publishhw:publish_topics()
 		local add_paper_item_isdone = uikits.RUN
 		local function add_paper_item() --add_item
 			kits.log('>>>ADD ITEM')
-			if self.tb_parent_view._confirm_item and #self.tb_parent_view._confirm_item>0 then
+			if self.tb_parent_view._confirm_item and table.maxn(self.tb_parent_view._confirm_item)>0 then
 				self._paperid = paper_id
 				local send_data_pid = '?pid='..self._paperid
 				local tb_para = self:format_item_list()
 				local send_data_para = '&para='..json.encode(tb_para)
+				
 				local send_url = add_homework_item_url..send_data_pid..send_data_para
 				cache.request( send_url,function(b)
 						if b then
