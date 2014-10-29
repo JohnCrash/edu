@@ -88,7 +88,8 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	local infomation_view
 	local label_difficulty
 	local label_item_name
-	local wrong_per				
+	local wrong_per	
+	local label_wrong_per			
 	
 	local collect_view = src_collect_view:clone()
 	local size  = collect_view:getContentSize()
@@ -114,6 +115,7 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	infomation_view = collect_view:getChildByTag(643)
 	but_more = infomation_view:getChildByTag(644)
 	label_item_name = infomation_view:getChildByTag(645)
+	label_wrong_per = infomation_view:getChildByTag(648)
 	wrong_per = infomation_view:getChildByTag(649)
 	label_difficulty = infomation_view:getChildByTag(647)
 	local questions_view = collect_view:getChildByTag(650)
@@ -122,6 +124,9 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 	label_item_name:setString(collectitem.item_name)
 	label_difficulty:setString(collectitem.difficulty)				
 	wrong_per:setString(collectitem.perwrong.."%")	
+	
+	label_wrong_per:setVisible(false)
+	wrong_per:setVisible(false)
 	
 	local scrollView = ccui.ScrollView:create()
     scrollView:setTouchEnabled(true)
