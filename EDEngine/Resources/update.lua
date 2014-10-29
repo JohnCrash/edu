@@ -11,7 +11,7 @@ local platform = CCApplication:getInstance():getTargetPlatform()
  
 local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v3/'
 local local_server = 'http://192.168.2.211:81/lgh/v3/'
-local update_server = liexue_server
+local update_server = local_server
 
 local ui = {
 	FILE = 'loadscreen/jiazhan.json',
@@ -378,6 +378,8 @@ function UpdateProgram:update()
 				cc.Director:getInstance():replaceScene(scene)
 			else
 				kits.log("ERROR UpdateProgram:update pcall failed")
+				kits.log("error message:")
+				kits.log(tostring(scene))				
 				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."),请检查您的网络",2)
 			end
 			return
@@ -437,6 +439,8 @@ function UpdateProgram:update()
 				cc.Director:getInstance():replaceScene(scene)
 			else
 				kits.log("ERROR UpdateProgram:update pcall failed!")
+				kits.log("error message:")
+				kits.log(tostring(scene))
 				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
 			end		
 		else

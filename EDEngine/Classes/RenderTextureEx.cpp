@@ -334,6 +334,11 @@ bool CImageEx::ReduceAndSaveToFile(std::string filename, int nMaxLineLength, int
 {
 	int nWidth;
 	int nHeight;
+	if (_width < nMaxLineLength && _height < nMaxLineLength)
+	{
+		mTmpFile = filename;
+		return true; //不需要调整
+	}
 	char *pDst = ReduceRawBuf((char *)_data, _width, _height, nWidth, nHeight, nMaxLineLength, false);
 	if (pDst == NULL)
 	{
