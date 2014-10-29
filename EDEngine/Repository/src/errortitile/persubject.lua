@@ -504,8 +504,28 @@ function persubject:getdatabyurl()
 						base_url = t_nextview[8].url 
 					else
 						base_url = "http://app.lejiaolexue.com/exerbook/handler/ItemWrongPer.ashx"
-					end				
-					result = kits.http_post(base_url,send_data,login.cookie(),1)
+					end		
+					cache.post(base_url,send_data,function(t,d)
+						if t == true then
+							local tb_result = json.decode(d)
+							if tb_result.result == 0 then
+								local tb_perwrong = tb_result.exer_book_stat
+								for i,obj in pairs(tb_perwrong) do
+									self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
+								end
+							end
+							self:updatepage()
+						else
+							messagebox.open(self,function(e)
+								if e == messagebox.TRY then
+									self:init()
+								elseif e == messagebox.CLOSE then
+									uikits.popScene()
+								end
+							end,messagebox.RETRY)	
+						end
+					end)		
+--[[					result = kits.http_post(base_url,send_data,login.cookie(),1)
 					local tb_result = json.decode(result)
 					if tb_result.result == 0 then
 						local tb_perwrong = tb_result.exer_book_stat
@@ -513,7 +533,7 @@ function persubject:getdatabyurl()
 							self.wrongtitleitems[i].perwrong = tb_perwrong[i].wrong_per
 						end
 					end
-					self:updatepage()				
+					self:updatepage()		--]]		
 				end
 
 			else

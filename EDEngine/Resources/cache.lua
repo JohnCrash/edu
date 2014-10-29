@@ -277,9 +277,9 @@ local function post(url,form,func)
 	end
 end
 
-local function post_json( url,t,func )
+--[[local function post_json( url,t,func )
 end
-
+--]]
 local function request_cancel()
 	for i,m in pairs(request_list) do
 		m:cancel()
@@ -337,5 +337,5 @@ return {
 	upload = upload,
 	clear = clear_cache,
 	post = post,
-	post_json = post_json,
+--	post_json = post_json,
 }
