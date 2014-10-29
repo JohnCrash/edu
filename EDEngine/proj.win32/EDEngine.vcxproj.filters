@@ -60,6 +60,8 @@
     <ClCompile Include="..\Classes\Platform.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\IDF.cpp" />
+    <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -104,6 +106,8 @@
     <ClInclude Include="..\Classes\Platform.h">
       <Filter>Classes</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\IDF.h" />
+    <ClInclude Include="..\Classes\RenderTextureEx.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

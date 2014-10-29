@@ -82,6 +82,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4267;4251;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;jsonD.lib;armnb.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -99,6 +100,9 @@
       <Command>if not exist "$(OutDir)" mkdir "$(OutDir)"
 xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</Command>
     </PreLinkEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -140,6 +144,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\Console.cpp" />
     <ClCompile Include="..\Classes\Files.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\luaDebug.cpp" />
     <ClCompile Include="..\Classes\lua_ext.cpp" />
     <ClCompile Include="..\Classes\lua_json.cpp" />
@@ -148,6 +153,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\MD5.cpp" />
     <ClCompile Include="..\Classes\Platform.cpp" />
     <ClCompile Include="..\Classes\PlatformWnd32.cpp" />
+    <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
     <ClCompile Include="..\Classes\thread_curl.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FileOp.cpp" />
@@ -158,12 +164,14 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\Console.h" />
     <ClInclude Include="..\Classes\Files.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\IDF.h" />
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
     <ClInclude Include="..\Classes\lua_ljshell.h" />
     <ClInclude Include="..\Classes\lua_thread_curl.h" />
     <ClInclude Include="..\Classes\MD5.h" />
     <ClInclude Include="..\Classes\Platform.h" />
+    <ClInclude Include="..\Classes\RenderTextureEx.h" />
     <ClInclude Include="..\Classes\thread_curl.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="FileOp.h" />

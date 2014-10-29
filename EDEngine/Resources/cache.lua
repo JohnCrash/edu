@@ -250,6 +250,29 @@ local function upload(url,filename,data,func,progress_func)
 	end
 end
 
+local function post(url,form,func)
+	local ret,msg = mt.new('POST',url,login.cookie(),
+		function(obj)
+			if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+				if obj.state == 'OK' and obj.data then
+					func( true )
+				else
+					func( false,obj.errmsg)
+					kits.log('ERROR : cache.post failed! url = '..tostring(url))
+					kits.log('	errmsg = '..tostring(obj.errmsg))
+				end
+			end
+		end,form )
+	if not ret then
+		kits.log('ERROR : cache.post failed url = '..tostring(url))
+		kits.log('	errmsg = '..tostring(msg))
+		func( false,msg )
+	end
+end
+
+local function post_json( url,t,func )
+end
+
 local function request_cancel()
 	for i,m in pairs(request_list) do
 		m:cancel()
@@ -306,4 +329,6 @@ return {
 	request_cancel = request_cancel,
 	upload = upload,
 	clear = clear_cache,
+	post = post,
+	post_json = post_json,
 }

@@ -317,7 +317,6 @@ function WorkList:init_data()
 	cache.request( send_url,
 		function(b)
 			if b then
-				print("11111111")
 				self:init_data_by_cache()
 			else
 				kits.log('Connect faild : '..send_url )
@@ -881,11 +880,12 @@ function WorkList:add_item( t )
 			end
 			local function timer_func()
 				dt = end_time - os.time()
-				if dt > 0 then
+				local txt = uikits.child( item,ui.TIMELABEL )
+				if dt > 0 then					
+					if txt then txt:setString('剩余结束时间:') end
 					u:setString(kits.time_to_string_simple(dt))
 				else
 					--过期
-					local txt = uikits.child( item,ui.TIMELABEL )
 					if txt then txt:setString('已过期:') end
 					u:setString(kits.time_to_string_simple(-dt))
 					scheduler:unscheduleScriptEntry(u._scID)

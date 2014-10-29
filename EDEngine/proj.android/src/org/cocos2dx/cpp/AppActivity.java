@@ -82,7 +82,7 @@ public class AppActivity extends Cocos2dxActivity {
 			{
 				Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 				long ct = System.currentTimeMillis();
-				_resourceName = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + "ljdata/EDEngine/" + ct + ".jpg";
+				_resourceName = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + "ljdata/EDEngine/tmp" + ct + ".jpg";
 				File file = new File(_resourceName);
 				Uri fileUri = Uri.fromFile(file);
 				intent.putExtra( MediaStore.EXTRA_OUTPUT, fileUri);
@@ -278,7 +278,7 @@ public class AppActivity extends Cocos2dxActivity {
 	public static int VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
 	{
 		//if (CheckRecordPrivilege()==0) return 0;
-		Log.d("test"," j_VoiceStartRecord ");
+		//Log.d("test"," j_VoiceStartRecord ");
 		if (s_bRecording)
 		{
 			//如果正在录音，先要求停止
@@ -294,7 +294,7 @@ public class AppActivity extends Cocos2dxActivity {
 		//每次采样的数据位数，8或16
 		s_cnBitPerSample=cnBitPerSample;
 	
-		Log.d("test"," j_VoiceStartRecord new thread");
+		//Log.d("test"," j_VoiceStartRecord new thread");
 		//由独立线程录制
 		s_thread=new Thread(new Runnable()
 		{
