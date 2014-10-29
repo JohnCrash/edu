@@ -1,29 +1,34 @@
 #include "RenderTextureEx.h"
-#include "misc.h"
 #include "errno.h"
-#include "AppDelegateBase.h"
 #include "IDF.h"
+#include "Files.h"
+
+#define min(a,b) a>b?b:a
+
+static void StrToLower(std::string & str)
+{
+}
 
 CImageEx::CImageEx()
 {
 	m_nJpgOrientation=IMAGE_ORIENTATION_UP;
 }
 
-CCImage::EImageFormat CImageEx::GetImageFormat(const char *pszPathName)
+Image::Format CImageEx::GetImageFormat(const char *pszPathName)
 {
-	CCImage::EImageFormat ret=CCImage::kFmtUnKnown;
+	Image::Format ret = Image::Format::UNKOWN;
 
 	std::string str=pszPathName;
 	StrToLower(str);
 
-	if ((std::string::npos != str.find(".jpg"))) ret = CCImage::kFmtJpg;
-	else if ((std::string::npos != str.find(".png"))) ret = CCImage::kFmtPng;
-	else if ((std::string::npos != str.find(".tiff"))) ret = CCImage::kFmtTiff;
+	if ((std::string::npos != str.find(".jpg"))) ret = Image::Format::JPG;
+	else if ((std::string::npos != str.find(".png"))) ret = Image::Format::PNG;
+	else if ((std::string::npos != str.find(".tiff"))) ret = Image::Format::TIFF;
 
 	return ret;
 }
 
-CCImage::EImageFormat CImageEx::GetImageFormat(const char *pBuf,int lenBuf)
+Image::Format CImageEx::GetImageFormat(const char *pBuf,int lenBuf)
 {
 	//png
 	unsigned char *pHead=(unsigned char*)pBuf;
@@ -38,7 +43,7 @@ CCImage::EImageFormat CImageEx::GetImageFormat(const char *pBuf,int lenBuf)
 			&& pHead[6] == 0x1A
 			&& pHead[7] == 0x0A)
 		{
-			return CCImage::kFmtPng;
+			return Image::Format::PNG;
 		}
 	}
 
@@ -47,7 +52,7 @@ CCImage::EImageFormat CImageEx::GetImageFormat(const char *pBuf,int lenBuf)
 	{
 		if ((pHead[0] == 0x49 && pHead[1] == 0x49) || (pHead[0] == 0x4d && pHead[1] == 0x4d))
 		{
-			return CCImage::kFmtTiff;
+			return Image::Format::TIFF;
 		}
 	}
 
@@ -56,39 +61,39 @@ CCImage::EImageFormat CImageEx::GetImageFormat(const char *pBuf,int lenBuf)
 	{
 		if (pHead[0] == 0xff && pHead[1] == 0xd8)
 		{
-			return CCImage::kFmtJpg;
+			return Image::Format::JPG;
 		}
 	}
-	return CCImage::kFmtUnKnown;
+	return Image::Format::UNKOWN;
 }
 
 bool CImageEx::LoadFromFile(const char *pszPathName)
 {
-	gsWriteLog("LoadFromFile: %s\n",pszPathName);
+	CCLOG("LoadFromFile: %s\n",pszPathName);
 
 	int lenBuf;
 	char *pBuf=ReadDataFile(pszPathName,(uint32_t *)&lenBuf);
 	if (pBuf==NULL) return false;
 
-	if (!initWithImageData(pBuf,lenBuf,CCImage::kFmtUnKnown))
+	if (!initWithImageData((const unsigned char *)pBuf,lenBuf))
 	{
-		gsWriteLog("LoadFromFile: %s fail\n",pszPathName);
+		CCLOG("LoadFromFile: %s fail\n",pszPathName);
 		return false;
 	}
 
-	int fmt=GetImageFormat(pBuf,lenBuf);
-	gsWriteLog("LoadFromFile: %d x %d, fmt: %d\n",m_nWidth,m_nHeight,fmt);
-	if (fmt!=CCImage::kFmtJpg) return true;
+	Image::Format fmt=GetImageFormat(pBuf,lenBuf);
+	CCLOG("LoadFromFile: %d x %d, fmt: %d\n",_width,_height,fmt);
+	if (fmt!=Image::Format::JPG) return true;
 
 	//jpg文件，需要根据exif信息，旋转图片
 	CIDF idf;
 	if (!idf.LoadIDF(pBuf,lenBuf))
 	{
-		gsWriteLog("%s, fmt: %d, no IDF",pszPathName,fmt);
+		CCLOG("%s, fmt: %d, no IDF",pszPathName,fmt);
 		free(pBuf);
 		return true;
 	}
-	gsWriteLog("%s IDF found",pszPathName);
+	CCLOG("%s IDF found",pszPathName);
 
 	uint16_t *pData;
 	PIDFINFO pii=idf.FindIDF(0,0x0112,(char **)&pData);
@@ -110,17 +115,17 @@ bool CImageEx::InitImageData(int nWidth,int nHeight)
 	unsigned char *pData=new unsigned char[nSize];
 	if (pData==NULL) return false;
 
-	CC_SAFE_DELETE_ARRAY(m_pData);
-	m_pData=pData;
+	CC_SAFE_DELETE_ARRAY(_data);
+	_data=pData;
 
 	//初始化
-	memset(m_pData,0,nSize);
+	memset(_data,0,nSize);
 
-	m_nBitsPerComponent=8;
-	m_nHeight=(short)nHeight;
-	m_nWidth=(short)nWidth;
-	m_bHasAlpha=true;
-	m_bPreMulti=false;
+	//m_nBitsPerComponent=8; cocos2d 2.2
+	_height=(short)nHeight;
+	_width=(short)nWidth;
+	//m_bHasAlpha=true; 2.2
+	_preMulti=false;
 
 	return true;
 }
@@ -129,12 +134,12 @@ bool CImageEx::SaveToFileInTextMode(const char *pszPathName,int cnBytesPerBit)
 {
 	if (cnBytesPerBit!=3 && cnBytesPerBit!=4)
 	{
-		CCLog("only support RGB888 or RGBA8888 format");
+		CCLOG("only support RGB888 or RGBA8888 format");
 		return false;
 	}
-	if (m_pData==NULL)
+	if (_data==NULL)
 	{
-		CCLog("load image first");
+		CCLOG("load image first");
 		return false;
 	}
 
@@ -144,15 +149,15 @@ bool CImageEx::SaveToFileInTextMode(const char *pszPathName,int cnBytesPerBit)
 	FILE *fp=fopen(str.c_str(),"wt");
 	if (fp==NULL)
 	{
-		CCLog("can not create file: %s",str.c_str());
+		CCLOG("can not create file: %s",str.c_str());
 		return false;
 	}
 
 	int cnPixel=0;
-	for (int i=0;i<m_nHeight;i++)
+	for (int i=0;i<_height;i++)
 	{
-		GLubyte *pBuf=m_pData+(m_nHeight-i-1)*m_nWidth*cnBytesPerBit;
-		for (int j=0;j<m_nWidth;j++)
+		GLubyte *pBuf=_data+(_height-i-1)*_width*cnBytesPerBit;
+		for (int j=0;j<_width;j++)
 		{
 			GLubyte b1,b2,b3,b4;
 			b1=pBuf[0];
@@ -186,8 +191,8 @@ bool CImageEx::SaveToFileInTextMode(const char *pszPathName,int cnBytesPerBit)
 
 char *CImageEx::SaveToMem(int &len)
 {
-	std::string str=g_pTheApp->GetAppDataDir();
-	str+="tmp.png";
+	std::string str = allocTmpFile(".png");// g_pTheApp->GetAppDataDir();
+	
 	if (!saveToFile(str.c_str(),false)) return NULL;
 
 	return ReadDataFile(str.c_str(),(uint32_t *)&len);
@@ -195,15 +200,15 @@ char *CImageEx::SaveToMem(int &len)
 
 bool CImageEx::GetData(PINTRECT prc,unsigned char *pBuf)
 {
-	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>m_nWidth || prc->bottom>m_nHeight)
+	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>_width || prc->bottom>_height)
 	{
 		return false;
 	}
 	INTRECT rc;
 	rc.left=prc->left;
 	rc.right=prc->right;
-	rc.top=m_nHeight-prc->bottom;
-	rc.bottom=m_nHeight-prc->top;
+	rc.top=_height-prc->bottom;
+	rc.bottom=_height-prc->top;
 
 	int w=rc.right-rc.left;
 	int h=rc.bottom-rc.top;
@@ -211,7 +216,7 @@ bool CImageEx::GetData(PINTRECT prc,unsigned char *pBuf)
 //	unsigned char *p2=pBuf;
 	for (int i=rc.top;i<rc.bottom;i++)
 	{
-		unsigned char *p1=m_pData+i*m_nWidth*4+rc.left*4;
+		unsigned char *p1=_data+i*_width*4+rc.left*4;
 		memmove(p2,p1,w*4);
 		p2-=w*4;
 	}
@@ -220,7 +225,7 @@ bool CImageEx::GetData(PINTRECT prc,unsigned char *pBuf)
 
 unsigned char *CImageEx::GetData(PINTRECT prc)
 {
-	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>m_nWidth || prc->bottom>m_nHeight)
+	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>_width || prc->bottom>_height)
 	{
 		return NULL;
 	}
@@ -240,15 +245,15 @@ unsigned char *CImageEx::GetData(PINTRECT prc)
 
 bool CImageEx::SetData(PINTRECT prc,unsigned char *pBuf)
 {
-	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>m_nWidth || prc->bottom>m_nHeight)
+	if (prc->left<0 || prc->top<0 || prc->right<prc->left || prc->bottom<prc->top || prc->right>_width || prc->bottom>_height)
 	{
 		return false;
 	}
 	INTRECT rc;
 	rc.left=prc->left;
 	rc.right=prc->right;
-	rc.top=m_nHeight-prc->bottom;
-	rc.bottom=m_nHeight-prc->top;
+	rc.top=_height-prc->bottom;
+	rc.bottom=_height-prc->top;
 
 	int w=rc.right-rc.left;
 	int h=rc.bottom-rc.top;
@@ -256,18 +261,18 @@ bool CImageEx::SetData(PINTRECT prc,unsigned char *pBuf)
 //	unsigned char *p2=pBuf;
 	for (int i=rc.top;i<rc.bottom;i++)
 	{
-		unsigned char *p1=m_pData+i*m_nWidth*4+rc.left*4;
+		unsigned char *p1=_data+i*_width*4+rc.left*4;
 		memmove(p1,p2,w*4);
 		p2-=w*4;
 	}
 	return true;
 }
 
-CCSprite *CImageEx::GetReduceSprite(int nMaxLineLength,int nOrientation)
+Sprite *CImageEx::GetReduceSprite(int nMaxLineLength,int nOrientation)
 {
 	int nWidth;
 	int nHeight;
-	char *pDst=ReduceRawBuf((char *)m_pData,m_nWidth,m_nHeight,nWidth,nHeight,nMaxLineLength,m_bHasAlpha);
+	char *pDst=ReduceRawBuf((char *)_data,_width,_height,nWidth,nHeight,nMaxLineLength,true);
 	if (pDst==NULL) return NULL;
 
 	int nAngle=0;
@@ -315,7 +320,7 @@ CCSprite *CImageEx::GetReduceSprite(int nMaxLineLength,int nOrientation)
 			pDst=pNewBuf;
 		}
 	}
-	CCSprite *pSprite=SpriteFromRaw(pDst,nWidth,nHeight);
+	Sprite *pSprite=SpriteFromRaw(pDst,nWidth,nHeight);
 	free(pDst);
 	return pSprite;
 }
@@ -329,9 +334,9 @@ CRenderTextureEx::~CRenderTextureEx(void)
 {
 }
 
-GLubyte *CRenderTextureEx::GetSubData(CCRect &rcSub,int wDst,int hDst,float fEnhanceRate,bool bFlip)
+GLubyte *CRenderTextureEx::GetSubData(Rect &rcSub,int wDst,int hDst,float fEnhanceRate,bool bFlip)
 {
-	CCSize size=rcSub.size;
+	Size size=rcSub.size;
 	int wSrc=(int)size.width;
 	int hSrc=(int)size.height;
 	//只处理缩小的情况
@@ -466,17 +471,18 @@ void CRenderTextureEx::SetEnhanceByte(GLubyte *p,int v,int cnDot,float fEnhanceR
 	*p=v;
 }
 
-CCSprite *CRenderTextureEx::GetSubSprite(CCRect &rcSub,int wDst,int hDst,float fEnhanceRate)
+Sprite *CRenderTextureEx::GetSubSprite(Rect &rcSub,int wDst,int hDst,float fEnhanceRate)
 {
 	GLubyte *pBuf=GetSubData(rcSub,wDst,hDst,fEnhanceRate);
 	if (pBuf==NULL) return NULL;
 
-	CCTexture2D *pTexture=new CCTexture2D;
-	CCSize size;
+	Texture2D *pTexture=new Texture2D;
+	Size size;
 	size.width=wDst;
 	size.height=hDst;
 	if (m_bSetAlias) pTexture->setAliasTexParameters();
-	if (pTexture==NULL || !pTexture->initWithData(pBuf,kCCTexture2DPixelFormat_RGBA8888,wDst,hDst,size))
+	int len = wDst * hDst * 4;
+	if (pTexture == NULL || !pTexture->initWithData(pBuf, len,Texture2D::PixelFormat::RGBA8888, wDst, hDst, size))
 	{
 		pTexture->release();
 		free(pBuf);
@@ -484,22 +490,22 @@ CCSprite *CRenderTextureEx::GetSubSprite(CCRect &rcSub,int wDst,int hDst,float f
 	}
 	free(pBuf);
 	if (m_bSetAlias) pTexture->setAliasTexParameters();
-	CCSprite *pNewSprite=CCSprite::createWithTexture(pTexture);
+	Sprite *pNewSprite=Sprite::createWithTexture(pTexture);
 	pTexture->release();
 	if (m_bSetAlias) pNewSprite->getTexture()->setAliasTexParameters();
 	return pNewSprite;
 }
 
-CCSprite *CRenderTextureEx::GetSprite()
+Sprite *CRenderTextureEx::GetSprite()
 {
-	const CCSize &size=m_pTexture->getContentSizeInPixels();
-	CCRect rc(0,0,size.width,size.height);
+	const Size &size = _texture->getContentSizeInPixels();
+	Rect rc(0,0,size.width,size.height);
 	return GetSubSprite(rc,(int)size.width,(int)size.height);
 }
 
 GLubyte *CRenderTextureEx::GetData(bool bFlip)
 {
-	const CCSize &size=m_pTexture->getContentSizeInPixels();
-	CCRect rc(0,0,size.width,size.height);
+	const Size &size=_texture->getContentSizeInPixels();
+	Rect rc(0,0,size.width,size.height);
 	return GetSubData(rc,(int)size.width,(int)size.height,1.0f);
 }

@@ -151,6 +151,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\lua_ljshell.cpp" />
     <ClCompile Include="..\Classes\lua_thread_curl.cpp" />
     <ClCompile Include="..\Classes\MD5.cpp" />
+    <ClCompile Include="..\Classes\misc.cpp" />
     <ClCompile Include="..\Classes\Platform.cpp" />
     <ClCompile Include="..\Classes\PlatformWnd32.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
@@ -170,6 +171,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\lua_ljshell.h" />
     <ClInclude Include="..\Classes\lua_thread_curl.h" />
     <ClInclude Include="..\Classes\MD5.h" />
+    <ClInclude Include="..\Classes\misc.h" />
     <ClInclude Include="..\Classes\Platform.h" />
     <ClInclude Include="..\Classes\RenderTextureEx.h" />
     <ClInclude Include="..\Classes\thread_curl.h" />
