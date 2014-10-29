@@ -62,6 +62,7 @@
     </ClCompile>
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
+    <ClCompile Include="..\Classes\misc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -108,6 +109,7 @@
     </ClInclude>
     <ClInclude Include="..\Classes\IDF.h" />
     <ClInclude Include="..\Classes\RenderTextureEx.h" />
+    <ClInclude Include="..\Classes\misc.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">

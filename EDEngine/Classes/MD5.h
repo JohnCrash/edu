@@ -55,5 +55,6 @@ void Uint64ToBase16(unsigned long long nValue,char *pBase16);
 void GetCheckSumStr16(const char *pSrc,int len,char *pDst);
 //void md5(const unsigned char *pSrc,int len,unsigned char *pDst);
 
+bool IsLittleEndian();
 std::string CreateRandomString();
 #endif // __MD5_H__
