@@ -7,6 +7,10 @@
 
 static void StrToLower(std::string & str)
 {
+	for (unsigned int i = 0; i < str.length(); ++i)
+	{
+		str[i] = tolower(str[i]);
+	}
 }
 
 CImageEx::CImageEx()
@@ -323,6 +327,68 @@ Sprite *CImageEx::GetReduceSprite(int nMaxLineLength,int nOrientation)
 	Sprite *pSprite=SpriteFromRaw(pDst,nWidth,nHeight);
 	free(pDst);
 	return pSprite;
+}
+
+//
+bool CImageEx::ReduceAndSaveToFile(std::string filename, int nMaxLineLength, int nOrientation)
+{
+	int nWidth;
+	int nHeight;
+	char *pDst = ReduceRawBuf((char *)_data, _width, _height, nWidth, nHeight, nMaxLineLength, true);
+	if (pDst == NULL)
+	{
+		CCLOG("CImageEx::ReduceAndSaveToFile ReduceRawBuf return NULL");
+		return false;
+	}
+
+	int nAngle = 0;
+	bool bMirror = false;
+	switch (nOrientation)
+	{
+	case IMAGE_ORIENTATION_LEFT:
+		nAngle = 90;
+		bMirror = false;
+		break;
+	case IMAGE_ORIENTATION_RIGHT:
+		nAngle = 270;
+		bMirror = false;
+		break;
+	case IMAGE_ORIENTATION_DOWN:
+		nAngle = 180;
+		bMirror = false;
+		break;
+	case IMAGE_ORIENTATION_MIRROR_UP:
+		nAngle = 0;
+		bMirror = true;
+		break;
+	case IMAGE_ORIENTATION_MIRROR_LEFT:
+		nAngle = 90;
+		bMirror = true;
+		break;
+	case IMAGE_ORIENTATION_MIRROR_RIGHT:
+		nAngle = 270;
+		bMirror = true;
+		break;
+	case IMAGE_ORIENTATION_MIRROR_DOWN:
+		nAngle = 1800;
+		bMirror = true;
+		break;
+	case IMAGE_ORIENTATION_UP:
+	default:
+		break;
+	}
+	if (nAngle != 0 || bMirror)
+	{
+		char *pNewBuf = AdjustRawBufOrientation((char *)pDst, &nWidth, &nHeight, nAngle, bMirror);
+		if (pNewBuf != NULL)
+		{
+			free(pDst);
+			pDst = pNewBuf;
+		}
+	}
+	Sprite *pSprite = SpriteFromRaw(pDst, nWidth, nHeight);
+	free(pDst);
+	return true;
 }
 
 CRenderTextureEx::CRenderTextureEx(void)
