@@ -5,6 +5,8 @@
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
 #include "Platform.h"
+#include "RenderTextureEx.h"
+#include "Files.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
@@ -350,6 +352,46 @@ int cc_isVoicePlaying(lua_State *L)
 	return 1;
 }
 
+int cc_adjustPhoto(lua_State *L)
+{
+	if (lua_isstring(L, 1) &&lua_isnumber(L,2) )
+	{
+		const char *fn = lua_tostring(L, 1);
+		if (IsFileExist(fn))
+		{
+			auto img = new CImageEx();
+			if (img->LoadFromFile(fn))
+			{
+				bool b = img->ReduceAndSaveToFile(fn,lua_tonumber(L,2),img->GetJpgOrientation());
+				std::string tmp = img->GetTmpFile();
+				img->release();
+				lua_pushboolean(L, b);
+				lua_pushstring(L, tmp.c_str());
+				return 2;
+			}
+			else
+			{
+				img->release();
+				lua_pushboolean(L, false);
+				lua_pushstring(L, "load picture file error");
+				return 2;
+			}
+		}
+		else
+		{
+			lua_pushboolean(L, false);
+			lua_pushstring(L, "file not exist");
+			return 2;
+		}
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "invalid pamater");
+		return 2;
+	}
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -366,6 +408,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_stopVoice", cc_stopVoice);
 	lua_register(L, "cc_getVoiceLength", cc_getVoiceLength);
 	lua_register(L, "cc_isVoicePlaying", cc_isVoicePlaying);
+	lua_register(L, "cc_adjustPhoto", cc_adjustPhoto);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

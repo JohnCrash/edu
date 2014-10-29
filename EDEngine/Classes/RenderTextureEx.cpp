@@ -334,7 +334,7 @@ bool CImageEx::ReduceAndSaveToFile(std::string filename, int nMaxLineLength, int
 {
 	int nWidth;
 	int nHeight;
-	char *pDst = ReduceRawBuf((char *)_data, _width, _height, nWidth, nHeight, nMaxLineLength, true);
+	char *pDst = ReduceRawBuf((char *)_data, _width, _height, nWidth, nHeight, nMaxLineLength, false);
 	if (pDst == NULL)
 	{
 		CCLOG("CImageEx::ReduceAndSaveToFile ReduceRawBuf return NULL");
@@ -386,7 +386,22 @@ bool CImageEx::ReduceAndSaveToFile(std::string filename, int nMaxLineLength, int
 			pDst = pNewBuf;
 		}
 	}
-	Sprite *pSprite = SpriteFromRaw(pDst, nWidth, nHeight);
+	int len = nWidth*nHeight*4;
+	//Sprite *pSprite = SpriteFromRaw(pDst, nWidth, nHeight);
+	Image *pimg = new Image();
+	if (pimg)
+	{
+		pimg->initWithRawData((unsigned char *)pDst, len, nWidth, nHeight, 8);
+		mTmpFile = allocTmpFile(".jpg");
+		pimg->saveToFile(mTmpFile);
+		pimg->release();
+	}
+	else
+	{
+		CCLOG("CImageEx::ReduceAndSaveToFile new Image return 0");
+		free(pDst);
+		return false;
+	}
 	free(pDst);
 	return true;
 }

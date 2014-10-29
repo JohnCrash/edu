@@ -176,7 +176,7 @@ function TeacherList:add_batch_item( v )
 								if v.is_res and v.is_res==1 then
 								--一键导入题，提示不能做
 									messagebox.open(self,function()end,
-									messagebox.MESSAGE,"提示",'“一键导入作业”请到电脑上批改！')
+									messagebox.MESSAGE,"提示",'“一键导入作业”请到网站上批改！')
 								else
 									uikits.pushScene(TeacherBatch.create(v,class[1]))
 								end

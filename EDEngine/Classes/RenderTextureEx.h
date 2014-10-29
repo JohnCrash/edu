@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "misc.h"
+#include <string>
 
 USING_NS_CC;
 
@@ -54,11 +55,13 @@ public:
 	bool SetData(PINTRECT prc, unsigned char *pBuf);
 	Sprite *GetReduceSprite(int nMaxLineLength,int nOrientation);
 
+	bool ReduceAndSaveToFile(std::string filename,int nMaxLineLength, int nOrientation);
 	char *SaveToMem(int &len);
 	bool SaveToFileInTextMode(const char *pszPathName,int cnBytesPerBit=4);
-
+	std::string GetTmpFile(){ return mTmpFile;  }
 protected:
 	int m_nJpgOrientation;
+	std::string mTmpFile;
 };
 
 #endif // __RENDERTEXTUREEX_H__
