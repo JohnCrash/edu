@@ -5,7 +5,7 @@
 //#include "misc.h"
 
 USING_NS_CC;
-/*
+
 class CRenderTextureEx : public CCRenderTexture
 {
 public:
@@ -25,7 +25,7 @@ private:
 
 	bool m_bSetAlias;
 };
-*/
+
 #define	IMAGE_ORIENTATION_UP				1
 #define	IMAGE_ORIENTATION_LEFT				6
 #define	IMAGE_ORIENTATION_RIGHT				8

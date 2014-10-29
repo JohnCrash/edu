@@ -112,10 +112,10 @@ local function request_nc( url,func,filename ) --网络优先，然后缓存
 							add_cache_data(url,obj.data) --加入缓存
 							kits.write_cache(get_name(url),obj.data)
 						end
-						func( true )
+						func( true,obj.data )
 					else
 						if obj.state == 'FAILED' and (is_done( url ) or is_cache(filename)) then --下载失败尝试使用本地缓冲
-							func( true )
+							func( true,obj.data )
 						else
 							kits.log('ERROR : request failed! url = '..tostring(url))
 							if obj.state == 'FAILED' then
@@ -134,9 +134,14 @@ local function request_nc( url,func,filename ) --网络优先，然后缓存
 			end )
 	if not mh then
 		if is_done( url ) or is_cache(filename) then
-			func( true )
+			if is_done( url ) then
+				func( true,get_data(url) )
+			else
+				data = kits.read_cache( filename )
+				func( true,data )
+			end
 		else
-			func( false )
+			func( false,msg )
 			kits.log('ERROR : request failed! url = '..tostring(url))
 			kits.log('	reason:'..tostring(msg))
 		end
@@ -157,14 +162,14 @@ local function request_n( url,func )
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
 						add_cache_data(url,obj.data) --加入缓存
-						func( true )
+						func( true,obj.data )
 					else
-						func( false )
+						func( false,obj.errmsg )
 					end
 				end
 			end )
 	if not mh then
-		func( false )
+		func( false,msg )
 		kits.log('ERROR : request failed! url = '..tostring(url))
 		kits.log('	reason:'..tostring(msg))
 	else
@@ -255,7 +260,9 @@ local function post(url,form,func)
 		function(obj)
 			if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 				if obj.state == 'OK' and obj.data then
-					func( true )
+					add_cache_data(url,obj.data) --加入缓存
+					kits.write_cache(get_name(url),obj.data)
+					func( true,obj.data )
 				else
 					func( false,obj.errmsg)
 					kits.log('ERROR : cache.post failed! url = '..tostring(url))

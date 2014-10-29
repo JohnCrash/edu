@@ -28,6 +28,7 @@ local ui = {
 	WORKFLOW2 = 'subjective_item/start_subjective',
 	WORKFLOW2_COMPLETE = 'subjective_item/completed_subjective',
 	COMMIT = 'submit',
+	STUDENT_TIPS = 'wen',
 	OBJECTIVE_NUM = 'objective_item/objective_no',
 	SUBJECTIVE_NUM = 'subjective_item/subjective_no',
 	WHITE_STAR = 'objective_item/white_star_',
@@ -421,7 +422,13 @@ function WorkCommit:init()
 			end)
 		
 		self:init_star()
-	end						
+	end			
+	--老师关提示文字
+	if _G.hw_cur_child_id == 0 then
+	else
+		local txt = uikits.child( self._root,ui.STUDENT_TIPS )
+		if txt then txt:setVisible(false) end
+	end
 	--加载作业,然后计算出客观题和主观题数量
 	--做作业时也使用该数据.
 	local end_date = uikits.child(self._root,ui.END_DATE)

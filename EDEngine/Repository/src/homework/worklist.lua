@@ -875,8 +875,12 @@ function WorkList:add_item( t )
 			local scheduler = u:getScheduler()
 			local end_time = t.finish_time_unix
 			local dt = end_time - os.time()
+			local txt = uikits.child( item,ui.TIMELABEL )
 			if dt > 0 then
+				if txt then txt:setString('剩余结束时间:') end
 				u:setString(kits.time_to_string_simple(dt))
+			else
+				if txt then txt:setString('已过期:') end
 			end
 			local function timer_func()
 				dt = end_time - os.time()
