@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local loadingbox = require "loadingbox"
 local messagebox = require "messagebox"
+local RecordVoice = require "recordvoice"
 
 local FileUtils = cc.FileUtils:getInstance()
 local ui = {
@@ -368,29 +369,23 @@ end
 
 function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
-		self._record_button:addTouchEventListener(
-			function(sender,eventType) 
-				if eventType == ccui.TouchEventType.ended then
-					local b,str = cc_stopRecordVoice()
-					if b then
-						local tlen = cc_getVoiceLength(str)
-						kits.log('stopRecordVoice '..tostring(str) )
-						kits.log('record time = '..tostring(tlen))
-						self:addsound( str,tlen )
-						self:addsound_todata( str,tlen )
-						self:scroll_relayout()						
-					else
-						messagebox(self,"错误","录音失败")
-					end
-				elseif eventType == ccui.TouchEventType.began then
-					if cc_startRecordVoice() then
-						kits.log('startRecordVoice success')
-					else
-						messagebox(self,"错误","录音失败")
-					end
-				end		
+	uikits.event( self._record_button,function(sender)
+			if not self._recording then
+				self._recording = true
+				RecordVoice.open(
+						self,
+						function(b,file)
+							self._recording = nil
+							if b then
+								local tlen = cc_getVoiceLength(file)
+								self:addsound( file,tlen )
+								self:addsound_todata( file,tlen )
+								self:scroll_relayout()	
+							end
+						end
+					)
 			end
-		)
+		end)
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)

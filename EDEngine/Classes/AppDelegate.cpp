@@ -43,7 +43,11 @@ AppDelegate::~AppDelegate()
 }
 
 extern std::string g_Mode;
-
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+extern bool g_Reset;
+extern int g_FrameWidth;
+extern int g_FrameHeight;
+#endif
 bool AppDelegate::applicationDidFinishLaunching() 
 {
     // initialize director
@@ -51,6 +55,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     auto glview = director->getOpenGLView();
     if(!glview) {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	g_Reset = false;
 #ifndef _DEBUG
 		if( g_Mode == "fullscreen" )
 			glview = GLView::createWithFullScreen(toUTF8(TEXT("ÀÖ½ÌÀÖÑ§")));
@@ -89,7 +94,7 @@ void AppDelegate::initLuaEngine()
 	auto glview = director->getOpenGLView();
 
 #if  (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-	if(g_hFileMap)
+	if (g_hFileMap)
 	{
 		PAPPFILEMAPINFO pInfo = (PAPPFILEMAPINFO)MapViewOfFile(g_hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 		pInfo->size = sizeof(APPFILEMAPINFO);
@@ -109,25 +114,44 @@ void AppDelegate::initLuaEngine()
 #ifdef _WIN32
 	if(g_Mode=="window")
 	{
-		HWND hwnd = GetDesktopWindow();
-		RECT rect;
-		GetClientRect(hwnd,&rect);
-		int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
-		int width = rect.right-rect.left-2*borderHeight;
-		int height;
-		float v = (rect.bottom-rect.top)/(rect.right-rect.left);
-		if( abs(v -9/16) > abs(v-3/4) )
+		if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
 		{
-			glview->setFrameSize(width,width*3/4);
+			HWND hwnd = GetDesktopWindow();
+			RECT rect;
+			GetClientRect(hwnd,&rect);
+			int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
+			int width = rect.right-rect.left-2*borderHeight;
+			int height;
+			float v = (rect.bottom-rect.top)/(rect.right-rect.left);
+			if( abs(v -9/16) > abs(v-3/4) )
+			{
+				glview->setFrameSize(width,width*3/4);
+			}
+			else
+			{
+				glview->setFrameSize(width,width*9/16);
+			}
 		}
 		else
 		{
-			glview->setFrameSize(width,width*9/16);
+			glview->setFrameSize(g_FrameWidth,g_FrameHeight);
 		}
 	}
 #endif
 #else
-	glview->setFrameSize(1024,576);
+	if (g_Mode == "window")
+	{
+		if (g_FrameWidth <= 0 && g_FrameHeight <= 0)
+		{
+			glview->setFrameSize(1024, 576);
+		}
+		else
+		{
+			glview->setFrameSize(g_FrameWidth, g_FrameHeight);
+		}
+	}
+	else
+		glview->setFrameSize(1024, 576);
 #endif
 	//glview->setFrameSize(1920,1080);
 #endif	

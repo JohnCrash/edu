@@ -426,8 +426,7 @@ function WorkList:relayout_statistics()
 		self._scrollview:setInnerContainerSize(cc.size(self._statistics_item_width,height))
 		local offy = 0
 		local size = self._scrollview:getContentSize()
-		print( 'height = '..height )
-		print( '_statistics_item_width = '..self._statistics_item_width )
+
 		if height < size.height then
 			offy = size.height - height --顶到顶
 		end

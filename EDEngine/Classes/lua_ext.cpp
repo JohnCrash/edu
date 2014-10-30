@@ -11,6 +11,13 @@
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
 #endif
+extern std::string g_Mode;
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+extern int g_FrameWidth;
+extern int g_FrameHeight;
+extern bool g_Reset;
+#endif
 
 static int g_callref=LUA_REFNIL;
 
@@ -309,6 +316,17 @@ int cc_stopRecordVoice(lua_State *L)
 	return 2;
 }
 
+int cc_getRecordVoiceInfo(lua_State *L)
+{
+	float Duration;
+	int vol;
+	bool b = VoiceGetRecordInfo(Duration, vol);
+	lua_pushboolean(L, b);
+	lua_pushnumber(L, Duration);
+	lua_pushnumber(L, vol);
+	return 3;
+}
+
 int cc_playVoice(lua_State *L)
 {
 	if (lua_isstring(L,1))
@@ -392,6 +410,80 @@ int cc_adjustPhoto(lua_State *L)
 	}
 }
 
+int cc_resetWindow(lua_State *L)
+{
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	if (lua_isstring(L, 1))
+	{
+		std::string mode = lua_tostring(L, 1);
+		if (mode == "window")
+		{
+			int w, h;
+			if (lua_isnumber(L, 2) && lua_isnumber(L, 3))
+			{
+				g_FrameWidth = lua_tonumber(L, 2);
+				g_FrameHeight = lua_tonumber(L, 3);
+			}
+			else
+			{
+				g_FrameWidth = -1;
+				g_FrameHeight = -1;
+			}
+			g_Mode = mode;
+			g_Reset = true;
+			lua_pushboolean(L, true);
+			return 1;
+		}
+		else if (mode == "fullscreen")
+		{
+
+			g_FrameWidth = -1;
+			g_FrameHeight = -1;
+			g_Mode = mode;
+			g_Reset = true;
+			lua_pushboolean(L, true);
+			return 1;
+		}
+	}
+#else
+#endif
+	lua_pushboolean(L,false);
+	lua_pushstring(L,"Invalid argument");
+	return 2;
+}
+
+int cc_getWindowInfo(lua_State *L)
+{
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	lua_pushstring(L, g_Mode.c_str());
+	lua_pushinteger(L,g_FrameWidth);
+	lua_pushinteger(L,g_FrameHeight);
+	return 3;
+#else
+	lua_pushstring(L,"fullscreen");
+	return 1;
+#endif
+}
+
+int cc_getScreenInfo(lua_State *L)
+{
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	HWND hwnd = GetDesktopWindow();
+	RECT rect;
+	GetClientRect(hwnd, &rect);
+	lua_pushnumber(L, abs(rect.right - rect.left));
+	lua_pushnumber(L, abs(rect.bottom - rect.top));
+	return 2;
+#else
+	auto director = Director::getInstance();
+	auto glview = director->getOpenGLView();
+	auto size = glview->getFrameSize();
+	lua_pushnumber(L, size.width);
+	lua_pushnumber(L, size.height);
+	return 2;
+#endif
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -404,11 +496,15 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register( L,"cc_takeResource",cc_takeResource);
 	lua_register( L,"cc_startRecordVoice",cc_startRecordVoice);
 	lua_register( L,"cc_stopRecordVoice",cc_stopRecordVoice);
+	lua_register(L, "cc_getRecordVoiceInfo", cc_getRecordVoiceInfo);
 	lua_register(L, "cc_playVoice", cc_playVoice);
 	lua_register(L, "cc_stopVoice", cc_stopVoice);
 	lua_register(L, "cc_getVoiceLength", cc_getVoiceLength);
 	lua_register(L, "cc_isVoicePlaying", cc_isVoicePlaying);
 	lua_register(L, "cc_adjustPhoto", cc_adjustPhoto);
+	lua_register(L, "cc_resetWindow", cc_resetWindow);
+	lua_register(L, "cc_getWindowInfo", cc_getWindowInfo);
+	lua_register(L, "cc_getScreenInfo", cc_getScreenInfo);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

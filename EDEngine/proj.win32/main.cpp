@@ -11,6 +11,9 @@ std::string g_Cookie;
 std::string g_Launch;
 std::string g_Userid;
 std::string g_Mode;
+int g_FrameWidth = -1;
+int g_FrameHeight = -1;
+bool g_Reset = true;
 std::string toUTF8( const std::wstring& wstr );
 HANDLE g_hFileMap;
 
@@ -45,23 +48,23 @@ void ParseCommand(LPTSTR lpCmdLine)
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
-                       HINSTANCE hPrevInstance,
-                       LPTSTR    lpCmdLine,
-                       int       nCmdShow)
+	HINSTANCE hPrevInstance,
+	LPTSTR    lpCmdLine,
+	int       nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
 	ParseCommand(lpCmdLine);
 #ifdef USE_WIN32_CONSOLE
-    AllocConsole();
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 #endif
 
-    // create the application instance
-    AppDelegate app;
-    int ret;
+	// create the application instance
+	AppDelegate app;
+	int ret;
 
 	std::wstring uri = TEXT("com.edengine.luacore.") + getParam(lpCmdLine, TEXT("launch="));
 	g_hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(APPFILEMAPINFO), uri.c_str());
@@ -70,7 +73,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return false;
 
 #ifdef USE_WIN32_CONSOLE
-	while(g_Quit)
+	while (g_Quit)
 	{
 		CCLOG("EDEngine is launch...");
 		ret = Application::getInstance()->run();
@@ -78,11 +81,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		//reload lua engine
 		LuaEngine * pEngine = LuaEngine::getInstance();
 		ScriptEngineManager::getInstance()->setScriptEngine(nullptr);
-	//	pEngine = LuaEngine::getInstance();
-	//	ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
+		//	pEngine = LuaEngine::getInstance();
+		//	ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
 	}
 #else
-	ret = Application::getInstance()->run();
+	while(g_Reset)
+	{
+		ret = Application::getInstance()->run();
+	}
 #endif
 
 #ifdef USE_WIN32_CONSOLE

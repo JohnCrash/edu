@@ -4,6 +4,8 @@ local update = require "update"
 local login = require "login"
 local resume = require "resume"
 require "ljshellDeprecated"
+local RecordVoice = require "recordvoice"
+
 hw_cur_child_id = 0
 local ui = {
 }
@@ -187,26 +189,18 @@ function AppEntry:init()
 	local record =  uikits.button{caption='录音',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
-	record:addTouchEventListener( 
+	uikits.event( record,
 		function(sender,eventType) 
-			if eventType == ccui.TouchEventType.ended then
-				local b,str = cc_stopRecordVoice()
-				if b then
-					g_last = str
-					kits.log('stopRecordVoice '..tostring(str) )
-					kits.log('record time = '..tostring(cc_getVoiceLength(str)))
-				else
-					kits.log('stopRecordVoice fail')
-				end
-			elseif eventType == ccui.TouchEventType.began then
-				kits.log('startRecordVoice..')
-				if cc_startRecordVoice() then
-					kits.log('startRecordVoice success')
-				else
-					kits.log('startRecordVoice fail')
-				end
-				kits.log('startRecordVoice end')
-			end
+			RecordVoice.open(
+							bg,
+							function(b,file)
+								self._recording = nil
+								if b then
+									local tlen = cc_getVoiceLength(file)
+									g_last = file
+								end
+							end
+						) 
 		end)	
 	local playsound = uikits.button{caption='播放',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
@@ -218,6 +212,23 @@ function AppEntry:init()
 					kits.log('play fail')
 				end
 			end}	
+	local resetwindow = uikits.button{caption='重启改变尺寸',x=264*scale,y = 164*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+				local mode,width,height = cc_getWindowInfo()
+				print( 'mode = '..mode )
+				print( 'width = '..width )
+				print( 'height = '..height )
+				width,height = cc_getScreenInfo()
+				print( 'screenwidth = '..width )
+				print( 'screenheight = '..height )
+--				if cc_resetWindow("window",480,640) then
+					local Director = cc.Director:getInstance()
+					local glview = Director:getOpenGLView()
+					glview:setFrameSize(480,640)	
+--					Director:endToLua()
+--				end
+			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -271,6 +282,7 @@ function AppEntry:init()
 				isopen = true
 			end
 		end}	
+	bg:addChild(resetwindow)
 	bg:addChild(playsound)
 	bg:addChild(debugip)
 	bg:addChild(debugbutton)

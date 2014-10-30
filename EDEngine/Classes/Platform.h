@@ -53,7 +53,7 @@ public:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 		usleep(m);
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-		Sleep(m);
+		::Sleep(m);
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 #endif
 	}

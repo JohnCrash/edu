@@ -408,7 +408,7 @@ bool CDynaAMREncoder::AddEncoderBuf(char *pBuf,int len,int nRate)
 		m_cnVolumeValue++;
 	}
 	//200ms计算一次
-	if (m_cnVolumeValue*1000/8000>=200)
+	if (m_cnVolumeValue*1000/8000>=50)
 	{
 		m_nCurVolume=m_nVolumeSum/m_cnVolumeValue;
 		m_cnVolumeValue=0;
