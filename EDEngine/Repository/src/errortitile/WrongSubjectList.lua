@@ -12,6 +12,7 @@ local login = require "login"
 local ui = {
 	BASEFILE = "errortitile/TheWrong/Export/wrong_day.json",
 	MAINMENU = '7',
+	button_back = '7/4788',
 	collectbut = '7/11',
 	statisticsbut = '7/12',
 	morebut = '7/13',
@@ -458,6 +459,12 @@ function WrongSubjectList:init()
 				local scene_next = MoreView.create()								
 				cc.Director:getInstance():replaceScene(scene_next)			
 			end,"click")
+	local but_back = uikits.child(self._widget,ui.button_back)
+	uikits.event(but_back,
+			function(sender,eventType)						
+				uikits.popScene()		
+			end,"click")	
+	
 end
 
 function WrongSubjectList:release()

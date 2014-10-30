@@ -15,11 +15,13 @@ local ui = {
 	wronglist_but = '878/880',
 	collect_but = '878/881',
 	more_but = '878/883',
+	but_back = '878/4790',
 	
 	MAINMENU43 = '1374',
 	wronglist43_but = '1374/1376',
 	collect43_but = '1374/1377',
 	more43_but = '1374/1379',
+	but43_back = '1374/4790',
 	
 	title_view = '932/934',
 	title_all = '932/934/935',	
@@ -339,14 +341,17 @@ function StatisticsView:init()
 	local but_wronglist
 	local but_collect
 	local but_more
+	local but_back
 	if _G.screen_type == 1 then	
 		but_wronglist = uikits.child(self._widget,ui.wronglist_but)
 		but_collect = uikits.child(self._widget,ui.collect_but)
 		but_more = uikits.child(self._widget,ui.more_but)
+		but_back = uikits.child(self._widget,ui.but_back)
 	else
 		but_wronglist = uikits.child(self._widget,ui.wronglist43_but)
 		but_collect = uikits.child(self._widget,ui.collect43_but)
 		but_more = uikits.child(self._widget,ui.more43_but)	
+		but_back = uikits.child(self._widget,ui.but43_back)
 	end
 		
 	uikits.event(but_wronglist,
@@ -375,7 +380,12 @@ function StatisticsView:init()
 					cc.Director:getInstance():replaceScene(scene_next)								
 				end					
 			end,"click")
-			
+	
+	
+	uikits.event(but_back,
+			function(sender,eventType)						
+				uikits.popScene()		
+			end,"click")					
 	local ret = self:getdatabyurl()
 	if ret == false then
 		print("StatisticsView get error!")
