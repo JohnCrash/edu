@@ -20,6 +20,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/Files.cpp \
 				   ../../Classes/Platform.cpp \
 				   ../../Classes/PlatformAndroid.cpp \
+				   ../../Classes/RenderTextureEx.cpp \
+				   ../../Classes/misc.cpp \
+				   ../../Classes/IDF.cpp \
 				   JniLaunch.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \

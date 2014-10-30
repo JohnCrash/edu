@@ -1,4 +1,5 @@
 #include "IDF.h"
+#include "MD5.h"
 
 CIDFList::CIDFList()
 {

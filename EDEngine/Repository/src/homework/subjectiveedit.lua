@@ -2,6 +2,8 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local loadingbox = require "loadingbox"
+local messagebox = require "messagebox"
+
 local FileUtils = cc.FileUtils:getInstance()
 local ui = {
 	FILE = 'homework/laoshizuoye/gexinghua.json',
@@ -169,7 +171,7 @@ function SubjectiveEdit:index_delete(i)
 	end
 end
 
-function SubjectiveEdit:addsound( name )
+function SubjectiveEdit:addsound( name,length )
 	local item = self._audio_item:clone()
 	if item then
 		item:setVisible(true)
@@ -197,7 +199,7 @@ function SubjectiveEdit:addsound( name )
 	end
 end
 
-function SubjectiveEdit:addsound_todata( name )
+function SubjectiveEdit:addsound_todata( name,length )
 	if name and self._current and self._data[self._current] then
 		self._data[self._current].items = self._data[self._current].items or {}
 		table.insert(self._data[self._current].items,{file=name,type=1})
@@ -359,49 +361,70 @@ function SubjectiveEdit:init()
 		self:initpage()
 	end
 end
-local test_img = {
-	"635481928825042118.jpg",
-	"635485364524844606.jpg",
-	"635485520515758589.jpg",
-	"Lighthouse.jpg",
-	"Penguins.jpg",
-	"Tulips.jpg",
-	"140607978828.jpg",
-	"1401087060796.jpg",
-}
-local test_audio={
-	"84eba7b9bbab29c5fe429495373f387f.mp3",
-	"396e8aa7c4fb57ba9d1093d6e16960fd.mp3",
-	"840ec391c218ebb3bc89280de994f3ff.mp3",
-	"ac848ecb0764e0b75463cd03d8179ac0.mp3"
-}
-			
+
+local function messagebox(parent,title,text )
+	messagebox.open(parent,function()end,messagebox.MESSAGE,tostring(title),tostring(text) )
+end
+
 function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
-		uikits.event(self._record_button,function(sender)
-			math.randomseed(os.time())
-			local file = "backup-2/"..test_audio[math.random(1,#test_audio)]
-			self:addsound( file )
-			self:addsound_todata( file )
-			self:scroll_relayout()
-		end)
+		self._record_button:addTouchEventListener(
+			function(sender,eventType) 
+				if eventType == ccui.TouchEventType.ended then
+					local b,str = cc_stopRecordVoice()
+					if b then
+						local tlen = cc_getVoiceLength(str)
+						kits.log('stopRecordVoice '..tostring(str) )
+						kits.log('record time = '..tostring(tlen))
+						self:addsound( str,tlen )
+						self:addsound_todata( str,tlen )
+						self:scroll_relayout()						
+					else
+						messagebox(self,"错误","录音失败")
+					end
+				elseif eventType == ccui.TouchEventType.began then
+					if cc_startRecordVoice() then
+						kits.log('startRecordVoice success')
+					else
+						messagebox(self,"错误","录音失败")
+					end
+				end		
+			end
+		)
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)
-			math.randomseed(os.time())
-			local file = "backup-2/"..test_img[math.random(1,#test_img)]
-			self:addphoto( file )
-			self:addphote_todata( file )
-			self:scroll_relayout()
+			cc_takeResource(TAKE_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						--file = res
+						local b,res = cc_adjustPhoto(res,1024)
+						if b then
+							self:addphoto( res )
+							self:addphote_todata( res )
+							self:scroll_relayout()
+						else
+							messagebox(self,"错误","图像调整失败")
+						end
+					end
+				end)			
 		end)	
 	end
 	if self._photo_button then --从图库插入照片
 		uikits.event(self._photo_button,function(sender)
-			math.randomseed(os.time())
-			local file = "backup-2/"..test_img[math.random(1,#test_img)]
-			self:addphoto( file )
-			self:addphote_todata( file )
-			self:scroll_relayout()
+			cc_takeResource(PICK_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						local b,res = cc_adjustPhoto(res,1024)
+						if b then
+							self:addphoto( res )
+							self:addphote_todata( res )
+							self:scroll_relayout()
+						else
+							messagebox(self,"错误","图像调整失败")
+						end
+					end					
+				end)			
 		end)	
 	end	
 end

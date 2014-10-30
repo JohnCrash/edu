@@ -2,7 +2,6 @@
 #define __IDF_H__
 
 #include "cocos2d.h"
-#include "misc.h"
 
 USING_NS_CC;
 

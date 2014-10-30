@@ -239,6 +239,12 @@ function AppEntry:init()
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
 						--file = res
+						local b,res = cc_adjustPhoto(res,128)
+						if b then
+							kits.log('adjust success '..res)
+						else
+							kits.log('adjust fail : '..res)
+						end
 					else
 						kits.log("cc_takeResource return fail")
 					end

@@ -2,21 +2,22 @@
 #define __RENDERTEXTUREEX_H__
 
 #include "cocos2d.h"
-//#include "misc.h"
+#include "misc.h"
+#include <string>
 
 USING_NS_CC;
 
-class CRenderTextureEx : public CCRenderTexture
+class CRenderTextureEx : public RenderTexture
 {
 public:
 	CRenderTextureEx(void);
 	~CRenderTextureEx(void);
 
-	GLubyte *GetSubData(CCRect &rcSub,int wDst,int hDst,float fEnhanceRate,bool bFlip=true);
+	GLubyte *GetSubData(Rect &rcSub,int wDst,int hDst,float fEnhanceRate,bool bFlip=true);
 	GLubyte *GetData(bool bFlip);
-	CCSprite *GetSubSprite(CCRect &rcSub,int wDst,int hDst,float fEnhanceRate=1.0f);
-	CCSprite *GetSprite();
-	CCTexture2D *GetTexture(){return m_pTexture;}
+	Sprite *GetSubSprite(Rect &rcSub,int wDst,int hDst,float fEnhanceRate=1.0f);
+	Sprite *GetSprite();
+	Texture2D *GetTexture(){ return _texture; }
 
 	void EnableSetAlias(bool bEnable){m_bSetAlias=bEnable;}
 
@@ -35,8 +36,9 @@ private:
 #define	IMAGE_ORIENTATION_MIRROR_RIGHT		7
 #define	IMAGE_ORIENTATION_MIRROR_DOWN		4
 
+
 //RGBA8888模式时使用获取或设置子图像
-class CImageEx : public CCImage
+class CImageEx : public Image
 {
 public:
 	CImageEx();
@@ -44,20 +46,22 @@ public:
 	bool LoadFromFile(const char *pszPathName);
 	int GetJpgOrientation(){return m_nJpgOrientation;}
 
-	static CCImage::EImageFormat GetImageFormat(const char *pszPathName);
-	static CCImage::EImageFormat GetImageFormat(const char *pBuf,int lenBuf);
+	static Image::Format GetImageFormat(const char *pszPathName);
+	static Image::Format GetImageFormat(const char *pBuf, int lenBuf);
 	bool InitImageData(int nWidth,int hHeight);
 
 	unsigned char *GetData(PINTRECT prc);
-	bool GetData(PINTRECT prc,unsigned char *pBuf);
-	bool SetData(PINTRECT prc,unsigned char *pBuf);
-	CCSprite *GetReduceSprite(int nMaxLineLength,int nOrientation);
+	bool GetData(PINTRECT prc, unsigned char *pBuf);
+	bool SetData(PINTRECT prc, unsigned char *pBuf);
+	Sprite *GetReduceSprite(int nMaxLineLength,int nOrientation);
 
+	bool ReduceAndSaveToFile(std::string filename,int nMaxLineLength, int nOrientation);
 	char *SaveToMem(int &len);
 	bool SaveToFileInTextMode(const char *pszPathName,int cnBytesPerBit=4);
-
+	std::string GetTmpFile(){ return mTmpFile;  }
 protected:
 	int m_nJpgOrientation;
+	std::string mTmpFile;
 };
 
 #endif // __RENDERTEXTUREEX_H__
