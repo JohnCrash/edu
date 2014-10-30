@@ -33,6 +33,11 @@ local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
 SubjectiveEdit.__index = SubjectiveEdit
 
+local function stopSound()
+	print("stopSound")
+	uikits.delay_call( nil,uikits.stopAllSound,1.5 )
+end
+
 function SubjectiveEdit.create( arg )
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),SubjectiveEdit)
@@ -116,6 +121,7 @@ end
 
 function SubjectiveEdit:initpage()
 	if self._current and self._data[self._current] then
+		stopSound()
 		self._input_text:setText(self._data[self._current].text)
 		for i,v in pairs(self._items) do
 			v:removeFromParent()
@@ -191,7 +197,15 @@ function SubjectiveEdit:addsound( name,length )
 		end
 		local timetxt = uikits.child(item,'shijian')
 		if timetxt then
-			timetxt:setVisible(false)
+			if not length then
+				length = cc_getVoiceLength(name)
+			end
+			if length then
+				timetxt:setString( kits.time_to_string_simple(math.floor(length)))
+			else
+				timetxt:setString("-" )
+			end
+			--timetxt:setVisible(false)
 		else
 			kits.log("ERROR : SubjectiveEdit:addsound time label no found")
 		end
@@ -339,10 +353,12 @@ function SubjectiveEdit:init()
 	self._tops_space = y-self._tops:getContentSize().height
 	self._tops_ox = x
 	uikits.event(self._index_item_add,function(sender)
+			stopSound()
 			self:index_add()
 		end)
 	self._delete_button = uikits.child(self._root,ui.DELETE_BUTTON)
 	uikits.event(self._delete_button,function()
+		stopSound()
 		self:index_delete(self._current)
 	end)
 	self._delete_button:setVisible(false)
@@ -370,6 +386,7 @@ end
 function SubjectiveEdit:init_event()
 	if self._record_button then --插入录音
 	uikits.event( self._record_button,function(sender)
+			stopSound()
 			if not self._recording then
 				self._recording = true
 				RecordVoice.open(
@@ -389,6 +406,7 @@ function SubjectiveEdit:init_event()
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)
+			stopSound()
 			cc_takeResource(TAKE_PICTURE,function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
@@ -407,6 +425,7 @@ function SubjectiveEdit:init_event()
 	end
 	if self._photo_button then --从图库插入照片
 		uikits.event(self._photo_button,function(sender)
+			stopSound()
 			cc_takeResource(PICK_PICTURE,function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
@@ -425,6 +444,7 @@ function SubjectiveEdit:init_event()
 end
 
 function SubjectiveEdit:release()
+	stopSound()
 	for i,v in pairs(self._items) do
 		v:removeFromParent()
 	end

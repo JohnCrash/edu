@@ -265,8 +265,16 @@ function Publishhw:publish_topics()
 		local selector = self.tb_parent_view._selector	
 		local function upload(item) --upload attachments
 			kits.log('>>>UPLOAD')
-			local url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
-			local local_file = kits.get_cache_path()..item.file
+			local url
+			local suf = string.sub(item.file,-4)
+			local suffix = string.lower(suf)
+			if suffix == '.amr' then
+				url = 'http://image.lejiaolexue.com/handler/item/attachment_upload.ashx'
+			else
+				url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
+			end
+			--local url = 'http://file-stu.lejiaolexue.com/rest/user/upload/hw'
+			local local_file = item.file
 			local data = kits.read_file( local_file )
 			if data then
 				cache.upload( url,item.file,data,
@@ -283,6 +291,8 @@ function Publishhw:publish_topics()
 						else
 							item.err = 'upload'
 							kits.log("ERROR :  Publishhw:publish_topics upload failed")
+							kits.log("	local file "..local_file)
+							kits.log("	url "..url)
 						end
 					end)
 			else

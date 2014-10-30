@@ -27,7 +27,12 @@ end
 
 local function playSound( file )
 	if FileUtils:isFileExist(file) then
-		return AudioEngine.playEffect( file )
+		local suffix = string.sub(file,-4)
+		if string.lower(suffix) == '.amr' then
+			return cc_playVoice(file)
+		else
+			return AudioEngine.playEffect( file )
+		end
 	else
 		kits.log('ERROR playSound file not exist '..tostring(file))
 	end
@@ -43,6 +48,7 @@ end
 
 local function stopAllSound()
 	AudioEngine.stopAllEffects()
+	cc_stopVoice()
 end
 
 local ismute

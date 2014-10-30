@@ -9,9 +9,9 @@ local resume = require "resume"
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v3/'
-local local_server = 'http://192.168.2.211:81/lgh/v3/'
-local update_server = local_server
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v5/'
+local local_server = 'http://192.168.2.211:81/lgh/v5/'
+local update_server = liexue_server
 
 local ui = {
 	FILE = 'loadscreen/jiazhan.json',

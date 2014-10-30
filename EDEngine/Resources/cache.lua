@@ -242,7 +242,8 @@ local function upload(url,filename,data,func,progress_func)
 				end
 				func(false)
 				kits.log('ERROR : upload failed! url = '..tostring(url)..' filename='..filename)
-				kits.log('	reason:'..tostring(obj.errmsg))
+				kits.log('	reason:'..tostring(obj.errmsg)..' errorcode='..tostring(obj.errcode))
+				kits.log('	'..tostring(obj.data))
 			end
 			if obj.state == 'LOADING' and progress then
 				progress( obj.progress )
