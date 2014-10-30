@@ -14,7 +14,7 @@ local ui = {
 local function messagebox(parent,title,text )
 	messagebox.open(parent,function()end,messagebox.MESSAGE,tostring(title),tostring(text) )
 end
-
+local g_scale = 2
 local function open( parent,func )
 	if not parent then return end
 	if not cc_isobj(parent) then return end
@@ -81,6 +81,7 @@ local function open( parent,func )
 					local b,t,v = cc_getRecordVoiceInfo()
 					if b then
 						_time:setString(tostring(math.floor(t)).."'")
+						v = 100*v/1024
 						if v > 100 then
 							v = 100
 						end

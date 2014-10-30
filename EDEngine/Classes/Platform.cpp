@@ -329,13 +329,8 @@ bool CDynaAMREncoder::InitEncoder(int cnChannel,int nRate,int cnBitPerSample,int
 		return false;
 	}
 
-	if (m_strTmpFile.empty())
-	{
-		//char szPathName[256];
-		//g_pTheApp->AllocTmpFile(szPathName,".amr");
-		m_strTmpFile = allocTmpFile(".amr");
-		//m_strTmpFile=szPathName;
-	}
+	m_strTmpFile = allocTmpFile(".amr");
+
 	m_pInterfaceEncoder=Encoder_Interface_init(0);
 	m_fpEncoder=fopen(m_strTmpFile.c_str(),"wb");
 	if (m_fpEncoder==NULL)
