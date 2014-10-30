@@ -13,13 +13,15 @@ local ui = {
 	wronglist_but = '878/880',
 	collect_but = '878/881',
 	statistics_but = '878/882',
+	back_but = '878/4791',
 	music_but = '1051/1056',
 	exit_but = '1051/3665',
+	
 	MAINMENU43 = '1430',
 	wronglist43_but = '1430/1432',
 	collect43_but = '1430/1433',
 	statistics43_but = '1430/1434',
-	
+	back43_but = '1430/4791',
 	student_view = '1051/4710',
 	per_student_view = '1051/4710/4711',
 	student_name = '4713',
@@ -210,15 +212,17 @@ function MoreView:init()
 	local but_wronglist
 	local but_collect
 	local but_more
-
+	local but_back
 	if _G.screen_type == 1 then	
 		but_wronglist = uikits.child(self._widget,ui.wronglist_but)
 		but_collect = uikits.child(self._widget,ui.collect_but)
 		but_statistics = uikits.child(self._widget,ui.statistics_but)
+		but_back = uikits.child(self._widget,ui.back_but)
 	else
 		but_wronglist = uikits.child(self._widget,ui.wronglist43_but)
 		but_collect = uikits.child(self._widget,ui.collect43_but)
 		but_statistics = uikits.child(self._widget,ui.statistics43_but)	
+		but_back = uikits.child(self._widget,ui.back43_but)
 	end	
 	
 	uikits.event(but_wronglist,
@@ -247,7 +251,10 @@ function MoreView:init()
 					cc.Director:getInstance():replaceScene(scene_next)								
 				end					
 			end,"click")		
-	
+	uikits.event(but_back,
+			function(sender,eventType)						
+				uikits.popScene()		
+			end,"click")	
 	self:addChild(self._widget)
 end
 

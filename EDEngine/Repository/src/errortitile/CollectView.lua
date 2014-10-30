@@ -313,7 +313,11 @@ function CollectView:init()
 					cc.Director:getInstance():replaceScene(scene_next)								
 				end				
 			end,"click")	
-			
+	local but_back = mainmenu:getChildByTag(4789)
+	uikits.event(but_back,
+			function(sender,eventType)						
+				uikits.popScene()		
+			end,"click")				
 	local ret = self:getdatabyurl()
 	if ret == false then
 		print("CollectView get error!")
