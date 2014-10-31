@@ -15,10 +15,17 @@ local ui = {
 	NEXT_BUTTON = 'next_problem', 
 	FINISH_BUTTON = 'finish_5',
 	TEACHER_VIEW = 'teacher_view',
-	TOPICS = 'teacher_view/homework_text',
+	TOPICS_BG = 'teacher_view/Panel_36',
+	TOPICS = 'teacher_view/Panel_36/homework_text',
 	RECORD_BUTTON = 'write_view/white_3/recording',
 	CAM_BUTTON = 'write_view/white_3/photograph',
 	PHOTO_BUTTON = 'write_view/white_3/photo',
+	
+	WRITE_VIEW = 'write_view',
+	TOPICS_PIC = 'teacher_view/tu1',
+	TOPICS_VOICE = 'teacher_view/chat',
+	TOPICS_VOICE_PLAY = 'chat',
+	TOPICS_VOICE_TIME = 'chat_time',
 	
 	AUDIO_VIEW = 'chat_view',
 	AUDIO_BUTTON = 'chat',
@@ -152,6 +159,13 @@ function Subjective:add_item( t )
 		
 		local picture_view = uikits.child(layout,ui.PICTURE_VIEW)
 		picture_view:setVisible(false)
+		
+		local tpic = uikits.child(layout,ui.TOPICS_PIC)
+		local tvoice = uikits.child(layout,ui.TOPICS_VOICE)
+		
+		tpic:setVisible(false)
+		tvoice:setVisible(false)
+		
 		--add loading circle
 		--load attachments
 		local rtable = {}
@@ -185,11 +199,69 @@ function Subjective:add_item( t )
 					end
 					--done
 					kits.log('DONE')
+					self:relayout_topics( layout,rs.urls )
 				end
 			end)
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
 	end
+end
+
+function Subjective:relayout_topics( layout,urls )
+	local layout_size = layout:getContentSize()
+	local topics = uikits.child(layout,ui.TEACHER_VIEW)
+	local topics_txtbg = uikits.child(layout,ui.TOPICS_BG)
+	local topics_txt = uikits.child(layout,ui.TOPICS)
+	local topics_pic = uikits.child(layout,ui.TOPICS_PIC)
+	local topics_voice = uikits.child(layout,ui.TOPICS_VOICE)
+	local topics_size = topics:getContentSize()
+	local topics_txt_size = topics_txtbg:getContentSize()
+	local topics_txt_x,topics_txt_y = topics_txtbg:getPosition()
+	local topics_space = topics_size.height - (topics_txt_y+topics_txt_size.height)
+	local topics_y = topics_space
+	for i,v in pairs(urls) do
+		if kits.exist_cache(v.filename) then
+			local suffix = string.lower(string.sub(v.filename,-4))
+			if suffix == '.amr' then
+				local voice = topics_voice:clone()
+				local voice_button = uikits.child(voice,ui.TOPICS_VOICE_PLAY)
+				local voice_time = uikits.child(voice,ui.TOPICS_VOICE_TIME)
+				local path = kits.get_cache_path()..v.filename
+				local leng = cc_getVoiceLength( path )
+				voice_time:setString( kits.time_to_string_simple(math.floor(leng)))
+				
+				uikits.event( voice_button,function(sender)
+					uikits.playSound( path )
+				end)
+				voice:setPosition( topics_txt_x,topics_y )
+				topics_y = topics_y + topics_space
+				topics_y = topics_y + voice:getContentSize().height
+				topics:addChild( voice )
+				voice:setVisible(true)
+			elseif suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+				local pic = topics_pic:clone()
+				pic:loadTexture( v.filename )
+				pic:setPosition( topics_txt_x,topics_y )
+				topics_y = topics_y + topics_space
+				topics_y = topics_y + pic:getContentSize().height				
+				topics:addChild( pic )
+				pic:setVisible(true)
+			else
+				kits.log("ERROR not support type "..v.filename )
+			end
+		end
+	end
+	topics_txtbg:setPosition( topics_txt_x,topics_y )
+	topics_y = topics_y + 2*topics_space + topics_txt_size.height
+	topics:setContentSize(cc.size(topics_size.width,topics_y))
+	local move_y = topics_size.height - topics_y
+	local write_view = uikits.child( layout,ui.WRITE_VIEW )
+	local write_view_size = write_view:getContentSize()
+	local mvs = {}
+	table.insert(mvs,topics)
+	table.insert(mvs,write_view)
+	uikits.move(mvs,0,move_y)
+--	layout:setInnerContainerSize(cc.size(layout_size.width,topics_y + 2*topics_space +write_view_size.height ))
 end
 
 function Subjective:relayout()
@@ -310,6 +382,9 @@ function Subjective:scroll_relayout()
 	end
 end
 
+function Subjective:relayout_tops()
+end
+
 function Subjective:init_gui()
 	if not self._root then
 		self._list = {}
@@ -321,7 +396,7 @@ function Subjective:init_gui()
 			end)
 		self:addChild(self._root)
 		
-		self._scrollview = uikits.child(self._root,ui.LIST)
+		self._scrollview = uikits.child(self._root,ui.LIST) --index list
 		self._scroll = uikits.child(self._root,ui.PAGE_VIEW)
 		self._scroll_size = self._scroll:getContentSize()
 		
@@ -330,7 +405,7 @@ function Subjective:init_gui()
 		local ts = self._tops:getContentSize()
 		local tx,ty = self._tops:getPosition()
 		self._space = cs.height-ty-ts.height
-		self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
+		--self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
 		local x,y = self._tops:getPosition()
 		self._tops_space = y-self._tops:getContentSize().height
 		self._tops_ox = x
