@@ -50,16 +50,19 @@ end
 
 function StudentWatch:init_data()
 	if self._args and self._args._exam_table then
-		uikits.set(self._root,{
-			[ui.CAPTION] = self._args.caption or "",
-			[ui.OBJECTIVE_RATE] = "0/"..self._args.cnt_item,
-			[ui.OBJECTIVE_TIME] = kits.time_to_string_simple(self._args.total_time),
-			[ui.OBJECTIVE_FEN] = (self._args.real_score or "0").."分",
-		})
-		if self._args and type(self._args)=='table' then
-			self._args.right_num = 0
+		if not self._first then
+			self._first = true
+			uikits.set(self._root,{
+				[ui.CAPTION] = self._args.caption or "",
+				[ui.OBJECTIVE_RATE] = "0/"..self._args.cnt_item,
+				[ui.OBJECTIVE_TIME] = kits.time_to_string_simple(self._args.total_time),
+				[ui.OBJECTIVE_FEN] = (self._args.real_score or "0").."分",
+			})
+			if self._args and type(self._args)=='table' then
+				self._args.right_num = 0
+			end
+			self:init_paper_list_by_table(self._args._exam_table)
 		end
-		self:init_paper_list_by_table(self._args._exam_table)
 	else
 		kits.log('ERROR StudentWatch:init_data invalid arguments')
 	end
@@ -154,7 +157,6 @@ function StudentWatch:add_paper_item( topicType,topicID )
 							if aw and data.my_answer[1] then
 								if topicType==1 or topicType==2 or topicType==3 or topicType==6 then
 									aw:setText( data.my_answer[1] )
-									print("ANSWER:"..data.my_answer[1] )
 								elseif topicType==5 then --填空
 									local txt = ''
 									for i,v in pairs(data.my_answer) do

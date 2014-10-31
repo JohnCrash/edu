@@ -19,6 +19,10 @@ local function clear_files( path,day )
 	if string.sub(path,len,len) == '/' then
 		path = string.sub(path,1,len-1)
 	end
+	if not kits.exists_file(path) then 
+		return 
+	end
+	kits.log('---> do clear path:'..path)
 	for file in lfs.dir(path) do
 		if file~='.' and file~='..' then
 			local f = path..'/'..file
@@ -39,6 +43,7 @@ local function clear_cache()
 	kits.log('clear path:'..path)
 	clear_files( path,3 ) --保留7天的缓冲数据
 	local tmp = kits.get_tmp_path();
+	kits.log('clear path:'..path)
 	clear_files( tmp,1 ) --临时文件保留一天
 end
 
