@@ -3,6 +3,8 @@ local uikits = require "uikits"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
 local cache = require "cache"
+local RecordVoice = require "recordvoice"
+local messagebox_ = require "messagebox"
 
 local ui = {
 	FILE = 'homework/subjective.json',
@@ -22,6 +24,7 @@ local ui = {
 	PHOTO_BUTTON = 'write_view/white_3/photo',
 	
 	WRITE_VIEW = 'write_view',
+	WRITE_TEXT = 'write_view/write_text',
 	TOPICS_PIC = 'teacher_view/tu1',
 	TOPICS_VOICE = 'teacher_view/chat',
 	TOPICS_VOICE_PLAY = 'chat',
@@ -45,6 +48,14 @@ local ui = {
 
 local Subjective = class("Subjective")
 Subjective.__index = Subjective
+
+local function stopSound()
+	uikits.delay_call( nil,uikits.stopAllSound,1.5 )
+end
+
+local function messagebox(parent,title,text )
+	messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
+end
 
 function Subjective.create( args )
 	local scene = cc.Scene:create()
@@ -163,6 +174,10 @@ function Subjective:add_item( t )
 		local tpic = uikits.child(layout,ui.TOPICS_PIC)
 		local tvoice = uikits.child(layout,ui.TOPICS_VOICE)
 		
+		local write_text = uikits.child(layout,ui.WRITE_TEXT)
+		local org_text = uikits.child( self._scroll,ui.WRITE_TEXT)
+		local holderText = org_text:getPlaceHolder()
+		write_text:setPlaceHolder(holderText)
 		tpic:setVisible(false)
 		tvoice:setVisible(false)
 		
@@ -261,7 +276,95 @@ function Subjective:relayout_topics( layout,urls )
 	table.insert(mvs,topics)
 	table.insert(mvs,write_view)
 	uikits.move(mvs,0,move_y)
+	
+	layout._topics = topics
+	layout._writer = write_view
+	layout._space = topics_space
+	layout._size = layout_size
+	layout._x = topics_txt_x
+	
+	--设置事件
+	local next_button = uikits.child(layout,ui.NEXT_BUTTON)
+	local finish_button = uikits.child(layout,ui.FINISH_BUTTON)
+	uikits.event( next_button,function(sender)
+		self:next_item()
+	end)
+	uikits.event( finish_button,function(sender)
+	--保存
+		self:save()
+		uikits.popScene()
+	end)	
+	local record_button = uikits.child(layout,ui.RECORD_BUTTON)
+	local cam_button = uikits.child(layout,ui.CAM_BUTTON)
+	local pic_button = uikits.child(layout,ui.PHOTO_BUTTON)
+	uikits.event( record_button,function(sender)
+				stopSound()
+				RecordVoice.open(
+						self,
+						function(b,file)
+							self._recording = nil
+							if b then
+								local tlen = cc_getVoiceLength(file)
+								messagebox( self,"add voice",tostring(file))
+							end
+						end
+					)	
+	end)
+	uikits.event( cam_button,function(sender)
+			stopSound()
+			cc_takeResource(TAKE_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						--file = res
+						local b,res = cc_adjustPhoto(res,1024)
+						if b then
+							messagebox( self,"add photo",tostring(res))
+						else
+							messagebox(self,"错误","图像调整失败")
+						end
+					end
+				end)				
+	end)
+	uikits.event( pic_button,function(sender)
+			stopSound()
+			cc_takeResource(PICK_PICTURE,function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+					if result == RESULT_OK then
+						local b,res = cc_adjustPhoto(res,1024)
+						if b then
+							messagebox( self,"add picture",tostring(res))
+						else
+							messagebox(self,"错误","图像调整失败")
+						end
+					end					
+				end)				
+	end)
+	
+	self:relayout_myanswer(layout)
 --	layout:setInnerContainerSize(cc.size(layout_size.width,topics_y + 2*topics_space +write_view_size.height ))
+end
+
+function Subjective:relayout_myanswer( layout )
+	local next_button = uikits.child(layout,ui.NEXT_BUTTON)
+	local finish_button = uikits.child(layout,ui.FINISH_BUTTON)
+	local y = layout._space
+	local but_size = next_button:getContentSize()
+	next_button:setPosition( cc.p(layout._size.width/2,y+but_size.height/2) )
+	finish_button:setPosition( cc.p(layout._size.width/2,y+but_size.height/2) )
+	if layout._isdone then
+		next_button:setVisible( false )
+		finish_button:setVisible( true )	
+	else
+		next_button:setVisible( true )
+		finish_button:setVisible( false )
+	end
+	y = y + but_size.height + layout._space
+	--新加的item
+	layout._writer:setPosition( cc.p(layout._x,y) )
+	y = y + layout._writer:getContentSize().height + layout._space
+	layout._topics:setPosition( cc.p(layout._x,y) )
+	y = y + layout._topics:getContentSize().height + layout._space
+	layout:setInnerContainerSize(cc.size(layout._size.width,y))
 end
 
 function Subjective:relayout()
@@ -450,7 +553,7 @@ function Subjective:init_gui()
 		self._item_finished:setVisible(false)
 		self._item_unfinished:setVisible(false)
 		self._item_size = self._item_current:getContentSize()
-
+--[[
 		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
 		self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )
 		self._next_button:setVisible(true)
@@ -465,6 +568,7 @@ function Subjective:init_gui()
 						self:save()
 						uikits.popScene()
 					end,'click')		
+--]]					
 		local x
 		x,self._item_y = self._item_current:getPosition()			
 		---装入数据

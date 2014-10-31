@@ -712,7 +712,7 @@ bool VoiceStartPlay(const char *pszPathName)
 //-------------------------------------------------------------------------------------------------------------------------------------
 void VoiceStopPlay()
 {
-	if (s_pVoicePlay == NULL)
+	if (s_pVoicePlay != NULL)
 	{
 		s_pVoicePlay->StopPlay();
 	}

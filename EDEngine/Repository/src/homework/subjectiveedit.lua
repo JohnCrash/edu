@@ -34,7 +34,6 @@ local SubjectiveEdit = class("SubjectiveEdit")
 SubjectiveEdit.__index = SubjectiveEdit
 
 local function stopSound()
-	print("stopSound")
 	uikits.delay_call( nil,uikits.stopAllSound,1.5 )
 end
 
