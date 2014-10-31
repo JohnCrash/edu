@@ -239,7 +239,7 @@ function WorkList:load_page( first,last )
 		end
 		local function close_scheduler()
 			if local_first then
-				cache.clear()
+			--	cache.clear()
 			end
 			scheduler:unscheduleScriptEntry(self._scID)
 			self._scID = nil

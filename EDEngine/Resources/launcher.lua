@@ -6,10 +6,12 @@ local uikits = require "uikits"
 local login = require "login"
 local update = require "update"
 local resume = require "resume"
+local cache = require "cache"
 
 crash.open("launcher",1)
 
 uikits.muteSound( kits.config("mute","get") )
+cache.clear() --清除缓冲
 
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
@@ -94,11 +96,23 @@ local scene
 
 if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
+	kits.config("cookie",cookie)
 else
-	login.set_selector(1) --学生
+	local ck = kits.config("cookie","get")
+	if ck then
+		login.set_cookie( ck ) --上一次成功的启动
+	else
+		login.set_selector(1) --学生
+	end
 end
 if uid and type(uid)=='string' and string.len(uid)>1 then
 	login.set_userid( uid )
+	kits.config("uid",uid)
+else
+	local id = kits.config("uid","get")
+	if id then
+		login.set_userid( id )
+	end
 end
 
 resume.clearflag("launcher") --launcher isok

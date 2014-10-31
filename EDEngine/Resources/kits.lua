@@ -9,7 +9,7 @@ local ljshell = require "ljshell"
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 local platform = CCApplication:getInstance():getTargetPlatform()
 local cache_dir = local_dir.."cache/"
-
+local tmp_dir = local_dir.."tmp/"
 local host = {{"192.168.2.211",81,"/lgh/"},{"192.168.0.182",80,"/"}}
 local use_idx = 1
 local cobj = curl.new()
@@ -18,6 +18,8 @@ local MAX_LOG = 512
 local LOW_LOG = 256
 local logs = {}
 
+print("----------")
+print(tmp_dir)
 local function get_logs()
 	return logs
 end
@@ -499,6 +501,10 @@ local function get_cache_path()
 	return cache_dir
 end
 
+local function get_tmp_path()
+	return tmp_dir
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -539,6 +545,7 @@ local exports = {
 	exists_file = exists_file,
 	get_local_directory = get_local_directory,
 	get_cache_path = get_cache_path,
+	get_tmp_path = get_tmp_path,
 }
 
 return exports

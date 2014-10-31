@@ -14,14 +14,11 @@ local function add_cache_data(url,data)
 	cache_data[url] = data
 end
 
-local function clear_cache()
-	local path = kits.get_cache_path()
+local function clear_files( path,day )
 	local len = string.len(path)
-	kits.log('cache path:'..path)
 	if string.sub(path,len,len) == '/' then
 		path = string.sub(path,1,len-1)
 	end
-	kits.log('cache path:'..path)
 	for file in lfs.dir(path) do
 		if file~='.' and file~='..' then
 			local f = path..'/'..file
@@ -29,12 +26,20 @@ local function clear_cache()
 			if attr.mode=='directory' then
 			else
 				local dt = os.time() - attr.modification
-				if dt > 7*24*3600 then --保留7天的缓冲数据
+				if dt > day*24*3600 then 
 					os.remove(f)
 				end
 			end
 		end
 	end
+end
+
+local function clear_cache()
+	local path = kits.get_cache_path()
+	kits.log('clear path:'..path)
+	clear_files( path,3 ) --保留7天的缓冲数据
+	local tmp = kits.get_tmp_path();
+	clear_files( tmp,1 ) --临时文件保留一天
 end
 
 local function random_delay()
