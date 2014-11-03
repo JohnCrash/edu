@@ -1,5 +1,5 @@
 local uikits = require "uikits"
-local messagebox = require "messagebox"
+local messagebox_ = require "messagebox"
 
 local ui = {
 	RECORD = 'luyinui/luyinui_1.json',
@@ -12,7 +12,7 @@ local ui = {
 }
 
 local function messagebox(parent,title,text )
-	messagebox.open(parent,function()end,messagebox.MESSAGE,tostring(title),tostring(text) )
+	messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
 end
 local g_scale = 2
 local function open( parent,func )
@@ -54,6 +54,7 @@ local function open( parent,func )
 			
 		local function start_record()
 			uikits.event( _ok,function(sender)
+				_root:setVisible(false)
 				if parent.setKeyboardEnabled then
 					parent:setKeyboardEnabled(true)
 				end			
@@ -64,7 +65,7 @@ local function open( parent,func )
 				if _start_right then
 					local b,str = cc_stopRecordVoice()
 					if not b then
-						messagebox(self,"错误","录音失败")
+						messagebox(self,"错误","录音失败,原因:"..tostring(str))
 					end
 					if func and type(func)=='function' then
 						func(b,str)
@@ -92,7 +93,7 @@ local function open( parent,func )
 				end
 				_scID = scheduler:scheduleScriptFunc( volume_func,0.1,false )
 			else
-				messagebox(self,"错误","录音失败")
+				messagebox(self,"错误","录音失败,原因:"..tostring(str))
 				if func and type(func)=='function' then
 					func(false)
 				end		

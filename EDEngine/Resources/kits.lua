@@ -18,6 +18,10 @@ local MAX_LOG = 512
 local LOW_LOG = 256
 local logs = {}
 
+local function get_version()
+	return 5
+end
+
 local function get_logs()
 	return logs
 end
@@ -101,6 +105,9 @@ end
 --ÀýÈçapp_id=2001&game_id=agcn3nanf&stage_id=2
 local function encode_str( s )
 	local length = string.len(s)
+	if length == 0 then
+		return ''
+	end		
 	local t = {}
 	for i=1,length do
 		local ch = string.byte(s,i)
@@ -544,6 +551,7 @@ local exports = {
 	get_local_directory = get_local_directory,
 	get_cache_path = get_cache_path,
 	get_tmp_path = get_tmp_path,
+	get_version = get_version,
 }
 
 return exports

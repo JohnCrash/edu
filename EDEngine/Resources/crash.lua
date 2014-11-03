@@ -4,7 +4,6 @@ local md5 = require "md5"
 local json = require "json-c"
 local login = require "login"
 
-local luacore_version = 2
 local luaapp_name = "unkown"
 local luaapp_version = 0
 
@@ -72,7 +71,7 @@ local function report_export( errmsg,stack_level )
 			bugs.platform = 'unkown'
 		end
 		bugs.cocos2dx = '3.2'
-		bugs.luacore_version = luacore_version
+		bugs.luacore_version = kits.get_version()
 		bugs.luaapp_name = luaapp_name
 		bugs.luaapp_version = luaapp_version
 		
