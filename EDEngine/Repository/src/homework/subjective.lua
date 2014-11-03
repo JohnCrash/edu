@@ -382,7 +382,6 @@ function Subjective:add_photo( layout,photo_file )
 	local old = pic:getContentSize()
 	pic:setContentSize(cc.size(old.width,size.height))
 	layout:addChild(pic)
-	pic:setVisible( true )
 	layout._list = layout._list or {}
 	table.insert(layout._list,{file=photo_file,item=pic})
 end
@@ -417,7 +416,6 @@ function Subjective:add_voice( layout,voice_file,tlen )
 		uikits.playSound(voice_file)
 	end )
 	layout:addChild(voice)
-	voice:setVisible( true )
 	layout._list = layout._list or {}
 	table.insert(layout._list,{file=voice_file,item=voice})
 end
@@ -443,6 +441,7 @@ function Subjective:relayout_myanswer( layout )
 	for i,v in pairs( layout._list ) do
 		if v.item then
 			 v.item:setPosition( cc.p(layout._x,y) )
+			 v.item:setVisible( true )
 			y = y +  v.item:getContentSize().height + layout._space
 		end
 	end

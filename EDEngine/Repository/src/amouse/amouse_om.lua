@@ -439,7 +439,7 @@ function AMouseScene:clean_top_list()
 	if self._top_lists and type(self._top_lists) == 'table' then
 		for i = 1,#self._top_lists do
 			self._top_lists[i]:getChildByName('Label_fen'):setString(' ')
-			self._top_lists[i]:getChildByName('Label_school'):setString(' ')
+--			self._top_lists[i]:getChildByName('Label_school'):setString(' ')
 			self._top_lists[i]:getChildByName('Label_name'):setString(' ')
 		end
 	end
@@ -454,8 +454,8 @@ function AMouseScene:game_top10_Dialog( where )
 	self:addChild(self._uiLayer,1300)
 	self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("amouse/jie_mian_5/jie_mian_5.json")
 	self._uiLayer:addChild(self._widget)
-	--self._widget:setScaleX(0.5)
-	--self._widget:setScaleY(0.5)
+	self._widget:setScaleX(0.5)
+	self._widget:setScaleY(0.5)
 	local current_checkbox = nil
 	--返回
 	local function return_up( sender,eventType )
@@ -506,7 +506,7 @@ function AMouseScene:game_top10_Dialog( where )
 	root:getChildByTag(8):addTouchEventListener(return_up) --返回
 	root:getChildByTag(98):addTouchEventListener(week_top) --本周
 	root:getChildByTag(96):addTouchEventListener(all_top) --历史最佳
-	root:getChildByTag(97):addTouchEventListener(week_top) --历史最佳
+	--root:getChildByTag(97):addTouchEventListener(week_top) --历史最佳
 
 	self._top_lists = {}
 	--初始化积分表

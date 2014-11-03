@@ -1,3 +1,6 @@
+错误查询入口
+http://api.lejiaolexue.com/ssp/debug/getdata.html
+
 homework.lua 入口
 loadingbox.lua 加载，网络错误等公用对话栏
 workloading.lua 加载界面,进入界面
