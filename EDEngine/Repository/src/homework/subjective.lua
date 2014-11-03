@@ -128,7 +128,9 @@ function Subjective:set_item_state( i,ste )
 		self._list[i] = item
 		self._scrollview:addChild(item)	
 		local index = i
-		uikits.event(item,function(sender) self:set_current( index ) end,'click')
+		uikits.event(item,function(sender) 
+		stopSound()
+		self:set_current( index ) end,'click')
 	end
 end
 
@@ -157,10 +159,11 @@ function Subjective:add_item( t )
 		item:setVisible(true)
 		self._scrollview:addChild(item)
 		local index = #self._list
-		uikits.event(item,function(sender) self:set_current( index ) end,'click')
+		uikits.event(item,function(sender) 
+		stopSound()
+		self:set_current( index ) end,'click')
 		--add page
 		local layout = self._scroll:clone()
-
 		layout:setVisible(true)
 		local topics = uikits.child(layout,ui.TOPICS)
 		topics:setString( t.content )
@@ -213,7 +216,6 @@ function Subjective:add_item( t )
 						return
 					end
 					--done
-					kits.log('DONE')
 					self:relayout_topics( layout,rs.urls )
 				end
 			end)
@@ -287,6 +289,7 @@ function Subjective:relayout_topics( layout,urls )
 	local next_button = uikits.child(layout,ui.NEXT_BUTTON)
 	local finish_button = uikits.child(layout,ui.FINISH_BUTTON)
 	uikits.event( next_button,function(sender)
+		self:save()
 		self:next_item()
 	end)
 	uikits.event( finish_button,function(sender)
@@ -305,7 +308,9 @@ function Subjective:relayout_topics( layout,urls )
 							self._recording = nil
 							if b then
 								local tlen = cc_getVoiceLength(file)
-								messagebox( self,"add voice",tostring(file))
+								--messagebox( self,"add voice",tostring(file))
+								self:add_voice( layout,file,tlen )
+								self:relayout_myanswer( layout )
 							end
 						end
 					)	
@@ -318,7 +323,9 @@ function Subjective:relayout_topics( layout,urls )
 						--file = res
 						local b,res = cc_adjustPhoto(res,1024)
 						if b then
-							messagebox( self,"add photo",tostring(res))
+							--messagebox( self,"add photo",tostring(res))
+							self:add_photo( layout,res )
+							self:relayout_myanswer( layout )
 						else
 							messagebox(self,"错误","图像调整失败")
 						end
@@ -332,7 +339,9 @@ function Subjective:relayout_topics( layout,urls )
 					if result == RESULT_OK then
 						local b,res = cc_adjustPhoto(res,1024)
 						if b then
-							messagebox( self,"add picture",tostring(res))
+							--messagebox( self,"add picture",tostring(res))
+							self:add_photo( layout,res )
+							self:relayout_myanswer( layout )
 						else
 							messagebox(self,"错误","图像调整失败")
 						end
@@ -344,7 +353,77 @@ function Subjective:relayout_topics( layout,urls )
 --	layout:setInnerContainerSize(cc.size(layout_size.width,topics_y + 2*topics_space +write_view_size.height ))
 end
 
+function Subjective:add_photo( layout,photo_file )
+	local pic = uikits.child( layout,ui.PICTURE_VIEW):clone()
+	local img = uikits.child( pic,ui.PICTURE_PIC )
+	local del = uikits.child( pic,ui.PICTURE_DELETE_BUTTON )
+	uikits.event( del,function(sender)
+			if layout._list then
+				local del_pos = nil
+				for i,v in pairs(layout._list) do
+					if v.item == pic then
+						del_pos = i
+						break
+					end
+				end
+				if del_pos then
+					table.remove(layout._list,del_pos)
+				end
+				uikits.delay_call( nil,function()
+					pic:removeFromParent()
+				end )
+				self:relayout_myanswer( layout )
+			end
+		end)
+	img:loadTexture( photo_file )
+	local size = img:getContentSize()
+	local del_size = del:getContentSize()
+	del:setPosition(cc.p(size.width+3/2*del_size.width,size.height/2))
+	local old = pic:getContentSize()
+	pic:setContentSize(cc.size(old.width,size.height))
+	layout:addChild(pic)
+	pic:setVisible( true )
+	layout._list = layout._list or {}
+	table.insert(layout._list,{file=photo_file,item=pic})
+end
+
+function Subjective:add_voice( layout,voice_file,tlen )
+	local voice = uikits.child( layout,ui.AUDIO_VIEW):clone()
+	local play = uikits.child( voice,ui.AUDIO_BUTTON )
+	local del = uikits.child( voice,ui.PICTURE_DELETE_BUTTON )
+	local chat_time = uikits.child( voice,ui.AUDIO_TIME )
+	chat_time:setString( kits.time_to_string_simple(math.floor(tlen)) )
+	uikits.event( del,function(sender)
+			stopSound()
+			if layout._list then
+				local del_pos = nil
+				for i,v in pairs(layout._list) do
+					if v.item == voice then
+						del_pos = i
+						break
+					end
+				end
+				if del_pos then
+					table.remove(layout._list,del_pos)
+				end
+				uikits.delay_call( nil,function()
+					voice:removeFromParent()
+				end )
+				self:relayout_myanswer( layout )
+			end
+		end)
+	uikits.event( play,function(sender)
+		stopSound()
+		uikits.playSound(voice_file)
+	end )
+	layout:addChild(voice)
+	voice:setVisible( true )
+	layout._list = layout._list or {}
+	table.insert(layout._list,{file=voice_file,item=voice})
+end
+
 function Subjective:relayout_myanswer( layout )
+	if not layout._space then return end
 	local next_button = uikits.child(layout,ui.NEXT_BUTTON)
 	local finish_button = uikits.child(layout,ui.FINISH_BUTTON)
 	local y = layout._space
@@ -360,6 +439,13 @@ function Subjective:relayout_myanswer( layout )
 	end
 	y = y + but_size.height + layout._space
 	--新加的item
+	layout._list = layout._list or {}
+	for i,v in pairs( layout._list ) do
+		if v.item then
+			 v.item:setPosition( cc.p(layout._x,y) )
+			y = y +  v.item:getContentSize().height + layout._space
+		end
+	end
 	layout._writer:setPosition( cc.p(layout._x,y) )
 	y = y + layout._writer:getContentSize().height + layout._space
 	layout._topics:setPosition( cc.p(layout._x,y) )
@@ -378,11 +464,69 @@ end
 
 function Subjective:next_item()
 	if self._current and self._current < #self._list then
+		stopSound()
 		self:set_current( self._current+1 )
 	end
 end
 
 function Subjective:save()
+	if self._args and self._args.exam_id then
+		local file = self._args.exam_id..'.custom'
+		local t = {}
+		for i,layout in pairs(self._pageview:getPages()) do
+			local p = {}
+			p.text = uikits.child(layout,ui.WRITE_TEXT ):getStringValue()
+			p.attachments = {}
+			if layout._list then
+				for k,v in pairs(layout._list) do
+					table.insert(p.attachments,v.file )
+				end
+			end
+			table.insert(t,p)
+		end
+		local str = json.encode( t )
+		kits.write_cache( file,str )
+	end
+end
+
+function Subjective:load_myanswer_from_table( t )
+	local pages = self._pageview:getPages()
+	if table.maxn(pages) == table.maxn(t) then
+		for i,layout in pairs(pages) do
+			if t[i] then
+				uikits.child(layout,ui.WRITE_TEXT ):setText( t[i].text or '' )
+				for k,v in pairs(t[i].attachments) do
+					local suffix = string.lower(string.sub(v,-4))
+					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
+						self:add_photo( layout,v )
+					elseif suffix == '.amr' then
+						local tlen = cc_getVoiceLength( v )
+						self:add_voice( layout,v,tlen )
+					else
+						kits.log("ERROR not support meida type "..tostring(suffix))
+					end
+				end
+			else
+				kits.log("ERROR load_myanswer_from_table t[i] = nil")
+			end
+			self:relayout_myanswer(layout)
+		end
+	else
+		kits.log("ERROR load_myanswer_from_table #pages!=#t")
+	end
+end
+
+function Subjective:load_myanswer()
+	if self._args and self._args.exam_id then
+		local file = self._args.exam_id..'.custom'
+		local str = kits.read_cache( file )
+		if str then
+			local t = json.decode( str )
+			if t then
+				self:load_myanswer_from_table( t )
+			end
+		end
+	end
 end
 
 function Subjective:init()
@@ -418,6 +562,7 @@ function Subjective:init_data()
 				loadbox:removeFromParent()
 				if t then
 					self:load_subjective_from_table(t)
+					self:load_myanswer()
 				else
 					kits.log('ERROR Subjective:init_data request failed')
 				end			
@@ -495,6 +640,8 @@ function Subjective:init_gui()
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)
+				stopSound()
+				self:save()
 				uikits.popScene()
 			end)
 		self:addChild(self._root)
@@ -541,6 +688,7 @@ function Subjective:init_gui()
 			function(sender,eventType)
 				if eventType == ccui.PageViewEventType.turning then
 					local i = sender:getCurPageIndex()
+					stopSound()
 					self:set_current( i+1 )
 				end				
 			end)
@@ -576,6 +724,7 @@ function Subjective:init_gui()
 			for i,v in pairs(self._data) do
 				self:add_item( v )
 			end
+			stopSound()
 			self:set_current(1)
 			self:relayout()
 		end
