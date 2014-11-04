@@ -45,7 +45,7 @@ local ui = {
 	STATE_UNFINISHED = 3,	
 	PAGE_VIEW = 'homework_view',
 }
-
+local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
 local Subjective = class("Subjective")
 Subjective.__index = Subjective
 
@@ -520,10 +520,11 @@ function Subjective:save()
 			p.attachments = {}
 			if layout._list then
 				for k,v in pairs(layout._list) do
-					table.insert(p.attachments,v.file )
+					table.insert(p.attachments,{filename=v.file} )
 				end
 			end
-			table.insert(t,p)
+			--table.insert(t,p)
+			t[p.item_id] = p
 		end
 		local str = json.encode( t )
 		kits.write_cache( file,str )
@@ -534,17 +535,18 @@ function Subjective:load_myanswer_from_table( t )
 	local pages = self._pageview:getPages()
 	if table.maxn(pages) == table.maxn(t) then
 		for i,layout in pairs(pages) do
-			if t[i] and layout._item_id == t[i].item_id then
-				layout._times = t[i].times or 0
+			if t[layout._item_id] then
+				local item = t[layout._item_id]
+				layout._times = item.times or 0
 				layout._begin_time = os.time()
-				uikits.child(layout,ui.WRITE_TEXT ):setText( t[i].text or '' )
-				for k,v in pairs(t[i].attachments) do
-					local suffix = string.lower(string.sub(v,-4))
+				uikits.child(layout,ui.WRITE_TEXT ):setText( item.text or '' )
+				for k,v in pairs(item.attachments) do
+					local suffix = string.lower(string.sub(v.filename,-4))
 					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
-						self:add_photo( layout,v )
+						self:add_photo( layout,v.filename )
 					elseif suffix == '.amr' then
-						local tlen = cc_getVoiceLength( v )
-						self:add_voice( layout,v,tlen )
+						local tlen = cc_getVoiceLength( v.filename )
+						self:add_voice( layout,v.filename,tlen )
 					else
 						kits.log("ERROR not support meida type "..tostring(suffix))
 					end
@@ -559,6 +561,107 @@ function Subjective:load_myanswer_from_table( t )
 	end
 end
 
+function Subjective:load_from_cloud()
+	local function download_resources( rsts,cloud_answer )
+		local n = 0
+		local loadbox = loadingbox.open(self)
+		local r,msg = cache.request_resources( rsts,function(rs,i,b)
+			n = n+1
+			if n >= #rs.urls then
+				--全部下载完成
+				if not loadbox:removeFromParent() then
+					return
+				end
+				self:load_myanswer_from_table( cloud_answer )
+			end
+		end)
+		if not r then
+			kits.log(msg)
+		end
+	end
+	
+	if self._args.status == 10 or self._args.status == 11 then
+		if self._data then
+			local total_count = 0
+			local count = 0
+			local urls = {}
+			local rsts = {}
+			rsts.urls = {}
+			local tryagin = true
+			local cloud_answer = {}
+			for i,v in ipairs(self._data) do
+				if v.item_type == 93 then
+					local form = 'examId='..tostring(self._args.exam_id)
+					..'&itemId='..tostring(v.item_id)
+					..'&teacherId='..tostring(self._args.tid)
+					local url = cloud_answer_url..'?'..form
+					table.insert(urls,url)
+					total_count = total_count + 1
+				end
+			end
+			if total_count > 0 then
+				local loadbox = loadingbox.open(self)
+				for i,v in pairs(urls) do
+					cache.request_json(v,function(t)
+							if t and t.buffer then --答案数据
+								local answer = t.buffer
+								local p = {}
+								p.text = answer.content or {}
+								p.item_id = answer.item_id
+								p.attachments = {}
+								if answer.attachment then
+									local attach = json.decode(answer.attachment)
+									if attach and attach.attachments then
+										for k,v in pairs(attach.attachments) do
+											if v.value and v.name then
+												table.insert(p.attachments,{filename=v.name,url=v.value})
+												table.insert(rsts.urls,{url=v.value,filename=v.name})
+											else
+												kits.log("ERROR attachments value = nil or name = nil")
+											end
+										end
+									end
+								end
+								--table.insert(cloud_answer,p)
+								cloud_answer[p.item_id] = p
+							else
+								--下载失败
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										if tragin then
+											if not loadbox:removeFromParent() then
+												return
+											end										
+											cache.request_cancel()
+											self:load_from_cloud()
+											tryagin = false
+										end
+									end
+								end,messagebox.RETRY,"下载主观题答案是出错","是否重试?")								
+							end
+							count = count + 1
+							if count == total_count then
+								--全部做完
+								if not loadbox:removeFromParent() then
+									return
+								end
+								local str = json.encode( cloud_answer )
+								local file = self._args.exam_id..'.custom'
+								kits.write_cache( file,str )
+								--下载全部附件
+								download_resources( rsts,cloud_answer )
+							else
+								if not loadbox:removeFromParent() then
+									return
+								end							
+							end
+						end)
+				end
+			end
+		end
+	end
+end
+
 function Subjective:load_myanswer()
 	if self._args and self._args.exam_id then
 		local file = self._args.exam_id..'.custom'
@@ -567,9 +670,11 @@ function Subjective:load_myanswer()
 			local t = json.decode( str )
 			if t then
 				self:load_myanswer_from_table( t )
+				return
 			end
 		end
 	end
+	self:load_from_cloud()
 end
 
 function Subjective:init()

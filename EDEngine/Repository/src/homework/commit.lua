@@ -348,6 +348,7 @@ function WorkCommit:init_commit_page()
 			self:setPercent2(0)
 			if self._args.cnt_item == 0 then
 				local button = uikits.child(self._root,ui.WORKFLOW)
+				button:setEnabled(false)
 				button:setHighlighted(false)
 				button:setBright(false)
 			end
@@ -357,6 +358,7 @@ function WorkCommit:init_commit_page()
 			subj_num:setString(tostring(self._args.subjective_num))
 			if self._args.subjective_num == 0 then
 				local button = uikits.child(self._root,ui.WORKFLOW2)
+				button:setEnabled(false)
 				button:setHighlighted(false)
 				button:setBright(false)
 			end			
@@ -778,11 +780,13 @@ function WorkCommit:commit()
 	local step = 0
 	local loadbox = loadingbox.open( self )
 	
-	local function close_scheduler()
+	local function close_loadingbox()
 		if loadbox then
 			loadbox:removeFromParent()
 			loadbox = nil
-		end
+		end	
+	end
+	local function close_scheduler()
 		if self._commitSCID then
 			self:getScheduler():unscheduleScriptEntry(self._commitSCID)
 			self._commitSCID = nil
@@ -798,6 +802,7 @@ function WorkCommit:commit()
 			--检查是否全部成功
 			if self._faild_commit_flag then --上传中发生错误
 				step = 100
+				close_loadingbox()
 				close_scheduler()
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
@@ -810,8 +815,9 @@ function WorkCommit:commit()
 		elseif step==2 then --上传主观题答案
 			if subjective_context.result == 1 then --成功下一步
 				step = 3
-			elseif subjective_context.result == 1 then --错误要求退出
+			elseif subjective_context.result == -1 then --错误要求退出
 				step = 100
+				close_loadingbox()
 				close_scheduler()
 			else
 				self:commit_subjective( subjective_context )
@@ -823,6 +829,7 @@ function WorkCommit:commit()
 			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
 			cache.request_json(url,
 				function(t)
+					close_loadingbox()
 					if t then
 						self._args.status = 10 --标记已经提交
 						self._args.commit_order = t.num
