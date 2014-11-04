@@ -303,8 +303,10 @@ function Publishhw:publish_topics()
 		local function additem(item) --add topics item
 			kits.log('>>>ADD ATTACHMENTS')
 			local att = {}
-			for i,v in pairs(item.items) do
-				table.insert(att,{src=v.mini_src,name=v.mini_src})
+			if item.items then
+				for i,v in pairs(item.items) do
+					table.insert(att,{src=v.mini_src,name=v.mini_src})
+				end
 			end
 			local t = {
 				content = kits.encode_str(tostring(item.text)),

@@ -94,7 +94,7 @@ local function messagebox( parent,func,dt,caption,text )
 												s:removeFromParent()
 											end,0)
 											func( 5 )
-										end,'click')			
+										end,'click')
 		end
 		if quit then
 			uikits.event( quit,function(sender)

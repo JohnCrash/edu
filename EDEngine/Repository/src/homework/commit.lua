@@ -631,12 +631,67 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 			kits.log("ERROR : Publishhw:publish_topics upload can't open file "..local_file)
 		end
 	end	
+	local function commit_subjective_answer()
+		if not context.myanswer then
+			context.result = -1 --彻底失败
+			return
+		end
+		if context._commiting and context.commit_failed_count then
+			--检查看看是不是上传结束
+			if context.commit_tatol_count == context.commit_count then
+				--顺利结束
+				context.result = 1
+				return
+			elseif context.commit_tatol_count == context.commit_count+context.commit_failed_count then
+				--提交结束但是有失败的
+				context._dialog = true
+				messagebox.open(self,function(e)
+					context._dialog = nil
+					if e == messagebox.TRY then
+						context.commit_failed_count = nil
+					elseif e == messagebox.CLOSE then
+						context.result = -1
+					end
+				end,messagebox.RETRY,"提交主观题解答失败","失败数量:"..tostring(context.commit_failed_count))				
+			else
+				--递交中
+				return
+			end
+		end
+		context._commiting = true
+		context.commit_tatol_count = table.maxn(context.myanswer)
+		context.commit_failed_count = context.commit_failed_count or 0
+		context.commit_count = context.commit_count or 0
+		for i,v in pairs(context.myanswer) do
+			if v.result ~= 1 then
+				local att = {}
+				if v.attachs then
+					for k,item in pairs(v.attachs) do
+						table.insert(att,{src=item.mini_src,name=item.mini_src})
+					end
+				end
+				local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
+					..'&itemId='..tostring(v.item_id)
+					..'&answer='..(tostring(v.text) or "")
+					..'&times='..(v.times or 0) --做题题目计时器
+					..'&tid='..tostring(self._args.tid)
+					..'&attach='..json.encode(att)
+				cache.request( url,function(b,data)
+						if b then
+							v.result = 1
+							context.commit_count = context.commit_count + 1
+						else
+							v.result = -1
+							context.commit_failed_count = context.commit_failed_count + 1
+						end
+					end )
+			end
+		end
+	end
 	--上传答案
 	local function upload_myanswer_from_table( t )
 		for i,item in pairs(t) do
-			item.text
-			item.item_id
-			if item.attachments then
+			if item.attachments and not item.attachs then
 				item.attachs = {}
 				for k,v in pairs(item.attachments) do
 					if v then
@@ -644,6 +699,13 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 						table.insert( item.attachs,up_item )
 						upload( up_item )
 						context.attachments_count = context.attachments_count + 1
+					end
+				end
+			elseif item.attachs then --tryagin
+				for k,v in pairs(item.attachs) do
+					if not v.src and v.err then --下载错误的
+						v.err = nil
+						upload( v )
 					end
 				end
 			end
@@ -667,6 +729,13 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 			context.myanswer = -1
 		end
 	end
+	if context._dialog then
+		return
+	end
+	if context._commiting then
+		commit_subjective_answer()
+		return
+	end
 	if not context.myanswer then
 		upload_subjective_answer()
 	elseif context.myanswer == -1 then
@@ -678,11 +747,19 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 			if context.attachments_count == 0 or context.attachments_count == context.attachments_upload_count then
 				--成功上传或者没有附件
 				--开始提交主观题答案
-				
+				commit_subjective_answer()
 			elseif context.attachments_count == context.attachments_upload_count + context.attachments_upload_failed_count then
 				--上传失败
-				context.attachments_upload_failed_count = 0
-				upload_myanswer_from_table( context.myanswer ) --重新上传附件
+				context._dialog = true
+				messagebox.open(self,function(e)
+					context._dialog = nil
+					if e == messagebox.TRY then
+						context.attachments_upload_failed_count = 0
+						upload_myanswer_from_table( context.myanswer) --重新上传附件
+					elseif e == messagebox.CLOSE then
+						context.result = -1
+					end
+				end,messagebox.RETRY,"上传主观题附件失败","失败数量:"..tostring(context.attachments_upload_failed_count))
 			else
 				--上传中
 			end
@@ -699,7 +776,13 @@ function WorkCommit:commit()
 	end
 	local scheduler = self:getScheduler()
 	local step = 0
+	local loadbox = loadingbox.open( self )
+	
 	local function close_scheduler()
+		if loadbox then
+			loadbox:removeFromParent()
+			loadbox = nil
+		end
 		if self._commitSCID then
 			self:getScheduler():unscheduleScriptEntry(self._commitSCID)
 			self._commitSCID = nil
@@ -714,7 +797,7 @@ function WorkCommit:commit()
 		elseif step == 1 then
 			--检查是否全部成功
 			if self._faild_commit_flag then --上传中发生错误
-				step = 4
+				step = 100
 				close_scheduler()
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
@@ -727,18 +810,19 @@ function WorkCommit:commit()
 		elseif step==2 then --上传主观题答案
 			if subjective_context.result == 1 then --成功下一步
 				step = 3
+			elseif subjective_context.result == 1 then --错误要求退出
+				step = 100
+				close_scheduler()
 			else
 				self:commit_subjective( subjective_context )
 			end
 		elseif step==3 then
 			--开始提交作业
-			step = 4
+			step = 100
 			close_scheduler()
-			local loadbox = loadingbox.open( self )
 			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid
 			cache.request_json(url,
 				function(t)
-					loadbox:removeFromParent()
 					if t then
 						self._args.status = 10 --标记已经提交
 						self._args.commit_order = t.num
