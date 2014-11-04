@@ -588,6 +588,111 @@ function WorkCommit:commit_topics()
 	end
 end
 
+function WorkCommit:commit_subjective( context ) --提交主观题
+	--上传附件
+	local function upload(item) --upload attachments
+		kits.log('>>>UPLOAD')
+		local url
+		local suf = string.sub(item.file,-4)
+		local suffix = string.lower(suf)
+		if suffix == '.amr' then
+			url = 'http://image.lejiaolexue.com/handler/item/attachment_upload.ashx'
+		else
+			url = 'http://image.lejiaolexue.com/handler/item/upload.ashx'
+		end
+		--local url = 'http://file-stu.lejiaolexue.com/rest/user/upload/hw'
+		local local_file = item.file
+		local data = kits.read_file( local_file )
+		if data then
+			cache.upload( url,item.file,data,
+				function(b,t)
+					if b then
+						if t.src and t.mini_src then
+							item.src = t.src
+							item.mini_src = t.mini_src
+							context.attachments_upload_count = context.attachments_upload_count + 1
+							kits.log("INFO : upload "..tostring(item.mini_src))
+						else
+							item.err = 'result'
+							context.attachments_upload_failed_count = context.attachments_upload_failed_count + 1
+							kits.log("ERROR : Publishhw:publish_topics upload result invalid")
+						end
+					else
+						item.err = 'upload'
+						context.attachments_upload_failed_count = context.attachments_upload_failed_count + 1
+						kits.log("ERROR :  Publishhw:publish_topics upload failed")
+						kits.log("	local file "..local_file)
+						kits.log("	url "..url)
+					end
+				end)
+		else
+			item.err = 'read'
+			context.attachments_upload_failed_count = context.attachments_upload_failed_count + 1
+			kits.log("ERROR : Publishhw:publish_topics upload can't open file "..local_file)
+		end
+	end	
+	--上传答案
+	local function upload_myanswer_from_table( t )
+		for i,item in pairs(t) do
+			item.text
+			item.item_id
+			if item.attachments then
+				item.attachs = {}
+				for k,v in pairs(item.attachments) do
+					if v then
+						local up_item = { file=v }
+						table.insert( item.attachs,up_item )
+						upload( up_item )
+						context.attachments_count = context.attachments_count + 1
+					end
+				end
+			end
+		end
+	end	
+	local function upload_subjective_answer()
+		if self._args and self._args.exam_id then
+			local file = self._args.exam_id..'.custom'
+			local str = kits.read_cache( file )
+			if str then
+				local answ = json.decode( str )
+				context.myanswer = answ
+				context.attachments_count = 0
+				context.attachments_upload_count = 0
+				context.attachments_upload_failed_count = 0
+				if answ then
+					upload_myanswer_from_table( answ )
+					return
+				end
+			end
+			context.myanswer = -1
+		end
+	end
+	if not context.myanswer then
+		upload_subjective_answer()
+	elseif context.myanswer == -1 then
+		--根本没有答案
+		context.result = 1 --成功进行下一步
+	else
+		--检查附件是不是都上传成功
+		if context.attachments_count then
+			if context.attachments_count == 0 or context.attachments_count == context.attachments_upload_count then
+				--成功上传或者没有附件
+				--开始提交主观题答案
+				
+			elseif context.attachments_count == context.attachments_upload_count + context.attachments_upload_failed_count then
+				--上传失败
+				context.attachments_upload_failed_count = 0
+				upload_myanswer_from_table( context.myanswer ) --重新上传附件
+			else
+				--上传中
+			end
+		else
+			--根本没有作答
+			context.result = 1 --直接下一步
+		end
+	end
+end
+
 function WorkCommit:commit()	
 	if self._commitSCID then 
 		return
@@ -600,6 +705,7 @@ function WorkCommit:commit()
 			self._commitSCID = nil
 		end
 	end
+	local subjective_context = {}
 	local function commit_func(dt)
 		if step==0 then
 			--处理还没有提交的题
@@ -608,7 +714,7 @@ function WorkCommit:commit()
 		elseif step == 1 then
 			--检查是否全部成功
 			if self._faild_commit_flag then --上传中发生错误
-				step = 3
+				step = 4
 				close_scheduler()
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
@@ -618,9 +724,15 @@ function WorkCommit:commit()
 			elseif self._faild_commit_count <= 0 then
 				step = 2
 			end
-		elseif step==2 then
+		elseif step==2 then --上传主观题答案
+			if subjective_context.result == 1 then --成功下一步
+				step = 3
+			else
+				self:commit_subjective( subjective_context )
+			end
+		elseif step==3 then
 			--开始提交作业
-			step = 3
+			step = 4
 			close_scheduler()
 			local loadbox = loadingbox.open( self )
 			local url = commit_url..'?examId='..self._args.exam_id..'&tid='..self._args.tid

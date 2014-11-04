@@ -134,12 +134,30 @@ function Subjective:set_item_state( i,ste )
 	end
 end
 
+function Subjective:calc_times( i )
+	--计时
+	if self._current then
+		local layout = self._pageview:getPage(self._current)
+		if layout and layout._times and layout._begin_time then
+			layout._times = layout._times + (os.time()-layout._begin_time)
+		end
+	end
+	if i then
+		local layout = self._pageview:getPage(i)
+		if layout then
+			layout._times = layout._times or 0
+			layout._begin_time = os.time()
+		end
+	end
+end
+
 function Subjective:set_current( i )
 	if self._current ~= i then
 		self:set_item_state( i,ui.STATE_CURRENT )
 		if self._current then
 				self:set_item_state(self._current,self._data[self._current].state)
 		end
+		self:calc_times( i )
 		self._current = i
 		local ps = self._pageview:getCurPageIndex()+1
 		if ps ~= i then
@@ -164,6 +182,11 @@ function Subjective:add_item( t )
 		self:set_current( index ) end,'click')
 		--add page
 		local layout = self._scroll:clone()
+		
+		layout._item_id = t.item_id
+		layout._times = 0
+		layout._begin_time = os.time()
+	
 		layout:setVisible(true)
 		local topics = uikits.child(layout,ui.TOPICS)
 		topics:setString( t.content )
@@ -181,6 +204,11 @@ function Subjective:add_item( t )
 		local org_text = uikits.child( self._scroll,ui.WRITE_TEXT)
 		local holderText = org_text:getPlaceHolder()
 		write_text:setPlaceHolder(holderText)
+		if self._args.status == 10 or self._args.status == 11 then
+			--已经提交，不修改
+			write_text:setTouchAreaEnabled(false)
+			write_text:setEnabled(false)
+		end	
 		tpic:setVisible(false)
 		tvoice:setVisible(false)
 		
@@ -379,6 +407,10 @@ function Subjective:add_photo( layout,photo_file )
 	local size = img:getContentSize()
 	local del_size = del:getContentSize()
 	del:setPosition(cc.p(size.width+3/2*del_size.width,size.height/2))
+	if self._args.status == 10 or self._args.status == 11 then
+		--已经提交，不删除
+		del:setVisible(false)
+	end
 	local old = pic:getContentSize()
 	pic:setContentSize(cc.size(old.width,size.height))
 	layout:addChild(pic)
@@ -411,6 +443,10 @@ function Subjective:add_voice( layout,voice_file,tlen )
 				self:relayout_myanswer( layout )
 			end
 		end)
+	if self._args.status == 10 or self._args.status == 11 then
+		--已经提交，不删除
+		del:setVisible(false)
+	end		
 	uikits.event( play,function(sender)
 		stopSound()
 		uikits.playSound(voice_file)
@@ -469,11 +505,17 @@ function Subjective:next_item()
 end
 
 function Subjective:save()
+	if self._args.status == 10 or self._args.status == 11 then
+		--已经提交，不存储
+		return
+	end
 	if self._args and self._args.exam_id then
+		self:calc_times() --计算当前时间
 		local file = self._args.exam_id..'.custom'
 		local t = {}
 		for i,layout in pairs(self._pageview:getPages()) do
 			local p = {}
+			p.item_id = layout._item_id
 			p.text = uikits.child(layout,ui.WRITE_TEXT ):getStringValue()
 			p.attachments = {}
 			if layout._list then
@@ -492,7 +534,9 @@ function Subjective:load_myanswer_from_table( t )
 	local pages = self._pageview:getPages()
 	if table.maxn(pages) == table.maxn(t) then
 		for i,layout in pairs(pages) do
-			if t[i] then
+			if t[i] and layout._item_id == t[i].item_id then
+				layout._times = t[i].times or 0
+				layout._begin_time = os.time()
 				uikits.child(layout,ui.WRITE_TEXT ):setText( t[i].text or '' )
 				for k,v in pairs(t[i].attachments) do
 					local suffix = string.lower(string.sub(v,-4))
@@ -506,7 +550,7 @@ function Subjective:load_myanswer_from_table( t )
 					end
 				end
 			else
-				kits.log("ERROR load_myanswer_from_table t[i] = nil")
+				kits.log("ERROR load_myanswer_from_table t[i] = nil or layout._item_id == t[i].item_id")
 			end
 			self:relayout_myanswer(layout)
 		end

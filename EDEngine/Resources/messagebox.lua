@@ -18,10 +18,30 @@ local function messagebox( parent,func,dt,caption,text )
 	if not cc_isobj(parent) then return end
 	if dt == 1 then
 		s = uikits.fromJson{file=ui.LOADBOX}
+		local title = uikits.child(s,"loading_txet")
+		if title and caption then
+			title:setString( tostring(caption))
+		end		
 	elseif dt == 2 then
 		s = uikits.fromJson{file=ui.FILE}
+		local title = uikits.child(s,"text")
+		if title and caption then
+			title:setString( tostring(caption))
+		end
+		local label = uikits.child(s,"text2")
+		if label and text then
+			label:setString( tostring(text) )
+		end
 	elseif dt == 3 then
 		s = uikits.fromJson{file=ui.FILE2}
+		local title = uikits.child(s,"text")
+		if title and caption then
+			title:setString( tostring(caption))
+		end
+		local label = uikits.child(s,"text2")
+		if label and text then
+			label:setString( tostring(text) )
+		end		
 	elseif dt == 6 then --message
 		s = uikits.fromJson{file=ui.FILE3}
 		local tt = uikits.child(s,'text_0')
