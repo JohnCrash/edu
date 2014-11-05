@@ -264,7 +264,7 @@ function WorkCommit:init_student_page()
 	end
 	but2 = uikits.child(self._root,ui.WORKFLOW2)
 	uikits.child(self._root,ui.WORKFLOW2_COMPLETE):setVisible(false)
-	but1:setVisible(true)
+	but1:setVisible(true)	
 	but2:setVisible(true)
 	if self._args.status == 10 or self._args.status == 11 then --提交状态,0,1未提交,10,11已经提交
 		uikits.event(but1,
@@ -351,6 +351,9 @@ function WorkCommit:init_commit_page()
 				button:setEnabled(false)
 				button:setHighlighted(false)
 				button:setBright(false)
+				local but1 = uikits.child(self._root,ui.WORKFLOW_COMPLETE)
+				but1:setEnabled(false)
+				but1:setBright(false)				
 			end
 		end
 		local subj_num = uikits.child(self._root,ui.SUBJECTIVE_NUM)
@@ -361,6 +364,9 @@ function WorkCommit:init_commit_page()
 				button:setEnabled(false)
 				button:setHighlighted(false)
 				button:setBright(false)
+				local but2 = uikits.child(self._root,ui.WORKFLOW2_COMPLETE)
+				but2:setEnabled(false)
+				but2:setBright(false)
 			end			
 		end
 		local type_txt = uikits.child(self._root,ui.TYPE_TEXT)

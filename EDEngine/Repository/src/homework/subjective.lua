@@ -329,6 +329,7 @@ function Subjective:relayout_topics( layout,urls )
 	local cam_button = uikits.child(layout,ui.CAM_BUTTON)
 	local pic_button = uikits.child(layout,ui.PHOTO_BUTTON)
 	uikits.event( record_button,function(sender)
+			if not (self._args.status == 10 or self._args.status == 11) then
 				stopSound()
 				RecordVoice.open(
 						self,
@@ -341,40 +342,51 @@ function Subjective:relayout_topics( layout,urls )
 								self:relayout_myanswer( layout )
 							end
 						end
-					)	
+					)
+			else
+				messagebox(self,"提示","作业已经提交不能修改！")
+			end
 	end)
 	uikits.event( cam_button,function(sender)
-			stopSound()
-			cc_takeResource(TAKE_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						--file = res
-						local b,res = cc_adjustPhoto(res,1024)
-						if b then
-							--messagebox( self,"add photo",tostring(res))
-							self:add_photo( layout,res )
-							self:relayout_myanswer( layout )
-						else
-							messagebox(self,"错误","图像调整失败")
+			if not (self._args.status == 10 or self._args.status == 11) then
+				stopSound()
+				cc_takeResource(TAKE_PICTURE,function(t,result,res)
+						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+						if result == RESULT_OK then
+							--file = res
+							local b,res = cc_adjustPhoto(res,1024)
+							if b then
+								--messagebox( self,"add photo",tostring(res))
+								self:add_photo( layout,res )
+								self:relayout_myanswer( layout )
+							else
+								messagebox(self,"错误","图像调整失败")
+							end
 						end
-					end
-				end)				
+					end)
+			else
+				messagebox(self,"提示","作业已经提交不能修改！")
+			end
 	end)
 	uikits.event( pic_button,function(sender)
-			stopSound()
-			cc_takeResource(PICK_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						local b,res = cc_adjustPhoto(res,1024)
-						if b then
-							--messagebox( self,"add picture",tostring(res))
-							self:add_photo( layout,res )
-							self:relayout_myanswer( layout )
-						else
-							messagebox(self,"错误","图像调整失败")
-						end
-					end					
-				end)				
+			if not(self._args.status == 10 or self._args.status == 11) then
+				stopSound()
+				cc_takeResource(PICK_PICTURE,function(t,result,res)
+						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+						if result == RESULT_OK then
+							local b,res = cc_adjustPhoto(res,1024)
+							if b then
+								--messagebox( self,"add picture",tostring(res))
+								self:add_photo( layout,res )
+								self:relayout_myanswer( layout )
+							else
+								messagebox(self,"错误","图像调整失败")
+							end
+						end					
+					end)
+			else
+				messagebox(self,"提示","作业已经提交不能修改！")
+			end
 	end)
 	
 	self:relayout_myanswer(layout)
@@ -633,30 +645,32 @@ function Subjective:load_from_cloud()
 								cloud_answer[p.item_id] = p
 							else
 								--下载失败
-								messagebox.open(self,function(e)
-									if e == messagebox.TRY then
-										if tragin then
-											if not loadbox:removeFromParent() then
-												return
-											end										
-											cache.request_cancel()
-											self:load_from_cloud()
-											tryagin = false
-										end
+								if not tryagin then return end
+								tryagin = false
+								messagebox_.open(self,function(e)
+									if e == messagebox_.TRY then									
+										cache.request_cancel()
+										self:load_from_cloud()
+										tryagin = false
 									end
-								end,messagebox.RETRY,"下载主观题答案是出错","是否重试?")								
+								end,messagebox_.RETRY,"下载主观题答案是出错","是否重试?")								
 							end
-							count = count + 1
-							if count == total_count then
-								--全部做完
-								if not loadbox:removeFromParent() then
-									return
+							if tryagin then
+								count = count + 1
+								if count == total_count then
+									--全部做完
+									if not loadbox:removeFromParent() then
+										return
+									end
+									local str = json.encode( cloud_answer )
+									local file = self._args.exam_id..'.custom'
+									if tryagin then --没有出错
+										kits.write_cache( file,str )
+									
+										--下载全部附件
+										download_resources( rsts,cloud_answer )							
+									end
 								end
-								local str = json.encode( cloud_answer )
-								local file = self._args.exam_id..'.custom'
-								kits.write_cache( file,str )
-								--下载全部附件
-								download_resources( rsts,cloud_answer )							
 							end
 						end)
 				end
