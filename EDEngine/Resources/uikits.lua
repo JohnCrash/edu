@@ -975,17 +975,29 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			end
 		else --纵向
 			local cs = self._scrollview:getContentSize()
-			local height = 0
+			local height = self._tops_space or 0
 			if not self._item2 then
 				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
 			end
 			for i=1,#self._list do
 				height = height + self._list[i]:getContentSize().height + space
 			end
-			if self._scrollview.setInnerContainerSize then
-				self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
-			end
 			local offy = 0
+			local tops_offy = 0
+			local is_abs
+			if self._scrollview.setInnerContainerSize  then
+				if height > cs.height then
+					self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
+					tops_offy = height - cs.height
+				end
+				is_abs = false
+			elseif self._scrollview.setContentSize  then
+				if height > cs.height then
+					self._scrollview:setContentSize(cc.size(cs.width,height))
+					tops_offy = height - cs.height
+				end
+				is_abs = true
+			end
 			local size = self._scrollview:getContentSize()
 			
 			if height < size.height then
@@ -999,8 +1011,15 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			--放置置顶元件
 			if self._tops_space then
 				item_height = item_height + self._tops_space--起始阶段置顶元件和item的间隔
-				for i = 1,#self._tops do
-					self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+				if is_abs then
+					for i = 1,#self._tops do
+						local x,y = self._tops[i]:getPosition()
+						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+					end
+				else
+					for i = 1,#self._tops do
+						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+					end				
 				end
 			end
 		end

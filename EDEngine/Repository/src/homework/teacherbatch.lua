@@ -222,9 +222,12 @@ function Batch:init_topics_paper_list()
 		local loadbox = loadingbox.open(self)
 		cache.request_json( url,function(t)
 			if t and type(t)=='table' then
+				self._exam_data = t
 				if kits.check(t,"detail","part" ) then
 					self:init_paper_list_by_table( t )
 				end
+			else
+				self._exam_data = "error"
 			end
 			loadbox:removeFromParent()
 		end)
@@ -340,65 +343,109 @@ end
 
 --主观题
 function Batch:init_subjective()
+	if not self._exam_data then 
+		kits.log("INFO : wait paper data download complete")
+		return 
+	end
 	cache.request_cancel()
 	self._topicsview:setVisible(false)
 	self._subjectiveview:setVisible(true)
 	self._studentview:setVisible(false)
 	
 	self._subjectives:clear()
-	local result = kits.read_cache("backup-2/sujective_list.json")
-	if result then
-		local t = json.decode(result)
-		if t then
-			local size = nil
-			for k,v in pairs(t) do
-				local item = self._subjectives:additem{
-					[ui.SUBJECTIVE_TITLE] = v.title or '',
-					[ui.SUBJECTIVE_COMMITNUM] = tostring(v.commits or 0)..'人',
-					[ui.SUBJECTIVE_AUDIO] = function(child,item)
-						size = size or child:getContentSize()
-						if v.audio and type(v.audio)=='string' and string.len(v.audio) > 0 then
-							local play_but = uikits.child(child,ui.SUBJECTIVE_AUDIO_BUTTON)
-							local time_txt =  uikits.child(child,ui.SUBJECTIVE_AUDIO_TIME)
-							if play_but and time_txt then
-								uikits.event(play_but,function(sender)
-										uikits.playSound(v.audio)
-								end)
-							end
-						else
-							child:setVisible(false)
-							--将image向上移动
-							local img = uikits.child(item,ui.SUBJECTIVE_IMAGE)
-							if img then
-								local size = child:getContentSize()
-								local x,y = img:getPosition()
-								img:setPosition( cc.p(x,y+size.height))
-							end
+	if self._exam_data == 'error' then 
+		kits.log("INFO : exam data download error")
+		return 
+	end
+	local ds
+	if self._exam_data.item and type(self._exam_data.item)=='table' then
+		ds = self._exam_data.item
+	else
+		ds = self._exam_data
+	end	
+	local t = {}
+	local rtable = {}
+	rtable.urls = {}
+	for i,v in ipairs(ds) do
+		if v.item_type == 93 then
+			local p = {}
+			p.title = v.content
+			p.commits = self._args.commit_num
+			p.attachs = {}
+			if v.attachment then
+				local atts = json.decode(v.attachment)
+				if atts and atts.attachments then
+					for i,v in pairs(atts.attachments) do
+						if v.value then
+							table.insert(rtable.urls,{url=v.value,filename=v.name})
+							table.insert(p.attachs,{url=v.value,filename=v.name})
 						end
-					end,
-					[ui.SUBJECTIVE_BUTTON] = function(child,item)
-						uikits.event(child,function(sender)
-							uikits.pushScene(TeacherSubjective.create())
-						end)
 					end
-				}
-				local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,true,16)
-				layout:clear()
-				if v.image and type(v.image) == 'table' then
-					for i,p in pairs(v.image) do
-						if p and type(p)=='string' and string.len(p)>0 then
+				end
+			end
+			table.insert(t,1,p)
+		end
+	end
+	local function init_subjective_by_table( t )
+		local size = nil
+		for k,v in pairs(t) do
+			local item = self._subjectives:additem{
+				[ui.SUBJECTIVE_TITLE] = v.title or '',
+				[ui.SUBJECTIVE_COMMITNUM] = tostring(v.commits or 0)..'人',
+				[ui.SUBJECTIVE_BUTTON] = function(child,item)
+					uikits.event(child,function(sender)
+						uikits.pushScene(TeacherSubjective.create())
+					end)
+				end
+			}
+			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,false,16,ui.SUBJECTIVE_AUDIO)
+			layout:clear()
+			if v.attachs and type(v.attachs) == 'table' then
+				for i,p in pairs(v.attachs) do
+					if p and type(p)=='table' and p.filename then
+						local suffix = string.lower(string.sub(p.filename,-4))
+						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local it = layout:additem()
 							if it then
-								it:loadTexture(p)
+								it:loadTexture(p.filename)
+							end
+						elseif suffix == '.amr' then
+							local it = layout:additem(nil,2)
+							local filename = kits.get_cache_path()..p.filename
+							if it then
+								local play = uikits.child(it,ui.SUBJECTIVE_AUDIO_BUTTON)
+								local txt = uikits.child(it,ui.SUBJECTIVE_AUDIO_TIME)
+								uikits.event(play,function(sender)
+									uikits.playSound( filename )
+								end)
+								local length = cc_getVoiceLength( filename )
+								txt:setString( kits.time_to_string_simple(math.floor(length)) )
 							end
 						end
 					end
 				end
-				layout:relayout()
 			end
-			self._subjectives:relayout()
+			layout:relayout()
 		end
+		self._subjectives:relayout()
 	end
+	local n = 0
+	local loadbox = loadingbox.open(self)
+	cache.request_resources( rtable,
+		function(rs,i,b)
+			n = n + 1
+			if b and rs.urls[i] then
+				kits.log('download -> '..rs.urls[i].url )
+				kits.log('cahce ->' ..rs.urls[i].filename)
+				kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
+			end
+			if n >= #rs.urls then --complete
+				if not loadbox:removeFromParent() then
+					return
+				end
+				init_subjective_by_table( t )
+			end
+		end)
 	return true
 end
 
