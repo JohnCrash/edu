@@ -601,6 +601,10 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 	local function upload(item) --upload attachments
 		kits.log('>>>UPLOAD')
 		local url
+		if not item.file then 
+			kits.log("ERROR : UPLOAD item.file = nil")
+			return
+		end
 		local suf = string.sub(item.file,-4)
 		local suffix = string.lower(suf)
 		if suffix == '.amr' then
@@ -703,7 +707,7 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 				item.attachs = {}
 				for k,v in pairs(item.attachments) do
 					if v then
-						local up_item = { file=v }
+						local up_item = { file=v.filename }
 						table.insert( item.attachs,up_item )
 						upload( up_item )
 						context.attachments_count = context.attachments_count + 1
@@ -713,7 +717,7 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 				for k,v in pairs(item.attachs) do
 					if not v.src and v.err then --下载错误的
 						v.err = nil
-						upload( v )
+						upload( v ) --直接重试吗？ ，这里需要用户的操作确定
 					end
 				end
 			end
