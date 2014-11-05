@@ -533,7 +533,7 @@ end
 
 function Subjective:load_myanswer_from_table( t )
 	local pages = self._pageview:getPages()
-	if table.maxn(pages) == table.maxn(t) then
+	if pages and t then
 		for i,layout in pairs(pages) do
 			if t[layout._item_id] then
 				local item = t[layout._item_id]
@@ -557,7 +557,7 @@ function Subjective:load_myanswer_from_table( t )
 			self:relayout_myanswer(layout)
 		end
 	else
-		kits.log("ERROR load_myanswer_from_table #pages!=#t")
+		kits.log("ERROR load_myanswer_from_table pages = nil or t = nil")
 	end
 end
 
@@ -603,14 +603,21 @@ function Subjective:load_from_cloud()
 				local loadbox = loadingbox.open(self)
 				for i,v in pairs(urls) do
 					cache.request_json(v,function(t)
-							if t and t.buffer then --答案数据
-								local answer = t.buffer
+							if t and t.detail then --答案数据
+								local answer = t.detail
 								local p = {}
-								p.text = answer.content or {}
+								if answer.answer then
+									local t = json.decode(answer.answer)
+									if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
+										if t.answers[1] then
+											p.text = tostring( t.answers[1].content)
+										end
+									end
+								end
 								p.item_id = answer.item_id
 								p.attachments = {}
-								if answer.attachment then
-									local attach = json.decode(answer.attachment)
+								if answer.val_attach then
+									local attach = json.decode(answer.val_attach)
 									if attach and attach.attachments then
 										for k,v in pairs(attach.attachments) do
 											if v.value and v.name then
@@ -649,11 +656,7 @@ function Subjective:load_from_cloud()
 								local file = self._args.exam_id..'.custom'
 								kits.write_cache( file,str )
 								--下载全部附件
-								download_resources( rsts,cloud_answer )
-							else
-								if not loadbox:removeFromParent() then
-									return
-								end							
+								download_resources( rsts,cloud_answer )							
 							end
 						end)
 				end
