@@ -1,6 +1,7 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
+local loadingbox = require "loadingbox"
 local StudentList = require "homework/studentlist"
 
 local ui = {
@@ -61,7 +62,9 @@ function TeacherSubjective:init_student_list()
 			.."&itemId="..itemId
 			.."&teacherId="..teacherId
 			.."&uid="..v.student_id
-		table.insert(ldt,{url=url,uid=v.student_id,name=v.student_name})
+		if v.status == 10 or v.status == 11 then
+			table.insert(ldt,{url=url,uid=v.student_id,name=v.student_name})
+		end
 	end
 	uikits.scrollview_step_add(self._subjectives._scrollview,ldt,5,
 		function(v)
@@ -70,9 +73,81 @@ function TeacherSubjective:init_student_list()
 				local scrollview = uikits.scrollex(layout,nil,{ui.ITEM_VOICE,ui.ITEM_IMAGE},
 					{ui.ITEM_ANSWER,ui.ITEM_LOGO,ui.ITEM_NAME,ui.ITEM_TIME,ui.ITEM_GOOD},
 					{ui.ITEM_DIAPING})
-				--uikits.child(layout,ui.ITEM_NAME):setString( tostring(v.name))
-				--uikits.child(layout,ui.ITEM_ANSWER):setString( tostring(v.url))
-				--scrollview:relayout()
+				local name = uikits.child(layout,ui.ITEM_NAME)
+				if name then
+					name:setString( v.name )
+				end
+				local tim = uikits.child(layout,ui.ITEM_TIME)
+				if tim then
+					tim:setString( kits.time_to_string(os.time()) )
+				end
+				local logo = uikits.child(layout,ui.ITEM_LOGO)
+				if logo then
+				end
+				local answer_item = uikits.child(layout,ui.ITEM_ANSWER)
+				local good = uikits.child(layout,ui.ITEM_GOOD)
+				if good then
+					uikits.event( good,function(sender)
+							
+						end)
+				end
+				local circle = loadingbox.circle(layout)
+				cache.request_json( v.url,function(t)
+						if cc_isobj(circle) then
+							circle:removeFromParent()
+						end
+						if t and t.detail then
+							local answer = t.detail
+							local p = {}
+							if answer.answer and string.len(answer.answer) > 0 then
+								local t = json.decode(answer.answer)
+								if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
+									if t.answers[1] then
+										answer_item:setString(tostring( t.answers[1].content))
+									end
+								end
+							end
+							--准备下载附件
+							local rsts = {}
+							rsts.urls = {}							
+							local attachments = {}
+							if answer.val_attach and string.len(answer.val_attach) > 0 then
+								local attach = json.decode(answer.val_attach)
+								if attach and attach.attachments then
+									for k,v in pairs(attach.attachments) do
+										if v.value and v.name then
+											table.insert(attachments,{filename=v.name,url=v.value})
+											table.insert(rsts.urls,{url=v.value,filename=v.name})
+										else
+											kits.log("ERROR attachments value = nil or name = nil")
+										end
+									end
+								end								
+							end
+							local circle = loadingbox.circle(layout)
+							local n = 0
+							local r,msg = cache.request_resources( rsts,function(rs,i,b)
+									n = n + 1
+									if n >= #rs.urls then
+										if cc_isobj(circle) then
+											circle:removeFromParent()
+										end
+										--附加都下载了
+										for i,v in pairs(attachments) do
+											if v.name then
+												kits.log( "==========================")
+												kits.log( "add resource "..tostring(v.name))
+											end
+										end
+										scrollview:relayout()
+										self._subjectives:relayout()
+									end
+								end)
+						else
+							--下载失败
+							answer_item:setString("下载失败")
+						end
+					end)
 			else
 				self._subjectives:relayout()
 			end
