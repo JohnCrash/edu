@@ -79,6 +79,7 @@ topics.lua 和题相关的缓冲
 		examId:16190cacb1554279a0cd8dc8004e7c83
 		itemId:004bf582a837441c81e40d3c0e43071b
 		teacherId:122097
+		uid:44123 --可以省略
 {
     "buffer": {
         "answer_obj": {

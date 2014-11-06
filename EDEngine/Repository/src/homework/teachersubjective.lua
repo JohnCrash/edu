@@ -1,5 +1,6 @@
 local kits = require "kits"
 local uikits = require "uikits"
+local cache = require "cache"
 local StudentList = require "homework/studentlist"
 
 local ui = {
@@ -13,25 +14,31 @@ local ui = {
 	SUBJECTIVE_ITEM = 'xuesheng1',
 	TITLE = 'ding/kewen',
 	CLASS = 'ding/banji',
+	ITEM_LOGO = 'touxiang',
 	ITEM_NAME = 'mingzhi',
 	ITEM_TIME = 'tijiaoshijian',
 	ITEM_ANSWER = 'xswenzi',
+	ITEM_VOICE = 'voice',
 	ITEM_AUDIO = 'yuyin',
 	ITEM_AUDIO_TIME = 'shijian',
 	ITEM_IMAGE = 'xszp',
 	ITEM_GOOD = 'zan',
+	ITEM_DIAPING = 'dianping',
 	ITEM_INPUT = 'dianping/dpwenzi',
 }
 
 local TeacherSubjective = class("TeacherSubjective")
 TeacherSubjective.__index = TeacherSubjective
 
-function TeacherSubjective.create()
+function TeacherSubjective.create(args,class_args,student_list,item_id)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),TeacherSubjective)
 	
 	scene:addChild(layer)
-	
+	layer._args = args
+	layer._args_class = class_args
+	layer._student_list_table = student_list
+	layer._item_id = item_id
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -41,6 +48,35 @@ function TeacherSubjective.create()
 	end	
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
+end
+
+function TeacherSubjective:init_student_list()
+	local examId = self._args.exam_id
+	local itemId = self._item_id
+	local teacherId = self._args.teacher_id
+	local ldt = {}
+	for k,v in pairs(self._student_list_table) do
+		local url = "http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx?examId="
+			..examId
+			.."&itemId="..itemId
+			.."&teacherId="..teacherId
+			.."&uid="..v.student_id
+		table.insert(ldt,{url=url,uid=v.student_id,name=v.student_name})
+	end
+	uikits.scrollview_step_add(self._subjectives._scrollview,ldt,5,
+		function(v)
+			if v then
+				local layout = self._subjectives:additem()
+				local scrollview = uikits.scrollex(layout,nil,{ui.ITEM_VOICE,ui.ITEM_IMAGE},
+					{ui.ITEM_ANSWER,ui.ITEM_LOGO,ui.ITEM_NAME,ui.ITEM_TIME,ui.ITEM_GOOD},
+					{ui.ITEM_DIAPING})
+				--uikits.child(layout,ui.ITEM_NAME):setString( tostring(v.name))
+				--uikits.child(layout,ui.ITEM_ANSWER):setString( tostring(v.url))
+				--scrollview:relayout()
+			else
+				self._subjectives:relayout()
+			end
+		end)
 end
 
 function TeacherSubjective:init_gui()
@@ -54,6 +90,8 @@ function TeacherSubjective:init_gui()
 		end)
 	
 	self._subjectives = uikits.scroll(self._root,ui.SUBJECTIVE_LIST,ui.SUBJECTIVE_ITEM)
+	
+	self:init_student_list()
 	
 	local result = kits.read_cache("sujective_work.json")
 	if result then

@@ -1064,6 +1064,150 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	return t
 end
 
+--scroll 的改进版本
+--[[
+]]--
+local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
+	local t = {_root = root}
+	if scrollID then
+		t._scrollview = child(root,scrollID)
+	else
+		t._scrollview = root
+	end
+	if not t._scrollview then 
+		kits.log('ERROR : scrollex resource not exist')
+		log_caller()
+		return
+	end
+	local function init_items( ids,b )
+		local items = {}
+		for i, v in pairs(ids) do
+			items[i] = child(t._scrollview,v)
+			if not items[i] then
+				kits.log('ERROR : scrollex child resource not exist "'..tostring(v)..'"')
+				log_caller()
+			elseif b == false then
+				items[i]:setVisible(false)
+			end
+		end
+		return items
+	end
+	local function calc_tops_space( tops )
+		local miny = math.huge
+		local maxy = 0
+		for i, v in pairs(tops) do
+			local x,y = v:getPosition()
+			local anchor = v:getAnchorPoint()
+			local size = v:getContentSize()
+			local miy = y - anchor.y*size.height
+			local may = miy + size.height
+			miny = math.min(miy,miny)
+			maxy = math.max(may,maxy)
+		end
+		if miny == math.huge then
+			return 0
+		else
+			return maxy - miny
+		end
+	end
+	t._items = init_items( itemIDs,false )
+	t._tops = init_items( topIDs,true )
+	t._bottoms = init_items( bottomIDs,true )
+	t._lists = {}
+	t._tops_lists = {}
+	t._bottoms_lists = {}
+	t._tops_space = calc_tops_space( t._tops )
+	--布局函数
+	t.relayout = function(self,space)
+		space = space or 0
+		local cs = self._scrollview:getContentSize()
+		local height = space 
+		local function relayout_list( lists )
+			for i,v in pairs(lists) do
+				local size = v:getContentSize()
+				local x,y = v:getPosition()
+				local anchor = v:getAnchorPoint()			
+				v:setPosition( cc.p(x+anchor.x*size.width,height+anchor.y*size.height) )
+				height = height + size.height + space
+			end		
+		end
+		--bottom
+		relayout_list( self._bottoms_lists )
+		relayout_list( self._items )
+		height = height + self._tops_space
+		local tops_offy = height - cs.height
+		if tops_offy < 0 then
+			tops_offy = 0
+		end
+		--tops 要做特殊处理
+		for i,v in pairs(self._tops_lists) do
+			local x,y = v:getPosition()
+			v:setPosition(cc.p(c,y+tops_offy))
+		end
+		if self._scrollview.setInnerContainerSize then
+			self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
+		elseif self._scrollview.setContentSize then
+			self._scrollview:setContentSize(cc.size(cs.width,height))
+		end
+	end
+	--添加函数
+	t.additem = function(self,key,sector)
+		local item
+		local items
+		local lists
+		if sector == 0 then --itemIDs
+			items = self._items
+			lists = self._lists
+		elseif sector == 1 then --topIDs
+			items = self._tops
+			lists = self._tops_lists
+		elseif sector == 2 then --bottomIDs
+			items = self._bottoms
+			lists = self._bottoms_lists
+		else
+			items = self._items
+			lists = self._lists
+		end
+		if items[key] then
+			item = items[key]:clone()
+		else
+			kits.log('ERROR : scrollex additem not exist key "'..tostring(key)..'"')
+			log_caller()
+			return 
+		end
+		if item then
+			table.insert( lists,item )
+			item:setVisible( true )
+			self._scrollview:addChild(item)
+		else
+			kits.log('ERROR : scrollex item not exist')
+			log_caller()
+			return 			
+		end
+	end
+	--清除
+	t.clear = function(self,sector)
+		local lists
+		if sector == 0 then --itemIDs
+			lists = self._lists
+			self._lists = {}
+		elseif sector == 1 then --topIDs
+			lists = self._tops_lists
+			self._tops_lists = {}
+		elseif sector == 2 then --bottomIDs
+			lists = self._bottoms_lists
+			self._bottoms_lists = {}
+		else
+			lists = self._lists
+			self._lists = {}
+		end
+		for i,v in pairs(lists) do
+			v:removeFromParent()
+		end
+	end
+	return t
+end
+
 local function tab(root,LineID,butTable)
 	local t = {_root = root}
 	t._line = child(root,LineID)
@@ -1220,6 +1364,7 @@ return {
 	FACTOR_9_16 = FACTOR_9_16,
 	get_factor = get_factor,
 	scroll = scroll,
+	scrollex = scrollex,
 	tab = tab,
 	set = set,
 	set_item = set_item,

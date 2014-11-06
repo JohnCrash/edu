@@ -371,6 +371,7 @@ function Batch:init_subjective()
 			local p = {}
 			p.title = v.content
 			p.commits = self._args.commit_num
+			p.itemid = v.item_id
 			p.attachs = {}
 			if v.attachment then
 				local atts = json.decode(v.attachment)
@@ -394,7 +395,7 @@ function Batch:init_subjective()
 				[ui.SUBJECTIVE_COMMITNUM] = tostring(v.commits or 0)..'人',
 				[ui.SUBJECTIVE_BUTTON] = function(child,item)
 					uikits.event(child,function(sender)
-						uikits.pushScene(TeacherSubjective.create())
+						uikits.pushScene(TeacherSubjective.create(self._args,_args_class,self._student_list_table,v.itemid))
 					end)
 				end
 			}
