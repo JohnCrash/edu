@@ -1066,3 +1066,19 @@ http://api.lejiaolexue.com/meta/itemtypedesc.ashx
     },
 	...
 ]
+
+添加评论:
+http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx?action=pigai&exam_id=d12f00167f0f4fef843f3d1a18652e47&c_id=144971&student_id=144973&item_id=a9498a6a2ab5498bb87d1820b215a23a&score=-1&comment=11&isright=-1
+
+action=pigai
+exam_id 考试ID
+c_id 班级ID
+student_id 学生ID
+item_id 试题ID
+score -1
+comment 评论内容
+isright -1
+无返回值，网站状态码为200即为成功
+
+取评论:
+http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx?action=detail&exam_id=d12f00167f0f4fef843f3d1a18652e47&student_id=144973

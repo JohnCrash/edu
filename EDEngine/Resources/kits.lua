@@ -426,6 +426,11 @@ local function time_to_string( d,expet_sec )
 	end
 end
 
+local function time_abs_string( d ) --绝对时间,年月日分钟秒
+	local t = os.date('*t',d)
+	return t.year..'.'..t.month..'.'..t.day..'  '..t.hour..':'..t.min
+end
+
 local function time_to_string_simple( d,expet_sec )
 	if d then
 		local day = math.floor( d /(3600*24) )
@@ -537,6 +542,7 @@ local exports = {
 	unix_date_by_string = unix_date_by_string,
 	time_to_string = time_to_string,
 	time_to_string_simple = time_to_string_simple,
+	time_abs_string = time_abs_string,
 	log = my_log,
 	check = check_table,
 	write_file = write_file,

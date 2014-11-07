@@ -154,11 +154,10 @@ function WorkCommit:addCommitStudent( id,na,ti )
 		end
 		local photo = uikits.child(item,ui.PHOTO)
 		if photo then
-			local url = login.get_logo(id)
-			cache.request( url,
-				function(b)
-					if b then
-						photo:loadTexture( cache.get_name(url) )
+				login.get_logo(id,
+				function(filename)
+					if filename then
+						photo:loadTexture( filename )
 					else
 						kits.log('error : WorkCommit:addCommitStudent request logo')
 					end

@@ -52,7 +52,7 @@ local function set_selector(idx)
 end
 --返回logo cache文件名
 --如果不存在则先下载
-local function get_logo( uid,t )
+local function get_logo_url( uid,t )
 	local seg1 = math.floor(uid/10000)%100
 	local seg2 = math.floor(uid/100)%100
 	local logo_type = 2 --50x50
@@ -65,10 +65,39 @@ local function get_logo( uid,t )
 	return logo_url..tostring(seg1)..'/'..tostring(seg2)..'/'..tostring(uid)..'_'..logo_type..'.jpg'
 end
 
+local cache
+local kits
+local logo_cache = {}
+local function get_logo( uid,func,t )
+	local url = get_logo_url( uid,t )
+	if not cache then
+		cache = require "cache"
+		kits = require "kits"
+	end
+	if logo_cache[url] then
+		local filename = cache.get_name(url)
+		if kits.exist_cache(filename) then
+			func( filename )
+		else
+			func()
+		end
+	else --确保第一次申请下载一次
+		logo_cache[url] = true
+		cache.request( url,function(b)
+			if b then
+				func( cache.get_name(url) )
+			else
+				func()
+			end
+		end)
+	end
+end
+
 return {
 	cookie = get_cookie,
 	uid = get_uid,
 	get_logo = get_logo,
+	get_logo_url = get_logo_url,
 	get_name = get_name,
 	set_selector = set_selector,
 	test_login = test_login,

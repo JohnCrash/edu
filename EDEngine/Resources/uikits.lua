@@ -1092,7 +1092,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		end
 		return items
 	end
-	local function calc_tops_space( tops )
+	local function calc_space_y( tops )
 		local miny = math.huge
 		local maxy = 0
 		for i, v in pairs(tops) do
@@ -1113,36 +1113,35 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	t._items = init_items( itemIDs,false )
 	t._tops = init_items( topIDs,true )
 	t._bottoms = init_items( bottomIDs,true )
-	t._lists = {}
-	t._tops_lists = {}
-	t._bottoms_lists = {}
-	t._tops_space = calc_tops_space( t._tops )
+	t._list = {}
+	t._tops_lists = t._tops
+	t._bottoms_lists = t._bottoms
+	t._tops_space = calc_space_y( t._tops )
+	t._bottoms_space = calc_space_y( t._bottoms_lists )
 	--布局函数
 	t.relayout = function(self,space)
-		space = space or 0
+		space = space or 16
 		local cs = self._scrollview:getContentSize()
 		local height = space 
 		local function relayout_list( lists )
 			for i,v in pairs(lists) do
 				local size = v:getContentSize()
 				local x,y = v:getPosition()
-				local anchor = v:getAnchorPoint()			
+				local anchor = v:getAnchorPoint()
 				v:setPosition( cc.p(x+anchor.x*size.width,height+anchor.y*size.height) )
 				height = height + size.height + space
 			end		
 		end
 		--bottom
-		relayout_list( self._bottoms_lists )
-		relayout_list( self._items )
-		height = height + self._tops_space
+		height = height + t._bottoms_space
+		relayout_list( self._list )
+		height = height + self._tops_space - t._bottoms_space
 		local tops_offy = height - cs.height
-		if tops_offy < 0 then
-			tops_offy = 0
-		end
+
 		--tops 要做特殊处理
 		for i,v in pairs(self._tops_lists) do
 			local x,y = v:getPosition()
-			v:setPosition(cc.p(c,y+tops_offy))
+			v:setPosition(cc.p(x,y+tops_offy))
 		end
 		if self._scrollview.setInnerContainerSize then
 			self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
@@ -1157,7 +1156,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		local lists
 		if sector == 0 then --itemIDs
 			items = self._items
-			lists = self._lists
+			lists = self._list
 		elseif sector == 1 then --topIDs
 			items = self._tops
 			lists = self._tops_lists
@@ -1166,7 +1165,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			lists = self._bottoms_lists
 		else
 			items = self._items
-			lists = self._lists
+			lists = self._list
 		end
 		if items[key] then
 			item = items[key]:clone()
@@ -1179,6 +1178,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			table.insert( lists,item )
 			item:setVisible( true )
 			self._scrollview:addChild(item)
+			return item
 		else
 			kits.log('ERROR : scrollex item not exist')
 			log_caller()
@@ -1189,8 +1189,8 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	t.clear = function(self,sector)
 		local lists
 		if sector == 0 then --itemIDs
-			lists = self._lists
-			self._lists = {}
+			lists = self._list
+			self._list = {}
 		elseif sector == 1 then --topIDs
 			lists = self._tops_lists
 			self._tops_lists = {}
@@ -1198,8 +1198,8 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			lists = self._bottoms_lists
 			self._bottoms_lists = {}
 		else
-			lists = self._lists
-			self._lists = {}
+			lists = self._list
+			self._list = {}
 		end
 		for i,v in pairs(lists) do
 			v:removeFromParent()
@@ -1290,7 +1290,9 @@ local function scrollview_step_add(scrollview,t,n,add_func,sstate)
 		local offset = 1
 		local function add_n_item(s,n)
 			for i=s,s+n do
-				add_func(t[i])
+				if t[i] then
+					add_func(t[i])
+				end
 			end			
 			add_func() --重新布局
 		end

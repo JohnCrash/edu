@@ -257,14 +257,13 @@ function Batch:init_commits_list( t )
 			self._commits:additem{
 				[ui.COMMIT_NAME] =v.student_name,
 				[ui.COMMIT_ICON] = function(child,item)
-						local url = login.get_logo(v.student_id,3)
-						cache.request(url,function(b)
-							if b and child then
-								child:loadTexture( cache.get_name(url) )
+						login.get_logo(v.student_id,function(filename)
+							if filename and child then
+								child:loadTexture( filename )
 								--uikits.fitsize( child,250,250 )
 							end
-						end )
-					end				
+						end,3 )
+					end
 			}
 			if count >= 5 then
 				break
@@ -395,7 +394,7 @@ function Batch:init_subjective()
 				[ui.SUBJECTIVE_COMMITNUM] = tostring(v.commits or 0)..'人',
 				[ui.SUBJECTIVE_BUTTON] = function(child,item)
 					uikits.event(child,function(sender)
-						uikits.pushScene(TeacherSubjective.create(self._args,_args_class,self._student_list_table,v.itemid))
+						uikits.pushScene(TeacherSubjective.create(self._args,self._args_class,self._student_list_table,v.itemid))
 					end)
 				end
 			}
@@ -485,13 +484,12 @@ function Batch:init_student_list_func()
 						[ui.STUDENT_SUBJECTIVE_NUM] = '',
 						[ui.STUDENT_SCORE] = tostring(math.floor(v.real_score/total_score))..'分',
 						[ui.STUDENT_ICON] = function(child,item)
-							local url = login.get_logo(v.student_id,3)
-							cache.request(url,function(b)
-									if b and child then
-										child:loadTexture( cache.get_name(url) )
+								login.get_logo(v.student_id,function(filename)
+									if filename and child then
+										child:loadTexture( filename )
 										--uikits.fitsize( child,300,300 )
 									end
-								end)
+								end,3)
 						end
 					}
 				end

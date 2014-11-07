@@ -1,6 +1,7 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
+local login = require "login"
 local loadingbox = require "loadingbox"
 local StudentList = require "homework/studentlist"
 
@@ -63,13 +64,14 @@ function TeacherSubjective:init_student_list()
 			.."&teacherId="..teacherId
 			.."&uid="..v.student_id
 		if v.status == 10 or v.status == 11 then
-			table.insert(ldt,{url=url,uid=v.student_id,name=v.student_name})
+			table.insert(ldt,{url=url,uid=v.student_id,name=v.student_name,finish_time=v.finish_time})
 		end
 	end
 	uikits.scrollview_step_add(self._subjectives._scrollview,ldt,5,
 		function(v)
 			if v then
 				local layout = self._subjectives:additem()
+				layout.student_id = v.uid
 				local scrollview = uikits.scrollex(layout,nil,{ui.ITEM_VOICE,ui.ITEM_IMAGE},
 					{ui.ITEM_ANSWER,ui.ITEM_LOGO,ui.ITEM_NAME,ui.ITEM_TIME,ui.ITEM_GOOD},
 					{ui.ITEM_DIAPING})
@@ -78,18 +80,29 @@ function TeacherSubjective:init_student_list()
 					name:setString( v.name )
 				end
 				local tim = uikits.child(layout,ui.ITEM_TIME)
-				if tim then
-					tim:setString( kits.time_to_string(os.time()) )
+				if tim and v.finish_time then
+					local ft = kits.unix_date_by_string(v.finish_time)
+					tim:setString( kits.time_abs_string(ft) )
 				end
 				local logo = uikits.child(layout,ui.ITEM_LOGO)
 				if logo then
+					login.get_logo(v.uid,function(filename)
+							if filename then
+								logo:loadTexture( filename )
+							end
+						end,3)
 				end
 				local answer_item = uikits.child(layout,ui.ITEM_ANSWER)
+				answer_item:setString('')
 				local good = uikits.child(layout,ui.ITEM_GOOD)
 				if good then
 					uikits.event( good,function(sender)
 							
 						end)
+				end
+				local input = uikits.child(layout,ui.ITEM_INPUT)
+				if input then
+					input:setPlaceHolder("请在此输入点评!")
 				end
 				local circle = loadingbox.circle(layout)
 				cache.request_json( v.url,function(t)
@@ -107,6 +120,10 @@ function TeacherSubjective:init_student_list()
 									end
 								end
 							end
+							--点评
+							local old = answer.comment or ''
+							input:setText( old )
+							layout.old_comment = old
 							--准备下载附件
 							local rsts = {}
 							rsts.urls = {}							
@@ -134,9 +151,20 @@ function TeacherSubjective:init_student_list()
 										end
 										--附加都下载了
 										for i,v in pairs(attachments) do
-											if v.name then
-												kits.log( "==========================")
-												kits.log( "add resource "..tostring(v.name))
+											if v.filename then
+												local suffix = string.lower(string.sub(v.filename,-4))
+												if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+													local img = scrollview:additem(2)
+													img:loadTexture( v.filename )
+												elseif suffix == '.amr' then
+													local voice = scrollview:additem(1)
+													uikits.event( uikits.child(voice,ui.ITEM_AUDIO),
+													function(sender)
+														uikits.playSound(v.filename)
+													end)
+													local length = cc_getVoiceLength(filename)
+													uikits.child(voice,ui.ITEM_AUDIO_TIME):setString(  kits.time_to_string_simple(math.floor(length)) )
+												end
 											end
 										end
 										scrollview:relayout()
@@ -154,11 +182,53 @@ function TeacherSubjective:init_student_list()
 		end)
 end
 
+function TeacherSubjective:commit_comment( done_func ) --提交点评
+	local count = 0
+	local n = 0
+	local urls = {}
+	local loadbox = loadingbox.open(self)
+	for i,layout in pairs(self._subjectives._list) do
+		local input = uikits.child(layout,ui.ITEM_INPUT)
+		if input then
+			local text = input:getStringValue()
+			if text ~= old_comment then
+				local url = "http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx?action=pigai&exam_id="
+				..self._args.exam_id
+				.."&c_id="..self._args_class.class_id
+				.."&student_id="..layout.student_id
+				.."&item_id="..self._item_id
+				.."&score=-1&comment="..tostring(text)
+				.."&isright=-1"
+				count = count + 1
+				table.insert(urls,url)
+			end
+		end
+	end
+	for i,url in pairs(urls) do
+		cache.request(url,function(b)
+			n = n + 1
+			if n >= count then
+				if not loadbox:removeFromParent() then
+					return
+				end
+				done_func()
+			end
+		end)
+	end
+	if count <= 0 then
+		done_func()
+	end
+end
+
 function TeacherSubjective:init_gui()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	local back = uikits.child(self._root,ui.BACK)
-	uikits.event(back,function(sender)uikits.popScene()end)	
+	uikits.event(back,function(sender)
+		self:commit_comment(function()
+			uikits.popScene()
+		end)
+	end)	
 	local student_but = uikits.child(self._root,ui.STUDENT_LIST_BUTTON)
 	uikits.event(student_but,function(sender)
 			uikits.pushScene(StudentList.create())
