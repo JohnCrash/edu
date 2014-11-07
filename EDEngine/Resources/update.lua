@@ -429,7 +429,8 @@ function UpdateProgram:update()
 				--要求重新加载这些文件
 				package.loaded['kits'] = nil
 				package.loaded['uikits'] = nil
-				package.loaded['cache'] = nil				
+				package.loaded['cache'] = nil
+				package.loaded['login'] = nil
 			end
 
 			kits.log('Update complate!')

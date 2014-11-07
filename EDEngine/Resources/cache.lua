@@ -19,8 +19,9 @@ local function clear_files( path,day )
 	if string.sub(path,len,len) == '/' then
 		path = string.sub(path,1,len-1)
 	end
-	if not kits.exists_file(path) then 
-		return 
+	if not lfs.attributes( path ) then
+		kits.log("ERROR path not exist "..path )
+		return
 	end
 	kits.log('---> do clear path:'..path)
 	for file in lfs.dir(path) do
