@@ -170,7 +170,7 @@ function TeacherList:add_batch_item( v )
 					local url = get_class_url..'?action=brief&examid='..
 					v.exam_id
 					cache.request_json(url,function(class)
-						if class and type(class)=='table' and class[1] and class[1].class_name then
+						if class and type(class)=='table' and class[1] and class[1].class_name and cc_isobj(child) then
 							child:setString( class[1].class_name )
 							uikits.event(item,function(sender)
 								if v.is_res and v.is_res==1 then
@@ -245,12 +245,13 @@ end
 
 function TeacherList:refresh_ready_batch()
 	if not self._busy then
+		cache.request_cancel()
 		self._scrollview:clear()
 		self._busy = true
 		local mode = 2
 		if self._mode == ui.READYBATCH then
 			mode = 2
-		elseif self._mode == ui.READYBATCH then
+		elseif self._mode == ui.HISTORY then
 			mode = 3
 		end
 		self:init_batch_list(mode) --待批阅
