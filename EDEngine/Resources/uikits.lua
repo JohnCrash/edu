@@ -135,9 +135,9 @@ local function get_factor()
 	local glview = Director:getOpenGLView()
 	local ss = glview:getFrameSize()
 	local factor = ss.height/ss.width
-	if factor > (3/4+9/16)/2 then --∏¸Ω”Ω¸3/4
+	if factor > (3/4+9/16)/2 then --Êõ¥Êé•Ëøë3/4
 		return FACTOR_3_4,factor
-	else --∏¸Ω”Ω¸9/16
+	else --Êõ¥Êé•Ëøë9/16
 		return FACTOR_9_16,factor
 	end
 end
@@ -493,7 +493,7 @@ local function fromJson( t )
 		if t.file and type(t.file)=='string' then
 			s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file)
 		elseif t.file_9_16 and t.file_3_4 then
-			--∏˘æ›≤ªÕ¨µƒ∑÷±Ê¬ º”‘ÿŒƒº˛
+			--Ê†πÊçÆ‰∏çÂêåÁöÑÂàÜËæ®ÁéáÂä†ËΩΩÊñá‰ª∂
 			if get_factor() == FACTOR_3_4 then
 				s = ccs.GUIReader:getInstance():widgetFromJsonFile(t.file_3_4)
 			else
@@ -540,14 +540,14 @@ local function child( root,path )
 			end
 		end
 		if w == root then
-			--¥Ú”°µ˜”√’ﬂ–≈œ¢
+			--ÊâìÂç∞Ë∞ÉÁî®ËÄÖ‰ø°ÊÅØ
 			kits.log('ERROR: uikits.child return nil')
 			log_caller()
 		else
 			return w
 		end
 	else
-			--¥Ú”°µ˜”√’ﬂ–≈œ¢
+			--ÊâìÂç∞Ë∞ÉÁî®ËÄÖ‰ø°ÊÅØ
 			kits.log('ERROR: uikits.child return nil')
 			log_caller()
 	end
@@ -628,7 +628,7 @@ end
 local function delay_call( target,func,delay,param1,param2,param3 )
 	local obj = target
 	if not target then
-		obj = cc.Director:getInstance() --»Áπ˚√ª”–∂‘œÛ£¨ π”√»´æ÷∂‘œÛ
+		obj = cc.Director:getInstance() --Â¶ÇÊûúÊ≤°ÊúâÂØπË±°Ôºå‰ΩøÁî®ÂÖ®Â±ÄÂØπË±°
 	end
 	if obj and func then
 		 local scheduler = obj:getScheduler()
@@ -654,7 +654,7 @@ local END = 5
 local NEXT = 6
 local function sequence_call( t )
 	local seqs = {}
-	seqs._obj = cc.Director:getInstance() --»Áπ˚√ª”–∂‘œÛ£¨ π”√»´æ÷∂‘œÛ
+	seqs._obj = cc.Director:getInstance() --Â¶ÇÊûúÊ≤°ÊúâÂØπË±°Ôºå‰ΩøÁî®ÂÖ®Â±ÄÂØπË±°
 	if seqs._obj and t then
 		seqs._funcs = t
 		 seqs._scheduler = seqs._obj:getScheduler()
@@ -724,7 +724,7 @@ local function timer( obj,func,delay,param1,param2,param3)
 	end
 end
 
---∫·œÚ≤ºæ÷,
+--Ê®™ÂêëÂ∏ÉÂ±Ä,
 local function relayout_h( items,xx,y,width,space,scale,expet )
 	local w
 	local h
@@ -752,7 +752,7 @@ local function relayout_h( items,xx,y,width,space,scale,expet )
 			end
 			h = size.height > h and size.height or h
 		end
-		--æ”÷–
+		--Â±Ö‰∏≠
 		local x = (width-w)/2 + xx
 		for i,v in pairs(items) do
 			local size = v:getContentSize()
@@ -773,7 +773,7 @@ local function relayout_h( items,xx,y,width,space,scale,expet )
 	return {x=(width-w)/2,y=y,width=w,height=h}
 end
 
---◊›œÚ≤ºæ÷
+--Á∫µÂêëÂ∏ÉÂ±Ä
 local function relayout_v( items,space,scale )
 	space = space or 0
 	local x,y,w,h = 0,0,0,space
@@ -905,7 +905,7 @@ local function set_item(c,v)
 	end
 end
 
---itemID2 ¥˙±Ìø…ƒ‹µƒµ⁄∂˛¿‡item
+--itemID2 ‰ª£Ë°®ÂèØËÉΩÁöÑÁ¨¨‰∫åÁ±ªitem
 local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	local t = {_root = root}
 	if scrollID then
@@ -932,7 +932,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t._item_height = size.height
 	t._item_ox,t._item_oy = t._item:getPosition()
 
-		--Ω´≤ª «_itemµƒ◊”Ω⁄µ„∂º ”Œ™tops£¨tops‘⁄πˆ∂Ø≤ºæ÷÷–±£≥÷∂•≤øŒª÷√
+		--Â∞Ü‰∏çÊòØ_itemÁöÑÂ≠êËäÇÁÇπÈÉΩËßÜ‰∏∫topsÔºåtopsÂú®ÊªöÂä®Â∏ÉÂ±Ä‰∏≠‰øùÊåÅÈ°∂ÈÉ®‰ΩçÁΩÆ
 		local nodes = t._scrollview:getChildren()
 		t._tops = {}
 		for i,v in pairs(nodes) do
@@ -947,9 +947,74 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				end
 			end
 		end
-
+	local function relayout_refresh(self)
+		if self._scrollview and self._refresh_arrow then
+			--local cs = self._scrollview:getContentSize()
+			local inner = self._scrollview:getInnerContainer()
+			--local x,y = inner:getPosition()
+			local size = inner:getContentSize()
+			local arrow_size = self._refresh_arrow:getContentSize()
+			local text_size = self._refresh_text:getContentSize()
+			local H = math.max(arrow_size.height,text_size.height)
+			local W = arrow_size.width + text_size.width + 1
+			local xx = (size.width-W)/2 + arrow_size.width/2
+			local yy = size.height + H/2 + 1
+			self._refresh_arrow:setPosition( xx,yy )
+			xx = xx + 1 + arrow_size.width/2
+			self._refresh_text:setPosition( xx,yy )
+		end
+	end
+	t.refresh = function(self,func) --ËÆæÁΩÆ‰∏Ä‰∏™ÂõûÂºπÂà∑Êñ∞ÂáΩÊï∞
+		if not self._refresh_arrow and self._scrollview then
+			self._refresh_arrow = imageview{image="Images/arrow.png",anchorX = 0.5,anchorY=0.5}
+			self._refresh_text = text{caption="‰∏ãÊãâÂà∑Êñ∞",fontSize=38,color=cc.c3b(0,0,0),anchorX = 0,anchorY=0.5}
+			--self._refresh_circle = imageview{}
+			self._refresh_arrow:setRotation(-90)
+			self._scrollview:addChild(self._refresh_arrow)
+			self._scrollview:addChild(self._refresh_text)
+			self._refresh_func = func
+			relayout_refresh(self)
+			--self._scrollview:addChild(self._refresh_circle)
+		end
+		event(self._scrollview,function(sender,state)
+			local cs = sender:getContentSize()
+			local inner = sender:getInnerContainer()
+			local size = inner:getContentSize()
+			local x,y = inner:getPosition()
+			local arrow = self._refresh_arrow
+			local text = self._refresh_text
+			local drap_text = "‰∏ãÊãâÂà∑Êñ∞"
+			if state == ccui.ScrollviewEventType.scrolling then
+				yy = cs.height - (size.height+y)
+				local actionTo2 = cc.RotateTo:create( 0.3, -90)
+				local actionTo = cc.RotateTo:create( 0.3, -90-180)				
+				if yy>180 then
+					if self._refresh_flag ~= 1 then
+						self._refresh_flag = 1
+						self._refresh_done = 1
+						text:setString("ÊùæÂºÄÂà∑Êñ∞")
+						arrow:runAction( cc.Sequence:create(actionTo2,actionTo) )
+					end
+				else
+					if self._refresh_flag ~= 0 and self._refresh_flag then
+						self._refresh_flag = 0
+						text:setString(drap_text)
+						arrow:runAction( cc.Sequence:create(actionTo,actionTo2) )
+					end
+				end
+			elseif state == ccui.ScrollviewEventType.bounceTop then
+				arrow:setRotation(-90)
+				self._refresh_flag = nil
+				text:setString(drap_text)
+				if self._refresh_func and self._refresh_done then
+					self._refresh_func()
+				end
+				self._refresh_done = nil
+			end
+		end)
+	end
 	t.relayout = function(self)
-		if horiz then --∫·œÚ
+		if horiz then --Ê®™Âêë
 			local width = 0
 			local item_max_height = 0
 			for i=1,#self._list do
@@ -973,7 +1038,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				self._list[#self._list-i+1]:setPosition(cc.p(item_width,self._item_oy))
 				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
 			end
-		else --◊›œÚ
+		else --Á∫µÂêë
 			local cs = self._scrollview:getContentSize()
 			local height = self._tops_space or 0
 			if not self._item2 then
@@ -1001,16 +1066,16 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local size = self._scrollview:getContentSize()
 			
 			if height < size.height then
-				offy = size.height - height --∂•µΩ∂•
+				offy = size.height - height --È°∂Âà∞È°∂
 			end
 			local item_height = 0
 			for i = 1,#self._list do
 				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
 				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
 			end
-			--∑≈÷√÷√∂•‘™º˛
+			--ÊîæÁΩÆÁΩÆÈ°∂ÂÖÉ‰ª∂
 			if self._tops_space then
-				item_height = item_height + self._tops_space--∆ ºΩ◊∂Œ÷√∂•‘™º˛∫Õitemµƒº‰∏Ù
+				item_height = item_height + self._tops_space--Ëµ∑ÂßãÈò∂ÊÆµÁΩÆÈ°∂ÂÖÉ‰ª∂ÂíåitemÁöÑÈó¥Èöî
 				if is_abs then
 					for i = 1,#self._tops do
 						local x,y = self._tops[i]:getPosition()
@@ -1023,6 +1088,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				end
 			end
 		end
+		relayout_refresh(self)
 	end
 	t.setVisible = function(self,b)
 		self._scrollview:setVisible(b)
@@ -1064,7 +1130,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	return t
 end
 
---scroll µƒ∏ƒΩ¯∞Ê±æ
+--scroll ÁöÑÊîπËøõÁâàÊú¨
 --[[
 ]]--
 local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
@@ -1118,7 +1184,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	t._bottoms_lists = t._bottoms
 	t._tops_space = calc_space_y( t._tops )
 	t._bottoms_space = calc_space_y( t._bottoms_lists )
-	--≤ºæ÷∫Ø ˝
+	--Â∏ÉÂ±ÄÂáΩÊï∞
 	t.relayout = function(self,space)
 		space = space or 16
 		local cs = self._scrollview:getContentSize()
@@ -1138,7 +1204,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		height = height + self._tops_space - t._bottoms_space
 		local tops_offy = height - cs.height
 
-		--tops “™◊ˆÃÿ ‚¥¶¿Ì
+		--tops Ë¶ÅÂÅöÁâπÊÆäÂ§ÑÁêÜ
 		for i,v in pairs(self._tops_lists) do
 			local x,y = v:getPosition()
 			v:setPosition(cc.p(x,y+tops_offy))
@@ -1149,7 +1215,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			self._scrollview:setContentSize(cc.size(cs.width,height))
 		end
 	end
-	--ÃÌº”∫Ø ˝
+	--Ê∑ªÂä†ÂáΩÊï∞
 	t.additem = function(self,key,sector)
 		local item
 		local items
@@ -1185,7 +1251,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			return 			
 		end
 	end
-	--«Â≥˝
+	--Ê∏ÖÈô§
 	t.clear = function(self,sector)
 		local lists
 		if sector == 0 then --itemIDs
@@ -1294,9 +1360,9 @@ local function scrollview_step_add(scrollview,t,n,add_func,sstate)
 					add_func(t[i])
 				end
 			end			
-			add_func() --÷ÿ–¬≤ºæ÷
+			add_func() --ÈáçÊñ∞Â∏ÉÂ±Ä
 		end
-		if n < count then --÷ª”–‘⁄ªπ”–√ªÃÌº”µƒ≤≈πÿ±’ªÿµØ
+		if n < count then --Âè™ÊúâÂú®ËøòÊúâÊ≤°Ê∑ªÂä†ÁöÑÊâçÂÖ≥Èó≠ÂõûÂºπ
 			scrollview:setBounceEnabled(false)
 		end
 		add_n_item(offset,n)

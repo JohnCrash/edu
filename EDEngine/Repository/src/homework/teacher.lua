@@ -243,19 +243,53 @@ function TeacherList:init_batch_list( status )
 	down_page(1)
 end
 
+function TeacherList:refresh_ready_batch()
+	if not self._busy then
+		self._scrollview:clear()
+		self._busy = true
+		local mode = 2
+		if self._mode == ui.READYBATCH then
+			mode = 2
+		elseif self._mode == ui.READYBATCH then
+			mode = 3
+		end
+		self:init_batch_list(mode) --待批阅
+	end
+end
+
+function TeacherList:swap_list()
+	if self._scrollview and self._scrollview._list then
+		local temp_list = self._swap_list or {}
+		
+		for i,v in pairs(self._scrollview._list) do
+			v:setVisible(false)
+		end
+		for i,v in pairs(temp_list) do
+			v:setVisible(true)
+		end
+		self._swap_list = self._scrollview._list
+		self._scrollview._list = temp_list
+	end
+end
 --待阅
 function TeacherList:init_ready_batch()
+	if self._busy then return end
 	cache.request_cancel()
 	
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
-	if not self._scID and not self._busy then
+	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
+		if self._ready_batch_is_done then
+			self:swap_list()
+			self._scrollview:relayout()
+		else
+			self._busy = true
+			self:init_batch_list(2)--待批阅	
+			self._ready_batch_is_done = true
+		end
 		self._mode = ui.READYBATCH
-		self._scrollview:clear()
-		self._busy = true
-		self:init_batch_list(2)--待批阅
 	end
 	return true
 end
@@ -281,17 +315,26 @@ function TeacherList:init_ready_release()
 end
 --历史
 function TeacherList:init_ready_history()
+	if self._busy then return end
+	
 	cache.request_cancel()
 	
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
-	self._scrollview:clear()
-	if not self._scID and not self._busy then
+	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then
 		self._mode = ui.HISTORY
-		self._busy = true
-		self:init_batch_list(3)--完成批阅
+		
+		if self._ready_history_is_done then
+			self:swap_list()
+			self._scrollview:relayout()		
+		else
+			self._busy = true
+			self:swap_list()
+			self:init_batch_list(3)--完成批阅
+			self._ready_history_is_done = true
+		end
 	end
 	return true
 end
@@ -632,6 +675,22 @@ function TeacherList:init_gui()
 		uikits.popScene()end)
 	--列表视图
 	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
+	self._scrollview:refresh(function(state)
+		self:refresh_ready_batch()
+	end)
+	--[[
+	uikits.event(self._scrollview._scrollview,function(sender,state)
+		print( tostring(state) )
+		local inner = sender:getInnerContainer()
+		local x,y = inner:getPosition()
+		local size = inner:getContentSize()
+		local anchor = inner:getAnchorPoint()
+		local cs = sender:getContentSize()
+		print( "x="..x.." y="..y )
+		print( "cw="..cs.width.." ch="..cs.height )
+		print( "w="..size.width.." h="..size.height )
+	end)
+	--]]
 	--切换标签
 	self._tab = uikits.tab(self._root,ui.BUTTON_LINE,
 		{[ui.TAB_BUTTON_1]=function(sender) return self:init_ready_batch()end,
