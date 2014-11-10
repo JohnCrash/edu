@@ -267,7 +267,7 @@ local function upload(url,filename,data,func,progress_func)
 	end
 end
 
-local function post(url,form,func)
+local function post(url,form,func,content_type)
 	local ret,msg = mt.new('POST',url,login.cookie(),
 		function(obj)
 			if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
@@ -279,9 +279,11 @@ local function post(url,form,func)
 					func( false,obj.errmsg)
 					kits.log('ERROR : cache.post failed! url = '..tostring(url))
 					kits.log('	errmsg = '..tostring(obj.errmsg))
+					kits.log('	errcode = '..tostring(obj.errcode))
+					kits.log('	data= '..tostring(obj.data))
 				end
 			end
-		end,form )
+		end,form,content_type )
 	if not ret then
 		kits.log('ERROR : cache.post failed url = '..tostring(url))
 		kits.log('	errmsg = '..tostring(msg))

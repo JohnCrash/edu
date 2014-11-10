@@ -115,6 +115,12 @@ local function open_loadingbox_wrap(parent,dt,func)
 		end
 	end
 	box._loadingbox = open_loadingbox(parent,dt,func)
+	box._text = uikits.child( box._loadingbox,"loading_txet")
+	box.setString = function(self,text)
+		if self._text and text then
+			self._text:setString( text )
+		end
+	end
 	return box
 end
 

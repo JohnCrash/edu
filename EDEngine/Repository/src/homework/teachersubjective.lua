@@ -163,7 +163,9 @@ function TeacherSubjective:init_student_list()
 														uikits.playSound(v.filename)
 													end)
 													local length = cc_getVoiceLength(filename)
-													uikits.child(voice,ui.ITEM_AUDIO_TIME):setString(  kits.time_to_string_simple(math.floor(length)) )
+													if length then
+														uikits.child(voice,ui.ITEM_AUDIO_TIME):setString(  kits.time_to_string_simple(math.floor(length)) )
+													end
 												end
 											end
 										end

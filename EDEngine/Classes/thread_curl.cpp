@@ -149,6 +149,7 @@ namespace kits
 		CURL *curl;
 		CURLcode res;
 		vector_t bufs;
+		struct curl_slist *headers = NULL;
 
 		if( !pct ){ return ; }
 
@@ -189,11 +190,12 @@ namespace kits
 				break;
 			case POST:
 				{
-					struct curl_slist *headers=NULL;
-					headers = curl_slist_append(headers, "Content-Type: text/xml");
+					if (!pct->content_type.empty())
+						headers = curl_slist_append(headers, pct->content_type.c_str()); //"Content-Type: text/xml"
 					curl_easy_setopt(curl,CURLOPT_POSTFIELDS,pct->post_form.c_str());
 					curl_easy_setopt(curl,CURLOPT_POSTFIELDSIZE,pct->post_form.size());
-					curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+					if ( headers )
+						curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 				}
 				break;
 			case HTTPPOST:
@@ -221,6 +223,10 @@ namespace kits
 			}
 			pct->state = LOADING;
 			res = curl_easy_perform(curl);
+
+			if (headers)
+				curl_slist_free_all(headers);
+
 			pair_t result = vector_t_merge( bufs );
 
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &pct->retcode); 

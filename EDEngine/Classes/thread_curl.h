@@ -44,6 +44,7 @@ struct curl_t
 	std::string cookie;
 	std::string err;
 	std::string post_form;
+	std::string content_type;
 	std::vector<post_t> posts;
 	int errcode;
 	float progress;// 0-1

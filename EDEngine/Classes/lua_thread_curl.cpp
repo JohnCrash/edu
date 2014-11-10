@@ -185,6 +185,11 @@ static int do_curl(lua_State *L)
 				{
 					pct->post_form = lua_tostring(L,5);
 				}
+				//content-type
+				if (lua_isstring(L, 6))
+				{
+					pct->content_type = lua_tostring(L, 6);
+				}
 			}else if( m == kits::HTTPPOST )
 			{
 				httppost_params(L,5,pct);

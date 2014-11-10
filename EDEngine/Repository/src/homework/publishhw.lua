@@ -263,6 +263,8 @@ function Publishhw:publish_topics()
 		local custom_items = {}
 		local data = self.tb_parent_view._subjective_data
 		local selector = self.tb_parent_view._selector	
+		local loadbox = loadingbox.open(self)
+		
 		local function upload(item) --upload attachments
 			kits.log('>>>UPLOAD')
 			local url
@@ -302,6 +304,7 @@ function Publishhw:publish_topics()
 		end
 		local function additem(item) --add topics item
 			kits.log('>>>ADD ATTACHMENTS')
+			loadbox:setString("上传附件")
 			local att = {}
 			if item.items then
 				for i,v in pairs(item.items) do
@@ -356,6 +359,7 @@ function Publishhw:publish_topics()
 		local paper_id = nil
 		local function create_paper()
 			kits.log('>>>CREATE PAPER')
+			loadbox:setString("创建作业")
 			local data_cur_sec = os.time()
 			local tb_data = os.date("*t",data_cur_sec )
 			local send_data_course = '&course='..selector[1].id
@@ -377,16 +381,18 @@ function Publishhw:publish_topics()
 		local add_paper_item_isdone = uikits.RUN
 		local function add_paper_item() --add_item
 			kits.log('>>>ADD ITEM')
+			loadbox:setString("加入试题")
 			if self.tb_parent_view._confirm_item and table.maxn(self.tb_parent_view._confirm_item)>0 then
 				self._paperid = paper_id
-				local send_data_pid = '?pid='..self._paperid
+				local send_data_pid = 'pid='..self._paperid
 				local tb_para = self:format_item_list()
 				local send_data_para = '&para='..json.encode(tb_para)
-				
-				local send_url = add_homework_item_url..send_data_pid..send_data_para
-				cache.request( send_url,function(b)
+				--local url = 'http://new.www.lejiaolexue.com/paper/handler/APIManuallyItem.ashx'
+				--local send_url = url..'?'..send_data_pid..send_data_para
+				local form = send_data_pid..send_data_para
+				cache.post(add_homework_item_url,form,function(b,result)
 						if b then
-							local result = cache.get_data( send_url )
+							print( result )
 							if result then
 								add_paper_item_isdone = uikits.OK
 							else
@@ -405,6 +411,7 @@ function Publishhw:publish_topics()
 		local add_paper_custom_item_isdone = uikits.RUN
 		local function add_paper_custom_item() --add custom item
 			kits.log('>>>ADD CUSTOM ITEM')
+			loadbox:setString("加入主观题")
 			if #custom_items <= 0 then
 				--没有跳过
 				self._paperid = paper_id
@@ -446,6 +453,7 @@ function Publishhw:publish_topics()
 		local publish_paper_isdone = uikits.RUN
 		local function publish_paper()
 			kits.log('>>>PUBLISH')
+			loadbox:setString("发布作业")
 			local send_data = self:format_publish_data()
 			local send_url = kits.encode_space(publish_homework_url..send_data)
 			cache.request( send_url,function(b)
@@ -466,7 +474,7 @@ function Publishhw:publish_topics()
 					end)
 		end
 		local wnd = self
-		local loadbox = loadingbox.open(self)
+		
 		uikits.sequence_call{
 			function(state) --upload all attachments
 				if state==uikits.RUN then
