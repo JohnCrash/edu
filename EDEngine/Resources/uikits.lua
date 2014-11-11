@@ -969,13 +969,17 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			self._refresh_arrow = imageview{image="Images/arrow.png",anchorX = 0.5,anchorY=0.5}
 			self._refresh_text = text{caption="下拉刷新",fontSize=38,color=cc.c3b(0,0,0),anchorX = 0,anchorY=0.5}
 			--self._refresh_circle = imageview{}
-			self._refresh_arrow:setRotation(-90)
+			self._refresh_arrow:setRotation(90)
+			self._refresh_arrow:setScaleX(0.7)
+			self._refresh_arrow:setScaleY(0.7)
 			self._scrollview:addChild(self._refresh_arrow)
 			self._scrollview:addChild(self._refresh_text)
 			self._refresh_func = func
 			relayout_refresh(self)
 			--self._scrollview:addChild(self._refresh_circle)
 		end
+		local flag
+		local done
 		event(self._scrollview,function(sender,state)
 			local cs = sender:getContentSize()
 			local inner = sender:getInnerContainer()
@@ -986,12 +990,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local drap_text = "下拉刷新"
 			if state == ccui.ScrollviewEventType.scrolling then
 				yy = cs.height - (size.height+y)
-				local actionTo2 = cc.RotateTo:create( 0.3, -90)
-				local actionTo = cc.RotateTo:create( 0.3, -90-180)				
-				if yy>180 then
+				local actionTo2 = cc.RotateTo:create( 0.2, 90)
+				local actionTo = cc.RotateTo:create( 0.2, 90-180)				
+				if yy>200 then
 					if self._refresh_flag ~= 1 then
 						self._refresh_flag = 1
-						self._refresh_done = 1
+						done = 1
 						text:setString("松开刷新")
 						arrow:runAction( cc.Sequence:create(actionTo2,actionTo) )
 					end
@@ -1003,13 +1007,16 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 					end
 				end
 			elseif state == ccui.ScrollviewEventType.bounceTop then
-				arrow:setRotation(-90)
-				self._refresh_flag = nil
+				arrow:setRotation(90)
 				text:setString(drap_text)
-				if self._refresh_func and self._refresh_done then
+				if self._refresh_func and done == 1 then
+					done = 0
+					self._refresh_flag = nil
 					self._refresh_func()
+					delay_call(nil,function()
+						done = 0 end,0.5) --FIXBUG
 				end
-				self._refresh_done = nil
+				done = 0
 			end
 		end)
 	end
@@ -1051,8 +1058,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local tops_offy = 0
 			local is_abs
 			if self._scrollview.setInnerContainerSize  then
+				self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
 				if height > cs.height then
-					self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
 					tops_offy = height - cs.height
 				end
 				is_abs = false
@@ -1126,6 +1133,36 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			self._list[i]:removeFromParent()
 		end
 		self._list = {}
+	end
+	t.swap = function(self) --交换当前列表中的项到后缓
+		if self._scrollview and self._list then
+			local temp_list = self._back_list or {}
+			
+			for i,v in pairs(self._list) do
+				v:setVisible(false)
+			end
+			for i,v in pairs(temp_list) do
+				v:setVisible(true)
+			end
+			self._back_list = self._list
+			self._list = temp_list			
+		end
+	end
+	t.swap_by_index = function(self,i,j) --将当前列表总得放入i,取出j
+		if self._scrollview and self._list then
+			self._back_lists = self._back_lists or {}
+
+			for i,v in pairs(self._list) do
+				v:setVisible(false)
+			end
+			self._back_lists[i] = self._list
+			
+			self._back_lists[j] = self._back_lists[j] or {}
+			for i,v in pairs(self._back_lists[j]) do
+				v:setVisible(true)
+			end
+			self._list = self._back_lists[j]
+		end
 	end
 	return t
 end

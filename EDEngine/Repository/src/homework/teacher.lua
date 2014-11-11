@@ -258,20 +258,6 @@ function TeacherList:refresh_ready_batch()
 	end
 end
 
-function TeacherList:swap_list()
-	if self._scrollview and self._scrollview._list then
-		local temp_list = self._swap_list or {}
-		
-		for i,v in pairs(self._scrollview._list) do
-			v:setVisible(false)
-		end
-		for i,v in pairs(temp_list) do
-			v:setVisible(true)
-		end
-		self._swap_list = self._scrollview._list
-		self._scrollview._list = temp_list
-	end
-end
 --待阅
 function TeacherList:init_ready_batch()
 	if self._busy then return end
@@ -283,7 +269,7 @@ function TeacherList:init_ready_batch()
 	self._statistics_root:setVisible(false)
 	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
 		if self._ready_batch_is_done then
-			self:swap_list()
+			self._scrollview:swap()
 			self._scrollview:relayout()
 		else
 			self._busy = true
@@ -328,11 +314,11 @@ function TeacherList:init_ready_history()
 		self._mode = ui.HISTORY
 		
 		if self._ready_history_is_done then
-			self:swap_list()
+			self._scrollview:swap()
 			self._scrollview:relayout()		
 		else
 			self._busy = true
-			self:swap_list()
+			self._scrollview:swap()
 			self:init_batch_list(3)--完成批阅
 			self._ready_history_is_done = true
 		end
@@ -676,9 +662,10 @@ function TeacherList:init_gui()
 		uikits.popScene()end)
 	--列表视图
 	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
-	self._scrollview:refresh(function(state)
-		self:refresh_ready_batch()
-	end)
+	self._scrollview:refresh(
+		function(state)
+			self:refresh_ready_batch()
+		end)
 	--[[
 	uikits.event(self._scrollview._scrollview,function(sender,state)
 		print( tostring(state) )

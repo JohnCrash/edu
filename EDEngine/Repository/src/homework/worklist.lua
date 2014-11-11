@@ -43,7 +43,7 @@ local ui = {
 	LESSON = 'lesson',
 	BACK = 'white/back',
 	LIST = 'newview',
-	ITEM = 'newview/subject_1',
+	ITEM = 'subject_1',
 	ITEM_TITLE = 'textname',
 	ITEM_CURSE = 'subjectbox/subjecttext',
 	ITEM_BAR = 'finish2',
@@ -220,7 +220,8 @@ end
 local g_first = true
 
 function WorkList:load_page( first,last )
-	if not self._scID then--and not self._busy then
+	if not self._scID and not self._busy then--and not self._busy then
+		self._busy = true
 		cache.request_cancel()
 		local scheduler = self:getScheduler()
 		local idx = first
@@ -290,18 +291,35 @@ function WorkList:load_page( first,last )
 	end
 end
 
+function WorkList:refresh_list()
+	if not self._busy then
+		cache.request_cancel()
+		self._scrollview:clear()
+		if self._mode == ui.NEW then
+			self:load_page( 1 )
+		elseif self._mode == ui.HISTORY then
+			self:load_page( 1,5 )
+		end
+	end
+end
+
 function WorkList:init_new_list()
-	--if self._busy then return end
+	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.NEW )
 	self:show_statistics(false)
-	self:show_list(true)
+	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
-	self._mode = ui.NEW
-	if not self._scID then -- and not self._busy then
-		self._mode = nil
-		self:clear_all_item()
-		self:load_page( 1 )
+	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
+		if self._new_list_done then
+			self:Swap_list(ui.NEW)
+			self._scrollview:relayout()
+		else
+			--self:clear_all_item()
+			self._new_list_done = true
+			self:load_page( 1 )
+		end
+		self._mode = ui.NEW		
 	end
 	return true
 end
@@ -397,7 +415,7 @@ function WorkList:clone_statistics_item(v)
 			end
 		end
 		item:setVisible(true)
-		self._scrollview:addChild(item)
+		--self._scrollview:addChild(item)
 		self._statistics_list = self._statistics_list or {}
 		table.insert(self._statistics_list,item)
 	end
@@ -407,14 +425,6 @@ end
 function WorkList:show_statistics(b)
 	if self._statistics_list then
 		for i,v in pairs(self._statistics_list) do
-			v:setVisible(b)
-		end
-	end
-end
-
-function WorkList:show_list(b)
-	if self._list then
-		for i,v in pairs(self._list) do
 			v:setVisible(b)
 		end
 	end
@@ -520,11 +530,11 @@ function WorkList:clear_statistics()
 end
 
 function WorkList:init_statistics()
-	--if self._busy then return end
+	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
 	self:show_statistics(true)
-	self:show_list(false)
+	self._scrollview:setVisible(false)
 	self._setting:setVisible(false)
 	self._mode = ui.STATIST
 	self:clear_statistics()
@@ -552,16 +562,17 @@ function WorkList:init_statistics()
 end
 
 function WorkList:init_setting()
-	--if self._busy then return end
+	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.SETTING )
 	if _G.hw_cur_child_id ~= 0 and self.has_download_children == false then
 		self:getdatabyurl()	
 	end
 	self:show_statistics(false)
-	self:show_list(false)
+	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
-	self._mode = ui.SETTING
+
+	--self._mode = ui.SETTING
 	return true
 end
 
@@ -699,8 +710,13 @@ function WorkList:init_gui()
 	self._root:addChild(self._setting)
 	
 	self:addChild(self._root)
-	self._scrollview = uikits.child(self._root,ui.LIST)
-	self._item = uikits.child(self._root,ui.ITEM)
+	--self._scrollview = uikits.child(self._root,ui.LIST)
+	--self._item = uikits.child(self._root,ui.ITEM)
+	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
+	self._scrollview:refresh(
+		function(state)
+			self:refresh_list()
+		end)
 	local back = uikits.child(self._root,ui.BACK)
 	uikits.event(back,
 		function(sender)
@@ -709,11 +725,13 @@ function WorkList:init_gui()
 				uikits.popScene()
 			--end
 		end)
+	--[[
 	self._item:setVisible(false)
 	local size = self._item:getContentSize()
 	self._item_width = size.width
 	self._item_height = size.height
 	self._item_ox,self._item_oy = self._item:getPosition()
+	--]]
 	local statistics_item = uikits.child(self._statistics_root,ui.LESSON)
 	self._statistics_item = statistics_item
 	if statistics_item then
@@ -722,7 +740,7 @@ function WorkList:init_gui()
 		self._statistics_item_height = size.height
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
-	
+
 	self._tab = uikits.tab(self._root,ui.BUTTON_LINE,
 		{
 		[ui.NEW_BUTTON]=function(sender) return self:init_new_list() end,
@@ -730,7 +748,7 @@ function WorkList:init_gui()
 		[ui.STATIST_BUTTON]=function(sender) return self:init_statistics() end,
 		[ui.SETTING_BUTTON]=function(sender) return self:init_setting() end,
 		})
-
+--[[
 	uikits.event( self._scrollview,
 		function(sender,t)
 			if self._mode == ui.HISTORY then
@@ -742,20 +760,31 @@ function WorkList:init_gui()
 			end
 		end)
 	self._list = {}
+	--]]
+end
+
+function WorkList:Swap_list( new_mode )
+	self._scrollview:swap_by_index( self._mode,new_mode )
 end
 
 function WorkList:init_history_list()
-	--if self._busy then return end
+	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.HISTORY )
 	self:show_statistics(false)
-	self:show_list(true)
+	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	
-	if not self._scID then --and not self._busy then
+	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
+		if self._history_list_done then
+			self:Swap_list(ui.HISTORY)
+			self._scrollview:relayout()
+		else
+			self._history_list_done = true
+			self:Swap_list(ui.HISTORY)
+			self:load_page( 1,5 )	
+		end
 		self._mode = ui.HISTORY
-		self:clear_all_item()
-		self:load_page( 1,5 )
 	end
 	return true
 end
@@ -785,32 +814,11 @@ function WorkList:history_scroll( t )
 end
 
 function WorkList:relayout()
-	local height = self._item_height*(#self._list)
-	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
-	local offy = 0
-	local size = self._scrollview:getContentSize()
-	
-	if height < size.height then
-		offy = size.height - height --顶到顶
-	end
-
-	for i = 1,#self._list do
-		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
-	end
+	self._scrollview:relayout()
 end
 
 function WorkList:add_item( t )
-	local item
-	if #self._list == 0 then
-		item = self._item
-		item:setVisible(true)
-		item:setAnchorPoint(cc.p(0,0))
-		self._list[#self._list+1] = item
-	else
-		item = self._item:clone()
-		self._list[#self._list+1] = item
-		self._scrollview:addChild(item)
-	end
+	local item = self._scrollview:additem()
 
 	if t.exam_name then --作业名称
 		uikits.child( item,ui.ITEM_TITLE):setString( t.exam_name )
@@ -881,7 +889,13 @@ function WorkList:add_item( t )
 			else
 				if txt then txt:setString('已过期:') end
 			end
+			local _scID
 			local function timer_func()
+				if not cc_isobj(item) or not cc_isobj(u) then 
+					scheduler:unscheduleScriptEntry(_scID)
+					_scID = nil
+					return 
+				end
 				dt = end_time - os.time()
 				local txt = uikits.child( item,ui.TIMELABEL )
 				if dt > 0 then					
@@ -891,11 +905,11 @@ function WorkList:add_item( t )
 					--过期
 					if txt then txt:setString('已过期:') end
 					u:setString(kits.time_to_string_simple(-dt))
-					scheduler:unscheduleScriptEntry(u._scID)
-					u._scID = nil
+					scheduler:unscheduleScriptEntry(_scID)
+					_scID = nil
 				end
 			end
-			u._scID = scheduler:scheduleScriptFunc( timer_func,1,false )
+			_scID = scheduler:scheduleScriptFunc( timer_func,1,false )
 		elseif  t.finish_time_unix then
 			--过期
 			local dt = t.finish_time_unix - os.time()
