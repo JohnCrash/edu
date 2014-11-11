@@ -299,6 +299,8 @@ function WorkList:refresh_list()
 			self:load_page( 1 )
 		elseif self._mode == ui.HISTORY then
 			self:load_page( 1,5 )
+		elseif self._mode == ui.STATIST then
+			self:load_statistics()
 		end
 	end
 end
@@ -307,7 +309,6 @@ function WorkList:init_new_list()
 	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.NEW )
-	self:show_statistics(false)
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
@@ -415,35 +416,29 @@ function WorkList:clone_statistics_item(v)
 			end
 		end
 		item:setVisible(true)
-		--self._scrollview:addChild(item)
-		self._statistics_list = self._statistics_list or {}
-		table.insert(self._statistics_list,item)
+		self._scrollview._scrollview:addChild(item)
+		table.insert( self._scrollview._list,item )
+		--self._statistics_list = self._statistics_list or {}
+		--table.insert(self._statistics_list,item)
 	end
 	return item
 end
 
-function WorkList:show_statistics(b)
-	if self._statistics_list then
-		for i,v in pairs(self._statistics_list) do
-			v:setVisible(b)
-		end
-	end
-end
-
 function WorkList:relayout_statistics()
-	if self._statistics_list then
-		local height = self._statistics_item_height*(#self._statistics_list)
-		self._scrollview:setInnerContainerSize(cc.size(self._statistics_item_width,height))
+	if self._scrollview._list then
+		local height = self._statistics_item_height*(#self._scrollview._list)
+		self._scrollview._scrollview:setInnerContainerSize(cc.size(self._statistics_item_width,height))
 		local offy = 0
-		local size = self._scrollview:getContentSize()
+		local size = self._scrollview._scrollview:getContentSize()
 
 		if height < size.height then
 			offy = size.height - height --顶到顶
 		end
 
-		for i = 1,#self._statistics_list do
-			self._statistics_list[#self._statistics_list-i+1]:setPosition(cc.p(self._statistics_item_ox,self._statistics_item_height*(i-1)+offy))
+		for i = 1,#self._scrollview._list do
+			self._scrollview._list[#self._scrollview._list-i+1]:setPosition(cc.p(self._statistics_item_ox,self._statistics_item_height*(i-1)+offy))
 		end
+		self._scrollview:relayout_refresh()
 	end
 end
 
@@ -529,15 +524,8 @@ function WorkList:clear_statistics()
 	end
 end
 
-function WorkList:init_statistics()
-	if self._busy then return end
-	cache.request_cancel()
-	--self:SwapButton( ui.STATIST )
-	self:show_statistics(true)
-	self._scrollview:setVisible(false)
-	self._setting:setVisible(false)
-	self._mode = ui.STATIST
-	self:clear_statistics()
+function WorkList:load_statistics()
+	self._busy = true
 	local loadbox = loadingbox.open(self)
 	local url = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx'
 	local send_url
@@ -547,6 +535,7 @@ function WorkList:init_statistics()
 		send_url = url..'?uid='.._G.hw_cur_child_id
 	end		
 	cache.request_json( send_url,function(t)
+		self._busy = false
 		if not loadbox:removeFromParent() then
 			return
 		end
@@ -558,6 +547,27 @@ function WorkList:init_statistics()
 			self:relayout_statistics()
 		end
 	end)
+end
+
+function WorkList:init_statistics()
+	if self._busy then return end
+	
+	cache.request_cancel()
+	--self:SwapButton( ui.STATIST )
+	self._scrollview:setVisible(true)
+	self._setting:setVisible(false)
+	
+	if self._mode ~= ui.STATIST then
+		if self._statistics_list_done then
+			self:Swap_list(ui.STATIST)
+			self:relayout_statistics()
+		else
+			self._statistics_list_done = true
+			self:Swap_list(ui.STATIST)
+			self:load_statistics()
+		end
+		self._mode = ui.STATIST
+	end
 	return true
 end
 
@@ -568,7 +578,6 @@ function WorkList:init_setting()
 	if _G.hw_cur_child_id ~= 0 and self.has_download_children == false then
 		self:getdatabyurl()	
 	end
-	self:show_statistics(false)
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
 
@@ -771,7 +780,6 @@ function WorkList:init_history_list()
 	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.HISTORY )
-	self:show_statistics(false)
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	

@@ -964,6 +964,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			self._refresh_text:setPosition( xx,yy )
 		end
 	end
+	t.relayout_refresh = relayout_refresh
 	t.refresh = function(self,func) --设置一个回弹刷新函数
 		if not self._refresh_arrow and self._scrollview then
 			self._refresh_arrow = imageview{image="Images/arrow.png",anchorX = 0.5,anchorY=0.5}
