@@ -523,7 +523,7 @@ function Subjective:save()
 	end
 	if self._args and self._args.exam_id then
 		self:calc_times() --计算当前时间
-		local file = self._args.exam_id..'.custom'
+		local file = self._args.exam_id..login.uid()..'.custom'
 		local t = {}
 		for i,layout in pairs(self._pageview:getPages()) do
 			local p = {}
@@ -663,7 +663,7 @@ function Subjective:load_from_cloud()
 										return
 									end
 									local str = json.encode( cloud_answer )
-									local file = self._args.exam_id..'.custom'
+									local file = self._args.exam_id..login.uid()..'.custom'
 									if tryagin then --没有出错
 										kits.write_cache( file,str )
 									
@@ -681,7 +681,7 @@ end
 
 function Subjective:load_myanswer()
 	if self._args and self._args.exam_id then
-		local file = self._args.exam_id..'.custom'
+		local file = self._args.exam_id..login.uid()..'.custom'
 		local str = kits.read_cache( file )
 		if str then
 			local t = json.decode( str )

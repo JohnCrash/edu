@@ -724,7 +724,7 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 	end	
 	local function upload_subjective_answer()
 		if self._args and self._args.exam_id then
-			local file = self._args.exam_id..'.custom'
+			local file = self._args.exam_id..login.uid()..'.custom'
 			local str = kits.read_cache( file )
 			if str then
 				local answ = json.decode( str )
