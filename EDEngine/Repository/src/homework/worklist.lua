@@ -318,6 +318,7 @@ function WorkList:init_new_list()
 			self._scrollview:relayout()
 		else
 			--self:clear_all_item()
+			self._scrollview:clear()
 			self._new_list_done = true
 			self:load_page( 1 )
 		end
@@ -964,6 +965,7 @@ function WorkList:add_item( t )
 							real_score = t.real_score,
 							total_time = t.total_time,
 							uid = login.uid(),
+							parent = self,
 							})
 					end
 				--end

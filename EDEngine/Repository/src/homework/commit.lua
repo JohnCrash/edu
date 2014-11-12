@@ -824,6 +824,10 @@ function WorkCommit:commit()
 						self._args.status = 10 --标记已经提交
 						self._args.commit_order = t.num
 						self._args.workflow_time = t.times
+						if self._args.parent then
+							self._args.parent._mode = nil
+							self._args.parent._new_list_done = nil
+						end						
 						uikits.pushScene( Score.create(self._args) )
 					else
 						--加入提交失败的对话框

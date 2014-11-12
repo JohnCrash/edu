@@ -190,7 +190,7 @@ function Batch:init_paper_list_by_table( p )
 		self._papers_tips_text:setVisible(false)
 	end
 
-	uikits.scrollview_step_add( self._papers._scrollview,paper_table,5,function(v)
+	uikits.scrollview_step_add( self._papers,paper_table,5,function(v)
 		if v then
 			if v.item_type and v.item_id then
 				self:add_paper_item( v.item_type,v.item_id )
