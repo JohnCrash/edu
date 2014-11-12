@@ -994,14 +994,14 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				local actionTo2 = cc.RotateTo:create( 0.2, 90)
 				local actionTo = cc.RotateTo:create( 0.2, 90-180)				
 				if yy>200 then
-					if self._refresh_flag ~= 1 then
+					if self._refresh_flag == 0 then
 						self._refresh_flag = 1
 						done = 1
 						text:setString("松开刷新")
 						arrow:runAction( cc.Sequence:create(actionTo2,actionTo) )
 					end
 				else
-					if self._refresh_flag ~= 0 and self._refresh_flag then
+					if not self._refresh_flag  then
 						self._refresh_flag = 0
 						text:setString(drap_text)
 						arrow:runAction( cc.Sequence:create(actionTo,actionTo2) )
@@ -1014,8 +1014,9 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 					done = 0
 					self._refresh_flag = nil
 					self._refresh_func()
-					delay_call(nil,function()
-						done = 0 end,0.5) --FIXBUG
+					done = 0
+--					delay_call(nil,function()
+	--					done = 0 end,0.5) --FIXBUG
 				end
 				done = 0
 			end
