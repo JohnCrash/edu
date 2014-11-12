@@ -21,7 +21,7 @@ local ui = {
 	PHOTO = 'student_logo_1',
 	TIME = 'time_student',
 	NUMBER = 'number_1',
-	ITEM = 'top_view/top_1',
+	ITEM = 'top_1',
 	TOPICS = 'red_case',
 	WORKFLOW = 'objective_item/start_objective',
 	WORKFLOW_COMPLETE = 'objective_item/completed_objective',
@@ -131,10 +131,10 @@ function WorkCommit:setPercent( p )
 end
 
 function WorkCommit:addCommitStudent( id,na,ti )
-	local item
-	if self._item then
-		item = self._item:clone()
-	end
+	local item = self._scrollview:additem()
+	--if self._item then
+	--	item = self._item:clone()
+	--end
 	if item then
 		self._list = self._list or {}
 		self._list[#self._list+1] = item	
@@ -154,8 +154,10 @@ function WorkCommit:addCommitStudent( id,na,ti )
 		end
 		local photo = uikits.child(item,ui.PHOTO)
 		if photo then
+				self._busy = true
 				login.get_logo(id,
 				function(filename)
+					self._busy = false
 					if filename then
 						photo:loadTexture( filename )
 					else
@@ -163,25 +165,11 @@ function WorkCommit:addCommitStudent( id,na,ti )
 					end
 				end)
 		end
-		self._scrollview:addChild( item )
 	end
 end
 
 function WorkCommit:relayoutScroolView()
-	if not self._list then return end
-	
-	local height = self._item_height*(#self._list)
-	self._scrollview:setInnerContainerSize(cc.size(self._item_width,height))
-	local offy = 0
-	local size = self._scrollview:getContentSize()
-	
-	if height < size.height then
-		offy = size.height - height --顶到顶
-	end
-
-	for i = 1,#self._list do
-		self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,self._item_height*(i-1)+offy))
-	end
+	self._scrollview:relayout()
 end
 
 function WorkCommit:init_commit_list_by_table( t )
@@ -205,18 +193,14 @@ function WorkCommit:init_commit_list_by_table( t )
 	end
 end
 
-function WorkCommit:clear_commit_list()
-	if self._list then
-		for i,v in pairs(self._list) do
-			v:removeFromParent()
-		end
-		self._list = {}
-	end
-end
 --提交列表
 function WorkCommit:init_commit_list()
+	if self._busy then return end
 	if self._args and self._args.exam_id and self._args.tid and self._scrollview then
-		self:clear_commit_list()
+		--self:clear_commit_list()
+		self._busy = true
+		self._scrollview:clear()
+		self._list = {}
 		local url = commit_list_url..'?examId='..self._args.exam_id..'&teacherId='..self._args.tid
 		local function load_from_cache()
 			local data = cache.get_data(url)
@@ -229,9 +213,10 @@ function WorkCommit:init_commit_list()
 				end
 			end
 		end
-		local circle = loadingbox.circle( self._scrollview )
+		local circle = loadingbox.circle( self._scrollview._scrollview )
 		cache.request(url,
 			function(b)
+				self._busy = false
 				if circle and cc_isobj(circle) then
 					circle:removeFromParent()
 				else
@@ -412,15 +397,11 @@ function WorkCommit:init()
 	if not self._root then
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		self:addChild(self._root)
-		self._scrollview = uikits.child( self._root,ui.LIST )
-		self._item = uikits.child( self._root,ui.ITEM )
-		self._topics = uikits.child( self._root,ui.TOPICS)
-		if self._item then
-			self._item:setVisible(false)
-			local size = self._item:getContentSize()
-			self._item_width = size.width
-			self._item_height = size.height
-		end
+		self._scrollview = uikits.scroll( self._root,ui.LIST,ui.ITEM )
+		self._scrollview:refresh( function(state)
+			self:init_commit_list(true)
+		end)
+
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)

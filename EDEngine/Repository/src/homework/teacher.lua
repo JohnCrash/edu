@@ -36,6 +36,7 @@ local ui = {
 	CLASS_NAME = 'banji',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
+	MORE_DEBUG = 'debug',
 	BACK = 'ding/back',
 	LIST = 'zuo',
 	ITEM = 'zuoye1',
@@ -623,6 +624,16 @@ function TeacherList:init_gui()
 			uikits.muteSound(b)
 		end)
 	end
+	local dbg = uikits.child(self._setting,ui.MORE_DEBUG)
+	if dbg then
+		dbg:setSelectedState (kits.config("debug","get"))
+		uikits.event(dbg,function(sender,b)
+			kits.config("debug",b)
+			if _G.enableDebug then
+				_G.enableDebug(b)
+			end
+		end)
+	end	
 	self._root:addChild(self._setting)
 	
 	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}

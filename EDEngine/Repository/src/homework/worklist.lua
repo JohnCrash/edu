@@ -40,6 +40,7 @@ local ui = {
 	MORE2_3_4 = 'homework/more243.json',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
+	MORE_DEBUG = 'debug',
 	LESSON = 'lesson',
 	BACK = 'white/back',
 	LIST = 'newview',
@@ -716,6 +717,17 @@ function WorkList:init_gui()
 			uikits.muteSound(b)
 		end)
 	end
+	local dbg = uikits.child(self._setting,ui.MORE_DEBUG)
+	if dbg then
+		dbg:setSelectedState (kits.config("debug","get"))
+		uikits.event(dbg,function(sender,b)
+			kits.config("debug",b)
+			if _G.enableDebug then
+				_G.enableDebug(b)
+			end
+		end)
+	end
+	
 	self._root:addChild(self._setting)
 	
 	self:addChild(self._root)
