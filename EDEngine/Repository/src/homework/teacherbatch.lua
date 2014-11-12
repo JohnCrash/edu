@@ -17,6 +17,8 @@ local ui = {
 	FILE_STUDENT_LIST = 'homework/laoshizuoye/xuesheng.json',
 	FILE_STUDENT_LIST_3_4 = 'homework/laoshizuoye/xuesheng43.json',	
 	BACK = 'ding/back',
+	TIPS = "heitiao/tips",
+	TIPS_TEXT = "text",
 	CLASS_NAME = 'ding/banji',
 	TOPICS_NAME = 'ding/kewen',
 	PAPER_LIST = 'keguan',
@@ -159,8 +161,8 @@ end
 
 function Batch:init_paper_list_by_table( p )
 	local paper_table = {}
-	local subject_num = 0
-	local objective_num = 0
+	self._objective_num = 0
+	self._subject_num = 0
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
@@ -168,28 +170,17 @@ function Batch:init_paper_list_by_table( p )
 				local item = { item_type = t.item_type,item_id = t.item_id }
 				table.insert(paper_table,item)
 				if t.item_type == 93 then
-					objective_num = objective_num + 1
+					self._objective_num = self._objective_num + 1
 				elseif topics.types[t.item_type] then
-					subject_num = subject_num + 1
+					self._subject_num = self._subject_num + 1
 				end
 			end
 		end
 	end
-
-	if subject_num == 0 then
-		if not self._papers_tips_text then
-			local size = self._papers._scrollview:getContentSize()
-			self._papers_tips_text = uikits.text{caption="没有客观题",fontSize=48,
-				anchorX=0.5,anchorY=1,x=size.width/2,y=size.height/2,color=cc.c3b(0,0,0)}
-			self._papers._scrollview:addChild( self._papers_tips_text )
-		else
-			self._papers_tips_text:setVisible(true)
-		end
-		return
-	elseif self._papers_tips_text then
-		self._papers_tips_text:setVisible(false)
-	end
-
+	
+	self:tips(1)
+	if self._subject_num == 0 then return end
+	
 	uikits.scrollview_step_add( self._papers,paper_table,5,function(v)
 		if v then
 			if v.item_type and v.item_id then
@@ -365,12 +356,38 @@ function Batch:init_topics()
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(false)
 	
+	self:tips(1)
 	if self._init_topics_done then
 	else
 		self._init_topics_done = true
 		self:load_topics()
 	end
 	return true
+end
+
+function Batch:tips(t)
+	if t == 1 then
+		if self._subject_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("没有客观题")	
+		else
+			self._tips:setVisible(false)
+		end
+	elseif t== 2 then
+		if self._objective_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("没有自定义题")		
+		else
+			self._tips:setVisible(false)
+		end
+	elseif t==3 then
+		if self._statuents_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("还没有学生提交")				
+		else
+			self._tips:setVisible(false)
+		end
+	end
 end
 
 function Batch:load_subjective()
@@ -486,6 +503,7 @@ function Batch:init_subjective()
 	self._subjectiveview:setVisible(true)
 	self._studentview:setVisible(false)
 	
+	self:tips(2)
 	if self._init_subjective_done then
 	else
 		self._init_subjective_done = true
@@ -504,6 +522,7 @@ local appraise = {
 local loadbox_student_list
 function Batch:init_student_list_func()
 	if self._student_list_table then
+		self._statuents_num = 0
 		local total_score = self._args.real_score or 100
 		if total_score<= 0 then total_score = 1 end
 		--没有实现分布加载
@@ -513,6 +532,7 @@ function Batch:init_student_list_func()
 				local score = v.real_score/total_score
 				if score >= appr.low and score < appr.up 
 				 and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
+					self._statuents_num = self._statuents_num + 1
 					table.insert(st,1,v)
 				end
 			end
@@ -540,6 +560,7 @@ function Batch:init_student_list_func()
 				end
 			end --for
 		end
+		self:tips(3)
 		self._students:relayout()
 		if loadbox_student_list then
 			loadbox_student_list:removeFromParent()
@@ -561,6 +582,7 @@ function Batch:init_student_list()
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(true)
 	
+	self:tips(3)
 	if self._init_student_done then
 	else
 		self._init_student_done = true
@@ -577,6 +599,8 @@ function Batch:init_gui()
 		cache.request_cancel()
 		uikits.popScene()
 	end)
+	self._tips = uikits.child(self._root,ui.TIPS)
+	self._tips_text = uikits.child(self._tips,ui.TIPS_TEXT)
 	--初始化标签
 	self._tab = uikits.tab(self._root,ui.RED_LINE,{
 		[ui.TAB_BUTTON_1] = function(sender) return self:init_topics() end,
