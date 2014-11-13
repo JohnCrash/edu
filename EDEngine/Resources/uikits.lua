@@ -1023,7 +1023,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		event(self._scrollview,t.drap_refresh_func)
 	end
 	t.relayout = function(self)
-		if horiz then --横向
+		if horiz == true then --横向
 			local width = 0
 			local item_max_height = 0
 			for i=1,#self._list do
@@ -1047,6 +1047,80 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				self._list[#self._list-i+1]:setPosition(cc.p(item_width,self._item_oy))
 				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
 			end
+		elseif horiz == "mix" then --特定排列方式
+			local cs = self._scrollview:getContentSize()
+			local height = self._tops_space or 0
+			local function calc_col_height( list,m )
+				if list and #list > 0 then
+					local s = list[1]:getContentSize()
+					local col = #list/m
+					local n = math.floor(col) 
+					if col > n then
+						n = n + 1
+					end
+					height = height + n * s.height + space
+				end			
+			end
+			calc_col_height(self._list,4)
+			calc_col_height(self._list2,4)
+			local is_abs
+			local tops_offy = 0
+			local offy = 0
+			if self._scrollview.setInnerContainerSize  then
+				if height > cs.height then
+					tops_offy = height - cs.height
+				end			
+				self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
+				is_abs = false
+			elseif self._scrollview.setContentSize  then
+				if height > cs.height then
+					self._scrollview:setContentSize(cc.size(cs.width,height))
+					tops_offy = height - cs.height
+				end
+				is_abs = true
+			end
+			if height < size.height then
+				offy = size.height - height --顶到顶
+			end
+			
+			local item_height = space
+			local function raw_list( list,m )
+				if list then
+					local x = self._item_ox
+					local cs = {width=0,height=0}
+					for i=1,#list do
+						local item = list[#list-i+1]
+						local size = item:getContentSize()
+						cs.width = math.max(cs.width,size.width)
+						cs.height = math.max(cs.height,size.height)
+						item:setPosition(cc.p(x,item_height))
+						if i~=1 and i%m == 1 then
+							item_height = item_height + size.height + space
+							x = self._item_ox
+						else
+							x = x + size.width + space
+						end
+					end
+					if cs.height > 0 then item_height = item_height + cs.height + space end
+				end
+			end
+			raw_list( self._list,4 )
+			raw_list( self._list2,4 )
+			--放置置顶元件
+			if self._tops_space then
+				item_height = item_height + self._tops_space--起始阶段置顶元件和item的间隔
+				if is_abs then
+					for i = 1,#self._tops do
+						local x,y = self._tops[i]:getPosition()
+						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+					end
+				else
+					for i = 1,#self._tops do
+						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+					end				
+				end
+			end			
+			relayout_refresh(self)
 		else --纵向
 			local cs = self._scrollview:getContentSize()
 			local height = self._tops_space or 0
@@ -1110,10 +1184,25 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			item = self._item:clone()
 		end
 		if item then
-			self._list[#self._list+1] = item
-			item:setVisible(true)
-			item:setAnchorPoint(cc.p(0,0))
-			self._scrollview:addChild(item)
+			if horiz == 'mix' then
+				if index == nil or index == 1 then
+					self._list[#self._list+1] = item
+					item:setVisible(true)
+					item:setAnchorPoint(cc.p(0,0))
+					self._scrollview:addChild(item)				
+				else
+					self._list2 = self._list2 or {}
+					self._list2[#self._list2+1] = item
+					item:setVisible(true)
+					item:setAnchorPoint(cc.p(0,0))
+					self._scrollview:addChild(item)									
+				end
+			else
+				self._list[#self._list+1] = item
+				item:setVisible(true)
+				item:setAnchorPoint(cc.p(0,0))
+				self._scrollview:addChild(item)
+			end
 		end
 		if item and data and type(data)=='table' then
 			for k,v in pairs(data) do
@@ -1134,6 +1223,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		for i=1,#self._list do
 			self._list[i]:removeFromParent()
 		end
+		if self._list2 then
+			for i=1,#self._list2 do
+				self._list2[i]:removeFromParent()
+			end
+		end
+		self._list2 = {}
 		self._list = {}
 	end
 	t.swap = function(self) --交换当前列表中的项到后缓

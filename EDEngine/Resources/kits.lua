@@ -256,6 +256,14 @@ local function write_file( name,buf )
   end
 end
 
+local function copy_file( f1,f2 )
+	if f1 == f2 then return end
+	local buf = read_file( f1 )
+	if buf then
+		return write_file( f2,buf )
+	end
+end
+
 local function write_local_file( name,buf )
   local filename = local_dir..name
   return write_file( filename,buf )
@@ -376,6 +384,14 @@ local function write_cache( name,buf )
      cclog('Can not write cache '..filename)
 	 return false
   end
+end
+
+local function copy_cache( f1,f2 )
+	if f1 == f2 then return end
+	local buf = read_cache( f1 )
+	if buf then
+		return write_cache( f2,buf )
+	end	
 end
 
 local function decode_json( buf )
@@ -538,6 +554,7 @@ local exports = {
 	write_cache = write_cache,
 	hot_cache = hot_cache,
 	exist_cache = exist_cache,
+	copy_cache = copy_cache,
 	decode_json = decode_json,
 	unix_date_by_string = unix_date_by_string,
 	time_to_string = time_to_string,
@@ -546,6 +563,7 @@ local exports = {
 	log = my_log,
 	check = check_table,
 	write_file = write_file,
+	copy_file = copy_file,
 	make_directory = make_directory,
 	del_file = del_file,
 	del_directory = del_directory,

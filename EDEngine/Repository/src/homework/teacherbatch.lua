@@ -376,7 +376,7 @@ function Batch:tips(t)
 	elseif t== 2 then
 		if self._objective_num == 0 then
 			self._tips:setVisible(true)
-			self._tips_text:setString("没有自定义题")		
+			self._tips_text:setString("没有主观题")		
 		else
 			self._tips:setVisible(false)
 		end
@@ -439,7 +439,7 @@ function Batch:load_subjective()
 					end)
 				end
 			}
-			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,false,16,ui.SUBJECTIVE_AUDIO)
+			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,'mix',16,ui.SUBJECTIVE_AUDIO)
 			layout:clear()
 			if v.attachs and type(v.attachs) == 'table' then
 				for i,p in pairs(v.attachs) do
@@ -447,8 +447,15 @@ function Batch:load_subjective()
 						local suffix = string.lower(string.sub(p.filename,-4))
 						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local it = layout:additem()
-							if it then
-								it:loadTexture(p.filename)
+							local name = string.sub( p.filename,0,-5 )..'_s'..suffix
+							if kits.exists_file(kits.get_tmp_path()..name) then
+								it:loadTexture(kits.get_tmp_path()..name)
+							else
+								local b,tmp = cc_adjustPhoto(kits.get_cache_path()..p.filename,256)
+								if b then
+									kits.rename_file( tmp,kits.get_tmp_path()..name)
+									it:loadTexture(kits.get_tmp_path()..name)
+								end
 							end
 						elseif suffix == '.amr' then
 							local it = layout:additem(nil,2)

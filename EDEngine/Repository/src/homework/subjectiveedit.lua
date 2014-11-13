@@ -2,7 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local loadingbox = require "loadingbox"
-local messagebox = require "messagebox"
+local messagebox_ = require "messagebox"
 local RecordVoice = require "recordvoice"
 
 local FileUtils = cc.FileUtils:getInstance()
@@ -379,7 +379,7 @@ function SubjectiveEdit:init()
 end
 
 local function messagebox(parent,title,text )
-	messagebox.open(parent,function()end,messagebox.MESSAGE,tostring(title),tostring(text) )
+	messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
 end
 
 function SubjectiveEdit:init_event()

@@ -82,9 +82,9 @@ local function get_logo( uid,func,t )
 			func()
 		end
 	else --确保第一次申请下载一次
-		logo_cache[url] = true
 		cache.request( url,function(b)
 			if b then
+				logo_cache[url] = true
 				func( cache.get_name(url) )
 			else
 				func()

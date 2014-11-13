@@ -45,6 +45,8 @@ local ui = {
 	BACK = 'white/back',
 	LIST = 'newview',
 	ITEM = 'subject_1',
+	ITEM_TEACHER_NAME = 'teacher_name',
+	ITEM_TEACHER_LOGO = 'teacher_photo',
 	ITEM_TITLE = 'textname',
 	ITEM_CURSE = 'subjectbox/subjecttext',
 	ITEM_BAR = 'finish2',
@@ -847,6 +849,21 @@ function WorkList:add_item( t )
 --	if t.course_name then --科目名称
 --		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
 --	end
+	if t.teacher_name then
+		local item = uikits.child( item,ui.ITEM_TEACHER_NAME)
+		item:setString( t.teacher_name )
+	end
+	if t.teacher_id then
+		login.get_logo( t.teacher_id,
+		function(name)
+			if name then
+				local item = uikits.child( item,ui.ITEM_TEACHER_LOGO)
+				item:loadTexture( name )
+			else
+				kits.log("get logo fail"..tostring(t.teacher_id))
+			end
+		end,3)
+	end
 	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)
