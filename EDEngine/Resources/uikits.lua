@@ -981,7 +981,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		end
 		local flag
 		local done
-		event(self._scrollview,function(sender,state)
+		t.drap_refresh_func=function(sender,state)
 			local cs = sender:getContentSize()
 			local inner = sender:getInnerContainer()
 			local size = inner:getContentSize()
@@ -994,32 +994,33 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				local actionTo2 = cc.RotateTo:create( 0.2, 90)
 				local actionTo = cc.RotateTo:create( 0.2, 90-180)				
 				if yy>200 then
-					if self._refresh_flag ~= 1 then
+					if self._refresh_flag == 0 then
 						self._refresh_flag = 1
 						done = 1
 						text:setString("松开刷新")
 						arrow:runAction( cc.Sequence:create(actionTo2,actionTo) )
 					end
 				else
-					if self._refresh_flag ~= 0 and self._refresh_flag then
+					if not self._refresh_flag  then
 						self._refresh_flag = 0
 						text:setString(drap_text)
-						arrow:runAction( cc.Sequence:create(actionTo,actionTo2) )
+						if done == 1 then
+							arrow:runAction( cc.Sequence:create(actionTo,actionTo2) )
+						end
 					end
 				end
 			elseif state == ccui.ScrollviewEventType.bounceTop then
 				arrow:setRotation(90)
-				text:setString(drap_text)
+				text:setString(drap_text)		
 				if self._refresh_func and done == 1 then
-					done = 0
-					self._refresh_flag = nil
 					self._refresh_func()
-					delay_call(nil,function()
-						done = 0 end,0.5) --FIXBUG
+					done = 0
 				end
 				done = 0
-			end
-		end)
+				self._refresh_flag = nil						
+			end		
+		end
+		event(self._scrollview,t.drap_refresh_func)
 	end
 	t.relayout = function(self)
 		if horiz then --横向
@@ -1386,7 +1387,15 @@ local function fitsize(child,w,h)
 	child:setScaleY(h/size.height/get_scale())
 end
 
-local function scrollview_step_add(scrollview,t,n,add_func,sstate)
+local function scrollview_step_add(scroll,t,n,add_func,sstate)
+	local scrollview
+	local refresh_func
+	if scroll._scrollview then
+		scrollview = scroll._scrollview
+		refresh_func = scroll.drap_refresh_func
+	else
+		scrollview = scroll
+	end
 	if t and type(t)=='table' and scrollview and n and add_func 
 	and type(add_func)=='function' then
 		sstate = sstate or ccui.ScrollviewEventType.scrollToBottom
@@ -1406,6 +1415,9 @@ local function scrollview_step_add(scrollview,t,n,add_func,sstate)
 		add_n_item(offset,n)
 		offset = offset + n + 1
 		event( scrollview,function(sender,state)
+				if refresh_func then
+					refresh_func(sender,state)
+				end
 				if state == sstate then
 					if offset <= count then
 						add_n_item( offset,n )

@@ -67,7 +67,7 @@ local function messagebox( parent,func,dt,caption,text )
 	end
 	s:setPosition{x=size.width/2,y=size.height/2}
 	--居中显示
-	parent:addChild( s )
+	parent:addChild( s,9999 )
 	if dt == 1 or not dt then
 		--旋转体
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.LOADING)
@@ -77,7 +77,7 @@ local function messagebox( parent,func,dt,caption,text )
 		s._circle:setAnchorPoint(cc.p(0.5,0.5))
 		size = s:getContentSize()
 		s._circle:setPosition(cc.p(size.width/2,size.height*2/3))
-		s:addChild( s._circle )
+		s:addChild( s._circle,9999 )
 	end
 	if func then
 		local quit = uikits.child(s,ui.EXIT)

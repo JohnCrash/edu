@@ -159,16 +159,38 @@ end
 
 function Batch:init_paper_list_by_table( p )
 	local paper_table = {}
+	local subject_num = 0
+	local objective_num = 0
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
 				--self:add_paper_item( t.item_type,t.item_id )
 				local item = { item_type = t.item_type,item_id = t.item_id }
 				table.insert(paper_table,item)
+				if t.item_type == 93 then
+					objective_num = objective_num + 1
+				elseif topics.types[t.item_type] then
+					subject_num = subject_num + 1
+				end
 			end
 		end
 	end
-	uikits.scrollview_step_add( self._papers._scrollview,paper_table,5,function(v)
+
+	if subject_num == 0 then
+		if not self._papers_tips_text then
+			local size = self._papers._scrollview:getContentSize()
+			self._papers_tips_text = uikits.text{caption="没有客观题",fontSize=48,
+				anchorX=0.5,anchorY=1,x=size.width/2,y=size.height/2,color=cc.c3b(0,0,0)}
+			self._papers._scrollview:addChild( self._papers_tips_text )
+		else
+			self._papers_tips_text:setVisible(true)
+		end
+		return
+	elseif self._papers_tips_text then
+		self._papers_tips_text:setVisible(false)
+	end
+
+	uikits.scrollview_step_add( self._papers,paper_table,5,function(v)
 		if v then
 			if v.item_type and v.item_id then
 				self:add_paper_item( v.item_type,v.item_id )
@@ -274,11 +296,7 @@ function Batch:init_commits_list( t )
 	self._commits:relayout()
 end
 
-function Batch:init_topics()
-	cache.request_cancel()
-	self._topicsview:setVisible(true)
-	self._subjectiveview:setVisible(false)
-	self._studentview:setVisible(false)
+function Batch:load_topics()
 	--请求班级统计成绩
 	if not kits.check(self._args_class,'exam_id','class_id','class_name') then
 		self._topicsview:setVisible(false)
@@ -337,20 +355,26 @@ function Batch:init_topics()
 			end
 			self._busy =false
 		end)
+end
+
+function Batch:init_topics()
+	if self._busy then return end
+	
+	cache.request_cancel()
+	self._topicsview:setVisible(true)
+	self._subjectiveview:setVisible(false)
+	self._studentview:setVisible(false)
+	
+	if self._init_topics_done then
+	else
+		self._init_topics_done = true
+		self:load_topics()
+	end
 	return true
 end
 
---主观题
-function Batch:init_subjective()
-	if not self._exam_data then 
-		kits.log("INFO : wait paper data download complete")
-		return 
-	end
-	cache.request_cancel()
-	self._topicsview:setVisible(false)
-	self._subjectiveview:setVisible(true)
-	self._studentview:setVisible(false)
-	
+function Batch:load_subjective()
+	self._busy = true
 	self._subjectives:clear()
 	if self._exam_data == 'error' then 
 		kits.log("INFO : exam data download error")
@@ -440,12 +464,33 @@ function Batch:init_subjective()
 				kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
 			end
 			if n >= #rs.urls then --complete
+				self._busy = false
 				if not loadbox:removeFromParent() then
 					return
 				end
 				init_subjective_by_table( t )
 			end
 		end)
+end
+
+--主观题
+function Batch:init_subjective()
+	if self._busy then return end
+	
+	if not self._exam_data then 
+		kits.log("INFO : wait paper data download complete")
+		return 
+	end
+	cache.request_cancel()
+	self._topicsview:setVisible(false)
+	self._subjectiveview:setVisible(true)
+	self._studentview:setVisible(false)
+	
+	if self._init_subjective_done then
+	else
+		self._init_subjective_done = true
+		self:load_subjective()
+	end
 	return true
 end
 
@@ -503,15 +548,24 @@ function Batch:init_student_list_func()
 	end
 end
 
+function Batch:load_student_list()
+	self._students:clear()
+	loadbox_student_list = loadingbox.open(self)
+	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
+end
+
 function Batch:init_student_list()
+	if self._busy then return end
 	cache.request_cancel()
 	self._topicsview:setVisible(false)
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(true)
 	
-	self._students:clear()
-	loadbox_student_list = loadingbox.open(self)
-	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
+	if self._init_student_done then
+	else
+		self._init_student_done = true
+		self:load_student_list()
+	end
 	return true
 end
 
@@ -535,11 +589,17 @@ function Batch:init_gui()
 	self._commits = uikits.scroll(self._topics_root,ui.COMMIT_LIST,ui.COMMIT_ITEM,true)
 	self._papers = uikits.scroll(self._topics_root,ui.PAPER_LIST,ui.PAPER_ITEM)
 	self:init_paper_item_space( uikits.child(self._topicsview,ui.PAPER_ITEM))
-	self:addChild(self._topics_root)
+	self:addChild(self._topics_root,100)
+	self._papers:refresh(function(state)
+		self:load_topics()
+	end)
 	--初始化主观题列表
 	self._subjective_root = uikits.fromJson{file_9_16=ui.FILE_SUBJECTIVE_LIST,file_3_4=ui.FILE_SUBJECTIVE_LIST_3_4}
 	self._subjectiveview = uikits.child(self._subjective_root,ui.SUBJECTIVE_VIEW)
 	self._subjectives = uikits.scroll(self._subjective_root,ui.SUBJECTIVE_VIEW,ui.SUBJECTIVE_ITEM)
+	self._subjectives:refresh(function(state)
+		self:load_subjective()
+	end)
 	
 	self:addChild(self._subjective_root)	
 	self._subjectiveview:setVisible(false)
@@ -547,6 +607,9 @@ function Batch:init_gui()
 	self._student_root = uikits.fromJson{file_9_16=ui.FILE_STUDENT_LIST,file_3_4=ui.FILE_STUDENT_LIST_3_4}
 	self._studentview = uikits.child(self._student_root,ui.STUDENT_LIST)
 	self._students = uikits.scroll(self._student_root,ui.STUDENT_LIST,ui.STUDENT_ITEM,false,0,ui.STUDENT_ITEM_TITLE)
+	self._students:refresh(function(state)
+		self:load_student_list()
+	end)
 	self:addChild(self._student_root)	
 	self._studentview:setVisible(false)
 	

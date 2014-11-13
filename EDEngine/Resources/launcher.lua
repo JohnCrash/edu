@@ -67,6 +67,17 @@ else
 end
 
 local mode
+
+function enableDebug( b )
+	if b then
+		kits.log("enable debug")
+		mode = 2
+	else
+		kits.log("disable debug")
+		mode = 0
+	end
+end
+enableDebug( kits.config("debug","get") )
 --android 返回键
 local function onKeyRelease(key,event)
 	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
