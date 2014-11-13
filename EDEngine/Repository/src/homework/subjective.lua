@@ -5,6 +5,7 @@ local loadingbox = require "loadingbox"
 local cache = require "cache"
 local RecordVoice = require "recordvoice"
 local messagebox_ = require "messagebox"
+local login = require "login"
 
 local ui = {
 	FILE = 'homework/subjective.json',
