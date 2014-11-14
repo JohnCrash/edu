@@ -297,7 +297,7 @@ end
 function WorkList:refresh_list()
 	if not self._busy then
 		cache.request_cancel()
-		self._scrollview:clear()
+		self._scrollview:clear('slide')
 		if self._mode == ui.NEW then
 			self:load_page( 1 )
 		elseif self._mode == ui.HISTORY then
@@ -310,6 +310,7 @@ end
 
 function WorkList:init_new_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.NEW )
 	self._scrollview:setVisible(true)
@@ -317,10 +318,10 @@ function WorkList:init_new_list()
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
 		if self._new_list_done then
 			self:Swap_list(ui.NEW)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			--self:clear_all_item()
-			self._scrollview:clear()
+			self._scrollview:clear('slide')
 			self._new_list_done = true
 			self:load_page( 1 )
 		end
@@ -555,7 +556,7 @@ end
 
 function WorkList:init_statistics()
 	if self._busy then return end
-	
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
 	self._scrollview:setVisible(true)
@@ -793,6 +794,7 @@ end
 
 function WorkList:init_history_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.HISTORY )
 	self._scrollview:setVisible(true)
@@ -801,7 +803,7 @@ function WorkList:init_history_list()
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
 		if self._history_list_done then
 			self:Swap_list(ui.HISTORY)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			self._history_list_done = true
 			self:Swap_list(ui.HISTORY)
@@ -837,7 +839,7 @@ function WorkList:history_scroll( t )
 end
 
 function WorkList:relayout()
-	self._scrollview:relayout()
+	self._scrollview:relayout('slide')
 end
 
 function WorkList:add_item( t )

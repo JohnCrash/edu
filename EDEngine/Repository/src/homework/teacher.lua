@@ -205,7 +205,7 @@ function TeacherList:add_ready_batch_from_table( t )
 		for k,v in pairs(t.page) do
 			self:add_batch_item( v )
 		end
-		self._scrollview:relayout()
+		self._scrollview:relayout("slide")
 		return true
 	else
 		kits.log('ERROR TeacherList:init_ready_batch_from_data decode failed')
@@ -248,7 +248,7 @@ end
 function TeacherList:refresh_ready_batch()
 	if not self._busy then
 		cache.request_cancel()
-		self._scrollview:clear()
+		self._scrollview:clear("slide")
 		self._busy = true
 		local mode = 2
 		if self._mode == ui.READYBATCH then
@@ -263,6 +263,8 @@ end
 --待阅
 function TeacherList:init_ready_batch()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
+	
 	cache.request_cancel()
 	
 	self._scrollview:setVisible(true)
@@ -273,7 +275,7 @@ function TeacherList:init_ready_batch()
 	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
 		if self._ready_batch_is_done then
 			self._scrollview:swap()
-			self._scrollview:relayout()
+			self._scrollview:relayout("slide")
 		else
 			self._busy = true
 			self:init_batch_list(2)--待批阅	
@@ -309,6 +311,7 @@ end
 --历史
 function TeacherList:init_ready_history()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	
 	cache.request_cancel()
 	
@@ -322,7 +325,7 @@ function TeacherList:init_ready_history()
 		
 		if self._ready_history_is_done then
 			self._scrollview:swap()
-			self._scrollview:relayout()		
+			self._scrollview:relayout("slide")		
 		else
 			self._busy = true
 			self._scrollview:swap()

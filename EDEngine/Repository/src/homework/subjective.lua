@@ -867,22 +867,7 @@ function Subjective:init_gui()
 		self._item_finished:setVisible(false)
 		self._item_unfinished:setVisible(false)
 		self._item_size = self._item_current:getContentSize()
---[[
-		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
-		self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )
-		self._next_button:setVisible(true)
-		self._finish_button:setVisible(false)
-		uikits.event( self._next_button,
-					function(sender)
-						self:next_item()
-					end,'click')
-		uikits.event( self._finish_button,
-					function(sender)
-						--保存
-						self:save()
-						uikits.popScene()
-					end,'click')		
---]]					
+				
 		local x
 		x,self._item_y = self._item_current:getPosition()			
 		---装入数据

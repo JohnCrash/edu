@@ -865,7 +865,7 @@ end
 local _pushNum = 0
 local function pushScene( scene,transition,t )
 	if transition then
-		Director:pushScene( transition:create(t or 1,scene) )
+		Director:pushScene( transition:create(t or 0.2,scene) )
 	else
 		Director:pushScene( scene )
 	end
@@ -982,6 +982,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		local flag
 		local done
 		t.drap_refresh_func=function(sender,state)
+			if self:isAnimation() then return end
+			
 			local cs = sender:getContentSize()
 			local inner = sender:getInnerContainer()
 			local size = inner:getContentSize()
@@ -1022,7 +1024,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		end
 		event(self._scrollview,t.drap_refresh_func)
 	end
-	t.relayout = function(self)
+	local function relayout_imp(self)
 		if horiz == true then --横向
 			local width = 0
 			local item_max_height = 0
@@ -1171,12 +1173,84 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				end
 			end
 		end
-		relayout_refresh(self)
+		relayout_refresh(self)	
+	end
+	
+	local function animations(self,list,animation,slide_time,slide_delay,over_func)
+		local size = self._scrollview:getContentSize()
+		if #list == 0 then return end
+		slide_time = slide_time or 0.2 --一条的滑动时间
+		slide_delay = slide_delay or 0.2 --总延时
+		local dt = slide_delay / #list
+		local t = slide_delay
+		self._animation_begin_time = os.clock()
+		self._animation_duration = 2*(slide_time+slide_delay)	
+		local suffix = string.sub(animation,-2)
+		if suffix == 'in' then
+			t = 0
+		end
+		for i,v in pairs(list) do
+			local x,y = v:getPosition()
+			if animation == 'slide_out' then
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(size.width,y))) )
+			elseif animation == 'fall_out' then
+				local s = v:getContentSize()
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,-size.height-s.height))) )
+			elseif animation == 'slide_in' then
+				v:setPosition(cc.p(-size.width,y))
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,y))) )
+				--v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.EaseIn:create(cc.MoveTo:create(slide_time,cc.p(x,y)),0.2) ))
+			elseif animation == 'fall_in' then
+				local s = v:getContentSize()
+				v:setPosition(cc.p(x,-size.height-s.height))
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,y))) )			
+			end
+			if suffix == 'in' then
+				t = t + dt
+			else
+				t = t - dt
+			end
+		end
+		if over_func then
+			delay_call( self._scrollview,function(d)
+					over_func()
+				end,2*(slide_time+slide_delay) )
+		end
+	end
+	
+	local function animation_relayout(self,animation,slide_time,slide_delay)
+		if animation == 'slide' or animation == 'fall' then
+			for i,v in pairs(self._list) do
+				v:setVisible(true)
+			end
+			local list = self:visibles()
+			animations(self,list,animation..'_in',
+				slide_time,slide_delay)		
+		end
+	end
+	t.relayout = function(self,animation)
+		if self._animation_begin_time then
+			local ct = os.clock()-self._animation_begin_time
+			if ct >= self._animation_duration then
+				relayout_imp(self)
+				animation_relayout(self,animation)
+			else
+				delay_call( nil,function()
+					relayout_imp(self)
+					animation_relayout(self,animation)
+				end,self._animation_duration-ct)
+			end
+			self._animation_begin_time = nil
+			self._animation_duration = nil
+		else
+			relayout_imp(self)
+			animation_relayout(self,animation)
+		end
 	end
 	t.setVisible = function(self,b)
 		self._scrollview:setVisible(b)
 	end
-	t.additem = function(self,data,index)
+	local function additem_imp(self,data,index)
 		local item
 		if index == 2 then
 			item = self._item2:clone()
@@ -1217,21 +1291,98 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				end
 			end
 		end
-		return item
+		return item	
 	end
-	t.clear = function(self)
-		for i=1,#self._list do
-			self._list[i]:removeFromParent()
-		end
-		if self._list2 then
-			for i=1,#self._list2 do
-				self._list2[i]:removeFromParent()
+	t.additem = function(self,data,index)
+		if self._animation_begin_time then
+			local ct = os.clock()-self._animation_begin_time
+			if ct >= self._animation_duration then
+				local item = additem_imp(self,data,index)
+				if _animation_tmp_list then
+					table.insert(self._animation_tmp_list,item)
+					item:setVisible(false)
+				end
+				return item
+			else
+				if not self._animation_tmp_list then
+					self._animation_tmp_list = {}
+					delay_call(nil,function()
+						self._animation_begin_time = nil
+						self._animation_duration = nil
+						for i,v in pairs(self._animation_tmp_list) do
+							v:setVisible(true)
+						end
+						self._animation_tmp_list = nil
+					end,self._animation_duration-ct )
+				end
+				local item = additem_imp(self,data,index)
+				item:setVisible(false)
+				table.insert(self._animation_tmp_list,item)
+				return item
+			end
+		else
+			return additem_imp(self,data,index)
+		end		
+	end
+	t.visibles= function(self)
+		local list = {}
+		local cs = self._scrollview:getContentSize()
+		local inner = self._scrollview:getInnerContainer()
+		local x,y = inner:getPosition()
+		local size = inner:getContentSize()
+		
+		for i,v in pairs(self._list) do
+			local xx,yy = v:getPosition()
+			local s = v:getContentSize()
+			if not ((yy < -y and yy + s.height < -y) or (yy > -y+cs.height)) then
+				if v:isVisible() then
+					table.insert(list,v)
+				end
 			end
 		end
-		self._list2 = {}
-		self._list = {}
+		return list
+	end
+	t.isAnimation = function(self)
+		if self._animation_begin_time then
+			if os.clock()-self._animation_begin_time >= self._animation_duration then
+				return false
+			else
+				return true
+			end
+		end
+		return false
+	end
+	t.clear = function(self,animation,slide_time,slide_delay)
+		local function do_clear(list,list2)
+			for i=1,#list do
+				list[i]:removeFromParent()
+			end
+			if list2 then
+				for i=1,#list2 do
+					list2[i]:removeFromParent()
+				end
+			end	
+		end
+		if animation == 'slide' or animation == 'fall' then
+			if self:isAnimation() then return end
+			local list_visible = self:visibles()
+			local list = self._list
+			local list2 = self._list2
+			self._list = {}
+			self._list2 = {}				
+			animations(self,list_visible,animation..'_out',
+				slide_time,slide_delay,
+				function()
+					do_clear(list,list2)
+				end)
+		else
+			do_clear(self._list,self._list2)
+			self._list = {}
+			self._list2 = {}
+		end
 	end
 	t.swap = function(self) --交换当前列表中的项到后缓
+		if self:isAnimation() then return end
 		if self._scrollview and self._list then
 			local temp_list = self._back_list or {}
 			
@@ -1246,6 +1397,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		end
 	end
 	t.swap_by_index = function(self,i,j) --将当前列表总得放入i,取出j
+		if self:isAnimation() then return end
 		if self._scrollview and self._list then
 			self._back_lists = self._back_lists or {}
 
@@ -1504,9 +1656,9 @@ local function scrollview_step_add(scroll,t,n,add_func,sstate)
 			end			
 			add_func() --重新布局
 		end
-		if n < count then --只有在还有没添加的才关闭回弹
-			scrollview:setBounceEnabled(false)
-		end
+--		if n < count then --只有在还有没添加的才关闭回弹
+--			scrollview:setBounceEnabled(false)
+--		end
 		add_n_item(offset,n)
 		offset = offset + n + 1
 		event( scrollview,function(sender,state)

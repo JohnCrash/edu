@@ -304,6 +304,8 @@ function AMouseScene:getIntegration()
 end
 
 function AMouseScene:game_setting_Dialog( where )
+	if self._uiLayer then return end
+	
 	kits.log("game setting dialog")
 	self:close_Dialog()
 	self._where = where
@@ -407,12 +409,15 @@ function AMouseScene:set_top_list( url )
 					if type(v)=='table' then
 						for n,s in pairs(v) do
 							kits.log( "	"..n..":"..s )
-							if n == 'uname' and type(s)=='string' then
-								self._top_lists[i]:getChildByName('Label_name'):setString(s)
-							elseif n == 'score' and type(s)=='number' then
-								self._top_lists[i]:getChildByName('Label_fen'):setString(tostring(s))
-							elseif n == 'school' and type(s)=='string' then
-								self._top_lists[i]:getChildByName('Label_school'):setString(s)
+							local item = self._top_lists[i]
+							if item then
+								if n == 'uname' and type(s)=='string' then
+									item:getChildByName('Label_name'):setString(s)
+								elseif n == 'score' and type(s)=='number' then
+									item:getChildByName('Label_fen'):setString(tostring(s))
+								elseif n == 'school' and type(s)=='string' then
+									item:getChildByName('Label_school'):setString(s)
+								end
 							end
 						end
 						--v = { uname='user name',user_id=1220423,score=1223}
@@ -446,6 +451,7 @@ function AMouseScene:clean_top_list()
 end
 
 function AMouseScene:game_top10_Dialog( where )
+	if self._uiLayer then return end
 	kits.log("game top10 dialog")
 	self:close_Dialog()
 	self._where = where
@@ -528,14 +534,16 @@ function AMouseScene:close_Dialog()
 		local layer = self._uiLayer
 		kits.log(":close_Dialog setVisible false")
 		layer:setVisible(false)
+		
 		uikits.delay_call(nil,function() 
 			kits.log(":close_Dialog removeFromParent")
-			layer:removeFromParent()
-			layer = nil end,0.01)
+			layer:removeFromParent()	
+			self._widget = nil
+			self._uiLayer = nil
+			self._where = nil				
+			end,0.01)			
+			
 		--self._uiLayer:removeFromParent()
-		self._widget = nil
-		self._uiLayer = nil
-		self._where = nil
 	end
 	kits.log(":close_Dialog _uiScene")
 	if self._uiScene then
