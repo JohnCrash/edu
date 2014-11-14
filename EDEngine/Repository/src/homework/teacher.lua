@@ -16,6 +16,17 @@ local messagebox = require "messagebox"
 local topics_course = topics.course_icon
 local res_local = "homework/"
 local subjectiveedit = require "homework/subjectiveedit"
+local moStats = require "homework/lly/LaStatisticsTeacher"
+
+--[[
+	lly卢乐颜进行修改部分：
+	1. class后，为worklist添加一个属性 _laStats_Tchr ，用于指向统计层
+	2. init_gui 里面加载自定义统计层并隐藏
+	3. init_statistics 中注释原统计层，显示自定义的新统计层
+	4. init_ready_batch init_ready_release init_history_list init_setting 中隐藏自定义的统计层
+	5. require 统计层
+]]
+
 
 crash.open("teacher",1)
 local course_icon = topics.course_icon
@@ -124,6 +135,7 @@ local get_class_url = "http://new.www.lejiaolexue.com/exam/handler/examhandler.a
 
 local TeacherList = class("TeacherList")
 TeacherList.__index = TeacherList
+TeacherList._laStats_Tchr = nil --统计层
 
 function TeacherList.create()
 	local scene = cc.Scene:create()
@@ -264,12 +276,13 @@ end
 function TeacherList:init_ready_batch()
 	if self._busy then return end
 	cache.request_cancel()
-	
+	self._laStats_Tchr:setVisible(false) --lly关闭统计层
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
 	self._gray_bar:setVisible(true)
+
 	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
 		if self._ready_batch_is_done then
 			self._scrollview:swap()
@@ -294,6 +307,7 @@ function TeacherList:init_ready_release()
 	self._setting:setVisible(false)
 	self._statistics_root:setVisible(false)
 	self._gray_bar:setVisible(false)
+	self._laStats_Tchr:setVisible(false) --lly关闭统计层
 	
 	if self._selector == nil or self._selector[1] == nil then
 		self._confirm_item = {}	
@@ -317,6 +331,8 @@ function TeacherList:init_ready_history()
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
 	self._gray_bar:setVisible(true)
+	self._laStats_Tchr:setVisible(false) --lly关闭统计层
+
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then
 		self._mode = ui.HISTORY
 		
@@ -520,7 +536,7 @@ function TeacherList:load_ready_statistics()
 				local checks = {}
 				for i,v in pairs(t.zone) do
 					local item = self._classview:additem{[ui.CLASS_NAME] = v.zone_name}
-					uikits.event(item,function(sender,b)
+					uikits.event(item,function(sender,b) --添加点击回调
 						self:clear_statistics()
 						for k,it in pairs(checks) do
 							it:setSelectedState(false)
@@ -549,14 +565,16 @@ end
 --统计
 function TeacherList:init_ready_statistics()
 	if self._busy then return end	
-	self._scrollview:setVisible(false)
-	self._setting:setVisible(false)
-	self._release:setVisible(false)
-	self._statistics_root:setVisible(false)
-	self:show_statistics(true)	
-	self._gray_bar:setVisible(true)
+	self._scrollview:setVisible(false) --隐藏列表
+	self._setting:setVisible(false) --隐藏设置页
+	self._release:setVisible(false) --隐藏发布页
+	--self._statistics_root:setVisible(false) 
+	--self:show_statistics(true)	
+	self._gray_bar:setVisible(true) --表头下的阴影显示
 	
-	self:load_ready_statistics()
+	--self:load_ready_statistics()
+	self._laStats_Tchr:setVisible(true) --lly开启统计层
+	--self._laStats_Tchr:enter() --lly进入此层
 	return true
 end
 
@@ -606,6 +624,7 @@ function TeacherList:init_ready_setting()
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
 	self._gray_bar:setVisible(true)
+	self._laStats_Tchr:setVisible(false) --lly关闭统计层
 	return true
 end
 
@@ -720,6 +739,13 @@ function TeacherList:init_gui()
 		[ui.TAB_BUTTON_4]=function(sender) return self:init_ready_statistics()end,
 		[ui.TAB_BUTTON_5]=function(sender) return self:init_ready_setting() end,
 		})
+
+	--lly创建统计层并隐藏
+	self._laStats_Tchr = cc.LayerColor:create(cc.c4b(125, 125, 125, 125), 500, 300)
+	if self._laStats_Tchr then
+		self._root:addChild(self._laStats_Tchr, 10)
+		self._laStats_Tchr:setVisible(false)
+	end
 end
 local selevel = {
 	'course',

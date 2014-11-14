@@ -10,6 +10,9 @@ hw_cur_child_id = 0
 local ui = {
 }
 
+----------------------------------
+-----------------------------------
+
 local ljshell = require "ljshell"
 kits.log('ShareDir:'..ljshell.getDirectory(ljshell.ShareDir))
 kits.log('DataDir:'..ljshell.getDirectory(ljshell.DataDir))

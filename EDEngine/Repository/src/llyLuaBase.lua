@@ -13,12 +13,12 @@ lly = lly or {}
 --if not status then error(msg) end
 --最终release时，可把此函数内容注释掉
 function lly.traceback(msg)
-	---[[
+	---[====[
 	lly.log("----------------------------------------")
 	lly.log("LUA ERROR: " .. tostring(msg) .. "\n")
 	lly.log(debug.traceback())
 	lly.log("----------------------------------------")
-	--]]
+	--]====]
 	return msg
 end
 
@@ -30,26 +30,26 @@ end
 -- cclog
 --最终release时，可把此函数内容注释掉
 function lly.log(...)
-	---[[
+	---[====[
 	print(string.format(...))
-	--]]
+	--]====]
 end
 
 --自定义的log输出，调试时，输出时同时打印位置，所在函数名，以及所在文件名
 --最终release时，可把此函数内容注释掉
 function lly.logCurLocAnd(...)
-	---[[
+	---[====[
 	local info = debug.getinfo(2,"Sln")
 	local strInfo = "(^_^)/: " .. string.format(...) .. " @ LINE " .. info.currentline .. " IN " .. 
 		(info.name and ("FUCN: " .. info.name .. " << ") or "FUCN: unnamed << ") .. info.short_src
 
 	lly.log(strInfo)
-	--]]
+	--]====]
 end
 
 --打印当前位置函数的调用追溯
 function lly.logTraceback()
-	---[[
+	---[====[
 	lly.log("(O_O)/ this func is called from :")
 	for nLevel = 3, math.huge do
 		local info = debug.getinfo(nLevel,"Sln")
@@ -58,7 +58,7 @@ function lly.logTraceback()
 			(info.name and (" FUCN: " .. info.name .. " ") or " FUCN: unnamed ")
 		lly.log(strInfo)
 	end
-	--]]
+	--]====]
 end
 
 
@@ -68,7 +68,7 @@ end
 
 --禁止所有的全局变量
 function lly.finalizeGlobalEnvironment()
-	---[[
+	---[====[
 	local mt = {}	
 	
 	mt.__index = function (t, k)
@@ -80,12 +80,12 @@ function lly.finalizeGlobalEnvironment()
 	end
 
 	setmetatable(_G, mt)
-	--]]
+	--]====]
 end
 
 --只禁止当前文件的全局变量，会改变当前文件的环境
 function lly.finalizeCurrentEnvironment()
-	---[[
+	---[====[
 	local mt = {}
 	
 	mt.__index = function (t, k)
@@ -106,7 +106,7 @@ function lly.finalizeCurrentEnvironment()
 	setmetatable(newgt,mt)
 	
 	setfenv(2, newgt)
-	--]]
+	--]====]
 end
 
 
@@ -124,7 +124,7 @@ local mt_table = {}
 
 --最终化
 function lly.finalizeInstance(ins)
-	---[[
+	---[====[
 	local mt = getmetatable(ins)
 
 	if mt ~= nil then 
@@ -187,7 +187,7 @@ function lly.finalizeInstance(ins)
 
 		setmetatable(ins, mt)			
 	end
-	--]]
+	--]====]
 end
 
 
@@ -338,7 +338,7 @@ end
 --基础类型和原始c类型的typename为文字
 --自定义类型和自定义结构体的typename为table
 function lly.ensure(value, typename)
-	---[[
+	---[====[
 	if type(value) == nil then return end --值为空则不进行检查
 
 	if type(typename) == "string" then 
@@ -371,7 +371,7 @@ function lly.ensure(value, typename)
 	else
 		error("(>_<)/ensure wrong: typename must be a string/table", 2)
 	end
-	--]]
+	--]====]
 end
 
 
