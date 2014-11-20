@@ -918,6 +918,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t._item = child(t._scrollview,itemID)
 	if not t._scrollview or not t._item then
 		kits.log('ERROR : scroll resource not exist')
+		if not t._scrollview then
+			kits.log('	resource not exit'..tostring(scrollID))
+		end
+		if not t._item then
+			kits.log('	resource not exit : '..tostring(itemID))
+		end		
 		log_caller()
 		return
 	end
@@ -1161,7 +1167,9 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			end
 			local item_height = 0
 			for i = 1,#self._list do
-				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+				local ox,oy = self._list[#self._list-i+1]:getPosition()
+				--self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+				self._list[#self._list-i+1]:setPosition(cc.p(ox,item_height+offy))
 				self._list[#self._list-i+1]:setVisible(true)
 				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
 			end
@@ -1427,6 +1435,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	end
 	local function init_items( ids,b )
 		local items = {}
+		if not ids then return end
 		for i, v in pairs(ids) do
 			items[i] = child(t._scrollview,v)
 			if not items[i] then
@@ -1439,6 +1448,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		return items
 	end
 	local function calc_space_y( tops )
+		if not tops then return 0 end
 		local miny = math.huge
 		local maxy = 0
 		for i, v in pairs(tops) do

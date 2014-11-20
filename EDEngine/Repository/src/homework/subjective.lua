@@ -18,16 +18,22 @@ local ui = {
 	NEXT_BUTTON = 'next_problem', 
 	FINISH_BUTTON = 'finish_5',
 	TEACHER_VIEW = 'teacher_view',
-	TOPICS_BG = 'teacher_view/Panel_36',
+	TOPICS_BG = 'Panel_36',
 	TOPICS = 'teacher_view/Panel_36/homework_text',
+	MAIN_VIEW = 'homework_view',
+	TEACHER_NAME = 'teacher_name',
+	TEACHER_PHOTO = 'teacher_photo',
 	RECORD_BUTTON = 'write_view/white_3/recording',
 	CAM_BUTTON = 'write_view/white_3/photograph',
 	PHOTO_BUTTON = 'write_view/white_3/photo',
 	
+	STUDENT_NAME = 'my_name',
+	STUDENT_PHOTO = 'my_photo',
+	STUDENT_BG = 'Panel_36',
 	WRITE_VIEW = 'write_view',
 	WRITE_TEXT = 'write_view/write_text',
-	TOPICS_PIC = 'teacher_view/tu1',
-	TOPICS_VOICE = 'teacher_view/chat',
+	TOPICS_PIC = 'tu1',
+	TOPICS_VOICE = 'chat',
 	TOPICS_VOICE_PLAY = 'chat',
 	TOPICS_VOICE_TIME = 'chat_time',
 	
@@ -144,11 +150,13 @@ function Subjective:calc_times( i )
 		end
 	end
 	if i then
+		--[[
 		local layout = self._pageview:getPage(i)
 		if layout then
 			layout._times = layout._times or 0
 			layout._begin_time = os.time()
 		end
+		--]]
 	end
 end
 
@@ -160,10 +168,12 @@ function Subjective:set_current( i )
 		end
 		self:calc_times( i )
 		self._current = i
+		--[[
 		local ps = self._pageview:getCurPageIndex()+1
 		if ps ~= i then
 			self._pageview:scrollToPage(i-1)
 		end
+		--]]
 		--self:set_anwser_field(i)
 	end
 end
@@ -181,7 +191,9 @@ function Subjective:add_item( t )
 		uikits.event(item,function(sender) 
 		stopSound()
 		self:set_current( index ) end,'click')
+
 		--add page
+		--[[
 		local layout = self._scroll:clone()
 		
 		layout._item_id = t.item_id
@@ -206,13 +218,15 @@ function Subjective:add_item( t )
 		local holderText = org_text:getPlaceHolder()
 		write_text:setPlaceHolder(holderText)
 		if self._args.status == 10 or self._args.status == 11 then
+		--]]
 			--已经提交，不修改
+		--[[	
 			write_text:setTouchAreaEnabled(false)
 			write_text:setEnabled(false)
 		end	
 		tpic:setVisible(false)
 		tvoice:setVisible(false)
-		
+		--]]
 		--add loading circle
 		--load attachments
 		local rtable = {}
@@ -228,7 +242,7 @@ function Subjective:add_item( t )
 			end
 		end
 		local n = 0
-		self._pageview:addPage( layout )
+		--self._pageview:addPage( layout )
 		rtable.loading = loadingbox.circle(layout)
 		cache.request_resources( rtable,
 			function(rs,i,b)
@@ -796,7 +810,16 @@ function Subjective:scroll_relayout()
 	end
 end
 
-function Subjective:relayout_tops()
+function Subjective:relayout_all()
+	self._topics_view:relayout()
+--	local size = self._topics_view._scrollview:getContentSize()
+--	self._topics_item:setContentSize(size)
+	
+	self._answer_view:relayout()
+--	size = self._answer_view._scrollview:getContentSize()
+--	self._answer_item:setContentSize(size)
+	
+	self._main_view:relayout()
 end
 
 function Subjective:init_gui()
@@ -812,16 +835,40 @@ function Subjective:init_gui()
 			end)
 		self:addChild(self._root)
 		
-		self._scrollview = uikits.child(self._root,ui.LIST) --index list
-		self._scroll = uikits.child(self._root,ui.PAGE_VIEW)
-		self._scroll_size = self._scroll:getContentSize()
+		--index list
+		self._scrollview = uikits.child(self._root,ui.LIST)
+		self._item_current = uikits.child(self._scrollview,ui.ITEM_CURRENT)
+		self._item_finished = uikits.child(self._scrollview,ui.ITEM_FINISHED)
+		self._item_unfinished = uikits.child(self._scrollview,ui.ITEM_UNFINISHED)
 		
+		self._item_current:setVisible(false)
+		self._item_finished:setVisible(false)
+		self._item_unfinished:setVisible(false)
+		self._item_size = self._item_current:getContentSize()
+				
+		local x
+		x,self._item_y = self._item_current:getPosition()				
+		--主视图
+		self._main_view = uikits.scroll(self._root,ui.MAIN_VIEW,ui.TEACHER_VIEW,false,16,ui.WRITE_VIEW) --uikits.child(self._root,ui.MAIN_VIEW)
+		self._topics_item = self._main_view:additem()
+		--题目视图
+		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_PIC,ui.TOPICS_VOICE},
+		{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO})
+		
+		--作答视图
+		self._answer_item = self._main_view:additem(nil,2)
+		self._answer_view = uikits.scrollex(self._answer_item,nil,{ui.PICTURE_VIEW,ui.AUDIO_VIEW},
+		{ui.STUDENT_BG,ui.STUDENT_NAME,ui.STUDENT_PHOTO})
+		self:relayout_all()
+		--[[
 		self._tops = uikits.child(self._scroll,ui.TEACHER_VIEW)
 		local cs = self._scroll:getContentSize()
 		local ts = self._tops:getContentSize()
 		local tx,ty = self._tops:getPosition()
 		self._space = cs.height-ty-ts.height
+		--]]
 		--self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
+		--[[
 		local x,y = self._tops:getPosition()
 		self._tops_space = y-self._tops:getContentSize().height
 		self._tops_ox = x
@@ -870,7 +917,9 @@ function Subjective:init_gui()
 				
 		local x
 		x,self._item_y = self._item_current:getPosition()			
+		--]]
 		---装入数据
+		--[[
 		if self._data then
 			for i,v in pairs(self._data) do
 				self:add_item( v )
@@ -879,6 +928,7 @@ function Subjective:init_gui()
 			self:set_current(1)
 			self:relayout()
 		end
+		--]]
 	end
 end
 
