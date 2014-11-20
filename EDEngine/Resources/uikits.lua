@@ -634,9 +634,11 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
 		 local function delay_call_func()
-			scheduler:unscheduleScriptEntry(schedulerID)
-			schedulerID = nil		
-			func(param1,param2,param3)
+			if not schedulerID then return end
+			if not func(param1,param2,param3) then
+				scheduler:unscheduleScriptEntry(schedulerID)
+				schedulerID = nil					
+			end
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)	
 	end
@@ -1047,6 +1049,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local item_width = self._item_ox
 			for i = 1,#self._list do
 				self._list[#self._list-i+1]:setPosition(cc.p(item_width,self._item_oy))
+				self._list[#self._list-i+1]:setVisible(true)
 				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
 			end
 		elseif horiz == "mix" then --特定排列方式
@@ -1096,6 +1099,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 						cs.width = math.max(cs.width,size.width)
 						cs.height = math.max(cs.height,size.height)
 						item:setPosition(cc.p(x,item_height))
+						item:setVisible(true)
 						if i~=1 and i%m == 1 then
 							item_height = item_height + size.height + space
 							x = self._item_ox
@@ -1115,10 +1119,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 					for i = 1,#self._tops do
 						local x,y = self._tops[i]:getPosition()
 						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+						self._tops[i]:setVisible(true)
 					end
 				else
 					for i = 1,#self._tops do
 						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+						self._tops[i]:setVisible(true)
 					end				
 				end
 			end			
@@ -1156,6 +1162,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local item_height = 0
 			for i = 1,#self._list do
 				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+				self._list[#self._list-i+1]:setVisible(true)
 				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
 			end
 			--放置置顶元件
@@ -1165,10 +1172,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 					for i = 1,#self._tops do
 						local x,y = self._tops[i]:getPosition()
 						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+						self._tops[i]:setVisible(true)
 					end
 				else
 					for i = 1,#self._tops do
 						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+						self._tops[i]:setVisible(true)
 					end				
 				end
 			end
@@ -1199,7 +1208,6 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			elseif animation == 'slide_in' then
 				v:setPosition(cc.p(-size.width,y))
 				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,y))) )
-				--v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.EaseIn:create(cc.MoveTo:create(slide_time,cc.p(x,y)),0.2) ))
 			elseif animation == 'fall_in' then
 				local s = v:getContentSize()
 				v:setPosition(cc.p(x,-size.height-s.height))
@@ -1211,11 +1219,13 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				t = t - dt
 			end
 		end
-		if over_func then
-			delay_call( self._scrollview,function(d)
+		delay_call( self._scrollview,function(d)
+				self._animation_begin_time = nil
+				self._animation_duration = nil
+				if over_func then
 					over_func()
-				end,2*(slide_time+slide_delay) )
-		end
+				end
+			end,2*(slide_time+slide_delay) )
 	end
 	
 	local function animation_relayout(self,animation,slide_time,slide_delay)
@@ -1231,17 +1241,27 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t.relayout = function(self,animation)
 		if self._animation_begin_time then
 			local ct = os.clock()-self._animation_begin_time
-			if ct >= self._animation_duration then
+			if ct >= self._animation_duration then --动画结束
+				self._animation_begin_time = nil
+				self._animation_duration = nil			
 				relayout_imp(self)
 				animation_relayout(self,animation)
-			else
+			else		--动画还在播放	
 				delay_call( nil,function()
+					if self._animation_begin_time then --延迟到动画播放结束
+						local cct = os.clock()-self._animation_begin_time
+						if cct >= self._animation_duration then
+							self._animation_begin_time = nil
+							self._animation_duration = nil
+							relayout_imp(self)
+							return false
+						end
+						return true --继续循环
+					end					
 					relayout_imp(self)
 					animation_relayout(self,animation)
-				end,self._animation_duration-ct)
+				end,(self._animation_duration-ct))
 			end
-			self._animation_begin_time = nil
-			self._animation_duration = nil
 		else
 			relayout_imp(self)
 			animation_relayout(self,animation)
@@ -1294,35 +1314,9 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		return item	
 	end
 	t.additem = function(self,data,index)
-		if self._animation_begin_time then
-			local ct = os.clock()-self._animation_begin_time
-			if ct >= self._animation_duration then
-				local item = additem_imp(self,data,index)
-				if _animation_tmp_list then
-					table.insert(self._animation_tmp_list,item)
-					item:setVisible(false)
-				end
-				return item
-			else
-				if not self._animation_tmp_list then
-					self._animation_tmp_list = {}
-					delay_call(nil,function()
-						self._animation_begin_time = nil
-						self._animation_duration = nil
-						for i,v in pairs(self._animation_tmp_list) do
-							v:setVisible(true)
-						end
-						self._animation_tmp_list = nil
-					end,self._animation_duration-ct )
-				end
-				local item = additem_imp(self,data,index)
-				item:setVisible(false)
-				table.insert(self._animation_tmp_list,item)
-				return item
-			end
-		else
-			return additem_imp(self,data,index)
-		end		
+		local item = additem_imp(self,data,index)
+		item:setVisible(false)
+		return item
 	end
 	t.visibles= function(self)
 		local list = {}
