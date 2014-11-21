@@ -15,11 +15,13 @@ local ui = {
 	ITEM_CURRENT = 'state_now',
 	ITEM_FINISHED = 'state_past',
 	ITEM_UNFINISHED = 'state_future',
-	NEXT_BUTTON = 'next_problem', 
+	NEXT_BUTTON = 'milk_write/next_problem', 
+	PREV_BUTTON = 'milk_write/next_problem_0', 
+	DONE_BUTTON = 'milk_write/finish_5', 
 	FINISH_BUTTON = 'finish_5',
 	TEACHER_VIEW = 'teacher_view',
 	TOPICS_BG = 'Panel_36',
-	TOPICS = 'teacher_view/Panel_36/homework_text',
+	TOPICS = 'Panel_36/homework_text',
 	MAIN_VIEW = 'homework_view',
 	TEACHER_NAME = 'teacher_name',
 	TEACHER_PHOTO = 'teacher_photo',
@@ -144,10 +146,10 @@ end
 function Subjective:calc_times( i )
 	--计时
 	if self._current then
-		local layout = self._pageview:getPage(self._current)
-		if layout and layout._times and layout._begin_time then
-			layout._times = layout._times + (os.time()-layout._begin_time)
-		end
+--		local layout = self._pageview:getPage(self._current)
+--		if layout and layout._times and layout._begin_time then
+--			layout._times = layout._times + (os.time()-layout._begin_time)
+--		end
 	end
 	if i then
 		--[[
@@ -160,12 +162,23 @@ function Subjective:calc_times( i )
 	end
 end
 
+function Subjective:clear_current()
+	self._answer_view:clear()
+	self._topics_view:clear()
+	self._answer_view:relayout()
+	self._topics_view:relayout()
+	self._main_view:relayout()
+end
+
 function Subjective:set_current( i )
 	if self._current ~= i then
 		self:set_item_state( i,ui.STATE_CURRENT )
 		if self._current then
 				self:set_item_state(self._current,self._data[self._current].state)
 		end
+		--切换到对应的
+		self:clear_current()
+		self:relayout_topics( i )
 		self:calc_times( i )
 		self._current = i
 		--[[
@@ -189,9 +202,13 @@ function Subjective:add_item( t )
 		self._scrollview:addChild(item)
 		local index = #self._list
 		uikits.event(item,function(sender) 
-		stopSound()
-		self:set_current( index ) end,'click')
+				stopSound()
+				self:set_current( index ) 
+			end,'click')
 
+		self._topics_list = self._topics_list or {} --题目列表,和索引对应
+		self._topics_list[index] = t
+		self._topics_done = self._topics_done or {} --题目的资源是不是都下载完
 		--add page
 		--[[
 		local layout = self._scroll:clone()
@@ -242,8 +259,6 @@ function Subjective:add_item( t )
 			end
 		end
 		local n = 0
-		--self._pageview:addPage( layout )
-		rtable.loading = loadingbox.circle(layout)
 		cache.request_resources( rtable,
 			function(rs,i,b)
 				n = n + 1
@@ -253,20 +268,81 @@ function Subjective:add_item( t )
 					kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
 				end
 				if n >= #rs.urls then --complete
-					if rs.loading and cc_isobj(rs.loading) then
-						rs.loading:removeFromParent() 
-					else
-						return
-					end
 					--done
-					self:relayout_topics( layout,rs.urls )
+					t.urls = rs.urls
+					self._topics_done[index] = true
+					if index == self._current then
+						self:clear_current()
+						self:relayout_topics( index )
+					end
 				end
 			end)
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
 	end
 end
+function Subjective:load_mini_texture(item,filename,suffix)
+	local name = string.sub( filename,0,-5 )..'_s'..suffix
+	if kits.exists_file(kits.get_tmp_path()..name) then --如果存在直接加载
+		item:loadTexture(kits.get_tmp_path()..name)
+	else
+		local b,tmp = cc_adjustPhoto(kits.get_cache_path()..filename,256) --调整图
+		if b then
+			kits.rename_file( tmp,kits.get_tmp_path()..name)
+			item:loadTexture(kits.get_tmp_path()..name)
+		end
+	end
+end
 
+function Subjective:load_voice(item,filename_,suffix)
+	local filename = kits.get_cache_path()..filename_
+	if it then
+		local play = uikits.child(item,ui.TOPICS_VOICE_PLAY)
+		local txt = uikits.child(item,ui.TOPICS_VOICE_TIME)
+		uikits.event(play,function(sender)
+			uikits.playSound( filename )
+		end)
+		local length = cc_getVoiceLength( filename )
+		txt:setString( kits.time_to_string_simple(math.floor(length)) )
+	end
+end
+
+--布局第i题
+function Subjective:relayout_topics( i )
+	if self._topics_list[i] then --存在
+		if self._topics_done[i] then --资源都下载完成
+			if self._loadingbox then
+				self._loadingbox:removeFromParent()
+				self._loadingbox = nil
+			end
+			local t = self._topics_list[i]
+			--设置标题
+			if t.content then
+				uikits.child(self._topics_item,ui.TOPICS):setString(t.content)
+			end
+			--布局资源
+			for i,v in pairs(t.urls) do
+				local suffix = string.lower(string.sub(v.filename,-4))
+				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+					local item = self._topics_view:additem(1)
+					self:load_mini_texture( item,v.filename,suffix )
+				elseif suffix == '.amr' then
+					local item = self._topics_view:additem(2)
+					self:load_voice( item,v.filename,suffix )
+				end
+			end
+			--设置答案标题
+			--设置答案资源
+			self:relayout_all()
+		else
+			if not self._loadingbox then
+				self._loadingbox = loadingbox.circle(self._root)
+			end
+		end
+	end
+end
+
+--[[
 function Subjective:relayout_topics( layout,urls )
 	local layout_size = layout:getContentSize()
 	local topics = uikits.child(layout,ui.TEACHER_VIEW)
@@ -407,6 +483,7 @@ function Subjective:relayout_topics( layout,urls )
 	self:relayout_myanswer(layout)
 --	layout:setInnerContainerSize(cc.size(layout_size.width,topics_y + 2*topics_space +write_view_size.height ))
 end
+--]]
 
 function Subjective:add_photo( layout,photo_file )
 	local pic = uikits.child( layout,ui.PICTURE_VIEW):clone()
@@ -524,10 +601,36 @@ function Subjective:relayout()
 	end
 end
 
+function enable( item,b )
+	--item:setEnabled(b)
+	item:setHighlighted(b)
+	item:setBright(b)
+end
+
+function Subjective:set_next_prev_state()
+	if self._current == 1 then
+		enable(self._next_button,true)
+		enable(self._prev_button,false)
+	elseif self._current == #self._list then
+		enable(self._next_button,false)
+		enable(self._prev_button,true)	
+	else
+		enable(self._next_button,true)
+		enable(self._prev_button,true)	
+	end
+end
+
 function Subjective:next_item()
 	if self._current and self._current < #self._list then
 		stopSound()
 		self:set_current( self._current+1 )
+	end
+end
+
+function Subjective:prev_item()
+	if self._current and self._current > 1 then
+		stopSound()
+		self:set_current( self._current-1 )
 	end
 end
 
@@ -536,6 +639,7 @@ function Subjective:save()
 		--已经提交，不存储
 		return
 	end
+	--[[
 	if self._args and self._args.exam_id then
 		self:calc_times() --计算当前时间
 		local file = self._args.exam_id..login.uid()..'.custom'
@@ -556,6 +660,7 @@ function Subjective:save()
 		local str = json.encode( t )
 		kits.write_cache( file,str )
 	end
+	]]--
 end
 
 function Subjective:load_myanswer_from_table( t )
@@ -709,8 +814,47 @@ function Subjective:load_myanswer()
 	self:load_from_cloud()
 end
 
+function Subjective:load_logo_and_name()
+	if self._args then
+		local t = self._args
+		--设置老师名称和老师图标
+		if t.teacher_name then
+			local item = uikits.child(self._topics_item,ui.TEACHER_NAME)
+			item:setString( t.teacher_name )
+		end		
+		if t.tid then
+			login.get_logo( t.tid,
+			function(name)
+				if name then
+					local item = uikits.child(self._topics_item,ui.TEACHER_PHOTO)
+					item:loadTexture( name )
+				else
+					kits.log("get logo fail"..tostring(t.tid))
+				end
+			end,3)
+		end		
+		--设置自己的名称和图标
+		if t._user_type and t._user_type.uig then
+			local item = uikits.child(self._answer_item,ui.STUDENT_NAME)
+			item:setString( t._user_type.uig[1].uname )
+		end		
+		if t.uid then
+			login.get_logo( t.uid,
+			function(name)
+				if name then
+					local item = uikits.child(self._answer_item,ui.STUDENT_PHOTO)
+					item:loadTexture( name )
+				else
+					kits.log("get logo fail"..tostring(t.uid))
+				end
+			end,3)
+		end			
+	end
+end
+
 function Subjective:init()
 	self:init_gui()
+	self:load_logo_and_name()
 	self:init_delay_release()
 	self:init_data()
 end
@@ -812,14 +956,9 @@ end
 
 function Subjective:relayout_all()
 	self._topics_view:relayout()
---	local size = self._topics_view._scrollview:getContentSize()
---	self._topics_item:setContentSize(size)
-	
 	self._answer_view:relayout()
---	size = self._answer_view._scrollview:getContentSize()
---	self._answer_item:setContentSize(size)
-	
 	self._main_view:relayout()
+	self:set_next_prev_state()
 end
 
 function Subjective:init_gui()
@@ -835,6 +974,23 @@ function Subjective:init_gui()
 			end)
 		self:addChild(self._root)
 		
+		--next prev done button
+		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON)
+		self._prev_button = uikits.child(self._root,ui.PREV_BUTTON)
+		self._done_button = uikits.child(self._root,ui.DONE_BUTTON)
+		uikits.event(self._next_button,function(sender)
+			self:save()
+			self:next_item()
+		end)
+		uikits.event(self._prev_button,function(sender)
+			self:save()
+			self:prev_item()		
+		end)
+		uikits.event(self._done_button,function(sender)
+			stopSound()
+			self:save()
+			uikits.popScene()		
+		end)		
 		--index list
 		self._scrollview = uikits.child(self._root,ui.LIST)
 		self._item_current = uikits.child(self._scrollview,ui.ITEM_CURRENT)
@@ -860,6 +1016,7 @@ function Subjective:init_gui()
 		self._answer_view = uikits.scrollex(self._answer_item,nil,{ui.PICTURE_VIEW,ui.AUDIO_VIEW},
 		{ui.STUDENT_BG,ui.STUDENT_NAME,ui.STUDENT_PHOTO})
 		self:relayout_all()
+		
 		--[[
 		self._tops = uikits.child(self._scroll,ui.TEACHER_VIEW)
 		local cs = self._scroll:getContentSize()

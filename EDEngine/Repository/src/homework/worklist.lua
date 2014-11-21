@@ -971,6 +971,7 @@ function WorkList:add_item( t )
 						uikits.pushScene(WorkCommit.create{
 							pid=t.paper_id,
 							tid=t.teacher_id,
+							teacher_name = t.teacher_name,
 							caption=t.exam_name,
 							cnt_item = t.cnt_item,
 							cnt_item_finish = t.cnt_item_finish,
