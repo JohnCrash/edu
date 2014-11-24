@@ -6,6 +6,7 @@ local cache = require "cache"
 local RecordVoice = require "recordvoice"
 local messagebox_ = require "messagebox"
 local login = require "login"
+local imagepreview = require "homework/imagepreview"
 
 local ui = {
 	FILE = 'homework/subjective.json',
@@ -336,6 +337,32 @@ function Subjective:clear_content()
 	--设置标题
 	uikits.child(self._topics_item,ui.TOPICS):setString("")
 end
+
+function Subjective:view_img(i,k)
+	if self._topics_list[i] then
+		local urls = self._topics_list[i].urls
+		local v = urls[k]
+		local imgs = {}
+		local index
+		for r,s in pairs(urls) do
+			if s.filename then
+				local suffix = string.lower(string.sub(s.filename,-4))
+				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+					table.insert(imgs,s.filename)
+				end
+				if r == k then
+					index = r
+				end
+			end
+		end
+		if index then
+			uikits.pushScene( imagepreview.create(index,imgs) )
+		else
+			kits.log("ERROR : Subjective:view_img index = nil")
+		end
+	end
+end
+
 --布局第i题
 function Subjective:relayout_topics( i )
 	if self._topics_list[i] then --存在
@@ -351,12 +378,15 @@ function Subjective:relayout_topics( i )
 			end
 			--布局资源
 			if t.urls then
-				for i,v in pairs(t.urls) do
+				for k,v in pairs(t.urls) do
 					local suffix = string.lower(string.sub(v.filename,-4))
 					if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 						local clip = self._topics_view:additem(1)
 						local item = uikits.child(clip,ui.TOPICS_PIC)
 						self:load_clip_texture( item,v.filename,suffix )
+						uikits.event( item,function(sender)
+							self:view_img(i,k)
+						end,"click" )
 					elseif suffix == '.amr' then
 						local item = self._topics_view:additem(2)
 						self:load_voice( item,v.filename,suffix )
@@ -889,10 +919,12 @@ function Subjective:load_logo_and_name()
 end
 
 function Subjective:init()
-	self:init_gui()
-	self:load_logo_and_name()
-	self:init_delay_release()
-	self:init_data()
+	if not self._root then
+		self:init_gui()
+		self:load_logo_and_name()
+		self:init_delay_release()
+		self:init_data()
+	end
 end
 
 local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
