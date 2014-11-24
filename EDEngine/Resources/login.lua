@@ -8,8 +8,8 @@ local test_login =
 	[5] = {name='赵小雪',uid = 122068,cookie='sc1=1ABBC23D33E46E8C97D0C35D087248F3D999015Eak99MgfnBYOcgXtZJkE170V%2fbwv3NRjis0zUi8KTvFZwQkjPwGZmMTO%2b8l6QqkrvS%2bP2md8fxG7diCAZ%2fSNbaewnwrbp3A%3d%3d'},
 	--]]
 	--[1] = {name='刘亮',uid=141770,cookie='sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d'},
-	[1] = {name='杨炳业',uid=145884,cookie='sc1=504C02F67C4CD5CDC30F16C4A8270BBC6D3079F0akl6OgnrBd%2bY1zlZegowowUjbRWwYAv%2f7A2U09%2bPu0Q0G0HPx21mNjK%2b8lOQ9h7xGOjimok%3d'},
-	[2] = {name='刘国辉',uid=144969,cookie='sc1=C39764B0F997FEAD871F8828788DDD143B72031Fakl7OwfmBZfKjGwJJVFk7lAsYQvwMBji7UyIisLP61YoQVaIwXsmayP59U6N9kT7EuDokQ%3d%3d'},
+	[1] = {name='刘策',uid=145883,cookie='sc1=545A2DF5FF807C16E27711B6F7E129CF7F2E721Fakl6OgnsBcqQzD1eKlNs%2fwUvfxatIATi8AyGl4bO%2b0onGELRlGVz'},
+	[2] = {name='张老师',uid=145487,cookie='sc1=B985BAC54D6A2322811266BD3A74BEFD1391BB39akl6NgnoBZfKi2oLKlJh7FEtYQvwMBi4tkzQgsLP5lYpE1bSlHsmZiP5qE6N90T7EuDokQ%3d%3d'},
 	[3] = {name='刘景升',uid=141804,cookie='sc1=C806AC16806888222C1EA1B75059AC4919773725akl%2bOgHoBYOcjHsDK0Fu4kV%2fbAusPBi7s0zUh8KSulYpFEjPwGtmaz6%2bqVOQqknvEOr2wN8fxGLdiSYZpHVbaewkwrbp3A%3d%3d'},
 }
 local selector = 2
@@ -82,9 +82,9 @@ local function get_logo( uid,func,t )
 			func()
 		end
 	else --确保第一次申请下载一次
-		logo_cache[url] = true
 		cache.request( url,function(b)
 			if b then
+				logo_cache[url] = true
 				func( cache.get_name(url) )
 			else
 				func()

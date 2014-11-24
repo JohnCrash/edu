@@ -28,6 +28,7 @@ local ui = {
 	RELEASE_3_4 = 'homework/laoshizuoye/buzhi43.json',
 	STATISTICS_FILE = 'homework/laoshizuoye/tongji.json',
 	STATISTICS_FILE_3_4 = 'homework/laoshizuoye/tongji43.json',
+	GRAYBAR = 'ding/gray_bar',
 	LESSON_LIST = 'lr1',
 	LESSON = 'lesson',
 	CLASSLIST = 'banji',
@@ -35,6 +36,7 @@ local ui = {
 	CLASS_NAME = 'banji',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
+	MORE_DEBUG = 'debug',
 	BACK = 'ding/back',
 	LIST = 'zuo',
 	ITEM = 'zuoye1',
@@ -183,7 +185,7 @@ function TeacherList:add_batch_item( v )
 							end,'click')
 							return
 						end
-					end)
+					end,"CN")
 				end
 			end,
 			[ui.ITEM_ICON] = function(child,item)
@@ -203,7 +205,7 @@ function TeacherList:add_ready_batch_from_table( t )
 		for k,v in pairs(t.page) do
 			self:add_batch_item( v )
 		end
-		self._scrollview:relayout()
+		self._scrollview:relayout("slide")
 		return true
 	else
 		kits.log('ERROR TeacherList:init_ready_batch_from_data decode failed')
@@ -246,7 +248,7 @@ end
 function TeacherList:refresh_ready_batch()
 	if not self._busy then
 		cache.request_cancel()
-		self._scrollview:clear()
+		self._scrollview:clear("slide")
 		self._busy = true
 		local mode = 2
 		if self._mode == ui.READYBATCH then
@@ -261,16 +263,19 @@ end
 --待阅
 function TeacherList:init_ready_batch()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
+	
 	cache.request_cancel()
 	
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
+	self._gray_bar:setVisible(true)
 	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
 		if self._ready_batch_is_done then
 			self._scrollview:swap()
-			self._scrollview:relayout()
+			self._scrollview:relayout("slide")
 		else
 			self._busy = true
 			self:init_batch_list(2)--待批阅	
@@ -283,12 +288,15 @@ end
 
 --布置
 function TeacherList:init_ready_release()
+	if self._busy then return end	
+	
 	cache.request_cancel()
 	self._scrollview:setVisible(false)
 	self._release:setVisible(true)
 	self._setting:setVisible(false)
 	self._statistics_root:setVisible(false)
-
+	self._gray_bar:setVisible(false)
+	
 	if self._selector == nil or self._selector[1] == nil then
 		self._confirm_item = {}	
 		local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
@@ -303,6 +311,7 @@ end
 --历史
 function TeacherList:init_ready_history()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	
 	cache.request_cancel()
 	
@@ -310,12 +319,13 @@ function TeacherList:init_ready_history()
 	self._setting:setVisible(false)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
+	self._gray_bar:setVisible(true)
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then
 		self._mode = ui.HISTORY
 		
 		if self._ready_history_is_done then
 			self._scrollview:swap()
-			self._scrollview:relayout()		
+			self._scrollview:relayout("slide")		
 		else
 			self._busy = true
 			self._scrollview:swap()
@@ -493,19 +503,18 @@ function TeacherList:class_statistics( cls )
 		end
 	end)
 end
---统计
-function TeacherList:init_ready_statistics()
-	cache.request_cancel()
-	
-	self._scrollview:setVisible(false)
-	self._setting:setVisible(false)
-	self._release:setVisible(false)
-	self._statistics_root:setVisible(false)
-	self:show_statistics(true)	
+
+function TeacherList:refresh_statistics_list()
+end
+
+function TeacherList:load_ready_statistics()
 	if not self._statistics_data then
+		self._busy = true
+		cache.request_cancel()
 		local url = 'http://api.lejiaolexue.com/rest/user/'..login.uid()..'/zone/class'
 		local loadbox = loadingbox.open(self)
 		cache.request_json(url,function(t)
+			self._busy = false
 			if not loadbox:removeFromParent() then
 				return
 			end
@@ -538,6 +547,19 @@ function TeacherList:init_ready_statistics()
 	else
 		self._statistics_root:setVisible(true)
 	end
+end
+
+--统计
+function TeacherList:init_ready_statistics()
+	if self._busy then return end	
+	self._scrollview:setVisible(false)
+	self._setting:setVisible(false)
+	self._release:setVisible(false)
+	self._statistics_root:setVisible(false)
+	self:show_statistics(true)	
+	self._gray_bar:setVisible(true)
+	
+	self:load_ready_statistics()
 	return true
 end
 
@@ -578,19 +600,22 @@ function TeacherList:clear_statistics()
 end
 --设置
 function TeacherList:init_ready_setting()
+	if self._busy then return end	
+	
 	cache.request_cancel()
 	
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
+	self._gray_bar:setVisible(true)
 	return true
 end
 
 function TeacherList:init_gui()
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
-	
+	self._gray_bar = uikits.child(self._root,ui.GRAYBAR)
 	--设置页
 	self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 	self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
@@ -602,6 +627,16 @@ function TeacherList:init_gui()
 			uikits.muteSound(b)
 		end)
 	end
+	local dbg = uikits.child(self._setting,ui.MORE_DEBUG)
+	if dbg then
+		dbg:setSelectedState (kits.config("debug","get"))
+		uikits.event(dbg,function(sender,b)
+			kits.config("debug",b)
+			if _G.enableDebug then
+				_G.enableDebug(b)
+			end
+		end)
+	end	
 	self._root:addChild(self._setting)
 	
 	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
@@ -618,6 +653,7 @@ function TeacherList:init_gui()
 		self._statistics_item_ox,self._statistics_item_oy = statistics_item:getPosition()
 	end
 	self._classview = uikits.scroll(self._statistics_root,ui.CLASSLIST,ui.CLASS_BUTTON,true,16)
+
 	--发布页
 	self._release = uikits.fromJson{file_9_16=ui.RELEASEPAGE,file_3_4=ui.RELEASE_3_4}
 	self._root:addChild(self._release)

@@ -40,10 +40,13 @@ local ui = {
 	MORE2_3_4 = 'homework/more243.json',
 	MORE_VIEW = 'more_view',
 	MORE_SOUND = 'sound',
+	MORE_DEBUG = 'debug',
 	LESSON = 'lesson',
 	BACK = 'white/back',
 	LIST = 'newview',
 	ITEM = 'subject_1',
+	ITEM_TEACHER_NAME = 'teacher_name',
+	ITEM_TEACHER_LOGO = 'teacher_photo',
 	ITEM_TITLE = 'textname',
 	ITEM_CURSE = 'subjectbox/subjecttext',
 	ITEM_BAR = 'finish2',
@@ -294,7 +297,7 @@ end
 function WorkList:refresh_list()
 	if not self._busy then
 		cache.request_cancel()
-		self._scrollview:clear()
+		self._scrollview:clear('slide')
 		if self._mode == ui.NEW then
 			self:load_page( 1 )
 		elseif self._mode == ui.HISTORY then
@@ -307,6 +310,7 @@ end
 
 function WorkList:init_new_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.NEW )
 	self._scrollview:setVisible(true)
@@ -314,9 +318,10 @@ function WorkList:init_new_list()
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
 		if self._new_list_done then
 			self:Swap_list(ui.NEW)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			--self:clear_all_item()
+			self._scrollview:clear('slide')
 			self._new_list_done = true
 			self:load_page( 1 )
 		end
@@ -551,7 +556,7 @@ end
 
 function WorkList:init_statistics()
 	if self._busy then return end
-	
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
 	self._scrollview:setVisible(true)
@@ -716,6 +721,17 @@ function WorkList:init_gui()
 			uikits.muteSound(b)
 		end)
 	end
+	local dbg = uikits.child(self._setting,ui.MORE_DEBUG)
+	if dbg then
+		dbg:setSelectedState (kits.config("debug","get"))
+		uikits.event(dbg,function(sender,b)
+			kits.config("debug",b)
+			if _G.enableDebug then
+				_G.enableDebug(b)
+			end
+		end)
+	end
+	
 	self._root:addChild(self._setting)
 	
 	self:addChild(self._root)
@@ -778,6 +794,7 @@ end
 
 function WorkList:init_history_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.HISTORY )
 	self._scrollview:setVisible(true)
@@ -786,7 +803,7 @@ function WorkList:init_history_list()
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
 		if self._history_list_done then
 			self:Swap_list(ui.HISTORY)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			self._history_list_done = true
 			self:Swap_list(ui.HISTORY)
@@ -822,7 +839,7 @@ function WorkList:history_scroll( t )
 end
 
 function WorkList:relayout()
-	self._scrollview:relayout()
+	self._scrollview:relayout('slide')
 end
 
 function WorkList:add_item( t )
@@ -834,6 +851,21 @@ function WorkList:add_item( t )
 --	if t.course_name then --科目名称
 --		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
 --	end
+	if t.teacher_name then
+		local item = uikits.child( item,ui.ITEM_TEACHER_NAME)
+		item:setString( t.teacher_name )
+	end
+	if t.teacher_id then
+		login.get_logo( t.teacher_id,
+		function(name)
+			if name then
+				local item = uikits.child( item,ui.ITEM_TEACHER_LOGO)
+				item:loadTexture( name )
+			else
+				kits.log("get logo fail"..tostring(t.teacher_id))
+			end
+		end,3)
+	end
 	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)
@@ -939,6 +971,7 @@ function WorkList:add_item( t )
 						uikits.pushScene(WorkCommit.create{
 							pid=t.paper_id,
 							tid=t.teacher_id,
+							teacher_name = t.teacher_name,
 							caption=t.exam_name,
 							cnt_item = t.cnt_item,
 							cnt_item_finish = t.cnt_item_finish,
@@ -952,6 +985,7 @@ function WorkList:add_item( t )
 							real_score = t.real_score,
 							total_time = t.total_time,
 							uid = login.uid(),
+							parent = self,
 							})
 					end
 				--end

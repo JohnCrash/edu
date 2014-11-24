@@ -17,6 +17,8 @@ local ui = {
 	FILE_STUDENT_LIST = 'homework/laoshizuoye/xuesheng.json',
 	FILE_STUDENT_LIST_3_4 = 'homework/laoshizuoye/xuesheng43.json',	
 	BACK = 'ding/back',
+	TIPS = "heitiao/tips",
+	TIPS_TEXT = "text",
 	CLASS_NAME = 'ding/banji',
 	TOPICS_NAME = 'ding/kewen',
 	PAPER_LIST = 'keguan',
@@ -159,16 +161,27 @@ end
 
 function Batch:init_paper_list_by_table( p )
 	local paper_table = {}
+	self._objective_num = 0
+	self._subject_num = 0
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
 				--self:add_paper_item( t.item_type,t.item_id )
 				local item = { item_type = t.item_type,item_id = t.item_id }
 				table.insert(paper_table,item)
+				if t.item_type == 93 then
+					self._objective_num = self._objective_num + 1
+				elseif topics.types[t.item_type] then
+					self._subject_num = self._subject_num + 1
+				end
 			end
 		end
 	end
-	uikits.scrollview_step_add( self._papers._scrollview,paper_table,5,function(v)
+	
+	self:tips(1)
+	if self._subject_num == 0 then return end
+	
+	uikits.scrollview_step_add( self._papers,paper_table,5,function(v)
 		if v then
 			if v.item_type and v.item_id then
 				self:add_paper_item( v.item_type,v.item_id )
@@ -274,11 +287,7 @@ function Batch:init_commits_list( t )
 	self._commits:relayout()
 end
 
-function Batch:init_topics()
-	cache.request_cancel()
-	self._topicsview:setVisible(true)
-	self._subjectiveview:setVisible(false)
-	self._studentview:setVisible(false)
+function Batch:load_topics()
 	--请求班级统计成绩
 	if not kits.check(self._args_class,'exam_id','class_id','class_name') then
 		self._topicsview:setVisible(false)
@@ -337,20 +346,52 @@ function Batch:init_topics()
 			end
 			self._busy =false
 		end)
+end
+
+function Batch:init_topics()
+	if self._busy then return end
+	
+	cache.request_cancel()
+	self._topicsview:setVisible(true)
+	self._subjectiveview:setVisible(false)
+	self._studentview:setVisible(false)
+	
+	self:tips(1)
+	if self._init_topics_done then
+	else
+		self._init_topics_done = true
+		self:load_topics()
+	end
 	return true
 end
 
---主观题
-function Batch:init_subjective()
-	if not self._exam_data then 
-		kits.log("INFO : wait paper data download complete")
-		return 
+function Batch:tips(t)
+	if t == 1 then
+		if self._subject_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("没有客观题")	
+		else
+			self._tips:setVisible(false)
+		end
+	elseif t== 2 then
+		if self._objective_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("没有主观题")		
+		else
+			self._tips:setVisible(false)
+		end
+	elseif t==3 then
+		if self._statuents_num == 0 then
+			self._tips:setVisible(true)
+			self._tips_text:setString("还没有学生提交")				
+		else
+			self._tips:setVisible(false)
+		end
 	end
-	cache.request_cancel()
-	self._topicsview:setVisible(false)
-	self._subjectiveview:setVisible(true)
-	self._studentview:setVisible(false)
-	
+end
+
+function Batch:load_subjective()
+	self._busy = true
 	self._subjectives:clear()
 	if self._exam_data == 'error' then 
 		kits.log("INFO : exam data download error")
@@ -398,7 +439,7 @@ function Batch:init_subjective()
 					end)
 				end
 			}
-			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,false,16,ui.SUBJECTIVE_AUDIO)
+			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,'mix',16,ui.SUBJECTIVE_AUDIO)
 			layout:clear()
 			if v.attachs and type(v.attachs) == 'table' then
 				for i,p in pairs(v.attachs) do
@@ -406,8 +447,15 @@ function Batch:init_subjective()
 						local suffix = string.lower(string.sub(p.filename,-4))
 						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local it = layout:additem()
-							if it then
-								it:loadTexture(p.filename)
+							local name = string.sub( p.filename,0,-5 )..'_s'..suffix
+							if kits.exists_file(kits.get_tmp_path()..name) then
+								it:loadTexture(kits.get_tmp_path()..name)
+							else
+								local b,tmp = cc_adjustPhoto(kits.get_cache_path()..p.filename,256)
+								if b then
+									kits.rename_file( tmp,kits.get_tmp_path()..name)
+									it:loadTexture(kits.get_tmp_path()..name)
+								end
 							end
 						elseif suffix == '.amr' then
 							local it = layout:additem(nil,2)
@@ -440,12 +488,34 @@ function Batch:init_subjective()
 				kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
 			end
 			if n >= #rs.urls then --complete
+				self._busy = false
 				if not loadbox:removeFromParent() then
 					return
 				end
 				init_subjective_by_table( t )
 			end
 		end)
+end
+
+--主观题
+function Batch:init_subjective()
+	if self._busy then return end
+	
+	if not self._exam_data then 
+		kits.log("INFO : wait paper data download complete")
+		return 
+	end
+	cache.request_cancel()
+	self._topicsview:setVisible(false)
+	self._subjectiveview:setVisible(true)
+	self._studentview:setVisible(false)
+	
+	self:tips(2)
+	if self._init_subjective_done then
+	else
+		self._init_subjective_done = true
+		self:load_subjective()
+	end
 	return true
 end
 
@@ -459,6 +529,7 @@ local appraise = {
 local loadbox_student_list
 function Batch:init_student_list_func()
 	if self._student_list_table then
+		self._statuents_num = 0
 		local total_score = self._args.real_score or 100
 		if total_score<= 0 then total_score = 1 end
 		--没有实现分布加载
@@ -468,6 +539,7 @@ function Batch:init_student_list_func()
 				local score = v.real_score/total_score
 				if score >= appr.low and score < appr.up 
 				 and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
+					self._statuents_num = self._statuents_num + 1
 					table.insert(st,1,v)
 				end
 			end
@@ -495,6 +567,7 @@ function Batch:init_student_list_func()
 				end
 			end --for
 		end
+		self:tips(3)
 		self._students:relayout()
 		if loadbox_student_list then
 			loadbox_student_list:removeFromParent()
@@ -503,15 +576,25 @@ function Batch:init_student_list_func()
 	end
 end
 
+function Batch:load_student_list()
+	self._students:clear()
+	loadbox_student_list = loadingbox.open(self)
+	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
+end
+
 function Batch:init_student_list()
+	if self._busy then return end
 	cache.request_cancel()
 	self._topicsview:setVisible(false)
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(true)
 	
-	self._students:clear()
-	loadbox_student_list = loadingbox.open(self)
-	uikits.delay_call(self._studentview,self.init_student_list_func,0,self)
+	self:tips(3)
+	if self._init_student_done then
+	else
+		self._init_student_done = true
+		self:load_student_list()
+	end
 	return true
 end
 
@@ -523,6 +606,8 @@ function Batch:init_gui()
 		cache.request_cancel()
 		uikits.popScene()
 	end)
+	self._tips = uikits.child(self._root,ui.TIPS)
+	self._tips_text = uikits.child(self._tips,ui.TIPS_TEXT)
 	--初始化标签
 	self._tab = uikits.tab(self._root,ui.RED_LINE,{
 		[ui.TAB_BUTTON_1] = function(sender) return self:init_topics() end,
@@ -535,11 +620,17 @@ function Batch:init_gui()
 	self._commits = uikits.scroll(self._topics_root,ui.COMMIT_LIST,ui.COMMIT_ITEM,true)
 	self._papers = uikits.scroll(self._topics_root,ui.PAPER_LIST,ui.PAPER_ITEM)
 	self:init_paper_item_space( uikits.child(self._topicsview,ui.PAPER_ITEM))
-	self:addChild(self._topics_root)
+	self:addChild(self._topics_root,100)
+	self._papers:refresh(function(state)
+		self:load_topics()
+	end)
 	--初始化主观题列表
 	self._subjective_root = uikits.fromJson{file_9_16=ui.FILE_SUBJECTIVE_LIST,file_3_4=ui.FILE_SUBJECTIVE_LIST_3_4}
 	self._subjectiveview = uikits.child(self._subjective_root,ui.SUBJECTIVE_VIEW)
 	self._subjectives = uikits.scroll(self._subjective_root,ui.SUBJECTIVE_VIEW,ui.SUBJECTIVE_ITEM)
+	self._subjectives:refresh(function(state)
+		self:load_subjective()
+	end)
 	
 	self:addChild(self._subjective_root)	
 	self._subjectiveview:setVisible(false)
@@ -547,6 +638,9 @@ function Batch:init_gui()
 	self._student_root = uikits.fromJson{file_9_16=ui.FILE_STUDENT_LIST,file_3_4=ui.FILE_STUDENT_LIST_3_4}
 	self._studentview = uikits.child(self._student_root,ui.STUDENT_LIST)
 	self._students = uikits.scroll(self._student_root,ui.STUDENT_LIST,ui.STUDENT_ITEM,false,0,ui.STUDENT_ITEM_TITLE)
+	self._students:refresh(function(state)
+		self:load_student_list()
+	end)
 	self:addChild(self._student_root)	
 	self._studentview:setVisible(false)
 	

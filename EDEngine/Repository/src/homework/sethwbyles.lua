@@ -8,6 +8,7 @@ local loadingbox = require "loadingbox"
 local TeacherBatch = require "homework/teacherbatch"
 local topics = require "homework/topics"
 local Workpreview = require "homework/workpreview"
+local messagebox = require "messagebox"
 
 local is_need_update
 local is_loading

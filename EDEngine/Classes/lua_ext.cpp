@@ -354,7 +354,7 @@ int cc_getVoiceLength(lua_State *L)
 		lua_pushnumber(L, d);
 		return 1;
 	}
-	lua_pushnil(L);
+	lua_pushnumber(L, 0);
 	return 1;
 }
 
