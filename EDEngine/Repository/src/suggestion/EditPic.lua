@@ -1,43 +1,40 @@
+local crash = require "crash"
 local uikits = require "uikits"
-local kits = require "kits"
-local json = require "json-c"
-local login = require "login"
 local cache = require "cache"
+local kits = require "kits"
+local login = require "login"
+local json = require "json-c"
 local loadingbox = require "loadingbox"
-local messagebox = require "messagebox"
-local SuggestionRet = require "suggestion/SuggestionRet"
-local SuggestionView = class("SuggestionView")
-SuggestionView.__index = SuggestionView
 
---local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 local ui = {
-	FILE = 'suggestion/yijian169.json',
-	FILE_3_4 = 'suggestion/yijian43.json',
-	CHECKBOX_YIJIAN = 'jian',
-	CHECKBOX_CUOWU = 'cuo',
-	CHECKBOX_TOUSU = 'tou',
-	BUTTON_BACK = 'tiao/fanhui',
-	BUTTON_COMMIT = 'tiao/ti',
-	EDIT_CONTENT = 'wen/wenzi',
+	FILE = 'suggestion/statistics43_new_0_0_0.json',
+	FILE_3_4 = 'suggestion/statistics43_new_0_0.json',
+	PIC_VIEW = 'Pic_view',
+	BUTTON_QUIT = 'mainmenu/fanhui',
+	BUTTON_ADD = 'mainmenu/Button_wc',
 }
 
-function create()
-	local scene = cc.Scene:create()				
-	local cur_layer = uikits.extend(cc.Layer:create(),SuggestionView)		
-	--cur_layer.screen_type = screen_type	
-	
-	scene:addChild(cur_layer)
+local EditPic = class("EditPic")
+EditPic.__index = EditPic
+
+function EditPic.create(parent_layer,file_path)
+	local scene = cc.Scene:create()
+	local layer = uikits.extend(cc.Layer:create(),EditPic)
+	scene:addChild(layer)
+	layer.parent_layer = parent_layer
+	layer.file_path = file_path
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
-			cur_layer:init()
-		elseif "exit" == event then			
-			cur_layer:release()
+			layer:init()
+		elseif "exit" == event then
+			layer:release()
 		end
 	end	
-	cur_layer:registerScriptHandler(onNodeEvent)
-	return scene	
+	layer:registerScriptHandler(onNodeEvent)
+	return scene
 end
+
 local rotation_all = 0
 local rotation_begain
 local scale_all = 1
@@ -55,21 +52,146 @@ local buttonTR
 local buttonBR
 local buttonBL
 local loadbox
+local url = 'http://file-stu.lejiaolexue.com/rest/user/upload/hw'
+local temp_filename
 
-function SuggestionView:init()	
+function EditPic:uploadpic()
+	local local_file = self.file_path
+	print('loacl_path::'..local_file)
+	print('layer.parent_layer::'..tostring(#self.parent_layer._piclist))
+	local data = kits.read_file( local_file )
+	if data then
+		cache.upload( url,self.file_path,data,
+			function(b,t)
+				if b then
+					if t.result==0 then
+						self.parent_layer._piclist[#self.parent_layer._piclist+1] = {}
+						self.parent_layer._piclist[#self.parent_layer._piclist].mini_src = t.md5
+						self.parent_layer._piclist[#self.parent_layer._piclist].file_path = self.file_path
+						self.parent_layer.isneedupdate = 2
+						uikits.popScene()
+						kits.log("ERROR : AddPic:AddPic upload result invalid::"..t.md5..'::'..t.width..'::'..t.height)
+					else
+						self.parent_layer.isneedupdate = 1
+						uikits.popScene()
+						kits.log("ERROR : AddPic:AddPic upload result invalid")
+					end
+				else
+					self.parent_layer.isneedupdate = 1
+					uikits.popScene()
+					kits.log("ERROR :  AddPic:AddPic upload failed")
+					kits.log("	local file "..local_file)
+					kits.log("	url "..url)
+				end
+			end)
+	else
+		self.parent_layer.isneedupdate = 1
+		uikits.popScene()
+		print('ERROR :  AddPic:AddPic readfile failed')
+	end	
+end
+
+function EditPic:copyfile(src_file,dest_file)
+	local data
+	data = kits.read_file(src_file)
+	kits.write_file(dest_file,data)
+	os.remove(src_file)
+end
+
+function EditPic:init()
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1920,height=1080}
+	else
+		uikits.initDR{width=1440,height=1080}
+	end
+	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
+	self:addChild(self._widget)
+	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+	uikits.event(but_add,	
+	function(sender,eventType)	
+		self:uploadpic()						
+	end,"click")
+		local data
+	local file
+
+	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
+	uikits.event(but_quit,	
+		function(sender,eventType)	
+			self.parent_layer.isneedupdate = 1
+			uikits.popScene()						
+	end,"click")		
+	
+	self._picview = uikits.child(self._widget,ui.PIC_VIEW)
 	local scheduler = cc.Director:getInstance():getScheduler()
-	local back_pic = cc.Sprite:create('suggestion/11.jpg')
-	local s = cc.Director:getInstance():getWinSize()
-	back_pic:setPosition(cc.p(s.width/2,s.height/2))
-	self:addChild(back_pic)
+--	local back_pic = cc.Sprite:create('suggestion/11.jpg')
+	local s = self._picview:getContentSize()
+--	back_pic:setPosition(cc.p(s.width/2,s.height/2))
+    local back_pic = ccui.ImageView:create()
+	back_pic:setTouchEnabled(true)
+	--self.file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+	print('self.file_path::'..self.file_path)
+    back_pic:loadTexture(self.file_path)
+    back_pic:setPosition(cc.p(s.width/2,s.height/2))
+	self._picview:addChild(back_pic,1,10001)
+	
+	local function touchEventPic(sender,eventType)
+		if eventType == ccui.TouchEventType.began then
+		elseif eventType == ccui.TouchEventType.moved then
+			local pos = sender:getTouchMovePosition()
+			local location = self._picview:convertToNodeSpace(pos) 
+			if 	operate_type == 1 then
+				if scale_begain == nil then
+					scale_begain = location
+				end
+				local pic_x,pic_y = back_pic:getPosition()
+				local scale_dis = 5
+				local scale_per = 0.1
+				local pos_begain = cc.pGetDistance(scale_begain, cc.p(pic_x,pic_y))
+				local pos_end = cc.pGetDistance(location, cc.p(pic_x,pic_y))
+				if pos_begain > pos_end then
+					local t=pos_begain-pos_end
+					if t>=scale_dis and scale_all>0.4 then
+						scale_all = scale_all-scale_per
+						back_pic:setScale(scale_all)
+					end
+				else
+					local t=pos_end-pos_begain
+					if t>=scale_dis and scale_all<5 then
+						scale_all = scale_all+scale_per
+						back_pic:setScale(scale_all)
+					end				
+				end	
+				scale_begain = location	
+			elseif operate_type == 8 then
+				if move_begain == nil then
+					move_begain = location
+				end		
+				local pic_x,pic_y = back_pic:getPosition()
+				pic_x = pic_x+(location.x-move_begain.x)
+				pic_y = pic_y+(location.y-move_begain.y)
+				back_pic:setPosition(cc.p(pic_x,pic_y))
+				move_begain = location	
+			end
+		elseif eventType == ccui.TouchEventType.ended then
+			if operate_type == 1 then
+				scale_begain = nil
+			elseif operate_type == 8 then
+				move_begain = nil
+			end	
+		end
+	end
+	
+	back_pic:addTouchEventListener(touchEventPic)	
+	
+--	local pic_size = back_pic:getContentSize()
 	local sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
 	local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
---	local sel_rect = self:setRectPos(sel_rect_size.x1,sel_rect_size.x2,sel_rect_size.y1,sel_rect_size.y2)
-	self:addChild(sel_rect,1000,10000)
+
+	self._picview:addChild(sel_rect,1000,10000)
 	
 	local rotation_table = cc.Sprite:create('suggestion/kd.png')
 	rotation_table:setPosition(cc.p(s.width-100,s.height/2))
-	self:addChild(rotation_table)
+	self._picview:addChild(rotation_table,10)
 	
 	local function touchEventRota(sender,eventType)
 		if eventType == ccui.TouchEventType.moved then
@@ -78,12 +200,10 @@ function SuggestionView:init()
 			if local_pos.y>sender.maxheight or local_pos.y < 0 then
 				return
 			end
-			--print('pos.y::'..math.ceil((local_pos.y-500)/500*180))
 			rotation_num = 0-math.ceil((local_pos.y-500)/500*180)
 			if rotation_num>0 then
 				rotation_num = rotation_num+1
 			end
-			print('pos.y::'..rotation_num)
 			back_pic:setRotation(rotation_num)
 			sender:setPositionY(local_pos.y)
 		end
@@ -93,7 +213,6 @@ function SuggestionView:init()
     button_rota:setTouchEnabled(true)
     button_rota:loadTextures("suggestion/jt.png", "suggestion/jt.png", "")
 	local rota_size = rotation_table:getContentSize()
-	--print('rota_size.width::'..rota_size.width..'::rota_size.height::'..rota_size.height)
 	button_rota.maxheight = rota_size.height
     button_rota:setPosition(cc.p(rota_size.width/2,rota_size.height/2))        
     button_rota:addTouchEventListener(touchEventRota)
@@ -141,9 +260,9 @@ function SuggestionView:init()
 				sel_rect_size.x1 = pos.x
 				sel_rect_size.y1 = pos.y
 			end
-			self:removeChildByTag(10000)
+			self._picview:removeChildByTag(10000)
 			local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
-			self:addChild(sel_rect,1000,10000)	
+			self._picview:addChild(sel_rect,1000,10000)	
 			buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
 			buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
 			buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
@@ -160,7 +279,7 @@ function SuggestionView:init()
 	buttonTL.scale_but = 1
     buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2))        
     buttonTL:addTouchEventListener(touchEvent)
-    self:addChild(buttonTL,1001,10001)
+    self._picview:addChild(buttonTL,1001,10001)
 
     buttonTR = ccui.Button:create()
     buttonTR:setTouchEnabled(true)
@@ -169,7 +288,7 @@ function SuggestionView:init()
 	buttonTR.scale_but = 2
     buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2))        
     buttonTR:addTouchEventListener(touchEvent)
-    self:addChild(buttonTR,1002,10001)
+    self._picview:addChild(buttonTR,1002,10001)
 
     buttonBR = ccui.Button:create()
     buttonBR:setTouchEnabled(true)
@@ -178,7 +297,7 @@ function SuggestionView:init()
 	buttonBR.scale_but = 3
     buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))        
     buttonBR:addTouchEventListener(touchEvent)
-    self:addChild(buttonBR,1003,10001)
+    self._picview:addChild(buttonBR,1003,10001)
 	
     buttonBL = ccui.Button:create()
     buttonBL:setTouchEnabled(true)
@@ -187,17 +306,17 @@ function SuggestionView:init()
 	buttonBL.scale_but = 4
     buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1))        
     buttonBL:addTouchEventListener(touchEvent)
-    self:addChild(buttonBL,1004,10001)
+    self._picview:addChild(buttonBL,1004,10001)
 	
 	local label_status_cut = cc.Sprite:create('suggestion/t4.png')
 	label_status_cut:setPosition(cc.p(s.width/2,s.height*4/5))
-	self:addChild(label_status_cut)
+	self._picview:addChild(label_status_cut,10)
 	local label_status_rota = cc.Sprite:create('suggestion/t3.png')
 	label_status_rota:setPosition(cc.p(s.width/2,s.height*4/5))
-	self:addChild(label_status_rota)
+	self._picview:addChild(label_status_rota,10)
 	local label_status_move = cc.Sprite:create('suggestion/t5.png')
 	label_status_move:setPosition(cc.p(s.width/2,s.height*4/5))
-	self:addChild(label_status_move)
+	self._picview:addChild(label_status_move,10)
 	label_status_cut:setVisible(true)
 	label_status_rota:setVisible(false)
 	label_status_move:setVisible(false)
@@ -208,13 +327,39 @@ function SuggestionView:init()
 	button_cutpic:setPosition(cc.p(100,100))
 	menu:addChild(button_cutpic)
 	menu:setPosition(cc.p(0, 0))
-	self:addChild(menu)
+	self._picview:addChild(menu,10)
 	
 	local function timer_update(time)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		cur_sence:setPosition(cc.p(old_pos_x,old_pos_y))
+		
+		self._picview:removeChildByTag(10001)
+		back_pic = ccui.ImageView:create()
+		back_pic:setTouchEnabled(true)
+		
+		self.file_path = kits.get_local_directory()..'cache/'..temp_filename
+		local plat_path = cc.FileUtils:getInstance():getWritablePath()..temp_filename
+		self:copyfile(plat_path,self.file_path)
+
+		back_pic:loadTexture(self.file_path)
+		back_pic:setPosition(cc.p(s.width/2,s.height/2))
+		back_pic:addTouchEventListener(touchEventPic)
+		self._picview:addChild(back_pic,1,10001)
+		
+		--sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
+		sel_rect_size.x1 = s.width/2-100
+		sel_rect_size.y1 = s.height/2-100
+		sel_rect_size.x2 = s.width/2+100
+		sel_rect_size.y2 = s.height/2+100
+		self._picview:removeChildByTag(10000)
+		local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
+		self._picview:addChild(sel_rect,1000,10000)	
+		buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
+		buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
+		buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
+		buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1)) 
+					
 		if schedulerEntry then
-		--	loadbox:removeFromParent()
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
 	end
@@ -225,14 +370,13 @@ function SuggestionView:init()
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		old_pos_x, old_pos_y= cur_sence:getPosition()
 		cur_sence:setPosition(cc.p(0-sel_rect_size.x1, 0-sel_rect_size.y1))
-		--[[texture:setPosition(cc.p(sel_rect_size.x1, sel_rect_size.y1))--]]
 		texture:begin()
 		back_pic:visit()
-	--	cur_sence:visit()
 		texture.my_end = texture["end"]
 		texture:my_end()
-		texture:saveToFile('screenshot.png', kCCImageFormatPNG)	
-	--	loadbox = loadingbox.open(self)
+		--self.file_path = kits.get_local_directory()..'cache/screenshot.png'
+		temp_filename = os.time()..'.png'
+		texture:saveToFile(temp_filename, kCCImageFormatPNG)		
 		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
 	end
 	button_cutpic:registerScriptTapHandler(Cut_pic)
@@ -242,7 +386,7 @@ function SuggestionView:init()
 	button_rota:setPosition(cc.p(400,100))
 	menu_rota:addChild(button_rota)
 	menu_rota:setPosition(cc.p(0, 0))
-	self:addChild(menu_rota)
+	self._picview:addChild(menu_rota,10)
 	local function rota_callback(tag, sender)	
 		label_status_cut:setVisible(false)
 		label_status_rota:setVisible(true)
@@ -257,7 +401,7 @@ function SuggestionView:init()
 	button_cut:setPosition(cc.p(700,100))
 	menu_cut:addChild(button_cut)
 	menu_cut:setPosition(cc.p(0, 0))
-	self:addChild(menu_cut)
+	self._picview:addChild(menu_cut,10)
 	local function cut_callback(tag, sender)	
 		label_status_cut:setVisible(true)
 		label_status_rota:setVisible(false)
@@ -271,7 +415,7 @@ function SuggestionView:init()
 	button_move:setPosition(cc.p(1000,100))
 	menu_move:addChild(button_move)
 	menu_move:setPosition(cc.p(0, 0))
-	self:addChild(menu_move)
+	self._picview:addChild(menu_move,10)
 	local function move_callback(tag, sender)	
 		label_status_cut:setVisible(false)
 		label_status_rota:setVisible(false)
@@ -279,8 +423,9 @@ function SuggestionView:init()
 		operate_type = 8
 	end
 	button_move:registerScriptTapHandler(move_callback)
-
+--[[
 	local function onTouchEnded(touches, event)  
+		print('3333333333333333')
 		if operate_type == 2 then   
 			rotation_begain = nil
 		elseif operate_type == 1 then
@@ -293,6 +438,7 @@ function SuggestionView:init()
 		end
 	end
 	local function onTouchMove(touches, event)  
+		print('222222222222222')
 		local location = touches[1]:getLocation()
 		if operate_type == 2 then
 			if rotation_begain == nil then
@@ -303,7 +449,6 @@ function SuggestionView:init()
 			local angle2 = cc.pToAngleSelf(cc.pSub(location, cc.p(pic_x,pic_y)))
 			local angle = (angle1 - angle2) * 180 / 3.14
 			rotation_all = rotation_all+angle
-			print('rotation_all::'..rotation_all)
 			back_pic:setRotation(rotation_all)
 			rotation_begain = location	
 		elseif 	operate_type == 1 then
@@ -318,17 +463,14 @@ function SuggestionView:init()
 			if pos_begain > pos_end then
 				local t=pos_begain-pos_end
 				if t>=scale_dis and scale_all>0.4 then
-					--back_pic:setScale(rotation_all)
 					scale_all = scale_all-scale_per
 					back_pic:setScale(scale_all)
-					--back_pic:runAction(CCScaleTo:create(0.1,scale_all))--»Ö¸´
 				end
 			else
 				local t=pos_end-pos_begain
 				if t>=scale_dis and scale_all<5 then
 					scale_all = scale_all+scale_per
 					back_pic:setScale(scale_all)
-					--back_pic:runAction(CCScaleTo:create(0.1,scale_all))--·Å´ó
 				end				
 			end	
 			scale_begain = location	
@@ -357,9 +499,9 @@ function SuggestionView:init()
 				end
 				sel_rect_size.y2 = location.y
 			end		
-			self:removeChildByTag(10000)
+			self._picview:removeChildByTag(10000)
 			local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
-			self:addChild(sel_rect,1000,10000)	
+			self._picview:addChild(sel_rect,1000,10000)	
 			buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
 			buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
 			buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
@@ -369,16 +511,14 @@ function SuggestionView:init()
 				move_begain = location
 			end		
 			local pic_x,pic_y = back_pic:getPosition()
-			--print('pic_x111::'..pic_x..'::pic_y111::'..pic_y)
 			pic_x = pic_x+(location.x-move_begain.x)
 			pic_y = pic_y+(location.y-move_begain.y)
-			--print('pic_x222::'..pic_x..'::pic_y222::'..pic_y)
 			back_pic:setPosition(cc.p(pic_x,pic_y))
 			move_begain = location	
 		end
 	end
 	local function onTouchBegan(touches, event)  
-	--	if operate_type == 1 then
+			print('11111111111111')
 			local location = touches[1]:getLocation()
 			old_operate_type = operate_type
 			if location.x > sel_rect_size.x1 -5 and location.x < sel_rect_size.x1 +5 then
@@ -402,15 +542,7 @@ function SuggestionView:init()
 					change_rect_begain = location
 				end		
 			end		
-	--	end
 	end
-
---[[    local listener = cc.EventListenerTouchAllAtOnce:create()
-	listener:registerScriptHandler(onTouchMove,cc.Handler.EVENT_TOUCHES_MOVED )
-    listener:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )
-
-    local eventDispatcher = back_pic:getEventDispatcher()
-    eventDispatcher:addEventListenerWithSceneGraphPriority(listener, back_pic)--]]
 	
     local listener_rect = cc.EventListenerTouchAllAtOnce:create()
 	listener_rect:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
@@ -418,13 +550,11 @@ function SuggestionView:init()
     listener_rect:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )
 
     local eventDispatcher_rect = self:getEventDispatcher()
-    eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)
+    eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)--]]
+end
+
+function EditPic:release()
 	
 end
 
-function SuggestionView:release()
-
-end
-return {
-create = create,
-}
+return EditPic

@@ -351,5 +351,6 @@ return {
 	upload = upload,
 	clear = clear_cache,
 	post = post,
+	request_nc = request_nc
 --	post_json = post_json,
 }
