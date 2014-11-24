@@ -34,6 +34,7 @@ local ui = {
 	STUDENT_BG = 'Panel_36',
 	WRITE_VIEW = 'write_view',
 	WRITE_TEXT = 'write_view/write_text',
+	TOPICS_CLIP = 'clip',
 	TOPICS_PIC = 'tu1',
 	TOPICS_VOICE = 'chat',
 	TOPICS_VOICE_PLAY = 'chat',
@@ -178,9 +179,9 @@ function Subjective:set_current( i )
 		end
 		--切换到对应的
 		self:clear_current()
-		self:relayout_topics( i )
 		self:calc_times( i )
 		self._current = i
+		self:relayout_topics( i )
 		--[[
 		local ps = self._pageview:getCurPageIndex()+1
 		if ps ~= i then
@@ -209,6 +210,11 @@ function Subjective:add_item( t )
 		self._topics_list = self._topics_list or {} --题目列表,和索引对应
 		self._topics_list[index] = t
 		self._topics_done = self._topics_done or {} --题目的资源是不是都下载完
+		
+		--先将标题放上去
+		if index == 1 and t.content then
+			uikits.child(self._topics_item,ui.TOPICS):setString(t.content)
+		end
 		--add page
 		--[[
 		local layout = self._scroll:clone()
@@ -270,6 +276,7 @@ function Subjective:add_item( t )
 				if n >= #rs.urls then --complete
 					--done
 					t.urls = rs.urls
+					self._topics_done = self._topics_done or {}
 					self._topics_done[index] = true
 					if index == self._current then
 						self:clear_current()
@@ -294,6 +301,24 @@ function Subjective:load_mini_texture(item,filename,suffix)
 	end
 end
 
+function Subjective:load_clip_texture(item,filename)
+	if kits.exist_cache(filename) then
+		item:loadTexture(filename)
+		local size = item:getContentSize()
+		local scale
+		if size.width > size.height then
+			scale = 256/size.height
+		else
+			scale = 256/size.width
+		end
+		item:setScaleX(scale)
+		item:setScaleY(scale)
+		uikits.event( item,function(sender)
+			
+		end,"click")
+	end
+end
+
 function Subjective:load_voice(item,filename_,suffix)
 	local filename = kits.get_cache_path()..filename_
 	if it then
@@ -307,6 +332,10 @@ function Subjective:load_voice(item,filename_,suffix)
 	end
 end
 
+function Subjective:clear_content()
+	--设置标题
+	uikits.child(self._topics_item,ui.TOPICS):setString("")
+end
 --布局第i题
 function Subjective:relayout_topics( i )
 	if self._topics_list[i] then --存在
@@ -321,14 +350,17 @@ function Subjective:relayout_topics( i )
 				uikits.child(self._topics_item,ui.TOPICS):setString(t.content)
 			end
 			--布局资源
-			for i,v in pairs(t.urls) do
-				local suffix = string.lower(string.sub(v.filename,-4))
-				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
-					local item = self._topics_view:additem(1)
-					self:load_mini_texture( item,v.filename,suffix )
-				elseif suffix == '.amr' then
-					local item = self._topics_view:additem(2)
-					self:load_voice( item,v.filename,suffix )
+			if t.urls then
+				for i,v in pairs(t.urls) do
+					local suffix = string.lower(string.sub(v.filename,-4))
+					if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+						local clip = self._topics_view:additem(1)
+						local item = uikits.child(clip,ui.TOPICS_PIC)
+						self:load_clip_texture( item,v.filename,suffix )
+					elseif suffix == '.amr' then
+						local item = self._topics_view:additem(2)
+						self:load_voice( item,v.filename,suffix )
+					end
 				end
 			end
 			--设置答案标题
@@ -602,13 +634,17 @@ function Subjective:relayout()
 end
 
 function enable( item,b )
+	item:setVisible(true)
 	--item:setEnabled(b)
 	item:setHighlighted(b)
 	item:setBright(b)
 end
 
 function Subjective:set_next_prev_state()
-	if self._current == 1 then
+	if #self._list == 1 then
+		self._next_button:setVisible(false)
+		self._prev_button:setVisible(false)
+	elseif self._current == 1 then
 		enable(self._next_button,true)
 		enable(self._prev_button,false)
 	elseif self._current == #self._list then
@@ -1005,18 +1041,19 @@ function Subjective:init_gui()
 		local x
 		x,self._item_y = self._item_current:getPosition()				
 		--主视图
-		self._main_view = uikits.scroll(self._root,ui.MAIN_VIEW,ui.TEACHER_VIEW,false,16,ui.WRITE_VIEW) --uikits.child(self._root,ui.MAIN_VIEW)
+		self._main_view = uikits.scroll(self._root,ui.MAIN_VIEW,ui.TEACHER_VIEW,false,16,ui.WRITE_VIEW,220) --uikits.child(self._root,ui.MAIN_VIEW)
 		self._topics_item = self._main_view:additem()
 		--题目视图
-		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_PIC,ui.TOPICS_VOICE},
-		{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO})
+		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
+		{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO},nil,true,4,110)
 		
 		--作答视图
 		self._answer_item = self._main_view:additem(nil,2)
 		self._answer_view = uikits.scrollex(self._answer_item,nil,{ui.PICTURE_VIEW,ui.AUDIO_VIEW},
-		{ui.STUDENT_BG,ui.STUDENT_NAME,ui.STUDENT_PHOTO})
+		{ui.STUDENT_BG,ui.STUDENT_NAME,ui.STUDENT_PHOTO},nil,true,4)
 		self:relayout_all()
 		
+		self:clear_content()
 		--[[
 		self._tops = uikits.child(self._scroll,ui.TEACHER_VIEW)
 		local cs = self._scroll:getContentSize()

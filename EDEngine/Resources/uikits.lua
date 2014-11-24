@@ -908,7 +908,7 @@ local function set_item(c,v)
 end
 
 --itemID2 代表可能的第二类item
-local function scroll(root,scrollID,itemID,horiz,space,itemID2)
+local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 	local t = {_root = root}
 	if scrollID then
 		t._scrollview = child(root,scrollID)
@@ -1137,12 +1137,18 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			relayout_refresh(self)
 		else --纵向
 			local cs = self._scrollview:getContentSize()
-			local height = self._tops_space or 0
+			local height = self._tops_space or space
 			if not self._item2 then
 				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
 			end
 			for i=1,#self._list do
-				height = height + self._list[i]:getContentSize().height + space
+				local size = self._list[i]:getContentSize()
+				if item_min_height then --有最小item_height
+					if size.height < item_min_height then
+						size.height = item_min_height
+					end
+				end				
+				height = height + size.height + space
 			end
 			local offy = 0
 			local tops_offy = 0
@@ -1169,9 +1175,17 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			for i = 1,#self._list do
 				local ox,oy = self._list[#self._list-i+1]:getPosition()
 				--self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
-				self._list[#self._list-i+1]:setPosition(cc.p(ox,item_height+offy))
-				self._list[#self._list-i+1]:setVisible(true)
-				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
+				local item = self._list[#self._list-i+1]
+				local size = item:getContentSize()
+				if item_min_height and size.height < item_min_height then --有最小item_height
+					local dh = item_min_height - size.height
+					item:setPosition(cc.p(ox,item_height+offy+dh))
+					size.height = item_min_height
+				else
+					item:setPosition(cc.p(ox,item_height+offy))
+				end				
+				item:setVisible(true)
+				item_height = item_height + size.height + space
 			end
 			--放置置顶元件
 			if self._tops_space then
@@ -1420,8 +1434,9 @@ end
 
 --scroll 的改进版本
 --[[
+overlapping  tops 和 items可以有重叠区
 ]]--
-local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
+local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlapping)
 	local t = {_root = root}
 	if scrollID then
 		t._scrollview = child(root,scrollID)
@@ -1478,7 +1493,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	t.relayout = function(self,space)
 		space = space or 16
 		local cs = self._scrollview:getContentSize()
-		local height = space 
+		local height = 0
 		local function relayout_list( lists )
 			for i,v in pairs(lists) do
 				local size = v:getContentSize()
@@ -1488,10 +1503,48 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 				height = height + size.height + space
 			end		
 		end
+		local function calc_col_height( list,m )
+			if list and #list > 0 then
+				local s = list[1]:getContentSize()
+				local col = #list/m
+				local n = math.floor(col) 
+				if col > n then
+					n = n + 1
+				end
+				return n * (s.height + space) + space
+			end			
+			return 0
+		end		
+		local function relayout_mix( lists,m )
+			if not lists then return end
+			if not lists[1] then return end
+			local ox,oy = lists[1]:getPosition()
+			local col_height = calc_col_height(lists,m or 6)
+			local h = height + col_height
+			local xx = ox
+			for i,v in pairs(lists) do
+				local size = v:getContentSize()
+				local x,y = v:getPosition()
+				local anchor = v:getAnchorPoint()
+				if i == 1 then
+					h = h - size.height
+				elseif i ~= 1 and i%m==1 then					
+					xx = ox
+					h = h - size.height - space
+				end
+				v:setPosition( cc.p(xx+anchor.x*size.width,h+anchor.y*size.height) )
+				xx = xx + size.width + space
+			end		
+			height = height + col_height
+		end
 		--bottom
 		height = height + t._bottoms_space
-		relayout_list( self._list )
-		height = height + self._tops_space - t._bottoms_space
+		if horz then
+			relayout_mix( self._list,m )
+		else
+			relayout_list( self._list )
+		end
+		height = height + self._tops_space - t._bottoms_space - (overlapping or 0)
 		local tops_offy = height - cs.height
 
 		--tops 要做特殊处理
