@@ -108,7 +108,7 @@ local ui = {
 --]]
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
-WorkList._laStats_Stu = nil --lly统计层
+WorkList._laStats_Stu = {} --lly统计层
 
 function WorkList.create()
 	local scene = cc.Scene:create()
@@ -568,7 +568,6 @@ end
 function WorkList:init_statistics()
 	if self._busy then return end
 	
-	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
 
 	--[[原方法
@@ -596,7 +595,7 @@ function WorkList:init_statistics()
 	if self._mode ~= ui.STATIST then
 
 		--读取数据
-		--self._laStats_Stu:enter()
+		--self._laStats_Stu:loadData()
 
 		self._mode = ui.STATIST
 	end

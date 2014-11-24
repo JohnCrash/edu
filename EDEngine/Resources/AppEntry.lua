@@ -11,6 +11,7 @@ local ui = {
 }
 
 ----------------------------------
+
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -22,8 +23,10 @@ AppEntry.__index = AppEntry
 function AppEntry.create()
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),AppEntry)
+
 	
 	scene:addChild(layer)
+
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
@@ -285,6 +288,17 @@ function AppEntry:init()
 				isopen = true
 			end
 		end}	
+
+	---[[
+	local moLaStatisticsStudent = require "homework/lly/LaStatisticsTeacher"
+	print("2hahahahah")
+
+	local stu = moLaStatisticsStudent.Class:create()
+	bg:addChild(stu, 10)
+
+	stu:enter()
+	--]]
+
 	bg:addChild(resetwindow)
 	bg:addChild(playsound)
 	bg:addChild(debugip)

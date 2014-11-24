@@ -1,12 +1,11 @@
----
+﻿---
 --llyLuaBase.lua
 --lua基础函数，系统所用
 --某些函数可在release时注销其内容
 --卢乐颜
 --2014.11.2
 
---命名空间
-lly = lly or {}
+local lly = {}
 
 --用于main函数，进行错误输出，用法如下
 --local status, msg = xpcall(main, lly.traceback)
@@ -117,19 +116,24 @@ end
 --	自定义的c class、
 --	自定义的lua class
 --	自定义的结构
+--	自定义的有限项目数组
 --最终release时，可把此函数内容注释掉
+
 
 --【私有】保存原有的mt的index函数
 local mt_table = {}
 
 --最终化
+--注意：如果userdata的tolua.type一致，则会使用同一个元表，这意味着自己继承一个类，比如layer，所有layer的元表会改变
+--     	因此，在mt_table中，我使用tolua.type(ins)获得同类的元表并记录，在index中检测是否是同种元表
+--		另外利用cname获得本类的__cname，这个属性表示本类已经成为了一个自定义的类，没有的话则不是，也就不用最终化了
 function lly.finalizeInstance(ins)
 	---[====[
 	local mt = getmetatable(ins)
 
-	if mt ~= nil then 
-		--有元表
-		local strClassName = ins.__cname --对象的类名
+	if mt ~= nil and type(ins) == "userdata" then --有元表
+
+		local strClassName = tolua.type(ins) --对象的类名
 
 		if mt_table[strClassName] == nil then
 			mt_table[strClassName] = {}
@@ -138,43 +142,41 @@ function lly.finalizeInstance(ins)
 		end
 
 		mt.__index = function (t, k)
-			local __idxTmp = mt_table[strClassName].__index
+			local __idxTmp = mt_table[tolua.type(t)].__index
+
+			if __idxTmp == nil then error("wrong __index " .. tolua.type(t)) end
 
 			local result = nil
+			local cname = nil --cname用于区分是否是自定义的类
 			if type(__idxTmp) == "function" then
 				result = __idxTmp(t, k)
+				cname = __idxTmp(t, "__cname")
 			else
 				result = __idxTmp[k]
+				cname = __idxTmp["__cname"]
 			end
 
-			if result == nil then
-				error("(>_<)/no this attribute : " .. k, 2)
+			if result == nil and cname ~= nil then
+				error("(>_<)/no attribute [" .. k .. "] in ", 2)
 			end
+
 			return result
 		end
 
 		mt.__newindex = function (t, k, v)
-			local __idxTmp = mt_table[strClassName].__index
+			if t[k] ~= nil then lly.log("new attribute " .. k) end --检测是否存在，不存在就会新建
 
-			local result = nil
-			if type(__idxTmp) == "function" then
-				result = __idxTmp(t, k)
+			local __nwidxTmp = mt_table[tolua.type(t)].__newindex
+
+			if type(__nwidxTmp) == "function" then
+				__nwidxTmp(t, k, v)
 			else
-				result = __idxTmp[k]
+				__nwidxTmp[k] = v
 			end
-			
-			if result == nil then
-				error("(>_<)/no this attribute : " .. k, 2)
-			else
-				local __nwidxTmp = mt_table[strClassName].__newindex
-				if type(__nwidxTmp) == "function" then
-					__nwidxTmp(t, k, v)
-				else
-					__nwidxTmp[k] = v
-				end
-			end
+
 		end	
-	else
+
+	elseif mt == nil then
 		mt = {}	
 		
 		mt.__index = function (t, k)
@@ -221,7 +223,7 @@ local function clone(object)
 	return _copy(object)
 end
 
---Create an class.
+--Create an class. super可以是一个function或者一个自定义的class
 function lly.class(classname, super)
 	local superType = type(super)
 	local cls
@@ -240,21 +242,21 @@ function lly.class(classname, super)
 			-- copy fields from super
 			for k,v in pairs(super) do cls[k] = v end
 			cls.__create = super.__create
-			cls.super    = super
+			cls.super = super
 		else
 			cls.__create = super
 		end
 
-		cls.ctor = function(...) error("need implement", 2) end--必须重载
+		cls.ctor = function() error("need implement", 2) end--必须重载
 		cls.__cname = classname
 		cls.__ctype = 1
 
-		function cls.new(...)
-			local instance = cls.__create(...)
+		function cls.new()
+			local instance = cls.__create()
 			-- copy fields from class to native object
 			for k,v in pairs(cls) do instance[k] = v end
 			instance.class = cls
-			instance:ctor(...)
+			instance:ctor()
 			return instance
 		end
 
@@ -264,17 +266,17 @@ function lly.class(classname, super)
 			cls = clone(super)
 			cls.super = super
 		else
-			cls = {ctor = function(...) error("need ctor", 2) end}--必须重载
+			cls = {ctor = function() error("need ctor", 2) end}--必须重载
 		end
 
 		cls.__cname = classname
 		cls.__ctype = 2 -- lua
 		cls.__index = cls
 
-		function cls.new(...)
+		function cls.new()
 			local instance = setmetatable({}, cls)
 			instance.class = cls
-			instance:ctor(...)
+			instance:ctor()
 			return instance
 		end
 	end
@@ -284,14 +286,14 @@ function lly.class(classname, super)
 	function cls:implementFunction() error("need implement func", 2) end
 
 	--初始化 --返回是否初始化成功
-	function cls:init(...) error("need init", 2) end
+	function cls:init(t) error("need init", 2) end
 
-	--工厂函数，创建对象
-	function cls:create(...)--返回class的对象
+	--工厂函数，创建对象，可以放入一个table进入init
+	function cls:create(t)--返回class的对象
 		local pRet = self.new()
 		lly.finalizeInstance(pRet)--最终化对象
 		pRet:implementFunction()
-		b = pRet:init(...)  
+		b = pRet:init(t)  
 		if b then
 			return pRet
 		else
@@ -316,6 +318,10 @@ local function getUniqueStructID()
 end
 
 function lly.struct(create_table_func)
+	if type(create_table_func) ~= "function" then 
+		error("create struct need a func param", 2)
+	end
+
 	local stru = {}
 	stru.table_ctor = create_table_func
 	stru.__ID = getUniqueStructID()
@@ -324,14 +330,33 @@ function lly.struct(create_table_func)
 	function stru:create()--返回struct的对象
 		local pRet = self.table_ctor()
 		if type(pRet) == "table" then
+
+			---[====[
 			pRet.__ctype = 3 --区别于class
 			pRet.__structID = self.__ID
 			lly.finalizeInstance(pRet)--最终化对象
+			--]====]
+
 			return pRet
 		end
 	end
 
 	return stru
+end
+
+--创建一个确定项目的数组，参数为取得数组的指针和数组的项目数
+function lly.array(number)
+	local ar = {}
+
+	---[====[
+	for i = 1, number do
+		ar[i] = 0
+	end
+
+	lly.finalizeInstance(ar)
+	--]====]
+
+	return ar
 end
 
 --确保对象属于某个类型，不属于则报错
@@ -343,7 +368,8 @@ function lly.ensure(value, typename)
 
 	if type(typename) == "string" then 
 		if type(value) ~= typename and tolua.type(value) ~= typename then
-			error("(>_<)/ensure wrong: value must be a " .. typename, 2)
+			error("(>_<)/ensure wrong: value is a " .. type(value) .. 
+				", but it must be a " .. typename, 2)
 		end
 
 	elseif type(typename) == "table" then
@@ -374,5 +400,5 @@ function lly.ensure(value, typename)
 	--]====]
 end
 
-
+return lly
 

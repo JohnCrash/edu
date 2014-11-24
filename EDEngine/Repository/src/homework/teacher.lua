@@ -16,13 +16,14 @@ local messagebox = require "messagebox"
 local topics_course = topics.course_icon
 local res_local = "homework/"
 local subjectiveedit = require "homework/subjectiveedit"
+
 local moStats = require "homework/lly/LaStatisticsTeacher"
 
 --[[
 	lly卢乐颜进行修改部分：
 	1. class后，为worklist添加一个属性 _laStats_Tchr ，用于指向统计层
 	2. init_gui 里面加载自定义统计层并隐藏
-	3. init_statistics 中注释原统计层，显示自定义的新统计层
+	3. init_ready_statistics 中注释原统计层，显示自定义的新统计层
 	4. init_ready_batch init_ready_release init_history_list init_setting 中隐藏自定义的统计层
 	5. require 统计层
 ]]
