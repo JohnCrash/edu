@@ -83,11 +83,11 @@
 			<key>di.png</key>
 			<dict>
 				<key>width</key>
-				<integer>20</integer>
+				<integer>30</integer>
 				<key>height</key>
 				<integer>541</integer>
 				<key>originalWidth</key>
-				<integer>20</integer>
+				<integer>30</integer>
 				<key>originalHeight</key>
 				<integer>541</integer>
 				<key>x</key>

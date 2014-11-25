@@ -12,6 +12,8 @@ local ui = {
 
 ----------------------------------
 
+
+
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -120,7 +122,7 @@ function AppEntry:Snow( b )
 end
 
 function AppEntry:init()
-	self:Snow(true)
+	--self:Snow(true)
 	--self:LavaFlow(32)
 	local glview = cc.Director:getInstance():getOpenGLView()
 	local ss = glview:getFrameSize()
@@ -289,15 +291,16 @@ function AppEntry:init()
 			end
 		end}	
 
-	---[[
+	---[[-----------------------------------
 	local moLaStatisticsStudent = require "homework/lly/LaStatisticsTeacher"
 	print("2hahahahah")
 
 	local stu = moLaStatisticsStudent.Class:create()
-	bg:addChild(stu, 10)
+	bg:addChild(stu, 100)
 
 	stu:enter()
-	--]]
+
+	----------------]]
 
 	bg:addChild(resetwindow)
 	bg:addChild(playsound)

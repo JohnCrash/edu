@@ -60,7 +60,35 @@ function lly.logTraceback()
 	--]====]
 end
 
+--打印table中所有内容
+function lly.logTable(t, index)
+	---[====[
+	if index == nil then
+		print("TABLE:")
+	end
 
+	local space = "    "
+	local _space = ""
+	if index ~= nil then
+		for i = 1, index do
+			_space = _space .. space
+		end
+		index = index + 1
+	else
+		index = 1
+	end
+
+	for k,v in pairs(t) do
+		if type(v) ~= "table" then
+			print(_space .. string.format(k) .. "  " .. v)
+		else
+			print(_space .. "T[".. string.format(k) .. "]------------------")
+			lly.logTable(v, index)
+		end
+	end
+
+	--]====]
+end
 
 ---
 --禁止产生全局变量的函数，定义在主函数中，此后将不可新建全局变量，避免因写错名称但无法检测而造成的麻烦
@@ -120,13 +148,23 @@ end
 --最终release时，可把此函数内容注释掉
 
 
+
+--【私有函数】给每个结构体提供唯一标识，为每个对象提供唯一标示
+local structID = 0 
+local function getUniqueStructID()
+	structID = structID + 1
+	return structID
+end
+
+
+
 --【私有】保存原有的mt的index函数
 local mt_table = {}
 
 --最终化
 --注意：如果userdata的tolua.type一致，则会使用同一个元表，这意味着自己继承一个类，比如layer，所有layer的元表会改变
 --     	因此，在mt_table中，我使用tolua.type(ins)获得同类的元表并记录，在index中检测是否是同种元表
---		另外利用cname获得本类的__cname，这个属性表示本类已经成为了一个自定义的类，没有的话则不是，也就不用最终化了
+--		另外利用__ID获得当前对象的唯一值，以防止对象之间相互影响
 function lly.finalizeInstance(ins)
 	---[====[
 	local mt = getmetatable(ins)
@@ -139,32 +177,46 @@ function lly.finalizeInstance(ins)
 			mt_table[strClassName] = {}
 			mt_table[strClassName].__index = mt.__index
 			mt_table[strClassName].__newindex = mt.__newindex
+			mt_table[strClassName].ID = {}
 		end
 
+		mt_table[strClassName].ID[#mt_table[strClassName].ID + 1] = ins.__ID
+
 		mt.__index = function (t, k)
-			local __idxTmp = mt_table[tolua.type(t)].__index
+			local mt = mt_table[tolua.type(t)]
+			local __idxTmp = mt.__index
 
 			if __idxTmp == nil then error("wrong __index " .. tolua.type(t)) end
 
 			local result = nil
-			local cname = nil --cname用于区分是否是自定义的类
+			local id = nil --cname用于区分是否是自定义的类
 			if type(__idxTmp) == "function" then
 				result = __idxTmp(t, k)
-				cname = __idxTmp(t, "__cname")
+				id = __idxTmp(t, "__ID")
 			else
 				result = __idxTmp[k]
-				cname = __idxTmp["__cname"]
+				id = __idxTmp["__ID"]
 			end
 
-			if result == nil and cname ~= nil then
-				error("(>_<)/no attribute [" .. k .. "] in ", 2)
+			local b = false
+			for i, v in ipairs(mt.ID) do
+				if id == v then
+					b = true
+					break
+				end
+			end
+
+			if result == nil and b then
+				error("(>_<)/no attribute [" .. k .. "] in " .. tolua.type(t) .. "[" .. cname .. "]", 2)
 			end
 
 			return result
 		end
 
 		mt.__newindex = function (t, k, v)
-			if t[k] ~= nil then lly.log("new attribute " .. k) end --检测是否存在，不存在就会新建
+			if t[k] ~= nil then --检测是否存在，不存在就会新建
+				--lly.log("new attribute " .. k) 
+			end 
 
 			local __nwidxTmp = mt_table[tolua.type(t)].__newindex
 
@@ -240,7 +292,7 @@ function lly.class(classname, super)
 
 		if superType == "table" then
 			-- copy fields from super
-			for k,v in pairs(super) do cls[k] = v end
+			--for k,v in pairs(super) do cls[k] = v end
 			cls.__create = super.__create
 			cls.super = super
 		else
@@ -256,6 +308,9 @@ function lly.class(classname, super)
 			-- copy fields from class to native object
 			for k,v in pairs(cls) do instance[k] = v end
 			instance.class = cls
+			---[====[
+			instance.__ID = getUniqueStructID()
+			--]====]
 			instance:ctor()
 			return instance
 		end
@@ -309,14 +364,6 @@ end
 --创建一个结构体，基本为 一个简化的创建类的方法
 --在函数的ctor方法要返回 一个结构体
 --创建好以后，用create生成的对象，不能再往里面添加内容
-
---【私有函数】给每个类提供唯一标识
-local structID = 0 
-local function getUniqueStructID()
-	structID = structID + 1
-	return structID
-end
-
 function lly.struct(create_table_func)
 	if type(create_table_func) ~= "function" then 
 		error("create struct need a func param", 2)
@@ -359,6 +406,23 @@ function lly.array(number)
 	return ar
 end
 
+--只读的table
+function lly.const(table)
+	---[====[
+	local oldtable = table --交换是为了能在注释以外直接返回table
+	table = {}
+	local mt = {
+		__index = oldtable,
+		__newindex = function (t, k, v)
+			error("it is a const table")
+		end
+	}
+	setmetatable(table, mt)
+	--]====]
+	return table
+end
+
+
 --确保对象属于某个类型，不属于则报错
 --基础类型和原始c类型的typename为文字
 --自定义类型和自定义结构体的typename为table
@@ -399,6 +463,8 @@ function lly.ensure(value, typename)
 	end
 	--]====]
 end
+
+
 
 return lly
 

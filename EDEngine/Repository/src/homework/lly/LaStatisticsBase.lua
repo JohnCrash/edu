@@ -16,34 +16,36 @@ local moTopics = require "homework/topics"
 
 lly.finalizeCurrentEnvironment()
 
+--常量
+local CONST = lly.const{
+	UI_FILE = "homework/lly/LaStatus/statistics.ExportJson",
+
+	BTN_CLASS = "Panel_27",
+	LAB_CLASS = "Label_banji_xiala",
+	LIST_CLASS = "ListView_banji",
+
+	LEFT_TOKEN = "Button_zuo",
+	RIGHT_TOKEN = "Button_you",
+
+	LIST_COURSE = "ListView_kemu",
+	COURSE_MODEL = "Panel_course",
+	COURSE_MODEL_LABEL = "Label_15",
+	COURSE_TOKEN = "Image_xuanzhong",
+
+	REFRESH_BTN = "Button_95",
+
+	UI_WIDTH_OF_3_4 = 1440, --4:3时是1440
+	UI_WIDTH_OF_16_9 = 1920, --16:9时的宽度是1920
+
+	BTN_COLOR_PRESS = cc.c3b(200, 200, 200),
+	BTN_COLOR_NORMAL = cc.c3b(255, 255, 255),
+}
+
 local LaStatisticsBase = lly.class("LaStatisticsBase", function () 
     return cc.Layer:create()
 end)
 
 function LaStatisticsBase:ctor()
-	--常量
-	self.UI_FILE = "homework/lly/LaStatus/statistics.ExportJson"
-
-	self.BTN_CLASS = "Panel_27"
-	self.LAB_CLASS = "Label_banji_xiala"
-	self.LIST_CLASS = "ListView_banji"
-
-	self.LEFT_TOKEN = "Button_zuo"
-	self.RIGHT_TOKEN = "Button_you"
-
-	self.LIST_COURSE = "ListView_kemu"
-	self.COURSE_MODEL = "Panel_course"
-	self.COURSE_MODEL_LABEL = "Label_15"
-	self.COURSE_TOKEN = "Image_xuanzhong"
-
-	self.REFRESH_BTN = "Button_95"
-
-	self.UI_WIDTH_OF_3_4 = 1440 --4:3时是1440
-	self.UI_WIDTH_OF_16_9 = 1920 --16:9时的宽度是1920
-
-	self.BTN_COLOR_PRESS = cc.c3b(200, 200, 200)
-	self.BTN_COLOR_NORMAL = cc.c3b(255, 255, 255)
-
 	--变量
 	self._wiRoot = {} --根
 
@@ -89,38 +91,39 @@ end
 function LaStatisticsBase:init( ... )
 	repeat
 		--读入原图root
-		self._wiRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(self.UI_FILE)
+		self._wiRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(CONST.UI_FILE)
 
 		if not self._wiRoot then break end
 		self:addChild(self._wiRoot, 0)
 
 		--根据不同的屏幕比例，调整原图 16:9为原图不用调整
 		local factor = moUIKits.get_factor()
+
 		if factor == moUIKits.FACTOR_3_4 then --3：4
 			self._wiRoot:setContentSize(
-				cc.size(self.UI_WIDTH_OF_3_4, self._wiRoot:getContentSize().height))
+				cc.size(CONST.UI_WIDTH_OF_3_4, self._wiRoot:getContentSize().height))
 
 			lly.log("4:3")
 		end
 
 		--控件
-		self._layClassBtn = self._wiRoot:getChildByName(self.BTN_CLASS)
+		self._layClassBtn = self._wiRoot:getChildByName(CONST.BTN_CLASS)
 		if not self._layClassBtn then break end
 
-		self._labClassInBtn = self._layClassBtn:getChildByName(self.LAB_CLASS)
+		self._labClassInBtn = self._layClassBtn:getChildByName(CONST.LAB_CLASS)
 		if not self._labClassInBtn then break end
 
-		self._listClass = self._wiRoot:getChildByName(self.LIST_CLASS)
+		self._listClass = self._wiRoot:getChildByName(CONST.LIST_CLASS)
 		if not self._listClass then break end
 
 		---
-		self._imageLeft = self._wiRoot:getChildByName(self.LEFT_TOKEN)
+		self._imageLeft = self._wiRoot:getChildByName(CONST.LEFT_TOKEN)
 		if not self._imageLeft then break end
 
-		self._imageRight = self._wiRoot:getChildByName(self.RIGHT_TOKEN)
+		self._imageRight = self._wiRoot:getChildByName(CONST.RIGHT_TOKEN)
 		if not self._imageRight then break end
 
-		self._listCourse = self._wiRoot:getChildByName(self.LIST_COURSE)
+		self._listCourse = self._wiRoot:getChildByName(CONST.LIST_COURSE)
 		if not self._listCourse then break end
 
 		--实现列表控制左右指示
@@ -141,40 +144,41 @@ function LaStatisticsBase:init( ... )
 		end)
 
 		--列表内控件和控件激活指示
-		self._layCourseModel = self._wiRoot:getChildByName(self.COURSE_MODEL)
+		self._layCourseModel = self._wiRoot:getChildByName(CONST.COURSE_MODEL)
 		if not self._layCourseModel then break end
 
 		--点击，变色，激活当前按钮
 		self._layCourseModel:addTouchEventListener(function (sender, eventType)
 
-			if touchType == ccui.TouchEventType.ended then
-				sender:setBackGroundColor(self.BTN_COLOR_PRESS)
+			if eventType == ccui.TouchEventType.began then
+				sender:setBackGroundColor(CONST.BTN_COLOR_PRESS)
 
-			elseif touchType == ccui.TouchEventType.ended then
+			elseif eventType == ccui.TouchEventType.ended then
 				lly.logCurLocAnd("touch")
-				sender:setBackGroundColor(self.BTN_COLOR_NORMAL)
+				sender:setBackGroundColor(CONST.BTN_COLOR_NORMAL)
 				self:activeCourseBtn(sender)
 				
-			elseif touchType == ccui.TouchEventType.canceled then
-				sender:setBackGroundColor(self.BTN_COLOR_NORMAL)
+			elseif eventType == ccui.TouchEventType.canceled then
+				sender:setBackGroundColor(CONST.BTN_COLOR_NORMAL)
 			end
 		end)
 
-		self._labCourse = self._layCourseModel:getChildByName(self.COURSE_MODEL_LABEL)
+		self._labCourse = self._layCourseModel:getChildByName(CONST.COURSE_MODEL_LABEL)
 		if not self._labCourse then break end
 
-		self._laySelected = self._wiRoot:getChildByName(self.COURSE_TOKEN)
+		self._laySelected = self._wiRoot:getChildByName(CONST.COURSE_TOKEN)
 		if not self._laySelected then break end
+		self._laySelected:retain() --防止释放
 
 		---
-		self._btnRefresh = self._wiRoot:getChildByName(self.REFRESH_BTN)
+		self._btnRefresh = self._wiRoot:getChildByName(CONST.REFRESH_BTN)
 		if not self._btnRefresh then break end
 
 		--刷新按钮的功能
 		self._btnRefresh:addTouchEventListener(function (sender, touchType)
 			if touchType == ccui.TouchEventType.ended then
 				lly.logCurLocAnd("touch")
-				self.refresh()
+				self:refresh()
 			end
 		end)
 
@@ -186,8 +190,9 @@ function LaStatisticsBase:init( ... )
 		local scale = nil
 		local height = nil
 		if factor == moUIKits.FACTOR_3_4 then --3：4
-			scale = self.UI_WIDTH_OF_3_4 / self.UI_WIDTH_OF_16_9
-			height = self._layHistogram:getContentSize().width * (1 - scale) / 2
+			scale = CONST.UI_WIDTH_OF_3_4 / CONST.UI_WIDTH_OF_16_9
+			height = self._layHistogram:getRootWidget():getContentSize().height * (1 - scale) / 2
+			lly.log("%f = %f * (1 - %f) / 2", height, self._layHistogram:getRootWidget():getContentSize().height, scale)
 		else
 			scale = 1
 			height = 0
@@ -196,14 +201,8 @@ function LaStatisticsBase:init( ... )
 		self._layHistogram:setScale(scale)
 		self._layHistogram:setPosition(cc.p(0, height))
 
-		--设置柱状图每个类别的数据类型（1整数 2时间）
-		self._layHistogram:setValueType(
-			moLayHistogram.VALUE_TYPE.INTEGER,
-			moLayHistogram.VALUE_TYPE.TIME)
-
-		self:addChild(self._layHistogram, 10) --班级列表为20，其他为0，放在两个中间
+		self._wiRoot:addChild(self._layHistogram, 10) --班级列表为20，其他为0，放在两个中间
 			
-		
 		lly.logCurLocAnd("right")
 		return true
 	until true
@@ -213,8 +212,58 @@ function LaStatisticsBase:init( ... )
 end
 
 function LaStatisticsBase:implementFunction()
+
 	--刷新控件，从网上获取到该班级的统计数据，加载到控件上
 	function self:refresh()
+		---[=[测试数据
+		local j = [[
+		[
+		{"cnt_home_work":5,"cnt_times":1120,"course":10003,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":11,"cnt_times":0,"course":10002,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":8,"cnt_times":2071,"course":10009,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":25,"cnt_times":2071,"course":10010,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":15,"cnt_times":2071,"course":10011,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":9,"cnt_times":2071,"course":11005,"success_percent":-1,"year_month":"201411"},
+		{"cnt_home_work":12,"cnt_times":1120,"course":10001,"success_percent":-1,"year_month":"201411"},
+
+		{"cnt_home_work":11,"cnt_times":0,"course":10002,"success_percent":-1,"year_month":"201412"},
+		{"cnt_home_work":22,"cnt_times":2071,"course":10009,"success_percent":-1,"year_month":"201412"},
+		{"cnt_home_work":16,"cnt_times":2071,"course":10010,"success_percent":-1,"year_month":"201412"},
+		{"cnt_home_work":3,"cnt_times":2071,"course":10011,"success_percent":-1,"year_month":"201412"},
+		{"cnt_home_work":9,"cnt_times":2071,"course":11005,"success_percent":-1,"year_month":"201412"},
+		{"cnt_home_work":14,"cnt_times":1120,"course":10001,"success_percent":-1,"year_month":"201412"},
+
+		{"cnt_home_work":18,"cnt_times":0,"course":10002,"success_percent":-1,"year_month":"201501"},
+		{"cnt_home_work":9,"cnt_times":2071,"course":10009,"success_percent":-1,"year_month":"201501"},
+		{"cnt_home_work":13,"cnt_times":2071,"course":10010,"success_percent":-1,"year_month":"201501"},
+		{"cnt_home_work":4,"cnt_times":2071,"course":10011,"success_percent":-1,"year_month":"201501"},
+		{"cnt_home_work":5,"cnt_times":2071,"course":11005,"success_percent":-1,"year_month":"201501"},
+		{"cnt_home_work":5,"cnt_times":1120,"course":10001,"success_percent":-1,"year_month":"201501"},
+
+		{"cnt_home_work":7,"cnt_times":0,"course":10002,"success_percent":-1,"year_month":"201502"},
+		{"cnt_home_work":6,"cnt_times":2071,"course":10009,"success_percent":-1,"year_month":"201502"},
+		{"cnt_home_work":4,"cnt_times":2071,"course":10010,"success_percent":-1,"year_month":"201502"},
+		{"cnt_home_work":5,"cnt_times":2071,"course":10011,"success_percent":-1,"year_month":"201502"},
+		{"cnt_home_work":13,"cnt_times":2071,"course":11005,"success_percent":-1,"year_month":"201502"},
+		{"cnt_home_work":15,"cnt_times":1120,"course":10001,"success_percent":-1,"year_month":"201502"},
+
+		{"cnt_home_work":15,"cnt_times":2120,"course":10001,"success_percent":-1,"year_month":"201503"},
+		{"cnt_home_work":15,"cnt_times":1620,"course":10001,"success_percent":-1,"year_month":"201504"},
+		{"cnt_home_work":15,"cnt_times":1820,"course":10001,"success_percent":-1,"year_month":"201505"},
+		{"cnt_home_work":15,"cnt_times":1220,"course":10001,"success_percent":-1,"year_month":"201506"},
+		{"cnt_home_work":15,"cnt_times":1420,"course":10001,"success_percent":-1,"year_month":"201507"},
+		{"cnt_home_work":15,"cnt_times":1920,"course":10001,"success_percent":-1,"year_month":"201508"},
+		{"cnt_home_work":15,"cnt_times":1020,"course":10001,"success_percent":-1,"year_month":"201509"},
+		{"cnt_home_work":15,"cnt_times":1720,"course":10001,"success_percent":-1,"year_month":"201510"}
+		]
+		]]
+
+		local json = require "json"
+		local t = json.decode(j)
+		self:processStatusData(t)
+		do return end
+		--]=]
+
 		if self._bBusyToRefresh then return end
 		self._bBusyToRefresh = true
 
@@ -223,7 +272,7 @@ function LaStatisticsBase:implementFunction()
 
 		--设置url
 		local send_url = self:getFinalURL()
-		
+
 		moCache.request_cancel()
 		moCache.request_json( send_url, function(t)
 			self._bBusyToRefresh = false
@@ -240,15 +289,30 @@ function LaStatisticsBase:implementFunction()
 	function self:processStatusData(table)
 		--把json解析出来的table以学科>月份>数据分类，
 		--内部数据按：时间，次数 排列，并记录
-		for i, v in ipairs(table_name) do
+		for i, v in ipairs(table) do
 			if self._tabData[v.course] == nil then
 				self._tabData[v.course] = {}
 			end
 
-			self._tabData[v.course][v.year_month] = {
-				v.cnt_times, --作业时间
-				v.cnt_home_work,} --作业次数
+			--没有则新建，有则和以往的加和
+			if self._tabData[v.course][v.year_month] == nil then
+				self._tabData[v.course][v.year_month] = {
+					v.cnt_times, --作业时间
+					v.cnt_home_work,} --作业次数
+			else
+				self._tabData[v.course][v.year_month][1] = 
+					self._tabData[v.course][v.year_month][1] + v.cnt_times
+
+				self._tabData[v.course][v.year_month][2] = 
+					self._tabData[v.course][v.year_month][2] + v.cnt_home_work
+			end
+			
 		end
+
+		--首先清空原来的按钮
+		self._listCourse:removeAllItems()
+		self._nCurrentBtnTag = -1
+
 
 		--根据导入的学科，生成科目按钮
 		local courseBtn = nil
@@ -283,26 +347,37 @@ function LaStatisticsBase:implementFunction()
 		self._imageLeft:setVisible(false) 
 
 		--如果生成的科目数没有超出显示区域，则不显示左右指示标，否则显示右指示标
-		if self._listCourse:getInnerContainerSize().width > 
-			self._listCourse:getContentSize().width then
+		--但是不知为何，self._listCourse:getInnerContainerSize().width只能获得一个12884901888
+		--因此无法使用
+		--[[
+		local inner = self._listCourse:getInnerContainerSize()
+		local outer = self._listCourse:getContentSize().width
+
+		if inner >= outer then
 			self._imageRight:setVisible(true)
 		else
 			self._imageRight:setVisible(false)
 		end
-		
+		--]]
+		self._imageRight:setVisible(true)
 	end	
 
 	function self:activeCourseBtn(btn)
 		--如果已经被激活则不能再次激活
 		local courseNumber = btn:getTag()
+		lly.log("btn tag is " .. courseNumber)
+
 		if self._nCurrentBtnTag == courseNumber then return end
 
 		--把激活指示移动到当前按钮上
+		print(tolua.type(self._laySelected))
+
 		if self._laySelected:getParent() ~= nil then
 			self._laySelected:removeFromParent()
 		end
 
 		btn:addChild(self._laySelected, 5)
+		self._laySelected:setPosition(cc.p(0, 0))
 
 		--根据tag中所记录的科目编号，设置柱状图		
 		self:setHistogram(courseNumber)
@@ -314,32 +389,33 @@ function LaStatisticsBase:implementFunction()
 	function self:setHistogram(number)
 		self._layHistogram:clearAllItems()
 
+		--设置柱状图每个类别的数据类型（1作业时间 2作业数量）
+		self._layHistogram:setValueType(
+			moLayHistogram.VALUE_TYPE.TIME,
+			moLayHistogram.VALUE_TYPE.INTEGER)
+
 		local tabCourse = self._tabData[number]
 		for str, tabData in pairs(tabCourse) do
 			--处理年月的字符串 201411 to 14年11月
-			str = string.sub(str, 3, 4) .. '年' .. string.sub(str, 5, -1) .. '月'
+			local strName = string.sub(str, 3, 4) .. '年' .. string.sub(str, 5, -1) .. '月'
 
 			--增加项
-			self._layHistogram:addItem(str, unpack(tabData))
+			self._layHistogram:addItem(strName, tabData, tonumber(str))
 		end
 
 		--激活第一个按钮
-		self._layHistogram:_setAllCheckBoxUnselected() --先让所有的复选框都取消选择
-		self._layHistogram._ckbHomeworkCount:setTouchEnabled(false) --自己不可以再被点击
-		self._layHistogram._ckbHomeworkCount:setSelectedState(true)
-
-		self._layHistogram:shiftCategory(1) --切换到第一项
-		self._layHistogram:show() --显示
+		self._layHistogram.selectCategory_cb()
 	end
 
 	function self:enter()
 		if self._bIsFirstEnter == true then
-			self.refresh()
+			self:refresh()
 			self._bIsFirstEnter = false
 		end
 	end
 end
 
 return {
-	Class = LaStatisticsBase
+	Class = LaStatisticsBase,
+	CONST = CONST,
 }

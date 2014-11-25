@@ -18,6 +18,7 @@ local StruItem = lly.struct( function ()
 	return {
 	name = "none",
 	values = {},
+	index = 0,
 	}
 end)
 
@@ -25,8 +26,8 @@ end)
 local StruCategoryAttr = lly.struct( function ()
 	return {
 		type = 1, --数值类型
-		min = 1,
-		max = 100,
+		min = 99999999,
+		max = -99999999,
 	}
 end)
 
@@ -38,23 +39,25 @@ local VALUE_TYPE = {
 	MAX = 4,
 }
 
+--常量
+local CONST = lly.const{
+	INDICATOR_COUNT = 6,
+	MAX_ITEM_COUNT = 12,
+
+	UI_FILE = "homework/lly/LayHistogram/zhu_zhuang_tu.ExportJson",
+	TIME_BTN_NAME = "CheckBox_1",
+	COUNT_BTN_NAME = "CheckBox_2",
+	BG_NAME = "Image_BG",
+}
+
 local LayHistogram = lly.class("LayHistogram", function () 
     return ccui.Layout:create()
 end)
 
 function LayHistogram:ctor()
-	--常量
-	self.INDICATOR_COUNT = 6
-	self.MAX_ITEM_COUNT = 12
-
-	self.UI_FILE = "homework/lly/LayHistogram/zhu_zhuang_tu.ExportJson"
-	self.TIME_BTN_NAME = "CheckBox_1"
-	self.COUNT_BTN_NAME = "CheckBox_2"
-	self.BG_NAME = "Image_BG"
-
 	--变量
 	self._wiRoot = {} --根
-	self._arlabIndicator = lly.array(self.INDICATOR_COUNT) --图标左侧的六个指标
+	self._arlabIndicator = lly.array(CONST.INDICATOR_COUNT) --图标左侧的六个指标
 	self._layBG = {} --底图,用于分配项目
 	self._arwiItem = {} --项目，1到12个
 
@@ -74,8 +77,8 @@ function LayHistogram:ctor()
 	--设置多个类别的值类型，包括整数，浮点数和时间
 	self.setValueType = function (type, ...) end
 
-	--添加项目，可携带多个数据，反应不同的类别
-	self.addItem = function (strItem, value, ...) end 
+	--添加项目，可携带多个数据，反应不同的类别，index表示item的序号，序号小的在前面
+	self.addItem = function (strItem, valueTable, index) end 
 
 	--切换统计类别，如果在录入项目时候输入多个数值，则在此切换显示的类别，然后需要show
 	self.shiftCategory = function (index) end
@@ -89,35 +92,40 @@ function LayHistogram:ctor()
 	--选中时回调
 	self.selectCategory_cb = function (sender, eventType) end
 
+	--获得根节点
+	self.getRootWidget = function () end
+
 end
 
 function LayHistogram:init( ... )
 	repeat
 		--读入原图root
-		self._wiRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(self.UI_FILE)
+		self._wiRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(CONST.UI_FILE)
 		if not self._wiRoot then break end
 		self:addChild(self._wiRoot, 0)
 		
 		--数值标识
-		for i = 1, self.INDICATOR_COUNT do
-			self._arlabIndicator[i] = self._wiRoot:getChildByTag(i)
+		local str = nil
+		for i = 1, CONST.INDICATOR_COUNT do
+			str = string.format("Label_%d", i)
+			self._arlabIndicator[i] = self._wiRoot:getChildByName(str)
 			if not self._arlabIndicator[i] then break end
 		end
 
 		--底图
-		self._layBG = self._wiRoot:getChildByName(self.BG_NAME)
+		self._layBG = self._wiRoot:getChildByName(CONST.BG_NAME)
 		if not self._layBG then break end
 
 		--按钮
-		self._ckbHomeworkCount = self._wiRoot:getChildByName(self.COUNT_BTN_NAME)
-		if not self._ckbHomeworkCount then break end
-		self._ckbHomeworkCount:addEventListener(self.selectCategory_cb)
-		self._arckb[#self._arckb + 1] = self._ckbHomeworkCount --注册
-
-		self._ckbTimeCosting = self._wiRoot:getChildByName(self.TIME_BTN_NAME)
+		self._ckbTimeCosting = self._wiRoot:getChildByName(CONST.TIME_BTN_NAME)
 		if not self._ckbTimeCosting then break end
 		self._ckbTimeCosting:addEventListener(self.selectCategory_cb)
 		self._arckb[#self._arckb + 1] = self._ckbTimeCosting --注册	
+
+		self._ckbHomeworkCount = self._wiRoot:getChildByName(CONST.COUNT_BTN_NAME)
+		if not self._ckbHomeworkCount then break end
+		self._ckbHomeworkCount:addEventListener(self.selectCategory_cb)
+		self._arckb[#self._arckb + 1] = self._ckbHomeworkCount --注册
 		
 		lly.logCurLocAnd("right")
 		return true
@@ -143,39 +151,52 @@ function LayHistogram:implementFunction()
 			end
 
 			self._arStruCategoryAttr[i].type = arg[i]
-		end
-
-		
+		end		
 	end
 
-	function self:addItem(strItem, ...)
+	function self:addItem(strItem, valueTable, index)
 		lly.ensure(strItem, "string")
-		local arg = {...}
-		for i = 1, #arg do
-			lly.ensure(arg[i], "number")
-		end
+		lly.ensure(valueTable, "table")
+		lly.ensure(index, "number")
 
 		--如果超出12项就不能再添加
-		if #self._arStructItem >= self.MAX_ITEM_COUNT then
+		if #self._arStructItem >= CONST.MAX_ITEM_COUNT then
 			lly.log("item is full")
 			return
 		end
 
 		--录入
-		self._arStructItem[#self._arStructItem + 1] = StruItem:create()
-		self._arStructItem[#self._arStructItem].name = strItem
-		self._arStructItem[#self._arStructItem].values = arg
+		local item = StruItem:create()
+		item.name = strItem
+		item.values = valueTable
+		item.index = index
+
+		--根据规则调整顺序
+		local bIsInsert = false
+		for i, v in ipairs(self._arStructItem) do
+			if item.index < v.index then
+				table.insert(self._arStructItem, i, item)
+				bIsInsert = true
+				break
+			end
+		end
+
+		if bIsInsert == false then
+			self._arStructItem[#self._arStructItem + 1] = item
+		end
 
 		--获得最大最小值
-		for i = 1, #arg do
+		for i = 1, #valueTable do
 			if self._arStruCategoryAttr[i] == nil then --生成新的结构体
 				self._arStruCategoryAttr[i] = StruCategoryAttr:create()
-			end
-
-			if arg[i] > self._arStruCategoryAttr[i].max then
-				self._arStruCategoryAttr[i].max = arg[i]
-			elseif arg[i] < self._arStruCategoryAttr[i].min then
-				self._arStruCategoryAttr[i].min = arg[i]
+				self._arStruCategoryAttr[i].max = valueTable[i]
+				self._arStruCategoryAttr[i].min = valueTable[i]
+			else
+				if valueTable[i] > self._arStruCategoryAttr[i].max then
+					self._arStruCategoryAttr[i].max = valueTable[i]
+				elseif valueTable[i] < self._arStruCategoryAttr[i].min then
+					self._arStruCategoryAttr[i].min = valueTable[i]
+				end
 			end
 		end
 
@@ -183,7 +204,7 @@ function LayHistogram:implementFunction()
 
 	function self:shiftCategory(index)
 		lly.ensure(index, "number")
-		if index <= 0 or index >= #self._arStruCategoryAttr then
+		if index <= 0 or index > #self._arStruCategoryAttr then
 			error("wrong index", 2)
 		end
 
@@ -201,23 +222,23 @@ function LayHistogram:implementFunction()
 		local nItemCount = #self._arStructItem
 		if nItemCount < 6 then nItemCount = 6 end --最少按6个排列
 		
-		local nItemDistance = self._layBG:getContentSize() / (nItemCount + 1)
+		local nItemDistance = self._layBG:getContentSize().width / (nItemCount + 1)
 
 		--把已有的柱子放对位置，录入名称，如果不够就生成，如果多余就隐藏
 		for i = 1, #self._arStructItem do
-
 			if self._arwiItem[i] == nil then --没有就生成
 				self._arwiItem[i] = moWiHistogramBar.Class:create()
 				if not self._arwiItem[i] then return end
+				self._layBG:addChild(self._arwiItem[i], 2)
 			else
 				self._arwiItem[i]:setVisible(true)
 			end
 
-			self._arwiItem[i]:setPosition(cc.p(0, nItemDistance * i))
+			self._arwiItem[i]:setPosition(cc.p(nItemDistance * i, 0))
 			self._arwiItem[i]:setItemName(self._arStructItem[i].name)
 		end
 
-		for i = #self._arStructItem + 1, self.MAX_ITEM_COUNT do --剩下不用的就隐藏
+		for i = #self._arStructItem + 1, CONST.MAX_ITEM_COUNT do --剩下不用的就隐藏
 			if self._arwiItem[i] == nil then break end
 			self._arwiItem[i]:setVisible(false)
 		end
@@ -228,32 +249,39 @@ function LayHistogram:implementFunction()
 		local min = category.min
 		local max = category.max
 
+		if min == max and min > 0 then min = 0 end --如果只有一个月，则min，max会一样，此时把min变成0
+		lly.log("min %d, max %d", min, max)
+
 		if category.type == VALUE_TYPE.INTEGER then
+			lly.log("int")
 			--整数
 			local MIN_DIFFERENCE = 10 --指标之间的最小差
 
 			min = min - (min % MIN_DIFFERENCE) -- 36 - (36 % 10) = 30
 			max = max - (max % MIN_DIFFERENCE) + MIN_DIFFERENCE -- 36 - (36 % 10) + 10 = 40
+			lly.log("real min %d, max %d", min, max)
 
 			for i = 1, #self._arStructItem do --录入柱子，并设置格式
 				self._arwiItem[i]:setMinAndMaxValue(min, max)
 				self._arwiItem[i]:setStatusFormatType(moWiHistogramBar.FORMAT_TYPE.NORMAL)
 			end
 			
-			for i = 1, self.INDICATOR_COUNT do --把最小值最大值分配到6个指示中
-				local str = string.format("%d", (min + (max - min) * (i - 1)))
-				self._arlabIndicator:setString(str)
+			for i = 1, CONST.INDICATOR_COUNT do --把最小值到最大值分成5份分配到6个指示中
+				local str = string.format("%d", (min + (max - min) * (i - 1) * 0.2))
+				self._arlabIndicator[i]:setString(str)
 			end
 
 		elseif category.type == VALUE_TYPE.FLOAT then
 			--浮点
 
 		elseif category.type == VALUE_TYPE.TIME then
+			lly.log("time")
 			--时间（多少分钟多少秒）录入时是纯秒数
-			local MIN_DIFFERENCE = 60 --指标之间的最小差，一分钟
+			local MIN_DIFFERENCE = 150 --指标之间的最小差，一分钟
 
 			min = min - (min % MIN_DIFFERENCE) -- 136 - (136 % 60) = 120 2分
 			max = max - (max % MIN_DIFFERENCE) + MIN_DIFFERENCE -- 36 - (36 % 60) + 60 = 180 3分
+			lly.log("real min %d, max %d", min, max)
 
 			for i = 1, #self._arStructItem do --录入柱子，并设置格式
 				self._arwiItem[i]:setMinAndMaxValue(min, max)
@@ -264,24 +292,34 @@ function LayHistogram:implementFunction()
 			local nTime = nil
 			local nSecond = nil
 			
-			for i = 1, self.INDICATOR_COUNT do --把最小值最大值分配到6个指示中
-				nTime = min + (max - min) * (i - 1)
+			for i = 1, CONST.INDICATOR_COUNT do --把最小值最大值分配到6个指示中
+				nTime = min + (max - min) * (i - 1) * 0.2
 				nSecond = nTime % 60
 				str = string.format("%d\"%d", (nTime - nSecond) / 60, nSecond)
-				self._arlabIndicator:setString(str)
+				self._arlabIndicator[i]:setString(str)
 			end
 
 		end
 
 		--录入柱子的当前值，同时会进行动画
 		for i = 1, #self._arStructItem do
-			self._arwiItem[i]:setCurrentValue(self._arStructItem.values[self._nCurrentCategory])
+			self._arwiItem[i]:setCurrentValue(self._arStructItem[i].values[self._nCurrentCategory])
+			lly.log("set value " .. i .. " is " .. self._arStructItem[i].values[self._nCurrentCategory])
 		end
 	end
 
 	function self.selectCategory_cb(sender, eventType)
+		if eventType == nil then
+			eventType = ccui.CheckBoxEventType.selected
+		end
+
 		if eventType == ccui.CheckBoxEventType.selected then
 			lly.log("select")
+
+			if sender == nil then
+				sender = self._arckb[1]
+				sender:setSelectedState(true)
+			end
 			
 			--取消其他选中
 			for i, v in ipairs(self._arckb) do
@@ -298,12 +336,15 @@ function LayHistogram:implementFunction()
 			sender:setTouchEnabled(false) 
 
 			--切换项
-			--self:shiftCategory(sender:getTag()) 
-			--self:show() --显示
+			self:shiftCategory(sender:getTag()) 
+			self:show() --显示
 		end
 		
 	end
 
+	function self:getRootWidget()
+		return self._wiRoot
+	end
 end
 
 return {

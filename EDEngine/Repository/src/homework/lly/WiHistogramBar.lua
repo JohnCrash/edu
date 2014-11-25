@@ -17,23 +17,25 @@ local FORMAT_TYPE = {
 	MAX = 3,
 }
 
+--常量
+local CONST = lly.const{
+	UI_FILE = "homework/lly/wiHistogramBar/zhu_zhuang_shu_ju_1.ExportJson",
+	BAR_NAME = "layout_bar",
+	STATUS_LAB_NAME = "Label_status",
+	ITEM_LAB_NAME = "Label_item",
+
+	STATUS_LABEL_HEIGHT = 30, --柱子上文字高出柱子的高度
+	HISTOGRAM_BAR_HEIGHT = 540, --柱子总高度
+	ACTION_MOVE_TIME = 0.4,
+	SPEED_RATE = 0.3,
+	ACTION_SHOW_TIME = 0.1,	
+}
+
 local WiHistogramBar = lly.class("WiHistogramBar", function () 
     return cc.Node:create()
 end)
 
-function WiHistogramBar:ctor()
-	--常量
-	self.UI_FILE = "homework/lly/wiHistogramBar/zhu_zhuang_shu_ju_1.ExportJson"
-	self.BAR_NAME = "layout_bar"
-	self.STATUS_LAB_NAME = "Label_status"
-	self.ITEM_LAB_NAME = "Label_item"
-
-	self.STATUS_LABEL_HEIGHT = 30 --柱子上文字高出柱子的高度
-	self.HISTOGRAM_BAR_HEIGHT = 540 --柱子总高度
-	self.ACTION_MOVE_TIME = 0.4
-	self.SPEED_RATE = 0.3
-	self.ACTION_SHOW_TIME = 0.1
-	
+function WiHistogramBar:ctor()	
 	--变量
 	self._layRoot = {} --背景颜色
 	self._layBar = {} --柱子
@@ -67,20 +69,20 @@ end
 function WiHistogramBar:init( ... )
 	repeat
 		--读入原图root，也就是背景
-		self._layRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(self.UI_FILE)
+		self._layRoot = ccs.GUIReader:getInstance():widgetFromJsonFile(CONST.UI_FILE)
 		if not self._layRoot then break end
 		self:addChild(self._layRoot, 0)
 		
 		--柱子
-		self._layBar = self._layRoot:getChildByName(self.BAR_NAME)
+		self._layBar = self._layRoot:getChildByName(CONST.BAR_NAME)
 		if not self._layBar then break end
 		
 		--数值
-		self._labStatus = self._layRoot:getChildByName(self.STATUS_LAB_NAME)
+		self._labStatus = self._layRoot:getChildByName(CONST.STATUS_LAB_NAME)
 		if not self._labStatus then break end
 		
 		--项目
-		self._labItem = self._layRoot:getChildByName(self.ITEM_LAB_NAME)
+		self._labItem = self._layRoot:getChildByName(CONST.ITEM_LAB_NAME)
 		if not self._labItem then break end
 		
 		lly.logCurLocAnd("right")
@@ -157,10 +159,10 @@ function WiHistogramBar:implementFunction()
 		
 		
 		--计算柱子的高度与总高度比例
-		local fBarHeightRate = self._fCurrentValue / (self._fMaxValue - self._fMinValue)
+		local fBarHeightRate = (self._fCurrentValue - self._fMinValue) / (self._fMaxValue - self._fMinValue)
 
 		--计算当前柱子上面文字的实际高度
-		local fCurHeight = fBarHeightRate * self.HISTOGRAM_BAR_HEIGHT + self.STATUS_LABEL_HEIGHT
+		local fCurHeight = fBarHeightRate * CONST.HISTOGRAM_BAR_HEIGHT + CONST.STATUS_LABEL_HEIGHT
 		
 		--有动画则显示动画，否则直接把柱子高度设定完成
 		if self._bIsAnimationEnabled then
@@ -170,11 +172,11 @@ function WiHistogramBar:implementFunction()
 			self._labStatus:setPositionY(fCurHeight)
 			
 			--通过动画，把bar的高度变成实际的高度
-			local acAddBarHeight = cc.ScaleTo:create(self.ACTION_MOVE_TIME, 1, fBarHeightRate)
-			local acEaseIn = cc.EaseIn:create(acAddBarHeight, self.SPEED_RATE)
+			local acAddBarHeight = cc.ScaleTo:create(CONST.ACTION_MOVE_TIME, 1, fBarHeightRate)
+			local acEaseIn = cc.EaseIn:create(acAddBarHeight, CONST.SPEED_RATE)
 			
 			--显示文字
-			local acShowLabel = cc.FadeIn:create(self.ACTION_SHOW_TIME)
+			local acShowLabel = cc.FadeIn:create(CONST.ACTION_SHOW_TIME)
 			local acT = cc.TargetedAction:create(self._labStatus, acShowLabel)
 
 			self._layBar:runAction(cc.Sequence:create(acEaseIn, acT))
