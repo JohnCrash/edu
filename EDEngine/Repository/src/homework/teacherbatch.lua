@@ -448,7 +448,7 @@ function Batch:load_subjective()
 						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local it = layout:additem()
 							local name = string.sub( p.filename,0,-5 )..'_s'..suffix
-							if kits.exists_file(kits.get_tmp_path()..name) then
+							if kits.exist_file(kits.get_tmp_path()..name) then
 								it:loadTexture(kits.get_tmp_path()..name)
 							else
 								local b,tmp = cc_adjustPhoto(kits.get_cache_path()..p.filename,256)

@@ -1268,25 +1268,38 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				self._animation_duration = nil			
 				relayout_imp(self)
 				animation_relayout(self,animation)
+				kits.log("--------------------------------------------------")
+				kits.log("relayout animation end "..tostring(os.clock()))
 			else		--动画还在播放	
+				kits.log("--------------------------------------------------")
+				kits.log("animation playing,wait"..tostring(os.clock()))	
+				kits.log("")
 				delay_call( nil,function()
 					if self._animation_begin_time then --延迟到动画播放结束
 						local cct = os.clock()-self._animation_begin_time
 						if cct >= self._animation_duration then
 							self._animation_begin_time = nil
 							self._animation_duration = nil
+							kits.log("--------------------------------------------------")
+							kits.log("delay relayout call"..tostring(os.clock()))							
 							relayout_imp(self)
 							return false
 						end
+						kits.log("--------------------------------------------------")
+						kits.log("relayout animation playing yet..."..tostring(os.clock()))		
 						return true --继续循环
 					end					
 					relayout_imp(self)
-					animation_relayout(self,animation)
+					--animation_relayout(self,animation)
+					kits.log("--------------------------------------------------")
+					kits.log("relayout animation playing ,delay relayout "..tostring(os.clock()))
 				end,(self._animation_duration-ct))
 			end
 		else
 			relayout_imp(self)
 			animation_relayout(self,animation)
+			kits.log("--------------------------------------------------")
+			kits.log("not animation relayout immediate "..tostring(os.clock()))
 		end
 	end
 	t.setVisible = function(self,b)
