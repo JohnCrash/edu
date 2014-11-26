@@ -7,15 +7,16 @@ local json = require "json-c"
 local loadingbox = require "loadingbox"
 local adderrorview = require "suggestion/AddErrorView"
 local ljshell = require "ljshell"
+local imagepreview = require "suggestion/imagepreview"
 local ui = {
-	FILE = 'suggestion/wrong_day_0.json',
-	FILE_3_4 = 'suggestion/wrong_day_0.json',
+	FILE = 'suggestion/main_new.json',
+	FILE_3_4 = 'suggestion/main43_new.json',
 
 	EMPTY_VIEW = 'suggestion/meishouchang.json',
 	EMPTY_VIEW_3_4 = 'suggestion/meishouchang43.json',
 	
-	BIG_PIC_VIEW = 'suggestion/mypic_up_0.json',
-	BIG_PIC_VIEW_3_4 = 'suggestion/mypic_up.json',
+	BIG_PIC_VIEW = 'suggestion/showpic_new.json',
+	BIG_PIC_VIEW_3_4 = 'suggestion/showpic43_new.json',
 	
 	VIEW_BIG = 'mypic_up',
 	BIG_PIC = 'mypic_up/my_pic',
@@ -59,13 +60,13 @@ local ui = {
 	TXT_REMARK = 'TextField_31_0',
 	PIC_VIEW = 'Image_sc_all_0',
 	
-	CHECK_VIEW = 'cause_view',
-	BUTTON_CUXIN = 'cause_view/careless',
-	BUTTON_LIJIE = 'cause_view/understand',
-	BUTTON_GAINIAN = 'cause_view/vague',
-	BUTTON_BUHUI = 'cause_view/not',
-	BUTTON_JISUAN = 'cause_view/count',
-	BUTTON_QITA = 'cause_view/other',
+	CHECK_VIEW = 'Panel_44',
+	BUTTON_CUXIN = 'Panel_44/careless',
+	BUTTON_LIJIE = 'Panel_44/understand',
+	BUTTON_GAINIAN = 'Panel_44/vague',
+	BUTTON_BUHUI = 'Panel_44/not',
+	BUTTON_JISUAN = 'Panel_44/count',
+	BUTTON_QITA = 'Panel_44/other',
 }
 
 local ErrorTitlePerView = class("ErrorTitlePerView")
@@ -81,6 +82,7 @@ function ErrorTitlePerView.create()
 	layer.status_index = 0
 	layer.page_index = 1
 	layer.totalpagecount = 0
+	layer.isneedupdate = true
 	is_loading = false
 	local function onNodeEvent(event)
 		if "enter" == event then
@@ -320,7 +322,7 @@ function ErrorTitlePerView:show_checkview(check_view,title_tabel)
 	local checkview_size = check_view:getContentSize()
 	local per_checkbox_size = check_boxlist[1]:getContentSize()
 	local per_checkbox_posX = check_boxlist[1]:getPositionX()
-	check_view:setInnerContainerSize(cc.size((per_checkbox_size.width+(per_checkbox_posX-per_checkbox_size.width/2))*check_boxnum,checkview_size.height))
+	--check_view:setInnerContainerSize(cc.size((per_checkbox_size.width+(per_checkbox_posX-per_checkbox_size.width/2))*check_boxnum,checkview_size.height))
 
 	local i
 	for i=1,check_boxnum do	
@@ -375,49 +377,43 @@ local pic_space = 10
 local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local download_pic_big_url = 'http://file-stu.lejiaolexue.com/rest/dl/'
 local button_empty_path = 'suggestion/kuang.png'
+local inner_posx
+local inner_posy
+
+function ErrorTitlePerView:save_innerpos()
+	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
+	inner_posx,inner_posy = view_title:getInnerContainer():getPosition()
+end
+
+function ErrorTitlePerView:set_innerpos()
+	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
+	view_title:getInnerContainer():setPosition(cc.p(inner_posx,inner_posy))
+end
 
 function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 	
-	local function onImageViewClicked(sender,eventType)	
-		print('11111111111111')
-	end
-
 	local function touchEventPic(sender,eventType)
+--[[		local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+		local imgs = {}
+		imgs[1] = file_path
+		--local scene_next = imagepreview.create(1,imgs,self)		
+		local scene_next = imagepreview.create()		
+		uikits.pushScene(scene_next)--]]	
 		if eventType == ccui.TouchEventType.began then
-			self._bigpic:setVisible(true)
-			local picview = uikits.child(self._bigpic,ui.BIG_PIC)
 			local loadbox = loadingbox.open(self)
 			is_loading = true
 			cache.request_nc(download_pic_big_url..sender.pic_name,
 			function(b,t)
 					if b then
-						local s_pic = picview:getContentSize()
+					--	local s_pic = picview:getContentSize()
+						self:save_innerpos()	
 						local local_dir = ljshell.getDirectory(ljshell.AppDir)
 						local file_path = local_dir.."cache/"..sender.pic_name..'1'
-						local imageView = ccui.ImageView:create(file_path)
-						imageView:setTouchEnabled(true)
-						imageView:setPosition(cc.p(s_pic.width/2,s_pic.height/2)) 
-						--imageView:addTouchEventListener(onImageViewClicked)
-						local function onTouchBegan(touches, event)
-							print('1111111111')
-						end
-						local function onTouchMove(touches, event)
-							print('2222222222')
-						end
-						local function onTouchEnded(touches, event)
-							print('33333333333')
-						end
-						self:setTouchEnabled(false)
---[[						local viewbig = uikits.child(self._bigpic,'mypic_up/closebox')
-						viewbig:setTouchEnabled(false)--]]
-						self._bigpic:setTouchEnabled(true)
-						local listener_rect = cc.EventListenerTouchAllAtOnce:create()
-						listener_rect:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
-						listener_rect:registerScriptHandler(onTouchMove,cc.Handler.EVENT_TOUCHES_MOVED )
-						listener_rect:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )
-						local eventDispatcher_rect = self._bigpic:getEventDispatcher()
-						eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self._bigpic)	
-						picview:addChild(imageView)					
+					--	local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+						local imgs = {}
+						imgs[1] = file_path
+						local scene_next = imagepreview.create(1,imgs,self)	
+						uikits.pushScene(scene_next)	
 					else
 						kits.log("ERROR :  download_pic_big_url failed")
 					end
@@ -648,6 +644,9 @@ function ErrorTitlePerView:getdatabyurl()
 			if t.result ~= 0 then
 				if t.result == 1 then
 					self:show_title(false)
+					is_loading = true
+					loadbox:removeFromParent()
+					return true
 				end
 				is_loading = false
 				loadbox:removeFromParent()
@@ -674,6 +673,10 @@ function ErrorTitlePerView:getdatabyurl()
 end
 
 function ErrorTitlePerView:init()
+	if self.isneedupdate == false then
+		self:set_innerpos()
+		return
+	end
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
 	else
@@ -683,21 +686,21 @@ function ErrorTitlePerView:init()
 	self:addChild(self._widget)
 	
 	
-	local function touchEventClose(sender,eventType)
+--[[	local function touchEventClose(sender,eventType)
 		if eventType == ccui.TouchEventType.began then
 			self._bigpic:setVisible(false)
 			local picview = uikits.child(self._bigpic,ui.BIG_PIC)
 			picview:removeAllChildren()
 		end
-	end
+	end--]]
 
-	self._bigpic = uikits.fromJson{file_9_16=ui.BIG_PIC_VIEW,file_3_4=ui.BIG_PIC_VIEW_3_4}
+--[[	self._bigpic = uikits.fromJson{file_9_16=ui.BIG_PIC_VIEW,file_3_4=ui.BIG_PIC_VIEW_3_4}
 	self:addChild(self._bigpic)
-	self._bigpic:setVisible(false)
+	self._bigpic:setVisible(false)--]]
 
 	--local viewbig = uikits.child(self._bigpic,ui.VIEW_BIG)
-	local button_close = uikits.child(self._bigpic,ui.CLOSE_BUT)
-	button_close:addTouchEventListener(touchEventClose)
+--[[	local button_close = uikits.child(self._bigpic,ui.CLOSE_BUT)
+	button_close:addTouchEventListener(touchEventClose)--]]
 	
 	local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
 	per_title_src:setVisible(false)
