@@ -295,8 +295,8 @@ function AppEntry:init()
 	local moLaStatisticsStudent = require "homework/lly/LaStatisticsTeacher"
 	print("2hahahahah")
 
-	local stu = moLaStatisticsStudent.Class:create()
-	bg:addChild(stu, 100)
+	local layStats = moLaStatisticsStudent.Class:create()
+	bg:addChild(layStats, 100)
 
 	stu:enter()
 

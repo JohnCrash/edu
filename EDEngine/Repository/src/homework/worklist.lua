@@ -816,9 +816,9 @@ function WorkList:init_gui()
 	--]]
 
 	--lly添加统计层，并先隐藏
-	self._laStats_Stu = cc.LayerColor:create(cc.c4b(125, 125, 125, 125), 500, 300)
+	self._laStats_Stu = moStats.Class:create()
 	if self._laStats_Stu then
-		self._root:addChild(self._laStats_Stu, 10)
+		self._root:addChild(self._laStats_Stu, 1)
 		self._laStats_Stu:setVisible(false)
 	end
 
