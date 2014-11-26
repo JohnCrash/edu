@@ -1267,6 +1267,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 		end
 	end
 	t.relayout = function(self,animation)
+		animation = nil --暂时屏蔽动画
 		if self._animation_begin_time then
 			local ct = os.clock()-self._animation_begin_time
 			if ct >= self._animation_duration then --动画结束
@@ -1398,6 +1399,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				end
 			end	
 		end
+		animation = nil --暂时屏蔽
 		if animation == 'slide' or animation == 'fall' then
 			if self:isAnimation() then return end
 			local list_visible = self:visibles()
