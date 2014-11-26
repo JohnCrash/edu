@@ -575,7 +575,7 @@ function TeacherList:init_ready_statistics()
 	
 	--self:load_ready_statistics()
 	self._laStats_Tchr:setVisible(true) --lly开启统计层
-	--self._laStats_Tchr:enter() --lly进入此层
+	self._laStats_Tchr:enter() --lly进入此层
 	return true
 end
 
@@ -742,9 +742,9 @@ function TeacherList:init_gui()
 		})
 
 	--lly创建统计层并隐藏
-	self._laStats_Tchr = cc.LayerColor:create(cc.c4b(125, 125, 125, 125), 500, 300)
+	self._laStats_Tchr = moStats.Class:create()
 	if self._laStats_Tchr then
-		self._root:addChild(self._laStats_Tchr, 10)
+		self._root:addChild(self._laStats_Tchr, 1)
 		self._laStats_Tchr:setVisible(false)
 	end
 end

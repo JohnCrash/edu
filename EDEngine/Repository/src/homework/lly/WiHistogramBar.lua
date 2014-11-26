@@ -7,7 +7,7 @@
 --卢乐颜
 --2014.11.18
 
-local lly = require "llyLuaBase"
+local lly = require "homework/lly/llyLuaBase"
 
 lly.finalizeCurrentEnvironment()
 

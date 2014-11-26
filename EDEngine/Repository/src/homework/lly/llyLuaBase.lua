@@ -12,7 +12,7 @@ local lly = {}
 --if not status then error(msg) end
 --最终release时，可把此函数内容注释掉
 function lly.traceback(msg)
-	---[====[
+	--[====[
 	lly.log("----------------------------------------")
 	lly.log("LUA ERROR: " .. tostring(msg) .. "\n")
 	lly.log(debug.traceback())
@@ -29,7 +29,7 @@ end
 -- cclog
 --最终release时，可把此函数内容注释掉
 function lly.log(...)
-	---[====[
+	--[====[
 	print(string.format(...))
 	--]====]
 end
@@ -37,7 +37,7 @@ end
 --自定义的log输出，调试时，输出时同时打印位置，所在函数名，以及所在文件名
 --最终release时，可把此函数内容注释掉
 function lly.logCurLocAnd(...)
-	---[====[
+	--[====[
 	local info = debug.getinfo(2,"Sln")
 	local strInfo = "(^_^)/: " .. string.format(...) .. " @ LINE " .. info.currentline .. " IN " .. 
 		(info.name and ("FUCN: " .. info.name .. " << ") or "FUCN: unnamed << ") .. info.short_src
@@ -48,7 +48,7 @@ end
 
 --打印当前位置函数的调用追溯
 function lly.logTraceback()
-	---[====[
+	--[====[
 	lly.log("(O_O)/ this func is called from :")
 	for nLevel = 3, math.huge do
 		local info = debug.getinfo(nLevel,"Sln")
@@ -62,7 +62,7 @@ end
 
 --打印table中所有内容
 function lly.logTable(t, index)
-	---[====[
+	--[====[
 	if index == nil then
 		print("TABLE:")
 	end
@@ -95,7 +95,7 @@ end
 
 --禁止所有的全局变量
 function lly.finalizeGlobalEnvironment()
-	---[====[
+	--[====[
 	local mt = {}	
 	
 	mt.__index = function (t, k)
@@ -112,7 +112,7 @@ end
 
 --只禁止当前文件的全局变量，会改变当前文件的环境
 function lly.finalizeCurrentEnvironment()
-	---[====[
+	--[====[
 	local mt = {}
 	
 	mt.__index = function (t, k)
@@ -140,11 +140,13 @@ end
 
 
 --【私有函数】给每个结构体提供唯一标识，为每个对象提供唯一标示
+--[====[
 local structID = 0 
 local function getUniqueStructID()
 	structID = structID + 1
 	return structID
 end
+--]====]
 
 ---
 --使类的实例最终化，也就是这之后不能再添加新的属性，避免因写错名称但无法检测而造成的麻烦
@@ -156,14 +158,16 @@ end
 --最终release时，可把此函数内容注释掉
 
 --【私有】保存原有的mt的index函数
+--[====[
 local mt_table = {}
+--]====]
 
 --最终化
 --注意：如果userdata的tolua.type一致，则会使用同一个元表，这意味着自己继承一个类，比如layer，所有layer的元表会改变
 --     	因此，在mt_table中，我使用tolua.type(ins)获得同类的元表并记录，在index中检测是否是同种元表
 --		另外利用__ID获得当前对象的唯一值，以防止对象之间相互影响
 function lly.finalizeInstance(ins)
-	---[====[
+	--[====[
 	local mt = getmetatable(ins)
 
 	if mt ~= nil and type(ins) == "userdata" then --有元表
@@ -305,7 +309,7 @@ function lly.class(classname, super)
 			-- copy fields from class to native object
 			for k,v in pairs(cls) do instance[k] = v end
 			instance.class = cls
-			---[====[
+			--[====[
 			instance.__ID = getUniqueStructID()
 			--]====]
 			instance:ctor()
@@ -356,16 +360,19 @@ function lly.class(classname, super)
 		end	
 		pRet:registerScriptHandler(onNodeEvent)
 
+		--[====[
 		lly.finalizeInstance(pRet)--最终化对象
-		pRet:implementFunction()--实现函数
-		b = pRet:init(t)--初始化
-		if not b then
+		--]====]
+
+		pRet:implementFunction()
+		b = pRet:init(t)  
+		if b then
+			return pRet
+		else
 			lly.log("(O_O)/init false")
 			pRet = nil
 			return nil
 		end
-
-		return pRet
 	end
 
 	return cls
@@ -375,20 +382,25 @@ end
 --在函数的ctor方法要返回 一个结构体
 --创建好以后，用create生成的对象，不能再往里面添加内容
 function lly.struct(create_table_func)
+	--[====[
 	if type(create_table_func) ~= "function" then 
 		error("create struct need a func param", 2)
 	end
+	--]====]
 
 	local stru = {}
 	stru.table_ctor = create_table_func
+
+	--[====[
 	stru.__ID = getUniqueStructID()
+	--]====]
 
 	--工厂函数，创建对象
 	function stru:create()--返回struct的对象
 		local pRet = self.table_ctor()
 		if type(pRet) == "table" then
 
-			---[====[
+			--[====[
 			pRet.__ctype = 3 --区别于class
 			pRet.__structID = self.__ID
 			lly.finalizeInstance(pRet)--最终化对象
@@ -403,9 +415,15 @@ end
 
 --创建一个确定项目的数组，参数为取得数组的指针和数组的项目数
 function lly.array(number)
+	--[====[
+	if type(number) ~= "number" then 
+		error("create array need a number param", 2)
+	end
+	--]====]
+
 	local ar = {}
 
-	---[====[
+	--[====[
 	for i = 1, number do
 		ar[i] = 0
 	end
@@ -418,7 +436,7 @@ end
 
 --只读的table
 function lly.const(table)
-	---[====[
+	--[====[
 	local oldtable = table --交换是为了能在注释以外直接返回table
 	table = {}
 	local mt = {
@@ -437,7 +455,7 @@ end
 --基础类型和原始c类型的typename为文字
 --自定义类型和自定义结构体的typename为table
 function lly.ensure(value, typename)
-	---[====[
+	--[====[
 	if type(value) == nil then return end --值为空则不进行检查
 
 	if type(typename) == "string" then 

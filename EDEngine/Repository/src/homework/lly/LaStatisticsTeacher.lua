@@ -6,7 +6,7 @@
 --卢乐颜
 --2014.11.13
 
-local lly = require "llyLuaBase"
+local lly = require "homework/lly/llyLuaBase"
 local moLaStatisticsBase = require "homework/lly/LaStatisticsBase"
 
 local moLogin = require "login"
@@ -45,7 +45,11 @@ function LaStatisticsTeacher:ctor()
 
 	self.enter = function () end --重载
 
-	self.getFinalURL = function () end --继承
+	self.getFinalURL_inherit = function () end --继承
+
+	--_表示为继承函数
+	self._onEnter = function () end
+	self._onExit = function () end
 
 end
 
@@ -72,10 +76,6 @@ function LaStatisticsTeacher:init( ... )
 
 		self._labClassInModel = self._layClassModel:getChildByName(CONST.CLASS_MODEL_LABEL)
 		if not self._labClassInModel then break end
-
-		--先把模型取出列表
-		self._layClassModel:retain()
-		self._layClassModel:removeFromParent()
 
 		--模型的点击回调，变颜色
 		self._layClassModel:addTouchEventListener(function (sender, touchType)
@@ -123,7 +123,7 @@ function LaStatisticsTeacher:implementFunction()
 			--关闭读档动画
 			if not Loadbox:removeFromParent() then return end
 
-			---[=[测试数据
+			--[=[测试数据
 			local j = [[
 			{
 				"msg": "成功", 
@@ -229,8 +229,28 @@ function LaStatisticsTeacher:implementFunction()
 		end
 	end
 
-	function self:getFinalURL()
+	function self:getFinalURL_inherit()
 		return string.format(CONST.TEACHER_STATUS_URL, self._nCurrentClass)
+	end
+
+	--选择指示要先从节点树中移走，为了防止释放则retain
+	--因为不能有析构函数，所以在onExit中释放，但为了多次onEnter不冲突，则在onExit把选择指示绑到节点上
+	self._onEnter = self.onEnter
+	function self:onEnter()
+		self:_onEnter()
+		self._layClassModel:retain() --防止释放
+		if self._layClassModel:getParent() ~= nil then
+			self._layClassModel:removeFromParent()
+		end	
+	end
+
+	self._onExit = self.onExit
+	function self:onExit()
+		self:_onExit()
+		if self._layClassModel:getParent() == nil then
+			self:addChild(self._layClassModel, -10)
+		end
+		self._layClassModel:release()
 	end
 
 end

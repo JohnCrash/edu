@@ -6,7 +6,7 @@
 --卢乐颜
 --2014.11.13
 
-local lly = require "llyLuaBase"
+local lly = require "homework/lly/llyLuaBase"
 local moLayHistogram = require "homework/lly/LayHistogram"
 
 local moUIKits = require "uikits"
@@ -85,7 +85,8 @@ function LaStatisticsBase:ctor()
 
 	self.enter = function () end --进入统计层，第一次时会调用refresh
 
-	self.getFinalURL = function () error("need inherit")end --得到最终的URL
+	self.getFinalURL_inherit = function () error("need inherit")end --得到最终的URL
+		
 end
 
 function LaStatisticsBase:init( ... )
@@ -115,6 +116,7 @@ function LaStatisticsBase:init( ... )
 
 		self._listClass = self._wiRoot:getChildByName(CONST.LIST_CLASS)
 		if not self._listClass then break end
+		self._listClass:setInertiaScrollEnabled(false) --禁止惯性滑动
 
 		---
 		self._imageLeft = self._wiRoot:getChildByName(CONST.LEFT_TOKEN)
@@ -125,6 +127,7 @@ function LaStatisticsBase:init( ... )
 
 		self._listCourse = self._wiRoot:getChildByName(CONST.LIST_COURSE)
 		if not self._listCourse then break end
+		self._listCourse:setInertiaScrollEnabled(false) --禁止惯性滑动
 
 		--实现列表控制左右指示
 		self._listCourse:addScrollViewEventListener(function (sender, srollEventType)
@@ -215,7 +218,7 @@ function LaStatisticsBase:implementFunction()
 
 	--刷新控件，从网上获取到该班级的统计数据，加载到控件上
 	function self:refresh()
-		---[=[测试数据
+		--[=[测试数据
 		local j = [[
 		[
 		{"cnt_home_work":5,"cnt_times":1120,"course":10003,"success_percent":-1,"year_month":"201411"},
@@ -271,7 +274,7 @@ function LaStatisticsBase:implementFunction()
 		local loadbox = moLoadingbox.open(self)
 
 		--设置url
-		local send_url = self:getFinalURL()
+		local send_url = self:getFinalURL_inherit()
 
 		moCache.request_cancel()
 		moCache.request_json( send_url, function(t)
@@ -370,8 +373,6 @@ function LaStatisticsBase:implementFunction()
 		if self._nCurrentBtnTag == courseNumber then return end
 
 		--把激活指示移动到当前按钮上
-		print(tolua.type(self._laySelected))
-
 		if self._laySelected:getParent() ~= nil then
 			self._laySelected:removeFromParent()
 		end
@@ -412,6 +413,22 @@ function LaStatisticsBase:implementFunction()
 			self:refresh()
 			self._bIsFirstEnter = false
 		end
+	end
+
+	--选择指示要先从节点树中移走，为了防止释放则retain
+	--因为不能有析构函数，所以在onExit中释放，但为了多次onEnter不冲突，则在onExit把选择指示绑到节点上
+	function self:onEnter()
+		if self._laySelected:getParent() ~= nil then
+			self._laySelected:removeFromParent()
+		end
+		self._laySelected:retain() --防止释放
+	end
+
+	function self:onExit()
+		if self._laySelected:getParent() == nil then
+			self:addChild(self._laySelected, -10)
+		end
+		self._laySelected:release()
 	end
 end
 

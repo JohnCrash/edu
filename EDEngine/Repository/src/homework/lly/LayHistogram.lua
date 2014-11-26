@@ -8,7 +8,7 @@
 --卢乐颜
 --2014.11.13
 
-local lly = require "llyLuaBase"
+local lly = require "homework/lly/llyLuaBase"
 local moWiHistogramBar = require "homework/lly/WiHistogramBar"
 
 lly.finalizeCurrentEnvironment()

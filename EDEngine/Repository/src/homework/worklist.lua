@@ -595,7 +595,7 @@ function WorkList:init_statistics()
 	if self._mode ~= ui.STATIST then
 
 		--读取数据
-		--self._laStats_Stu:loadData()
+		self._laStats_Stu:enter()
 
 		self._mode = ui.STATIST
 	end

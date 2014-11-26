@@ -291,14 +291,14 @@ function AppEntry:init()
 			end
 		end}	
 
-	---[[-----------------------------------
+	--[[-----------------------------------
 	local moLaStatisticsStudent = require "homework/lly/LaStatisticsTeacher"
 	print("2hahahahah")
 
 	local layStats = moLaStatisticsStudent.Class:create()
 	bg:addChild(layStats, 100)
 
-	stu:enter()
+	layStats:enter()
 
 	----------------]]
 
