@@ -109,12 +109,14 @@ if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
 	kits.config("cookie",cookie)
 else
+	--[[
 	local ck = kits.config("cookie","get")
 	if ck then
 		login.set_cookie( ck ) --上一次成功的启动
 	else
 		login.set_selector(1) --学生
 	end
+	--]]
 end
 if uid and type(uid)=='string' and string.len(uid)>1 then
 	login.set_userid( uid )

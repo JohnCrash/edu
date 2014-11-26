@@ -1221,6 +1221,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			t = 0
 		end
 		for i,v in pairs(list) do
+			if v:getNumberOfRunningActions() > 0 then
+				kits.log("WARNING : scroll animation running yet")
+				return
+			end
+		end
+		for i,v in pairs(list) do
 			local x,y = v:getPosition()
 			if animation == 'slide_out' then
 				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(size.width,y))) )
@@ -1273,7 +1279,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			else		--动画还在播放	
 				kits.log("--------------------------------------------------")
 				kits.log("animation playing,wait"..tostring(os.clock()))	
-				kits.log("")
+				kits.log("dt="..(self._animation_duration-ct))
 				delay_call( nil,function()
 					if self._animation_begin_time then --延迟到动画播放结束
 						local cct = os.clock()-self._animation_begin_time
@@ -1551,12 +1557,22 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 			height = height + col_height
 		end
 		--bottom
+		local tops = {}
+		local lists = {}
+		for i,v in pairs(self._list) do
+			if v._placeType == 'top' then
+				table.insert(tops,v)
+			else
+				table.insert(lists,v)
+			end
+		end
 		height = height + t._bottoms_space
 		if horz then
-			relayout_mix( self._list,m )
+			relayout_mix( lists,m )
 		else
-			relayout_list( self._list )
+			relayout_list( lists )
 		end
+		relayout_list( tops )
 		height = height + self._tops_space - t._bottoms_space - (overlapping or 0)
 		local tops_offy = height - cs.height
 
@@ -1572,7 +1588,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 		end
 	end
 	--添加函数
-	t.additem = function(self,key,sector)
+	t.additem = function(self,key,sector,place_type)
 		local item
 		local items
 		local lists
@@ -1597,6 +1613,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 			return 
 		end
 		if item then
+			item._placeType = place_type
 			table.insert( lists,item )
 			item:setVisible( true )
 			self._scrollview:addChild(item)

@@ -328,11 +328,13 @@ function Subjective:load_clip_texture(item,filename)
 	end
 end
 
-function Subjective:load_voice(item,filename_,suffix)
-	local filename = kits.get_cache_path()..filename_
-	if it then
+function Subjective:load_voice(item,filename,suffix)
+	kits.log("load_voice "..filename)
+	if item then
 		local play = uikits.child(item,ui.TOPICS_VOICE_PLAY)
 		local txt = uikits.child(item,ui.TOPICS_VOICE_TIME)
+		local del = uikits.child(item,ui.AUDIO_DELETE_BUTTON)
+		del:setVisible(false)
 		uikits.event(play,function(sender)
 			uikits.playSound( filename )
 		end)
@@ -346,7 +348,7 @@ function Subjective:clear_content()
 	uikits.child(self._topics_item,ui.TOPICS):setString("")
 end
 
-function Subjective:view_img(i,k)
+function Subjective:view_img(i,file)
 	if self._topics_list[i] then
 		local urls = self._topics_list[i].urls
 		local imgs = {}
@@ -357,8 +359,8 @@ function Subjective:view_img(i,k)
 				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 					table.insert(imgs,s.filename)
 				end
-				if r == k then
-					index = r
+				if s.filename == file then
+					index = #imgs
 				end
 			end
 		end
@@ -391,13 +393,13 @@ function Subjective:view_img_answer(i,k)
 		local imgs = {}
 		local index
 		for r,s in pairs(urls) do
-			if s then
-				local suffix = string.lower(string.sub(s,-4))
+			if s and s.filename then
+				local suffix = string.lower(string.sub(s.filename,-4))
 				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
-					table.insert(imgs,s)
+					table.insert(imgs,s.filename)
 				end
-				if r == k then
-					index = r
+				if s.filename == k then
+					index = #imgs
 				end
 			end
 		end
@@ -430,11 +432,12 @@ function Subjective:relayout_topics( i )
 						local item = uikits.child(clip,ui.TOPICS_PIC)
 						self:load_clip_texture( item,v.filename,suffix )
 						uikits.event( item,function(sender)
-							self:view_img(i,k)
+							self:view_img(i,v.filename)
 						end,"click" )
 					elseif suffix == '.amr' then
-						local item = self._topics_view:additem(2)
-						self:load_voice( item,v.filename,suffix )
+						local item = self._topics_view:additem(2,0,"top")
+						local filename = kits.get_cache_path()..v.filename
+						self:load_voice( item,filename,suffix )
 					end
 				end
 			end
@@ -444,20 +447,19 @@ function Subjective:relayout_topics( i )
 				self._edit_text:setText(t.answer.text or "")
 				if t.answer.resources then
 					for k,v in pairs(t.answer.resources) do
-						kits.log("relayout topics answer :"..v)
-						local suffix = string.lower(string.sub(v,-4))
+						local suffix = string.lower(string.sub(v.filename,-4))
 						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local clip = self._answer_view:additem(1)
 							local item = uikits.child(clip,ui.ANSWER_PIC)
 							local delete = uikits.child(clip,ui.PICTURE_DELETE_BUTTON)
 							delete:setVisible(false)
 							--加入删除功能
-							self:load_clip_texture( item,v,suffix )
+							self:load_clip_texture( item,v.filename,suffix )
 							uikits.event( item,function(sender)
-								self:view_img_answer(i,k)
+								self:view_img_answer(i,v.filename)
 							end,"click" )						
 						elseif suffix == '.amr' then
-							local item = self._topics_view:additem(2)
+							local item = self._answer_view:additem(2,0,"top")
 							self:load_voice( item,v.filename,suffix )
 						end
 					end
@@ -617,7 +619,6 @@ end
 --]]
 
 function Subjective:add_photo( photo_file,index )
-	kits.log("add_photo :"..photo_file)
 	local idx
 	if index then
 		idx = index
@@ -628,8 +629,7 @@ function Subjective:add_photo( photo_file,index )
 		local t = self._topics_list[idx]
 		t.answer = t.answer or {}
 		t.answer.resources = t.answer.resources or {}
-		table.insert(t.answer.resources,photo_file)
-		kits.log("add_photo insert:"..photo_file)
+		table.insert(t.answer.resources,{filename=photo_file})
 	end
 --[[
 	local pic = uikits.child( layout,ui.PICTURE_VIEW):clone()
@@ -670,6 +670,18 @@ function Subjective:add_photo( photo_file,index )
 end
 
 function Subjective:add_voice( voice_file,tlen,index )
+	local idx
+	if index then
+		idx = index
+	else
+		idx = self._current
+	end
+	if idx and self._topics_list then
+		local t = self._topics_list[idx]
+		t.answer = t.answer or {}
+		t.answer.resources = t.answer.resources or {}
+		table.insert(t.answer.resources,{filename=voice_file,length=tlen})
+	end	
 --[[
 	local voice = uikits.child( layout,ui.AUDIO_VIEW):clone()
 	local play = uikits.child( voice,ui.AUDIO_BUTTON )
@@ -811,7 +823,7 @@ function Subjective:save()
 					t.attachments = {}
 					if v.answer.resources then
 						for k,s in pairs(v.answer.resources) do
-							table.insert(t.attachments,{filename=s})
+							table.insert(t.attachments,{filename=s.filename})
 						end
 					end
 				else
