@@ -9,8 +9,8 @@ local editpic = require "suggestion/EditPic"
 local ljshell = require "ljshell"
 
 local ui = {
-	FILE = 'suggestion/statistics43_new.json',
-	FILE_3_4 = 'suggestion/statistics43_new_0.json',
+	FILE = 'suggestion/addtitle_new.json',
+	FILE_3_4 = 'suggestion/addtitle43_new.json',
 
 	SEL_FLAG = 'Panel_kemu/select3',
 	BUTTON_SEL_COURSE_MATH = 'Panel_kemu/shuxue',
@@ -98,11 +98,25 @@ end
 
 local scheduler
 
+function AddErrorView:SetButtonEnabled(is_show)
+	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+	if is_show == true then
+		but_add:setEnabled(true)
+		but_add:setBright(true)
+		but_add:setTouchEnabled(true)
+	else
+		but_add:setEnabled(false)
+		but_add:setBright(false)
+		but_add:setTouchEnabled(false)	
+	end
+end
+
 function AddErrorView:init()
 	if self.isneedupdate == 1 then
 		return
 	elseif self.isneedupdate == 2 then
 		self:update_info()
+		self:SetButtonEnabled(true)
 		return
 	end
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
@@ -113,6 +127,7 @@ function AddErrorView:init()
 	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._widget)
 	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+	self:SetButtonEnabled(false)
 	uikits.event(but_add,	
 	function(sender,eventType)	
 		self:adderrortitle()				
@@ -240,6 +255,9 @@ function AddErrorView:update_info()
 				end
 			end
 			self._piclist[#self._piclist] = nil
+			if #self._piclist == 0 then
+				self:SetButtonEnabled(false)
+			end
 			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 		end
 	end

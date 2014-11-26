@@ -7,8 +7,8 @@ local json = require "json-c"
 local loadingbox = require "loadingbox"
 
 local ui = {
-	FILE = 'suggestion/statistics43_new_0_0_0.json',
-	FILE_3_4 = 'suggestion/statistics43_new_0_0.json',
+	FILE = 'suggestion/editpic_new.json',
+	FILE_3_4 = 'suggestion/editpic43_new.json',
 	PIC_VIEW = 'Pic_view',
 	BUTTON_QUIT = 'mainmenu/fanhui',
 	BUTTON_ADD = 'mainmenu/Button_wc',
@@ -127,14 +127,14 @@ function EditPic:init()
 	local s = self._picview:getContentSize()
 --	back_pic:setPosition(cc.p(s.width/2,s.height/2))
     local back_pic = ccui.ImageView:create()
-	back_pic:setTouchEnabled(true)
-	--self.file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+--	back_pic:setTouchEnabled(true)
+--	self.file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
 	print('self.file_path::'..self.file_path)
     back_pic:loadTexture(self.file_path)
     back_pic:setPosition(cc.p(s.width/2,s.height/2))
 	self._picview:addChild(back_pic,1,10001)
 	
-	local function touchEventPic(sender,eventType)
+--[[	local function touchEventPic(sender,eventType)
 		if eventType == ccui.TouchEventType.began then
 		elseif eventType == ccui.TouchEventType.moved then
 			local pos = sender:getTouchMovePosition()
@@ -181,7 +181,7 @@ function EditPic:init()
 		end
 	end
 	
-	back_pic:addTouchEventListener(touchEventPic)	
+	back_pic:addTouchEventListener(touchEventPic)	--]]
 	
 --	local pic_size = back_pic:getContentSize()
 	local sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
@@ -200,7 +200,7 @@ function EditPic:init()
 			if local_pos.y>sender.maxheight or local_pos.y < 0 then
 				return
 			end
-			rotation_num = 0-math.ceil((local_pos.y-500)/500*180)
+			rotation_num = 0-math.ceil((local_pos.y-450)/450*180)
 			if rotation_num>0 then
 				rotation_num = rotation_num+1
 			end
@@ -308,7 +308,7 @@ function EditPic:init()
     buttonBL:addTouchEventListener(touchEvent)
     self._picview:addChild(buttonBL,1004,10001)
 	
-	local label_status_cut = cc.Sprite:create('suggestion/t4.png')
+--[[	local label_status_cut = cc.Sprite:create('suggestion/t4.png')
 	label_status_cut:setPosition(cc.p(s.width/2,s.height*4/5))
 	self._picview:addChild(label_status_cut,10)
 	local label_status_rota = cc.Sprite:create('suggestion/t3.png')
@@ -320,7 +320,7 @@ function EditPic:init()
 	label_status_cut:setVisible(true)
 	label_status_rota:setVisible(false)
 	label_status_move:setVisible(false)
-	operate_type = 1
+	operate_type = 1--]]
 	
 	local menu = cc.Menu:create()
 	local button_cutpic = cc.MenuItemImage:create('suggestion/ti1.png', 'suggestion/ti2.png')
@@ -335,7 +335,7 @@ function EditPic:init()
 		
 		self._picview:removeChildByTag(10001)
 		back_pic = ccui.ImageView:create()
-		back_pic:setTouchEnabled(true)
+		back_pic:setTouchEnabled(false)
 		
 		self.file_path = kits.get_local_directory()..'cache/'..temp_filename
 		local plat_path = cc.FileUtils:getInstance():getWritablePath()..temp_filename
@@ -343,7 +343,7 @@ function EditPic:init()
 
 		back_pic:loadTexture(self.file_path)
 		back_pic:setPosition(cc.p(s.width/2,s.height/2))
-		back_pic:addTouchEventListener(touchEventPic)
+--		back_pic:addTouchEventListener(touchEventPic)
 		self._picview:addChild(back_pic,1,10001)
 		
 		--sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
@@ -381,7 +381,7 @@ function EditPic:init()
 	end
 	button_cutpic:registerScriptTapHandler(Cut_pic)
 	
-	local menu_rota = cc.Menu:create()
+--[[	local menu_rota = cc.Menu:create()
 	local button_rota = cc.MenuItemImage:create('suggestion/t3.png', 'suggestion/t3.png')
 	button_rota:setPosition(cc.p(400,100))
 	menu_rota:addChild(button_rota)
@@ -394,9 +394,9 @@ function EditPic:init()
 		operate_type = 2
 	end
 	button_rota:setVisible(false)
-	button_rota:registerScriptTapHandler(rota_callback)
+	button_rota:registerScriptTapHandler(rota_callback)--]]
 
-	local menu_cut = cc.Menu:create()
+--[[	local menu_cut = cc.Menu:create()
 	local button_cut = cc.MenuItemImage:create('suggestion/t4.png', 'suggestion/t4.png')
 	button_cut:setPosition(cc.p(700,100))
 	menu_cut:addChild(button_cut)
@@ -408,9 +408,9 @@ function EditPic:init()
 		label_status_move:setVisible(false)
 		operate_type = 1
 	end
-	button_cut:registerScriptTapHandler(cut_callback)
+	button_cut:registerScriptTapHandler(cut_callback)--]]
 
-	local menu_move = cc.Menu:create()
+--[[	local menu_move = cc.Menu:create()
 	local button_move = cc.MenuItemImage:create('suggestion/t5.png', 'suggestion/t5.png')
 	button_move:setPosition(cc.p(1000,100))
 	menu_move:addChild(button_move)
@@ -422,9 +422,9 @@ function EditPic:init()
 		label_status_move:setVisible(true)
 		operate_type = 8
 	end
-	button_move:registerScriptTapHandler(move_callback)
---[[
-	local function onTouchEnded(touches, event)  
+	button_move:registerScriptTapHandler(move_callback)--]]
+
+--[[	local function onTouchEnded(touches, event)  
 		print('3333333333333333')
 		if operate_type == 2 then   
 			rotation_begain = nil
@@ -436,121 +436,47 @@ function EditPic:init()
 		elseif operate_type == 8 then
 			move_begain = nil
 		end
-	end
+	end--]]
+	local newTouch
+	local oldx,oldy,oldscale
 	local function onTouchMove(touches, event)  
-		print('222222222222222')
-		local location = touches[1]:getLocation()
-		if operate_type == 2 then
-			if rotation_begain == nil then
-				rotation_begain = location
-			end
-			local pic_x,pic_y = back_pic:getPosition()
-			local angle1 = cc.pToAngleSelf(cc.pSub(rotation_begain, cc.p(pic_x,pic_y)))
-			local angle2 = cc.pToAngleSelf(cc.pSub(location, cc.p(pic_x,pic_y)))
-			local angle = (angle1 - angle2) * 180 / 3.14
-			rotation_all = rotation_all+angle
-			back_pic:setRotation(rotation_all)
-			rotation_begain = location	
-		elseif 	operate_type == 1 then
-			if scale_begain == nil then
-				scale_begain = location
-			end
-			local pic_x,pic_y = back_pic:getPosition()
-			local scale_dis = 5
-			local scale_per = 0.1
-			local pos_begain = cc.pGetDistance(scale_begain, cc.p(pic_x,pic_y))
-			local pos_end = cc.pGetDistance(location, cc.p(pic_x,pic_y))
-			if pos_begain > pos_end then
-				local t=pos_begain-pos_end
-				if t>=scale_dis and scale_all>0.4 then
-					scale_all = scale_all-scale_per
-					back_pic:setScale(scale_all)
-				end
-			else
-				local t=pos_end-pos_begain
-				if t>=scale_dis and scale_all<5 then
-					scale_all = scale_all+scale_per
-					back_pic:setScale(scale_all)
-				end				
-			end	
-			scale_begain = location	
-		elseif operate_type > 2 and operate_type < 7 then	
-			if change_rect_begain == nil then
-				change_rect_begain = location
-			end		
-			if operate_type == 3 then
-				if location.x > sel_rect_size.x2 -20 or location.x < 0 then
-					return
-				end
-				sel_rect_size.x1 = location.x 
-			elseif operate_type == 4 then
-				if location.x < sel_rect_size.x1 +20 or location.x > s.width then
-					return
-				end
-				sel_rect_size.x2 = location.x
-			elseif operate_type == 5 then
-				if location.y > sel_rect_size.y2 -20 or location.y < 0 then
-					return
-				end			
-				sel_rect_size.y1 = location.y
-			elseif operate_type == 6 then
-				if location.y < sel_rect_size.y1 +20 or location.y > s.height then
-					return
-				end
-				sel_rect_size.y2 = location.y
-			end		
-			self._picview:removeChildByTag(10000)
-			local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
-			self._picview:addChild(sel_rect,1000,10000)	
-			buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
-			buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
-			buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
-			buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1)) 
-		elseif 	operate_type == 8 then	
-			if move_begain == nil then
-				move_begain = location
-			end		
-			local pic_x,pic_y = back_pic:getPosition()
-			pic_x = pic_x+(location.x-move_begain.x)
-			pic_y = pic_y+(location.y-move_begain.y)
-			back_pic:setPosition(cc.p(pic_x,pic_y))
-			move_begain = location	
+		local count = #touches
+		print('count::::'..count)
+		if not newTouch then return end
+		if count == 1 then
+			local img = back_pic
+			local scale = img:getScaleX()
+			local size = img:getContentSize()
+			local p = touches[1]:getLocation()
+			local sp = touches[1]:getStartLocation()			
+			img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+		elseif count == 2 then
+			local p1 = touches[1]:getLocation()
+			local sp1 = touches[1]:getStartLocation()
+			local p2 = touches[2]:getLocation()
+			local sp2 = touches[2]:getStartLocation()		
+			local sd = math.sqrt((sp1.x-sp2.x)*(sp1.x-sp2.x) + (sp1.y-sp2.y)*(sp1.y-sp2.y))
+			local d = math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y))
+			local img = back_pic
+			local scale = d/sd
+			img:setScaleX(scale*oldscale)
+			img:setScaleY(scale*oldscale)
 		end
 	end
 	local function onTouchBegan(touches, event)  
-			print('11111111111111')
-			local location = touches[1]:getLocation()
-			old_operate_type = operate_type
-			if location.x > sel_rect_size.x1 -5 and location.x < sel_rect_size.x1 +5 then
-				if location.y > sel_rect_size.y1 and location.y < sel_rect_size.y2 then
-					change_rect_begain = location
-					operate_type = 3
-				end
-			elseif location.x > sel_rect_size.x2 -5 and location.x < sel_rect_size.x2 +5 then
-				if location.y > sel_rect_size.y1 and location.y < sel_rect_size.y2 then
-					operate_type = 4
-					change_rect_begain = location
-				end		
-			elseif location.y > sel_rect_size.y1 -5 and location.y < sel_rect_size.y1 +5 then
-				if location.x > sel_rect_size.x1 and location.x < sel_rect_size.x2 then
-					operate_type = 5
-					change_rect_begain = location
-				end
-			elseif location.y > sel_rect_size.y2 -5 and location.y < sel_rect_size.y2 +5 then
-				if location.x > sel_rect_size.x1 and location.x < sel_rect_size.x2 then
-					operate_type = 6
-					change_rect_begain = location
-				end		
-			end		
+		newTouch = true
+		oldx,oldy = back_pic:getPosition()
+		oldscale = back_pic:getScaleX()
+		onTouchMove(touches, event)	
 	end
-	
     local listener_rect = cc.EventListenerTouchAllAtOnce:create()
 	listener_rect:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
 	listener_rect:registerScriptHandler(onTouchMove,cc.Handler.EVENT_TOUCHES_MOVED )
-    listener_rect:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )
-
+  --  listener_rect:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )
+	self:setTouchEnabled(true)
+	self._picview:setTouchEnabled(false)
     local eventDispatcher_rect = self:getEventDispatcher()
-    eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)--]]
+    eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)
 end
 
 function EditPic:release()
