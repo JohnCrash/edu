@@ -23,12 +23,12 @@ local ui = {
 	CLOSE_BUT = 'mypic_up/closebox/close',
 	
 	
-	VIEW_CUR_COURSE = 'Panel_5',
-	BUTTON_CUR_COURSE_ALL = 'Panel_5/Button_kemu_0',
-	BUTTON_CUR_COURSE_MATH = 'Panel_5/Button_kemu_shuxue',
-	BUTTON_CUR_COURSE_CHN = 'Panel_5/Button_kemu_yuwen',
-	BUTTON_CUR_COURSE_ENG = 'Panel_5/Button_kemu_yingyu',
-	BUTTON_CUR_COURSE_OTHER = 'Panel_5/Button_kemu_qita',
+	VIEW_CUR_COURSE = 'Panel_44',
+	BUTTON_CUR_COURSE_ALL = 'Panel_44/kemu',
+	BUTTON_CUR_COURSE_MATH = 'Panel_44/shuxu',
+	BUTTON_CUR_COURSE_CHN = 'Panel_44/yuwen',
+	BUTTON_CUR_COURSE_ENG = 'Panel_44/yingyu',
+	BUTTON_CUR_COURSE_OTHER = 'Panel_44/qita',
 	
 	COURSE_LIST = 'ListView_kemu_1',
 	COURSE_LIST_ALL = 'ListView_kemu_1/Button_49',
@@ -37,25 +37,32 @@ local ui = {
 	COURSE_LIST_ENG = 'ListView_kemu_1/Button_49_1_0',
 	COURSE_LIST_OTHER = 'ListView_kemu_1/Button_49_1_1',
 	
-	VIEW_CUR_STA = 'Panel_6',
+	CHECK_HUI = 'hui',
+--[[	VIEW_CUR_STA = 'Panel_6',
 	BUTTON_CUR_STA_ALL = 'Panel_6/Button_zhuangtai_1',
 	BUTTON_CUR_STA_YES = 'Panel_6/Button_zhuangtai_yihui',
-	BUTTON_CUR_STA_NO = 'Panel_6/Button_zhuangtai_0',
+	BUTTON_CUR_STA_NO = 'Panel_6/Button_zhuangtai_0',--]]
 	
-	STA_LIST = 'ListView_zhuangtai_0',
+--[[	STA_LIST = 'ListView_zhuangtai_0',
 	STA_LIST_ALL = 'ListView_zhuangtai_0/Button_49',
 	STA_LIST_YES = 'ListView_zhuangtai_0/Button_49_0',
-	STA_LIST_NO = 'ListView_zhuangtai_0/Button_49_1',
+	STA_LIST_NO = 'ListView_zhuangtai_0/Button_49_1',--]]
 
 	BUTTON_QUIT = 'mainmenu/fanhui',
 	BUTTON_ADD = 'Button_wc_0',
 	
 	VIEW_TITLE = 'ScrollView_6',
 	PER_TITLE_VIEW = 'ScrollView_6/have_1',
-	VIEW_BUHUI_MAINMENU = 'information',
-	VIEW_YIHUI_MAINMENU = 'information_0',
-	BUTTON_STA_BUHUI = 'information/Button_22',
-	BUTTON_STA_YIHUI = 'information_0/Button_23',
+--	VIEW_BUHUI_MAINMENU = 'information',
+--	VIEW_YIHUI_MAINMENU = 'information_0',
+--	BUTTON_STA_BUHUI = 'information/Button_22',
+	BUTTON_STA_HUI = 'huibuhui',
+	BUTTON_DEL = 'shanchu',
+	
+	PIC_COURSE_MATH = 'questions_pic/shuxue',
+	PIC_COURSE_CHN = 'questions_pic/yuwen',
+	PIC_COURSE_ENG = 'questions_pic/yingyu',
+	PIC_COURSE_OTHER = 'questions_pic/qita',
 	
 	TXT_REMARK = 'TextField_31_0',
 	PIC_VIEW = 'Image_sc_all_0',
@@ -79,7 +86,7 @@ function ErrorTitlePerView.create()
 	local layer = uikits.extend(cc.Layer:create(),ErrorTitlePerView)
 	scene:addChild(layer)
 	layer.course_index = 0
-	layer.status_index = 0
+	layer.status_index = 1
 	layer.page_index = 1
 	layer.totalpagecount = 0
 	layer.isneedupdate = true
@@ -97,9 +104,20 @@ end
 
 function ErrorTitlePerView:init_butlist()
 	local course_list = uikits.child(self._widget,ui.COURSE_LIST)
-	local status_list = uikits.child(self._widget,ui.STA_LIST)
+--	local status_list = uikits.child(self._widget,ui.STA_LIST)
 	course_list:setVisible(false)
-	status_list:setVisible(false)
+--	status_list:setVisible(false)
+	local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
+	per_title_src:setVisible(false)
+	
+	local pic_course_math = uikits.child(per_title_src,ui.PIC_COURSE_MATH)
+	local pic_course_chn = uikits.child(per_title_src,ui.PIC_COURSE_CHN)
+	local pic_course_eng = uikits.child(per_title_src,ui.PIC_COURSE_ENG)
+	local pic_course_other = uikits.child(per_title_src,ui.PIC_COURSE_OTHER)
+	pic_course_math:setVisible(false)
+	pic_course_chn:setVisible(false)
+	pic_course_eng:setVisible(false)
+	pic_course_other:setVisible(false)
 
 	local but_cur_course_all = uikits.child(self._widget,ui.BUTTON_CUR_COURSE_ALL)
 	local but_cur_course_math = uikits.child(self._widget,ui.BUTTON_CUR_COURSE_MATH)
@@ -160,44 +178,6 @@ function ErrorTitlePerView:init_butlist()
 				course_list:setVisible(false)
 			else
 				course_list:setVisible(true)
-			end	
-	end,"click")
-
-	local but_cur_status_all = uikits.child(self._widget,ui.BUTTON_CUR_STA_ALL)
-	local but_cur_status_yes = uikits.child(self._widget,ui.BUTTON_CUR_STA_YES)
-	local but_cur_status_no = uikits.child(self._widget,ui.BUTTON_CUR_STA_NO)
-	
-	but_cur_status_all:setVisible(true)
-	but_cur_status_yes:setVisible(false)
-	but_cur_status_no:setVisible(false)
-	
-	uikits.event(but_cur_status_all,	
-		function(sender,eventType)	
-			local is_show = status_list:isVisible()	
-			if is_show == true then
-				status_list:setVisible(false)
-			else
-				status_list:setVisible(true)
-			end	
-	end,"click")
-	
-	uikits.event(but_cur_status_yes,	
-		function(sender,eventType)	
-			local is_show = status_list:isVisible()	
-			if is_show == true then
-				status_list:setVisible(false)
-			else
-				status_list:setVisible(true)
-			end	
-	end,"click")
-	
-	uikits.event(but_cur_status_no,	
-		function(sender,eventType)	
-			local is_show = status_list:isVisible()	
-			if is_show == true then
-				status_list:setVisible(false)
-			else
-				status_list:setVisible(true)
 			end	
 	end,"click")
 	
@@ -272,7 +252,59 @@ function ErrorTitlePerView:init_butlist()
 			self:getdatabyurl()
 	end,"click")
 	
-	local list_status_all = uikits.child(self._widget,ui.STA_LIST_ALL)
+	local check_status = uikits.child(self._widget,ui.CHECK_HUI)
+	uikits.event(check_status,	
+		function(sender,eventType)	
+			print('eventType::'..tostring(eventType))
+			if eventType == true then
+				self.page_index = 1
+				self.status_index = 2
+				self:getdatabyurl()
+			else
+				self.page_index = 1
+				self.status_index = 1
+				self:getdatabyurl()
+			end	
+	end)
+--[[	local but_cur_status_all = uikits.child(self._widget,ui.BUTTON_CUR_STA_ALL)
+	local but_cur_status_yes = uikits.child(self._widget,ui.BUTTON_CUR_STA_YES)
+	local but_cur_status_no = uikits.child(self._widget,ui.BUTTON_CUR_STA_NO)
+	
+	but_cur_status_all:setVisible(true)
+	but_cur_status_yes:setVisible(false)
+	but_cur_status_no:setVisible(false)
+	
+	uikits.event(but_cur_status_all,	
+		function(sender,eventType)	
+			local is_show = status_list:isVisible()	
+			if is_show == true then
+				status_list:setVisible(false)
+			else
+				status_list:setVisible(true)
+			end	
+	end,"click")
+	
+	uikits.event(but_cur_status_yes,	
+		function(sender,eventType)	
+			local is_show = status_list:isVisible()	
+			if is_show == true then
+				status_list:setVisible(false)
+			else
+				status_list:setVisible(true)
+			end	
+	end,"click")
+	
+	uikits.event(but_cur_status_no,	
+		function(sender,eventType)	
+			local is_show = status_list:isVisible()	
+			if is_show == true then
+				status_list:setVisible(false)
+			else
+				status_list:setVisible(true)
+			end	
+	end,"click")--]]	
+	
+--[[	local list_status_all = uikits.child(self._widget,ui.STA_LIST_ALL)
 	local list_status_yes = uikits.child(self._widget,ui.STA_LIST_YES)
 	local list_status_no = uikits.child(self._widget,ui.STA_LIST_NO)
 	
@@ -305,7 +337,7 @@ function ErrorTitlePerView:init_butlist()
 		but_cur_status_yes:setVisible(false)
 		but_cur_status_no:setVisible(true)
 		self:getdatabyurl()
-	end,"click")
+	end,"click")--]]
 end
 
 function ErrorTitlePerView:show_checkview(check_view,title_tabel)
@@ -460,49 +492,11 @@ end
 
 local title_space = 20 
 local status_change_url = 'http://app.lejiaolexue.com/exerbook2/do.ashx?'
+local item_del_url = 'http://app.lejiaolexue.com/exerbook2/del.ashx?'
 
 function ErrorTitlePerView:show_title(is_has_title)
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 	local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
-
-	local function touchEventHui(sender,eventType)
-		if eventType == ccui.TouchEventType.began then
-			local send_url = status_change_url..'id='..sender.id
-			local loadbox = loadingbox.open(self)
-			is_loading = true
-			self._empty:setVisible(false)
-			cache.request_json( send_url,function(t)
-				if t and type(t)=='table' then
-					if t.result ~= 0 then
-						is_loading = false
-						loadbox:removeFromParent()
-						return false
-					else
-						local buhui_mainmenu = uikits.child(sender.cur_title_view,ui.VIEW_BUHUI_MAINMENU)
-						local yihui_mainmenu = uikits.child(sender.cur_title_view,ui.VIEW_YIHUI_MAINMENU)
-						if t.status == 2 then      --会做的
-							yihui_mainmenu:setVisible(true)
-							buhui_mainmenu:setVisible(false)
-						elseif t.status == 1 then	--不会做
-							buhui_mainmenu:setVisible(true)
-							yihui_mainmenu:setVisible(false)
-						end
-					end
-				else
-					--既没有网络也没有缓冲
-					messagebox.open(self,function(e)
-						if e == messagebox.TRY then
-							self:adderrortitle()
-						elseif e == messagebox.CLOSE then
-							uikits.popScene()
-						end
-					end,messagebox.RETRY)	
-				end
-				is_loading = false
-				loadbox:removeFromParent()
-			end,'N')			
-		end
-	end
 
 	local function cleartitle()
 		local titleview = view_title:getChildren()
@@ -514,7 +508,6 @@ function ErrorTitlePerView:show_title(is_has_title)
 		local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 		view_title:setInnerContainerSize(view_title:getContentSize())
 	end
-
 	if is_has_title == false then
 		cleartitle()
 		self._empty:setVisible(true)
@@ -528,15 +521,89 @@ function ErrorTitlePerView:show_title(is_has_title)
 			for i,v in pairs(self.title_table) do
 				local cur_title_view
 				cur_title_view = per_title_src:clone()
-				local buhui_mainmenu = uikits.child(cur_title_view,ui.VIEW_BUHUI_MAINMENU)
-				local yihui_mainmenu = uikits.child(cur_title_view,ui.VIEW_YIHUI_MAINMENU)
-				if v.status == 2 then      --会做的
-					yihui_mainmenu:setVisible(true)
-					buhui_mainmenu:setVisible(false)
-				elseif v.status == 1 then	--不会做
-					buhui_mainmenu:setVisible(true)
-					yihui_mainmenu:setVisible(false)
+
+				local but_del = uikits.child(cur_title_view,ui.BUTTON_DEL)
+				but_del.id = v.id
+				uikits.event(but_del,	
+					function(sender,eventType)	
+						local send_url = item_del_url..'id='..sender.id
+						local loadbox = loadingbox.open(self)
+						is_loading = true
+						self._empty:setVisible(false)
+						cache.request_json( send_url,function(t)
+							if t and type(t)=='table' then
+								if t.result ~= 0 then
+									is_loading = false
+									loadbox:removeFromParent()
+									return false
+								else
+									self.page_index = 1
+									self:getdatabyurl()						
+								end
+							else
+								--既没有网络也没有缓冲
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										self:adderrortitle()
+									elseif e == messagebox.CLOSE then
+										uikits.popScene()
+									end
+								end,messagebox.RETRY)	
+							end
+							is_loading = false
+							loadbox:removeFromParent()
+						end,'N')			
+				end)		
+				
+				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
+				--but_del:addTouchEventListener(touchEventHui)
+				but_status.id = v.id
+				if v.status == 1 then
+					but_status:setSelectedState(true)
+				elseif v.status == 2 then
+					but_status:setSelectedState(false)
 				end
+				uikits.event(but_status,	
+					function(sender,eventType)	
+						local send_url = status_change_url..'id='..sender.id
+						local loadbox = loadingbox.open(self)
+						is_loading = true
+						self._empty:setVisible(false)
+						cache.request_json( send_url,function(t)
+							if t and type(t)=='table' then
+								if t.result ~= 0 then
+									is_loading = false
+									loadbox:removeFromParent()
+									return false
+								else
+									self.page_index = 1
+									self:getdatabyurl()						
+								end
+							else
+								--既没有网络也没有缓冲
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										self:adderrortitle()
+									elseif e == messagebox.CLOSE then
+										uikits.popScene()
+									end
+								end,messagebox.RETRY)	
+							end
+							is_loading = false
+							loadbox:removeFromParent()
+						end,'N')			
+				end)				
+				local pic_course 
+				if v.course	== 1 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
+				elseif v.course	== 2 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_MATH)
+				elseif v.course	== 3 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_ENG)
+				elseif v.course	== 4 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_OTHER)
+				end			
+				pic_course:setVisible(true)
 				
 				local txt_remark = uikits.child(cur_title_view,ui.TXT_REMARK)
 				txt_remark:setTouchEnabled(false)
@@ -553,16 +620,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 				local pos_y = view_title:getInnerContainerSize().height-(size_per_view.height+ title_space)*i	
 				cur_title_view:setPositionY(pos_y)	
 				cur_title_view:setVisible(true)
-
-				local but_buhui = uikits.child(cur_title_view,ui.BUTTON_STA_BUHUI)
-				local but_yihui = uikits.child(cur_title_view,ui.BUTTON_STA_YIHUI)
-				but_buhui:addTouchEventListener(touchEventHui)
-				but_yihui:addTouchEventListener(touchEventHui)
-				but_buhui.id = v.id
-				but_buhui.cur_title_view = cur_title_view
-				but_yihui.id = v.id
-				but_yihui.cur_title_view = cur_title_view
-				
+								
 				view_title:addChild(cur_title_view,1,10000+i)
 			end		
 		else
@@ -584,15 +642,88 @@ function ErrorTitlePerView:show_title(is_has_title)
 			for i,v in pairs(self.title_table) do
 				local cur_title_view
 				cur_title_view = per_title_src:clone()
-				local buhui_mainmenu = uikits.child(cur_title_view,ui.VIEW_BUHUI_MAINMENU)
-				local yihui_mainmenu = uikits.child(cur_title_view,ui.VIEW_YIHUI_MAINMENU)
-				if v.status == 2 then      --会做的
-					yihui_mainmenu:setVisible(true)
-					buhui_mainmenu:setVisible(false)
-				elseif v.status == 1 then	--不会做
-					buhui_mainmenu:setVisible(true)
-					yihui_mainmenu:setVisible(false)
+				local but_del = uikits.child(cur_title_view,ui.BUTTON_DEL)
+				but_del.id = v.id
+				uikits.event(but_del,	
+					function(sender,eventType)	
+						local send_url = item_del_url..'id='..sender.id
+						local loadbox = loadingbox.open(self)
+						is_loading = true
+						self._empty:setVisible(false)
+						cache.request_json( send_url,function(t)
+							if t and type(t)=='table' then
+								if t.result ~= 0 then
+									is_loading = false
+									loadbox:removeFromParent()
+									return false
+								else
+									self.page_index = 1
+									self:getdatabyurl()						
+								end
+							else
+								--既没有网络也没有缓冲
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										self:adderrortitle()
+									elseif e == messagebox.CLOSE then
+										uikits.popScene()
+									end
+								end,messagebox.RETRY)	
+							end
+							is_loading = false
+							loadbox:removeFromParent()
+						end,'N')			
+				end)		
+				
+				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
+				--but_del:addTouchEventListener(touchEventHui)
+				but_status.id = v.id
+				if v.status == 1 then
+					but_status:setSelectedState(true)
+				elseif v.status == 2 then
+					but_status:setSelectedState(false)
 				end
+				uikits.event(but_status,	
+					function(sender,eventType)	
+						local send_url = status_change_url..'id='..sender.id
+						local loadbox = loadingbox.open(self)
+						is_loading = true
+						self._empty:setVisible(false)
+						cache.request_json( send_url,function(t)
+							if t and type(t)=='table' then
+								if t.result ~= 0 then
+									is_loading = false
+									loadbox:removeFromParent()
+									return false
+								else
+									self.page_index = 1
+									self:getdatabyurl()						
+								end
+							else
+								--既没有网络也没有缓冲
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										self:adderrortitle()
+									elseif e == messagebox.CLOSE then
+										uikits.popScene()
+									end
+								end,messagebox.RETRY)	
+							end
+							is_loading = false
+							loadbox:removeFromParent()
+						end,'N')			
+				end)				
+				local pic_course 
+				if v.course	== 1 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
+				elseif v.course	== 2 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_MATH)
+				elseif v.course	== 3 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_ENG)
+				elseif v.course	== 4 then
+					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_OTHER)
+				end			
+				pic_course:setVisible(true)
 				
 				local txt_remark = uikits.child(cur_title_view,ui.TXT_REMARK)
 				txt_remark:setTouchEnabled(false)
@@ -609,16 +740,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 				local pos_y = view_title:getInnerContainerSize().height-(size_per_view.height+ title_space)*(i+count_old)	
 				cur_title_view:setPositionY(pos_y)	
 				cur_title_view:setVisible(true)
-				
-				local but_buhui = uikits.child(cur_title_view,ui.BUTTON_STA_BUHUI)
-				local but_yihui = uikits.child(cur_title_view,ui.BUTTON_STA_YIHUI)
-				but_buhui:addTouchEventListener(touchEventHui)
-				but_yihui:addTouchEventListener(touchEventHui)
-				but_buhui.id = v.id
-				but_buhui.cur_title_view = cur_title_view
-				but_yihui.id = v.id
-				but_yihui.cur_title_view = cur_title_view
-				
+								
 				view_title:addChild(cur_title_view,1,10000+i+count_old)
 			end				
 		end
@@ -701,9 +823,6 @@ function ErrorTitlePerView:init()
 	--local viewbig = uikits.child(self._bigpic,ui.VIEW_BIG)
 --[[	local button_close = uikits.child(self._bigpic,ui.CLOSE_BUT)
 	button_close:addTouchEventListener(touchEventClose)--]]
-	
-	local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
-	per_title_src:setVisible(false)
 	
 	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)
 	uikits.event(but_add,	
