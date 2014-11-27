@@ -329,7 +329,15 @@ function WorkCommit:init_commit_page()
 		local obj_num = uikits.child(self._root,ui.OBJECTIVE_NUM)
 		if obj_num and self._args.cnt_item then
 			obj_num:setString(tostring(self._args.cnt_item))
-			self:setPercent2(0)
+			local sn = self._args.subjective_num
+			if sn and sn > 0 then
+				local donesn = Subjective.get_done_num( self._args.exam_id)
+				print("##########################"..donesn)
+				self:setPercent2(donesn*100/sn)
+			else
+				self:setPercent2(0)
+			end
+			
 			if self._args.cnt_item == 0 then
 				local button = uikits.child(self._root,ui.WORKFLOW)
 				button:setEnabled(false)
@@ -385,7 +393,11 @@ function WorkCommit:init_commit_page()
 				end,'click')			
 		end
 		if self._args.cnt_item_finish and self._args.cnt_item and self._args.cnt_item_finish > 0 then
-			self:setPercent( math.floor(self._args.cnt_item_finish*100.0/self._args.cnt_item) )
+			if self._args.cnt_item == 0 then
+				self:setPercent(0)
+			else
+				self:setPercent( math.floor(self._args.cnt_item_finish*100.0/self._args.cnt_item) )
+			end
 		else
 			self:setPercent(0)
 		end
@@ -664,7 +676,7 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 				end
 				local url = commit_answer_url..'?examId='..tostring(self._args.exam_id)
 					..'&itemId='..tostring(v.item_id)
-					..'&answer='..(tostring(v.text) or "")
+					..'&answer='..(v.text or "")
 					..'&times='..(v.times or 0) --做题题目计时器
 					..'&tid='..tostring(self._args.tid)
 					..'&attach='..json.encode(att)
@@ -717,6 +729,8 @@ function WorkCommit:commit_subjective( context ) --提交主观题
 					upload_myanswer_from_table( answ )
 					return
 				end
+			else
+				kits.log("ERROR : can't load answer file "..tostring(file))
 			end
 			context.myanswer = -1
 		end

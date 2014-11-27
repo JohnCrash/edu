@@ -95,7 +95,7 @@ local function is_done( url )
 	if cache_data[url] then
 		return true
 	else
-		local s = get_name( url )
+		local s = get_name( url )	
 		if s then
 			return kits.exist_cache( s )
 		end
@@ -160,11 +160,16 @@ local function request_nc( url,func,filename ) --网络优先，然后缓存
 		table.insert(request_list,mh)
 	end
 end
-local function request_cn( url,func )
-	if is_done() then
+local function request_cn( url,func,filename )
+	if is_done(url) then
+		if filename then
+			if not kits.exist_cache(filename) then
+				kits.copy_cache(get_name(url),filename)
+			end
+		end
 		func( true )
 	else
-		request_nc( url,func )
+		request_nc( url,func,filename )
 	end
 end
 local function request_n( url,func )
@@ -325,7 +330,7 @@ local function request_resources( rtable,efunc,priority )
 		for i,v in pairs(rtable.urls) do
 			b = false
 			if type(v)=='table' and isurl(v.url) then
-				request_nc(v.url,function(b)
+				request_cn(v.url,function(b)
 					efunc( rtable,i,b )
 				end,v.filename)
 			else
