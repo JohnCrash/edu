@@ -122,10 +122,12 @@ if uid and type(uid)=='string' and string.len(uid)>1 then
 	login.set_userid( uid )
 	kits.config("uid",uid)
 else
+	--[[
 	local id = kits.config("uid","get")
 	if id then
 		login.set_userid( id )
 	end
+	--]]
 end
 
 resume.clearflag("launcher") --launcher isok

@@ -41,6 +41,7 @@ local ui = {
 	TOPICS_VOICE_PLAY = 'chat',
 	TOPICS_VOICE_TIME = 'chat_time',
 	
+	WRITE_EDIT = "Panel_36/edit",
 	AUDIO_VIEW = 'chat_view',
 	AUDIO_BUTTON = 'chat',
 	AUDIO_TIME = 'chat_time',
@@ -183,11 +184,6 @@ function Subjective:set_current( i )
 		self:clear_current()
 		self:calc_times( i )
 
-		--保存老的文本
-		if self._current then
-			self._topics_list[self._current].answer.text = self._edit_text:getStringValue()
-		end
-		
 		self._current = i
 		self:relayout_topics( i )
 		--[[
@@ -333,12 +329,10 @@ function Subjective:load_voice(item,filename,suffix)
 	if item then
 		local play = uikits.child(item,ui.TOPICS_VOICE_PLAY)
 		local txt = uikits.child(item,ui.TOPICS_VOICE_TIME)
-		local del = uikits.child(item,ui.AUDIO_DELETE_BUTTON)
-		del:setVisible(false)
 		uikits.event(play,function(sender)
-			uikits.playSound( filename )
+			uikits.playSound( kits.get_cache_path()..filename )
 		end)
-		local length = cc_getVoiceLength( filename )
+		local length = cc_getVoiceLength( kits.get_cache_path()..filename )
 		txt:setString( kits.time_to_string_simple(math.floor(length)) )
 	end
 end
@@ -414,7 +408,7 @@ end
 
 --布局第i题
 function Subjective:relayout_topics( i )
-	if self._topics_list[i] then --存在
+	if i and self._topics_list[i] then --存在
 		if self._topics_done[i] then --资源都下载完成
 			if self._loadingbox then
 				self._loadingbox:removeFromParent()
@@ -436,7 +430,7 @@ function Subjective:relayout_topics( i )
 						end,"click" )
 					elseif suffix == '.amr' then
 						local item = self._topics_view:additem(2,0,"top")
-						local filename = kits.get_cache_path()..v.filename
+						local filename = v.filename
 						self:load_voice( item,filename,suffix )
 					end
 				end
@@ -452,20 +446,44 @@ function Subjective:relayout_topics( i )
 							local clip = self._answer_view:additem(1)
 							local item = uikits.child(clip,ui.ANSWER_PIC)
 							local delete = uikits.child(clip,ui.PICTURE_DELETE_BUTTON)
-							delete:setVisible(false)
+							delete:setVisible(self._edit:getSelectedState())
 							--加入删除功能
+							uikits.event(delete,function(sender)
+								uikits.delay_call(self,function()
+									table.remove( t.answer.resources,k )
+									self:clear_current()
+									self:relayout_topics(self._current)
+								end,0.01)
+							end)
 							self:load_clip_texture( item,v.filename,suffix )
 							uikits.event( item,function(sender)
 								self:view_img_answer(i,v.filename)
 							end,"click" )						
 						elseif suffix == '.amr' then
 							local item = self._answer_view:additem(2,0,"top")
+							local delete = uikits.child(item,ui.PICTURE_DELETE_BUTTON)
+							uikits.event(delete,function(sender)
+								uikits.delay_call(self,function()
+									table.remove( t.answer.resources,k )
+									self:clear_current()
+									self:relayout_topics(self._current)
+								end,0.01)
+							end)							
+							delete:setVisible(self._edit:getSelectedState())
 							self:load_voice( item,v.filename,suffix )
 						end
 					end
 				end
 			end
-			--设置答案资源
+			--设置评论
+			if self._comment_item then
+				if t.answer.comment and string.len(t.answer.comment)>0 then
+					self._comment_item._isHidden = false
+					uikits.child(self._comment_item,ui.TOPICS):setString(t.answer.comment or "" )
+				else
+					self._comment_item._isHidden = true
+				end
+			end
 			self:relayout_all()
 		else
 			if not self._loadingbox then
@@ -809,9 +827,6 @@ function Subjective:save()
 		self:calc_times() --计算当前时间
 		local file = self._args.exam_id..login.uid()..'.custom'
 	
-		if self._current then
-			self._topics_list[self._current].answer.text = self._edit_text:getStringValue()
-		end
 		if self._topics_list then
 			local my_answer = {}
 			for i,v in pairs(self._topics_list) do
@@ -820,6 +835,7 @@ function Subjective:save()
 					local t = my_answer[v.item_id]
 					t.times = v.answer._times
 					t.text = v.answer.text
+					t.item_id = v.item_id
 					t.attachments = {}
 					if v.answer.resources then
 						for k,s in pairs(v.answer.resources) do
@@ -836,6 +852,28 @@ function Subjective:save()
 	end
 end
 
+function Subjective.get_done_num( exam_id )
+	local file = exam_id..login.uid()..'.custom'
+	local str = kits.read_cache( file )
+	
+	if str then
+		local t = json.decode( str )
+		local count = 0
+		for i,v in pairs(t) do
+			if v and type(v)=='table' then
+				if v.text and string.len(v.text)>0 then
+					count = count + 1
+				elseif #v.attachments>0 then
+					count = count + 1
+				end
+			end
+		end
+		return count
+	else
+		return 0
+	end
+end
+
 --装入答案
 function Subjective:load_myanswer_from_table( t )
 	for i,v in pairs(self._topics_list) do
@@ -847,12 +885,13 @@ function Subjective:load_myanswer_from_table( t )
 				my_answer._times = item.times or 0
 				my_answer._begin_time = os.time()
 				my_answer.text = item.text
+				my_answer.comment = item.comment
 				for k,s in pairs(item.attachments) do
 					local suffix = string.lower(string.sub(s.filename,-4))
 					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
 						self:add_photo( s.filename,i )
 					elseif suffix == '.amr' then
-						local tlen = cc_getVoiceLength( s.filename )
+						local tlen = cc_getVoiceLength( kits.get_cache_path()..s.filename )
 						self:add_voice( s.filename,tlen,i )
 					else
 						kits.log("ERROR not support meida type "..tostring(suffix))
@@ -895,6 +934,7 @@ function Subjective:load_myanswer_from_table( t )
 end
 
 function Subjective:load_from_cloud()
+	kits.log("Subjective:load_from_cloud")
 	local function download_resources( rsts,cloud_answer )
 		local n = 0
 		local loadbox = loadingbox.open(self)
@@ -906,6 +946,8 @@ function Subjective:load_from_cloud()
 					return
 				end
 				self:load_myanswer_from_table( cloud_answer )
+				self:clear_current()
+				self:relayout_topics(self._current)
 			end
 		end)
 		if not r then
@@ -963,6 +1005,10 @@ function Subjective:load_from_cloud()
 									end
 								end
 								--table.insert(cloud_answer,p)
+								p.comment = answer.comment
+								p.isjudged = answer.isjudged
+								p.isright = answer.isright
+								p.score = answer.score
 								cloud_answer[p.item_id] = p
 							else
 								--下载失败
@@ -1007,12 +1053,18 @@ function Subjective:load_myanswer()
 		if str then
 			local t = json.decode( str )
 			if t then
+				if self._args.status == 10 or self._args.status == 11 then
+					--已经提交,老师的批改也需要下载，因此只能每次从网上拉
+					self:load_from_cloud()
+					return
+				end
 				self:load_myanswer_from_table( t )
+				self:clear_current()
+				self:relayout_topics(self._current)				
 				return
 			end
 		end
 	end
-	self:load_from_cloud()
 end
 
 function Subjective:load_logo_and_name()
@@ -1022,6 +1074,10 @@ function Subjective:load_logo_and_name()
 		if t.teacher_name then
 			local item = uikits.child(self._topics_item,ui.TEACHER_NAME)
 			item:setString( t.teacher_name )
+			if self._comment_item then
+				item = uikits.child(self._comment_item,ui.TEACHER_NAME)
+				item:setString( t.teacher_name )
+			end
 		end		
 		if t.tid then
 			login.get_logo( t.tid,
@@ -1029,6 +1085,10 @@ function Subjective:load_logo_and_name()
 				if name then
 					local item = uikits.child(self._topics_item,ui.TEACHER_PHOTO)
 					item:loadTexture( name )
+					if self._comment_item then
+						item = uikits.child(self._comment_item,ui.TEACHER_PHOTO)
+						item:loadTexture( name )
+					end
 				else
 					kits.log("get logo fail"..tostring(t.tid))
 				end
@@ -1211,6 +1271,15 @@ function Subjective:init_gui()
 		x,self._item_y = self._item_current:getPosition()				
 		--主视图
 		self._main_view = uikits.scroll(self._root,ui.MAIN_VIEW,ui.TEACHER_VIEW,false,16,ui.WRITE_VIEW,220) --uikits.child(self._root,ui.MAIN_VIEW)
+		--加入评论
+		if self._args.status == 10 or self._args.status == 11 then
+			self._comment_item = self._main_view:additem()
+			self._comment_view = uikits.scrollex(self._comment_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
+												{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO},nil,true,4,110)
+			self._comment_view:clear()
+			self._comment_view:relayout()
+			self._comment_item._isHidden = true
+		end
 		self._topics_item = self._main_view:additem()
 		--题目视图
 		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
@@ -1226,6 +1295,23 @@ function Subjective:init_gui()
 		self._voice_button = uikits.child(self._answer_item,ui.VOICE_BUTTON)
 		self._cam_button = uikits.child(self._answer_item,ui.CAM_BUTTON)
 		self._photo_button = uikits.child(self._answer_item,ui.PHOTO_BUTTON)
+		self._edit = uikits.child(self._answer_item,ui.WRITE_EDIT)
+		uikits.event(self._edit_text,function(sender,eventType)
+			if self._current and self._topics_list and self._topics_list[self._current] then
+				self._topics_list[self._current].answer.text = self._edit_text:getStringValue()
+			end
+		end)
+		if self._args.status == 10 or self._args.status == 11 then		
+			self._edit:setVisible(false)
+		end
+		uikits.event(self._edit,function(sender,b)
+			for i,v in pairs(self._answer_view._list) do
+				local del = uikits.child(v,ui.AUDIO_DELETE_BUTTON)
+				if del then
+					del:setVisible(b)
+				end
+			end		
+		end)
 		uikits.event( self._voice_button,function(sender) --录音
 				if not (self._args.status == 10 or self._args.status == 11) then
 					stopSound()

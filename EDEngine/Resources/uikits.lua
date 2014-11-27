@@ -876,6 +876,8 @@ end
 
 local function popScene()
 	if _pushNum and _pushNum > 0 then
+		local glview = Director:getOpenGLView()
+		glview:setIMEKeyboardState(false) 
 		Director:popScene()
 		_pushNum = _pushNum - 1
 	else
@@ -1142,13 +1144,15 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
 			end
 			for i=1,#self._list do
-				local size = self._list[i]:getContentSize()
-				if item_min_height then --有最小item_height
-					if size.height < item_min_height then
-						size.height = item_min_height
-					end
-				end				
-				height = height + size.height + space
+				if not self._list[i]._isHidden then
+					local size = self._list[i]:getContentSize()
+					if item_min_height then --有最小item_height
+						if size.height < item_min_height then
+							size.height = item_min_height
+						end
+					end				
+					height = height + size.height + space
+				end
 			end
 			local offy = 0
 			local tops_offy = 0
@@ -1173,19 +1177,21 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			end
 			local item_height = 0
 			for i = 1,#self._list do
-				local ox,oy = self._list[#self._list-i+1]:getPosition()
-				--self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
 				local item = self._list[#self._list-i+1]
-				local size = item:getContentSize()
-				if item_min_height and size.height < item_min_height then --有最小item_height
-					local dh = item_min_height - size.height
-					item:setPosition(cc.p(ox,item_height+offy+dh))
-					size.height = item_min_height
-				else
-					item:setPosition(cc.p(ox,item_height+offy))
-				end				
-				item:setVisible(true)
-				item_height = item_height + size.height + space
+				if not item._isHidden then
+					local ox,oy = item:getPosition()
+					--self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+					local size = item:getContentSize()
+					if item_min_height and size.height < item_min_height then --有最小item_height
+						local dh = item_min_height - size.height
+						item:setPosition(cc.p(ox,item_height+offy+dh))
+						size.height = item_min_height
+					else
+						item:setPosition(cc.p(ox,item_height+offy))
+					end				
+					item:setVisible(true)
+					item_height = item_height + size.height + space
+				end
 			end
 			--放置置顶元件
 			if self._tops_space then
@@ -1267,6 +1273,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 		end
 	end
 	t.relayout = function(self,animation)
+		animation = nil --暂时屏蔽动画
 		if self._animation_begin_time then
 			local ct = os.clock()-self._animation_begin_time
 			if ct >= self._animation_duration then --动画结束
@@ -1398,6 +1405,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				end
 			end	
 		end
+		animation = nil --暂时屏蔽
 		if animation == 'slide' or animation == 'fall' then
 			if self:isAnimation() then return end
 			local list_visible = self:visibles()
@@ -1642,6 +1650,18 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 		end
 		for i,v in pairs(lists) do
 			v:removeFromParent()
+		end
+	end
+	t.remove = function(self,item )
+		local pos
+		for i,v in pairs(self._list) do
+			if v == item then
+				pos = i
+				break
+			end
+		end
+		if pos then
+			table.remove(self._list,pos)
 		end
 	end
 	return t
