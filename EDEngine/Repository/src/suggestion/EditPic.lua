@@ -106,21 +106,7 @@ function EditPic:init()
 	end
 	self._widget = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._widget)
-	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
-	uikits.event(but_add,	
-	function(sender,eventType)	
-		self:uploadpic()						
-	end,"click")
-		local data
-	local file
 
-	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
-	uikits.event(but_quit,	
-		function(sender,eventType)	
-			self.parent_layer.isneedupdate = 1
-			uikits.popScene()						
-	end,"click")		
-	
 	self._picview = uikits.child(self._widget,ui.PIC_VIEW)
 	local scheduler = cc.Director:getInstance():getScheduler()
 --	local back_pic = cc.Sprite:create('suggestion/11.jpg')
@@ -183,8 +169,8 @@ function EditPic:init()
 	
 	back_pic:addTouchEventListener(touchEventPic)	--]]
 	
---	local pic_size = back_pic:getContentSize()
-	local sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
+	local pic_size = back_pic:getContentSize()
+	local sel_rect_size = {x1 = (s.width-pic_size.width)/2,y1 = (s.height-pic_size.height)/2,x2 = (s.width+pic_size.width)/2,y2=(s.height+pic_size.height)/2}
 	local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
 
 	self._picview:addChild(sel_rect,1000,10000)
@@ -327,6 +313,7 @@ function EditPic:init()
 	button_cutpic:setPosition(cc.p(100,100))
 	menu:addChild(button_cutpic)
 	menu:setPosition(cc.p(0, 0))
+	menu:setVisible(false)
 	self._picview:addChild(menu,10)
 	
 	local function timer_update(time)
@@ -365,7 +352,7 @@ function EditPic:init()
 	end
 	
 	
-	local function Cut_pic(tag, sender)	
+	local function Cut_pic()	
 		local texture = cc.RenderTexture:create(sel_rect_size.x2-sel_rect_size.x1,sel_rect_size.y2-sel_rect_size.y1)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		old_pos_x, old_pos_y= cur_sence:getPosition()
@@ -379,7 +366,7 @@ function EditPic:init()
 		texture:saveToFile(temp_filename, kCCImageFormatPNG)		
 		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
 	end
-	button_cutpic:registerScriptTapHandler(Cut_pic)
+--	button_cutpic:registerScriptTapHandler(Cut_pic)
 	
 --[[	local menu_rota = cc.Menu:create()
 	local button_rota = cc.MenuItemImage:create('suggestion/t3.png', 'suggestion/t3.png')
@@ -477,6 +464,22 @@ function EditPic:init()
 	self._picview:setTouchEnabled(false)
     local eventDispatcher_rect = self:getEventDispatcher()
     eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)
+	
+	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+	uikits.event	(but_add,	
+	function(sender,eventType)	
+		Cut_pic()
+		self:uploadpic()						
+	end,"click")
+		local data
+	local file
+
+	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
+	uikits.event(but_quit,	
+		function(sender,eventType)	
+			self.parent_layer.isneedupdate = 1
+			uikits.popScene()						
+	end,"click")		
 end
 
 function EditPic:release()
