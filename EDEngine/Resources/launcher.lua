@@ -180,6 +180,12 @@ elseif app == 'suggestion' then
 			local suggestion = require "suggestion/SuggestionView.lua"
 			return suggestion.create()
 	end}	
+elseif app == 'exerbooknew' then
+	update.create{name=app,updates={'errortitlenew','luacore'},
+		run=function()
+			local exerbooknew = require "errortitlenew/ErrorTitlePerView.lua"
+			return exerbooknew.create()
+	end}	
 elseif app and string.len(app)>0 then
 	--任意启动
 	update.create{name=app,updates={app,'luacore'},
