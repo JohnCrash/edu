@@ -41,7 +41,7 @@ local ui = {
 	TOPICS_VOICE_PLAY = 'chat',
 	TOPICS_VOICE_TIME = 'chat_time',
 	
-	WRITE_EDIT = "Panel_36/edit",
+	WRITE_EDIT = "Panel_36/bianji",
 	AUDIO_VIEW = 'chat_view',
 	AUDIO_BUTTON = 'chat',
 	AUDIO_TIME = 'chat_time',
@@ -364,6 +364,19 @@ function Subjective:view_img(i,file)
 		else
 			kits.log("ERROR : Subjective:view_img index = nil")
 		end
+	end
+end
+
+function Subjective:get_attach_num()
+	if self._current and self._topics_list[self._current] and self._topics_list[self._current].answer then
+		local t = self._topics_list[self._current].answer
+		if t.resources then
+			return #t.resources
+		else
+			return 0
+		end
+	else
+		return 0
 	end
 end
 
@@ -1315,20 +1328,24 @@ function Subjective:init_gui()
 		uikits.event( self._voice_button,function(sender) --录音
 				if not (self._args.status == 10 or self._args.status == 11) then
 					stopSound()
-					RecordVoice.open(
-							self,
-							function(b,file)
-								self._recording = nil
-								if b then
-									local tlen = cc_getVoiceLength(file)
-									self:add_voice( file,tlen )
-									self:clear_current()
-									self:relayout_topics( self._current )
-									self:relayout_all()
-									self._main_view._scrollview:scrollToBottom(0.1,false)
+					if self:get_attach_num() < 6 then
+						RecordVoice.open(
+								self,
+								function(b,file)
+									self._recording = nil
+									if b then
+										local tlen = cc_getVoiceLength(file)
+										self:add_voice( file,tlen )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									end
 								end
-							end
-						)
+							)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
 				else
 					messagebox(self,"提示","作业已经提交不能修改！")
 				end		
@@ -1336,21 +1353,25 @@ function Subjective:init_gui()
 		uikits.event( self._cam_button,function(sender) --照相
 				if not (self._args.status == 10 or self._args.status == 11) then
 					stopSound()
-					cc_takeResource(TAKE_PICTURE,function(t,result,res)
-							kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-							if result == RESULT_OK then
-								local b,res = cc_adjustPhoto(res,1024)
-								if b then
-									self:add_photo( res )
-									self:clear_current()
-									self:relayout_topics( self._current )
-									self:relayout_all()
-									self._main_view._scrollview:scrollToBottom(0.1,false)
-								else
-									messagebox(self,"错误","图像调整失败")
+					if self:get_attach_num() < 6 then
+						cc_takeResource(TAKE_PICTURE,function(t,result,res)
+								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+								if result == RESULT_OK then
+									local b,res = cc_adjustPhoto(res,1024)
+									if b then
+										self:add_photo( res )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									else
+										messagebox(self,"错误","图像调整失败")
+									end
 								end
-							end
-						end)
+							end)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
 				else
 					messagebox(self,"提示","作业已经提交不能修改！")
 				end		
@@ -1358,21 +1379,25 @@ function Subjective:init_gui()
 		uikits.event( self._photo_button,function(sender) --图库
 				if not(self._args.status == 10 or self._args.status == 11) then
 					stopSound()
-					cc_takeResource(PICK_PICTURE,function(t,result,res)
-							kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-							if result == RESULT_OK then
-								local b,res = cc_adjustPhoto(res,1024)
-								if b then
-									self:add_photo( res )
-									self:clear_current()
-									self:relayout_topics( self._current )
-									self:relayout_all()
-									self._main_view._scrollview:scrollToBottom(0.1,false)
-								else
-									messagebox(self,"错误","图像调整失败")
-								end
-							end					
-						end)
+					if self:get_attach_num() < 6 then
+						cc_takeResource(PICK_PICTURE,function(t,result,res)
+								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+								if result == RESULT_OK then
+									local b,res = cc_adjustPhoto(res,1024)
+									if b then
+										self:add_photo( res )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									else
+										messagebox(self,"错误","图像调整失败")
+									end
+								end					
+							end)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
 				else
 					messagebox(self,"提示","作业已经提交不能修改！")
 				end		
