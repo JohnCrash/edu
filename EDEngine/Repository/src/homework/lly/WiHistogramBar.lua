@@ -127,7 +127,10 @@ function WiHistogramBar:implementFunction()
 		lly.ensure(fMax, "number")
 		
 		if fMin >= fMax then
-			error("min must less than max", 2)
+			--print("fMin="..fMin)
+			--print("fMax="..fMax)
+			--error("min must less than max", 2)
+			kits.log("ERROR : setMinAndMaxValue fMin >= fMax "..tostring(fMin).."/"..tostring(fMax))
 		end
 		
 		self._fMinValue = fMin
