@@ -292,7 +292,7 @@ function AppEntry:init()
 		end}	
 
 	--[[-----------------------------------
-	local moLaStatisticsStudent = require "homework/lly/LaStatisticsTeacher"
+	local moLaStatisticsStudent = require "homework/lly/LaStatisticsStudent"
 	print("2hahahahah")
 
 	local layStats = moLaStatisticsStudent.Class:create()

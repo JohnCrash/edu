@@ -352,6 +352,7 @@ function LaStatisticsBase:implementFunction()
 		--如果生成的科目数没有超出显示区域，则不显示左右指示标，否则显示右指示标
 		--但是不知为何，self._listCourse:getInnerContainerSize().width只能获得一个12884901888
 		--因此无法使用
+		--经查勘，在cocos code ide 中 getInnerContainerSize没有问题!!!!!!
 		--[[
 		local inner = self._listCourse:getInnerContainerSize()
 		local outer = self._listCourse:getContentSize().width
@@ -413,22 +414,6 @@ function LaStatisticsBase:implementFunction()
 			self:refresh()
 			self._bIsFirstEnter = false
 		end
-	end
-
-	--选择指示要先从节点树中移走，为了防止释放则retain
-	--因为不能有析构函数，所以在onExit中释放，但为了多次onEnter不冲突，则在onExit把选择指示绑到节点上
-	function self:onEnter()
-		if self._laySelected:getParent() ~= nil then
-			self._laySelected:removeFromParent()
-		end
-		self._laySelected:retain() --防止释放
-	end
-
-	function self:onExit()
-		if self._laySelected:getParent() == nil then
-			self:addChild(self._laySelected, -10)
-		end
-		self._laySelected:release()
 	end
 end
 

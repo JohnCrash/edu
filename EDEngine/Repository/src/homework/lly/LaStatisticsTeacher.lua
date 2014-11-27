@@ -12,7 +12,6 @@ local moLaStatisticsBase = require "homework/lly/LaStatisticsBase"
 local moLogin = require "login"
 local moCache = require "cache"
 local moLoadingbox = require "loadingbox"
-local uikits = require "uikits"
 
 lly.finalizeCurrentEnvironment()
 
@@ -46,10 +45,6 @@ function LaStatisticsTeacher:ctor()
 	self.enter = function () end --重载
 
 	self.getFinalURL_inherit = function () end --继承
-
-	--_表示为继承函数
-	self._onEnter = function () end
-	self._onExit = function () end
 
 end
 
@@ -232,27 +227,6 @@ function LaStatisticsTeacher:implementFunction()
 	function self:getFinalURL_inherit()
 		return string.format(CONST.TEACHER_STATUS_URL, self._nCurrentClass)
 	end
-
-	--选择指示要先从节点树中移走，为了防止释放则retain
-	--因为不能有析构函数，所以在onExit中释放，但为了多次onEnter不冲突，则在onExit把选择指示绑到节点上
-	self._onEnter = self.onEnter
-	function self:onEnter()
-		self:_onEnter()
-		self._layClassModel:retain() --防止释放
-		if self._layClassModel:getParent() ~= nil then
-			self._layClassModel:removeFromParent()
-		end	
-	end
-
-	self._onExit = self.onExit
-	function self:onExit()
-		self:_onExit()
-		if self._layClassModel:getParent() == nil then
-			self:addChild(self._layClassModel, -10)
-		end
-		self._layClassModel:release()
-	end
-
 end
 
 return {
