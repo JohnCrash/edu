@@ -54,7 +54,7 @@ local buttonBL
 local loadbox
 local url = 'http://file-stu.lejiaolexue.com/rest/user/upload/hw'
 local temp_filename
-
+local loadbox
 function EditPic:uploadpic()
 	local local_file = self.file_path
 	print('loacl_path::'..local_file)
@@ -86,6 +86,7 @@ function EditPic:uploadpic()
 			end)
 	else
 		self.parent_layer.isneedupdate = 1
+		loadbox:removeFromParent()
 		uikits.popScene()
 		print('ERROR :  AddPic:AddPic readfile failed')
 	end	
@@ -319,7 +320,7 @@ function EditPic:init()
 	local function timer_update(time)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		cur_sence:setPosition(cc.p(old_pos_x,old_pos_y))
-		
+		self._picview:removeChildByTag(10000)
 		self._picview:removeChildByTag(10001)
 		back_pic = ccui.ImageView:create()
 		back_pic:setTouchEnabled(false)
@@ -328,7 +329,7 @@ function EditPic:init()
 		local plat_path = cc.FileUtils:getInstance():getWritablePath()..temp_filename
 		self:copyfile(plat_path,self.file_path)
 
-		back_pic:loadTexture(self.file_path)
+--[[		back_pic:loadTexture(self.file_path)
 		back_pic:setPosition(cc.p(s.width/2,s.height/2))
 --		back_pic:addTouchEventListener(touchEventPic)
 		self._picview:addChild(back_pic,1,10001)
@@ -344,8 +345,8 @@ function EditPic:init()
 		buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
 		buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
 		buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
-		buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1)) 
-					
+		buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1)) --]]
+		self:uploadpic()			
 		if schedulerEntry then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
@@ -353,6 +354,7 @@ function EditPic:init()
 	
 	
 	local function Cut_pic()	
+		loadbox = loadingbox.open(self)
 		local texture = cc.RenderTexture:create(sel_rect_size.x2-sel_rect_size.x1,sel_rect_size.y2-sel_rect_size.y1)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		old_pos_x, old_pos_y= cur_sence:getPosition()
@@ -468,8 +470,7 @@ function EditPic:init()
 	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
 	uikits.event	(but_add,	
 	function(sender,eventType)	
-		Cut_pic()
-		self:uploadpic()						
+		Cut_pic()						
 	end,"click")
 		local data
 	local file
