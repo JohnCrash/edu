@@ -8,18 +8,6 @@ local WorkCommit = require "homework/commit"
 local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
 local messagebox = require "messagebox"
-local moStats = require "homework/lly/LaStatisticsStudent"
-
---[[
-	lly卢乐颜进行修改部分：
-	1. class后，为worklist添加一个属性_laStats_Stu，用于指向统计层
-	2. init_gui 里面加载自定义统计层并隐藏
-	3. init_statistics 中隐藏原数据列表，显示自定义统计层
-	4. init_new_list init_history_list init_setting 中隐藏自定义的统计层
-	5. refresh_list 中注释掉 load_statistics 因为刷新列表时不对统计层有效
-	6. require 统计层
-]]
-
 
 crash.open("homework",1)
 
@@ -57,6 +45,8 @@ local ui = {
 	BACK = 'white/back',
 	LIST = 'newview',
 	ITEM = 'subject_1',
+	ITEM_TEACHER_NAME = 'teacher_name',
+	ITEM_TEACHER_LOGO = 'teacher_photo',
 	ITEM_TITLE = 'textname',
 	ITEM_CURSE = 'subjectbox/subjecttext',
 	ITEM_BAR = 'finish2',
@@ -108,7 +98,6 @@ local ui = {
 --]]
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
-WorkList._laStats_Stu = {} --lly统计层
 
 function WorkList.create()
 	local scene = cc.Scene:create()
@@ -308,31 +297,31 @@ end
 function WorkList:refresh_list()
 	if not self._busy then
 		cache.request_cancel()
-		self._scrollview:clear()
+		self._scrollview:clear('slide')
 		if self._mode == ui.NEW then
 			self:load_page( 1 )
 		elseif self._mode == ui.HISTORY then
 			self:load_page( 1,5 )
 		elseif self._mode == ui.STATIST then
-			--self:load_statistics() --lly不会刷新
+			self:load_statistics()
 		end
 	end
 end
 
 function WorkList:init_new_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.NEW )
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
-	self._laStats_Stu:setVisible(false) --lly关闭统计层
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
 		if self._new_list_done then
 			self:Swap_list(ui.NEW)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			--self:clear_all_item()
-			self._scrollview:clear()
+			self._scrollview:clear('slide')
 			self._new_list_done = true
 			self:load_page( 1 )
 		end
@@ -567,10 +556,9 @@ end
 
 function WorkList:init_statistics()
 	if self._busy then return end
-	
+	if self._scrollview:isAnimation() then return end
+	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
-
-	--[[原方法
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	
@@ -585,21 +573,6 @@ function WorkList:init_statistics()
 		end
 		self._mode = ui.STATIST
 	end
-	--]]
-
-	--开启统计层
-	self._scrollview:setVisible(false) --关闭原有的列表，使用自定义的新层
-	self._setting:setVisible(false) --关闭设置层
-	self._laStats_Stu:setVisible(true) --开启统计层
-
-	if self._mode ~= ui.STATIST then
-
-		--读取数据
-		self._laStats_Stu:enter()
-
-		self._mode = ui.STATIST
-	end
-
 	return true
 end
 
@@ -612,7 +585,6 @@ function WorkList:init_setting()
 	end
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
-	self._laStats_Stu:setVisible(false) --lly关闭统计层
 
 	--self._mode = ui.SETTING
 	return true
@@ -814,14 +786,6 @@ function WorkList:init_gui()
 		end)
 	self._list = {}
 	--]]
-
-	--lly添加统计层，并先隐藏
-	self._laStats_Stu = moStats.Class:create()
-	if self._laStats_Stu then
-		self._root:addChild(self._laStats_Stu, 1)
-		self._laStats_Stu:setVisible(false)
-	end
-
 end
 
 function WorkList:Swap_list( new_mode )
@@ -830,16 +794,16 @@ end
 
 function WorkList:init_history_list()
 	if self._busy then return end
+	if self._scrollview:isAnimation() then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.HISTORY )
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
-	self._laStats_Stu:setVisible(false) --lly关闭统计层
 	
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
 		if self._history_list_done then
 			self:Swap_list(ui.HISTORY)
-			self._scrollview:relayout()
+			self._scrollview:relayout('slide')
 		else
 			self._history_list_done = true
 			self:Swap_list(ui.HISTORY)
@@ -875,7 +839,7 @@ function WorkList:history_scroll( t )
 end
 
 function WorkList:relayout()
-	self._scrollview:relayout()
+	self._scrollview:relayout('slide')
 end
 
 function WorkList:add_item( t )
@@ -887,6 +851,21 @@ function WorkList:add_item( t )
 --	if t.course_name then --科目名称
 --		uikits.child( item,ui.ITEM_CURSE):setString( t.course_name )
 --	end
+	if t.teacher_name then
+		local item = uikits.child( item,ui.ITEM_TEACHER_NAME)
+		item:setString( t.teacher_name )
+	end
+	if t.teacher_id then
+		login.get_logo( t.teacher_id,
+		function(name)
+			if name then
+				local item = uikits.child( item,ui.ITEM_TEACHER_LOGO)
+				item:loadTexture( name )
+			else
+				kits.log("get logo fail"..tostring(t.teacher_id))
+			end
+		end,3)
+	end
 	if t.course and course_icon[t.course] and course_icon[t.course].logo then --类型
 		local pic =  uikits.child(item,ui.CLASS_TYPE)
 		pic:loadTexture(res_local..course_icon[t.course].logo)
@@ -992,6 +971,7 @@ function WorkList:add_item( t )
 						uikits.pushScene(WorkCommit.create{
 							pid=t.paper_id,
 							tid=t.teacher_id,
+							teacher_name = t.teacher_name,
 							caption=t.exam_name,
 							cnt_item = t.cnt_item,
 							cnt_item_finish = t.cnt_item_finish,

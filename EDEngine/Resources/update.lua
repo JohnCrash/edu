@@ -9,8 +9,9 @@ local resume = require "resume"
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v5/'
-local local_server = 'http://192.168.2.211:81/lgh/v5/'
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v6/'
+--local local_server = 'http://192.168.2.211:81/lgh/v6/'
+local local_server = 'http://192.168.2.182/v6/'
 local update_server = liexue_server
 
 local ui = {
@@ -42,7 +43,7 @@ UpdateProgram.__index = UpdateProgram
 local function download_file(t,m5)
 	local url = update_server..t
 	local local_file = local_dir..t..'_' --临时文件后面加个下划线
-	if kits.exists_file(local_file) then
+	if kits.exist_file(local_file) then
 		local result = kits.read_file(local_file)
 		if result and md5.sumhexa(result)==m5 then
 			return true,0 --已经下载好了
@@ -259,7 +260,7 @@ end
 
 function UpdateProgram:NErrorCheckLocal(dir)
 	local src_local = local_dir..'src/'..dir..'/filelist.json' 
-	if not kits.exists_file( src_local ) then --看看有没有本地版本
+	if not kits.exist_file( src_local ) then --看看有没有本地版本
 		kits.log("INFO : not exists "..src_local)
 		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
 	end

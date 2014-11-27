@@ -541,7 +541,7 @@ local function child( root,path )
 		end
 		if w == root then
 			--打印调用者信息
-			kits.log('ERROR: uikits.child return nil')
+			kits.log('ERROR: uikits.child return nil, '..tostring(path))
 			log_caller()
 		else
 			return w
@@ -634,9 +634,11 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
 		 local function delay_call_func()
-			scheduler:unscheduleScriptEntry(schedulerID)
-			schedulerID = nil		
-			func(param1,param2,param3)
+			if not schedulerID then return end
+			if not func(param1,param2,param3) then
+				scheduler:unscheduleScriptEntry(schedulerID)
+				schedulerID = nil					
+			end
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)	
 	end
@@ -865,7 +867,7 @@ end
 local _pushNum = 0
 local function pushScene( scene,transition,t )
 	if transition then
-		Director:pushScene( transition:create(t or 1,scene) )
+		Director:pushScene( transition:create(t or 0.2,scene) )
 	else
 		Director:pushScene( scene )
 	end
@@ -874,6 +876,8 @@ end
 
 local function popScene()
 	if _pushNum and _pushNum > 0 then
+		local glview = Director:getOpenGLView()
+		glview:setIMEKeyboardState(false) 
 		Director:popScene()
 		_pushNum = _pushNum - 1
 	else
@@ -906,7 +910,7 @@ local function set_item(c,v)
 end
 
 --itemID2 代表可能的第二类item
-local function scroll(root,scrollID,itemID,horiz,space,itemID2)
+local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 	local t = {_root = root}
 	if scrollID then
 		t._scrollview = child(root,scrollID)
@@ -916,6 +920,12 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 	t._item = child(t._scrollview,itemID)
 	if not t._scrollview or not t._item then
 		kits.log('ERROR : scroll resource not exist')
+		if not t._scrollview then
+			kits.log('	resource not exit'..tostring(scrollID))
+		end
+		if not t._item then
+			kits.log('	resource not exit : '..tostring(itemID))
+		end		
 		log_caller()
 		return
 	end
@@ -982,6 +992,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		local flag
 		local done
 		t.drap_refresh_func=function(sender,state)
+			if self:isAnimation() then return end
+			
 			local cs = sender:getContentSize()
 			local inner = sender:getInnerContainer()
 			local size = inner:getContentSize()
@@ -1022,8 +1034,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		end
 		event(self._scrollview,t.drap_refresh_func)
 	end
-	t.relayout = function(self)
-		if horiz then --横向
+	local function relayout_imp(self)
+		if horiz == true then --横向
 			local width = 0
 			local item_max_height = 0
 			for i=1,#self._list do
@@ -1045,16 +1057,102 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			local item_width = self._item_ox
 			for i = 1,#self._list do
 				self._list[#self._list-i+1]:setPosition(cc.p(item_width,self._item_oy))
+				self._list[#self._list-i+1]:setVisible(true)
 				item_width = item_width + self._list[#self._list-i+1]:getContentSize().width + space
 			end
-		else --纵向
+		elseif horiz == "mix" then --特定排列方式
 			local cs = self._scrollview:getContentSize()
 			local height = self._tops_space or 0
+			local function calc_col_height( list,m )
+				if list and #list > 0 then
+					local s = list[1]:getContentSize()
+					local col = #list/m
+					local n = math.floor(col) 
+					if col > n then
+						n = n + 1
+					end
+					height = height + n * s.height + space
+				end			
+			end
+			calc_col_height(self._list,4)
+			calc_col_height(self._list2,4)
+			local is_abs
+			local tops_offy = 0
+			local offy = 0
+			if self._scrollview.setInnerContainerSize  then
+				if height > cs.height then
+					tops_offy = height - cs.height
+				end			
+				self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
+				is_abs = false
+			elseif self._scrollview.setContentSize  then
+				if height > cs.height then
+					self._scrollview:setContentSize(cc.size(cs.width,height))
+					tops_offy = height - cs.height
+				end
+				is_abs = true
+			end
+			if height < size.height then
+				offy = size.height - height --顶到顶
+			end
+			
+			local item_height = space
+			local function raw_list( list,m )
+				if list then
+					local x = self._item_ox
+					local cs = {width=0,height=0}
+					for i=1,#list do
+						local item = list[#list-i+1]
+						local size = item:getContentSize()
+						cs.width = math.max(cs.width,size.width)
+						cs.height = math.max(cs.height,size.height)
+						item:setPosition(cc.p(x,item_height))
+						item:setVisible(true)
+						if i~=1 and i%m == 1 then
+							item_height = item_height + size.height + space
+							x = self._item_ox
+						else
+							x = x + size.width + space
+						end
+					end
+					if cs.height > 0 then item_height = item_height + cs.height + space end
+				end
+			end
+			raw_list( self._list,4 )
+			raw_list( self._list2,4 )
+			--放置置顶元件
+			if self._tops_space then
+				item_height = item_height + self._tops_space--起始阶段置顶元件和item的间隔
+				if is_abs then
+					for i = 1,#self._tops do
+						local x,y = self._tops[i]:getPosition()
+						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+						self._tops[i]:setVisible(true)
+					end
+				else
+					for i = 1,#self._tops do
+						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+						self._tops[i]:setVisible(true)
+					end				
+				end
+			end			
+			relayout_refresh(self)
+		else --纵向
+			local cs = self._scrollview:getContentSize()
+			local height = self._tops_space or space
 			if not self._item2 then
 				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
 			end
 			for i=1,#self._list do
-				height = height + self._list[i]:getContentSize().height + space
+				if not self._list[i]._isHidden then
+					local size = self._list[i]:getContentSize()
+					if item_min_height then --有最小item_height
+						if size.height < item_min_height then
+							size.height = item_min_height
+						end
+					end				
+					height = height + size.height + space
+				end
 			end
 			local offy = 0
 			local tops_offy = 0
@@ -1079,8 +1177,21 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			end
 			local item_height = 0
 			for i = 1,#self._list do
-				self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
-				item_height = item_height + self._list[#self._list-i+1]:getContentSize().height + space
+				local item = self._list[#self._list-i+1]
+				if not item._isHidden then
+					local ox,oy = item:getPosition()
+					--self._list[#self._list-i+1]:setPosition(cc.p(self._item_ox,item_height+offy))
+					local size = item:getContentSize()
+					if item_min_height and size.height < item_min_height then --有最小item_height
+						local dh = item_min_height - size.height
+						item:setPosition(cc.p(ox,item_height+offy+dh))
+						size.height = item_min_height
+					else
+						item:setPosition(cc.p(ox,item_height+offy))
+					end				
+					item:setVisible(true)
+					item_height = item_height + size.height + space
+				end
 			end
 			--放置置顶元件
 			if self._tops_space then
@@ -1089,20 +1200,125 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 					for i = 1,#self._tops do
 						local x,y = self._tops[i]:getPosition()
 						self._tops[i]:setPosition(cc.p(x,y+tops_offy))
+						self._tops[i]:setVisible(true)
 					end
 				else
 					for i = 1,#self._tops do
 						self._tops[i]:setPosition(cc.p(self._tops[i]._ox,item_height+offy))
+						self._tops[i]:setVisible(true)
 					end				
 				end
 			end
 		end
-		relayout_refresh(self)
+		relayout_refresh(self)	
+	end
+	
+	local function animations(self,list,animation,slide_time,slide_delay,over_func)
+		local size = self._scrollview:getContentSize()
+		if #list == 0 then return end
+		slide_time = slide_time or 0.2 --一条的滑动时间
+		slide_delay = slide_delay or 0.2 --总延时
+		local dt = slide_delay / #list
+		local t = slide_delay
+		self._animation_begin_time = os.clock()
+		self._animation_duration = 2*(slide_time+slide_delay)	
+		local suffix = string.sub(animation,-2)
+		if suffix == 'in' then
+			t = 0
+		end
+		for i,v in pairs(list) do
+			if v:getNumberOfRunningActions() > 0 then
+				kits.log("WARNING : scroll animation running yet")
+				return
+			end
+		end
+		for i,v in pairs(list) do
+			local x,y = v:getPosition()
+			if animation == 'slide_out' then
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(size.width,y))) )
+			elseif animation == 'fall_out' then
+				local s = v:getContentSize()
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,-size.height-s.height))) )
+			elseif animation == 'slide_in' then
+				v:setPosition(cc.p(-size.width,y))
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,y))) )
+			elseif animation == 'fall_in' then
+				local s = v:getContentSize()
+				v:setPosition(cc.p(x,-size.height-s.height))
+				v:runAction( cc.Sequence:create(cc.DelayTime:create(t) ,cc.MoveTo:create(slide_time,cc.p(x,y))) )			
+			end
+			if suffix == 'in' then
+				t = t + dt
+			else
+				t = t - dt
+			end
+		end
+		delay_call( self._scrollview,function(d)
+				self._animation_begin_time = nil
+				self._animation_duration = nil
+				if over_func then
+					over_func()
+				end
+			end,2*(slide_time+slide_delay) )
+	end
+	
+	local function animation_relayout(self,animation,slide_time,slide_delay)
+		if animation == 'slide' or animation == 'fall' then
+			for i,v in pairs(self._list) do
+				v:setVisible(true)
+			end
+			local list = self:visibles()
+			animations(self,list,animation..'_in',
+				slide_time,slide_delay)		
+		end
+	end
+	t.relayout = function(self,animation)
+		animation = nil --暂时屏蔽动画
+		if self._animation_begin_time then
+			local ct = os.clock()-self._animation_begin_time
+			if ct >= self._animation_duration then --动画结束
+				self._animation_begin_time = nil
+				self._animation_duration = nil			
+				relayout_imp(self)
+				animation_relayout(self,animation)
+				kits.log("--------------------------------------------------")
+				kits.log("relayout animation end "..tostring(os.clock()))
+			else		--动画还在播放	
+				kits.log("--------------------------------------------------")
+				kits.log("animation playing,wait"..tostring(os.clock()))	
+				kits.log("dt="..(self._animation_duration-ct))
+				delay_call( nil,function()
+					if self._animation_begin_time then --延迟到动画播放结束
+						local cct = os.clock()-self._animation_begin_time
+						if cct >= self._animation_duration then
+							self._animation_begin_time = nil
+							self._animation_duration = nil
+							kits.log("--------------------------------------------------")
+							kits.log("delay relayout call"..tostring(os.clock()))							
+							relayout_imp(self)
+							return false
+						end
+						kits.log("--------------------------------------------------")
+						kits.log("relayout animation playing yet..."..tostring(os.clock()))		
+						return true --继续循环
+					end					
+					relayout_imp(self)
+					--animation_relayout(self,animation)
+					kits.log("--------------------------------------------------")
+					kits.log("relayout animation playing ,delay relayout "..tostring(os.clock()))
+				end,(self._animation_duration-ct))
+			end
+		else
+			relayout_imp(self)
+			animation_relayout(self,animation)
+			kits.log("--------------------------------------------------")
+			kits.log("not animation relayout immediate "..tostring(os.clock()))
+		end
 	end
 	t.setVisible = function(self,b)
 		self._scrollview:setVisible(b)
 	end
-	t.additem = function(self,data,index)
+	local function additem_imp(self,data,index)
 		local item
 		if index == 2 then
 			item = self._item2:clone()
@@ -1110,10 +1326,25 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 			item = self._item:clone()
 		end
 		if item then
-			self._list[#self._list+1] = item
-			item:setVisible(true)
-			item:setAnchorPoint(cc.p(0,0))
-			self._scrollview:addChild(item)
+			if horiz == 'mix' then
+				if index == nil or index == 1 then
+					self._list[#self._list+1] = item
+					item:setVisible(true)
+					item:setAnchorPoint(cc.p(0,0))
+					self._scrollview:addChild(item)				
+				else
+					self._list2 = self._list2 or {}
+					self._list2[#self._list2+1] = item
+					item:setVisible(true)
+					item:setAnchorPoint(cc.p(0,0))
+					self._scrollview:addChild(item)									
+				end
+			else
+				self._list[#self._list+1] = item
+				item:setVisible(true)
+				item:setAnchorPoint(cc.p(0,0))
+				self._scrollview:addChild(item)
+			end
 		end
 		if item and data and type(data)=='table' then
 			for k,v in pairs(data) do
@@ -1128,15 +1359,73 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 				end
 			end
 		end
+		return item	
+	end
+	t.additem = function(self,data,index)
+		local item = additem_imp(self,data,index)
+		item:setVisible(false)
 		return item
 	end
-	t.clear = function(self)
-		for i=1,#self._list do
-			self._list[i]:removeFromParent()
+	t.visibles= function(self)
+		local list = {}
+		local cs = self._scrollview:getContentSize()
+		local inner = self._scrollview:getInnerContainer()
+		local x,y = inner:getPosition()
+		local size = inner:getContentSize()
+		
+		for i,v in pairs(self._list) do
+			local xx,yy = v:getPosition()
+			local s = v:getContentSize()
+			if not ((yy < -y and yy + s.height < -y) or (yy > -y+cs.height)) then
+				if v:isVisible() then
+					table.insert(list,v)
+				end
+			end
 		end
-		self._list = {}
+		return list
+	end
+	t.isAnimation = function(self)
+		if self._animation_begin_time then
+			if os.clock()-self._animation_begin_time >= self._animation_duration then
+				return false
+			else
+				return true
+			end
+		end
+		return false
+	end
+	t.clear = function(self,animation,slide_time,slide_delay)
+		local function do_clear(list,list2)
+			for i=1,#list do
+				list[i]:removeFromParent()
+			end
+			if list2 then
+				for i=1,#list2 do
+					list2[i]:removeFromParent()
+				end
+			end	
+		end
+		animation = nil --暂时屏蔽
+		if animation == 'slide' or animation == 'fall' then
+			if self:isAnimation() then return end
+			local list_visible = self:visibles()
+			local list = self._list
+			local list2 = self._list2
+			self._list = {}
+			self._list2 = {}				
+			animations(self,list_visible,animation..'_out',
+				slide_time,slide_delay,
+				function()
+					do_clear(list,list2)
+				end)
+		else
+			do_clear(self._list,self._list2)
+			self._list = {}
+			self._list2 = {}
+		end
 	end
 	t.swap = function(self) --交换当前列表中的项到后缓
+		if self:isAnimation() then return end
 		if self._scrollview and self._list then
 			local temp_list = self._back_list or {}
 			
@@ -1151,6 +1440,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2)
 		end
 	end
 	t.swap_by_index = function(self,i,j) --将当前列表总得放入i,取出j
+		if self:isAnimation() then return end
 		if self._scrollview and self._list then
 			self._back_lists = self._back_lists or {}
 
@@ -1171,8 +1461,9 @@ end
 
 --scroll 的改进版本
 --[[
+overlapping  tops 和 items可以有重叠区
 ]]--
-local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
+local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlapping)
 	local t = {_root = root}
 	if scrollID then
 		t._scrollview = child(root,scrollID)
@@ -1186,6 +1477,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	end
 	local function init_items( ids,b )
 		local items = {}
+		if not ids then return end
 		for i, v in pairs(ids) do
 			items[i] = child(t._scrollview,v)
 			if not items[i] then
@@ -1198,6 +1490,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		return items
 	end
 	local function calc_space_y( tops )
+		if not tops then return 0 end
 		local miny = math.huge
 		local maxy = 0
 		for i, v in pairs(tops) do
@@ -1227,7 +1520,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 	t.relayout = function(self,space)
 		space = space or 16
 		local cs = self._scrollview:getContentSize()
-		local height = space 
+		local height = 0
 		local function relayout_list( lists )
 			for i,v in pairs(lists) do
 				local size = v:getContentSize()
@@ -1237,10 +1530,58 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 				height = height + size.height + space
 			end		
 		end
+		local function calc_col_height( list,m )
+			if list and #list > 0 then
+				local s = list[1]:getContentSize()
+				local col = #list/m
+				local n = math.floor(col) 
+				if col > n then
+					n = n + 1
+				end
+				return n * (s.height + space) + space
+			end			
+			return 0
+		end		
+		local function relayout_mix( lists,m )
+			if not lists then return end
+			if not lists[1] then return end
+			local ox,oy = lists[1]:getPosition()
+			local col_height = calc_col_height(lists,m or 6)
+			local h = height + col_height
+			local xx = ox
+			for i,v in pairs(lists) do
+				local size = v:getContentSize()
+				local x,y = v:getPosition()
+				local anchor = v:getAnchorPoint()
+				if i == 1 then
+					h = h - size.height
+				elseif i ~= 1 and i%m==1 then					
+					xx = ox
+					h = h - size.height - space
+				end
+				v:setPosition( cc.p(xx+anchor.x*size.width,h+anchor.y*size.height) )
+				xx = xx + size.width + space
+			end		
+			height = height + col_height
+		end
 		--bottom
+		local tops = {}
+		local lists = {}
+		for i,v in pairs(self._list) do
+			if v._placeType == 'top' then
+				table.insert(tops,v)
+			else
+				table.insert(lists,v)
+			end
+		end
 		height = height + t._bottoms_space
-		relayout_list( self._list )
-		height = height + self._tops_space - t._bottoms_space
+		if horz then
+			relayout_mix( lists,m )
+		else
+			relayout_list( lists )
+		end
+		relayout_list( tops )
+		height = height + self._tops_space - t._bottoms_space - (overlapping or 0)
 		local tops_offy = height - cs.height
 
 		--tops 要做特殊处理
@@ -1255,7 +1596,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		end
 	end
 	--添加函数
-	t.additem = function(self,key,sector)
+	t.additem = function(self,key,sector,place_type)
 		local item
 		local items
 		local lists
@@ -1280,6 +1621,7 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 			return 
 		end
 		if item then
+			item._placeType = place_type
 			table.insert( lists,item )
 			item:setVisible( true )
 			self._scrollview:addChild(item)
@@ -1308,6 +1650,18 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz)
 		end
 		for i,v in pairs(lists) do
 			v:removeFromParent()
+		end
+	end
+	t.remove = function(self,item )
+		local pos
+		for i,v in pairs(self._list) do
+			if v == item then
+				pos = i
+				break
+			end
+		end
+		if pos then
+			table.remove(self._list,pos)
 		end
 	end
 	return t
@@ -1409,9 +1763,9 @@ local function scrollview_step_add(scroll,t,n,add_func,sstate)
 			end			
 			add_func() --重新布局
 		end
-		if n < count then --只有在还有没添加的才关闭回弹
-			scrollview:setBounceEnabled(false)
-		end
+--		if n < count then --只有在还有没添加的才关闭回弹
+--			scrollview:setBounceEnabled(false)
+--		end
 		add_n_item(offset,n)
 		offset = offset + n + 1
 		event( scrollview,function(sender,state)

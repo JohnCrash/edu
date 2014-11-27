@@ -4,7 +4,7 @@ local ljshell = require "ljshell"
 
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
-local function exists_file( file )
+local function exist_file( file )
   local f = io.open(file, "rb")
   if f then f:close() end
   return f ~= nil  
@@ -12,7 +12,7 @@ end
 
 local function read_file(name)
   local file = local_dir..name
-  if not exists_file(file) then return false end
+  if not exist_file(file) then return false end
   local alls
   
   file = io.open(file,"rb")

@@ -2,8 +2,9 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local loadingbox = require "loadingbox"
-local messagebox = require "messagebox"
+local messagebox_ = require "messagebox"
 local RecordVoice = require "recordvoice"
+local imagepreview = require "homework/imagepreview"
 
 local FileUtils = cc.FileUtils:getInstance()
 local ui = {
@@ -20,14 +21,14 @@ local ui = {
 	RECORD_BUTTON = 'leirong/ys/luyin',
 	CAM_BUTTON = 'leirong/ys/paizhao',
 	PHOTO_BUTTON = 'leirong/ys/tupian',
-	SOUND_BUTTON = 'leirong/chat',
 	SOUND_DELTE_TEXT = 'shijian',
 	SOUND_DELTE_BUTTON = 'sc1',
-	DELETE_BUTTON = 'leirong/shancu',
+	DELETE_BUTTON = 'leirong/ys/shancu',
+	EDIT_BUTTON = 'leirong/ys/bianji',
 	INPUT_AREANA = 'leirong/ys',
 	INPUT_TEXT = 'wenzi',
 	AUDIO_ITEM = 'leirong/chat',
-	IMG_ITEM = 'leirong/pic',
+	IMG_ITEM = 'leirong/dip',
 }
 local INDEX_SPACE = 8
 local SubjectiveEdit = class("SubjectiveEdit")
@@ -186,6 +187,7 @@ function SubjectiveEdit:addsound( name,length )
 		end,"click")
 		local delbut = uikits.child(item,'sc1')
 		if delbut then
+			delbut:setVisible(self._edit:getSelectedState())
 			uikits.event( delbut,function(sender)
 				item:setVisible(false)
 				self:delsound_todata( name )
@@ -208,6 +210,7 @@ function SubjectiveEdit:addsound( name,length )
 		else
 			kits.log("ERROR : SubjectiveEdit:addsound time label no found")
 		end
+		item.isVoice = true
 		table.insert( self._items,item)
 		self._scroll:addChild(item)
 	end
@@ -235,21 +238,27 @@ function SubjectiveEdit:addphoto( name )
 	local item = self._img_item:clone()
 	if item then
 		item:setVisible(true)
+		local img = uikits.child(item,"tu1")
 		if FileUtils:isFileExist(name) then
-			item:loadTexture(name)
+			img:loadTexture(name)
+			local size = img:getContentSize()
+			local scale
+			if size.width > size.height then
+				scale = 256/size.height
+			else
+				scale = 256/size.width
+			end
+			img:setScaleX(scale)
+			img:setScaleY(scale)
+			uikits.event( item,function(sender)
+				self:view_img( name )
+			end,"click")
 		else
 			kits.log("ERROR : SubjectiveEdit:addphoto "..tostring(name).." is not exist")
 		end
-		local delbut = uikits.child(item,'sc2')
+		local delbut = uikits.child(item,'delete')
 		if delbut then
-			local s = item:getContentSize()
-			local bs = delbut:getContentSize()
-			if s.width > 1280 then
-				local v = 1280/s.width
-				item:setScaleX(v)
-				item:setScaleY(v)
-			end
-			delbut:setPosition(cc.p(s.width+16+bs.width/2,s.height/2))
+			delbut:setVisible(self._edit:getSelectedState())
 			uikits.event( delbut,function(sender)
 				item:setVisible(false)
 				self:delphoto_todata( name )
@@ -258,8 +267,48 @@ function SubjectiveEdit:addphoto( name )
 		else
 			kits.log("ERROR : SubjectiveEdit:addphoto delete button no found")
 		end
+		item.isImg = true
 		table.insert( self._items,item)
 		self._scroll:addChild(item)
+	end
+end
+
+function SubjectiveEdit:view_img( name )
+	if self._current and self._data[self._current] then
+		local resources = self._data[self._current].items
+		if resources then
+			local imgs = {}
+			local index
+			for i,v in pairs(resources) do
+				local suffix = string.lower(string.sub(v.file,-4))
+				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+					table.insert(imgs,v.file)
+				end
+				if v.file == name then
+					index = #imgs
+				end
+			end
+			if index then
+				self:saveScrollViewPos()
+				uikits.pushScene( imagepreview.create(index,imgs) )
+			else
+				kits.log("ERROR : Subjective:view_img index = nil")
+			end
+		end
+	end
+end
+
+function SubjectiveEdit:saveScrollViewPos()
+	if self._scroll then
+		local inner = self._scroll:getInnerContainer()
+		self._mainx,self._mainy = inner:getPosition()
+	end
+end
+
+function SubjectiveEdit:resoreScrollView()
+	if self._scroll then
+		local inner = self._scroll:getInnerContainer()
+		inner:setPosition(cc.p(self._mainx,self._mainy))	
 	end
 end
 
@@ -281,18 +330,72 @@ function SubjectiveEdit:delphoto_todata( name )
 	end
 end
 
+function SubjectiveEdit:get_attach_num()
+	if self._items then
+		return #self._items
+	else
+		return 0
+	end
+end
+
 function SubjectiveEdit:scroll_relayout()
 	--计算高度
 	local uis = {}
 	local ts = self._tops:getContentSize()
 	local cs = self._scroll:getContentSize()
-	local ds = self._delete_button:getContentSize()
-	local x,y = self._delete_button:getPosition()
-	y = self._space
-	self._delete_button:setPosition(cc.p(x,y))
-	y = y + ds.height + self._space
+	local y = self._space
+	local ox = self._item_ox
+	local space = self._space
+	
+	local function calc_col_height( list,m )
+		if list and #list > 0 then
+			local s = list[1]:getContentSize()
+			local col = #list/m
+			local n = math.floor(col) 
+			if col > n then
+				n = n + 1
+			end
+			return n * (s.height + space)
+		end			
+		return 0
+	end
+			
+	local function raw_list( list,m )
+		if list then
+			local x = ox
+			local cs = {width=0,height=0}
+			local H = calc_col_height( list,m )
+			local item_y = y + H
+			for i=1,#list do
+				local item = list[i]
+				local size = item:getContentSize()
+				if i == 1 then
+					item_y = item_y - size.height - space
+				end
+				cs.width = math.max(cs.width,size.width)
+				cs.height = math.max(cs.height,size.height)
+				item:setPosition(cc.p(x,item_y))
+				item:setVisible(true)
+				if i~=1 and i%m == 0 and i~=#list then
+					item_y = item_y - size.height - space
+					x = ox
+				else
+					x = x + size.width + space
+				end
+			end
+			if cs.height > 0 then y = y + H end
+		end
+	end
+	local list = {}
 	for i,v in pairs(self._items) do
-		if v:isVisible() then
+		if v.isImg and v:isVisible() then
+			table.insert(list,v)
+			table.insert(uis,v)
+		end
+	end	
+	raw_list( list,4 )
+	for i,v in pairs(self._items) do
+		if v.isVoice and v:isVisible() then
 			local xx,yy = v:getPosition()
 			v:setPosition( cc.p(xx,y) )
 			y = y + v:getContentSize().height*v:getScaleY() + self._space
@@ -304,13 +407,16 @@ function SubjectiveEdit:scroll_relayout()
 	y = y + ts.height + self._space
 	self._scroll:setInnerContainerSize(cc.size(cs.width,y))
 	table.insert(uis,self._tops)
-	table.insert(uis,self._delete_button)
 	if y < cs.height then
 		uikits.move( uis,0,cs.height-y)
 	end
 end
 
 function SubjectiveEdit:init()
+	if self._root then
+		self:resoreScrollView()
+		return
+	end
 	self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._root)
 	local back = uikits.child(self._root,ui.BACK)
@@ -337,6 +443,21 @@ function SubjectiveEdit:init()
 	self._scroll = uikits.child(self._root,ui.LIST)
 	self._audio_item = uikits.child(self._root,ui.AUDIO_ITEM)
 	self._img_item = uikits.child(self._root,ui.IMG_ITEM)
+	self._edit = uikits.child(self._root,ui.EDIT_BUTTON)
+	self._item_ox  = self._img_item:getPosition()
+	uikits.event(self._edit,function(sender,b)
+		for i,v in pairs(self._items) do
+			local delete
+			if v.isVoice then
+				delete = uikits.child(v,"sc1")
+			elseif v.isImg then
+				delete = uikits.child(v,"delete")
+			end
+			if delete then
+				delete:setVisible( b )
+			end
+		end
+	end)
 	self._audio_item:setVisible(false)
 	self._img_item:setVisible(false)
 	self._scroll_list = {}
@@ -379,7 +500,7 @@ function SubjectiveEdit:init()
 end
 
 local function messagebox(parent,title,text )
-	messagebox.open(parent,function()end,messagebox.MESSAGE,tostring(title),tostring(text) )
+	messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
 end
 
 function SubjectiveEdit:init_event()
@@ -387,67 +508,75 @@ function SubjectiveEdit:init_event()
 	uikits.event( self._record_button,function(sender)
 			stopSound()
 			if not self._recording then
-				self._recording = true
-				RecordVoice.open(
-						self,
-						function(b,file)
-							self._recording = nil
-							if b then
-								local tlen = cc_getVoiceLength(file)
-								self:addsound( file,tlen )
-								self:addsound_todata( file,tlen )
-								self:scroll_relayout()	
+				if self:get_attach_num() < 6 then
+					self._recording = true
+					RecordVoice.open(
+							self,
+							function(b,file)
+								self._recording = nil
+								if b then
+									local tlen = cc_getVoiceLength(file)
+									self:addsound( file,tlen )
+									self:addsound_todata( file,tlen )
+									self:scroll_relayout()	
+								end
 							end
-						end
-					)
+						)
+				else
+					messagebox(self,"提示","附件不能多于6个!")	
+				end
 			end
 		end)
 	end
 	if self._cam_button then --插入照片
 		uikits.event(self._cam_button,function(sender)
 			stopSound()
-			cc_takeResource(TAKE_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						--file = res
-						local b,res = cc_adjustPhoto(res,1024)
-						if b then
-							self:addphoto( res )
-							self:addphote_todata( res )
-							self:scroll_relayout()
-						else
-							messagebox(self,"错误","图像调整失败")
+			if self:get_attach_num() < 6 then
+				cc_takeResource(TAKE_PICTURE,function(t,result,res)
+						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+						if result == RESULT_OK then
+							--file = res
+							local b,res = cc_adjustPhoto(res,1024)
+							if b then
+									self:addphoto( res )
+									self:addphote_todata( res )
+									self:scroll_relayout()
+							else
+								messagebox(self,"错误","图像调整失败")
+							end
 						end
-					end
-				end)			
+					end)
+			else
+				messagebox(self,"提示","附件不能多于6个!")	
+			end
 		end)	
 	end
 	if self._photo_button then --从图库插入照片
 		uikits.event(self._photo_button,function(sender)
 			stopSound()
-			cc_takeResource(PICK_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						local b,res = cc_adjustPhoto(res,1024)
-						if b then
-							self:addphoto( res )
-							self:addphote_todata( res )
-							self:scroll_relayout()
-						else
-							messagebox(self,"错误","图像调整失败")
-						end
-					end					
-				end)			
+			if self:get_attach_num() < 6 then
+				cc_takeResource(PICK_PICTURE,function(t,result,res)
+						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+						if result == RESULT_OK then
+							local b,res = cc_adjustPhoto(res,1024)
+							if b then
+									self:addphoto( res )
+									self:addphote_todata( res )
+									self:scroll_relayout()
+							else
+								messagebox(self,"错误","图像调整失败")
+							end
+						end					
+					end)			
+				else
+					messagebox(self,"提示","附件不能多于6个!")	
+				end				
 		end)	
 	end	
 end
 
 function SubjectiveEdit:release()
 	stopSound()
-	for i,v in pairs(self._items) do
-		v:removeFromParent()
-	end
-	self._items = {}
 end
 
 return SubjectiveEdit

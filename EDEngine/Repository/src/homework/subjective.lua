@@ -5,6 +5,8 @@ local loadingbox = require "loadingbox"
 local cache = require "cache"
 local RecordVoice = require "recordvoice"
 local messagebox_ = require "messagebox"
+local login = require "login"
+local imagepreview = require "homework/imagepreview"
 
 local ui = {
 	FILE = 'homework/subjective.json',
@@ -14,27 +16,38 @@ local ui = {
 	ITEM_CURRENT = 'state_now',
 	ITEM_FINISHED = 'state_past',
 	ITEM_UNFINISHED = 'state_future',
-	NEXT_BUTTON = 'next_problem', 
+	NEXT_BUTTON = 'milk_write/next_problem', 
+	PREV_BUTTON = 'milk_write/next_problem_0', 
+	DONE_BUTTON = 'milk_write/finish_5', 
 	FINISH_BUTTON = 'finish_5',
 	TEACHER_VIEW = 'teacher_view',
-	TOPICS_BG = 'teacher_view/Panel_36',
-	TOPICS = 'teacher_view/Panel_36/homework_text',
+	TOPICS_BG = 'Panel_36',
+	TOPICS = 'Panel_36/homework_text',
+	MAIN_VIEW = 'homework_view',
+	TEACHER_NAME = 'teacher_name',
+	TEACHER_PHOTO = 'teacher_photo',
 	RECORD_BUTTON = 'write_view/white_3/recording',
-	CAM_BUTTON = 'write_view/white_3/photograph',
-	PHOTO_BUTTON = 'write_view/white_3/photo',
+	CAM_BUTTON = 'Panel_36/photograph',
+	PHOTO_BUTTON = 'Panel_36/photo',
 	
+	STUDENT_NAME = 'my_name',
+	STUDENT_PHOTO = 'my_photo',
+	STUDENT_BG = 'Panel_36',
 	WRITE_VIEW = 'write_view',
-	WRITE_TEXT = 'write_view/write_text',
-	TOPICS_PIC = 'teacher_view/tu1',
-	TOPICS_VOICE = 'teacher_view/chat',
+	WRITE_TEXT = 'Panel_36/write_text',
+	TOPICS_CLIP = 'clip',
+	TOPICS_PIC = 'tu1',
+	TOPICS_VOICE = 'chat',
 	TOPICS_VOICE_PLAY = 'chat',
 	TOPICS_VOICE_TIME = 'chat_time',
 	
+	WRITE_EDIT = "Panel_36/bianji",
 	AUDIO_VIEW = 'chat_view',
 	AUDIO_BUTTON = 'chat',
 	AUDIO_TIME = 'chat_time',
 	AUDIO_DELETE_BUTTON = 'delete',
 	
+	VOICE_BUTTON = 'Panel_36/recording',
 	PICTURE_VIEW = 'picture_view',
 	PICTURE_PIC = 'picture',
 	PICTURE_DELETE_BUTTON = 'delete',
@@ -44,6 +57,8 @@ local ui = {
 	STATE_FINISHED = 2,
 	STATE_UNFINISHED = 3,	
 	PAGE_VIEW = 'homework_view',
+	
+	ANSWER_PIC = 'Image_9',
 }
 local cloud_answer_url = 'http://new.www.lejiaolexue.com/student/handler/WorkItem.ashx'
 local Subjective = class("Subjective")
@@ -137,18 +152,26 @@ end
 function Subjective:calc_times( i )
 	--计时
 	if self._current then
-		local layout = self._pageview:getPage(self._current)
-		if layout and layout._times and layout._begin_time then
-			layout._times = layout._times + (os.time()-layout._begin_time)
+		local t = self._topics_list[self._current].answer
+		if t._times then
+			t._times = t._times + (os.time()-t._begin_time)
+		else
+			t._times = 0
 		end
 	end
 	if i then
-		local layout = self._pageview:getPage(i)
-		if layout then
-			layout._times = layout._times or 0
-			layout._begin_time = os.time()
-		end
+		local t = self._topics_list[i].answer
+		t._times = t._times or 0
+		t._begin_time = os.time()
 	end
+end
+
+function Subjective:clear_current()
+	self._answer_view:clear()
+	self._topics_view:clear()
+	self._answer_view:relayout()
+	self._topics_view:relayout()
+	self._main_view:relayout()
 end
 
 function Subjective:set_current( i )
@@ -157,12 +180,18 @@ function Subjective:set_current( i )
 		if self._current then
 				self:set_item_state(self._current,self._data[self._current].state)
 		end
+		--切换到对应的
+		self:clear_current()
 		self:calc_times( i )
+
 		self._current = i
+		self:relayout_topics( i )
+		--[[
 		local ps = self._pageview:getCurPageIndex()+1
 		if ps ~= i then
 			self._pageview:scrollToPage(i-1)
 		end
+		--]]
 		--self:set_anwser_field(i)
 	end
 end
@@ -178,9 +207,21 @@ function Subjective:add_item( t )
 		self._scrollview:addChild(item)
 		local index = #self._list
 		uikits.event(item,function(sender) 
-		stopSound()
-		self:set_current( index ) end,'click')
+				stopSound()
+				self:set_current( index ) 
+			end,'click')
+
+		self._topics_list = self._topics_list or {} --题目列表,和索引对应
+		self._topics_list[index] = t
+		self._topics_list[index].answer = {}
+		self._topics_done = self._topics_done or {} --题目的资源是不是都下载完
+		
+		--先将标题放上去
+		if index == 1 and t.content then
+			uikits.child(self._topics_item,ui.TOPICS):setString(t.content)
+		end
 		--add page
+		--[[
 		local layout = self._scroll:clone()
 		
 		layout._item_id = t.item_id
@@ -205,13 +246,15 @@ function Subjective:add_item( t )
 		local holderText = org_text:getPlaceHolder()
 		write_text:setPlaceHolder(holderText)
 		if self._args.status == 10 or self._args.status == 11 then
+		--]]
 			--已经提交，不修改
+		--[[	
 			write_text:setTouchAreaEnabled(false)
 			write_text:setEnabled(false)
 		end	
 		tpic:setVisible(false)
 		tvoice:setVisible(false)
-		
+		--]]
 		--add loading circle
 		--load attachments
 		local rtable = {}
@@ -227,8 +270,6 @@ function Subjective:add_item( t )
 			end
 		end
 		local n = 0
-		self._pageview:addPage( layout )
-		rtable.loading = loadingbox.circle(layout)
 		cache.request_resources( rtable,
 			function(rs,i,b)
 				n = n + 1
@@ -238,20 +279,234 @@ function Subjective:add_item( t )
 					kits.log('file is '..tostring(kits.exist_cache(rs.urls[i].filename )))
 				end
 				if n >= #rs.urls then --complete
-					if rs.loading and cc_isobj(rs.loading) then
-						rs.loading:removeFromParent() 
-					else
-						return
-					end
 					--done
-					self:relayout_topics( layout,rs.urls )
+					t.urls = rs.urls
+					self._topics_done = self._topics_done or {}
+					self._topics_done[index] = true
+					if index == self._current then
+						self:clear_current()
+						self:relayout_topics( index )
+					end
 				end
 			end)
 	else
 		kits.log( '	ERROR: clone_item() return nil' )
 	end
 end
+function Subjective:load_mini_texture(item,filename,suffix)
+	local name = string.sub( filename,0,-5 )..'_s'..suffix
+	if kits.exist_file(kits.get_tmp_path()..name) then --如果存在直接加载
+		item:loadTexture(kits.get_tmp_path()..name)
+	else
+		local b,tmp = cc_adjustPhoto(kits.get_cache_path()..filename,256) --调整图
+		if b then
+			kits.rename_file( tmp,kits.get_tmp_path()..name)
+			item:loadTexture(kits.get_tmp_path()..name)
+		end
+	end
+end
 
+function Subjective:load_clip_texture(item,filename)
+	if kits.exist_cache(filename) or kits.exist_file(filename) then
+		item:loadTexture(filename)
+		local size = item:getContentSize()
+		local scale
+		if size.width > size.height then
+			scale = 256/size.height
+		else
+			scale = 256/size.width
+		end
+		item:setScaleX(scale)
+		item:setScaleY(scale)
+		uikits.event( item,function(sender)
+			
+		end,"click")
+	end
+end
+
+function Subjective:load_voice(item,filename,suffix)
+	kits.log("load_voice "..filename)
+	if item then
+		local play = uikits.child(item,ui.TOPICS_VOICE_PLAY)
+		local txt = uikits.child(item,ui.TOPICS_VOICE_TIME)
+		uikits.event(play,function(sender)
+			uikits.playSound( kits.get_cache_path()..filename )
+		end)
+		local length = cc_getVoiceLength( kits.get_cache_path()..filename )
+		txt:setString( kits.time_to_string_simple(math.floor(length)) )
+	end
+end
+
+function Subjective:clear_content()
+	--设置标题
+	uikits.child(self._topics_item,ui.TOPICS):setString("")
+end
+
+function Subjective:view_img(i,file)
+	if self._topics_list[i] then
+		local urls = self._topics_list[i].urls
+		local imgs = {}
+		local index
+		for r,s in pairs(urls) do
+			if s.filename then
+				local suffix = string.lower(string.sub(s.filename,-4))
+				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+					table.insert(imgs,s.filename)
+				end
+				if s.filename == file then
+					index = #imgs
+				end
+			end
+		end
+		if index then
+			self:saveScrollViewPos()
+			uikits.pushScene( imagepreview.create(index,imgs) )
+		else
+			kits.log("ERROR : Subjective:view_img index = nil")
+		end
+	end
+end
+
+function Subjective:get_attach_num()
+	if self._current and self._topics_list[self._current] and self._topics_list[self._current].answer then
+		local t = self._topics_list[self._current].answer
+		if t.resources then
+			return #t.resources
+		else
+			return 0
+		end
+	else
+		return 0
+	end
+end
+
+function Subjective:saveScrollViewPos()
+	if self._main_view and self._main_view._scrollview then
+		local inner = self._main_view._scrollview:getInnerContainer()
+		self._mainx,self._mainy = inner:getPosition()
+	end
+end
+
+function Subjective:restoreScrollViewPos()
+	if self._main_view and self._main_view._scrollview then
+		local inner = self._main_view._scrollview:getInnerContainer()
+		inner:setPosition(cc.p(self._mainx,self._mainy))	
+	end
+end
+
+function Subjective:view_img_answer(i,k)
+	if self._topics_list[i] then
+		local urls = self._topics_list[i].answer.resources
+		local imgs = {}
+		local index
+		for r,s in pairs(urls) do
+			if s and s.filename then
+				local suffix = string.lower(string.sub(s.filename,-4))
+				if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+					table.insert(imgs,s.filename)
+				end
+				if s.filename == k then
+					index = #imgs
+				end
+			end
+		end
+		if index then
+			self:saveScrollViewPos()
+			uikits.pushScene( imagepreview.create(index,imgs) )
+		else
+			kits.log("ERROR : Subjective:view_img index = nil")
+		end
+	end
+end
+
+--布局第i题
+function Subjective:relayout_topics( i )
+	if i and self._topics_list[i] then --存在
+		if self._topics_done[i] then --资源都下载完成
+			if self._loadingbox then
+				self._loadingbox:removeFromParent()
+				self._loadingbox = nil
+			end
+			local t = self._topics_list[i]
+			--设置标题
+			uikits.child(self._topics_item,ui.TOPICS):setString(t.content or "" )
+			--布局资源
+			if t.urls then
+				for k,v in pairs(t.urls) do
+					local suffix = string.lower(string.sub(v.filename,-4))
+					if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+						local clip = self._topics_view:additem(1)
+						local item = uikits.child(clip,ui.TOPICS_PIC)
+						self:load_clip_texture( item,v.filename,suffix )
+						uikits.event( item,function(sender)
+							self:view_img(i,v.filename)
+						end,"click" )
+					elseif suffix == '.amr' then
+						local item = self._topics_view:additem(2,0,"top")
+						local filename = v.filename
+						self:load_voice( item,filename,suffix )
+					end
+				end
+			end
+			--设置答案标题
+			if t.answer then
+				--文本区设置
+				self._edit_text:setText(t.answer.text or "")
+				if t.answer.resources then
+					for k,v in pairs(t.answer.resources) do
+						local suffix = string.lower(string.sub(v.filename,-4))
+						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
+							local clip = self._answer_view:additem(1)
+							local item = uikits.child(clip,ui.ANSWER_PIC)
+							local delete = uikits.child(clip,ui.PICTURE_DELETE_BUTTON)
+							delete:setVisible(self._edit:getSelectedState())
+							--加入删除功能
+							uikits.event(delete,function(sender)
+								uikits.delay_call(self,function()
+									table.remove( t.answer.resources,k )
+									self:clear_current()
+									self:relayout_topics(self._current)
+								end,0.01)
+							end)
+							self:load_clip_texture( item,v.filename,suffix )
+							uikits.event( item,function(sender)
+								self:view_img_answer(i,v.filename)
+							end,"click" )						
+						elseif suffix == '.amr' then
+							local item = self._answer_view:additem(2,0,"top")
+							local delete = uikits.child(item,ui.PICTURE_DELETE_BUTTON)
+							uikits.event(delete,function(sender)
+								uikits.delay_call(self,function()
+									table.remove( t.answer.resources,k )
+									self:clear_current()
+									self:relayout_topics(self._current)
+								end,0.01)
+							end)							
+							delete:setVisible(self._edit:getSelectedState())
+							self:load_voice( item,v.filename,suffix )
+						end
+					end
+				end
+			end
+			--设置评论
+			if self._comment_item then
+				if t.answer.comment and string.len(t.answer.comment)>0 then
+					self._comment_item._isHidden = false
+					uikits.child(self._comment_item,ui.TOPICS):setString(t.answer.comment or "" )
+				else
+					self._comment_item._isHidden = true
+				end
+			end
+			self:relayout_all()
+		else
+			if not self._loadingbox then
+				self._loadingbox = loadingbox.circle(self._root)
+			end
+		end
+	end
+end
+
+--[[
 function Subjective:relayout_topics( layout,urls )
 	local layout_size = layout:getContentSize()
 	local topics = uikits.child(layout,ui.TEACHER_VIEW)
@@ -392,8 +647,22 @@ function Subjective:relayout_topics( layout,urls )
 	self:relayout_myanswer(layout)
 --	layout:setInnerContainerSize(cc.size(layout_size.width,topics_y + 2*topics_space +write_view_size.height ))
 end
+--]]
 
-function Subjective:add_photo( layout,photo_file )
+function Subjective:add_photo( photo_file,index )
+	local idx
+	if index then
+		idx = index
+	else
+		idx = self._current
+	end
+	if idx and self._topics_list then
+		local t = self._topics_list[idx]
+		t.answer = t.answer or {}
+		t.answer.resources = t.answer.resources or {}
+		table.insert(t.answer.resources,{filename=photo_file})
+	end
+--[[
 	local pic = uikits.child( layout,ui.PICTURE_VIEW):clone()
 	local img = uikits.child( pic,ui.PICTURE_PIC )
 	local del = uikits.child( pic,ui.PICTURE_DELETE_BUTTON )
@@ -428,9 +697,23 @@ function Subjective:add_photo( layout,photo_file )
 	layout:addChild(pic)
 	layout._list = layout._list or {}
 	table.insert(layout._list,{file=photo_file,item=pic})
+	--]]
 end
 
-function Subjective:add_voice( layout,voice_file,tlen )
+function Subjective:add_voice( voice_file,tlen,index )
+	local idx
+	if index then
+		idx = index
+	else
+		idx = self._current
+	end
+	if idx and self._topics_list then
+		local t = self._topics_list[idx]
+		t.answer = t.answer or {}
+		t.answer.resources = t.answer.resources or {}
+		table.insert(t.answer.resources,{filename=voice_file,length=tlen})
+	end	
+--[[
 	local voice = uikits.child( layout,ui.AUDIO_VIEW):clone()
 	local play = uikits.child( voice,ui.AUDIO_BUTTON )
 	local del = uikits.child( voice,ui.PICTURE_DELETE_BUTTON )
@@ -466,8 +749,9 @@ function Subjective:add_voice( layout,voice_file,tlen )
 	layout:addChild(voice)
 	layout._list = layout._list or {}
 	table.insert(layout._list,{file=voice_file,item=voice})
+	--]]
 end
-
+--[[
 function Subjective:relayout_myanswer( layout )
 	if not layout._space then return end
 	local next_button = uikits.child(layout,ui.NEXT_BUTTON)
@@ -499,13 +783,36 @@ function Subjective:relayout_myanswer( layout )
 	y = y + layout._topics:getContentSize().height + layout._space
 	layout:setInnerContainerSize(cc.size(layout._size.width,y))
 end
-
+]]--
 function Subjective:relayout()
 	if self._scrollview and #self._list > 0 then
 		self._scrollview:setInnerContainerSize(cc.size(self._item_size.width*(#self._list+1),self._item_size.height))
 		for i,v in ipairs(self._list) do
 			v:setPosition(cc.p(i*self._item_size.width,self._item_y))
 		end
+	end
+end
+
+function enable( item,b )
+	item:setVisible(true)
+	--item:setEnabled(b)
+	item:setHighlighted(b)
+	item:setBright(b)
+end
+
+function Subjective:set_next_prev_state()
+	if #self._list == 1 then
+		self._next_button:setVisible(false)
+		self._prev_button:setVisible(false)
+	elseif self._current == 1 then
+		enable(self._next_button,true)
+		enable(self._prev_button,false)
+	elseif self._current == #self._list then
+		enable(self._next_button,false)
+		enable(self._prev_button,true)	
+	else
+		enable(self._next_button,true)
+		enable(self._prev_button,true)	
 	end
 end
 
@@ -516,6 +823,14 @@ function Subjective:next_item()
 	end
 end
 
+function Subjective:prev_item()
+	if self._current and self._current > 1 then
+		stopSound()
+		self:set_current( self._current-1 )
+	end
+end
+
+--保存答案
 function Subjective:save()
 	if self._args.status == 10 or self._args.status == 11 then
 		--已经提交，不存储
@@ -524,26 +839,83 @@ function Subjective:save()
 	if self._args and self._args.exam_id then
 		self:calc_times() --计算当前时间
 		local file = self._args.exam_id..login.uid()..'.custom'
-		local t = {}
-		for i,layout in pairs(self._pageview:getPages()) do
-			local p = {}
-			p.item_id = layout._item_id
-			p.text = uikits.child(layout,ui.WRITE_TEXT ):getStringValue()
-			p.attachments = {}
-			if layout._list then
-				for k,v in pairs(layout._list) do
-					table.insert(p.attachments,{filename=v.file} )
+	
+		if self._topics_list then
+			local my_answer = {}
+			for i,v in pairs(self._topics_list) do
+				if v.item_id then
+					my_answer[v.item_id] = {}
+					local t = my_answer[v.item_id]
+					t.times = v.answer._times
+					t.text = v.answer.text
+					t.item_id = v.item_id
+					t.attachments = {}
+					if v.answer.resources then
+						for k,s in pairs(v.answer.resources) do
+							table.insert(t.attachments,{filename=s.filename})
+						end
+					end
+				else
+					kits.log("ERROR Subjective:save v.item_id = nil")
 				end
 			end
-			--table.insert(t,p)
-			t[p.item_id] = p
+			local str = json.encode( my_answer,2)
+			kits.write_cache( file,str )
 		end
-		local str = json.encode( t )
-		kits.write_cache( file,str )
 	end
 end
 
+function Subjective.get_done_num( exam_id )
+	local file = exam_id..login.uid()..'.custom'
+	local str = kits.read_cache( file )
+	
+	if str then
+		local t = json.decode( str )
+		local count = 0
+		for i,v in pairs(t) do
+			if v and type(v)=='table' then
+				if v.text and string.len(v.text)>0 then
+					count = count + 1
+				elseif #v.attachments>0 then
+					count = count + 1
+				end
+			end
+		end
+		return count
+	else
+		return 0
+	end
+end
+
+--装入答案
 function Subjective:load_myanswer_from_table( t )
+	for i,v in pairs(self._topics_list) do
+		if v.item_id then
+			v.answer = {}
+			local my_answer = v.answer
+			if t[v.item_id] then
+				local item = t[v.item_id]
+				my_answer._times = item.times or 0
+				my_answer._begin_time = os.time()
+				my_answer.text = item.text
+				my_answer.comment = item.comment
+				for k,s in pairs(item.attachments) do
+					local suffix = string.lower(string.sub(s.filename,-4))
+					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
+						self:add_photo( s.filename,i )
+					elseif suffix == '.amr' then
+						local tlen = cc_getVoiceLength( kits.get_cache_path()..s.filename )
+						self:add_voice( s.filename,tlen,i )
+					else
+						kits.log("ERROR not support meida type "..tostring(suffix))
+					end
+				end
+			end
+		else
+			kits.log("ERROR Subjective:load_myanswer_from_table v.item_id = nil")
+		end
+	end
+--[[
 	local pages = self._pageview:getPages()
 	if pages and t then
 		for i,layout in pairs(pages) do
@@ -571,9 +943,11 @@ function Subjective:load_myanswer_from_table( t )
 	else
 		kits.log("ERROR load_myanswer_from_table pages = nil or t = nil")
 	end
+	--]]
 end
 
 function Subjective:load_from_cloud()
+	kits.log("Subjective:load_from_cloud")
 	local function download_resources( rsts,cloud_answer )
 		local n = 0
 		local loadbox = loadingbox.open(self)
@@ -585,6 +959,8 @@ function Subjective:load_from_cloud()
 					return
 				end
 				self:load_myanswer_from_table( cloud_answer )
+				self:clear_current()
+				self:relayout_topics(self._current)
 			end
 		end)
 		if not r then
@@ -642,6 +1018,10 @@ function Subjective:load_from_cloud()
 									end
 								end
 								--table.insert(cloud_answer,p)
+								p.comment = answer.comment
+								p.isjudged = answer.isjudged
+								p.isright = answer.isright
+								p.score = answer.score
 								cloud_answer[p.item_id] = p
 							else
 								--下载失败
@@ -686,18 +1066,75 @@ function Subjective:load_myanswer()
 		if str then
 			local t = json.decode( str )
 			if t then
+				if self._args.status == 10 or self._args.status == 11 then
+					--已经提交,老师的批改也需要下载，因此只能每次从网上拉
+					self:load_from_cloud()
+					return
+				end
 				self:load_myanswer_from_table( t )
+				self:clear_current()
+				self:relayout_topics(self._current)				
 				return
 			end
 		end
 	end
-	self:load_from_cloud()
+end
+
+function Subjective:load_logo_and_name()
+	if self._args then
+		local t = self._args
+		--设置老师名称和老师图标
+		if t.teacher_name then
+			local item = uikits.child(self._topics_item,ui.TEACHER_NAME)
+			item:setString( t.teacher_name )
+			if self._comment_item then
+				item = uikits.child(self._comment_item,ui.TEACHER_NAME)
+				item:setString( t.teacher_name )
+			end
+		end		
+		if t.tid then
+			login.get_logo( t.tid,
+			function(name)
+				if name then
+					local item = uikits.child(self._topics_item,ui.TEACHER_PHOTO)
+					item:loadTexture( name )
+					if self._comment_item then
+						item = uikits.child(self._comment_item,ui.TEACHER_PHOTO)
+						item:loadTexture( name )
+					end
+				else
+					kits.log("get logo fail"..tostring(t.tid))
+				end
+			end,3)
+		end		
+		--设置自己的名称和图标
+		if t._user_type and t._user_type.uig then
+			local item = uikits.child(self._answer_item,ui.STUDENT_NAME)
+			item:setString( t._user_type.uig[1].uname )
+		end		
+		if t.uid then
+			login.get_logo( t.uid,
+			function(name)
+				if name then
+					local item = uikits.child(self._answer_item,ui.STUDENT_PHOTO)
+					item:loadTexture( name )
+				else
+					kits.log("get logo fail"..tostring(t.uid))
+				end
+			end,3)
+		end			
+	end
 end
 
 function Subjective:init()
-	self:init_gui()
-	self:init_delay_release()
-	self:init_data()
+	if not self._root then
+		self:init_gui()
+		self:load_logo_and_name()
+		self:init_delay_release()
+		self:init_data()
+	else
+		self:restoreScrollViewPos()
+	end
 end
 
 local loadpaper_url = "http://new.www.lejiaolexue.com/paper/handler/LoadPaperItem.ashx"
@@ -795,7 +1232,11 @@ function Subjective:scroll_relayout()
 	end
 end
 
-function Subjective:relayout_tops()
+function Subjective:relayout_all()
+	self._topics_view:relayout()
+	self._answer_view:relayout()
+	self._main_view:relayout()
+	self:set_next_prev_state()
 end
 
 function Subjective:init_gui()
@@ -811,16 +1252,168 @@ function Subjective:init_gui()
 			end)
 		self:addChild(self._root)
 		
-		self._scrollview = uikits.child(self._root,ui.LIST) --index list
-		self._scroll = uikits.child(self._root,ui.PAGE_VIEW)
-		self._scroll_size = self._scroll:getContentSize()
+		--next prev done button
+		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON)
+		self._prev_button = uikits.child(self._root,ui.PREV_BUTTON)
+		self._done_button = uikits.child(self._root,ui.DONE_BUTTON)
+		uikits.event(self._next_button,function(sender)
+			self:save()
+			self:next_item()
+		end)
+		uikits.event(self._prev_button,function(sender)
+			self:save()
+			self:prev_item()		
+		end)
+		uikits.event(self._done_button,function(sender)
+			stopSound()
+			self:save()
+			uikits.popScene()		
+		end)		
+		--index list
+		self._scrollview = uikits.child(self._root,ui.LIST)
+		self._item_current = uikits.child(self._scrollview,ui.ITEM_CURRENT)
+		self._item_finished = uikits.child(self._scrollview,ui.ITEM_FINISHED)
+		self._item_unfinished = uikits.child(self._scrollview,ui.ITEM_UNFINISHED)
 		
+		self._item_current:setVisible(false)
+		self._item_finished:setVisible(false)
+		self._item_unfinished:setVisible(false)
+		self._item_size = self._item_current:getContentSize()
+				
+		local x
+		x,self._item_y = self._item_current:getPosition()				
+		--主视图
+		self._main_view = uikits.scroll(self._root,ui.MAIN_VIEW,ui.TEACHER_VIEW,false,16,ui.WRITE_VIEW,220) --uikits.child(self._root,ui.MAIN_VIEW)
+		--加入评论
+		if self._args.status == 10 or self._args.status == 11 then
+			self._comment_item = self._main_view:additem()
+			self._comment_view = uikits.scrollex(self._comment_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
+												{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO},nil,true,4,110)
+			self._comment_view:clear()
+			self._comment_view:relayout()
+			self._comment_item._isHidden = true
+		end
+		self._topics_item = self._main_view:additem()
+		--题目视图
+		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
+		{ui.TOPICS_BG,ui.TEACHER_NAME,ui.TEACHER_PHOTO},nil,true,4,110)
+		
+		--作答视图
+		self._answer_item = self._main_view:additem(nil,2)
+		self._answer_view = uikits.scrollex(self._answer_item,nil,{ui.PICTURE_VIEW,ui.AUDIO_VIEW},
+		{ui.STUDENT_BG,ui.STUDENT_NAME,ui.STUDENT_PHOTO},nil,true,4,110)
+		
+		--作答区事件
+		self._edit_text = uikits.child(self._answer_item,ui.WRITE_TEXT)
+		self._voice_button = uikits.child(self._answer_item,ui.VOICE_BUTTON)
+		self._cam_button = uikits.child(self._answer_item,ui.CAM_BUTTON)
+		self._photo_button = uikits.child(self._answer_item,ui.PHOTO_BUTTON)
+		self._edit = uikits.child(self._answer_item,ui.WRITE_EDIT)
+		uikits.event(self._edit_text,function(sender,eventType)
+			if self._current and self._topics_list and self._topics_list[self._current] then
+				self._topics_list[self._current].answer.text = self._edit_text:getStringValue()
+			end
+		end)
+		if self._args.status == 10 or self._args.status == 11 then		
+			self._edit:setVisible(false)
+		end
+		uikits.event(self._edit,function(sender,b)
+			for i,v in pairs(self._answer_view._list) do
+				local del = uikits.child(v,ui.AUDIO_DELETE_BUTTON)
+				if del then
+					del:setVisible(b)
+				end
+			end		
+		end)
+		uikits.event( self._voice_button,function(sender) --录音
+				if not (self._args.status == 10 or self._args.status == 11) then
+					stopSound()
+					if self:get_attach_num() < 6 then
+						RecordVoice.open(
+								self,
+								function(b,file)
+									self._recording = nil
+									if b then
+										local tlen = cc_getVoiceLength(file)
+										self:add_voice( file,tlen )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									end
+								end
+							)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
+				else
+					messagebox(self,"提示","作业已经提交不能修改！")
+				end		
+			end )
+		uikits.event( self._cam_button,function(sender) --照相
+				if not (self._args.status == 10 or self._args.status == 11) then
+					stopSound()
+					if self:get_attach_num() < 6 then
+						cc_takeResource(TAKE_PICTURE,function(t,result,res)
+								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+								if result == RESULT_OK then
+									local b,res = cc_adjustPhoto(res,1024)
+									if b then
+										self:add_photo( res )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									else
+										messagebox(self,"错误","图像调整失败")
+									end
+								end
+							end)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
+				else
+					messagebox(self,"提示","作业已经提交不能修改！")
+				end		
+			end )
+		uikits.event( self._photo_button,function(sender) --图库
+				if not(self._args.status == 10 or self._args.status == 11) then
+					stopSound()
+					if self:get_attach_num() < 6 then
+						cc_takeResource(PICK_PICTURE,function(t,result,res)
+								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+								if result == RESULT_OK then
+									local b,res = cc_adjustPhoto(res,1024)
+									if b then
+										self:add_photo( res )
+										self:clear_current()
+										self:relayout_topics( self._current )
+										self:relayout_all()
+										self._main_view._scrollview:scrollToBottom(0.1,false)
+									else
+										messagebox(self,"错误","图像调整失败")
+									end
+								end					
+							end)
+					else
+						messagebox(self,"提示","附件不能多于6个!")	
+					end
+				else
+					messagebox(self,"提示","作业已经提交不能修改！")
+				end		
+			end )			
+		self:relayout_all()
+		
+		self:clear_content()
+		--[[
 		self._tops = uikits.child(self._scroll,ui.TEACHER_VIEW)
 		local cs = self._scroll:getContentSize()
 		local ts = self._tops:getContentSize()
 		local tx,ty = self._tops:getPosition()
 		self._space = cs.height-ty-ts.height
+		--]]
 		--self._input_text = uikits.child(self._tops,ui.INPUT_TEXT)
+		--[[
 		local x,y = self._tops:getPosition()
 		self._tops_space = y-self._tops:getContentSize().height
 		self._tops_ox = x
@@ -866,25 +1459,12 @@ function Subjective:init_gui()
 		self._item_finished:setVisible(false)
 		self._item_unfinished:setVisible(false)
 		self._item_size = self._item_current:getContentSize()
---[[
-		self._next_button = uikits.child(self._root,ui.NEXT_BUTTON )
-		self._finish_button = uikits.child(self._root,ui.FINISH_BUTTON )
-		self._next_button:setVisible(true)
-		self._finish_button:setVisible(false)
-		uikits.event( self._next_button,
-					function(sender)
-						self:next_item()
-					end,'click')
-		uikits.event( self._finish_button,
-					function(sender)
-						--保存
-						self:save()
-						uikits.popScene()
-					end,'click')		
---]]					
+				
 		local x
 		x,self._item_y = self._item_current:getPosition()			
+		--]]
 		---装入数据
+		--[[
 		if self._data then
 			for i,v in pairs(self._data) do
 				self:add_item( v )
@@ -893,6 +1473,7 @@ function Subjective:init_gui()
 			self:set_current(1)
 			self:relayout()
 		end
+		--]]
 	end
 end
 

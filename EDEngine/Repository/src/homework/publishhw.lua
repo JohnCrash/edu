@@ -390,6 +390,8 @@ function Publishhw:publish_topics()
 				--local url = 'http://new.www.lejiaolexue.com/paper/handler/APIManuallyItem.ashx'
 				--local send_url = url..'?'..send_data_pid..send_data_para
 				local form = send_data_pid..send_data_para
+				kits.log("	POST : "..add_homework_item_url)
+				kits.log("		POST FORM : "..form )
 				cache.post(add_homework_item_url,form,function(b,result)
 						if b then
 							print( result )
@@ -405,6 +407,7 @@ function Publishhw:publish_topics()
 						end
 					end)
 			else
+				kits.log("	ITEM EMPTY")
 				add_paper_item_isdone = uikits.OK
 			end
 		end

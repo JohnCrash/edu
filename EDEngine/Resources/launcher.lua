@@ -109,21 +109,25 @@ if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
 	kits.config("cookie",cookie)
 else
+	--[[
 	local ck = kits.config("cookie","get")
 	if ck then
 		login.set_cookie( ck ) --上一次成功的启动
 	else
 		login.set_selector(1) --学生
 	end
+	--]]
 end
 if uid and type(uid)=='string' and string.len(uid)>1 then
 	login.set_userid( uid )
 	kits.config("uid",uid)
 else
+	--[[
 	local id = kits.config("uid","get")
 	if id then
 		login.set_userid( id )
 	end
+	--]]
 end
 
 resume.clearflag("launcher") --launcher isok
@@ -175,6 +179,12 @@ elseif app == 'suggestion' then
 		run=function()
 			local suggestion = require "suggestion/SuggestionView.lua"
 			return suggestion.create()
+	end}	
+elseif app == 'exerbooknew' then
+	update.create{name=app,updates={'errortitlenew','luacore'},
+		run=function()
+			local exerbooknew = require "errortitlenew/ErrorTitlePerView.lua"
+			return exerbooknew.create()
 	end}	
 elseif app and string.len(app)>0 then
 	--任意启动
