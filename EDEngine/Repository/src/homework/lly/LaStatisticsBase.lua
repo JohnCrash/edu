@@ -121,30 +121,15 @@ function LaStatisticsBase:init( ... )
 		---
 		self._imageLeft = self._wiRoot:getChildByName(CONST.LEFT_TOKEN)
 		if not self._imageLeft then break end
+		self._imageLeft:setVisible(false)
 
 		self._imageRight = self._wiRoot:getChildByName(CONST.RIGHT_TOKEN)
 		if not self._imageRight then break end
+		self._imageRight:setVisible(false)
 
 		self._listCourse = self._wiRoot:getChildByName(CONST.LIST_COURSE)
 		if not self._listCourse then break end
 		self._listCourse:setInertiaScrollEnabled(false) --禁止惯性滑动
-
-		--实现列表控制左右指示
-		self._listCourse:addScrollViewEventListener(function (sender, srollEventType)
-			--移动时显示两个指示，到最左面了就把表示左面还有的标志隐藏，右边同理
-			if srollEventType == ccui.ScrollviewEventType.scrolling then
-				self._imageLeft:setVisible(true)
-				self._imageRight:setVisible(true)
-
-			elseif srollEventType == ccui.ScrollviewEventType.scrollToLeft then
-				lly.logCurLocAnd("left")
-				self._imageLeft:setVisible(false)
-
-			elseif srollEventType == ccui.ScrollviewEventType.scrollToRight then
-				lly.logCurLocAnd("right")
-				self._imageRight:setVisible(false)
-			end
-		end)
 
 		--列表内控件和控件激活指示
 		self._layCourseModel = self._wiRoot:getChildByName(CONST.COURSE_MODEL)
@@ -284,7 +269,7 @@ function LaStatisticsBase:implementFunction()
 			if not loadbox:removeFromParent() then return end
 
 			if t and type(t) == 'table' then
-				--lly.logTable(t)
+				lly.logTable(t)
 				self:processStatusData(t)
 			end
 		end)
@@ -322,7 +307,9 @@ function LaStatisticsBase:implementFunction()
 		local courseBtn = nil
 		local bHasSetFirst = false
 		local strCourse = nil
+		local widgetNum = 0 --控件数量，用于后面计算是否超出可视范围
 		for course, v in pairs(self._tabData) do
+			widgetNum = widgetNum + 1
 			--改变模型
 			strCourse = moTopics.course_map[course]
 
@@ -352,7 +339,7 @@ function LaStatisticsBase:implementFunction()
 
 		--如果生成的科目数没有超出显示区域，则不显示左右指示标，否则显示右指示标
 		--但是不知为何，self._listCourse:getInnerContainerSize().width只能获得一个12884901888
-		--因此无法使用
+		--因此无法使用，改成使用控件数量判断
 		--经查勘，在cocos code ide 中 getInnerContainerSize没有问题!!!!!!
 		--[[
 		local inner = self._listCourse:getInnerContainerSize()
@@ -364,7 +351,39 @@ function LaStatisticsBase:implementFunction()
 			self._imageRight:setVisible(false)
 		end
 		--]]
-		self._imageRight:setVisible(true)
+
+		local maxWidgetNumber
+		if moUIKits.get_factor() == moUIKits.FACTOR_3_4 then --3：4
+			maxWidgetNumber = 4
+		else
+			maxWidgetNumber = 6
+		end
+
+		lly.log("widget num is " .. widgetNum .. ", list can contain " .. maxWidgetNumber)
+		if widgetNum > maxWidgetNumber then --如果数量超出能显示的范围
+			self._imageRight:setVisible(true)
+
+			--实现列表控制左右指示
+			self._listCourse:addScrollViewEventListener(function (sender, srollEventType)
+				--移动时显示两个指示，到最左面了就把表示左面还有的标志隐藏，右边同理
+				if srollEventType == ccui.ScrollviewEventType.scrolling then
+					self._imageLeft:setVisible(true)
+					self._imageRight:setVisible(true)
+
+				elseif srollEventType == ccui.ScrollviewEventType.scrollToLeft then
+					lly.logCurLocAnd("left")
+					self._imageLeft:setVisible(false)
+
+				elseif srollEventType == ccui.ScrollviewEventType.scrollToRight then
+					lly.logCurLocAnd("right")
+					self._imageRight:setVisible(false)
+				end
+			end)
+
+		else
+			self._imageRight:setVisible(false)
+			self._listCourse:addScrollViewEventListener(function (sender, srollEventType) end)
+		end	
 	end	
 
 	function self:activeCourseBtn(btn)

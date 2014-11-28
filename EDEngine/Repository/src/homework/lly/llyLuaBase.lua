@@ -54,14 +54,14 @@ end
 --自定义的log输出，调试时，输出时同时打印位置，所在函数名，以及所在文件名
 --最终release时，可把此函数内容注释掉
 function lly.logCurLocAnd(...)
-	--[====[
+	
 	local info = debug.getinfo(2,"Sln")
-	local strInfo = "(^_^)/: " .. string.format(...) .. " @ LINE " .. info.currentline .. " IN " .. 
+	local strInfo = "INFO : " .. string.format(...) .. " @ LINE " .. info.currentline .. " IN " .. 
 		(info.name and ("FUCN: " .. info.name .. " << ") or "FUCN: unnamed << ") .. info.short_src
-
+	--[====[
 	lly.log(strInfo)
 	--]====]
-	moKits.log(...)
+	moKits.log(strInfo)
 end
 
 --打印当前位置函数的调用追溯
@@ -106,10 +106,12 @@ function lly.logTable(t, index)
 	end
 
 	--]====]
-	moKits.log(tostring(t))
 end
 
 function lly.error(errorStr, n)
+	--[====[
+	error(errorStr, n)
+	--]====]
 	moKits.log("ERROR : " .. errorStr)
 end
 

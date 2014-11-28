@@ -9,6 +9,17 @@ local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
 local messagebox = require "messagebox"
 
+--[[
+	lly卢乐颜进行修改部分：
+	1. class后，为worklist添加一个属性_laStats_Stu，用于指向统计层
+	2. init_gui 里面加载自定义统计层并隐藏
+	3. init_statistics 中隐藏原数据列表，显示自定义统计层
+	4. init_new_list init_history_list init_setting 中隐藏自定义的统计层
+	5. refresh_list 中注释掉 load_statistics 因为刷新列表时不对统计层有效
+	6. require 统计层
+]]
+local moStats = require "homework/lly/LaStatisticsStudent"
+
 crash.open("homework",1)
 
 local course_icon = topics.course_icon
@@ -98,6 +109,8 @@ local ui = {
 --]]
 local WorkList = class("WorkList")
 WorkList.__index = WorkList
+
+WorkList._laStats_Stu = {} --lly统计层
 
 function WorkList.create()
 	local scene = cc.Scene:create()
@@ -303,7 +316,7 @@ function WorkList:refresh_list()
 		elseif self._mode == ui.HISTORY then
 			self:load_page( 1,5 )
 		elseif self._mode == ui.STATIST then
-			self:load_statistics()
+			--self:load_statistics() --lly不会刷新
 		end
 	end
 end
@@ -315,6 +328,7 @@ function WorkList:init_new_list()
 	--self:SwapButton( ui.NEW )
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
+	self._laStats_Stu:setVisible(false) --lly关闭统计层
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
 		if self._new_list_done then
 			self:Swap_list(ui.NEW)
@@ -556,9 +570,9 @@ end
 
 function WorkList:init_statistics()
 	if self._busy then return end
-	if self._scrollview:isAnimation() then return end
-	cache.request_cancel()
 	--self:SwapButton( ui.STATIST )
+
+	--[[原方法
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	
@@ -573,6 +587,21 @@ function WorkList:init_statistics()
 		end
 		self._mode = ui.STATIST
 	end
+	--]]
+
+	--开启统计层
+	self._scrollview:setVisible(false) --关闭原有的列表，使用自定义的新层
+	self._setting:setVisible(false) --关闭设置层
+	self._laStats_Stu:setVisible(true) --开启统计层
+
+	if self._mode ~= ui.STATIST then
+
+		--读取数据
+		self._laStats_Stu:enter()
+
+		self._mode = ui.STATIST
+	end
+
 	return true
 end
 
@@ -585,6 +614,7 @@ function WorkList:init_setting()
 	end
 	self._scrollview:setVisible(false)
 	self._setting:setVisible(true)
+	self._laStats_Stu:setVisible(false) --lly关闭统计层
 
 	--self._mode = ui.SETTING
 	return true
@@ -786,6 +816,13 @@ function WorkList:init_gui()
 		end)
 	self._list = {}
 	--]]
+
+	--lly添加统计层，并先隐藏
+	self._laStats_Stu = moStats.Class:create()
+	if self._laStats_Stu then
+		self._root:addChild(self._laStats_Stu, 1)
+		self._laStats_Stu:setVisible(false)
+	end
 end
 
 function WorkList:Swap_list( new_mode )
@@ -799,7 +836,8 @@ function WorkList:init_history_list()
 	--self:SwapButton( ui.HISTORY )
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
-	
+	self._laStats_Stu:setVisible(false) --lly关闭统计层
+
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
 		if self._history_list_done then
 			self:Swap_list(ui.HISTORY)

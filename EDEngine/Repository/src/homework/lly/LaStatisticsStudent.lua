@@ -17,7 +17,7 @@ function LaStatisticsStudent:ctor()
 	--载入学生统计的url
 	self.STU_STATUS_URL = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx'
 
-	self.getFinalURL = function () end --继承
+	self.getFinalURL_inherit = function () end --继承
 end
 
 function LaStatisticsStudent:init( ... )
@@ -38,7 +38,7 @@ end
 function LaStatisticsStudent:implementFunction()
 	self.super.implementFunction(self)
 
-	function self:getFinalURL()
+	function self:getFinalURL_inherit()
 		if _G.hw_cur_child_id == 0 then
 			return self.STU_STATUS_URL
 		else
