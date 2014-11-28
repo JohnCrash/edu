@@ -181,6 +181,7 @@ end
 function SubjectiveEdit:addsound( name,length )
 	local item = self._audio_item:clone()
 	if item then
+		kits.log("SubjectiveEdit:addsound "..tostring(name)..":"..tostring(length))
 		item:setVisible(true)
 		uikits.event(item,function(sender)
 			uikits.playSound(name)
@@ -190,6 +191,12 @@ function SubjectiveEdit:addsound( name,length )
 			delbut:setVisible(self._edit:getSelectedState())
 			uikits.event( delbut,function(sender)
 				item:setVisible(false)
+				for k,v in pairs(self._items) do
+					if v == item then
+						table.remove(self._items,k)
+						break
+					end
+				end				
 				self:delsound_todata( name )
 				self:scroll_relayout()
 			end,"click" )
@@ -218,6 +225,7 @@ end
 
 function SubjectiveEdit:addsound_todata( name,length )
 	if name and self._current and self._data[self._current] then
+		kits.log("SubjectiveEdit:addsound_todata "..tostring(name)..":"..tostring(length))
 		self._data[self._current].items = self._data[self._current].items or {}
 		table.insert(self._data[self._current].items,{file=name,type=1})
 	end	
@@ -261,6 +269,12 @@ function SubjectiveEdit:addphoto( name )
 			delbut:setVisible(self._edit:getSelectedState())
 			uikits.event( delbut,function(sender)
 				item:setVisible(false)
+				for k,v in pairs(self._items) do
+					if v == item then
+						table.remove(self._items,k)
+						break
+					end
+				end
 				self:delphoto_todata( name )
 				self:scroll_relayout()
 			end,"click" )
@@ -306,7 +320,7 @@ function SubjectiveEdit:saveScrollViewPos()
 end
 
 function SubjectiveEdit:resoreScrollView()
-	if self._scroll then
+	if self._scroll and self._mainx and self._mainy then
 		local inner = self._scroll:getInnerContainer()
 		inner:setPosition(cc.p(self._mainx,self._mainy))	
 	end
@@ -519,6 +533,8 @@ function SubjectiveEdit:init_event()
 									self:addsound( file,tlen )
 									self:addsound_todata( file,tlen )
 									self:scroll_relayout()	
+								else
+									kits.log("RecordVoice.open callback b = false~")
 								end
 							end
 						)
