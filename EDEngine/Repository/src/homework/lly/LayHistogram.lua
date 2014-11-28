@@ -143,7 +143,7 @@ function LayHistogram:implementFunction()
 		for i = 1, #arg do
 			lly.ensure(arg[i], "number") --检测
 			if arg[i] <= 0 or arg[i] >= VALUE_TYPE.MAX then
-				error("wrong type", 2)
+				lly.error("wrong type", 2)
 			end
 
 			if self._arStruCategoryAttr[i] == nil then --生成新的结构体
@@ -205,7 +205,7 @@ function LayHistogram:implementFunction()
 	function self:shiftCategory(index)
 		lly.ensure(index, "number")
 		if index <= 0 or index > #self._arStruCategoryAttr then
-			error("wrong index", 2)
+			lly.error("wrong index", 2)
 		end
 
 		self._nCurrentCategory = index
@@ -249,8 +249,8 @@ function LayHistogram:implementFunction()
 		local min = category.min
 		local max = category.max
 
-		if min == max and min > 0 then min = 0 end --如果只有一个月，则min，max会一样，此时把min变成0
-		lly.log("min %d, max %d", min, max)
+		if min >= max and min > 0 then min = 0 end --如果只有一个月，则min，max会一样，此时把min变成0
+		lly.logCurLocAnd("min %d, max %d", min, max)
 
 		if category.type == VALUE_TYPE.INTEGER then
 			lly.log("int")

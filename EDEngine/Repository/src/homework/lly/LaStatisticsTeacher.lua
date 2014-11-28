@@ -69,6 +69,10 @@ function LaStatisticsTeacher:init( ... )
 		self._layClassModel = self._listClass:getChildByName(CONST.CLASS_MODEL)
 		if not self._layClassModel then break end
 
+		--从表格中取出，但不让他释放
+		self._layClassModel:retain()
+		self._layClassModel:removeFromParent()
+
 		self._labClassInModel = self._layClassModel:getChildByName(CONST.CLASS_MODEL_LABEL)
 		if not self._labClassInModel then break end
 
@@ -163,6 +167,7 @@ function LaStatisticsTeacher:implementFunction()
 			--]=]
 				
 			if t and type(t) == 'table' and t.result == 0 and t.zone then
+				--lly.logTable(t.zone)
 				self:processClassData(t.zone)
 			else
 				lly.logCurLocAnd("wrong Data")
@@ -175,6 +180,9 @@ function LaStatisticsTeacher:implementFunction()
 	--遍历table生成班级按钮
 	function self:processClassData(tab)
 		lly.ensure(tab, "table")
+
+		--清空原列表内容
+		self._listClass:removeAllItems()
 
 		local classBtn = nil
 		local bHasSetFirst = false

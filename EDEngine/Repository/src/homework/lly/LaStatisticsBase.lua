@@ -85,7 +85,7 @@ function LaStatisticsBase:ctor()
 
 	self.enter = function () end --进入统计层，第一次时会调用refresh
 
-	self.getFinalURL_inherit = function () error("need inherit")end --得到最终的URL
+	self.getFinalURL_inherit = function () lly.error("need inherit")end --得到最终的URL
 		
 end
 
@@ -284,6 +284,7 @@ function LaStatisticsBase:implementFunction()
 			if not loadbox:removeFromParent() then return end
 
 			if t and type(t) == 'table' then
+				--lly.logTable(t)
 				self:processStatusData(t)
 			end
 		end)

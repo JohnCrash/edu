@@ -8,6 +8,7 @@
 --2014.11.18
 
 local lly = require "homework/lly/llyLuaBase"
+local kits = require "kits"
 
 lly.finalizeCurrentEnvironment()
 
@@ -115,7 +116,7 @@ function WiHistogramBar:implementFunction()
 	function self:setStatusFormatType(nType)
 		lly.ensure(nType, "number")
 		if nType <= 0 or nType >= FORMAT_TYPE.MAX then
-			error("wrong type")
+			lly.error("wrong type")
 		end
 
 		self._nStatusFormatType = nType
@@ -129,7 +130,7 @@ function WiHistogramBar:implementFunction()
 		if fMin >= fMax then
 			--print("fMin="..fMin)
 			--print("fMax="..fMax)
-			--error("min must less than max", 2)
+			--lly.error("min must less than max", 2)
 			kits.log("ERROR : setMinAndMaxValue fMin >= fMax "..tostring(fMin).."/"..tostring(fMax))
 		end
 		
