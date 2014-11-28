@@ -330,9 +330,9 @@ function Subjective:load_voice(item,filename,suffix)
 		local play = uikits.child(item,ui.TOPICS_VOICE_PLAY)
 		local txt = uikits.child(item,ui.TOPICS_VOICE_TIME)
 		uikits.event(play,function(sender)
-			uikits.playSound( kits.get_cache_path()..filename )
+			uikits.playSound( filename )
 		end)
-		local length = cc_getVoiceLength( kits.get_cache_path()..filename )
+		local length = cc_getVoiceLength( filename )
 		txt:setString( kits.time_to_string_simple(math.floor(length)) )
 	end
 end
@@ -443,7 +443,7 @@ function Subjective:relayout_topics( i )
 						end,"click" )
 					elseif suffix == '.amr' then
 						local item = self._topics_view:additem(2,0,"top")
-						local filename = v.filename
+						local filename = kits.get_cache_path()..v.filename
 						self:load_voice( item,filename,suffix )
 					end
 				end
