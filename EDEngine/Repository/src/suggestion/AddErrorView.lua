@@ -5,12 +5,12 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
-local editpic = require "suggestion/EditPic"
+local editpic = require "errortitlenew/EditPic"
 local ljshell = require "ljshell"
 
 local ui = {
-	FILE = 'suggestion/addtitle_new.json',
-	FILE_3_4 = 'suggestion/addtitle43_new.json',
+	FILE = 'errortitlenew/addtitle_new.json',
+	FILE_3_4 = 'errortitlenew/addtitle43_new.json',
 
 	SEL_FLAG = 'Panel_kemu/select3',
 	BUTTON_SEL_COURSE_MATH = 'Panel_kemu/shuxue',
