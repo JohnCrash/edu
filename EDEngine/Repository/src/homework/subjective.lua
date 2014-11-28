@@ -388,7 +388,7 @@ function Subjective:saveScrollViewPos()
 end
 
 function Subjective:restoreScrollViewPos()
-	if self._main_view and self._main_view._scrollview then
+	if self._main_view and self._main_view._scrollview and self._mainx and self._mainy then
 		local inner = self._main_view._scrollview:getInnerContainer()
 		inner:setPosition(cc.p(self._mainx,self._mainy))	
 	end
