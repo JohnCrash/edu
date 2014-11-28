@@ -5,18 +5,18 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
-local adderrorview = require "suggestion/AddErrorView"
+local adderrorview = require "errortitlenew/AddErrorView"
 local ljshell = require "ljshell"
-local imagepreview = require "suggestion/imagepreview"
+local imagepreview = require "errortitlenew/imagepreview"
 local ui = {
-	FILE = 'suggestion/main_new.json',
-	FILE_3_4 = 'suggestion/main43_new.json',
+	FILE = 'errortitlenew/main_new.json',
+	FILE_3_4 = 'errortitlenew/main43_new.json',
 
-	EMPTY_VIEW = 'suggestion/meishouchang.json',
-	EMPTY_VIEW_3_4 = 'suggestion/meishouchang43.json',
+	EMPTY_VIEW = 'errortitlenew/meishouchang.json',
+	EMPTY_VIEW_3_4 = 'errortitlenew/meishouchang43.json',
 	
-	BIG_PIC_VIEW = 'suggestion/showpic_new.json',
-	BIG_PIC_VIEW_3_4 = 'suggestion/showpic43_new.json',
+	BIG_PIC_VIEW = 'errortitlenew/showpic_new.json',
+	BIG_PIC_VIEW_3_4 = 'errortitlenew/showpic43_new.json',
 	
 	VIEW_BIG = 'mypic_up',
 	BIG_PIC = 'mypic_up/my_pic',
@@ -408,7 +408,7 @@ end
 local pic_space = 10
 local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local download_pic_big_url = 'http://file-stu.lejiaolexue.com/rest/dl/'
-local button_empty_path = 'suggestion/kuang.png'
+local button_empty_path = 'errortitlenew/kuang.png'
 local inner_posx
 local inner_posy
 
@@ -423,36 +423,43 @@ function ErrorTitlePerView:set_innerpos()
 end
 
 function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
-	
+	local pos_start,pos_end
 	local function touchEventPic(sender,eventType)
---[[		local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+--[[		local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
 		local imgs = {}
 		imgs[1] = file_path
 		--local scene_next = imagepreview.create(1,imgs,self)		
 		local scene_next = imagepreview.create()		
 		uikits.pushScene(scene_next)--]]	
+
 		if eventType == ccui.TouchEventType.began then
-			local loadbox = loadingbox.open(self)
-			is_loading = true
-			cache.request_nc(download_pic_big_url..sender.pic_name,
-			function(b,t)
-					if b then
-					--	local s_pic = picview:getContentSize()
-						self:save_innerpos()	
-						local local_dir = ljshell.getDirectory(ljshell.AppDir)
-						local file_path = local_dir.."cache/"..sender.pic_name..'1'
-					--	local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
-						local imgs = {}
-						imgs[1] = file_path
-						local scene_next = imagepreview.create(1,imgs,self)	
-						uikits.pushScene(scene_next)	
-					else
-						kits.log("ERROR :  download_pic_big_url failed")
-					end
-				is_loading = false
-				loadbox:removeFromParent()
-				end,sender.pic_name..'1')					
+			pos_start = sender:getTouchBeganPosition()
+		elseif eventType == ccui.TouchEventType.ended then
+			pos_end = sender:getTouchBeganPosition()
+			if math.sqrt((pos_end.x-pos_start.x)*(pos_end.x-pos_start.x)+(pos_end.y-pos_start.y)*(pos_end.y-pos_start.y)) < 10 then
+				local loadbox = loadingbox.open(self)
+				is_loading = true
+				cache.request_nc(download_pic_big_url..sender.pic_name,
+				function(b,t)
+						if b then
+						--	local s_pic = picview:getContentSize()
+							self:save_innerpos()	
+							local local_dir = ljshell.getDirectory(ljshell.AppDir)
+							local file_path = local_dir.."cache/"..sender.pic_name..'1'
+						--	local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
+							local imgs = {}
+							imgs[1] = file_path
+							local scene_next = imagepreview.create(1,imgs,self)	
+							uikits.pushScene(scene_next)	
+						else
+							kits.log("ERROR :  download_pic_big_url failed")
+						end
+					is_loading = false
+					loadbox:removeFromParent()
+					end,sender.pic_name..'1')						
+			end
 		end
+		
 	end
 	
 	local pic_table = json.decode(pic_str)
@@ -827,6 +834,7 @@ function ErrorTitlePerView:init()
 	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)
 	uikits.event(but_add,	
 		function(sender,eventType)	
+			self.isneedupdate = true
 			local scene_next = adderrorview.create()		
 			uikits.pushScene(scene_next)						
 	end,"click")
