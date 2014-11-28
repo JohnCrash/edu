@@ -1,3 +1,4 @@
+local kits = require "kits"
 local uikits = require "uikits"
 local messagebox_ = require "messagebox"
 
@@ -65,11 +66,16 @@ local function open( parent,func )
 				if _start_right then
 					local b,str = cc_stopRecordVoice()
 					if not b then
-						messagebox(self,"错误","录音失败,原因:"..tostring(str))
+						kits.log("ERROR RecordVoice false ")
+						messagebox(parent,"错误","录音失败")
 					end
 					if func and type(func)=='function' then
 						func(b,str)
+					else
+						kits.log("ERROR func = nil or invalid")
 					end
+				else
+					kits.log("ERROR _start_right = false")
 				end
 				uikits.delay_call(parent,function()
 					_root:removeFromParent()
@@ -93,7 +99,8 @@ local function open( parent,func )
 				end
 				_scID = scheduler:scheduleScriptFunc( volume_func,0.1,false )
 			else
-				messagebox(self,"错误","录音失败,原因:"..tostring(str))
+				kits.log("ERROR cc_startRecordVoice return false")
+				messagebox(parent,"错误","录音失败")
 				if func and type(func)=='function' then
 					func(false)
 				end		
