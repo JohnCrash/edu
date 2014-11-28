@@ -326,7 +326,7 @@ public class AppActivity extends Cocos2dxActivity {
 		s_bRecording=false;
 		//Log.w("stop","VoiceStopRecord");
 		//最多等待100毫秒，让线程自己终止
-		for (int i=0;i<50;i++)
+		for (int i=0;i<500;i++)
 		{
 			//线程已经不在录音了
 			if (s_nRecordState!=0) break;
