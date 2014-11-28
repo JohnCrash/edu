@@ -5,18 +5,18 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
-local adderrorview = require "suggestion/AddErrorView"
+local adderrorview = require "errortitlenew/AddErrorView"
 local ljshell = require "ljshell"
-local imagepreview = require "suggestion/imagepreview"
+local imagepreview = require "errortitlenew/imagepreview"
 local ui = {
-	FILE = 'suggestion/main_new.json',
-	FILE_3_4 = 'suggestion/main43_new.json',
+	FILE = 'errortitlenew/main_new.json',
+	FILE_3_4 = 'errortitlenew/main43_new.json',
 
-	EMPTY_VIEW = 'suggestion/meishouchang.json',
-	EMPTY_VIEW_3_4 = 'suggestion/meishouchang43.json',
+	EMPTY_VIEW = 'errortitlenew/meishouchang.json',
+	EMPTY_VIEW_3_4 = 'errortitlenew/meishouchang43.json',
 	
-	BIG_PIC_VIEW = 'suggestion/showpic_new.json',
-	BIG_PIC_VIEW_3_4 = 'suggestion/showpic43_new.json',
+	BIG_PIC_VIEW = 'errortitlenew/showpic_new.json',
+	BIG_PIC_VIEW_3_4 = 'errortitlenew/showpic43_new.json',
 	
 	VIEW_BIG = 'mypic_up',
 	BIG_PIC = 'mypic_up/my_pic',
@@ -408,7 +408,7 @@ end
 local pic_space = 10
 local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local download_pic_big_url = 'http://file-stu.lejiaolexue.com/rest/dl/'
-local button_empty_path = 'suggestion/kuang.png'
+local button_empty_path = 'errortitlenew/kuang.png'
 local inner_posx
 local inner_posy
 
@@ -425,7 +425,7 @@ end
 function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 	
 	local function touchEventPic(sender,eventType)
---[[		local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+--[[		local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
 		local imgs = {}
 		imgs[1] = file_path
 		--local scene_next = imagepreview.create(1,imgs,self)		
@@ -441,7 +441,7 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 						self:save_innerpos()	
 						local local_dir = ljshell.getDirectory(ljshell.AppDir)
 						local file_path = local_dir.."cache/"..sender.pic_name..'1'
-					--	local file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+					--	local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
 						local imgs = {}
 						imgs[1] = file_path
 						local scene_next = imagepreview.create(1,imgs,self)	
