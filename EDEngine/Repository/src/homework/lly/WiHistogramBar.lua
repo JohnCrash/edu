@@ -20,7 +20,7 @@ local FORMAT_TYPE = {
 
 --常量
 local CONST = lly.const{
-	UI_FILE = "homework/lly/wiHistogramBar/zhu_zhuang_shu_ju_1.ExportJson",
+	UI_FILE = "homework/lly/WiHistogramBar/zhu_zhuang_shu_ju_1.ExportJson",
 	BAR_NAME = "layout_bar",
 	STATUS_LAB_NAME = "Label_status",
 	ITEM_LAB_NAME = "Label_item",
