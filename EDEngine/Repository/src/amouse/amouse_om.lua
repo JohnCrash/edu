@@ -537,7 +537,9 @@ function AMouseScene:close_Dialog()
 		
 		uikits.delay_call(nil,function() 
 			kits.log(":close_Dialog removeFromParent")
-			layer:removeFromParent()	
+			if cc_isobj(layer) then
+				layer:removeFromParent()	
+			end
 			self._widget = nil
 			self._uiLayer = nil
 			self._where = nil				
