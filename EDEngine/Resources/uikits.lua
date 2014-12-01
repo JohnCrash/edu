@@ -26,16 +26,36 @@ local function log_caller()
 end
 
 local function playSound( file )
-	if FileUtils:isFileExist(file) then
+	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
 		if string.lower(suffix) == '.amr' then
-			return cc_playVoice(file)
+			if kits.exist_cache(file) then
+				return cc_playVoice(kits.get_cache_path()..file)
+			else
+				return cc_playVoice(file)
+			end
 		else
 			return AudioEngine.playEffect( file )
 		end
 	else
 		kits.log('ERROR playSound file not exist '..tostring(file))
 	end
+end
+
+local function voiceLength( file )
+	if kits.exist_file(file) or kits.exist_cache(file)  then
+		local suffix = string.sub(file,-4)
+		if string.lower(suffix) == '.amr' then
+			if kits.exist_cache(file) then
+				return cc_getVoiceLength(kits.get_cache_path()..file)
+			else
+				return cc_getVoiceLength(file)
+			end			
+		end
+	else
+		kits.log('ERROR voiceLength file not exist '..tostring(file))
+	end
+	return 0
 end
 
 local function pauseSound( id )
@@ -1074,8 +1094,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 					height = height + n * s.height + space
 				end			
 			end
-			calc_col_height(self._list,4)
-			calc_col_height(self._list2,4)
+			calc_col_height(self._list,6)
+			calc_col_height(self._list2,6)
 			local is_abs
 			local tops_offy = 0
 			local offy = 0
@@ -1118,8 +1138,8 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 					if cs.height > 0 then item_height = item_height + cs.height + space end
 				end
 			end
-			raw_list( self._list,4 )
-			raw_list( self._list2,4 )
+			raw_list( self._list,6 )
+			raw_list( self._list2,6 )
 			--放置置顶元件
 			if self._tops_space then
 				item_height = item_height + self._tops_space--起始阶段置顶元件和item的间隔
@@ -1830,6 +1850,7 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	voiceLength = voiceLength,
 	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,

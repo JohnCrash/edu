@@ -332,7 +332,7 @@ function Subjective:load_voice(item,filename,suffix)
 		uikits.event(play,function(sender)
 			uikits.playSound( filename )
 		end)
-		local length = cc_getVoiceLength( filename )
+		local length = uikits.voiceLength( filename )
 		txt:setString( kits.time_to_string_simple(math.floor(length)) )
 	end
 end
@@ -527,7 +527,7 @@ function Subjective:relayout_topics( layout,urls )
 				local voice_button = uikits.child(voice,ui.TOPICS_VOICE_PLAY)
 				local voice_time = uikits.child(voice,ui.TOPICS_VOICE_TIME)
 				local path = kits.get_cache_path()..v.filename
-				local leng = cc_getVoiceLength( path )
+				local leng = uikits.voiceLength( path )
 				voice_time:setString( kits.time_to_string_simple(math.floor(leng)))
 				
 				uikits.event( voice_button,function(sender)
@@ -591,7 +591,7 @@ function Subjective:relayout_topics( layout,urls )
 						function(b,file)
 							self._recording = nil
 							if b then
-								local tlen = cc_getVoiceLength(file)
+								local tlen = uikits.voiceLength(file)
 								--messagebox( self,"add voice",tostring(file))
 								self:add_voice( layout,file,tlen )
 								self:relayout_myanswer( layout )
@@ -904,7 +904,7 @@ function Subjective:load_myanswer_from_table( t )
 					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
 						self:add_photo( s.filename,i )
 					elseif suffix == '.amr' then
-						local tlen = cc_getVoiceLength( kits.get_cache_path()..s.filename )
+						local tlen = uikits.voiceLength( s.filename )
 						self:add_voice( s.filename,tlen,i )
 					else
 						kits.log("ERROR not support meida type "..tostring(suffix))
@@ -929,7 +929,7 @@ function Subjective:load_myanswer_from_table( t )
 					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
 						self:add_photo( layout,v.filename )
 					elseif suffix == '.amr' then
-						local tlen = cc_getVoiceLength( v.filename )
+						local tlen = uikits.voiceLength( v.filename )
 						self:add_voice( layout,v.filename,tlen )
 					else
 						kits.log("ERROR not support meida type "..tostring(suffix))
@@ -1334,7 +1334,7 @@ function Subjective:init_gui()
 								function(b,file)
 									self._recording = nil
 									if b then
-										local tlen = cc_getVoiceLength(file)
+										local tlen = uikits.voiceLength(file)
 										self:add_voice( file,tlen )
 										self:clear_current()
 										self:relayout_topics( self._current )
