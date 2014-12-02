@@ -17,6 +17,13 @@ local g_cookie
 local g_uid
 local s_app,s_cookie,s_uid = cc_launchparam()
 
+local TEACHER = 3
+local STUDENT = 1
+local PARENT = 2
+
+local g_uidtype = nil
+local g_subid = nil
+
 if s_cookie and type(s_cookie)=='string' and string.len(s_cookie)>1 then
 	g_cookie = s_cookie
 end
@@ -30,6 +37,22 @@ end
 
 local function set_userid( uid )
 	g_uid = uid
+end
+
+local function get_uid_type()
+	return g_uidtype
+end
+
+local function set_uid_type( t )
+	g_uidtype = t
+end
+
+local function set_subuid( t )
+	g_subid = t
+end
+
+local function get_subuid()
+	return g_subid
 end
 
 local function get_name()
@@ -111,4 +134,11 @@ return {
 	test_login = test_login,
 	set_cookie = set_cookie,
 	set_userid = set_userid,
+	TEACHER = TEACHER,
+	STUDENT = STUDENT,
+	PARENT = PARENT,
+	get_uid_type = get_uid_type,
+	set_uid_type = set_uid_type,
+	set_subuid = set_subuid,
+	get_subuid = get_subuid,
 }
