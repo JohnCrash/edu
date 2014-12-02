@@ -15,6 +15,14 @@ local test_login =
 local selector = 2
 local g_cookie
 local g_uid
+local s_app,s_cookie,s_uid = cc_launchparam()
+
+if s_cookie and type(s_cookie)=='string' and string.len(s_cookie)>1 then
+	g_cookie = s_cookie
+end
+if s_uid and type(s_uid)=='string' and string.len(s_uid)>1 then
+	g_uid = s_uid
+end
 
 local function set_cookie( cookie )
 	g_cookie = cookie
