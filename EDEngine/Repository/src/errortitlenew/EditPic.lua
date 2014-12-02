@@ -7,11 +7,13 @@ local json = require "json-c"
 local loadingbox = require "loadingbox"
 
 local ui = {
-	FILE = 'errortitlenew/editpic_new.json',
-	FILE_3_4 = 'errortitlenew/editpic43_new.json',
+	FILE = 'errortitlenew/editpic.json',
+	FILE_3_4 = 'errortitlenew/editpic43.json',
 	PIC_VIEW = 'Pic_view',
 	BUTTON_QUIT = 'mainmenu/fanhui',
-	BUTTON_ADD = 'mainmenu/Button_wc',
+	BUTTON_ADD = 'mainmenu/quer',
+	PIC_KD = 'kd',
+	PIC_JT = 'kd/jt',
 }
 
 local EditPic = class("EditPic")
@@ -195,9 +197,10 @@ function EditPic:init()
 
 	self._picview:addChild(sel_rect,1000,10000)
 	
-	local rotation_table = cc.Sprite:create('errortitlenew/kd.png')
+--[[	local rotation_table = cc.Sprite:create('errortitlenew/kd.png')
 	rotation_table:setPosition(cc.p(s.width-100,s.height/2))
-	self._picview:addChild(rotation_table,10)
+	self._picview:addChild(rotation_table,10)--]]
+	local rotation_table = uikits.child(self._widget,ui.PIC_KD)
 	
 	local function touchEventRota(sender,eventType)
 		if eventType == ccui.TouchEventType.moved then
@@ -206,7 +209,7 @@ function EditPic:init()
 			if local_pos.y>sender.maxheight or local_pos.y < 0 then
 				return
 			end
-			rotation_num = 0-math.ceil((local_pos.y-450)/450*180)
+			rotation_num = 0-math.ceil((local_pos.y-450)/450*30)
 			if rotation_num>0 then
 				rotation_num = rotation_num+1
 			end
@@ -215,14 +218,15 @@ function EditPic:init()
 		end
 	end
 
-    button_rota = ccui.Button:create()
+--[[    button_rota = ccui.Button:create()
     button_rota:setTouchEnabled(true)
-    button_rota:loadTextures("errortitlenew/jt.png", "errortitlenew/jt.png", "")
+    button_rota:loadTextures("errortitlenew/jt.png", "errortitlenew/jt.png", "")--]]
+	local button_rota = uikits.child(self._widget,ui.PIC_JT)
 	local rota_size = rotation_table:getContentSize()
 	button_rota.maxheight = rota_size.height
     button_rota:setPosition(cc.p(rota_size.width/2,rota_size.height/2))        
     button_rota:addTouchEventListener(touchEventRota)
-    rotation_table:addChild(button_rota)	
+ --   rotation_table:addChild(button_rota)	
 	
 	local function touchEvent(sender,eventType)
         if eventType == ccui.TouchEventType.began then
@@ -328,13 +332,13 @@ function EditPic:init()
 	label_status_move:setVisible(false)
 	operate_type = 1--]]
 	
-	local menu = cc.Menu:create()
+--[[	local menu = cc.Menu:create()
 	local button_cutpic = cc.MenuItemImage:create('errortitlenew/ti1.png', 'errortitlenew/ti2.png')
 	button_cutpic:setPosition(cc.p(100,100))
 	menu:addChild(button_cutpic)
 	menu:setPosition(cc.p(0, 0))
 	menu:setVisible(false)
-	self._picview:addChild(menu,10)
+	self._picview:addChild(menu,10)--]]
 	
 	local function timer_update(time)
 		local cur_sence = cc.Director:getInstance():getRunningScene()

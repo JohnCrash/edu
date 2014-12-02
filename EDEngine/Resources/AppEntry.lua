@@ -188,8 +188,8 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'suggestion','luacore'},
 				run=function()
-				login.set_selector(1) --家长
-				local selstudent = require "suggestion/ErrorTitlePerView.lua"
+				login.set_selector(2) 
+				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
 		end}

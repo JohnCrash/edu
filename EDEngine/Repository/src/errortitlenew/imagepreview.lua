@@ -2,8 +2,8 @@ local kits = require "kits"
 local uikits = require "uikits"
 
 local ui = {
-	FILE = "errortitlenew/imagepreview.json",
-	FILE_3_4 = "errortitlenew/imagepreview43.json",
+	FILE = "errortitlenew/showpic.json",
+	FILE_3_4 = "errortitlenew/showpic43.json",
 	IMAGEVIEW = "scrollview/image",
 	SCROLLVIEW = "scrollview",
 	PAGEVIEW = "pageview",
@@ -15,7 +15,7 @@ local ui = {
 local ImagePreview = class("ImagePreview")
 ImagePreview.__index = ImagePreview
 
-function ImagePreview.create(index,images,parent_view)
+function ImagePreview.create(index,images)
 --function ImagePreview.create()
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),ImagePreview)
@@ -23,8 +23,6 @@ function ImagePreview.create(index,images,parent_view)
 	scene:addChild(layer)
 	layer._imgs = images
 	layer._current = index
-	layer._parent_view = parent_view
-	layer._parent_view.isneedupdate = false
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -43,12 +41,8 @@ function ImagePreview:init()
 	self._pageview = uikits.child(self._root,ui.PAGEVIEW)
 	self._layout = uikits.child(self._root,ui.LAYOUT)
 	self._close = uikits.child(self._root,ui.CLOSE)
-	self._close:setVisible(false)
-	uikits.event(self._close,function(sender)
-		uikits.popScene()
-	end)
 	self._text = uikits.child(self._root,ui.TEXT)
-	self._text:setVisible(false)
+	
 	local cs = self._pageview:getContentSize()
 	
 	for i,v in pairs(self._imgs) do
@@ -77,14 +71,20 @@ function ImagePreview:init()
 	
 	self._pageview:scrollToPage(self._current-1)
 	
+	--提示到顶了
+	local function text_tips()
+		local action1 = cc.ScaleTo:create(0.2,2)
+		local action2 = cc.ScaleTo:create(0.1,1)
+		self._text:runAction( cc.Sequence:create(action1,action2) )
+	end
 	--注册滚动事件
 	local newTouch
 	local oldx,oldy,oldscale
 	local function onTouchMoved(touches, event)
 		local count = #touches
-		print('count::::'..count)
-		if not newTouch then return end
+		
 		if count == 1 then
+			if not newTouch then return end
 			local idx = self._pageview:getCurPageIndex()
 			local layout = self._pageview:getPage(idx)
 			local img = uikits.child(layout,ui.IMAGEVIEW)
@@ -92,7 +92,31 @@ function ImagePreview:init()
 			local size = img:getContentSize()
 			local p = touches[1]:getLocation()
 			local sp = touches[1]:getStartLocation()			
-			img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+			if scale == 1 then
+				--原图没有缩放,翻页
+				local dx = p.x-sp.x
+				if dx > 100 then
+					local idx = self._pageview:getCurPageIndex()
+					if idx - 1 >= 0 then
+						self._pageview:scrollToPage(idx-1)
+						newTouch = nil
+					else
+						text_tips()
+					end
+				elseif dx < -100 then
+					local idx = self._pageview:getCurPageIndex()
+					local layouts = self._pageview:getPages()
+					if idx + 1 < #layouts then
+						self._pageview:scrollToPage(idx+1)
+						newTouch = nil
+					else
+						text_tips()
+					end			
+				end
+			else
+				--偏移
+				img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+			end
 		elseif count == 2 then
 			local p1 = touches[1]:getLocation()
 			local sp1 = touches[1]:getStartLocation()
@@ -104,12 +128,23 @@ function ImagePreview:init()
 			local layout = self._pageview:getPage(idx)
 			local img = uikits.child(layout,ui.IMAGEVIEW)
 			local scale = d/sd
+		
+			if newTouch then
+				--定位缩放中心
+				local cx = (p1.x+p2.x)/2
+				local cy = (p1.y+p2.y)/2
+				local p = img:convertToNodeSpace(cc.p(cx,cy))
+				local scale = img:getScaleX()
+				local size = img:getContentSize()
+				 
+				img:setAnchorPoint(cc.p(p.x/(size.width),p.y/(size.height)))
+				newTouch=nil --双手缩放
+			end
 			img:setScaleX(scale*oldscale)
 			img:setScaleY(scale*oldscale)
 		end
 	end
 	local function onTouchBegan(touches, event)
-		print('1111111111')
 		newTouch = true
 		local idx = self._pageview:getCurPageIndex()
 		local layout = self._pageview:getPage(idx)
@@ -123,7 +158,19 @@ function ImagePreview:init()
 			local p = touches[1]:getLocation()
 			local sp = touches[1]:getStartLocation()
 			if math.sqrt((p.x-sp.x)*(p.x-sp.x)+(p.y-sp.y)*(p.y-sp.y)) < 20 then
-				uikits.popScene()
+				local idx = self._pageview:getCurPageIndex()
+				local layout = self._pageview:getPage(idx)		
+				local img = uikits.child(layout,ui.IMAGEVIEW)
+				local curscale = img:getScaleX()
+				if curscale ~= 1 then
+					--回归原点
+					img:setScaleX(1)
+					img:setScaleY(1)
+					img:setAnchorPoint(cc.p(0.5,0.5))
+					img:setPosition(cc.p(cs.width/2,cs.height/2))
+				else
+					uikits.popScene()				
+				end
 			end
 		end
 	end
@@ -135,7 +182,12 @@ function ImagePreview:init()
 	local eventDispatcher=self:getEventDispatcher()
 	self:setTouchEnabled(true)
 	self._pageview:setTouchEnabled(false)
-	eventDispatcher:addEventListenerWithSceneGraphPriority(listener,self)		
+	eventDispatcher:addEventListenerWithSceneGraphPriority(listener,self)
+	
+	--做动作
+	self:setScaleX(0.2)
+	self:setScaleY(0.2)
+	self:runAction(cc.ScaleTo:create(0.1,1) )
 end
 
 function ImagePreview:release()

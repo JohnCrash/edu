@@ -183,7 +183,7 @@ elseif app == 'suggestion' then
 elseif app == 'exerbooknew' then
 	update.create{name=app,updates={'errortitlenew','luacore'},
 		run=function()
-			local exerbooknew = require "errortitlenew/ErrorTitlePerView.lua"
+			local exerbooknew = require "errortitlenew/Loading"
 			return exerbooknew.create()
 	end}	
 elseif app and string.len(app)>0 then
