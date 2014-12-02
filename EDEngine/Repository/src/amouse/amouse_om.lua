@@ -304,7 +304,7 @@ function AMouseScene:getIntegration()
 end
 
 function AMouseScene:game_setting_Dialog( where )
-	if self._uiLayer then return end
+	--if self._uiLayer then return end
 	
 	kits.log("game setting dialog")
 	self:close_Dialog()
@@ -451,7 +451,7 @@ function AMouseScene:clean_top_list()
 end
 
 function AMouseScene:game_top10_Dialog( where )
-	if self._uiLayer then return end
+	--if self._uiLayer then return end
 	kits.log("game top10 dialog")
 	self:close_Dialog()
 	self._where = where
@@ -534,15 +534,12 @@ function AMouseScene:close_Dialog()
 		local layer = self._uiLayer
 		kits.log(":close_Dialog setVisible false")
 		layer:setVisible(false)
-		
+		self._uiLayer = nil
 		uikits.delay_call(nil,function() 
 			kits.log(":close_Dialog removeFromParent")
 			if cc_isobj(layer) then
 				layer:removeFromParent()	
 			end
-			self._widget = nil
-			self._uiLayer = nil
-			self._where = nil				
 			end,0.01)			
 			
 		--self._uiLayer:removeFromParent()
