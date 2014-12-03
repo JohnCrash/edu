@@ -6,6 +6,7 @@
 
 local lly = require "homework/lly/llyLuaBase"
 local moLaStatisticsBase = require "homework/lly/LaStatisticsBase"
+local moLogin = require "login"
 
 lly.finalizeCurrentEnvironment()
 
@@ -39,10 +40,15 @@ function LaStatisticsStudent:implementFunction()
 	self.super.implementFunction(self)
 
 	function self:getFinalURL_inherit()
-		if _G.hw_cur_child_id == 0 then
+		-- 判断身份
+		local identity = moLogin.get_uid_type()
+
+		-- if学生 then self.STU_STATUS_URL
+		-- if 家长 then self.STU_STATUS_URL。。g_uid
+		if identity == moLogin.STUDENT then
 			return self.STU_STATUS_URL
 		else
-			return self.STU_STATUS_URL .. '?uid=' .. _G.hw_cur_child_id
+			return self.STU_STATUS_URL .. '?uid=' .. moLogin.get_subuid()
 		end
 	end
 
