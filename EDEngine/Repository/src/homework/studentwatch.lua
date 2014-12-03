@@ -84,8 +84,8 @@ function StudentWatch:add_paper_item( topicType,topicID )
 				topicID.."&teacherId="..
 				self._args.tid
 				
-				if _G.hw_cur_child_id ~= 0 then
-					url = url..'&uid='.._G.hw_cur_child_id
+				if login.get_uid_type() == login.PARENT then
+					url = url..'&uid='..login.get_subuid()
 				end
 				
 				local circle = loadingbox.circle(child)
@@ -108,8 +108,8 @@ function StudentWatch:add_paper_item( topicType,topicID )
 							if it and t.detail and t.detail.class_id then
 								local u = 'http://new.www.lejiaolexue.com/exam/handler/examstatistic.ashx?q=stu_correct&t_id='
 								..self._args.tid..'&exam_id='..self._args.exam_id..'&c_id='..t.detail.class_id..'&item_id='..topicID
-								if _G.hw_cur_child_id ~= 0 then
-									u = u..'&uid='.._G.hw_cur_child_id
+								if login.get_uid_type() == login.PARENT then
+									u = u..'&uid='..login.get_subuid()
 								end
 								cache.request_json(u,function(t)
 									if t and type(t)=='number' and cc_isobj(it) then
@@ -243,7 +243,7 @@ function StudentWatch:init()
 				end
 			--uikits.pushScace()
 			end)		
-			if _G.hw_cur_child_id ~= 0 then
+			if login.get_uid_type() == login.PARENT then
 				wrong:setVisible(false)	
 			end
 		--列表视图

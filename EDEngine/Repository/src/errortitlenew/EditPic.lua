@@ -7,11 +7,13 @@ local json = require "json-c"
 local loadingbox = require "loadingbox"
 
 local ui = {
-	FILE = 'suggestion/editpic_new.json',
-	FILE_3_4 = 'suggestion/editpic43_new.json',
+	FILE = 'errortitlenew/editpic.json',
+	FILE_3_4 = 'errortitlenew/editpic43.json',
 	PIC_VIEW = 'Pic_view',
 	BUTTON_QUIT = 'mainmenu/fanhui',
-	BUTTON_ADD = 'mainmenu/Button_wc',
+	BUTTON_ADD = 'mainmenu/quer',
+	PIC_KD = 'kd',
+	PIC_JT = 'kd/jt',
 }
 
 local EditPic = class("EditPic")
@@ -110,12 +112,12 @@ function EditPic:init()
 
 	self._picview = uikits.child(self._widget,ui.PIC_VIEW)
 	local scheduler = cc.Director:getInstance():getScheduler()
---	local back_pic = cc.Sprite:create('suggestion/11.jpg')
+--	local back_pic = cc.Sprite:create('errortitlenew/11.jpg')
 	local s = self._picview:getContentSize()
 --	back_pic:setPosition(cc.p(s.width/2,s.height/2))
     local back_pic = ccui.ImageView:create()
 --	back_pic:setTouchEnabled(true)
---	self.file_path = kits.get_local_directory()..'res/suggestion/11.jpg'
+--	self.file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
 	print('self.file_path::'..self.file_path)
     back_pic:loadTexture(self.file_path)
     back_pic:setPosition(cc.p(s.width/2,s.height/2))
@@ -171,14 +173,34 @@ function EditPic:init()
 	back_pic:addTouchEventListener(touchEventPic)	--]]
 	
 	local pic_size = back_pic:getContentSize()
-	local sel_rect_size = {x1 = (s.width-pic_size.width)/2,y1 = (s.height-pic_size.height)/2,x2 = (s.width+pic_size.width)/2,y2=(s.height+pic_size.height)/2}
+	local x1,x2,y1,y2
+	print('pic_size.width::'..pic_size.width..'::s.width::'..s.width)
+	print('pic_size.width::'..pic_size.width..'::s.width::'..s.width)
+	if pic_size.width>s.width then
+		x1 = 0
+		x2 = s.width
+	else
+		x1 = (s.width-pic_size.width)/2
+		x2 = (s.width+pic_size.width)/2
+	end
+	
+	if pic_size.height>s.height then
+		y1 = 0
+		y2 = s.height
+	else
+		y1 = (s.height-pic_size.height)/2
+		y2 = (s.height+pic_size.height)/2
+	end
+	
+	local sel_rect_size = {x1 = x1,y1 = y1,x2 = x2,y2=y2}
 	local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
 
 	self._picview:addChild(sel_rect,1000,10000)
 	
-	local rotation_table = cc.Sprite:create('suggestion/kd.png')
+--[[	local rotation_table = cc.Sprite:create('errortitlenew/kd.png')
 	rotation_table:setPosition(cc.p(s.width-100,s.height/2))
-	self._picview:addChild(rotation_table,10)
+	self._picview:addChild(rotation_table,10)--]]
+	local rotation_table = uikits.child(self._widget,ui.PIC_KD)
 	
 	local function touchEventRota(sender,eventType)
 		if eventType == ccui.TouchEventType.moved then
@@ -187,7 +209,7 @@ function EditPic:init()
 			if local_pos.y>sender.maxheight or local_pos.y < 0 then
 				return
 			end
-			rotation_num = 0-math.ceil((local_pos.y-450)/450*180)
+			rotation_num = 0-math.ceil((local_pos.y-450)/450*30)
 			if rotation_num>0 then
 				rotation_num = rotation_num+1
 			end
@@ -196,14 +218,15 @@ function EditPic:init()
 		end
 	end
 
-    button_rota = ccui.Button:create()
+--[[    button_rota = ccui.Button:create()
     button_rota:setTouchEnabled(true)
-    button_rota:loadTextures("suggestion/jt.png", "suggestion/jt.png", "")
+    button_rota:loadTextures("errortitlenew/jt.png", "errortitlenew/jt.png", "")--]]
+	local button_rota = uikits.child(self._widget,ui.PIC_JT)
 	local rota_size = rotation_table:getContentSize()
 	button_rota.maxheight = rota_size.height
     button_rota:setPosition(cc.p(rota_size.width/2,rota_size.height/2))        
     button_rota:addTouchEventListener(touchEventRota)
-    rotation_table:addChild(button_rota)	
+ --   rotation_table:addChild(button_rota)	
 	
 	local function touchEvent(sender,eventType)
         if eventType == ccui.TouchEventType.began then
@@ -261,7 +284,7 @@ function EditPic:init()
 		
     buttonTL = ccui.Button:create()
     buttonTL:setTouchEnabled(true)
-    buttonTL:loadTextures("suggestion/jt2.png", "suggestion/jt2.png", "")
+    buttonTL:loadTextures("errortitlenew/jt2.png", "errortitlenew/jt2.png", "")
 	buttonTL:setScale(2)
 	buttonTL.scale_but = 1
     buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2))        
@@ -270,7 +293,7 @@ function EditPic:init()
 
     buttonTR = ccui.Button:create()
     buttonTR:setTouchEnabled(true)
-    buttonTR:loadTextures("suggestion/jt3.png", "suggestion/jt3.png", "")
+    buttonTR:loadTextures("errortitlenew/jt3.png", "errortitlenew/jt3.png", "")
 	buttonTR:setScale(2)
 	buttonTR.scale_but = 2
     buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2))        
@@ -279,7 +302,7 @@ function EditPic:init()
 
     buttonBR = ccui.Button:create()
     buttonBR:setTouchEnabled(true)
-    buttonBR:loadTextures("suggestion/jt2.png", "suggestion/jt2.png", "")
+    buttonBR:loadTextures("errortitlenew/jt2.png", "errortitlenew/jt2.png", "")
 	buttonBR:setScale(2)
 	buttonBR.scale_but = 3
     buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))        
@@ -288,20 +311,20 @@ function EditPic:init()
 	
     buttonBL = ccui.Button:create()
     buttonBL:setTouchEnabled(true)
-    buttonBL:loadTextures("suggestion/jt3.png", "suggestion/jt3.png", "")
+    buttonBL:loadTextures("errortitlenew/jt3.png", "errortitlenew/jt3.png", "")
 	buttonBL:setScale(2)
 	buttonBL.scale_but = 4
     buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1))        
     buttonBL:addTouchEventListener(touchEvent)
     self._picview:addChild(buttonBL,1004,10001)
 	
---[[	local label_status_cut = cc.Sprite:create('suggestion/t4.png')
+--[[	local label_status_cut = cc.Sprite:create('errortitlenew/t4.png')
 	label_status_cut:setPosition(cc.p(s.width/2,s.height*4/5))
 	self._picview:addChild(label_status_cut,10)
-	local label_status_rota = cc.Sprite:create('suggestion/t3.png')
+	local label_status_rota = cc.Sprite:create('errortitlenew/t3.png')
 	label_status_rota:setPosition(cc.p(s.width/2,s.height*4/5))
 	self._picview:addChild(label_status_rota,10)
-	local label_status_move = cc.Sprite:create('suggestion/t5.png')
+	local label_status_move = cc.Sprite:create('errortitlenew/t5.png')
 	label_status_move:setPosition(cc.p(s.width/2,s.height*4/5))
 	self._picview:addChild(label_status_move,10)
 	label_status_cut:setVisible(true)
@@ -309,13 +332,13 @@ function EditPic:init()
 	label_status_move:setVisible(false)
 	operate_type = 1--]]
 	
-	local menu = cc.Menu:create()
-	local button_cutpic = cc.MenuItemImage:create('suggestion/ti1.png', 'suggestion/ti2.png')
+--[[	local menu = cc.Menu:create()
+	local button_cutpic = cc.MenuItemImage:create('errortitlenew/ti1.png', 'errortitlenew/ti2.png')
 	button_cutpic:setPosition(cc.p(100,100))
 	menu:addChild(button_cutpic)
 	menu:setPosition(cc.p(0, 0))
 	menu:setVisible(false)
-	self._picview:addChild(menu,10)
+	self._picview:addChild(menu,10)--]]
 	
 	local function timer_update(time)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
@@ -371,7 +394,7 @@ function EditPic:init()
 --	button_cutpic:registerScriptTapHandler(Cut_pic)
 	
 --[[	local menu_rota = cc.Menu:create()
-	local button_rota = cc.MenuItemImage:create('suggestion/t3.png', 'suggestion/t3.png')
+	local button_rota = cc.MenuItemImage:create('errortitlenew/t3.png', 'errortitlenew/t3.png')
 	button_rota:setPosition(cc.p(400,100))
 	menu_rota:addChild(button_rota)
 	menu_rota:setPosition(cc.p(0, 0))
@@ -386,7 +409,7 @@ function EditPic:init()
 	button_rota:registerScriptTapHandler(rota_callback)--]]
 
 --[[	local menu_cut = cc.Menu:create()
-	local button_cut = cc.MenuItemImage:create('suggestion/t4.png', 'suggestion/t4.png')
+	local button_cut = cc.MenuItemImage:create('errortitlenew/t4.png', 'errortitlenew/t4.png')
 	button_cut:setPosition(cc.p(700,100))
 	menu_cut:addChild(button_cut)
 	menu_cut:setPosition(cc.p(0, 0))
@@ -400,7 +423,7 @@ function EditPic:init()
 	button_cut:registerScriptTapHandler(cut_callback)--]]
 
 --[[	local menu_move = cc.Menu:create()
-	local button_move = cc.MenuItemImage:create('suggestion/t5.png', 'suggestion/t5.png')
+	local button_move = cc.MenuItemImage:create('errortitlenew/t5.png', 'errortitlenew/t5.png')
 	button_move:setPosition(cc.p(1000,100))
 	menu_move:addChild(button_move)
 	menu_move:setPosition(cc.p(0, 0))

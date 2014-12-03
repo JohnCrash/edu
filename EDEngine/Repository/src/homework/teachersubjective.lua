@@ -4,6 +4,7 @@ local cache = require "cache"
 local login = require "login"
 local loadingbox = require "loadingbox"
 local StudentList = require "homework/studentlist"
+local imagepreview = require "homework/imagepreview"
 
 local ui = {
 	FILE = 'homework/laoshizuoye/jinruzgt.json',
@@ -23,7 +24,7 @@ local ui = {
 	ITEM_VOICE = 'voice',
 	ITEM_AUDIO = 'yuyin',
 	ITEM_AUDIO_TIME = 'shijian',
-	ITEM_IMAGE = 'xszp',
+	ITEM_IMAGE = 'clip',
 	ITEM_GOOD = 'zan',
 	ITEM_DIAPING = 'dianping',
 	ITEM_INPUT = 'dianping/dpwenzi',
@@ -52,6 +53,21 @@ function TeacherSubjective.create(args,class_args,student_list,item_id)
 	return scene
 end
 
+function TeacherSubjective:load_clip_texture(item,filename)
+	if kits.exist_cache(filename) or kits.exist_file(filename) then
+		item:loadTexture(filename)
+		local size = item:getContentSize()
+		local scale
+		if size.width > size.height then
+			scale = 256/size.height
+		else
+			scale = 256/size.width
+		end
+		item:setScaleX(scale)
+		item:setScaleY(scale)
+	end
+end
+
 function TeacherSubjective:init_student_list()
 	local examId = self._args.exam_id
 	local itemId = self._item_id
@@ -72,9 +88,9 @@ function TeacherSubjective:init_student_list()
 			if v then
 				local layout = self._subjectives:additem()
 				layout.student_id = v.uid
-				local scrollview = uikits.scrollex(layout,nil,{ui.ITEM_VOICE,ui.ITEM_IMAGE},
+				local scrollview = uikits.scrollex(layout,nil,{ui.ITEM_IMAGE,ui.ITEM_VOICE},
 					{ui.ITEM_ANSWER,ui.ITEM_LOGO,ui.ITEM_NAME,ui.ITEM_TIME,ui.ITEM_GOOD},
-					{ui.ITEM_DIAPING})
+					{ui.ITEM_DIAPING},true,4)
 				local name = uikits.child(layout,ui.ITEM_NAME)
 				if name then
 					name:setString( v.name )
@@ -150,19 +166,31 @@ function TeacherSubjective:init_student_list()
 											circle:removeFromParent()
 										end
 										--附加都下载了
+										local imgs = {}
 										for i,v in pairs(attachments) do
 											if v.filename then
 												local suffix = string.lower(string.sub(v.filename,-4))
 												if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
-													local img = scrollview:additem(2)
-													img:loadTexture( v.filename )
+													local img = scrollview:additem(1)
+													local tu = uikits.child(img,"tu1")
+													tu:setTouchEnabled(true)
+													self:load_clip_texture(tu,v.filename)
+													table.insert(imgs,v.filename)
+													uikits.event(tu,function(sender)
+														for i,value in pairs(imgs) do
+															if value == v.filename then
+																uikits.pushScene( imagepreview.create(i,imgs) )
+																break
+															end
+														end														
+													end,"click")
 												elseif suffix == '.amr' then
-													local voice = scrollview:additem(1)
+													local voice = scrollview:additem(2,0,"top")
 													uikits.event( uikits.child(voice,ui.ITEM_AUDIO),
 													function(sender)
 														uikits.playSound(v.filename)
 													end)
-													local length = cc_getVoiceLength(filename)
+													local length = uikits.voiceLength(v.filename)
 													if length then
 														uikits.child(voice,ui.ITEM_AUDIO_TIME):setString(  kits.time_to_string_simple(math.floor(length)) )
 													end

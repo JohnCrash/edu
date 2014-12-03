@@ -134,14 +134,14 @@ resume.clearflag("launcher") --launcher isok
 if app == 'studenthw' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
-		hw_cur_child_id = 0
+		login.set_uid_type(login.STUDENT)
 		local worklist = require "homework/worklist"
 		return worklist.create()
 	end}
 elseif  app == 'studenthw2' then
 	update.create{name=app,updates={'homework','luacore','errortitile'},
 		run=function()
-		hw_cur_child_id = 0
+		login.set_uid_type(login.PARENT)
 		local selstudent = require "homework/selstudent"
 		return selstudent.create()
 	end}
@@ -155,12 +155,14 @@ elseif app == 'amouse' then
 elseif app == 'teacherhw' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
+		login.set_uid_type(login.TEACHER)
 		local teacher = require "homework/teacher"
 		return teacher.create()
 	end}	
 elseif app == 'exerbook' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
+		login.set_uid_type(login.STUDENT)
 		user_status = 1	
 		cur_child_id = 0
 		local WrongSubjectList = require "errortitile/WrongSubjectList"
@@ -169,6 +171,7 @@ elseif app == 'exerbook' then
 elseif app == 'exerbook2' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},
 		run=function()
+		login.set_uid_type(login.PARENT)
 		user_status = 1	
 		cur_child_id = 0
 		local WrongLoading = require "errortitile/Loading"
@@ -183,7 +186,7 @@ elseif app == 'suggestion' then
 elseif app == 'exerbooknew' then
 	update.create{name=app,updates={'errortitlenew','luacore'},
 		run=function()
-			local exerbooknew = require "errortitlenew/ErrorTitlePerView.lua"
+			local exerbooknew = require "errortitlenew/Loading"
 			return exerbooknew.create()
 	end}	
 elseif app and string.len(app)>0 then

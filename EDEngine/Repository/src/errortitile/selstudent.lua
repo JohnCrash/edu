@@ -79,7 +79,7 @@ function selstudent:init()
     local function selectedEvent(sender,eventType)
 		local checkBox = sender
         if eventType == ccui.CheckBoxEventType.selected then
-            _G.cur_child_id = checkBox.uid
+            login.set_subuid(checkBox.uid)
 			local scene_next = WrongSubjectList.create()								
 			cc.Director:getInstance():replaceScene(scene_next)				
         end

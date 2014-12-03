@@ -5,6 +5,7 @@ local kits = require "kits"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
+local imagepreview = require "homework/imagepreview"
 local TeacherSubjective = require "homework/teachersubjective"
 
 local ui = {
@@ -37,7 +38,7 @@ local ui = {
 	SUBJECTIVE_AUDIO = 'audio',
 	SUBJECTIVE_AUDIO_BUTTON = 'yuyin',
 	SUBJECTIVE_AUDIO_TIME = 'shijian',
-	SUBJECTIVE_IMAGE = 'zhaopian',
+	SUBJECTIVE_IMAGE = 'clip',
 	SUBJECTIVE_BUTTON = 'jinru',
 	STUDENT_LIST = 'xuesheng',
 	STUDENT_ITEM_TITLE = 'ztxx',
@@ -390,6 +391,24 @@ function Batch:tips(t)
 	end
 end
 
+function Batch:load_clip_texture(item,filename)
+	if kits.exist_cache(filename) or kits.exist_file(filename) then
+		item:loadTexture(filename)
+		local size = item:getContentSize()
+		local scale
+		if size.width > size.height then
+			scale = 256/size.height
+		else
+			scale = 256/size.width
+		end
+		item:setScaleX(scale)
+		item:setScaleY(scale)
+		uikits.event( item,function(sender)
+			
+		end,"click")
+	end
+end
+
 function Batch:load_subjective()
 	self._busy = true
 	self._subjectives:clear()
@@ -442,21 +461,24 @@ function Batch:load_subjective()
 			local layout = uikits.scroll(item,nil,ui.SUBJECTIVE_IMAGE,'mix',16,ui.SUBJECTIVE_AUDIO)
 			layout:clear()
 			if v.attachs and type(v.attachs) == 'table' then
+				local imgs = {}
 				for i,p in pairs(v.attachs) do
 					if p and type(p)=='table' and p.filename then
 						local suffix = string.lower(string.sub(p.filename,-4))
 						if suffix == '.jpg' or suffix == '.png' or suffix == '.gif' then
 							local it = layout:additem()
-							local name = string.sub( p.filename,0,-5 )..'_s'..suffix
-							if kits.exist_file(kits.get_tmp_path()..name) then
-								it:loadTexture(kits.get_tmp_path()..name)
-							else
-								local b,tmp = cc_adjustPhoto(kits.get_cache_path()..p.filename,256)
-								if b then
-									kits.rename_file( tmp,kits.get_tmp_path()..name)
-									it:loadTexture(kits.get_tmp_path()..name)
+							local img = uikits.child(it,'tu1')
+							self:load_clip_texture( img,p.filename)
+							table.insert(imgs,1,p.filename)
+							img:setTouchEnabled(true)
+							uikits.event( img,function(sender)
+								for i,v in pairs(imgs) do
+									if v == p.filename then
+										uikits.pushScene( imagepreview.create(i,imgs) )
+										break
+									end
 								end
-							end
+							end,"click")
 						elseif suffix == '.amr' then
 							local it = layout:additem(nil,2)
 							local filename = kits.get_cache_path()..p.filename
@@ -466,7 +488,7 @@ function Batch:load_subjective()
 								uikits.event(play,function(sender)
 									uikits.playSound( filename )
 								end)
-								local length = cc_getVoiceLength( filename )
+								local length = uikits.voiceLength( filename )
 								txt:setString( kits.time_to_string_simple(math.floor(length)) )
 							end
 						end

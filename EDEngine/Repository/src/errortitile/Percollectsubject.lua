@@ -188,9 +188,9 @@ function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_vie
 --	questions_view:addChild()
 --	questions_view:setTouchEnabled(false);
 	--处理更多操作按钮
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		but_more:setVisible(true)
-	elseif _G.user_status == 2 then
+	elseif login.get_uid_type() == login.PARENT then
 		but_more:setVisible(false)
 	end		
 	but_more.share_box = page.share_box_src:clone()
@@ -337,10 +337,10 @@ function Percollectsubject:getdatabyurl()
 	local send_data
 	
 	--send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time	
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time
-	elseif _G.user_status == 2 then
-		send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time.."&user_id=".._G.cur_child_id
+	elseif login.get_uid_type() == login.PARENT then
+		send_data = "?course="..self.courseid.."&page="..self.pageindex.."&show_type=1".."&time="..self.time.."&user_id="..login.get_subuid()
 	end
 --	print(t_nextview[6].url..send_data)
 	local loadbox = loadingbox.open(self)
@@ -438,9 +438,9 @@ function Percollectsubject:init()
 				--cc.Director:getInstance():replaceScene(scene_next)		
 			end,'N')	
 	end,"click")
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		but_practice:setVisible(true)
-	elseif _G.user_status == 2 then
+	elseif login.get_uid_type() == login.PARENT then
 		but_practice:setVisible(false)
 	end		
 	

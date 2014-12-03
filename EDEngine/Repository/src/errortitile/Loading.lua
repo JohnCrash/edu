@@ -65,11 +65,11 @@ function Loading:getdatabyurl()
 			else
 				--local tb_uig = json.decode(tb_result.uig)
 				if t.uig[1].user_role == 1 then	--?¡ì¨¦¨²
-					_G.user_status = 1
+					login.set_uid_type(login.STUDENT)
 					local scene_next = WrongSubjectList.create()								
 					cc.Director:getInstance():replaceScene(scene_next)	
 				elseif t.uig[1].user_role == 2 then	--?¨°3¡è
-					_G.user_status = 2
+					login.set_uid_type(login.PARENT)
 					local scene_next = selstudent.create()								
 					cc.Director:getInstance():replaceScene(scene_next)				
 				end

@@ -424,7 +424,7 @@ function WorkCommit:init()
 		self:init_star()
 	end			
 	--老师关提示文字
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 	else
 		local txt = uikits.child( self._root,ui.STUDENT_TIPS )
 		if txt then txt:setVisible(false) end

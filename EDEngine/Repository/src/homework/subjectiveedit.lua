@@ -206,7 +206,7 @@ function SubjectiveEdit:addsound( name,length )
 		local timetxt = uikits.child(item,'shijian')
 		if timetxt then
 			if not length then
-				length = cc_getVoiceLength(name)
+				length = uikits.voiceLength(name)
 			end
 			if length then
 				timetxt:setString( kits.time_to_string_simple(math.floor(length)))
@@ -529,7 +529,7 @@ function SubjectiveEdit:init_event()
 							function(b,file)
 								self._recording = nil
 								if b then
-									local tlen = cc_getVoiceLength(file)
+									local tlen = uikits.voiceLength(file)
 									self:addsound( file,tlen )
 									self:addsound_todata( file,tlen )
 									self:scroll_relayout()	

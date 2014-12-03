@@ -84,12 +84,12 @@ function MoreView:init()
 		return
 	end		
 	if _G.user_status == 1 then
-		if _G.screen_type == 1 then
+		if login.get_uid_type() == login.STUDENT then
 			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more.json")
 		else		
 			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more43.json")
 		end
-	elseif _G.user_status == 2 then
+	elseif login.get_uid_type() == login.PARENT then
 		if _G.screen_type == 1 then
 			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more2.json")
 		else		
@@ -123,7 +123,7 @@ function MoreView:init()
 	--self._widget:addChild(self.statistics_view)
 	--处理切换首页按钮
 	--local mainmenu = uikits.child(self._widget,ui.MAINMENU)
-	if _G.user_status == 2 then
+	if login.get_uid_type() == login.PARENT then
 		self:getdatabyurl()
 		local student_view = uikits.child(self._widget,ui.student_view)
 		local src_student_view = uikits.child(self._widget,ui.per_student_view)
@@ -136,10 +136,10 @@ function MoreView:init()
 		local function selectedEvent(sender,eventType)
 			local checkBox = sender
 			if eventType == ccui.CheckBoxEventType.selected then
-				if _G.cur_child_id == checkBox.uid then
+				if login.get_subuid() == checkBox.uid then
 					return
 				end
-				_G.cur_child_id = checkBox.uid			
+				login.set_subuid(checkBox.uid)		
 				--local parent_view = checkBox:getParent()
 				local parent_view = checkBox.parentview
 				local tb_all_student = parent_view:getChildren()
@@ -157,7 +157,7 @@ function MoreView:init()
 				end					
 			end
 			if eventType == ccui.CheckBoxEventType.unselected then
-				if _G.cur_child_id == checkBox.uid	then
+				if login.get_subuid() == checkBox.uid	then
 					checkBox:setSelectedState(true)
 				end
 			end
@@ -171,7 +171,7 @@ function MoreView:init()
 			local student_name = uikits.child(cur_student_view,ui.student_name)
 			local checkBox = uikits.child(cur_student_view,ui.student_checkbox)
 			student_name:setString(self.childinfo[i].uname)
-			if _G.cur_child_id == self.childinfo[i].uid then
+			if login.get_subuid() == self.childinfo[i].uid then
 				checkBox:setSelectedState(true)
 			else
 				checkBox:setSelectedState(false)
