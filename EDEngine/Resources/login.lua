@@ -40,6 +40,26 @@ local function set_userid( uid )
 end
 
 local function get_uid_type()
+	if not g_uidtype then
+		local kits = require "kits"
+		local json = require "json-c"
+		local url = "http://api.lejiaolexue.com/rest/userinfo/simple/current"
+		local result = kits.http_get( url,g_cookie )
+		if result then
+			local t  = json.decode( result )
+			if t and type(t) == 'table' then
+				if t.uig and type(t.uig)=='table' and t.uig[1] and t.uig[1].user_role then
+					g_uidtype =  t.uig[1].user_role
+				else
+					kits.log("ERROR: login get_uid_type invalid result")
+				end
+			else
+				kits.log("ERROR:login get_uid_type decode failed!")
+			end
+		else
+			kits.log("ERROR: login get_uid_type http_get return nil")
+		end
+	end
 	return g_uidtype
 end
 
