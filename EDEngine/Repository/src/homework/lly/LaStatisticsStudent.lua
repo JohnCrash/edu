@@ -42,7 +42,7 @@ function LaStatisticsStudent:implementFunction()
 		if _G.hw_cur_child_id == 0 then
 			return self.STU_STATUS_URL
 		else
-			return url .. '?uid=' .. _G.hw_cur_child_id
+			return self.STU_STATUS_URL .. '?uid=' .. _G.hw_cur_child_id
 		end
 	end
 
