@@ -62,7 +62,7 @@ function Loading:getdatabyparent()
 			if 	t.result ~= 0 then				
 				print(t.result.." : "..t.message)			
 			else
-				self.childinfo = tb_result.uis
+				self.childinfo = t.uis
 				self:showparentview()
 			end	
 		else

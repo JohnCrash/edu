@@ -271,10 +271,10 @@ function StatisticsView:updatepage()
 end
 function StatisticsView:getdatabyurl()
 	local send_data
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		send_data = "?range=3"
-	elseif _G.user_status == 2 then
-		send_data = "?range=3&user_id=".._G.cur_child_id
+	elseif login.get_uid_type() == login.PARENT then
+		send_data = "?range=3&user_id="..login.get_subuid()
 	end
 	
 	local loadbox = loadingbox.open(self)

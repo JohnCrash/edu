@@ -146,6 +146,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='teacher',updates={'homework','luacore'},
 				run=function()
+				login.set_uid_type(login.TEACHER)
 				login.set_selector(2)
 				local teacher = require "homework/teacher"
 				return teacher.create()
@@ -156,6 +157,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='student',updates={'homework','errortitile','luacore'},
 				run=function()
+				login.set_uid_type(login.STUDENT)
 				login.set_selector(1) --学生
 				local worklist = require "homework/worklist"
 				return worklist.create()
@@ -166,6 +168,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='errortitle',updates={'homework','errortitile','luacore'},
 				run=function()
+				login.set_uid_type(login.STUDENT)
 				login.set_selector(1) --学生
 				local Loading = require "errortitile/Loading"
 				return Loading.create()
@@ -177,6 +180,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenterrortitle',updates={'homework','errortitile','luacore'},
 				run=function()
+				login.set_uid_type(login.PARENT)
 				login.set_selector(3) --家长
 				local Loading = require "errortitile/Loading"
 				return Loading.create()
@@ -188,7 +192,8 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'suggestion','luacore'},
 				run=function()
-				login.set_selector(2) 
+				login.set_uid_type(login.PARENT)
+				login.set_selector(3) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}

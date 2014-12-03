@@ -130,10 +130,10 @@ end
 
 function WorkList:init_data_by_cache()
 	local result
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		result = kits.read_cache(cache.get_name(worklist_url))
 	else
-		result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
+		result = kits.read_cache(cache.get_name(worklist_url..'?uid='..login.get_subuid()))
 	end
 	if result then
 		self._data = json.decode( result )
@@ -145,10 +145,10 @@ end
 
 function WorkList:get_page( i,func )
 	local url
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		url = worklist_url..'?p='..i
 	else
-		url = worklist_url..'?p='..i..'&uid='.._G.hw_cur_child_id
+		url = worklist_url..'?p='..i..'&uid='..login.get_subuid()
 		--result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
 	end
 	--先尝试下载
@@ -162,10 +162,10 @@ local WEEK = 0--7*24*3600
 
 function WorkList:add_page_from_cache( idx,last )
 	local url
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		url = worklist_url..'?p='..idx
 	else
-		url = worklist_url..'?p='..idx..'&uid='.._G.hw_cur_child_id
+		url = worklist_url..'?p='..idx..'&uid='..login.get_subuid()
 	end
 	--local url = worklist_url..'?p='..idx
 	local result = cache.get_data( url )
@@ -347,10 +347,10 @@ end
 function WorkList:init_data()
 	local loadbox = loadingbox.open( self )
 	local send_url
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		send_url = worklist_url
 	else
-		send_url = worklist_url..'?uid='.._G.hw_cur_child_id
+		send_url = worklist_url..'?uid='..login.get_subuid()
 	end	
 	cache.request( send_url,
 		function(b)
@@ -548,10 +548,10 @@ function WorkList:load_statistics()
 	local loadbox = loadingbox.open(self)
 	local url = 'http://new.www.lejiaolexue.com/paper/handler/GetStatisticsStudent.ashx'
 	local send_url
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		send_url = url
 	else
-		send_url = url..'?uid='.._G.hw_cur_child_id
+		send_url = url..'?uid='..login.get_subuid()
 	end		
 	cache.request_json( send_url,function(t)
 		self._busy = false
@@ -609,7 +609,7 @@ function WorkList:init_setting()
 	if self._busy then return end
 	cache.request_cancel()
 	--self:SwapButton( ui.SETTING )
-	if _G.hw_cur_child_id ~= 0 and self.has_download_children == false then
+	if login.get_uid_type() == login.PARENT and self.has_download_children == false then
 		self:getdatabyurl()	
 	end
 	self._scrollview:setVisible(false)
@@ -685,10 +685,11 @@ function WorkList:show_children()
 	local function selectedEvent(sender,eventType)
 		local checkBox = sender
 		if eventType == ccui.CheckBoxEventType.selected then
-			if _G.hw_cur_child_id == checkBox.uid then
+			if login.get_subuid() == checkBox.uid then
 				return
 			end
-			_G.hw_cur_child_id = checkBox.uid			
+			login.set_subuid(checkBox.uid)
+			--_G.hw_cur_child_id = checkBox.uid			
 			--local parent_view = checkBox:getParent()
 			local parent_view = checkBox.parentview
 			local tb_all_student = parent_view:getChildren()
@@ -701,7 +702,7 @@ function WorkList:show_children()
 			self:init()				
 		end
 		if eventType == ccui.CheckBoxEventType.unselected then
-			if _G.hw_cur_child_id == checkBox.uid	then
+			if login.get_subuid() == checkBox.uid	then
 				checkBox:setSelectedState(true)
 			end
 		end
@@ -715,7 +716,7 @@ function WorkList:show_children()
 		local student_name = uikits.child(cur_student_view,ui.student_name)
 		local checkBox = uikits.child(cur_student_view,ui.student_checkbox)
 		student_name:setString(self.childinfo[i].uname)
-		if _G.hw_cur_child_id == self.childinfo[i].uid then
+		if login.get_subuid() == self.childinfo[i].uid then
 			checkBox:setSelectedState(true)
 		else
 			checkBox:setSelectedState(false)
@@ -733,7 +734,7 @@ function WorkList:init_gui()
 	self._statistics_root = uikits.fromJson{file_9_16=ui.STATISTICS_FILE,file_3_4=ui.STATISTICS_FILE_3_4}
 	self:addChild(self._statistics_root)
 	self._statistics_root:setVisible(false)
-	if _G.hw_cur_child_id == 0 then
+	if login.get_uid_type() == login.STUDENT then
 		self._setting_root = uikits.fromJson{file_9_16=ui.MORE,file_3_4=ui.MORE_3_4}
 		self._setting = uikits.child(self._setting_root,ui.MORE_VIEW):clone()
 	else

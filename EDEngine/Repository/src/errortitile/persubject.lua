@@ -226,9 +226,9 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	local check_boxlist = check_view:getChildren()
 	local check_boxnum = check_view:getChildrenCount()	
 	for i=1,check_boxnum do	
-		if _G.user_status == 1 then
+		if login.get_uid_type() == login.STUDENT then
 			check_boxlist[i]:setEnabled(true)
-		elseif _G.user_status == 2 then
+		elseif login.get_uid_type() == login.PARENT then
 			check_boxlist[i]:setEnabled(false)
 		end		
 		if i ~= tb_wrongtitle_item.reason then
@@ -286,9 +286,9 @@ function persubject:addwrong(index,src_wrongview,src_wrongview_has,src_wrongview
 	--处理更多操作按钮
 	--local share_view = 
 	--self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")	
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		but_more:setVisible(true)
-	elseif _G.user_status == 2 then
+	elseif login.get_uid_type() == login.PARENT then
 		but_more:setVisible(false)
 	end		
 	local share_box_src = self.share_view:getChildByTag(657)
@@ -442,13 +442,13 @@ end
 
 function persubject:getdatabyurl()
 	local send_data
-	if _G.user_status == nil then
+--[[	if _G.user_status == nil then
 		_G.user_status = 1
-	end
-	if _G.user_status == 1 then
+	end--]]
+	if login.get_uid_type() == login.STUDENT then
 		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2"
-	elseif _G.user_status == 2 then
-		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2&user_id=".._G.cur_child_id
+	elseif login.get_uid_type() == login.PARENT then
+		send_data = "?range="..self.range.."&course="..self.subject_id.."&page="..self.pageindex.."&show_type=2&user_id="..login.get_subuid()
 	end
 	
 --[[	local send_url = t_nextview[2].url..send_data
@@ -714,9 +714,9 @@ function persubject:init()
 			but_practice_no:setVisible(true)
 		end			
 	end,"click")	
-	if _G.user_status == 1 then
+	if login.get_uid_type() == login.STUDENT then
 		but_practice:setVisible(true)
-	elseif _G.user_status == 2 then
+	elseif login.get_uid_type() == login.PARENT then
 		but_practice:setVisible(false)
 	end	
 	--下拉更新错题列表

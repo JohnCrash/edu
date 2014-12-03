@@ -327,15 +327,14 @@ end
 
 function WrongSubjectList:getdatabyurl()
 	local send_data
-	if _G.user_status == nil then
+--[[	if _G.user_status == nil then
 		_G.user_status = 1
-	end
-	if _G.user_status == 1 then
+	end--]]
+	if login.get_uid_type() == login.STUDENT then
 		send_data = "?show_type=2"
-	elseif _G.user_status == 2 then
-		send_data = "?show_type=2&user_id=".._G.cur_child_id
+	elseif login.get_uid_type() == login.PARENT then
+		send_data = "?show_type=2&user_id="..login.get_subuid()
 	end
-	print(_G.user_status)
 	print(send_data)
 --[[	local send_url = t_nextview[1].url..send_data
 	local result = kits.http_get(send_url,login.cookie(),1)
