@@ -16,7 +16,6 @@ local selector = 2
 local g_cookie
 local g_uid
 local s_app,s_cookie,s_uid = cc_launchparam()
-
 local TEACHER = 3
 local STUDENT = 1
 local PARENT = 2
@@ -48,10 +47,14 @@ local function get_uid_type()
 		if result then
 			local t  = json.decode( result )
 			if t and type(t) == 'table' then
-				if t.uig and type(t.uig)=='table' and t.uig[1] and t.uig[1].user_role then
-					g_uidtype =  t.uig[1].user_role
+				if t.result == 0 then
+					if t.uig and type(t.uig)=='table' and t.uig[1] and t.uig[1].user_role then
+						g_uidtype =  t.uig[1].user_role
+					else
+						kits.log("ERROR: login get_uid_type invalid result")
+					end
 				else
-					kits.log("ERROR: login get_uid_type invalid result")
+					kits.log("ERROR: login get_uid_type invalid result ("..tostring(t.msg))
 				end
 			else
 				kits.log("ERROR:login get_uid_type decode failed!")
