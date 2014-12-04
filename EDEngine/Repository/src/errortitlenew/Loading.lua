@@ -36,10 +36,6 @@ function create()
 	return scene	
 end
 
-Errortitle_User_Id = 0
-Errortitle_User_Type = 0
-
-
 local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
 local get_class_url = 'http://api.lejiaolexue.com/rest/user/145487/zone/class'
@@ -47,13 +43,16 @@ local get_stu_url = 'http://api.lejiaolexue.com/rest/zone/145488/student/page=1&
 
 function Loading:showparentview()
 	if #self.childinfo == 1 then
-		Errortitle_User_Id = self.childinfo[1].uid
+		login.set_subuid(self.childinfo[1].uid)
 		local scene_next = errortitleview.create(self.childinfo[1].uname)								
 		cc.Director:getInstance():replaceScene(scene_next)			
 	else
 		local scene_next = studentsel.create(self.childinfo)								
 		cc.Director:getInstance():replaceScene(scene_next)		
 	end
+	
+--[[	local scene_next = studentsel.create(self.childinfo)								
+	cc.Director:getInstance():replaceScene(scene_next)		--]]
 end
 
 function Loading:getdatabyparent()
@@ -78,25 +77,9 @@ function Loading:getdatabyparent()
 	end,'N')	
 end
 
-function Loading:getdatabyteacher()
-	cache.request_json( get_class_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				self.childinfo = tb_result.uis
-			end	
-		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:getdatabyparent()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
-				end
-			end,messagebox.RETRY)	
-		end
-	end,'N')		
+function Loading:showteacherview()
+	local scene_next = studentsel.create()								
+	cc.Director:getInstance():replaceScene(scene_next)		
 end
 
 function Loading:getdatabyurl()
@@ -106,15 +89,16 @@ function Loading:getdatabyurl()
 			if 	t.result ~= 0 then				
 				print(t.result.." : "..t.message)			
 			else
-				--local tb_uig = json.decode(tb_result.uig)
-				Errortitle_User_Type = t.uig[1].user_role
 				if t.uig[1].user_role == 1 then	--xuesheng
+					login.set_uid_type(login.STUDENT)
 					local scene_next = errortitleview.create(t.uig[1].uname)								
 					cc.Director:getInstance():replaceScene(scene_next)	
 				elseif t.uig[1].user_role == 2 then	--jiazhang
+					login.set_uid_type(login.PARENT)
 					self:getdatabyparent()
 				elseif t.uig[1].user_role == 3 then	--laoshi
-					self:getdatabyteacher()		
+					login.set_uid_type(login.TEACHER)
+					self:showteacherview()		
 				end
 			end	
 		else
