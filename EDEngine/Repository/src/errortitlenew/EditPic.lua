@@ -454,17 +454,22 @@ function EditPic:init()
 		end
 	end--]]
 	local newTouch
+	local touchAction
 	local oldx,oldy,oldscale
 	local function onTouchMove(touches, event)  
 		local count = #touches
-		if not newTouch then return end
 		if count == 1 then
+			if not newTouch then return end
 			local img = back_pic
 			local scale = img:getScaleX()
 			local size = img:getContentSize()
 			local p = touches[1]:getLocation()
 			local sp = touches[1]:getStartLocation()			
-			img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+			if touchAction == 1 or  touchAction == 3 then
+				--偏移
+				img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+				touchAction = 3
+			end
 		elseif count == 2 then
 			local p1 = touches[1]:getLocation()
 			local sp1 = touches[1]:getStartLocation()
@@ -474,12 +479,34 @@ function EditPic:init()
 			local d = math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y))
 			local img = back_pic
 			local scale = d/sd
-			img:setScaleX(scale*oldscale)
-			img:setScaleY(scale*oldscale)
+			if scale*oldscale < 4 and scale*oldscale > 0.3 then
+				if newTouch then
+					--定位缩放中心
+					local cx = (p1.x+p2.x)/2
+					local cy = (p1.y+p2.y)/2
+					local p = img:convertToNodeSpace(cc.p(cx,cy))
+					local scale = img:getScaleX()
+					local size = img:getContentSize()
+					 
+					local ap = cc.p(p.x/(size.width),p.y/(size.height))
+					local oldap = img:getAnchorPoint()
+					local oldx,oldy = img:getPosition()
+					local delta = {}
+					delta.x = oldx + (ap.x - oldap.x)*size.width
+					delta.y = oldy + (ap.y - oldap.y)*size.height
+					img:setPosition( delta )
+					img:setAnchorPoint(ap)
+					newTouch=nil --双手缩放
+				end
+				touchAction = 2
+				img:setScaleX(scale*oldscale)
+				img:setScaleY(scale*oldscale)
+			end
 		end
 	end
 	local function onTouchBegan(touches, event)  
 		newTouch = true
+		touchAction = 1
 		oldx,oldy = back_pic:getPosition()
 		oldscale = back_pic:getScaleX()
 		onTouchMove(touches, event)	
