@@ -1445,13 +1445,17 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			self._back_lists = self._back_lists or {}
 
 			for i,v in pairs(self._list) do
-				v:setVisible(false)
+				if cc_isobj(v) then
+					v:setVisible(false)
+				end
 			end
 			self._back_lists[i] = self._list
 			
 			self._back_lists[j] = self._back_lists[j] or {}
 			for i,v in pairs(self._back_lists[j]) do
-				v:setVisible(true)
+				if cc_isobj(v) then
+					v:setVisible(true)
+				end
 			end
 			self._list = self._back_lists[j]
 		end
