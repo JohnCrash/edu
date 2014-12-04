@@ -14,6 +14,7 @@ local ui = {
 	BUTTON_ADD = 'mainmenu/quer',
 	PIC_KD = 'kd',
 	PIC_JT = 'kd/jt',
+	BUTTON_ROTA = 'mainmenu/xuan',
 }
 
 local EditPic = class("EditPic")
@@ -48,7 +49,7 @@ local move_begain
 local old_pos_x
 local old_pos_y
 local schedulerEntry
-
+local rotation_num =0
 local buttonTL
 local buttonTR
 local buttonBR
@@ -201,7 +202,6 @@ function EditPic:init()
 	rotation_table:setPosition(cc.p(s.width-100,s.height/2))
 	self._picview:addChild(rotation_table,10)--]]
 	local rotation_table = uikits.child(self._widget,ui.PIC_KD)
-	
 	local function touchEventRota(sender,eventType)
 		if eventType == ccui.TouchEventType.moved then
 			local pos = sender:getTouchMovePosition()
@@ -209,12 +209,16 @@ function EditPic:init()
 			if local_pos.y>sender.maxheight or local_pos.y < 0 then
 				return
 			end
-			rotation_num = 0-math.ceil((local_pos.y-450)/450*30)
-			if rotation_num>0 then
-				rotation_num = rotation_num+1
+			local cur_rotation_num = 0-math.ceil((local_pos.y-450)/450*30)
+			if cur_rotation_num>0 then
+				cur_rotation_num = cur_rotation_num+1
 			end
-			back_pic:setRotation(rotation_num)
+			--rotation_num = rotation_num+cur_rotation_num
+			back_pic:setRotation(rotation_num+cur_rotation_num)
 			sender:setPositionY(local_pos.y)
+		elseif eventType == ccui.TouchEventType.ended then
+--[[			rotation_num = back_pic:getRotation()
+			print('rotation_num1:::'..rotation_num)--]]
 		end
 	end
 
@@ -453,7 +457,6 @@ function EditPic:init()
 	local oldx,oldy,oldscale
 	local function onTouchMove(touches, event)  
 		local count = #touches
-		print('count::::'..count)
 		if not newTouch then return end
 		if count == 1 then
 			local img = back_pic
@@ -490,13 +493,37 @@ function EditPic:init()
     local eventDispatcher_rect = self:getEventDispatcher()
     eventDispatcher_rect:addEventListenerWithSceneGraphPriority(listener_rect, self)
 	
-	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
-	uikits.event	(but_add,	
+	local function Rota_PIC()
+		rotation_num = rotation_num - 90
+		back_pic:setRotation(rotation_num)
+		button_rota:setPosition(cc.p(rota_size.width/2,rota_size.height/2))
+	end
+	
+	local but_rota = uikits.child(self._widget,ui.BUTTON_ROTA)
+	uikits.event(but_rota,	
 	function(sender,eventType)	
+		Rota_PIC()
+	end,"click")	
+	
+	local function SetButtonEnabled(is_show)
+		local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+		if is_show == true then
+			but_add:setEnabled(true)
+			but_add:setBright(true)
+			but_add:setTouchEnabled(true)
+		else
+			but_add:setEnabled(false)
+			but_add:setBright(false)
+			but_add:setTouchEnabled(false)	
+		end
+	end
+	
+	local but_add = uikits.child(self._widget,ui.BUTTON_ADD)	
+	uikits.event(but_add,	
+	function(sender,eventType)	
+		SetButtonEnabled(false)
 		Cut_pic()						
 	end,"click")
-		local data
-	local file
 
 	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
