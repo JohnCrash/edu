@@ -660,6 +660,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 		self.totalcount = 0
 		self.totalpagecount = 1
 		self:show_emptyview_type(true)
+		self:settitlecount()
 	else
 		if self.page_index == 1 then
 			cleartitle()
@@ -716,39 +717,43 @@ function ErrorTitlePerView:show_title(is_has_title)
 				elseif v.status == 2 then
 					but_status:setSelectedState(false)
 				end
-				uikits.event(but_status,	
-					function(sender,eventType)	
-						local send_url = status_change_url..'id='..sender.id
-						if login.get_uid_type() ~= login.STUDENT then
-							send_url = send_url..'&user_id='..login.get_subuid()
-						end
-						local loadbox = loadingbox.open(self)
-						is_loading = true
-						self:show_emptyview_type(false)
-						cache.request_json( send_url,function(t)
-							if t and type(t)=='table' then
-								if t.result ~= 0 then
-									is_loading = false
-									loadbox:removeFromParent()
-									return false
-								else
-									self.page_index = 1
-									self:getdatabyurl()						
-								end
-							else
-								--既没有网络也没有缓冲
-								messagebox.open(self,function(e)
-									if e == messagebox.TRY then
-										self:adderrortitle()
-									elseif e == messagebox.CLOSE then
-										uikits.popScene()
+				print('login.get_uid_type()::'..login.get_uid_type())
+				if login.get_uid_type() == login.TEACHER then		
+					but_status:setEnabled(false)
+					but_status:setTouchEnabled(false)
+				else
+					uikits.event(but_status,	
+						function(sender,eventType)	
+							local send_url = status_change_url..'id='..sender.id
+							local loadbox = loadingbox.open(self)
+							is_loading = true
+							self:show_emptyview_type(false)
+							cache.request_json( send_url,function(t)
+								if t and type(t)=='table' then
+									if t.result ~= 0 then
+										is_loading = false
+										loadbox:removeFromParent()
+										return false
+									else
+										self.page_index = 1
+										self:getdatabyurl()						
 									end
-								end,messagebox.RETRY)	
-							end
-							is_loading = false
-							loadbox:removeFromParent()
-						end,'N')			
-				end)				
+								else
+									--既没有网络也没有缓冲
+									messagebox.open(self,function(e)
+										if e == messagebox.TRY then
+											self:adderrortitle()
+										elseif e == messagebox.CLOSE then
+											uikits.popScene()
+										end
+									end,messagebox.RETRY)	
+								end
+								is_loading = false
+								loadbox:removeFromParent()
+							end,'N')			
+					end)							
+				end		
+				
 				local pic_course 
 				if v.course	== 1 then
 					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
@@ -853,36 +858,43 @@ function ErrorTitlePerView:show_title(is_has_title)
 				elseif v.status == 2 then
 					but_status:setSelectedState(false)
 				end
-				uikits.event(but_status,	
-					function(sender,eventType)	
-						local send_url = status_change_url..'id='..sender.id
-						local loadbox = loadingbox.open(self)
-						is_loading = true
-						self:show_emptyview_type(false)
-						cache.request_json( send_url,function(t)
-							if t and type(t)=='table' then
-								if t.result ~= 0 then
-									is_loading = false
-									loadbox:removeFromParent()
-									return false
-								else
-									self.page_index = 1
-									self:getdatabyurl()						
-								end
-							else
-								--既没有网络也没有缓冲
-								messagebox.open(self,function(e)
-									if e == messagebox.TRY then
-										self:adderrortitle()
-									elseif e == messagebox.CLOSE then
-										uikits.popScene()
+				print('login.get_uid_type()::'..login.get_uid_type())
+				if login.get_uid_type() == login.TEACHER then		
+					but_status:setEnabled(false)
+					but_status:setTouchEnabled(false)
+				else
+					uikits.event(but_status,	
+						function(sender,eventType)	
+							local send_url = status_change_url..'id='..sender.id
+							local loadbox = loadingbox.open(self)
+							is_loading = true
+							self:show_emptyview_type(false)
+							cache.request_json( send_url,function(t)
+								if t and type(t)=='table' then
+									if t.result ~= 0 then
+										is_loading = false
+										loadbox:removeFromParent()
+										return false
+									else
+										self.page_index = 1
+										self:getdatabyurl()						
 									end
-								end,messagebox.RETRY)	
-							end
-							is_loading = false
-							loadbox:removeFromParent()
-						end,'N')			
-				end)				
+								else
+									--既没有网络也没有缓冲
+									messagebox.open(self,function(e)
+										if e == messagebox.TRY then
+											self:adderrortitle()
+										elseif e == messagebox.CLOSE then
+											uikits.popScene()
+										end
+									end,messagebox.RETRY)	
+								end
+								is_loading = false
+								loadbox:removeFromParent()
+							end,'N')			
+					end)							
+				end
+			
 				local pic_course 
 				if v.course	== 1 then
 					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
