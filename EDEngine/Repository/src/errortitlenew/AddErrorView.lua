@@ -75,6 +75,9 @@ function AddErrorView:adderrortitle()
 	send_url = send_url..'course='..self.course_sel
 	send_url = send_url..'&status=1'
 	send_url = send_url..'&reason='..self.reason_sel
+	if login.get_uid_type() ~= login.STUDENT then
+		send_url = send_url..'&user_id='..login.get_subuid()
+	end
 --[[	local txt_remark = uikits.child(self._widget,ui.TXT_REMARK)	
 	self._remark = txt_remark:getStringValue()
 	if self._remark then

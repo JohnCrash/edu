@@ -190,10 +190,9 @@ function AppEntry:init()
 	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='parenthw',updates={'suggestion','luacore'},
+			update.create{name='parenthw',updates={'errortitlenew','luacore'},
 				run=function()
-				login.set_uid_type(login.PARENT)
-				login.set_selector(3) 
+				login.set_selector(1) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
