@@ -48,7 +48,9 @@ function lly.log(...)
 	--[====[
 	print(string.format(...))
 	--]====]
-	moKits.log(...)
+	local info = debug.getinfo(2,"Sln")
+	local strInfo = "INFO : " .. string.format(...) .. " @" .. info.currentline .. " " .. info.short_src
+	moKits.log(strInfo)
 end
 
 --自定义的log输出，调试时，输出时同时打印位置，所在函数名，以及所在文件名
@@ -56,8 +58,7 @@ end
 function lly.logCurLocAnd(...)
 	
 	local info = debug.getinfo(2,"Sln")
-	local strInfo = "INFO : " .. string.format(...) .. " @ LINE " .. info.currentline .. " IN " .. 
-		(info.name and ("FUCN: " .. info.name .. " << ") or "FUCN: unnamed << ") .. info.short_src
+	local strInfo = "INFO : " .. string.format(...) .. " @" .. info.currentline .. " " .. info.short_src
 	--[====[
 	lly.log(strInfo)
 	--]====]

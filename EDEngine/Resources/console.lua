@@ -132,6 +132,46 @@ function Console:init()
 		eventClick=function(sender)
 			kits.quit()
 		end}		
+	local isOpen = false
+	local update_directory_button = uikits.button{caption='Update server...',fontSize=32*scale,x=(128+240+2*128)*scale,
+		width=128*2.5*scale,height=64*scale,
+		eventClick=function(sender)
+			if isOpen then return end
+			local layout = uikits.layout{width=640*scale,height=128*scale,x=ss.width/2,y=ss.height/2,anchorX=0.5,anchorY=0.5,bgcolor=cc.c3b(0,0,0)}
+			local edit = uikits.editbox{caption="http://file.lejiaolexue.com/upgrade/luaapp/v6/",y = 64*scale,width=640*scale,height=48*scale}
+			local txt = uikits.text{caption="Modify update server:",width=640*scale,height=48,y=(64+48)*scale}
+			local cancel = uikits.button{width=180*scale,height=64*scale,caption="Cancel"}
+			local ok = uikits.button{width=320*scale,height=64*scale,caption="Ok",x=320*scale}
+			local default = uikits.button{width=160*scale,height=64*scale,caption="Default",x=160*scale}
+			local function close()
+				uikits.delay_call( nil,function()
+					layout:removeFromParent()
+					isOpen = false
+				end)
+			end
+			uikits.event( default,function(sender)
+				edit:setText( "http://file.lejiaolexue.com/upgrade/luaapp/v6/" )
+			end)
+			uikits.event( ok,function(sender)
+				local ip = edit:getStringValue()
+				kits.log("modify update server :"..tostring(ip))
+				kits.config("update_server",ip)
+				kits.config("current_server",ip)
+				close()
+			end)
+			uikits.event( cancel,function(sender)
+				close()
+			end)		
+			edit:setText( tostring(kits.config("current_server","get")) )
+			layout:addChild(default)
+			layout:addChild(txt)
+			layout:addChild(ok)
+			layout:addChild(cancel)
+			layout:addChild(edit)
+			self:addChild(layout)
+			isOpen = true
+		end}		
+	self:addChild(update_directory_button)		
 	self:addChild(exitbut)		
 	self:addChild(debugip)
 	self:addChild(debugbutton)

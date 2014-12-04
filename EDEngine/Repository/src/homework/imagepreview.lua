@@ -84,6 +84,7 @@ function ImagePreview:init()
 	end
 	--注册滚动事件
 	local newTouch
+	local touchAction
 	local oldx,oldy,oldscale
 	local function onTouchMoved(touches, event)
 		local count = #touches
@@ -118,9 +119,10 @@ function ImagePreview:init()
 						text_tips()
 					end			
 				end
-			else
+			elseif touchAction == 1 or  touchAction == 3 then
 				--偏移
 				img:setPosition(cc.p(oldx+(p.x-sp.x),oldy+(p.y-sp.y)))
+				touchAction = 3
 			end
 		elseif count == 2 then
 			local p1 = touches[1]:getLocation()
@@ -134,23 +136,34 @@ function ImagePreview:init()
 			local img = uikits.child(layout,ui.IMAGEVIEW)
 			local scale = d/sd
 		
-			if newTouch then
-				--定位缩放中心
-				local cx = (p1.x+p2.x)/2
-				local cy = (p1.y+p2.y)/2
-				local p = img:convertToNodeSpace(cc.p(cx,cy))
-				local scale = img:getScaleX()
-				local size = img:getContentSize()
-				 
-				img:setAnchorPoint(cc.p(p.x/(size.width),p.y/(size.height)))
-				newTouch=nil --双手缩放
+			if scale*oldscale < 4 and scale*oldscale > 0.3 then
+				if newTouch then
+					--定位缩放中心
+					local cx = (p1.x+p2.x)/2
+					local cy = (p1.y+p2.y)/2
+					local p = img:convertToNodeSpace(cc.p(cx,cy))
+					local scale = img:getScaleX()
+					local size = img:getContentSize()
+					 
+					local ap = cc.p(p.x/(size.width),p.y/(size.height))
+					local oldap = img:getAnchorPoint()
+					local oldx,oldy = img:getPosition()
+					local delta = {}
+					delta.x = oldx + (ap.x - oldap.x)*size.width
+					delta.y = oldy + (ap.y - oldap.y)*size.height
+					img:setPosition( delta )
+					img:setAnchorPoint(ap)
+					newTouch=nil --双手缩放
+				end
+				touchAction = 2
+				img:setScaleX(scale*oldscale)
+				img:setScaleY(scale*oldscale)
 			end
-			img:setScaleX(scale*oldscale)
-			img:setScaleY(scale*oldscale)
 		end
 	end
 	local function onTouchBegan(touches, event)
 		newTouch = true
+		touchAction = 1
 		local idx = self._pageview:getCurPageIndex()
 		local layout = self._pageview:getPage(idx)
 		local img = uikits.child(layout,ui.IMAGEVIEW)
@@ -159,7 +172,7 @@ function ImagePreview:init()
 		onTouchMoved(touches, event)
 	end	
 	local function onTouchEnded(touches, event)
-		if #touches == 1 then
+		if #touches == 1 and (touchAction==1 or touchAction==3 ) then
 			local p = touches[1]:getLocation()
 			local sp = touches[1]:getStartLocation()
 			if math.sqrt((p.x-sp.x)*(p.x-sp.x)+(p.y-sp.y)*(p.y-sp.y)) < 20 then
