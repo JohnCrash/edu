@@ -137,7 +137,7 @@ function Console:init()
 		width=128*2.5*scale,height=64*scale,
 		eventClick=function(sender)
 			if isOpen then return end
-			local layout = uikits.layout{width=640*scale,height=128*scale,x=ss.width*scale/2,y=ss.height*scale/2,anchorX=0.5,anchorY=0.5,bgcolor=cc.c3b(0,0,0)}
+			local layout = uikits.layout{width=640*scale,height=128*scale,x=ss.width/2,y=ss.height/2,anchorX=0.5,anchorY=0.5,bgcolor=cc.c3b(0,0,0)}
 			local edit = uikits.editbox{caption="http://file.lejiaolexue.com/upgrade/luaapp/v6/",y = 64*scale,width=640*scale,height=48*scale}
 			local txt = uikits.text{caption="Modify update server:",width=640*scale,height=48,y=(64+48)*scale}
 			local cancel = uikits.button{width=180*scale,height=64*scale,caption="Cancel"}

@@ -142,7 +142,14 @@ function ImagePreview:init()
 				local scale = img:getScaleX()
 				local size = img:getContentSize()
 				 
-				img:setAnchorPoint(cc.p(p.x/(size.width),p.y/(size.height)))
+				local ap = cc.p(p.x/(size.width),p.y/(size.height))
+				local oldap = img:getAnchorPoint()
+				local oldx,oldy = img:getPosition()
+				local delta = {}
+				delta.x = oldx + (ap.x - oldap.x)*size.width
+				delta.y = oldy + (ap.y - oldap.y)*size.height
+				img:setPosition( delta )
+				img:setAnchorPoint(ap)
 				newTouch=nil --双手缩放
 			end
 			img:setScaleX(scale*oldscale)
