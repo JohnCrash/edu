@@ -26,16 +26,37 @@ local function log_caller()
 end
 
 local function playSound( file )
-	if FileUtils:isFileExist(file) then
+	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
 		if string.lower(suffix) == '.amr' then
-			return cc_playVoice(file)
+			if kits.exist_cache(file) then
+				return cc_playVoice(kits.get_cache_path()..file)
+			else
+				return cc_playVoice(file)
+			end
 		else
 			return AudioEngine.playEffect( file )
 		end
 	else
 		kits.log('ERROR playSound file not exist '..tostring(file))
 	end
+end
+
+
+local function voiceLength( file )
+	if kits.exist_file(file) or kits.exist_cache(file)  then
+		local suffix = string.sub(file,-4)
+		if string.lower(suffix) == '.amr' then
+			if kits.exist_cache(file) then
+				return cc_getVoiceLength(kits.get_cache_path()..file)
+			else
+				return cc_getVoiceLength(file)
+			end			
+		end
+	else
+		kits.log('ERROR voiceLength file not exist '..tostring(file))
+	end
+	return 0
 end
 
 local function pauseSound( id )
@@ -1430,10 +1451,14 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			local temp_list = self._back_list or {}
 			
 			for i,v in pairs(self._list) do
-				v:setVisible(false)
+				if cc_isobj(v) then
+					v:setVisible(false)
+				end
 			end
 			for i,v in pairs(temp_list) do
-				v:setVisible(true)
+				if cc_isobj(v) then
+					v:setVisible(true)
+				end
 			end
 			self._back_list = self._list
 			self._list = temp_list			
@@ -1834,6 +1859,7 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	voiceLength = voiceLength,
 	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,
