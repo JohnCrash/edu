@@ -42,6 +42,10 @@ void ParseCommand(LPTSTR lpCmdLine)
 	g_Launch = toUTF8(getParam(cmd,TEXT("launch=")));
 	g_Userid = toUTF8(getParam(cmd,TEXT("userid=")));
 	g_Mode = toUTF8(getParam(cmd,TEXT("mode=")));
+	if (g_Mode.length() == 0)
+	{
+		g_Mode = "window";
+	}
 	CCLOG("cookie=%s",g_Cookie.c_str());
 	CCLOG("userid=%s", g_Userid.c_str());
 	CCLOG("launch=%s", g_Launch.c_str());

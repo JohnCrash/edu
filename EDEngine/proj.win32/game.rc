@@ -79,8 +79,8 @@ GLFW_ICON               ICON                    "res\\game.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 6,0,0,0
+ PRODUCTVERSION 6,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -97,12 +97,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "????"
             VALUE "FileDescription", "EDEngine"
-            VALUE "FileVersion", "1"
+            VALUE "FileVersion", "6.0.0.0"
             VALUE "InternalName", "EDEngine"
             VALUE "LegalCopyright", "Copyright "
             VALUE "OriginalFilename", "EDEngine.exe"
             VALUE "ProductName", "EDEngine"
-            VALUE "ProductVersion", "1"
+            VALUE "ProductVersion", "6.0.0.0"
         END
     END
     BLOCK "VarFileInfo"

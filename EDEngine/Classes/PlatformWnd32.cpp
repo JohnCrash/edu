@@ -2,6 +2,8 @@
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
+#include "Files.h"
+
 #pragma comment (lib,"vfw32")
 #pragma comment (lib,"winmm.lib")
 #pragma comment (lib,"imm32.lib")
@@ -124,7 +126,35 @@ void CCameraWin::OnFinish()
 	{
 		//结束
 		//g_pTheApp->OnReturnBuf(RETURN_TYPE_TAKEPICTUREDIB, m_nID, m_nSaveWidth, m_nSaveHeight, m_nSaveWidth * 4 * m_nSaveHeight, (char *)m_pImageBuf);
-		takeResource_callback(m_pImageBuf, TAKE_PICTURE, RESULT_OK);
+		/*
+			这里需要将m_pImageBuf中的数据保存到一个临时文件中
+		*/
+		std::string name = allocTmpFile(".jpg");
+		cocos2d::Image *pimg = new cocos2d::Image();
+		if (pimg && m_pImageBuf )
+		{
+			//调整RGBA顺序
+			for (int y = 0; y < m_nSaveHeight; ++y)
+			{
+				unsigned char * pline = (unsigned char*)m_pImageBuf + y*m_nSaveWidth * 4;
+				for (int x = 0; x < m_nSaveWidth; ++x)
+				{
+					unsigned char *pc = pline + x * 4;
+					unsigned char tmp;
+					tmp = pc[0];
+					pc[0] = pc[1];
+					pc[1] = tmp;
+				}
+			}
+			pimg->initWithRawData((unsigned char*)m_pImageBuf, m_nSaveWidth * 4 * m_nSaveHeight, m_nSaveWidth, m_nSaveHeight, 8);
+			pimg->saveToFile(name);
+			pimg->release();
+		}
+		else
+		{
+			CCLOG("CCameraWini::OnFinish new cocos2d::Image return null!");
+		}
+		takeResource_callback(name, TAKE_PICTURE, RESULT_OK);
 	}
 	else
 	{
@@ -222,7 +252,10 @@ bool CCameraWin::Open(int nID, HWND hwndParent)
 		m_hInstance,									//Instance
 		NULL
 		);
-	if (m_hwnd == NULL) return false;
+	if (m_hwnd == NULL)
+	{
+		return false;
+	}
 	SetWindowLong(m_hwnd, GWL_USERDATA, (LONG)this);
 
 	//创建窗口
@@ -296,11 +329,7 @@ bool CCameraWin::Open(int nID, HWND hwndParent)
 	y = hImage + (nBottomHeight - h) / 2;
 
 	m_hFinish = CreateButton(L"取消", x, y, w, h);
-	if (m_hTakePhoto == NULL)
-	{
-		Close();
-		return false;
-	}
+
 	x -= (w + nGap);
 	m_hTakePhoto = CreateButton(L"拍摄", x, y, w, h);
 	if (m_hFinish == NULL)
@@ -323,6 +352,7 @@ extern HWND g_hMainWnd;
 bool bTaking = false;
 void takeResource( int mode )
 {
+	CCLOG("takeResource mode=%d (%d)", mode, TAKE_PICTURE);
 	if (mode == TAKE_PICTURE) //cam
 	{
 		if (s_pCameraWin != NULL)
