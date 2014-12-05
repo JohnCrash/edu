@@ -192,7 +192,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
 				run=function()
-				login.set_selector(1) 
+				login.set_selector(3) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}

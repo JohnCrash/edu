@@ -167,6 +167,13 @@ function AddErrorView:set_view_type(type_index)
 end
 
 function AddErrorView:init_gui_fun()
+	
+	local save_info = kits.config("et_add",'get')
+	if save_info then
+		local save_info_tb = json.decode(save_info)
+		self.course_sel = save_info_tb.course_sel
+	end
+	
 	local but_to_show_choose = uikits.child(self._widget,ui.BUTTON_TO_CHOOSE)
 	uikits.event(but_to_show_choose,	
 	function(sender,eventType)	
@@ -180,8 +187,8 @@ function AddErrorView:init_gui_fun()
 	function(sender,eventType)	
 		self:set_view_type(TYPE_HIDE_CHOOSE)				
 	end,"click")
-	
---[[	uikits.event(but_show_pic,	
+--[[	
+	uikits.event(but_show_pic,	
 		function(sender,eventType)	
 			local scene_next = editpic.create(self)		
 			uikits.pushScene(scene_next)						
@@ -234,7 +241,20 @@ function AddErrorView:init_gui_fun()
 	but_sel_course_chn.index = INDEX_COURSE_CHN
 	but_sel_course_eng.index = INDEX_COURSE_ENG
 	but_sel_course_other.index = INDEX_COURSE_OTHER
-	but_sel_course_chn:setSelectedState(true)
+	but_sel_course_chn:setSelectedState(false)
+	but_sel_course_math:setSelectedState(false)
+	but_sel_course_eng:setSelectedState(false)
+	but_sel_course_other:setSelectedState(false)
+	if self.course_sel == INDEX_COURSE_CHN then
+		but_sel_course_chn:setSelectedState(true)
+	elseif self.course_sel == INDEX_COURSE_MATH then
+		but_sel_course_math:setSelectedState(true)
+	elseif self.course_sel == INDEX_COURSE_ENG then
+		but_sel_course_eng:setSelectedState(true)
+	elseif self.course_sel == INDEX_COURSE_OTHER then
+		but_sel_course_other:setSelectedState(true)
+	end	
+	
 	local function set_checkbox_course(cur_but,is_sel)
 		if is_sel == true then
 			if self.course_sel == INDEX_COURSE_CHN then
@@ -476,7 +496,10 @@ function AddErrorView:update_info()
 end
 
 function AddErrorView:release()
-	
+	local save_info_tb = {}
+	save_info_tb.course_sel = self.course_sel
+	local save_info = json.encode(save_info_tb)
+	kits.config("et_add",save_info)
 end
 
 return AddErrorView

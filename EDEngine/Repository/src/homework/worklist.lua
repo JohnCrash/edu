@@ -593,7 +593,9 @@ function WorkList:init_statistics()
 	self._scrollview:setVisible(false) --关闭原有的列表，使用自定义的新层
 	self._setting:setVisible(false) --关闭设置层
 	self._laStats_Stu:setVisible(true) --开启统计层
+	self._laStats_Stu:enter()
 
+	--[[
 	if self._mode ~= ui.STATIST then
 
 		--读取数据
@@ -601,6 +603,7 @@ function WorkList:init_statistics()
 
 		self._mode = ui.STATIST
 	end
+	--]]
 
 	return true
 end

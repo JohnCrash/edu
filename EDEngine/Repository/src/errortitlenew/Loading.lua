@@ -91,7 +91,8 @@ function Loading:getdatabyurl()
 			else
 				if t.uig[1].user_role == 1 then	--xuesheng
 					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)								
+					local scene_next = errortitleview.create(t.uig[1].uname)		
+					--uikits.pushScene(scene_next)						
 					cc.Director:getInstance():replaceScene(scene_next)	
 				elseif t.uig[1].user_role == 2 then	--jiazhang
 					login.set_uid_type(login.PARENT)
