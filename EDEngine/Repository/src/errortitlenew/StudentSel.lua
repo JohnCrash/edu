@@ -54,7 +54,7 @@ function create(child_tb)
 	return scene	
 end
 
-local parent_view_space = 20
+local parent_view_space = 60
 local button_empty_path = 'errortitlenew/but_stu.png'
 local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
 
@@ -77,7 +77,7 @@ function StudentSel:showparentview()
 	
 	local function showLogoPic(student_view,logo_pic_path)
 		local logo_pic = uikits.child(student_view,ui.PIC_STU)
-		logo_pic:loadTexture(file_path)
+		logo_pic:loadTexture(logo_pic_path)
 	end
 	
 	for i = 1,#self._child_tb do
@@ -100,13 +100,16 @@ function StudentSel:showparentview()
 		self._StudentSel:addChild(cur_view_student)
 		local local_dir = ljshell.getDirectory(ljshell.AppDir)
 		local file_path = local_dir.."cache/"..self._child_tb[i].uid..'.jpg'
+		print('self._child_tb[i].uid::'..self._child_tb[i].uid)
 		if kits.exist_file(file_path) then
+			print('1111111111')
 			showLogoPic(cur_view_student,file_path)
 		else
 			local send_url = download_log_url..self._child_tb[i].uid..'/99'
 			cache.request_nc(send_url,
 			function(b,t)
 					if b then
+						print('222222222222')
 						showLogoPic(cur_view_student,file_path)
 					else
 						kits.log("ERROR :  download_pic_url failed")

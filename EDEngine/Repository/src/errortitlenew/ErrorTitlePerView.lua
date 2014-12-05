@@ -129,8 +129,9 @@ function ErrorTitlePerView:init_butlist()
 	local but_add_no = uikits.child(self._widget,ui.BUTTON_ADD_NO)
 	uikits.event(but_add_no,	
 		function(sender,eventType)	
+			self:save_innerpos()
 			self.isneedupdate = true
-			local scene_next = adderrorview.create()		
+			local scene_next = adderrorview.create(self)		
 			uikits.pushScene(scene_next)	
 	end,"click")
 	
@@ -497,7 +498,12 @@ end
 local pic_space = 10
 local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local download_pic_big_url = 'http://file-stu.lejiaolexue.com/rest/dl/'
+local get_list_url = 'http://app.lejiaolexue.com/exerbook2/list.ashx?'
 local button_empty_path = 'errortitlenew/kuang.png'
+local title_space_shu = 40 
+local title_space_heng = 20 
+local status_change_url = 'http://app.lejiaolexue.com/exerbook2/do.ashx?'
+local item_del_url = 'http://app.lejiaolexue.com/exerbook2/del.ashx?'
 
 function ErrorTitlePerView:save_innerpos()
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
@@ -634,10 +640,189 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 	end
 end
 
-local title_space_shu = 40 
-local title_space_heng = 20 
-local status_change_url = 'http://app.lejiaolexue.com/exerbook2/do.ashx?'
-local item_del_url = 'http://app.lejiaolexue.com/exerbook2/del.ashx?'
+
+
+function ErrorTitlePerView:update_title_save_pos(index)
+	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
+--	view_title:removeChildByTag(index)
+	local end_index = 20*self.page_index
+	local pos_x,pos_y
+
+	local function add_one_title(title_data)
+		local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
+		local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
+		if title_data then
+			local cur_title_view
+			cur_title_view = per_title_src:clone()
+			
+			local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
+			but_status.id = title_data.id
+			but_status.view = cur_title_view
+			if title_data.status == 1 then
+				but_status:setSelectedState(true)
+			elseif title_data.status == 2 then
+				but_status:setSelectedState(false)
+			end
+
+			if login.get_uid_type() == login.TEACHER then		
+				but_status:setEnabled(false)
+				but_status:setTouchEnabled(false)
+			else
+				uikits.event(but_status,	
+					function(sender,eventType)	
+						local send_url = status_change_url..'id='..sender.id
+						local loadbox = loadingbox.open(self)
+						is_loading = true
+						self:show_emptyview_type(false)
+						cache.request_json( send_url,function(t)
+							if t and type(t)=='table' then
+								if t.result ~= 0 then
+									is_loading = false
+									loadbox:removeFromParent()
+									return false
+								else
+									if self.status_index ~= 0 then
+										self:update_title_save_pos(sender.view:getTag())
+									end										
+								end
+							else
+								--既没有网络也没有缓冲
+								messagebox.open(self,function(e)
+									if e == messagebox.TRY then
+										self:adderrortitle()
+									elseif e == messagebox.CLOSE then
+										uikits.popScene()
+									end
+								end,messagebox.RETRY)	
+							end
+							is_loading = false
+							loadbox:removeFromParent()
+						end,'N')			
+				end)							
+			end		
+			
+			local pic_course 
+			if title_data.course	== 1 then
+				pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
+			elseif title_data.course	== 2 then
+				pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_MATH)
+			elseif title_data.course	== 3 then
+				pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_ENG)
+			elseif title_data.course	== 4 then
+				pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_OTHER)
+			end			
+			pic_course:setVisible(true)
+
+			self:show_checkview(cur_title_view,title_data.reason)
+			
+			local pic_view = uikits.child(cur_title_view,ui.PIC_VIEW)
+			pic_view:setVisible(false)
+			self:show_picview(pic_view,title_data.content,cur_title_view)
+			
+			print('pos_x::'..pos_x..'::pos_y::'..pos_y)
+			cur_title_view:setPosition(pos_x,pos_y)
+			cur_title_view:setVisible(true)
+			view_title:addChild(cur_title_view,1,100000+20*self.page_index)			
+		else
+			if pos_x == per_title_src:getPositionX() then
+				local size_per_view = per_title_src:getContentSize()
+				local size_old = view_title:getInnerContainerSize()
+				local size_win = view_title:getContentSize()
+				print('size_per_view.height::'..size_per_view.height..'::(size_win.height)::'..size_win.height)
+				if size_old.height-(size_per_view.height+title_space_shu) > size_win.height then
+					print('1111111111')
+					view_title:setInnerContainerSize(cc.size(size_old.width,size_old.height-(size_per_view.height+title_space_shu)))
+					local titleview = view_title:getChildren()
+					for i,obj in pairs(titleview) do
+						local per_size_old_y = titleview[i]:getPositionY()-(size_per_view.height+title_space_shu)
+						titleview[i]:setPositionY(per_size_old_y)
+					end		
+				else
+					print('222222222')
+					--view_title:setInnerContainerSize(size_win)
+				end
+							
+			end
+		end
+	end 
+	
+	local function gettitle_byone()
+		local send_url = get_list_url
+		send_url = send_url..'range=0'
+		send_url = send_url..'&course='..self.course_index
+		send_url = send_url..'&status='..self.status_index
+		send_url = send_url..'&page_size=1'
+		send_url = send_url..'&page='..20*self.page_index
+		if login.get_uid_type() ~= login.STUDENT then
+			send_url = send_url..'&user_id='..login.get_subuid()
+		end
+		local loadbox = loadingbox.open(self)
+		is_loading = true
+		print('send_url:::'..send_url)
+		self:show_emptyview_type(false)
+		cache.request_json( send_url,function(t)
+			if t and type(t)=='table' then
+				if t.result ~= 0 then
+					print('t.result:::'..t.result..':::t.msg:::'..t.msg)
+					if t.result == 1 then
+						add_one_title()
+						is_loading = false
+						loadbox:removeFromParent()
+						return true
+					end
+					is_loading = false
+					loadbox:removeFromParent()
+					return false
+				else
+					add_one_title(t.list[1])
+				end
+			else
+				--既没有网络也没有缓冲
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:adderrortitle()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+			end
+			is_loading = false
+			loadbox:removeFromParent()
+		end,'N')		
+	end
+	self.totalcount = self.totalcount-1
+	for j = index , end_index+100000 do
+		print('j::'..j)
+		--local cur_title = uikits.child(view_title,j+index)
+		local cur_title = view_title:getChildByTag(j)
+		if cur_title then
+			if j == index then
+				pos_x,pos_y = cur_title:getPosition()
+				cur_title:removeFromParent()
+			else
+				local pos_x_temp,pos_y_temp = cur_title:getPosition()
+				cur_title:setPosition(pos_x,pos_y)
+				cur_title:setTag(j-1)
+				pos_x = pos_x_temp
+				pos_y = pos_y_temp
+			end
+		else
+			break
+		end
+	end
+	
+	if self.totalcount >0 then
+		local page_num = self.totalcount/20
+		self.totalpagecount = math.ceil(page_num)
+		self:settitlecount()
+		gettitle_byone()
+	else
+		self.totalpagecount = 1
+		self:settitlecount()
+		self:show_emptyview_type(true)
+	end
+	
+end
 
 function ErrorTitlePerView:show_title(is_has_title)
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
@@ -673,45 +858,10 @@ function ErrorTitlePerView:show_title(is_has_title)
 			for i,v in pairs(self.title_table) do
 				local cur_title_view
 				cur_title_view = per_title_src:clone()
-
---[[				local but_del = uikits.child(cur_title_view,ui.BUTTON_DEL)
-				but_del.id = v.id
-				uikits.event(but_del,	
-					function(sender,eventType)	
-						local send_url = item_del_url..'id='..sender.id
-						if login.get_uid_type() ~= login.STUDENT then
-							send_url = send_url..'&user_id='..login.get_subuid()
-						end
-						local loadbox = loadingbox.open(self)
-						is_loading = true
-						self._empty:setVisible(false)
-						cache.request_json( send_url,function(t)
-							if t and type(t)=='table' then
-								if t.result ~= 0 then
-									is_loading = false
-									loadbox:removeFromParent()
-									return false
-								else
-									self.page_index = 1
-									self:getdatabyurl()						
-								end
-							else
-								--既没有网络也没有缓冲
-								messagebox.open(self,function(e)
-									if e == messagebox.TRY then
-										self:adderrortitle()
-									elseif e == messagebox.CLOSE then
-										uikits.popScene()
-									end
-								end,messagebox.RETRY)	
-							end
-							is_loading = false
-							loadbox:removeFromParent()
-						end,'N')			
-				end)		--]]
 				
 				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
 				but_status.id = v.id
+				but_status.view = cur_title_view
 				if v.status == 1 then
 					but_status:setSelectedState(true)
 				elseif v.status == 2 then
@@ -735,8 +885,10 @@ function ErrorTitlePerView:show_title(is_has_title)
 										loadbox:removeFromParent()
 										return false
 									else
-										self.page_index = 1
-										self:getdatabyurl()						
+										--self.page_index = 1
+										if self.status_index ~= 0 then
+											self:update_title_save_pos(sender.view:getTag())
+										end						
 									end
 								else
 									--既没有网络也没有缓冲
@@ -853,6 +1005,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
 				--but_del:addTouchEventListener(touchEventHui)
 				but_status.id = v.id
+				but_status.view = cur_title_view
 				if v.status == 1 then
 					but_status:setSelectedState(true)
 				elseif v.status == 2 then
@@ -876,8 +1029,11 @@ function ErrorTitlePerView:show_title(is_has_title)
 										loadbox:removeFromParent()
 										return false
 									else
-										self.page_index = 1
-										self:getdatabyurl()						
+										--self.page_index = 1
+										--self:getdatabyurl()	
+										if self.status_index ~= 0 then
+											self:update_title_save_pos(sender.view:getTag())	
+										end				
 									end
 								else
 									--既没有网络也没有缓冲
@@ -975,7 +1131,6 @@ function ErrorTitlePerView:settitlecount()
 	txt_err_count:setString(self.totalcount)
 end
 
-local get_list_url = 'http://app.lejiaolexue.com/exerbook2/list.ashx?'
 --local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 
 function ErrorTitlePerView:getdatabyurl()
@@ -998,7 +1153,7 @@ function ErrorTitlePerView:getdatabyurl()
 				print('t.result:::'..t.result..':::t.msg:::'..t.msg)
 				if t.result == 1 then
 					self:show_title(false)
-					is_loading = true
+					is_loading = false
 					loadbox:removeFromParent()
 					return true
 				end
@@ -1068,8 +1223,9 @@ function ErrorTitlePerView:init()
 	
 	uikits.event(but_add,	
 		function(sender,eventType)	
+			self:save_innerpos()
 			self.isneedupdate = true
-			local scene_next = adderrorview.create()		
+			local scene_next = adderrorview.create(self)		
 			uikits.pushScene(scene_next)						
 	end,"click")
 	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
