@@ -1982,7 +1982,7 @@
           "bgStartColorB": 255,
           "bgStartColorG": 255,
           "bgStartColorR": 255,
-          "bounceEnable": true,
+          "bounceEnable": false,
           "capInsetsHeight": 1,
           "capInsetsWidth": 1,
           "capInsetsX": 0,

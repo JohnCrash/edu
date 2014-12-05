@@ -47,10 +47,11 @@ local ui = {
 local AddErrorView = class("AddErrorView")
 AddErrorView.__index = AddErrorView
 
-function AddErrorView.create()
+function AddErrorView.create(parent_view)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),AddErrorView)
 	scene:addChild(layer)
+	layer._parent_view = parent_view
 	layer._piclist = {}
 	layer.course_sel = 1
 	layer.reason_sel = 1
@@ -70,8 +71,8 @@ end
 local add_title_url = 'http://app.lejiaolexue.com/exerbook2/add.ashx?'
 
 function AddErrorView:adderrortitle()
+	self._parent_view.isneedupdate = true
 	local send_url = add_title_url
-	
 	send_url = send_url..'course='..self.course_sel
 	send_url = send_url..'&status=1'
 	send_url = send_url..'&reason='..self.reason_sel
@@ -395,6 +396,7 @@ function AddErrorView:init()
 	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
 		function(sender,eventType)	
+			self._parent_view.isneedupdate = false
 			uikits.popScene()						
 	end,"click")		
 	
