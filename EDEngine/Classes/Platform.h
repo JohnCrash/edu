@@ -8,6 +8,11 @@
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 #include <unistd.h>
 #endif
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS||CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+#include <unistd.h>
+#endif
+
 #define RETURN_TYPE_RECORDDATA 10
 #define TAKE_PICTURE 1
 #define PICK_PICTURE 2
@@ -244,6 +249,15 @@ protected:
 };
 
 #else
+//MAC or IOS
+class CVoiceRecord : public CVoiceRecordBase
+{
+public:
+    virtual bool StartRecord(int cnChannel,int nRate,int cnBitPerSample=16);
+    virtual bool StopRecord(char *pszSaveFile);
+    
+    bool OnRecordData(char *pBuf,int len,int nRate);
+};
 #endif
 
 #endif

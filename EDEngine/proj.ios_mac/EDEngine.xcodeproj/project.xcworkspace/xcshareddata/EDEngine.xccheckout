@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>37130E80-7D72-4EF8-B37E-1247A22F13B5</string>
+	<key>IDESourceControlProjectName</key>
+	<string>EDEngine</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>11D97FE84BAA7BF0128D17060C5B2EA1443E662E</key>
+		<string>/Volumes/sharefile/reps/Edu</string>
+		<key>852ED3691A47A99B0D19C820A500AE9772B2A44E</key>
+		<string>https://github.com/JohnCrash/cocos2d-x-EDU-Version.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>EDEngine/proj.ios_mac/EDEngine.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>11D97FE84BAA7BF0128D17060C5B2EA1443E662E</key>
+		<string>../../../..</string>
+		<key>852ED3691A47A99B0D19C820A500AE9772B2A44E</key>
+		<string>../../../../../cocos2d-x-EDU-Version</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>/Volumes/sharefile/reps/Edu</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>11D97FE84BAA7BF0128D17060C5B2EA1443E662E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>852ED3691A47A99B0D19C820A500AE9772B2A44E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>cocos2d-x-EDU-Version</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>11D97FE84BAA7BF0128D17060C5B2EA1443E662E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Edu</string>
+		</dict>
+	</array>
+</dict>
+</plist>

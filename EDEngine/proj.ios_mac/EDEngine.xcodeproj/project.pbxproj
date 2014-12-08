@@ -49,11 +49,25 @@
 		50EF629917ECD46A001EB2F8 /* Icon-100.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF629517ECD46A001EB2F8 /* Icon-100.png */; };
 		50EF62A217ECD613001EB2F8 /* Icon-29.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF62A017ECD613001EB2F8 /* Icon-29.png */; };
 		50EF62A317ECD613001EB2F8 /* Icon-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF62A117ECD613001EB2F8 /* Icon-50.png */; };
-		527774C01A35525D0048D357 /* libbox2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 529BBCF91A35455D000555FF /* libbox2d Mac.a */; };
-		527774C11A35525D0048D357 /* libchipmunk Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 529BBCF71A35455D000555FF /* libchipmunk Mac.a */; };
-		527774C21A35525D0048D357 /* libcocos2dx Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 529BBCF31A35455D000555FF /* libcocos2dx Mac.a */; };
-		527774C31A35525D0048D357 /* libcocos2dx-extensions Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 529BBCF51A35455D000555FF /* libcocos2dx-extensions Mac.a */; };
-		527774C41A35525D0048D357 /* libCocosDenshion Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 529BBCFB1A35455D000555FF /* libCocosDenshion Mac.a */; };
+		5277751C1A355E250048D357 /* libgif.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527774E91A355B300048D357 /* libgif.a */; };
+		5277751D1A355E250048D357 /* libjson-c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527774E41A355B110048D357 /* libjson-c.a */; };
+		5277751E1A355E5C0048D357 /* libcocos2dx Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775011A355B5F0048D357 /* libcocos2dx Mac.a */; };
+		5277751F1A355E5C0048D357 /* libluabindings Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527774EF1A355B470048D357 /* libluabindings Mac.a */; };
+		527775201A355E8C0048D357 /* libbox2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775071A355B5F0048D357 /* libbox2d Mac.a */; };
+		527775211A355E8C0048D357 /* libcocos2dx-extensions Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775031A355B5F0048D357 /* libcocos2dx-extensions Mac.a */; };
+		527775221A355E8C0048D357 /* libCocosDenshion Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775091A355B5F0048D357 /* libCocosDenshion Mac.a */; };
+		5277759A1A357A0F0048D357 /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775901A357A0F0048D357 /* Files.cpp */; };
+		5277759B1A357A0F0048D357 /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775901A357A0F0048D357 /* Files.cpp */; };
+		5277759C1A357A0F0048D357 /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775921A357A0F0048D357 /* IDF.cpp */; };
+		5277759D1A357A0F0048D357 /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775921A357A0F0048D357 /* IDF.cpp */; };
+		5277759E1A357A0F0048D357 /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775941A357A0F0048D357 /* lua_ljshell.cpp */; };
+		5277759F1A357A0F0048D357 /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775941A357A0F0048D357 /* lua_ljshell.cpp */; };
+		527775A01A357A0F0048D357 /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775961A357A0F0048D357 /* Platform.cpp */; };
+		527775A11A357A0F0048D357 /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775961A357A0F0048D357 /* Platform.cpp */; };
+		527775A21A357A0F0048D357 /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775981A357A0F0048D357 /* RenderTextureEx.cpp */; };
+		527775A31A357A0F0048D357 /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775981A357A0F0048D357 /* RenderTextureEx.cpp */; };
+		527775A61A357F830048D357 /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775A41A357F830048D357 /* PlatformApple.cpp */; };
+		527775A71A357F830048D357 /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 527775A41A357F830048D357 /* PlatformApple.cpp */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -177,6 +191,34 @@
 			proxyType = 2;
 			remoteGlobalIDString = A07A4FB4178387730073F6A7;
 			remoteInfo = "CocosDenshion iOS";
+		};
+		527775141A355D490048D357 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 527774BA1A35514A0048D357 /* json-c.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 527774031A3549BD0048D357;
+			remoteInfo = "json-c";
+		};
+		527775161A355D490048D357 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 527774B41A35512E0048D357 /* gif.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 527774521A354FEA0048D357;
+			remoteInfo = gif;
+		};
+		527775181A355D490048D357 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5943B1E1998FADB00A4881E /* cocos2d_lua_bindings.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A6FB50417854BC200CDF010;
+			remoteInfo = "luabindings Mac";
+		};
+		5277751A1A355D490048D357 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5943AC61998F83500A4881E /* cocos2d_libs.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A03F2E8E178141C1006731B9;
+			remoteInfo = "build all libs Mac";
 		};
 		529BBCF21A35455D000555FF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -421,6 +463,18 @@
 		50EF62A117ECD613001EB2F8 /* Icon-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-50.png"; sourceTree = "<group>"; };
 		527774B41A35512E0048D357 /* gif.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = gif.xcodeproj; path = "../../../cocos2d-x/external/giflib/mac/gif/gif.xcodeproj"; sourceTree = "<group>"; };
 		527774BA1A35514A0048D357 /* json-c.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "json-c.xcodeproj"; path = "../../../cocos2d-x/external/json-c/json-c/json-c.xcodeproj"; sourceTree = "<group>"; };
+		527775901A357A0F0048D357 /* Files.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Files.cpp; path = ../Classes/Files.cpp; sourceTree = "<group>"; };
+		527775911A357A0F0048D357 /* Files.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Files.h; path = ../Classes/Files.h; sourceTree = "<group>"; };
+		527775921A357A0F0048D357 /* IDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDF.cpp; path = ../Classes/IDF.cpp; sourceTree = "<group>"; };
+		527775931A357A0F0048D357 /* IDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDF.h; path = ../Classes/IDF.h; sourceTree = "<group>"; };
+		527775941A357A0F0048D357 /* lua_ljshell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_ljshell.cpp; path = ../Classes/lua_ljshell.cpp; sourceTree = "<group>"; };
+		527775951A357A0F0048D357 /* lua_ljshell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lua_ljshell.h; path = ../Classes/lua_ljshell.h; sourceTree = "<group>"; };
+		527775961A357A0F0048D357 /* Platform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Platform.cpp; path = ../Classes/Platform.cpp; sourceTree = "<group>"; };
+		527775971A357A0F0048D357 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Classes/Platform.h; sourceTree = "<group>"; };
+		527775981A357A0F0048D357 /* RenderTextureEx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTextureEx.cpp; path = ../Classes/RenderTextureEx.cpp; sourceTree = "<group>"; };
+		527775991A357A0F0048D357 /* RenderTextureEx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RenderTextureEx.h; path = ../Classes/RenderTextureEx.h; sourceTree = "<group>"; };
+		527775A41A357F830048D357 /* PlatformApple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlatformApple.cpp; path = ../Classes/PlatformApple.cpp; sourceTree = "<group>"; };
+		527775A51A357F830048D357 /* PlatformApple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlatformApple.h; path = ../Classes/PlatformApple.h; sourceTree = "<group>"; };
 		529B9EFC1A354548000555FF /* .gitattributes */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitattributes; sourceTree = "<group>"; };
 		529B9EFD1A354548000555FF /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		529B9EFE1A354548000555FF /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
@@ -6928,11 +6982,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				527774C01A35525D0048D357 /* libbox2d Mac.a in Frameworks */,
-				527774C11A35525D0048D357 /* libchipmunk Mac.a in Frameworks */,
-				527774C21A35525D0048D357 /* libcocos2dx Mac.a in Frameworks */,
-				527774C31A35525D0048D357 /* libcocos2dx-extensions Mac.a in Frameworks */,
-				527774C41A35525D0048D357 /* libCocosDenshion Mac.a in Frameworks */,
+				527775201A355E8C0048D357 /* libbox2d Mac.a in Frameworks */,
+				527775211A355E8C0048D357 /* libcocos2dx-extensions Mac.a in Frameworks */,
+				527775221A355E8C0048D357 /* libCocosDenshion Mac.a in Frameworks */,
+				5277751E1A355E5C0048D357 /* libcocos2dx Mac.a in Frameworks */,
+				5277751F1A355E5C0048D357 /* libluabindings Mac.a in Frameworks */,
+				5277751C1A355E250048D357 /* libgif.a in Frameworks */,
+				5277751D1A355E250048D357 /* libjson-c.a in Frameworks */,
 				503AE11217EB99EE00D1A890 /* libcurl.dylib in Frameworks */,
 				5087E76717EB910900C73F5D /* libz.dylib in Frameworks */,
 				503AE11B17EB9C5A00D1A890 /* IOKit.framework in Frameworks */,
@@ -6967,6 +7023,16 @@
 		15AA9C4015B7EC450033D6C2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				527775901A357A0F0048D357 /* Files.cpp */,
+				527775911A357A0F0048D357 /* Files.h */,
+				527775921A357A0F0048D357 /* IDF.cpp */,
+				527775931A357A0F0048D357 /* IDF.h */,
+				527775941A357A0F0048D357 /* lua_ljshell.cpp */,
+				527775951A357A0F0048D357 /* lua_ljshell.h */,
+				527775961A357A0F0048D357 /* Platform.cpp */,
+				527775971A357A0F0048D357 /* Platform.h */,
+				527775981A357A0F0048D357 /* RenderTextureEx.cpp */,
+				527775991A357A0F0048D357 /* RenderTextureEx.h */,
 				F5CC68F3199B8EE500145900 /* AssetsManager.h */,
 				F5CC68F4199B8EE500145900 /* Console.h */,
 				F5CC68F5199B8EE500145900 /* lua_ext.h */,
@@ -6986,6 +7052,8 @@
 				1AFAF8B616D35DE700DB1158 /* HelloWorldScene.h */,
 				F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */,
 				F5BA4CC8199A3B3B000B95B2 /* AppleBundle.h */,
+				527775A41A357F830048D357 /* PlatformApple.cpp */,
+				527775A51A357F830048D357 /* PlatformApple.h */,
 			);
 			name = Classes;
 			path = ../classes;
@@ -23081,6 +23149,10 @@
 			buildRules = (
 			);
 			dependencies = (
+				527775151A355D490048D357 /* PBXTargetDependency */,
+				527775171A355D490048D357 /* PBXTargetDependency */,
+				527775191A355D490048D357 /* PBXTargetDependency */,
+				5277751B1A355D490048D357 /* PBXTargetDependency */,
 			);
 			name = "EDEngine Mac";
 			productName = iphone;
@@ -23503,8 +23575,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
+				527775A61A357F830048D357 /* PlatformApple.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
+				527775A21A357A0F0048D357 /* RenderTextureEx.cpp in Sources */,
 				1AFAF8B716D35DE700DB1158 /* AppDelegate.cpp in Sources */,
+				527775A01A357A0F0048D357 /* Platform.cpp in Sources */,
+				5277759A1A357A0F0048D357 /* Files.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 				1AFAF8B816D35DE700DB1158 /* HelloWorldScene.cpp in Sources */,
 				F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */,
@@ -23513,8 +23589,10 @@
 				F53B0FCD1997A9AC007C8988 /* lua_json.cpp in Sources */,
 				F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */,
 				F53B0FCF1997A9AC007C8988 /* luaDebug.cpp in Sources */,
+				5277759C1A357A0F0048D357 /* IDF.cpp in Sources */,
 				F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */,
 				F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
+				5277759E1A357A0F0048D357 /* lua_ljshell.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -23522,11 +23600,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				527775A71A357F830048D357 /* PlatformApple.cpp in Sources */,
 				5087E75717EB910900C73F5D /* AppDelegate.cpp in Sources */,
+				5277759B1A357A0F0048D357 /* Files.cpp in Sources */,
+				527775A31A357A0F0048D357 /* RenderTextureEx.cpp in Sources */,
 				5087E75817EB910900C73F5D /* HelloWorldScene.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
+				527775A11A357A0F0048D357 /* Platform.cpp in Sources */,
+				5277759D1A357A0F0048D357 /* IDF.cpp in Sources */,
 				F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */,
 				F5E0ED611997B21700B61F2E /* Console.cpp in Sources */,
+				5277759F1A357A0F0048D357 /* lua_ljshell.cpp in Sources */,
 				F5E0ED621997B21A00B61F2E /* lua_ext.cpp in Sources */,
 				F5E0ED631997B21C00B61F2E /* lua_json.cpp in Sources */,
 				F5E0ED641997B21F00B61F2E /* lua_thread_curl.cpp in Sources */,
@@ -23537,6 +23621,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		527775151A355D490048D357 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "json-c";
+			targetProxy = 527775141A355D490048D357 /* PBXContainerItemProxy */;
+		};
+		527775171A355D490048D357 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = gif;
+			targetProxy = 527775161A355D490048D357 /* PBXContainerItemProxy */;
+		};
+		527775191A355D490048D357 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "luabindings Mac";
+			targetProxy = 527775181A355D490048D357 /* PBXContainerItemProxy */;
+		};
+		5277751B1A355D490048D357 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "build all libs Mac";
+			targetProxy = 5277751A1A355D490048D357 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		529BB0A11A354554000555FF /* InfoPlist.strings */ = {

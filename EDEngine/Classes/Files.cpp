@@ -24,6 +24,14 @@ std::string GetSDCardDir()
 
 #endif
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_PLATFORM_MAC)
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <dirent.h>
+#endif
+
 #define min(a,b) ((a)>(b)?(b):(a))
 #define max(a,b) ((a)>(b)?(a):(b))
 
