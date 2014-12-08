@@ -1,9 +1,5 @@
 #include "Platform.h"
 
-t.env->DeleteLocalRef(t.classID);
-}
-}
-
 bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
 {
     if (m_pEncoder)
@@ -18,7 +14,7 @@ bool CVoiceRecord::StartRecord(int cnChannel,int nRate,int cnBitPerSample)
     //CCLOG("CVoiceRecord::StartRecord ");
     if (!CVoiceRecordBase::StartRecord(cnChannel,nRate,cnBitPerSample)) return false;
     
-    int nRet == 0;
+    int nRet = 0;
     //...
     return nRet==1;
 }

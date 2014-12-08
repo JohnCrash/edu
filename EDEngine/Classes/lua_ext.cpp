@@ -4,9 +4,9 @@
 #include "cocos2d.h"
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
-#include "Platform.h"
-#include "RenderTextureEx.h"
-#include "Files.h"
+//#include "Platform.h"
+//#include "RenderTextureEx.h"
+//#include "Files.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
@@ -281,7 +281,7 @@ static int cc_takeResource(lua_State *L)
 			{
 				g_callref = LUA_REFNIL;
 			}
-			takeResource(i);
+		//	takeResource(i);
 			return 1;
 		}
 	}
@@ -302,7 +302,8 @@ int cc_startRecordVoice(lua_State *L)
 		rate = lua_tointeger(L,2);
 	if( lua_isnumber(L,3) )
 		samples = lua_tointeger(L,3);
-	bool b = VoiceStartRecord(channel,rate,samples);
+	//bool b = VoiceStartRecord(channel,rate,samples);
+    bool b = false;
 	lua_pushboolean(L,b);
 	return 1;
 }
@@ -310,7 +311,8 @@ int cc_startRecordVoice(lua_State *L)
 int cc_stopRecordVoice(lua_State *L)
 {
 	char pszSaveFile[256];
-	bool b = VoiceStopRecord( pszSaveFile );
+	//bool b = VoiceStopRecord( pszSaveFile );
+    bool b = false;
 	lua_pushboolean(L,b);
 	lua_pushstring(L,pszSaveFile);
 	return 2;
@@ -320,7 +322,8 @@ int cc_getRecordVoiceInfo(lua_State *L)
 {
 	float Duration;
 	int vol;
-	bool b = VoiceGetRecordInfo(Duration, vol);
+//	bool b = VoiceGetRecordInfo(Duration, vol);
+    bool b = false;
 	lua_pushboolean(L, b);
 	lua_pushnumber(L, Duration);
 	lua_pushnumber(L, vol);
@@ -332,7 +335,8 @@ int cc_playVoice(lua_State *L)
 	if (lua_isstring(L,1))
 	{
 		const char *amr = lua_tostring(L, 1);
-		lua_pushboolean(L, VoiceStartPlay(amr));
+	//	lua_pushboolean(L, VoiceStartPlay(amr));
+        lua_pushboolean(L, false);
 		return 1;
 	}
 	lua_pushnil(L);
@@ -341,7 +345,7 @@ int cc_playVoice(lua_State *L)
 
 int cc_stopVoice(lua_State *L)
 {
-	VoiceStopPlay();
+	//VoiceStopPlay();
 	return 0; 
 }
 
@@ -350,7 +354,8 @@ int cc_getVoiceLength(lua_State *L)
 	if (lua_isstring(L, 1))
 	{
 		const char *amr = lua_tostring(L, 1);
-		double d = VoiceLongth(amr);
+	//	double d = VoiceLongth(amr);
+        double d = 0;
 		lua_pushnumber(L, d);
 		return 1;
 	}
@@ -363,13 +368,18 @@ int cc_isVoicePlaying(lua_State *L)
 	if (lua_isstring(L, 1))
 	{
 		const char *amr = lua_tostring(L, 1);
-		lua_pushboolean(L,VoiceIsPlaying(amr));
+//		lua_pushboolean(L,VoiceIsPlaying(amr));
+        lua_pushboolean(L,false);
 		return 1;
 	}
 	lua_pushnil(L);
 	return 1;
 }
 
+    static bool IsFileExist( const char * fn )
+    {
+        return false;
+    }
 int cc_adjustPhoto(lua_State *L)
 {
 	if (lua_isstring(L, 1) &&lua_isnumber(L,2) )
@@ -377,6 +387,7 @@ int cc_adjustPhoto(lua_State *L)
 		const char *fn = lua_tostring(L, 1);
 		if (IsFileExist(fn))
 		{
+            /*
 			auto img = new CImageEx();
 			if (img->LoadFromFile(fn))
 			{
@@ -393,7 +404,8 @@ int cc_adjustPhoto(lua_State *L)
 				lua_pushboolean(L, false);
 				lua_pushstring(L, "load picture file error");
 				return 2;
-			}
+			}*/
+            return 0;
 		}
 		else
 		{
@@ -475,7 +487,7 @@ int cc_getScreenInfo(lua_State *L)
 	lua_pushnumber(L, abs(rect.bottom - rect.top));
 	return 2;
 #else
-	auto director = Director::getInstance();
+    auto director = cocos2d::Director::getInstance();
 	auto glview = director->getOpenGLView();
 	auto size = glview->getFrameSize();
 	lua_pushnumber(L, size.width);
