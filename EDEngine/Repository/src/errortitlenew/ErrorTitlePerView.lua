@@ -99,6 +99,7 @@ function ErrorTitlePerView.create(user_name)
 	layer.inner_posy = 0
 	layer.user_name = user_name
 	is_loading = false
+	layer.status_change = {}
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -246,7 +247,7 @@ function ErrorTitlePerView:init_butlist()
 			but_cur_course_chn:setVisible(false)
 			but_cur_course_eng:setVisible(false)
 			but_cur_course_other:setVisible(false)
-			self:getdatabyurl()
+			self:update_title()
 	end,"click")
 
 	uikits.event(list_course_math,	
@@ -259,7 +260,7 @@ function ErrorTitlePerView:init_butlist()
 			but_cur_course_chn:setVisible(false)
 			but_cur_course_eng:setVisible(false)
 			but_cur_course_other:setVisible(false)
-			self:getdatabyurl()
+			self:update_title()
 	end,"click")
 	
 	uikits.event(list_course_chn,	
@@ -272,7 +273,7 @@ function ErrorTitlePerView:init_butlist()
 			but_cur_course_chn:setVisible(true)
 			but_cur_course_eng:setVisible(false)
 			but_cur_course_other:setVisible(false)
-			self:getdatabyurl()
+			self:update_title()
 	end,"click")
 
 	uikits.event(list_course_eng,	
@@ -285,7 +286,7 @@ function ErrorTitlePerView:init_butlist()
 			but_cur_course_chn:setVisible(false)
 			but_cur_course_eng:setVisible(true)
 			but_cur_course_other:setVisible(false)
-			self:getdatabyurl()
+			self:update_title()
 	end,"click")
 
 	uikits.event(list_course_other,	
@@ -298,7 +299,7 @@ function ErrorTitlePerView:init_butlist()
 			but_cur_course_chn:setVisible(false)
 			but_cur_course_eng:setVisible(false)
 			but_cur_course_other:setVisible(true)
-			self:getdatabyurl()
+			self:update_title()
 	end,"click")
 	
 --[[	local check_status = uikits.child(self._widget,ui.BUTTON_STA_HUI)
@@ -308,11 +309,11 @@ function ErrorTitlePerView:init_butlist()
 			if eventType == true then
 				self.page_index = 1
 				self.status_index = 2
-				self:getdatabyurl()
+				self:update_title()
 			else
 				self.page_index = 1
 				self.status_index = 1
-				self:getdatabyurl()
+				self:update_title()
 			end	
 	end)--]]
 	local but_cur_status_all = uikits.child(self._widget,ui.BUTTON_CUR_STA_ALL)
@@ -376,7 +377,7 @@ function ErrorTitlePerView:init_butlist()
 		but_cur_status_all:setVisible(true)
 		but_cur_status_yes:setVisible(false)
 		but_cur_status_no:setVisible(false)
-		self:getdatabyurl()
+		self:update_title()
 	end,"click")
 	uikits.event(list_status_yes,	
 		function(sender,eventType)	
@@ -386,7 +387,7 @@ function ErrorTitlePerView:init_butlist()
 		but_cur_status_all:setVisible(false)
 		but_cur_status_yes:setVisible(true)
 		but_cur_status_no:setVisible(false)
-		self:getdatabyurl()
+		self:update_title()
 	end,"click")
 	uikits.event(list_status_no,	
 		function(sender,eventType)	
@@ -396,7 +397,7 @@ function ErrorTitlePerView:init_butlist()
 		but_cur_status_all:setVisible(false)
 		but_cur_status_yes:setVisible(false)
 		but_cur_status_no:setVisible(true)
-		self:getdatabyurl()
+		self:update_title()
 	end,"click")
 end
 
@@ -867,14 +868,14 @@ function ErrorTitlePerView:show_title(is_has_title)
 				elseif v.status == 2 then
 					but_status:setSelectedState(false)
 				end
-				print('login.get_uid_type()::'..login.get_uid_type())
 				if login.get_uid_type() == login.TEACHER then		
 					but_status:setEnabled(false)
 					but_status:setTouchEnabled(false)
 				else
 					uikits.event(but_status,	
 						function(sender,eventType)	
-							local send_url = status_change_url..'id='..sender.id
+							self.status_change[sender.id] = sender.id
+--[[							local send_url = status_change_url..'id='..sender.id
 							local loadbox = loadingbox.open(self)
 							is_loading = true
 							self:show_emptyview_type(false)
@@ -902,7 +903,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 								end
 								is_loading = false
 								loadbox:removeFromParent()
-							end,'N')			
+							end,'N')			--]]
 					end)							
 				end		
 				
@@ -985,7 +986,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 									return false
 								else
 									self.page_index = 1
-									self:getdatabyurl()						
+									self:update_title()						
 								end
 							else
 								--既没有网络也没有缓冲
@@ -1011,14 +1012,14 @@ function ErrorTitlePerView:show_title(is_has_title)
 				elseif v.status == 2 then
 					but_status:setSelectedState(false)
 				end
-				print('login.get_uid_type()::'..login.get_uid_type())
 				if login.get_uid_type() == login.TEACHER then		
 					but_status:setEnabled(false)
 					but_status:setTouchEnabled(false)
 				else
 					uikits.event(but_status,	
 						function(sender,eventType)	
-							local send_url = status_change_url..'id='..sender.id
+							self.status_change[sender.id] = sender.id
+							--[[local send_url = status_change_url..'id='..sender.id
 							local loadbox = loadingbox.open(self)
 							is_loading = true
 							self:show_emptyview_type(false)
@@ -1030,7 +1031,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 										return false
 									else
 										--self.page_index = 1
-										--self:getdatabyurl()	
+										--self:update_title()	
 										if self.status_index ~= 0 then
 											self:update_title_save_pos(sender.view:getTag())	
 										end				
@@ -1047,7 +1048,7 @@ function ErrorTitlePerView:show_title(is_has_title)
 								end
 								is_loading = false
 								loadbox:removeFromParent()
-							end,'N')			
+							end,'N')			--]]
 					end)							
 				end
 			
@@ -1132,6 +1133,54 @@ function ErrorTitlePerView:settitlecount()
 end
 
 --local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
+local status_batch_change_url = 'http://app.lejiaolexue.com/exerbook2/do_batch.ashx'
+function ErrorTitlePerView:update_title()
+	local send_data_tb = {}
+	local send_index = 1
+	for i,obj in pairs(self.status_change) do
+		send_data_tb[send_index] = obj
+		send_index = send_index+1
+	end
+	local title_num = #send_data_tb
+	print('title_num::'..title_num)
+	if title_num >0 then
+		local send_data = json.encode(send_data_tb)
+		local send_data_js = 'id='..send_data
+
+	--	local send_data_js = json.encode(send_data)
+		
+		local send_url = status_batch_change_url
+		if login.get_uid_type() ~= login.STUDENT then
+			send_url = send_url..'?user_id='..login.get_subuid()
+		end
+		local loadbox = loadingbox.open(self)
+		is_loading = true
+		cache.post(status_batch_change_url,send_data_js,function(b,result)
+			if b then
+				if result.result ~= 0 then
+					print( result )
+				end			
+				is_loading = false
+				loadbox:removeFromParent()
+				self:getdatabyurl()			
+			else
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:update_title()
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+				is_loading = false
+				loadbox:removeFromParent()
+				return false
+			end
+		end)
+	else
+		self:getdatabyurl()
+	end
+	self.status_change = {}
+end
 
 function ErrorTitlePerView:getdatabyurl()
 	local send_url = get_list_url
@@ -1171,7 +1220,7 @@ function ErrorTitlePerView:getdatabyurl()
 			--既没有网络也没有缓冲
 			messagebox.open(self,function(e)
 				if e == messagebox.TRY then
-					self:adderrortitle()
+					self:getdatabyurl()
 				elseif e == messagebox.CLOSE then
 					uikits.popScene()
 				end
@@ -1246,7 +1295,7 @@ function ErrorTitlePerView:init()
 		end
 	end)	
 	self:init_butlist()
-	self:getdatabyurl()	
+	self:update_title()	
 end
 
 function ErrorTitlePerView:updatetitleview()
