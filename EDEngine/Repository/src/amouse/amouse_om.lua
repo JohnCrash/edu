@@ -545,6 +545,7 @@ function AMouseScene:close_Dialog()
 		--self._uiLayer:removeFromParent()
 	end
 	kits.log(":close_Dialog _uiScene")
+	
 	if self._uiScene then
 		kits.log(":close_Dialog popScene")
 		uikits.popScene()
@@ -657,6 +658,9 @@ end
 --一关结束
 function AMouseScene:game_end_Dialog()
 	--if self._uiLayer then return end
+	if self._uiScene then 
+		return 
+	end
 	--60分过关
 	local fen100 = self:getIntegration()
 	local b = fen100 > 60
@@ -699,6 +703,9 @@ function AMouseScene:game_end_Dialog()
 	--self._uiLayer = cc.Layer:create()
 	--self:addChild(self._uiLayer)
 	self._uiScene = cc.Scene:create()
+	kits.log("===============================")
+	kits.log(" pushScene ")
+	kits.log("===============================")
 	uikits.pushScene(self._uiScene)
 	if b then
 		--播放成功过关的声音
