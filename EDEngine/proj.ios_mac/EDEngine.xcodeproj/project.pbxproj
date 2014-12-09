@@ -55,6 +55,22 @@
 		52538FFC1A35A2E7000E229F /* libamrnb mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538FF01A35A2CF000E229F /* libamrnb mac.a */; };
 		52538FFD1A35A2E7000E229F /* libgif mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538FFB1A35A2CF000E229F /* libgif mac.a */; };
 		52538FFE1A35A2E7000E229F /* libjson-c mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538F681A3593E1000E229F /* libjson-c mac.a */; };
+		52CDB2CF1A35D5CB005C737B /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
+		52CDB2D01A35D5CB005C737B /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
+		52CDB2D21A35D61C005C737B /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */; };
+		52CDB2D31A35D61C005C737B /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */; };
+		52CDB2D51A35D638005C737B /* MD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D41A35D638005C737B /* MD5.cpp */; };
+		52CDB2D61A35D638005C737B /* MD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D41A35D638005C737B /* MD5.cpp */; };
+		52CDB2DA1A35D6AB005C737B /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D71A35D6AB005C737B /* IDF.cpp */; };
+		52CDB2DB1A35D6AB005C737B /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D71A35D6AB005C737B /* IDF.cpp */; };
+		52CDB2DC1A35D6AB005C737B /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */; };
+		52CDB2DD1A35D6AB005C737B /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */; };
+		52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */; };
+		52CDB2DF1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */; };
+		52CDB2E11A35D6C6005C737B /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E01A35D6C6005C737B /* Platform.cpp */; };
+		52CDB2E21A35D6C6005C737B /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E01A35D6C6005C737B /* Platform.cpp */; };
+		52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
+		52CDB2E51A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -6934,6 +6950,14 @@
 		529BBCE31A35455A000555FF /* install_glfw.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = install_glfw.sh; sourceTree = "<group>"; };
 		529BBCE41A35455A000555FF /* run-script.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "run-script.sh"; sourceTree = "<group>"; };
 		529BBCE51A35455A000555FF /* travis_mac.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = travis_mac.yml; sourceTree = "<group>"; };
+		52CDB2CE1A35D5CB005C737B /* Files.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Files.cpp; path = ../Classes/Files.cpp; sourceTree = "<group>"; };
+		52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_ljshell.cpp; path = ../Classes/lua_ljshell.cpp; sourceTree = "<group>"; };
+		52CDB2D41A35D638005C737B /* MD5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MD5.cpp; path = ../Classes/MD5.cpp; sourceTree = "<group>"; };
+		52CDB2D71A35D6AB005C737B /* IDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDF.cpp; path = ../Classes/IDF.cpp; sourceTree = "<group>"; };
+		52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlatformApple.cpp; path = ../Classes/PlatformApple.cpp; sourceTree = "<group>"; };
+		52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTextureEx.cpp; path = ../Classes/RenderTextureEx.cpp; sourceTree = "<group>"; };
+		52CDB2E01A35D6C6005C737B /* Platform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Platform.cpp; path = ../Classes/Platform.cpp; sourceTree = "<group>"; };
+		52CDB2E31A35D6F5005C737B /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = misc.cpp; path = ../Classes/misc.cpp; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		BF1C47EA1293683800B63C5D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -7023,6 +7047,14 @@
 		15AA9C4015B7EC450033D6C2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				52CDB2E31A35D6F5005C737B /* misc.cpp */,
+				52CDB2E01A35D6C6005C737B /* Platform.cpp */,
+				52CDB2D71A35D6AB005C737B /* IDF.cpp */,
+				52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */,
+				52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */,
+				52CDB2D41A35D638005C737B /* MD5.cpp */,
+				52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */,
+				52CDB2CE1A35D5CB005C737B /* Files.cpp */,
 				F5CC68F3199B8EE500145900 /* AssetsManager.h */,
 				F5CC68F4199B8EE500145900 /* Console.h */,
 				F5CC68F5199B8EE500145900 /* lua_ext.h */,
@@ -23583,16 +23615,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
+				52CDB2CF1A35D5CB005C737B /* Files.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				1AFAF8B716D35DE700DB1158 /* AppDelegate.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
+				52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
 				F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */,
+				52CDB2D51A35D638005C737B /* MD5.cpp in Sources */,
 				F53B0FCB1997A9AC007C8988 /* Console.cpp in Sources */,
 				F53B0FCC1997A9AC007C8988 /* lua_ext.cpp in Sources */,
+				52CDB2DC1A35D6AB005C737B /* PlatformApple.cpp in Sources */,
 				F53B0FCD1997A9AC007C8988 /* lua_json.cpp in Sources */,
 				F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */,
+				52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */,
 				F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */,
+				52CDB2DA1A35D6AB005C737B /* IDF.cpp in Sources */,
 				F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
+				52CDB2E11A35D6C6005C737B /* Platform.cpp in Sources */,
+				52CDB2D21A35D61C005C737B /* lua_ljshell.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -23601,9 +23641,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				5087E75717EB910900C73F5D /* AppDelegate.cpp in Sources */,
+				52CDB2D01A35D5CB005C737B /* Files.cpp in Sources */,
+				52CDB2E21A35D6C6005C737B /* Platform.cpp in Sources */,
+				52CDB2DF1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
+				52CDB2DD1A35D6AB005C737B /* PlatformApple.cpp in Sources */,
 				F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */,
+				52CDB2DB1A35D6AB005C737B /* IDF.cpp in Sources */,
 				F5E0ED611997B21700B61F2E /* Console.cpp in Sources */,
+				52CDB2D31A35D61C005C737B /* lua_ljshell.cpp in Sources */,
+				52CDB2D61A35D638005C737B /* MD5.cpp in Sources */,
+				52CDB2E51A35D6F5005C737B /* misc.cpp in Sources */,
 				F5E0ED621997B21A00B61F2E /* lua_ext.cpp in Sources */,
 				F5E0ED631997B21C00B61F2E /* lua_json.cpp in Sources */,
 				F5E0ED641997B21F00B61F2E /* lua_thread_curl.cpp in Sources */,
@@ -23824,7 +23872,12 @@
 				INFOPLIST_FILE = mac/Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-pagezero_size",
+					10000,
+					"-image_base",
+					100000000,
+				);
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -23861,7 +23914,12 @@
 				INFOPLIST_FILE = mac/Info.plist;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-pagezero_size",
+					10000,
+					"-image_base",
+					100000000,
+				);
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
