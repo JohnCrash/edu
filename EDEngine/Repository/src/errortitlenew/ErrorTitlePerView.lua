@@ -132,8 +132,9 @@ function ErrorTitlePerView:init_butlist()
 		function(sender,eventType)	
 			self:save_innerpos()
 			self.isneedupdate = true
-			local scene_next = adderrorview.create(self)		
-			uikits.pushScene(scene_next)	
+			local scene_next = adderrorview.create(self)	
+			self:change_status_only(scene_next)		
+			--uikits.pushScene(scene_next)	
 	end,"click")
 	
 	local course_list = uikits.child(self._widget,ui.COURSE_LIST)
@@ -551,6 +552,7 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 					is_loading = false
 					loadbox:removeFromParent()
 					end,sender.pic_name)		--]]	
+				--self:change_status_only()
 				local local_dir = ljshell.getDirectory(ljshell.AppDir)	
 				local imgs = {}	
 				self:save_innerpos()
@@ -560,7 +562,8 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 					imgs[j] = file_path
 				end
 				local scene_next = imagepreview.create(1,imgs)	
-				uikits.pushScene(scene_next)					
+				self:change_status_only(scene_next)	
+				--uikits.pushScene(scene_next)					
 			end
 		end
 		
@@ -1134,6 +1137,62 @@ end
 
 --local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local status_batch_change_url = 'http://app.lejiaolexue.com/exerbook2/do_batch.ashx'
+function ErrorTitlePerView:change_status_only(layer_push)
+	local send_data_tb = {}
+	local send_index = 1
+	for i,obj in pairs(self.status_change) do
+		send_data_tb[send_index] = obj
+		send_index = send_index+1
+	end
+	local title_num = #send_data_tb
+	print('title_num::'..title_num)
+	if title_num >0 then
+		local send_data = json.encode(send_data_tb)
+		local send_data_js = 'id='..send_data
+
+	--	local send_data_js = json.encode(send_data)
+		
+		local send_url = status_batch_change_url
+		if login.get_uid_type() ~= login.STUDENT then
+			send_url = send_url..'?user_id='..login.get_subuid()
+		end
+		local loadbox = loadingbox.open(self)
+		is_loading = true
+		cache.post(status_batch_change_url,send_data_js,function(b,result)
+			if b then
+				if result.result ~= 0 then
+					print( result )
+				end			
+				is_loading = false
+				loadbox:removeFromParent()
+				if layer_push then
+					uikits.pushScene(layer_push)
+				else
+					uikits.popScene()	
+				end
+			else
+				messagebox.open(self,function(e)
+					if e == messagebox.TRY then
+						self:change_status_only(layer_push)	
+					elseif e == messagebox.CLOSE then
+						uikits.popScene()
+					end
+				end,messagebox.RETRY)	
+				is_loading = false
+				loadbox:removeFromParent()
+				return false
+			end
+		end)
+	else
+		if layer_push then
+			uikits.pushScene(layer_push)
+		else
+			uikits.popScene()	
+		end
+	end
+	self.status_change = {}	
+end
+
 function ErrorTitlePerView:update_title()
 	local send_data_tb = {}
 	local send_index = 1
@@ -1272,15 +1331,18 @@ function ErrorTitlePerView:init()
 	
 	uikits.event(but_add,	
 		function(sender,eventType)	
+			
 			self:save_innerpos()
 			self.isneedupdate = true
-			local scene_next = adderrorview.create(self)		
-			uikits.pushScene(scene_next)						
+			local scene_next = adderrorview.create(self)	
+			self:change_status_only(scene_next)	
+			--uikits.pushScene(scene_next)						
 	end,"click")
 	local but_quit = uikits.child(self._widget,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
 		function(sender,eventType)	
-			uikits.popScene()						
+			self:change_status_only()	
+			--uikits.popScene()						
 	end,"click")	
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 
