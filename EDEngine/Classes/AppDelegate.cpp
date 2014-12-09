@@ -112,6 +112,7 @@ void AppDelegate::initLuaEngine()
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 #ifndef _DEBUG
 #ifdef _WIN32
+    //window release
 	if(g_Mode=="window")
 	{
 		if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
@@ -137,8 +138,9 @@ void AppDelegate::initLuaEngine()
 			glview->setFrameSize(g_FrameWidth,g_FrameHeight);
 		}
 	}
-#endif
+#endif //_WIN32
 #else
+    //window debug
 	if (g_Mode == "window")
 	{
 		if (g_FrameWidth <= 0 && g_FrameHeight <= 0)
@@ -152,6 +154,15 @@ void AppDelegate::initLuaEngine()
 	}
 	else
 		glview->setFrameSize(1024, 576);
+#endif //_DEBUG
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+    //Mac
+    if (g_Mode == "window")
+    {
+        glview->setFrameSize(1024, 576);
+    }
+    else
+        glview->setFrameSize(1024, 576);
 #endif
 	//glview->setFrameSize(1920,1080);
 #endif	

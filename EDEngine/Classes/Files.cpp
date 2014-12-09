@@ -157,7 +157,7 @@ int MakeDir(const char *pszDir)
 	nRet=mkdir(pszDir,S_IRWXU | S_IRWXG | S_IRWXO);
 	chmod(pszDir,0x777);
 #endif
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
 	nRet=mkdir(pszDir,0xffff);
 #endif
 	int nError=GetError();
@@ -368,6 +368,10 @@ std::string genUniqueName()
 		timeval tv;
 		gettimeofday(&tv,NULL);
 		GeneUniqueName( (const char*)&tv.tv_usec,sizeof(tv.tv_usec),unqstr );
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+    timeval tv;
+    gettimeofday(&tv,NULL);
+    GeneUniqueName( (const char*)&tv.tv_usec,sizeof(tv.tv_usec),unqstr );
 #endif
 	return std::string( unqstr );
 }
