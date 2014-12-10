@@ -1077,7 +1077,7 @@
               "visible": true,
               "width": 1400,
               "x": 15,
-              "y": 460,
+              "y": 459,
               "adaptScreen": false,
               "backGroundImage": null,
               "backGroundImageData": null,
@@ -1636,7 +1636,7 @@
             "options": {
               "__type": "PanelSurrogate:#EditorCommon.JsonModel.Component.GUI",
               "classname": "Panel",
-              "name": "clip",
+              "name": "dip",
               "ZOrder": 0,
               "actiontag": 4896645,
               "anchorPointX": 0,
