@@ -52,7 +52,6 @@
 		52538FFC1A35A2E7000E229F /* libamrnb mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538FF01A35A2CF000E229F /* libamrnb mac.a */; };
 		52538FFD1A35A2E7000E229F /* libgif mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538FFB1A35A2CF000E229F /* libgif mac.a */; };
 		52538FFE1A35A2E7000E229F /* libjson-c mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52538F681A3593E1000E229F /* libjson-c mac.a */; };
-		52CDB2CF1A35D5CB005C737B /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
 		52CDB2D01A35D5CB005C737B /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
 		52CDB2D21A35D61C005C737B /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */; };
 		52CDB2D31A35D61C005C737B /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */; };
@@ -60,14 +59,13 @@
 		52CDB2D61A35D638005C737B /* MD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D41A35D638005C737B /* MD5.cpp */; };
 		52CDB2DA1A35D6AB005C737B /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D71A35D6AB005C737B /* IDF.cpp */; };
 		52CDB2DB1A35D6AB005C737B /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D71A35D6AB005C737B /* IDF.cpp */; };
-		52CDB2DC1A35D6AB005C737B /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */; };
-		52CDB2DD1A35D6AB005C737B /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */; };
 		52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */; };
 		52CDB2DF1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */; };
 		52CDB2E11A35D6C6005C737B /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E01A35D6C6005C737B /* Platform.cpp */; };
 		52CDB2E21A35D6C6005C737B /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E01A35D6C6005C737B /* Platform.cpp */; };
 		52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
 		52CDB2E51A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
+		52D37C701A37D88A007E0098 /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */; };
 		52D5B16A1A36CA90000C5536 /* libamrnb iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1401A36C971000C5536 /* libamrnb iOS.a */; };
 		52D5B16B1A36CA90000C5536 /* libbox2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775111A355B5F0048D357 /* libbox2d iOS.a */; };
 		52D5B16C1A36CA90000C5536 /* libchipmunk iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5277750F1A355B5F0048D357 /* libchipmunk iOS.a */; };
@@ -77,6 +75,15 @@
 		52D5B1701A36CA90000C5536 /* libgif ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B14F1A36C971000C5536 /* libgif ios.a */; };
 		52D5B1711A36CA90000C5536 /* libjson-c ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1551A36C971000C5536 /* libjson-c ios.a */; };
 		52D5B1721A36CA90000C5536 /* libluabindings iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527774F11A355B470048D357 /* libluabindings iOS.a */; };
+		52D5B1731A36D1F1000C5536 /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
+		52D5B1AE1A36EB4D000C5536 /* parsparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */; };
+		52D5B1BE1A36EE5D000C5536 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */; };
+		52D5B1CA1A36F65F000C5536 /* IOSHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C71A36F65F000C5536 /* IOSHelper.mm */; };
+		52D5B1CB1A36F65F000C5536 /* NativeHelperIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */; };
+		52D5B1CE1A36F8F9000C5536 /* EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1CD1A36F8F9000C5536 /* EAGLView.m */; };
+		52D5B1D11A36FA79000C5536 /* Imaging.c in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1CF1A36FA79000C5536 /* Imaging.c */; };
+		52D5B1D41A36FAB2000C5536 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1D31A36FAB2000C5536 /* Texture.m */; };
+		52D5B1D71A36FAE4000C5536 /* Debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1D51A36FAE4000C5536 /* Debug.c */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -573,7 +580,7 @@
 		503AE0F717EB97AB00D1A890 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		503AE0FA17EB989F00D1A890 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppController.h; path = ios/AppController.h; sourceTree = SOURCE_ROOT; };
 		503AE0FB17EB989F00D1A890 /* AppController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppController.mm; path = ios/AppController.mm; sourceTree = SOURCE_ROOT; };
-		503AE0FC17EB989F00D1A890 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ios/main.m; sourceTree = SOURCE_ROOT; };
+		503AE0FC17EB989F00D1A890 /* main.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = main.m; path = ios/main.m; sourceTree = SOURCE_ROOT; };
 		503AE0FE17EB989F00D1A890 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RootViewController.h; path = ios/RootViewController.h; sourceTree = SOURCE_ROOT; };
 		503AE0FF17EB989F00D1A890 /* RootViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = RootViewController.mm; path = ios/RootViewController.mm; sourceTree = SOURCE_ROOT; };
 		503AE10317EB98FF00D1A890 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = mac/main.cpp; sourceTree = "<group>"; };
@@ -7065,10 +7072,27 @@
 		52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lua_ljshell.cpp; path = ../Classes/lua_ljshell.cpp; sourceTree = "<group>"; };
 		52CDB2D41A35D638005C737B /* MD5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MD5.cpp; path = ../Classes/MD5.cpp; sourceTree = "<group>"; };
 		52CDB2D71A35D6AB005C737B /* IDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IDF.cpp; path = ../Classes/IDF.cpp; sourceTree = "<group>"; };
-		52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlatformApple.cpp; path = ../Classes/PlatformApple.cpp; sourceTree = "<group>"; };
 		52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTextureEx.cpp; path = ../Classes/RenderTextureEx.cpp; sourceTree = "<group>"; };
 		52CDB2E01A35D6C6005C737B /* Platform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Platform.cpp; path = ../Classes/Platform.cpp; sourceTree = "<group>"; };
 		52CDB2E31A35D6F5005C737B /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = misc.cpp; path = ../Classes/misc.cpp; sourceTree = "<group>"; };
+		52D37C671A37D7DE007E0098 /* PlatformApple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlatformApple.h; path = ../Classes/PlatformApple.h; sourceTree = "<group>"; };
+		52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlatformApple.cpp; path = ../Classes/PlatformApple.cpp; sourceTree = "<group>"; };
+		52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsparam.cpp; path = ios/parsparam.cpp; sourceTree = SOURCE_ROOT; };
+		52D5B1AD1A36EB4D000C5536 /* parsparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsparam.h; path = ios/parsparam.h; sourceTree = SOURCE_ROOT; };
+		52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
+		52D5B1C61A36F65F000C5536 /* IOSHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOSHelper.h; path = ios/IOSHelper.h; sourceTree = SOURCE_ROOT; };
+		52D5B1C71A36F65F000C5536 /* IOSHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = IOSHelper.mm; path = ios/IOSHelper.mm; sourceTree = SOURCE_ROOT; };
+		52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeHelperIOS.cpp; path = ios/NativeHelperIOS.cpp; sourceTree = SOURCE_ROOT; };
+		52D5B1C91A36F65F000C5536 /* NativeHelperIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeHelperIOS.h; path = ios/NativeHelperIOS.h; sourceTree = SOURCE_ROOT; };
+		52D5B1CC1A36F87D000C5536 /* EAGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EAGLView.h; path = ios/EAGLView.h; sourceTree = SOURCE_ROOT; };
+		52D5B1CD1A36F8F9000C5536 /* EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EAGLView.m; path = ios/EAGLView.m; sourceTree = SOURCE_ROOT; };
+		52D5B1CF1A36FA79000C5536 /* Imaging.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Imaging.c; path = ios/Imaging.c; sourceTree = SOURCE_ROOT; };
+		52D5B1D01A36FA79000C5536 /* Imaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Imaging.h; path = ios/Imaging.h; sourceTree = SOURCE_ROOT; };
+		52D5B1D21A36FAB2000C5536 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = ios/Texture.h; sourceTree = SOURCE_ROOT; };
+		52D5B1D31A36FAB2000C5536 /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Texture.m; path = ios/Texture.m; sourceTree = SOURCE_ROOT; };
+		52D5B1D51A36FAE4000C5536 /* Debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Debug.c; path = ios/Debug.c; sourceTree = SOURCE_ROOT; };
+		52D5B1D61A36FAE4000C5536 /* Debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = ios/Debug.h; sourceTree = SOURCE_ROOT; };
+		52D5B1EA1A36FDC3000C5536 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Classes/Platform.h; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		BF1C47EA1293683800B63C5D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -7099,6 +7123,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52D5B1BE1A36EE5D000C5536 /* MediaPlayer.framework in Frameworks */,
 				52D5B16A1A36CA90000C5536 /* libamrnb iOS.a in Frameworks */,
 				52D5B16B1A36CA90000C5536 /* libbox2d iOS.a in Frameworks */,
 				52D5B16C1A36CA90000C5536 /* libchipmunk iOS.a in Frameworks */,
@@ -7153,12 +7178,26 @@
 		080E96DDFE201D6D7F000001 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				52D5B1D51A36FAE4000C5536 /* Debug.c */,
+				52D5B1D61A36FAE4000C5536 /* Debug.h */,
+				52D5B1D21A36FAB2000C5536 /* Texture.h */,
+				52D5B1D31A36FAB2000C5536 /* Texture.m */,
+				52D5B1CF1A36FA79000C5536 /* Imaging.c */,
+				52D5B1D01A36FA79000C5536 /* Imaging.h */,
+				52D5B1CD1A36F8F9000C5536 /* EAGLView.m */,
+				52D5B1C61A36F65F000C5536 /* IOSHelper.h */,
+				52D5B1C71A36F65F000C5536 /* IOSHelper.mm */,
+				52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */,
+				52D5B1C91A36F65F000C5536 /* NativeHelperIOS.h */,
 				5087E77117EB970100C73F5D /* Icons */,
 				503AE0FA17EB989F00D1A890 /* AppController.h */,
 				503AE0FB17EB989F00D1A890 /* AppController.mm */,
 				503AE0FC17EB989F00D1A890 /* main.m */,
 				503AE0FE17EB989F00D1A890 /* RootViewController.h */,
 				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
+				52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */,
+				52D5B1AD1A36EB4D000C5536 /* parsparam.h */,
+				52D5B1CC1A36F87D000C5536 /* EAGLView.h */,
 			);
 			name = ios;
 			path = Classes;
@@ -7167,10 +7206,12 @@
 		15AA9C4015B7EC450033D6C2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */,
+				52D37C671A37D7DE007E0098 /* PlatformApple.h */,
+				52D5B1EA1A36FDC3000C5536 /* Platform.h */,
 				52CDB2E31A35D6F5005C737B /* misc.cpp */,
 				52CDB2E01A35D6C6005C737B /* Platform.cpp */,
 				52CDB2D71A35D6AB005C737B /* IDF.cpp */,
-				52CDB2D81A35D6AB005C737B /* PlatformApple.cpp */,
 				52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */,
 				52CDB2D41A35D638005C737B /* MD5.cpp */,
 				52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */,
@@ -7226,6 +7267,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */,
 				529B9EFB1A354548000555FF /* cocos2d-x-EDU-Version */,
 				D6B0611A1803AB670077942B /* CoreMotion.framework */,
 				503AE11A17EB9C5A00D1A890 /* IOKit.framework */,
@@ -23788,22 +23830,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52D5B1731A36D1F1000C5536 /* Files.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
-				52CDB2CF1A35D5CB005C737B /* Files.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
+				52D5B1D41A36FAB2000C5536 /* Texture.m in Sources */,
 				1AFAF8B716D35DE700DB1158 /* AppDelegate.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
+				52D5B1AE1A36EB4D000C5536 /* parsparam.cpp in Sources */,
+				52D5B1D71A36FAE4000C5536 /* Debug.c in Sources */,
+				52D5B1D11A36FA79000C5536 /* Imaging.c in Sources */,
 				52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
+				52D5B1CE1A36F8F9000C5536 /* EAGLView.m in Sources */,
 				F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */,
 				52CDB2D51A35D638005C737B /* MD5.cpp in Sources */,
+				52D37C701A37D88A007E0098 /* PlatformApple.cpp in Sources */,
 				F53B0FCB1997A9AC007C8988 /* Console.cpp in Sources */,
+				52D5B1CA1A36F65F000C5536 /* IOSHelper.mm in Sources */,
 				F53B0FCC1997A9AC007C8988 /* lua_ext.cpp in Sources */,
-				52CDB2DC1A35D6AB005C737B /* PlatformApple.cpp in Sources */,
 				F53B0FCD1997A9AC007C8988 /* lua_json.cpp in Sources */,
 				F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */,
 				52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */,
 				F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */,
 				52CDB2DA1A35D6AB005C737B /* IDF.cpp in Sources */,
+				52D5B1CB1A36F65F000C5536 /* NativeHelperIOS.cpp in Sources */,
 				F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
 				52CDB2E11A35D6C6005C737B /* Platform.cpp in Sources */,
 				52CDB2D21A35D61C005C737B /* lua_ljshell.cpp in Sources */,
@@ -23819,7 +23868,6 @@
 				52CDB2E21A35D6C6005C737B /* Platform.cpp in Sources */,
 				52CDB2DF1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
-				52CDB2DD1A35D6AB005C737B /* PlatformApple.cpp in Sources */,
 				F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */,
 				52CDB2DB1A35D6AB005C737B /* IDF.cpp in Sources */,
 				F5E0ED611997B21700B61F2E /* Console.cpp in Sources */,
@@ -24006,24 +24054,27 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../../../cocos2d-x/cocos",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/mac",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
-					"$(SRCROOT)/../../../cocos2d-x/external/glfw3/include/mac",
-					"$(SRCROOT)/../../../cocos2d-x/external/lua/lua",
-					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/audio/include",
 					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
 					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
 				);
 				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/proj.ios_mac/build/Debug\"",
-					"\"$(SRCROOT)/../../../cocos2d-x/build/build/Debug\"",
-					"\"$(SRCROOT)/../../../cocos2d-x/external/json-c/macx/build/Debug\"",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -24044,28 +24095,32 @@
 					USE_FILE32API,
 					CC_TARGET_OS_IPHONE,
 					"CC_ENABLE_CHIPMUNK_INTEGRATION=1",
+					"COCOS2D_DEBUG=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../../../cocos2d-x/cocos",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/mac",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
-					"$(SRCROOT)/../../../cocos2d-x/external/glfw3/include/mac",
-					"$(SRCROOT)/../../../cocos2d-x/external/lua/lua",
-					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
-					"$(SRCROOT)/../../../cocos2d-x/cocos/audio/include",
 					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
 					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
 				);
 				INFOPLIST_FILE = ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/proj.ios_mac/build/Debug\"",
-					"\"$(SRCROOT)/../../../cocos2d-x/build/build/Debug\"",
-					"\"$(SRCROOT)/../../../cocos2d-x/external/json-c/macx/build/Debug\"",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

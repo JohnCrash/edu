@@ -1,6 +1,6 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-#include "SimpleAudioEngine.h"
+//#include "SimpleAudioEngine.h"
 #include "lua_ext.h"
 #include "lua_ljshell.h"
 #include "luaDebug.h"

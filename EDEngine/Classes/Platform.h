@@ -35,6 +35,10 @@ double VoiceLongth(const char *filename);
 
 void OnJavaReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
 void OnJavaReturn(int nType,int nID,int nParam1,int nParam2);
+
+void OnIOSReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
+void OnIOSReturn(int nType,int nID,int nParam1,int nParam2);
+
 //	mode	MR475, MR515, MR59, MR67, MR74, MR795, MR102, MR122
 bool AMREncoder(int cnChannel,int nRate,int cnBitPerSample,char *pBuf,int len,const char *pszPathName,int nMode);
 char *AMRDecoder(const char *pszPathName,int &len);
@@ -248,8 +252,8 @@ protected:
 	std::string m_strPathName;
 };
 
-#else
-//MAC or IOS
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+//IOS
 class CVoiceRecord : public CVoiceRecordBase
 {
 public:
@@ -258,6 +262,7 @@ public:
     
     bool OnRecordData(char *pBuf,int len,int nRate);
 };
+
 #endif
 
 #endif

@@ -1,14 +1,16 @@
+#include "Platform.h"
 #include "NativeHelperIOS.h"
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 
 #include "IOSHelper.h"
-#include "AppDelegateBase.h"
+#include "cocos2d.h"
+USING_NS_CC;
+
+//#include "AppDelegateBase.h"
 
 const char *g_pszFontNameSongTi="SongTi";
 const char *g_pszFontNameHeiTi="HeiTi";
-
-static CVoiceRecord *s_pVoiceRecord=NULL;
 
 static CCPoint s_ptRoot=CCPointZero;
 
@@ -28,40 +30,11 @@ bool IsPhone()
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
-//	OnIOSReturnBuf
-//
-//	called from native
-//-------------------------------------------------------------------------------------------------------------------------------------
-void OnIOSReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf)
-{
-	if (nType==RETURN_TYPE_RECORDDATA)
-	{
-        //record data
-		if (s_pVoiceRecord) s_pVoiceRecord->OnRecordData(pBuf,lenBuf,nParam1);
-		return;
-	}
-	g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,lenBuf,pBuf);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------
-//	OnIOSReturn
-//
-//	called from native
-//-------------------------------------------------------------------------------------------------------------------------------------
-void OnIOSReturn(int nType,int nID,int nParam1,int nParam2)
-{
-	if (nType==RETURN_TYPE_TAKEPICTURE && nParam1!=0)
-	{
-		std::string strTmpPathName=g_pTheApp->GetAppTmpDir()+"takephoto.jpg";
-		g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,strTmpPathName.length()+1,(char *)strTmpPathName.c_str());
-		return;
-	}
-	g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------
 //	StartApp
 //-------------------------------------------------------------------------------------------------------------------------------------
+
+/*
+ CURI
 bool StartApp(const char *pszURI)
 {
 	CURI uri(pszURI);
@@ -95,10 +68,11 @@ bool StartAppStoreForRank(const char *pszURI)
 	sprintf(szURL,"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%s",strID.c_str());
 	return IOS_StartApp(szURL);
 }
-
+*/
 //-------------------------------------------------------------------------------------------------------------------------------------
 //	GetPackageVersion
 //-------------------------------------------------------------------------------------------------------------------------------------
+/*
 int GetPackageVersion(const char *pszURI)
 {
 	CURI uri(pszURI);
@@ -117,7 +91,7 @@ int GetPackageVersion(const char *pszURI)
     
     return -1;
 }
-
+*/
 //-------------------------------------------------------------------------------------------------------------------------------------
 //	InstallPackage
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -132,6 +106,10 @@ bool InstallPackage(const char *pszProgramPathName)
 bool BackToTheHome()
 {
 	return 0;
+}
+
+void takeResource( int mode )
+{
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -171,44 +149,6 @@ int SaveDocFileToSystemFolder(const char *pszDownloadName,const char *pszFileNam
 bool OpenDocFile(const char *pszPathName)
 {
 	return false;
-}
-
-static bool NewVoice()
-{
-	if (s_pVoiceRecord!=NULL) return true;
-    
-	s_pVoiceRecord=new CVoiceRecord;
-	if (s_pVoiceRecord->Init()) return true;
-    
-	delete s_pVoiceRecord;
-	s_pVoiceRecord=NULL;
-	return false;
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------
-//	VoiceStartRecord
-//-------------------------------------------------------------------------------------------------------------------------------------
-bool VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
-{
-	if (!NewVoice()) return false;
-	return s_pVoiceRecord->StartRecord(cnChannel,nRate,cnBitPerSample);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------
-//	VoiceStopRecord
-//-------------------------------------------------------------------------------------------------------------------------------------
-bool VoiceStopRecord(char *pszSaveFile)
-{
-	return s_pVoiceRecord->StopRecord(pszSaveFile);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------
-//	VoiceGetRecordInfo
-//-------------------------------------------------------------------------------------------------------------------------------------
-bool VoiceGetRecordInfo(float &fDuration,int &nCurVolume)
-{
-	if (s_pVoiceRecord==NULL) return false;
-	return s_pVoiceRecord->GetRecordInfo(fDuration,nCurVolume);
 }
 
 bool CVoiceRecord::OnRecordData(char *pBuf,int len,int nRate)
@@ -259,9 +199,12 @@ bool VoiceIsPlaying(const char *pszPathName)
 //-------------------------------------------------------------------------------------------------------------------------------------
 //	VoiceStopPlay
 //-------------------------------------------------------------------------------------------------------------------------------------
-bool VoiceStopPlay()
+void VoiceStopPlay()
 {
-	return IOS_VoiceStopPlay();
+    if( !IOS_VoiceStopPlay() )
+    {
+        CCLOG("IOS_VoiceStopPlay return false!");
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------

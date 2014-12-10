@@ -593,3 +593,39 @@ void OnJavaReturn(int nType,int nID,int nParam1,int nParam2)
 	//g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
 }
 #endif
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	OnIOSReturnBuf
+//
+//	called from native
+//-------------------------------------------------------------------------------------------------------------------------------------
+void OnIOSReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf)
+{
+    if (nType==RETURN_TYPE_RECORDDATA)
+    {
+        if (s_pVoiceRecord) s_pVoiceRecord->OnRecordData(pBuf,lenBuf,nParam1);
+        return;
+    }
+    //g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,lenBuf,pBuf);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//	OnIOSReturn
+//
+//	called from ios native
+//-------------------------------------------------------------------------------------------------------------------------------------
+void OnIOSReturn(int nType,int nID,int nParam1,int nParam2)
+{
+    /*
+     if (nType==RETURN_TYPE_TAKEPICTURE && nParam1!=0)
+     {
+     //照片存放在临时文件中
+     std::string strTmpPathName=g_pTheApp->GetAppTmpDir()+"takephoto.jpg";
+     g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,strTmpPathName.length()+1,(char *)strTmpPathName.c_str());
+     return;
+     }
+     */
+    //g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
+}
+#endif
