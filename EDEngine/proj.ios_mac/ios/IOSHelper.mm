@@ -1,5 +1,8 @@
 #import "IOSHelper.h"
-#import "EAGLView.h"
+//#import "EAGLView.h"
+#import "cocos2d.h"
+#import "CCEAGLView.h"
+#import "CCGLView.h"
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioQueue.h>
 #import <AudioToolbox/AudioFile.h>
@@ -196,8 +199,13 @@ static int s_nBufID;
 bool InitIOSHelper()
 {
     if (s_pHelperView!=NULL) return true;
+    cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+
+    static CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
     
-    static EAGLView *pOpenGLView=[EAGLView sharedEGLView];
+   //for cocos2d-x 2.2
+   // static EAGLView *pOpenGLView=[EAGLView sharedEGLView];
+    
     if (pOpenGLView==nil) return false;
     
     s_pHelperView=[[IOSHelperView alloc] initWithNibName:nil bundle:nil];
@@ -206,6 +214,7 @@ bool InitIOSHelper()
     s_pHelperView.view.frame=pOpenGLView.frame;
 
     [pOpenGLView addSubview:s_pHelperView.view];
+   
     return true;
 }
 

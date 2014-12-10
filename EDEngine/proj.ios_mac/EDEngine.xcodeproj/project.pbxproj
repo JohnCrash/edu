@@ -66,6 +66,20 @@
 		52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
 		52CDB2E51A35D6F5005C737B /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
 		52D37C701A37D88A007E0098 /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */; };
+		52D37C741A382783007E0098 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C731A382782007E0098 /* libcurl.a */; };
+		52D37C761A3827BB007E0098 /* libcurl_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C751A3827BA007E0098 /* libcurl_arm64.a */; };
+		52D37C791A3827DC007E0098 /* libpng_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C771A3827DB007E0098 /* libpng_arm64.a */; };
+		52D37C7A1A3827DC007E0098 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C781A3827DB007E0098 /* libpng.a */; };
+		52D37C7D1A382815007E0098 /* libjpeg_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C7B1A382815007E0098 /* libjpeg_arm64.a */; };
+		52D37C7E1A382815007E0098 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C7C1A382815007E0098 /* libjpeg.a */; };
+		52D37C811A382836007E0098 /* libfreetype_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C7F1A382836007E0098 /* libfreetype_arm64.a */; };
+		52D37C821A382836007E0098 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C801A382836007E0098 /* libfreetype.a */; };
+		52D37C851A382872007E0098 /* libwebsockets_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C831A382872007E0098 /* libwebsockets_arm64.a */; };
+		52D37C861A382872007E0098 /* libwebsockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C841A382872007E0098 /* libwebsockets.a */; };
+		52D37C891A382889007E0098 /* libtiff_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C871A382889007E0098 /* libtiff_arm64.a */; };
+		52D37C8A1A382889007E0098 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C881A382889007E0098 /* libtiff.a */; };
+		52D37C8D1A3828C3007E0098 /* libwebp_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */; };
+		52D37C8E1A3828C3007E0098 /* libwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C8C1A3828C3007E0098 /* libwebp.a */; };
 		52D5B16A1A36CA90000C5536 /* libamrnb iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1401A36C971000C5536 /* libamrnb iOS.a */; };
 		52D5B16B1A36CA90000C5536 /* libbox2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775111A355B5F0048D357 /* libbox2d iOS.a */; };
 		52D5B16C1A36CA90000C5536 /* libchipmunk iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5277750F1A355B5F0048D357 /* libchipmunk iOS.a */; };
@@ -80,10 +94,6 @@
 		52D5B1BE1A36EE5D000C5536 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */; };
 		52D5B1CA1A36F65F000C5536 /* IOSHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C71A36F65F000C5536 /* IOSHelper.mm */; };
 		52D5B1CB1A36F65F000C5536 /* NativeHelperIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */; };
-		52D5B1CE1A36F8F9000C5536 /* EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1CD1A36F8F9000C5536 /* EAGLView.m */; };
-		52D5B1D11A36FA79000C5536 /* Imaging.c in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1CF1A36FA79000C5536 /* Imaging.c */; };
-		52D5B1D41A36FAB2000C5536 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1D31A36FAB2000C5536 /* Texture.m */; };
-		52D5B1D71A36FAE4000C5536 /* Debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1D51A36FAE4000C5536 /* Debug.c */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -7077,6 +7087,21 @@
 		52CDB2E31A35D6F5005C737B /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = misc.cpp; path = ../Classes/misc.cpp; sourceTree = "<group>"; };
 		52D37C671A37D7DE007E0098 /* PlatformApple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlatformApple.h; path = ../Classes/PlatformApple.h; sourceTree = "<group>"; };
 		52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlatformApple.cpp; path = ../Classes/PlatformApple.cpp; sourceTree = "<group>"; };
+		52D37C711A382768007E0098 /* curl */ = {isa = PBXFileReference; lastKnownFileType = folder; name = curl; path = "../../../cocos2d-x/external/curl"; sourceTree = "<group>"; };
+		52D37C731A382782007E0098 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = "../../../cocos2d-x/external/curl/prebuilt/ios/libcurl.a"; sourceTree = "<group>"; };
+		52D37C751A3827BA007E0098 /* libcurl_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl_arm64.a; path = "../../../cocos2d-x/external/curl/prebuilt/ios/libcurl_arm64.a"; sourceTree = "<group>"; };
+		52D37C771A3827DB007E0098 /* libpng_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng_arm64.a; path = "../../../cocos2d-x/external/png/prebuilt/ios/libpng_arm64.a"; sourceTree = "<group>"; };
+		52D37C781A3827DB007E0098 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = "../../../cocos2d-x/external/png/prebuilt/ios/libpng.a"; sourceTree = "<group>"; };
+		52D37C7B1A382815007E0098 /* libjpeg_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg_arm64.a; path = "../../../cocos2d-x/external/jpeg/prebuilt/ios/libjpeg_arm64.a"; sourceTree = "<group>"; };
+		52D37C7C1A382815007E0098 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = "../../../cocos2d-x/external/jpeg/prebuilt/ios/libjpeg.a"; sourceTree = "<group>"; };
+		52D37C7F1A382836007E0098 /* libfreetype_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype_arm64.a; path = "../../../cocos2d-x/external/freetype2/prebuilt/ios/libfreetype_arm64.a"; sourceTree = "<group>"; };
+		52D37C801A382836007E0098 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = "../../../cocos2d-x/external/freetype2/prebuilt/ios/libfreetype.a"; sourceTree = "<group>"; };
+		52D37C831A382872007E0098 /* libwebsockets_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebsockets_arm64.a; path = "../../../cocos2d-x/external/websockets/prebuilt/ios/libwebsockets_arm64.a"; sourceTree = "<group>"; };
+		52D37C841A382872007E0098 /* libwebsockets.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebsockets.a; path = "../../../cocos2d-x/external/websockets/prebuilt/ios/libwebsockets.a"; sourceTree = "<group>"; };
+		52D37C871A382889007E0098 /* libtiff_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff_arm64.a; path = "../../../cocos2d-x/external/tiff/prebuilt/ios/libtiff_arm64.a"; sourceTree = "<group>"; };
+		52D37C881A382889007E0098 /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = "../../../cocos2d-x/external/tiff/prebuilt/ios/libtiff.a"; sourceTree = "<group>"; };
+		52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebp_arm64.a; path = "../../../cocos2d-x/external/webp/prebuilt/ios/libwebp_arm64.a"; sourceTree = "<group>"; };
+		52D37C8C1A3828C3007E0098 /* libwebp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebp.a; path = "../../../cocos2d-x/external/webp/prebuilt/ios/libwebp.a"; sourceTree = "<group>"; };
 		52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsparam.cpp; path = ios/parsparam.cpp; sourceTree = SOURCE_ROOT; };
 		52D5B1AD1A36EB4D000C5536 /* parsparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsparam.h; path = ios/parsparam.h; sourceTree = SOURCE_ROOT; };
 		52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
@@ -7084,14 +7109,6 @@
 		52D5B1C71A36F65F000C5536 /* IOSHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = IOSHelper.mm; path = ios/IOSHelper.mm; sourceTree = SOURCE_ROOT; };
 		52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeHelperIOS.cpp; path = ios/NativeHelperIOS.cpp; sourceTree = SOURCE_ROOT; };
 		52D5B1C91A36F65F000C5536 /* NativeHelperIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeHelperIOS.h; path = ios/NativeHelperIOS.h; sourceTree = SOURCE_ROOT; };
-		52D5B1CC1A36F87D000C5536 /* EAGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EAGLView.h; path = ios/EAGLView.h; sourceTree = SOURCE_ROOT; };
-		52D5B1CD1A36F8F9000C5536 /* EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EAGLView.m; path = ios/EAGLView.m; sourceTree = SOURCE_ROOT; };
-		52D5B1CF1A36FA79000C5536 /* Imaging.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Imaging.c; path = ios/Imaging.c; sourceTree = SOURCE_ROOT; };
-		52D5B1D01A36FA79000C5536 /* Imaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Imaging.h; path = ios/Imaging.h; sourceTree = SOURCE_ROOT; };
-		52D5B1D21A36FAB2000C5536 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = ios/Texture.h; sourceTree = SOURCE_ROOT; };
-		52D5B1D31A36FAB2000C5536 /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Texture.m; path = ios/Texture.m; sourceTree = SOURCE_ROOT; };
-		52D5B1D51A36FAE4000C5536 /* Debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Debug.c; path = ios/Debug.c; sourceTree = SOURCE_ROOT; };
-		52D5B1D61A36FAE4000C5536 /* Debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = ios/Debug.h; sourceTree = SOURCE_ROOT; };
 		52D5B1EA1A36FDC3000C5536 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Classes/Platform.h; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -7123,6 +7140,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52D37C8D1A3828C3007E0098 /* libwebp_arm64.a in Frameworks */,
+				52D37C8E1A3828C3007E0098 /* libwebp.a in Frameworks */,
+				52D37C891A382889007E0098 /* libtiff_arm64.a in Frameworks */,
+				52D37C8A1A382889007E0098 /* libtiff.a in Frameworks */,
+				52D37C851A382872007E0098 /* libwebsockets_arm64.a in Frameworks */,
+				52D37C861A382872007E0098 /* libwebsockets.a in Frameworks */,
+				52D37C811A382836007E0098 /* libfreetype_arm64.a in Frameworks */,
+				52D37C821A382836007E0098 /* libfreetype.a in Frameworks */,
+				52D37C7D1A382815007E0098 /* libjpeg_arm64.a in Frameworks */,
+				52D37C7E1A382815007E0098 /* libjpeg.a in Frameworks */,
+				52D37C791A3827DC007E0098 /* libpng_arm64.a in Frameworks */,
+				52D37C7A1A3827DC007E0098 /* libpng.a in Frameworks */,
+				52D37C761A3827BB007E0098 /* libcurl_arm64.a in Frameworks */,
+				52D37C741A382783007E0098 /* libcurl.a in Frameworks */,
 				52D5B1BE1A36EE5D000C5536 /* MediaPlayer.framework in Frameworks */,
 				52D5B16A1A36CA90000C5536 /* libamrnb iOS.a in Frameworks */,
 				52D5B16B1A36CA90000C5536 /* libbox2d iOS.a in Frameworks */,
@@ -7178,13 +7209,6 @@
 		080E96DDFE201D6D7F000001 /* ios */ = {
 			isa = PBXGroup;
 			children = (
-				52D5B1D51A36FAE4000C5536 /* Debug.c */,
-				52D5B1D61A36FAE4000C5536 /* Debug.h */,
-				52D5B1D21A36FAB2000C5536 /* Texture.h */,
-				52D5B1D31A36FAB2000C5536 /* Texture.m */,
-				52D5B1CF1A36FA79000C5536 /* Imaging.c */,
-				52D5B1D01A36FA79000C5536 /* Imaging.h */,
-				52D5B1CD1A36F8F9000C5536 /* EAGLView.m */,
 				52D5B1C61A36F65F000C5536 /* IOSHelper.h */,
 				52D5B1C71A36F65F000C5536 /* IOSHelper.mm */,
 				52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */,
@@ -7197,7 +7221,6 @@
 				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
 				52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */,
 				52D5B1AD1A36EB4D000C5536 /* parsparam.h */,
-				52D5B1CC1A36F87D000C5536 /* EAGLView.h */,
 			);
 			name = ios;
 			path = Classes;
@@ -7267,6 +7290,21 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */,
+				52D37C8C1A3828C3007E0098 /* libwebp.a */,
+				52D37C871A382889007E0098 /* libtiff_arm64.a */,
+				52D37C881A382889007E0098 /* libtiff.a */,
+				52D37C831A382872007E0098 /* libwebsockets_arm64.a */,
+				52D37C841A382872007E0098 /* libwebsockets.a */,
+				52D37C7F1A382836007E0098 /* libfreetype_arm64.a */,
+				52D37C801A382836007E0098 /* libfreetype.a */,
+				52D37C7B1A382815007E0098 /* libjpeg_arm64.a */,
+				52D37C7C1A382815007E0098 /* libjpeg.a */,
+				52D37C771A3827DB007E0098 /* libpng_arm64.a */,
+				52D37C781A3827DB007E0098 /* libpng.a */,
+				52D37C751A3827BA007E0098 /* libcurl_arm64.a */,
+				52D37C731A382782007E0098 /* libcurl.a */,
+				52D37C711A382768007E0098 /* curl */,
 				52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */,
 				529B9EFB1A354548000555FF /* cocos2d-x-EDU-Version */,
 				D6B0611A1803AB670077942B /* CoreMotion.framework */,
@@ -23374,7 +23412,7 @@
 				LastUpgradeCheck = 0500;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
-						DevelopmentTeam = MDDB52YB8L;
+						DevelopmentTeam = 34WPB2ZB3N;
 					};
 				};
 			};
@@ -23833,14 +23871,10 @@
 				52D5B1731A36D1F1000C5536 /* Files.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
-				52D5B1D41A36FAB2000C5536 /* Texture.m in Sources */,
 				1AFAF8B716D35DE700DB1158 /* AppDelegate.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 				52D5B1AE1A36EB4D000C5536 /* parsparam.cpp in Sources */,
-				52D5B1D71A36FAE4000C5536 /* Debug.c in Sources */,
-				52D5B1D11A36FA79000C5536 /* Imaging.c in Sources */,
 				52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
-				52D5B1CE1A36F8F9000C5536 /* EAGLView.m in Sources */,
 				F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */,
 				52CDB2D51A35D638005C737B /* MD5.cpp in Sources */,
 				52D37C701A37D88A007E0098 /* PlatformApple.cpp in Sources */,
@@ -24040,6 +24074,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
@@ -24075,7 +24110,17 @@
 					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
 					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
 					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					"$(SRCROOT)/../../../cocos2d-x/external/curl/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/curl/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/png/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/jpeg/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/freetype2/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/websockets/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/tiff/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/webp/prebuilt/ios",
 				);
+				OTHER_LDFLAGS = "";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -24087,6 +24132,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -24121,7 +24167,17 @@
 					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
 					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
 					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					"$(SRCROOT)/../../../cocos2d-x/external/curl/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/curl/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/png/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/jpeg/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/freetype2/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/websockets/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/tiff/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/webp/prebuilt/ios",
 				);
+				OTHER_LDFLAGS = "";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";

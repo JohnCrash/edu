@@ -110,6 +110,14 @@ bool BackToTheHome()
 
 void takeResource( int mode )
 {
+    if( mode == TAKE_PICTURE )
+    {
+        TakePhoto();
+    }
+    else if(mode == PICK_PICTURE )
+    {
+        PickPicture();
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
