@@ -11,9 +11,11 @@ local ui = {
 }
 
 ----------------------------------
+local c = os.time()
+print(c)
 
-
-
+local d = os.clock()
+print(d)
 -----------------------------------
 
 local ljshell = require "ljshell"

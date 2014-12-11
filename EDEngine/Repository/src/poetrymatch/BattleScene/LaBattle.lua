@@ -35,10 +35,12 @@ function LaBattle:ctor()
 		--每个状态进入时候如果把哪个设置为false，则直到变为true时才可以进入下个状态
 		_bCurStateIsEnding = true, --本状态是否结束
 		_bNextStateDataHasLoad = true, --下个状态是否加载成功
+		_bForbidEnterNextState = false, --禁止进入下个状态
 
-		--繁忙状态
-		_bBuzyToAnim = false,
-		_bBuzyToLoading = false,
+		_nSecondLeft = 0, --剩余时间
+		_fLastTime = 0, --上次时间
+		_fCurrentTime = 0, --当前时间，用来和上次时间计算一秒钟时间
+		
 	}
 end
 
@@ -49,14 +51,39 @@ function LaBattle:init(tab)
 		
 		--开启更新函数
 		self:scheduleUpdateWithPriorityLua(function ()
+			--更换状态
 			if self._bCurStateIsEnding and 
 				self._bNextStateDataHasLoad and
+				not self._bForbidEnterNextState and
 				self._stateNext then
 				self:_stateNext()
 			end
+
+			--倒计时
+			if self._nSecondLeft > 0 then
+				self._fCurrentTime = os.clock()
+
+				--第一次进入时把lastTime设为0，可以在此先读入一个时间
+				if self._fLastTime == 0 then self._fLastTime = self._fCurrentTime end
+				
+				--时间差不过1秒，则不执行以后的内容
+				if self._fCurrentTime - self._fLastTime < 1 then return end
+
+				self._nSecondLeft = self._nSecondLeft - 1
+
+				--检查是否计时结束
+				if self._nSecondLeft > 0 then
+					self._fLastTime = self._fCurrentTime
+					self:onTimePass()
+				else
+					self._fLastTime = 0
+					self:onTimeEnd()
+				end
+			end
+
 		end, 0)
 
-		self._stateNext = state.playEnterAnim
+		self._nSecondLeft = 10
 
 		return true
 	until true
@@ -70,8 +97,10 @@ end
 local function printState(str)
 	lly.log(str)
 	
+	---[[
 	local socket = require("socket")
 	socket.select(nil, nil, 1)
+	--]]
 end
 
 
@@ -80,12 +109,25 @@ end
 function LaBattle:beginCountingdown(second)
 	printState("begin counting down")
 
+	self._nSecondLeft = second
+	self._fLastTime = 0
 end
 
 --停止倒计时
 function LaBattle:stopCountingdown(second)
 	printState("stop counting down")
 
+	self._nSecondLeft = 0
+end
+
+--计时器每过一秒的回调
+function LaBattle:onTimePass()
+	lly.log(os.time())
+end
+
+--计时结束的回调
+function LaBattle:onTimeEnd()
+	lly.log("time is up")
 end
 
 --使用道具
@@ -93,12 +135,11 @@ function LaBattle:useItem()
 	printState("use item")
 
 	--禁止进入下个状态
-	self._bBuzyToAnim = true
-	self._bBuzyToLoading = true
+	self._bForbidEnterNextState = true
 
-	--进行动画
+	--进行动画（完成是检查请求是否完成，完成则取消禁止）
 
-	--请求服务器
+	--请求服务器（完成是检查动画是否完成，完成则取消禁止）
 
 end
 
