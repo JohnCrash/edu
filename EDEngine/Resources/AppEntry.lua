@@ -158,7 +158,7 @@ function AppEntry:init()
 			update.create{name='student',updates={'homework','errortitile','luacore'},
 				run=function()
 				login.set_uid_type(login.STUDENT)
-				login.set_selector(1) --学生
+				login.set_selector(4) --学生
 				local worklist = require "homework/worklist"
 				return worklist.create()
 				end}

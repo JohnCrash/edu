@@ -1,4 +1,4 @@
-﻿---
+---
 --llyLuaBase.lua
 --lua基础函数，系统所用
 --某些函数可在release时注销其内容
