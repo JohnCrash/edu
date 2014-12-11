@@ -71,7 +71,8 @@ function StudentSel:showparentview()
 		if eventType == ccui.TouchEventType.ended then
 			login.set_subuid(sender.uid)
 			local scene_next = errortitleview.create(sender.name)								
-			cc.Director:getInstance():replaceScene(scene_next)			
+			--cc.Director:getInstance():replaceScene(scene_next)
+			uikits.pushScene(scene_next)			
 		end
 	end
 	
@@ -173,8 +174,9 @@ function StudentSel:show_class(class_tb)
 	local function touchEventPic(sender,eventType)
 		if eventType == ccui.TouchEventType.ended then
 			login.set_subuid(sender.uid)
-			local scene_next = errortitleview.create(sender.name)								
-			cc.Director:getInstance():replaceScene(scene_next)			
+			local scene_next = errortitleview.create(sender.name)	
+			uikits.pushScene(scene_next)								
+			--cc.Director:getInstance():replaceScene(scene_next)			
 		end
 	end
 
