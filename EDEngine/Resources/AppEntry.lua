@@ -13,6 +13,7 @@ local ui = {
 ----------------------------------
 
 
+
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -294,14 +295,11 @@ function AppEntry:init()
 			end
 		end}	
 
-	--[[-----------------------------------
-	local moLaStatisticsStudent = require "homework/lly/LaStatisticsStudent"
-	print("2hahahahah")
+	---[[-----------------------------------
+	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+	local laBattle = moLaBattle.Class:create()
+	bg:addChild(laBattle)
 
-	local layStats = moLaStatisticsStudent.Class:create()
-	bg:addChild(layStats, 100)
-
-	layStats:enter()
 
 	----------------]]
 
