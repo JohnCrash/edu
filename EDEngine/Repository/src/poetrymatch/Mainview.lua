@@ -5,6 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
+local countryview = require "poetrymatch/Countryview"
 
 local Mainview = class("Mainview")
 Mainview.__index = Mainview
@@ -16,6 +17,24 @@ local ui = {
 	TXT_TILI_NUM = 'xinxi/tili/tis',
 	PRO_TILI = 'xinxi/tili/jindu',
 	BUTTON_TILI_ADD = 'xinxi/tili/jia',
+	
+	PRO_LEVEL = 'xinxi/dengji/jidu',
+	TXT_LEVEL_NUM = 'xinxi/dengji/dengji',
+	
+	BUTTON_SILVER = 'xinxi/yibi/jia',
+	TXT_SILVER_NUM = 'xinxi/yibi/zhi',
+	
+	BUTTON_LE = 'xinxi/lebi/jia',
+	TXT_LE_NUM = 'xinxi/lebi/zhi',	
+	
+	CARD_VIEW = 'ka1',
+	PIC_CARD = 'kp',
+	TXT_CARD_LVL = 'dj',
+	
+	BUTTON_DUIZHAN = 'duizhan',
+	BUTTON_CHUANGGUAN = 'chuangguan',
+	BUTTON_LEITAI = 'leitai',
+	BUTTON_QUIT = 'xinxi/fanhui',
 }
 
 function create()
@@ -33,7 +52,6 @@ function create()
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
-
 
 function Mainview:getdatabyurl()
 
@@ -70,11 +88,60 @@ end
 local schedulerEntry = nil
 local per_tili_reset_time = 1*60
 
+function Mainview:show_level()
+	local lvl_table = person_info.get_user_lvl_info()
+	local lvl_bar = uikits.child(self._Mainview,ui.PRO_LEVEL)
+	local percent_lvl = (lvl_table.cur_exp/lvl_table.max_exp)*100
+	lvl_bar:setPercent(percent_lvl)
+	local txt_lvl = uikits.child(self._Mainview,ui.TXT_LEVEL_NUM)
+	txt_lvl:setString(lvl_table.lvl)
+end
+
 function Mainview:show_tili_num()
 	local tili_txt = self.tili_num..'/100'
 	self._txt_tili_num:setString(tili_txt)
 	local tili_bar = uikits.child(self._Mainview,ui.PRO_TILI)
 	tili_bar:setPercent(self.tili_num)
+end
+
+function Mainview:show_silver()
+	local silver_num = person_info.get_user_silver()
+	local txt_silver = uikits.child(self._Mainview,ui.TXT_SILVER_NUM)
+	txt_silver:setString(silver_num)
+end
+
+function Mainview:show_le_coin()
+	local le_num = person_info.get_user_le_coin()
+	local txt_le = uikits.child(self._Mainview,ui.TXT_LE_NUM)
+	txt_le:setString(le_num)
+end
+local card_space = 1
+function Mainview:show_cards()
+	local card_view_src = uikits.child(self._Mainview,ui.CARD_VIEW)
+	card_view_src:setVisible(false)
+	local all_battle_list = person_info.get_all_card_in_battle()
+	for i=1,#all_battle_list do
+		local cur_card = card_view_src:clone()
+		local pic_card = uikits.child(cur_card,ui.PIC_CARD)
+		local pic_path = 'poetrymatch/cards/'..all_battle_list[i].id..'2.png'
+		pic_card:loadTexture(pic_path)
+		local txt_card_lvl = uikits.child(cur_card,ui.TXT_CARD_LVL)
+		local pos_y = cur_card:getPositionY()
+		local size_card = cur_card:getContentSize()
+		pos_y = pos_y-(size_card.height+card_space)*(i-1)
+		cur_card:setPositionY(pos_y)
+		txt_card_lvl:setString(all_battle_list[i].lvl)
+		cur_card:setVisible(true)
+		self._Mainview:addChild(cur_card)
+	end
+end
+
+function Mainview:init_gui()	
+	self:show_tili_num()
+	self:show_level()
+	self:show_silver()
+	self:show_le_coin()
+	self:show_cards()
 end
 
 function Mainview:init()	
@@ -86,6 +153,33 @@ function Mainview:init()
 	self._Mainview = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 	self:addChild(self._Mainview)
 
+	local but_quit = uikits.child(self._Mainview,ui.BUTTON_QUIT)
+	uikits.event(but_quit,	
+		function(sender,eventType)	
+			uikits.popScene()
+		end,"click")	
+	
+	local but_duizhan = uikits.child(self._Mainview,ui.BUTTON_DUIZHAN)
+	uikits.event(but_duizhan,	
+		function(sender,eventType)	
+			
+		end,"click")	
+		
+	local but_chuangguan = uikits.child(self._Mainview,ui.BUTTON_CHUANGGUAN)
+	uikits.event(but_chuangguan,	
+		function(sender,eventType)	
+			local scene_next = countryview.create(self)
+			uikits.pushScene(scene_next)
+		end,"click")	
+		
+	local but_leitai = uikits.child(self._Mainview,ui.BUTTON_LEITAI)
+	uikits.event(but_leitai,	
+		function(sender,eventType)	
+		--	local scene_next = countryview.create(self)
+		--	uikits.pushScene(scene_next)
+		end,"click")	
+	
+	
 	local scheduler = cc.Director:getInstance():getScheduler()
 	--self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
 	self._txt_tili_num = uikits.child(self._Mainview,ui.TXT_TILI_NUM)
@@ -165,18 +259,8 @@ function Mainview:init()
 			end		
 		end
 	end
---[[	local txt_sec
-	local txt_min
-	txt_sec = self.last_time%60
-	txt_min = (self.last_time-txt_sec)/60
-	self._txt_tili_time:setString(txt_min..':'..txt_sec)
-	if self.tili_num <100 then
-		self._txt_tili_time:setVisible(true)
-	else
-		self._txt_tili_time:setVisible(false)
-	end--]]
-	self:show_tili_num()
-	
+
+	self:init_gui()
 	if not schedulerEntry and self.tili_num < 100 then
 		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
 	end
@@ -190,6 +274,7 @@ function Mainview:release()
 	save_info_tb.last_tili_num = self.tili_num
 	local save_info = json.encode(save_info_tb)
 	kits.config("tili_time",save_info)
+	local scheduler = cc.Director:getInstance():getScheduler()
 	if schedulerEntry then
 		scheduler:unscheduleScriptEntry(schedulerEntry)
 		schedulerEntry = nil
