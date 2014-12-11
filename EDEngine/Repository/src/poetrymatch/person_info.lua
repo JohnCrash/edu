@@ -176,7 +176,7 @@ local function get_card_in_bag_by_id(id)
 	local card_info = {}
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
-			if v.id = id then
+			if v.id == id then
 				card_info = v
 				return card_info
 			end
@@ -188,7 +188,7 @@ end
 local function update_card_info_by_id(id,card_info)
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
-			if v.id = id then
+			if v.id == id then
 				if card_info and type(card_info) == 'table' then
 					for j=1,#card_info do
 						g_person_bag.cards_table[i][card_info[j].name] = card_info[j].value
@@ -203,7 +203,7 @@ end
 local function add_card_to_battle_by_index(id,index)
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
-			if v.id = id then
+			if v.id == id then
 				g_person_battle_cards[index] = id
 				return true
 			end
@@ -217,7 +217,7 @@ local function get_card_in_battle_by_index(index)
 	if g_person_battle_cards and g_person_battle_cards[index] then
 		local id = g_person_battle_cards[index]
 		for i,v in ipairs(g_person_bag.cards_table) do
-			if v.id = id then
+			if v.id == id then
 				card_info = g_person_bag.cards_table[i]
 				return card_info
 			end

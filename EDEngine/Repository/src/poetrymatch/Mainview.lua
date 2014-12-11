@@ -13,9 +13,9 @@ local ui = {
 	FILE_3_4 = 'poetrymatch/shouye.json',
 
 	TXT_TILI_TIME = 'xinxi/tili/shij',
-	TXT_TILI_NUM = 'xinxi/tili/Label_38',
+	TXT_TILI_NUM = 'xinxi/tili/tis',
 	PRO_TILI = 'xinxi/tili/jindu',
-	BUTTON_TILI_ADD = 'xinxi/tili/Button_42',
+	BUTTON_TILI_ADD = 'xinxi/tili/jia',
 }
 
 function create()
@@ -71,7 +71,8 @@ local schedulerEntry = nil
 local per_tili_reset_time = 1*60
 
 function Mainview:show_tili_num()
-	self._txt_tili_num:setString(self.tili_num)
+	local tili_txt = self.tili_num..'/100'
+	self._txt_tili_num:setString(tili_txt)
 	local tili_bar = uikits.child(self._Mainview,ui.PRO_TILI)
 	tili_bar:setPercent(self.tili_num)
 end
@@ -86,7 +87,7 @@ function Mainview:init()
 	self:addChild(self._Mainview)
 
 	local scheduler = cc.Director:getInstance():getScheduler()
-	self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
+	--self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
 	self._txt_tili_num = uikits.child(self._Mainview,ui.TXT_TILI_NUM)
 	
 	local but_tili_add = uikits.child(self._Mainview,ui.BUTTON_TILI_ADD)
@@ -99,25 +100,25 @@ function Mainview:init()
 			--self._txt_tili_num:setString(self.tili_num)
 			self:show_tili_num()
 			if self.tili_num == 100 then
-				self._txt_tili_time:setVisible(false)
+			--	self._txt_tili_time:setVisible(false)
 				if schedulerEntry then
 					scheduler:unscheduleScriptEntry(schedulerEntry)
 					schedulerEntry = nil
 				end
 			end
 		end
-		local txt_sec
+--[[		local txt_sec
 		local txt_min
 		txt_sec = self.last_time%60
 		txt_min = (self.last_time-txt_sec)/60
-		self._txt_tili_time:setString(txt_min..':'..txt_sec)
+		self._txt_tili_time:setString(txt_min..':'..txt_sec)--]]
 	end
 	
 	uikits.event(but_tili_add,	
 		function(sender,eventType)	
 			self.tili_num = self.tili_num -1
 			self:show_tili_num()
-			self._txt_tili_time:setVisible(true)
+			--self._txt_tili_time:setVisible(true)
 			if not schedulerEntry and self.tili_num < 100 then
 				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
 			end
@@ -164,7 +165,7 @@ function Mainview:init()
 			end		
 		end
 	end
-	local txt_sec
+--[[	local txt_sec
 	local txt_min
 	txt_sec = self.last_time%60
 	txt_min = (self.last_time-txt_sec)/60
@@ -173,7 +174,7 @@ function Mainview:init()
 		self._txt_tili_time:setVisible(true)
 	else
 		self._txt_tili_time:setVisible(false)
-	end
+	end--]]
 	self:show_tili_num()
 	
 	if not schedulerEntry and self.tili_num < 100 then

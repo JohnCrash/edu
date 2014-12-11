@@ -276,6 +276,9 @@ function LaStatisticsBase:implementFunction()
 	end
 
 	function self:processStatusData(table)
+		--清空原有数据
+		self._tabData = {}
+
 		--把json解析出来的table以学科>月份>数据分类，
 		--内部数据按：时间，次数 排列，并记录
 		for i, v in ipairs(table) do

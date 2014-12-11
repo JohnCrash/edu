@@ -1149,13 +1149,10 @@ function ErrorTitlePerView:change_status_only(layer_push)
 	if title_num >0 then
 		local send_data = json.encode(send_data_tb)
 		local send_data_js = 'id='..send_data
-
-	--	local send_data_js = json.encode(send_data)
-		
-		local send_url = status_batch_change_url
 		if login.get_uid_type() ~= login.STUDENT then
-			send_url = send_url..'?user_id='..login.get_subuid()
+			send_data_js = send_data_js..'&user_id='..login.get_subuid()
 		end
+		print('send_data_js::'..send_data_js)
 		local loadbox = loadingbox.open(self)
 		is_loading = true
 		cache.post(status_batch_change_url,send_data_js,function(b,result)
@@ -1206,11 +1203,8 @@ function ErrorTitlePerView:update_title()
 		local send_data = json.encode(send_data_tb)
 		local send_data_js = 'id='..send_data
 
-	--	local send_data_js = json.encode(send_data)
-		
-		local send_url = status_batch_change_url
 		if login.get_uid_type() ~= login.STUDENT then
-			send_url = send_url..'?user_id='..login.get_subuid()
+			send_data_js = send_data_js..'&user_id='..login.get_subuid()
 		end
 		local loadbox = loadingbox.open(self)
 		is_loading = true

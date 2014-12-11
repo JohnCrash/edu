@@ -186,14 +186,23 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
-		
-	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+--[[	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
 				run=function()
 				login.set_selector(3) 
 				local selstudent = require "errortitlenew/Loading"
+				return selstudent.create()
+			end}
+		end}--]]		
+	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			update.create{name='parenthw',updates={'poetrymatch','luacore'},
+				run=function()
+				login.set_selector(3) 
+				local selstudent = require "poetrymatch/Loading"
 				return selstudent.create()
 			end}
 		end}
