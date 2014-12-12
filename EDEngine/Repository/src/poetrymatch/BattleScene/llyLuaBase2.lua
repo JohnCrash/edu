@@ -97,9 +97,9 @@ function lly.logTable(t, index)
 
 	for k,v in pairs(t) do
 		if type(v) ~= "table" then
-			lly.log(_space .. string.format(k) .. "  " .. v)
+			lly.log(_space .. tostring(k) .. "  " .. tostring(v))
 		else
-			lly.log(_space .. "T[".. string.format(k) .. "]------------------")
+			lly.log(_space .. "T[".. tostring(k) .. "]------------------")
 			lly.logTable(v, index)
 		end
 	end
@@ -458,7 +458,7 @@ function lly.array(number)
 
 	---[====[
 	for i = 1, number do
-		ar[i] = 0
+		ar[i] = false
 	end
 
 	lly.finalizeInstance(ar)
