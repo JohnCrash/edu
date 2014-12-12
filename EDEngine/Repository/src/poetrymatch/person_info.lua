@@ -15,8 +15,33 @@ skill_table = {},
 } -- 
 
 local g_person_battle_cards = {'caoz','caoc'}
-local g_person_section_info = {{id='fengyang',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',star_has=5,star_all=30,is_admit=0,},}
-
+local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
+local g_person_boss_info = {
+fengyang = {
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+},
+fengyanga = {
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+},
+fengyangb = {
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+},
+fengyangc = {
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+},
+}
 local function get_user_name()
 	local uname = ''
 	if g_person_name then
@@ -245,17 +270,23 @@ local card_root_path = 'poetrymatch/kapai/'
 local section_root_path = 'poetrymatch/guanka/'
 local skill_root_path = 'poetrymatch/jineng/'
 
-local function load_card_pic(handle,filename,filename1)
+local function load_card_pic(handle,filename,filename1,filename2)
 	if handle and filename then
 		local file_path = card_root_path..filename
-		local file_down_path
+		local file_path_dis
+		local file_path_down
 		if cc_type(handle) == 'ccui.Button' then
 			if filename1 then
 				file_down_path = card_root_path..filename1
 			else
 				file_down_path = file_path
 			end
-			handle:loadTextures(file_path, file_down_path, "")
+			if filename2 then
+				file_path_dis = card_root_path..filename2
+			else
+				file_path_dis = ''
+			end
+			handle:loadTextures(file_path, file_down_path, file_path_dis)
 		elseif cc_type(handle) == 'ccui.ImageView' then
 			handle:loadTexture(file_path)
 		end
@@ -265,9 +296,10 @@ local function load_card_pic(handle,filename,filename1)
 	end
 end
 
-local function load_section_pic(handle,filename,filename1)
+local function load_section_pic(handle,filename,filename1,filename2)
 	if handle and filename then
 		local file_path = section_root_path..filename
+		local file_path_dis
 		local file_down_path
 		if cc_type(handle) == 'ccui.Button' then
 			if filename1 then
@@ -275,7 +307,12 @@ local function load_section_pic(handle,filename,filename1)
 			else
 				file_down_path = file_path
 			end
-			handle:loadTextures(file_path, file_down_path, "")
+			if filename2 then
+				file_path_dis = section_root_path..filename2
+			else
+				file_path_dis = ''
+			end
+			handle:loadTextures(file_path, file_down_path, file_path_dis)
 		elseif cc_type(handle) == 'ccui.ImageView' then
 			handle:loadTexture(file_path)
 		end
@@ -285,9 +322,10 @@ local function load_section_pic(handle,filename,filename1)
 	end
 end
 
-local function load_skill_pic(handle,filename,filename1)
+local function load_skill_pic(handle,filename,filename1,filename2)
 	if handle and filename then
 		local file_path = skill_root_path..filename
+		local file_path_dis
 		local file_down_path
 		if cc_type(handle) == 'ccui.Button' then
 			if filename1 then
@@ -295,7 +333,12 @@ local function load_skill_pic(handle,filename,filename1)
 			else
 				file_down_path = file_path
 			end
-			handle:loadTextures(file_path, file_down_path, "")
+			if filename2 then
+				file_path_dis = skill_root_path..filename2
+			else
+				file_path_dis = ''
+			end
+			handle:loadTextures(file_path, file_down_path, file_path_dis)
 		elseif cc_type(handle) == 'ccui.ImageView' then
 			handle:loadTexture(file_path)
 		end
@@ -303,6 +346,26 @@ local function load_skill_pic(handle,filename,filename1)
 	else
 		return false
 	end
+end
+
+local function set_all_section_info(all_section_info)
+	if all_section_info and type(all_section_info) == 'table' then
+		g_person_section_info = all_section_info
+	end
+end
+
+local function get_all_section_info()
+	local all_section_info = {}
+	all_section_info = g_person_section_info
+	return all_section_info
+end
+
+local function get_boss_info_by_id(id)
+	local boss_info = {}
+	if g_person_boss_info[id] then
+		boss_info = g_person_boss_info[id]
+	end 
+	return boss_info
 end
 
 return {
@@ -329,4 +392,7 @@ return {
 	load_section_pic = load_section_pic,
 	load_skill_pic = load_skill_pic,
 	load_card_pic = load_card_pic,
+	set_all_section_info = set_all_section_info,
+	get_all_section_info = get_all_section_info,
+	get_boss_info_by_id = get_boss_info_by_id,
 }

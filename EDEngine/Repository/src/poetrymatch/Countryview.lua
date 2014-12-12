@@ -5,6 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
+local bossview = require "poetrymatch/Bossview"
 
 local Countryview = class("Countryview")
 Countryview.__index = Countryview
@@ -68,11 +69,77 @@ function Countryview:getdatabyurl()
 	end,'N')
 end
 
-function Countryview:init_gui()	
+function Countryview:save_innerpos()
+	self.inner_posx,self.inner_posy = self.guanka_view:getInnerContainer():getPosition()
+end
+
+function Countryview:set_innerpos()
+	self.guanka_view:getInnerContainer():setPosition(cc.p(self.inner_posx,self.inner_posy))
+end
+
+local country_space = 10
+
+function Countryview:show_country()	
+	self.country_view = uikits.child(self._Countryview,ui.COUNTRY_VIEW)	
+	self.country_view:setVisible(false)
+	local all_country_info = person_info.get_all_section_info()
+	local size_scroll = self.guanka_view:getInnerContainerSize()
+	local size_view = self.guanka_view:getContentSize()
+	local pos_x_src = self.country_view:getPositionX()
+	local size_country_src = self.country_view:getContentSize()
+	pos_x_src = pos_x_src+(size_country_src.width+country_space)*(#all_country_info)
+	if pos_x_src > size_view.width then
+		size_scroll.width = pos_x_src
+	else
+		size_scroll.width = size_view.width
+	end
 	
+	self.guanka_view:setInnerContainerSize(size_scroll)
+	for i=1,#all_country_info do
+		local cur_country = self.country_view:clone()
+		local pic_country = uikits.child(cur_country,ui.BUTTON_COUNTRY)
+		pic_country.name = all_country_info[i].name
+		local pic_name_def
+		local pic_name_dis
+		pic_name_def = all_country_info[i].id..'.png'
+		if all_country_info[i].is_admit == 1 then
+			person_info.load_section_pic(pic_country,pic_name_def)
+		else
+			pic_name_dis = all_country_info[i].id..'2.png'
+			person_info.load_section_pic(pic_country,pic_name_def,pic_name_def,pic_name_dis)
+			pic_country:setEnabled(false)
+			pic_country:setBright(false)
+			pic_country:setTouchEnabled(false)	
+		end 
+		local txt_star_num = uikits.child(cur_country,ui.TXT_STAR_NUM)
+		txt_star_num:setString(all_country_info[i].star_has..'/'..all_country_info[i].star_all)
+		
+		uikits.event(pic_country,	
+		function(sender,eventType)	
+			self:save_innerpos()
+			local scene_next = bossview.create(sender.name)	
+			uikits.pushScene(scene_next)	
+		end,"click")
+		
+		local pos_x = cur_country:getPositionX()
+		local size_country = cur_country:getContentSize()
+		pos_x = pos_x+(size_country.width+country_space)*(i-1)
+		cur_country:setPositionX(pos_x)
+		cur_country:setVisible(true)
+		self.guanka_view:addChild(cur_country)
+	end
+end
+
+function Countryview:init_gui()	
+	self:show_country()
 end
 
 function Countryview:init()	
+	if self._Countryview then
+		self:set_innerpos()
+		return
+	end
+	
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
 	else
@@ -87,8 +154,6 @@ function Countryview:init()
 			uikits.popScene()
 		end,"click")
 	self.guanka_view = uikits.child(self._Countryview,ui.GUANKA_VIEW)
-	self.country_view = uikits.child(self._Countryview,ui.COUNTRY_VIEW)	
-	self.country_view:setVisible(false)
 	self:init_gui()
 --	self:getdatabyurl()
 --	local loadbox = Countryviewbox.open(self)
