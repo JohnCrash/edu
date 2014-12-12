@@ -15,7 +15,7 @@ skill_table = {},
 } -- 
 
 local g_person_battle_cards = {'caoz','caoc'}
-local g_person_section_info = {}
+local g_person_section_info = {{id='fengyang',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',star_has=5,star_all=30,is_admit=0,},}
 
 local function get_user_name()
 	local uname = ''
@@ -241,6 +241,70 @@ local function get_all_card_in_battle()
 	return all_cards_table
 end
 
+local card_root_path = 'poetrymatch/kapai/'
+local section_root_path = 'poetrymatch/guanka/'
+local skill_root_path = 'poetrymatch/jineng/'
+
+local function load_card_pic(handle,filename,filename1)
+	if handle and filename then
+		local file_path = card_root_path..filename
+		local file_down_path
+		if cc_type(handle) == 'ccui.Button' then
+			if filename1 then
+				file_down_path = card_root_path..filename1
+			else
+				file_down_path = file_path
+			end
+			handle:loadTextures(file_path, file_down_path, "")
+		elseif cc_type(handle) == 'ccui.ImageView' then
+			handle:loadTexture(file_path)
+		end
+		return true
+	else
+		return false
+	end
+end
+
+local function load_section_pic(handle,filename,filename1)
+	if handle and filename then
+		local file_path = section_root_path..filename
+		local file_down_path
+		if cc_type(handle) == 'ccui.Button' then
+			if filename1 then
+				file_down_path = section_root_path..filename1
+			else
+				file_down_path = file_path
+			end
+			handle:loadTextures(file_path, file_down_path, "")
+		elseif cc_type(handle) == 'ccui.ImageView' then
+			handle:loadTexture(file_path)
+		end
+		return true
+	else
+		return false
+	end
+end
+
+local function load_skill_pic(handle,filename,filename1)
+	if handle and filename then
+		local file_path = skill_root_path..filename
+		local file_down_path
+		if cc_type(handle) == 'ccui.Button' then
+			if filename1 then
+				file_down_path = skill_root_path..filename1
+			else
+				file_down_path = file_path
+			end
+			handle:loadTextures(file_path, file_down_path, "")
+		elseif cc_type(handle) == 'ccui.ImageView' then
+			handle:loadTexture(file_path)
+		end
+		return true
+	else
+		return false
+	end
+end
+
 return {
 	get_user_name = get_user_name,
 	set_user_name = set_user_name,
@@ -262,4 +326,7 @@ return {
 	get_card_in_battle_by_index = get_card_in_battle_by_index,
 	get_card_in_bag_by_id = get_card_in_bag_by_id,
 	get_all_card_in_battle = get_all_card_in_battle,
+	load_section_pic = load_section_pic,
+	load_skill_pic = load_skill_pic,
+	load_card_pic = load_card_pic,
 }

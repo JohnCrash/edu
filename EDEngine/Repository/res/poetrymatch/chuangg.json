@@ -33,8 +33,7 @@
     "cg2.png",
     "lt.png",
     "lt2.png",
-    "GUI/image.png",
-    "sg-caoz2.png",
+    "kapai/sg-caoz2.png",
     "d_qd.png",
     "tis.png",
     "d_tz.png",
@@ -43,8 +42,8 @@
     "001.jpg",
     "sm.png",
     "back1.png",
-    "xue.png",
-    "gk1.png",
+    "nv.png",
+    "guanka/gk1.png",
     "jk2.png"
   ],
   "version": "1.5.0.0",
@@ -293,7 +292,7 @@
               "capInsetsY": 0,
               "fileName": null,
               "fileNameData": {
-                "path": "xue.png",
+                "path": "nv.png",
                 "plistFile": "",
                 "resourceType": 0
               },
@@ -360,7 +359,7 @@
                   "fontType": 0,
                   "normal": null,
                   "normalData": {
-                    "path": "gk1.png",
+                    "path": "guanka/gk1.png",
                     "plistFile": "",
                     "resourceType": 0
                   },
