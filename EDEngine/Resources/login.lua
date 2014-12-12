@@ -11,6 +11,7 @@ local test_login =
 	--[1] = {name='杨炳业',uid=146551,cookie='sc1=CEA85BC1D4187130336F24CB4619C8F62A195974akl5NwTuBd%2bY1zlZegowowUsYhWwYAv%2f7A2U09%2bPu0Q0G0HPx21mNjK%2b8lOQ9h7xGOjimok%3d'},
 	[2] = {name='张老师',uid=145487,cookie='sc1=B985BAC54D6A2322811266BD3A74BEFD1391BB39akl6NgnoBZfKi2oLKlJh7FEtYQvwMBi4tkzQgsLP5lYpE1bSlHsmZiP5qE6N90T7EuDokQ%3d%3d'},
 	[3] = {name='杨炳业家长',uid=146583,cookie='sc1=2AB5A8AD46D6A8E6989A12BB72A28F0702049650akl5NwnsBZfMiG4KI1Vi7FktYQvwMxjjsUzQisLP6VYpEVaIlnsmZyP5qE6MrlqvHPayxJxYl3KdiGcFqWcCPuwnwrbi3A%3d%3d'},
+	[4] = {name="赵颖",uid=146608,cookie='sc1=1751B59A5C03746874CE4817043C233BE282BEEBakl5NAHnBdyR2DFCegow4UV%2fYgv3MBi44EzUi8LL7FYoFUjbnm94Yw%3d%3d'}
 }
 local selector = 2
 local g_cookie

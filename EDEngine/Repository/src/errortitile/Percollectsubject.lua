@@ -48,34 +48,6 @@ function Percollectsubject:resetpagedata()
 	if ret == false then
 		return
 	end
---[[	self.share_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/share.json")
---[[	local title = self._widget:getChildByTag(1150) --获取title
-	local error_num = title:getChildByTag(1151) --获取错题数目文字描述	
-	error_num:setString(self.num)--]]
-	
-	local page_data = self._widget:getChildByTag(641)				
-	local per_collectview = page_data:getChildByTag(642)  --获取单个已纠收藏题view			
-
-	local old_collectview = page_data:getChildren()
-
-	for i,obj in pairs(old_collectview) do
-		if old_collectview[i] ~= per_collectview then
-			old_collectview[i]:removeFromParent()
-		end
-	end	
-	
-	local collect_title_num = table.getn(self.collect_items)
-	local row_num
-	row_num = collect_title_num/2	
-	row_num = math.ceil(row_num)
-	local size  = per_collectview:getContentSize()	
-	local size_win = self._widget:getContentSize()
-	page_data:setInnerContainerSize(cc.size(size_win.width,(size.height+collect_space)*row_num))
-	page_data.share_box_src = self.share_view:getChildByTag(657)
-	for i,obj in pairs(self.collect_items) do
-		self:addcollectitem(i,self.collect_items[i],page_data,per_collectview)
-	end				--]]
-	
 end
 
 function Percollectsubject:addcollectitem(index,collectitem,page,src_collect_view)

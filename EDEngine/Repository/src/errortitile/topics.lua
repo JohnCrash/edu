@@ -2,6 +2,7 @@ local kits = require 'kits'
 local uikits = require 'uikits'
 local cache = require 'cache'
 local json = require 'json-c'
+local login = require "login"
 local loadingbox = require "loadingbox"
 
 local course={
@@ -206,7 +207,7 @@ local function item_ui( t )
 end
 
 local function read_topics_cache( pid )
-	local result = kits.read_cache( pid )
+	local result = kits.read_cache( pid..tostring(login.uid()) )
 	if result then
 		local t = json.decode(result)
 		if t then
@@ -222,7 +223,7 @@ end
 local function write_topics_cache( pid,t )
 	local result = json.encode( t,2 )
 	if result then
-		kits.write_cache( pid,result )
+		kits.write_cache( pid..tostring(login.uid()),result )
 	else
 		kits.log('error : result = nil, write_topics_cache pid = '..tostring(pid))
 	end
@@ -329,7 +330,8 @@ local function parse_html( str )
 	return t
 end
 
-local function parse_rect( str )
+--加引号的格式
+local function parse_rect_fh( str )
 	local s,n1,n2,n3,n4 = string.match(str,'(%u).*\"(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)\"')
 
 	if s and n1 and n2 and n3 and n4 then
@@ -340,6 +342,22 @@ local function parse_rect( str )
 			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
 		else
 			kits.log( '		ERROR parse_rect : ' ..tostring(str) )
+		end
+	end
+end	
+
+--不加引号的格式
+local function parse_rect( str )
+	local s,n1,n2,n3,n4 = string.match(str,'(%u).*(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
+
+	if s and n1 and n2 and n3 and n4 then
+		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}
+	else
+		n1,n2,n3,n4 = string.match(str,'(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
+		if n1 and n2 and n3 and n4 then
+			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
+		else
+			return parse_rect_fh( str )
 		end
 	end
 end	
@@ -660,6 +678,10 @@ local function set_topics_image( layout,data,x,y )
 			img:setScaleX(g_scale)
 			img:setScaleY(g_scale)
 			layout:addChild(img)
+			local is = img:getContentSize()
+			if y < 4*TOPICS_SPACE and is.height*g_scale+y < size.height then --题干纵向居中放置
+				y = (size.height - y - is.height*g_scale)/2 + y
+			end
 			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,g_scale)
 			height = height+img:getContentSize().height*g_scale 
 		end
@@ -1383,8 +1405,12 @@ local function relayout_click( layout,data,ismulti )
 			if s then
 				local k = answer_idx[s]
 				local rc = rects[k]
-				rect_node[k] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
-				bg:addChild( rect_node[k] )
+				if rc then
+					rect_node[k] = uikits.rect{x1=rc.x1,y1=rc.y1,x2=rc.x2,y2=rc.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(1,0,0,0.2)}
+					bg:addChild( rect_node[k] )
+				else
+					kits.log("WARNING : relayout_click rects["..tostring(k).."] = nil")
+				end
 			end
 		end
 	else
@@ -1451,6 +1477,10 @@ local function relayout_drag( layout,data,ismul )
 	local function get_pt_center( item,i )
 		local xx,yy = bg:getPosition()
 		local v = data.drag_rects[i]
+		if not v then
+			kits.log("WARNING : get_pt_center data.drag_rects["..tostring(i).."] = nil")
+			return {x=0,y=0}
+		end
 		xx = xx - bg:getContentSize().width*g_scale/2
 		local rc =  {
 				x1 = xx + v.x1 * g_scale,
@@ -1924,8 +1954,7 @@ local function edit_topics(layout,data)
 			if parent and cc_type(parent)=='ccui.ScrollView' then
 				local w,h
 				h = _options[1]:getContentSize().height
-				w = ((_options[1]:getContentSize().width)+EditSpace)*data.options
-				print("w::"..w)
+				w = ((_options[1]:getContentSize().width)+EditSpace)*data.options+2*EditSpace
 				parent:setInnerContainerSize(cc.size(w,h))
 			end
 		end		

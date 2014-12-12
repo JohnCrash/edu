@@ -1053,7 +1053,7 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				arrow:setRotation(90)
 				text:setString(drap_text)		
 				if self._refresh_func and done == 1 then
-					if self._refreshBeginTime and os.clock()-self._refreshBeginTime>0.5 then
+					if self._refreshBeginTime and os.clock()-self._refreshBeginTime>0.6 then
 						self._refresh_func()
 					end
 					done = 0

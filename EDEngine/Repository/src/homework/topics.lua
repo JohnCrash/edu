@@ -330,7 +330,8 @@ local function parse_html( str )
 	return t
 end
 
-local function parse_rect( str )
+--加引号的格式
+local function parse_rect_fh( str )
 	local s,n1,n2,n3,n4 = string.match(str,'(%u).*\"(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)\"')
 
 	if s and n1 and n2 and n3 and n4 then
@@ -344,6 +345,22 @@ local function parse_rect( str )
 		end
 	end
 end	
+
+--不加引号的格式
+local function parse_rect( str )
+	local s,n1,n2,n3,n4 = string.match(str,'(%u).*(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
+
+	if s and n1 and n2 and n3 and n4 then
+		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}
+	else
+		n1,n2,n3,n4 = string.match(str,'(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
+		if n1 and n2 and n3 and n4 then
+			return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4)}
+		else
+			return parse_rect_fh( str )
+		end
+	end
+end
 
 local function parse_text( str )
 	return string.match(str,'\"(.-)\"')

@@ -332,7 +332,6 @@ function WorkCommit:init_commit_page()
 			local sn = self._args.subjective_num
 			if sn and sn > 0 then
 				local donesn = Subjective.get_done_num( self._args.exam_id)
-				print("##########################"..donesn)
 				self:setPercent2(donesn*100/sn)
 			else
 				self:setPercent2(0)

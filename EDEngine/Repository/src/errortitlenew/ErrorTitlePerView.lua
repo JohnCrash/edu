@@ -1116,17 +1116,17 @@ function ErrorTitlePerView:show_emptyview_type(is_show)
 	view_no_teacher:setVisible(false)
 	
 	if is_show == true then
-		if login.get_uid_type() == login.TEACHER then
-			view_no_teacher:setVisible(true)			
-		else
-			if self.status_index == 0 then --quanbu
+		if self.status_index == 0 then --quanbu
+			if login.get_uid_type() == login.TEACHER then
+				view_no_teacher:setVisible(true)			
+			else
 				view_no_all:setVisible(true)
-			elseif self.status_index == 1 then --buhui
-				view_no_buhui:setVisible(true)
-			elseif self.status_index == 2 then --yihui
-				view_no_yihui:setVisible(true)
-			end		
-		end
+			end
+		elseif self.status_index == 1 then --buhui
+			view_no_buhui:setVisible(true)
+		elseif self.status_index == 2 then --yihui
+			view_no_yihui:setVisible(true)
+		end		
 	end
 end
 
