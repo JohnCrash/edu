@@ -42,6 +42,63 @@
 				<key>offsetY</key>
 				<real>0</real>
 			</dict>
+			<key>qiy1.png</key>
+			<dict>
+				<key>width</key>
+				<integer>839</integer>
+				<key>height</key>
+				<integer>165</integer>
+				<key>originalWidth</key>
+				<integer>839</integer>
+				<key>originalHeight</key>
+				<integer>165</integer>
+				<key>x</key>
+				<integer>0</integer>
+				<key>y</key>
+				<integer>1237</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
+			<key>qiy2.png</key>
+			<dict>
+				<key>width</key>
+				<integer>840</integer>
+				<key>height</key>
+				<integer>170</integer>
+				<key>originalWidth</key>
+				<integer>840</integer>
+				<key>originalHeight</key>
+				<integer>170</integer>
+				<key>x</key>
+				<integer>0</integer>
+				<key>y</key>
+				<integer>1403</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
+			<key>tan2.png</key>
+			<dict>
+				<key>width</key>
+				<integer>794</integer>
+				<key>height</key>
+				<integer>250</integer>
+				<key>originalWidth</key>
+				<integer>794</integer>
+				<key>originalHeight</key>
+				<integer>250</integer>
+				<key>x</key>
+				<integer>1243</integer>
+				<key>y</key>
+				<integer>0</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
 		</dict>
 		<key>metadata</key>
 		<dict>

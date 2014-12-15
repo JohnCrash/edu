@@ -306,7 +306,7 @@ function AppEntry:init()
 	---[[-----------------------------------
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 	local laBattle = moLaBattle.Class:create()
-	bg:addChild(laBattle)
+	bg:addChild(laBattle, 10)
 
 
 	----------------]]
