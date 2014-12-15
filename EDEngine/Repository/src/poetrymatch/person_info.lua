@@ -18,28 +18,28 @@ local g_person_battle_cards = {'caoz','caoc'}
 local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
 local g_person_boss_info = {
 fengyang = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
 },
 fengyanga = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
 },
 fengyangb = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
 },
 fengyangc = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,hp=150,mp=100,ap=100,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,hp=250,mp=200,ap=200,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,hp=350,mp=300,ap=300,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,hp=450,mp=400,ap=400,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,poetry_cur=10,poetry_max=100,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,poetry_cur=20,poetry_max=100,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,poetry_cur=30,poetry_max=100,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,poetry_cur=40,poetry_max=100,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
 },
 }
 local function get_user_name()

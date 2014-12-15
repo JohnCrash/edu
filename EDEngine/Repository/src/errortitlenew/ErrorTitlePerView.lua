@@ -132,6 +132,7 @@ function ErrorTitlePerView:init_butlist()
 	local but_add_no = uikits.child(self._widget,ui.BUTTON_ADD_NO)
 	uikits.event(but_add_no,	
 		function(sender,eventType)	
+			print('1111111')
 			self:save_innerpos()
 			self.isneedupdate = true
 			local scene_next = adderrorview.create(self)	

@@ -17,6 +17,7 @@ local ui = {
 	BUTTON_COUNTRY = 'bt',
 	TXT_STAR_NUM = 'xing',
 	BUTTON_QUIT = 'xinxi/fanhui',
+	FUR_COUNTRY_VIEW = 'guanka/kg1_0',
 }
 
 function create()
@@ -80,6 +81,7 @@ end
 local country_space = 10
 
 function Countryview:show_country()	
+	local fur_country_view = uikits.child(self._Countryview,ui.FUR_COUNTRY_VIEW)
 	self.country_view = uikits.child(self._Countryview,ui.COUNTRY_VIEW)	
 	self.country_view:setVisible(false)
 	local all_country_info = person_info.get_all_section_info()
@@ -87,7 +89,7 @@ function Countryview:show_country()
 	local size_view = self.guanka_view:getContentSize()
 	local pos_x_src = self.country_view:getPositionX()
 	local size_country_src = self.country_view:getContentSize()
-	pos_x_src = pos_x_src+(size_country_src.width+country_space)*(#all_country_info)
+	pos_x_src = pos_x_src+(size_country_src.width+country_space)*(#all_country_info+1)
 	if pos_x_src > size_view.width then
 		size_scroll.width = pos_x_src
 	else
@@ -99,6 +101,7 @@ function Countryview:show_country()
 		local cur_country = self.country_view:clone()
 		local pic_country = uikits.child(cur_country,ui.BUTTON_COUNTRY)
 		pic_country.name = all_country_info[i].name
+		pic_country.id = all_country_info[i].id
 		local pic_name_def
 		local pic_name_dis
 		pic_name_def = all_country_info[i].id..'.png'
@@ -117,7 +120,7 @@ function Countryview:show_country()
 		uikits.event(pic_country,	
 		function(sender,eventType)	
 			self:save_innerpos()
-			local scene_next = bossview.create(sender.name)	
+			local scene_next = bossview.create(sender.name,sender.id)	
 			uikits.pushScene(scene_next)	
 		end,"click")
 		
@@ -127,7 +130,13 @@ function Countryview:show_country()
 		cur_country:setPositionX(pos_x)
 		cur_country:setVisible(true)
 		self.guanka_view:addChild(cur_country)
+		if i == #all_country_info then
+			pos_x = pos_x+(size_country.width+country_space)
+			fur_country_view:setPositionX(pos_x)
+			fur_country_view:setVisible(true)
+		end
 	end
+	
 end
 
 function Countryview:init_gui()	
