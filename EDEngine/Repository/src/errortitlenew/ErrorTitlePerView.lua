@@ -100,6 +100,8 @@ function ErrorTitlePerView.create(user_name)
 	layer.user_name = user_name
 	is_loading = false
 	layer.status_change = {}
+	layer.status_change.id = {}
+	layer.status_change.tag = 0
 	local function onNodeEvent(event)
 		if "enter" == event then
 			layer:init()
@@ -130,6 +132,7 @@ function ErrorTitlePerView:init_butlist()
 	local but_add_no = uikits.child(self._widget,ui.BUTTON_ADD_NO)
 	uikits.event(but_add_no,	
 		function(sender,eventType)	
+			print('1111111')
 			self:save_innerpos()
 			self.isneedupdate = true
 			local scene_next = adderrorview.create(self)	
@@ -877,36 +880,51 @@ function ErrorTitlePerView:show_title(is_has_title)
 				else
 					uikits.event(but_status,	
 						function(sender,eventType)	
-							self.status_change[sender.id] = sender.id
---[[							local send_url = status_change_url..'id='..sender.id
-							local loadbox = loadingbox.open(self)
-							is_loading = true
-							self:show_emptyview_type(false)
-							cache.request_json( send_url,function(t)
-								if t and type(t)=='table' then
-									if t.result ~= 0 then
-										is_loading = false
-										loadbox:removeFromParent()
-										return false
-									else
-										--self.page_index = 1
-										if self.status_index ~= 0 then
-											self:update_title_save_pos(sender.view:getTag())
-										end						
-									end
+							if self.status_index == 1 then  --buhui
+								self.status_change.tag = 1
+								if self.status_change.id[sender.id] then
+									self.status_change.id[sender.id] = nil
 								else
-									--既没有网络也没有缓冲
-									messagebox.open(self,function(e)
-										if e == messagebox.TRY then
-											self:adderrortitle()
-										elseif e == messagebox.CLOSE then
-											uikits.popScene()
-										end
-									end,messagebox.RETRY)	
+									self.status_change.id[sender.id] = sender.id
 								end
-								is_loading = false
-								loadbox:removeFromParent()
-							end,'N')			--]]
+							elseif self.status_index == 2 then --yihui
+								self.status_change.tag = 2
+								if self.status_change.id[sender.id] then
+									self.status_change.id[sender.id] = nil
+								else
+									self.status_change.id[sender.id] = sender.id
+								end
+							elseif self.status_index == 0 then --quanbu
+								local send_url = status_change_url..'id='..sender.id
+								if login.get_uid_type() ~= login.STUDENT then
+									send_url = send_url..'&user_id='..login.get_subuid()
+								end
+								local loadbox = loadingbox.open(self)
+								is_loading = true
+								self:show_emptyview_type(false)
+								cache.request_json( send_url,function(t)
+									if t and type(t)=='table' then
+										if t.result ~= 0 then
+											is_loading = false
+											loadbox:removeFromParent()
+											return false
+										else
+		
+										end
+									else
+										--既没有网络也没有缓冲
+										messagebox.open(self,function(e)
+											if e == messagebox.TRY then
+												self:adderrortitle()
+											elseif e == messagebox.CLOSE then
+												uikits.popScene()
+											end
+										end,messagebox.RETRY)	
+									end
+									is_loading = false
+									loadbox:removeFromParent()
+								end,'N')			
+							end
 					end)							
 				end		
 				
@@ -1021,37 +1039,50 @@ function ErrorTitlePerView:show_title(is_has_title)
 				else
 					uikits.event(but_status,	
 						function(sender,eventType)	
-							self.status_change[sender.id] = sender.id
-							--[[local send_url = status_change_url..'id='..sender.id
-							local loadbox = loadingbox.open(self)
-							is_loading = true
-							self:show_emptyview_type(false)
-							cache.request_json( send_url,function(t)
-								if t and type(t)=='table' then
-									if t.result ~= 0 then
-										is_loading = false
-										loadbox:removeFromParent()
-										return false
-									else
-										--self.page_index = 1
-										--self:update_title()	
-										if self.status_index ~= 0 then
-											self:update_title_save_pos(sender.view:getTag())	
-										end				
-									end
+							if self.status_index == 1 then  --buhui
+								self.status_change.tag = 1
+								if self.status_change.id[sender.id] then
+									self.status_change.id[sender.id] = nil
 								else
-									--既没有网络也没有缓冲
-									messagebox.open(self,function(e)
-										if e == messagebox.TRY then
-											self:adderrortitle()
-										elseif e == messagebox.CLOSE then
-											uikits.popScene()
-										end
-									end,messagebox.RETRY)	
+									self.status_change.id[sender.id] = sender.id
 								end
-								is_loading = false
-								loadbox:removeFromParent()
-							end,'N')			--]]
+							elseif self.status_index == 2 then --yihui
+								self.status_change.tag = 2
+								if self.status_change.id[sender.id] then
+									self.status_change.id[sender.id] = nil
+								else
+									self.status_change.id[sender.id] = sender.id
+								end
+							elseif self.status_index == 0 then --quanbu
+								local send_url = status_change_url..'id='..sender.id
+								if login.get_uid_type() ~= login.STUDENT then
+									send_url = send_url..'&user_id='..login.get_subuid()
+								end
+								local loadbox = loadingbox.open(self)
+								is_loading = true
+								self:show_emptyview_type(false)
+								cache.request_json( send_url,function(t)
+									if t and type(t)=='table' then
+										if t.result ~= 0 then
+											is_loading = false
+											loadbox:removeFromParent()
+											return false
+										else	
+										end
+									else
+										--既没有网络也没有缓冲
+										messagebox.open(self,function(e)
+											if e == messagebox.TRY then
+												self:adderrortitle()
+											elseif e == messagebox.CLOSE then
+												uikits.popScene()
+											end
+										end,messagebox.RETRY)	
+									end
+									is_loading = false
+									loadbox:removeFromParent()
+								end,'N')			
+							end
 					end)							
 				end
 			
@@ -1136,11 +1167,17 @@ function ErrorTitlePerView:settitlecount()
 end
 
 --local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
-local status_batch_change_url = 'http://app.lejiaolexue.com/exerbook2/do_batch.ashx'
+local status_batch_change_url = 'http://app.lejiaolexue.com/exerbook2/do_batch2.ashx'
 function ErrorTitlePerView:change_status_only(layer_push)
+	
+	local send_data_src = {}
+	if self.status_change.tag >0 then
+		send_data_src = self.status_change.id
+	end
+
 	local send_data_tb = {}
 	local send_index = 1
-	for i,obj in pairs(self.status_change) do
+	for i,obj in pairs(send_data_src) do
 		send_data_tb[send_index] = obj
 		send_index = send_index+1
 	end
@@ -1148,7 +1185,13 @@ function ErrorTitlePerView:change_status_only(layer_push)
 	print('title_num::'..title_num)
 	if title_num >0 then
 		local send_data = json.encode(send_data_tb)
-		local send_data_js = 'id='..send_data
+		local send_data_js
+		if self.status_change.tag == 1 then
+			send_data_js = 'id1='..send_data
+		elseif self.status_change.tag == 2 then
+			send_data_js = 'id2='..send_data
+		end
+
 		if login.get_uid_type() ~= login.STUDENT then
 			send_data_js = send_data_js..'&user_id='..login.get_subuid()
 		end
@@ -1187,13 +1230,18 @@ function ErrorTitlePerView:change_status_only(layer_push)
 			uikits.popScene()	
 		end
 	end
-	self.status_change = {}	
+	self.status_change.tag = 0
+	self.status_change.id = {}
 end
 
 function ErrorTitlePerView:update_title()
+	local send_data_src = {}
+	if self.status_change.tag >0 then
+		send_data_src = self.status_change.id
+	end
 	local send_data_tb = {}
 	local send_index = 1
-	for i,obj in pairs(self.status_change) do
+	for i,obj in pairs(send_data_src) do
 		send_data_tb[send_index] = obj
 		send_index = send_index+1
 	end
@@ -1201,7 +1249,12 @@ function ErrorTitlePerView:update_title()
 	print('title_num::'..title_num)
 	if title_num >0 then
 		local send_data = json.encode(send_data_tb)
-		local send_data_js = 'id='..send_data
+		local send_data_js
+		if self.status_change.tag == 1 then
+			send_data_js = 'id1='..send_data
+		elseif self.status_change.tag == 2 then
+			send_data_js = 'id2='..send_data
+		end
 
 		if login.get_uid_type() ~= login.STUDENT then
 			send_data_js = send_data_js..'&user_id='..login.get_subuid()
@@ -1232,7 +1285,8 @@ function ErrorTitlePerView:update_title()
 	else
 		self:getdatabyurl()
 	end
-	self.status_change = {}
+	self.status_change.tag = 0
+	self.status_change.id = {}
 end
 
 function ErrorTitlePerView:getdatabyurl()

@@ -28,7 +28,7 @@ local ui = {
 	TXT_LE_NUM = 'xinxi/lebi/zhi',	
 	
 	CARD_VIEW = 'ka1',
-	PIC_CARD = 'kp',
+	PIC_CARD = 'k1',
 	TXT_CARD_LVL = 'dj',
 	
 	BUTTON_DUIZHAN = 'duizhan',
@@ -123,8 +123,9 @@ function Mainview:show_cards()
 	for i=1,#all_battle_list do
 		local cur_card = card_view_src:clone()
 		local pic_card = uikits.child(cur_card,ui.PIC_CARD)
-		local pic_path = 'poetrymatch/cards/'..all_battle_list[i].id..'2.png'
-		pic_card:loadTexture(pic_path)
+		local pic_name = all_battle_list[i].id..'2.png'
+		--pic_card:loadTexture(pic_path)
+		person_info.load_card_pic(pic_card,pic_name)
 		local txt_card_lvl = uikits.child(cur_card,ui.TXT_CARD_LVL)
 		local pos_y = cur_card:getPositionY()
 		local size_card = cur_card:getContentSize()
