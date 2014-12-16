@@ -1,9 +1,9 @@
-[
+{
 	"exerbooknew":{
 		"name":"新错题本",
 		"launch":"errortitlenew/Loading",
 		"updates":[
-			"errortitlenew",
+			"errortitlenew"
 		]
 	}
-]
+}
