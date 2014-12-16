@@ -6,12 +6,17 @@ local md5 = require "md5"
 local json = require "json-c"
 local resume = require "resume"
 
+if not kits.exist_file then
+	kits.exist_file = kits.exists_file
+end
+
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v6/'
-local local_server = 'http://192.168.2.211:81/lgh/v6/'
---local local_server = 'http://192.168.2.182/v6/'
+local versionNUM = resume.getversion()
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
+--local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
 local config_server = kits.config("update_server","get")
 if config_server and string.len(config_server)>10 then
