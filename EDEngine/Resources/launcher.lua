@@ -195,7 +195,7 @@ elseif app == 'exerbooknew' then
 elseif app and string.len(app)>0 then
 	update.create{name=app.."_shell",updates={"luacore"},
 		run = function()
-			local s = kits.read_file("res/luacore/app.json")
+			local s = kits.read_local_file("res/luacore/app.json")
 			if s then
 				local apps = json.decode( s )
 				if apps[app] and apps[app].name and apps[app].updates and apps[app].launch then

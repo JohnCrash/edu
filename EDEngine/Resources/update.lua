@@ -461,7 +461,8 @@ function UpdateProgram:update()
 				kits.log("ERROR UpdateProgram:update pcall failed!")
 				kits.log("error message:")
 				kits.log(tostring(scene))
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
+				local text = tostring(self._args.name).."\n"..tostring(scene)
+				self:ErrorAndExit('没有成功更新('..text..")",2)
 			end		
 		else
 			local b,e = update_one_by_one(self._oplist[self._count])
