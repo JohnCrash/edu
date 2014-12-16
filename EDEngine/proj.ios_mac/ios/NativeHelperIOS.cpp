@@ -118,6 +118,10 @@ void takeResource( int mode )
     {
         PickPicture();
     }
+    else
+    {
+        takeResource_callback("iOS takeResource can't support mode",mode,RESULT_ERROR);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------

@@ -80,6 +80,8 @@
 		52D37C8A1A382889007E0098 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C881A382889007E0098 /* libtiff.a */; };
 		52D37C8D1A3828C3007E0098 /* libwebp_arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */; };
 		52D37C8E1A3828C3007E0098 /* libwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C8C1A3828C3007E0098 /* libwebp.a */; };
+		52D37CA61A393DF0007E0098 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C8F1A384DB3007E0098 /* libluajit.a */; };
+		52D37CA71A394CD8007E0098 /* liblua.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D37C921A39384C007E0098 /* liblua.a */; };
 		52D5B16A1A36CA90000C5536 /* libamrnb iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1401A36C971000C5536 /* libamrnb iOS.a */; };
 		52D5B16B1A36CA90000C5536 /* libbox2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775111A355B5F0048D357 /* libbox2d iOS.a */; };
 		52D5B16C1A36CA90000C5536 /* libchipmunk iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5277750F1A355B5F0048D357 /* libchipmunk iOS.a */; };
@@ -4513,8 +4515,6 @@
 		529BB09C1A354554000555FF /* RootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		529BB09D1A354554000555FF /* RootViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
 		529BB09F1A354554000555FF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		529BB0A21A354554000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		529BB0A41A354554000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		529BB0A51A354554000555FF /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		529BB0A61A354554000555FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		529BB0A71A354554000555FF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -4999,8 +4999,6 @@
 		529BB3081A354555000555FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		529BB3091A354555000555FF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		529BB30B1A354555000555FF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		529BB30E1A354555000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		529BB3101A354555000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		529BB3111A354555000555FF /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		529BB3121A354555000555FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		529BB3131A354555000555FF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -6765,8 +6763,6 @@
 		529BBB321A354559000555FF /* RootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		529BBB331A354559000555FF /* RootViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
 		529BBB351A354559000555FF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		529BBB381A354559000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		529BBB3A1A354559000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		529BBB3B1A354559000555FF /* HelloLua_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloLua_Prefix.pch; sourceTree = "<group>"; };
 		529BBB3C1A354559000555FF /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		529BBB3D1A354559000555FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -6875,8 +6871,6 @@
 		529BBBCE1A354559000555FF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		529BBBCF1A354559000555FF /* RootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		529BBBD01A354559000555FF /* RootViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
-		529BBBD31A354559000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		529BBBD51A354559000555FF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		529BBBD61A354559000555FF /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		529BBBD71A354559000555FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		529BBBD81A354559000555FF /* LuaObjectCBridgeTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LuaObjectCBridgeTest.h; sourceTree = "<group>"; };
@@ -7102,6 +7096,8 @@
 		52D37C881A382889007E0098 /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = "../../../cocos2d-x/external/tiff/prebuilt/ios/libtiff.a"; sourceTree = "<group>"; };
 		52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebp_arm64.a; path = "../../../cocos2d-x/external/webp/prebuilt/ios/libwebp_arm64.a"; sourceTree = "<group>"; };
 		52D37C8C1A3828C3007E0098 /* libwebp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebp.a; path = "../../../cocos2d-x/external/webp/prebuilt/ios/libwebp.a"; sourceTree = "<group>"; };
+		52D37C8F1A384DB3007E0098 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = "../../../cocos2d-x/external/lua/luajit/prebuilt/ios/libluajit.a"; sourceTree = "<group>"; };
+		52D37C921A39384C007E0098 /* liblua.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblua.a; path = "../../../cocos2d-x/external/lua/lua/prebuilt/ios/liblua.a"; sourceTree = "<group>"; };
 		52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsparam.cpp; path = ios/parsparam.cpp; sourceTree = SOURCE_ROOT; };
 		52D5B1AD1A36EB4D000C5536 /* parsparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsparam.h; path = ios/parsparam.h; sourceTree = SOURCE_ROOT; };
 		52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
@@ -7140,6 +7136,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52D37CA71A394CD8007E0098 /* liblua.a in Frameworks */,
+				52D37CA61A393DF0007E0098 /* libluajit.a in Frameworks */,
 				52D37C8D1A3828C3007E0098 /* libwebp_arm64.a in Frameworks */,
 				52D37C8E1A3828C3007E0098 /* libwebp.a in Frameworks */,
 				52D37C891A382889007E0098 /* libtiff_arm64.a in Frameworks */,
@@ -7290,6 +7288,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				52D37C921A39384C007E0098 /* liblua.a */,
+				52D37C8F1A384DB3007E0098 /* libluajit.a */,
 				52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */,
 				52D37C8C1A3828C3007E0098 /* libwebp.a */,
 				52D37C871A382889007E0098 /* libtiff_arm64.a */,
@@ -16234,8 +16234,6 @@
 		529BB0A01A354554000555FF /* proj.mac */ = {
 			isa = PBXGroup;
 			children = (
-				529BB0A11A354554000555FF /* InfoPlist.strings */,
-				529BB0A31A354554000555FF /* MainMenu.xib */,
 				529BB0A51A354554000555FF /* Icon.icns */,
 				529BB0A61A354554000555FF /* Info.plist */,
 				529BB0A71A354554000555FF /* main.cpp */,
@@ -17776,8 +17774,6 @@
 		529BB30C1A354555000555FF /* proj.mac */ = {
 			isa = PBXGroup;
 			children = (
-				529BB30D1A354555000555FF /* InfoPlist.strings */,
-				529BB30F1A354555000555FF /* MainMenu.xib */,
 				529BB3111A354555000555FF /* Icon.icns */,
 				529BB3121A354555000555FF /* Info.plist */,
 				529BB3131A354555000555FF /* main.cpp */,
@@ -22116,8 +22112,6 @@
 		529BBB361A354559000555FF /* proj.mac */ = {
 			isa = PBXGroup;
 			children = (
-				529BBB371A354559000555FF /* InfoPlist.strings */,
-				529BBB391A354559000555FF /* MainMenu.xib */,
 				529BBB3B1A354559000555FF /* HelloLua_Prefix.pch */,
 				529BBB3C1A354559000555FF /* Icon.icns */,
 				529BBB3D1A354559000555FF /* Info.plist */,
@@ -22569,8 +22563,6 @@
 		529BBBD11A354559000555FF /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				529BBBD21A354559000555FF /* InfoPlist.strings */,
-				529BBBD41A354559000555FF /* MainMenu.xib */,
 				529BBBD61A354559000555FF /* Icon.icns */,
 				529BBBD71A354559000555FF /* Info.plist */,
 				529BBBD81A354559000555FF /* LuaObjectCBridgeTest.h */,
@@ -23425,7 +23417,7 @@
 				Japanese,
 				French,
 				German,
-				en,
+				"zh-Hans",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
@@ -24001,73 +23993,6 @@
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		529BB0A11A354554000555FF /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BB0A21A354554000555FF /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		529BB0A31A354554000555FF /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BB0A41A354554000555FF /* en */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		529BB30D1A354555000555FF /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BB30E1A354555000555FF /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		529BB30F1A354555000555FF /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BB3101A354555000555FF /* en */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		529BBB371A354559000555FF /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BBB381A354559000555FF /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		529BBB391A354559000555FF /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BBB3A1A354559000555FF /* en */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-		529BBBD21A354559000555FF /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BBBD31A354559000555FF /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		529BBBD41A354559000555FF /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				529BBBD51A354559000555FF /* en */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -24118,6 +24043,8 @@
 					"/Users/john/source/cocos2d-x/external/websockets/prebuilt/ios",
 					"/Users/john/source/cocos2d-x/external/tiff/prebuilt/ios",
 					"/Users/john/source/cocos2d-x/external/webp/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/lua/luajit/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/lua/lua/prebuilt/ios",
 				);
 				OTHER_LDFLAGS = "";
 				PROVISIONING_PROFILE = "";
@@ -24175,6 +24102,8 @@
 					"/Users/john/source/cocos2d-x/external/websockets/prebuilt/ios",
 					"/Users/john/source/cocos2d-x/external/tiff/prebuilt/ios",
 					"/Users/john/source/cocos2d-x/external/webp/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/lua/luajit/prebuilt/ios",
+					"/Users/john/source/cocos2d-x/external/lua/lua/prebuilt/ios",
 				);
 				OTHER_LDFLAGS = "";
 				PROVISIONING_PROFILE = "";
@@ -24294,6 +24223,7 @@
 					"$(SRCROOT)/../cocos2d/external",
 					"$(SRCROOT)/../cocos2d/external/chipmunk/include/chipmunk",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -24322,6 +24252,7 @@
 					"$(SRCROOT)/../cocos2d/external",
 					"$(SRCROOT)/../cocos2d/external/chipmunk/include/chipmunk",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
