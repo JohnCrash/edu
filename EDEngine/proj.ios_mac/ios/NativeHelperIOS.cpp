@@ -110,6 +110,18 @@ bool BackToTheHome()
 
 void takeResource( int mode )
 {
+    if( mode == TAKE_PICTURE )
+    {
+        TakePhoto();
+    }
+    else if(mode == PICK_PICTURE )
+    {
+        PickPicture();
+    }
+    else
+    {
+        takeResource_callback("iOS takeResource can't support mode",mode,RESULT_ERROR);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------

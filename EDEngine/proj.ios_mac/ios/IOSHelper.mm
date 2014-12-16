@@ -1,5 +1,10 @@
 #import "IOSHelper.h"
-#import "EAGLView.h"
+//#import "EAGLView.h"
+#import "cocos2d.h"
+#import "Platform.h"
+#import "Files.h"
+#import "CCEAGLView.h"
+#import "CCGLView.h"
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioQueue.h>
 #import <AudioToolbox/AudioFile.h>
@@ -35,6 +40,7 @@ char *AdjustRawBufOrientation(char *pSrcBuf,int *pWidth,int *pHeight,int nAngle,
 static int s_nCurID=1;
 static int s_nBufType;
 static int s_nBufID;
+static int s_ResourceType = TAKE_PICTURE;
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
@@ -92,15 +98,52 @@ static int s_nBufID;
     {
         pBuf=(UInt8 *)pNewBuf;
     }
-    OnIOSReturnBuf(s_nBufType,s_nBufID,w,h,len,(char *)pBuf);
-    if (pNewBuf!=NULL) free(pNewBuf);
-    [picker.view removeFromSuperview];
-    [picker release];
-    
-    if (popoverController!=NULL)
+    /*
+        将数据保存为jpg
+     */
     {
-        [popoverController dismissPopoverAnimated:YES];
+        std::string tmp = allocTmpFile(".jpg");
+        cocos2d::Image *pimg = new cocos2d::Image();
+        if (pimg && pBuf )
+        {
+            /*
+             //调整rgba mode
+            for (int y = 0; y < h; ++y)
+            {
+                unsigned char * pline = (unsigned char*)pNewBuf + y*w * 4;
+                for (int x = 0; x < w; ++x)
+                {
+                    unsigned char *pc = pline + x * 4;
+                    unsigned char tmp;
+                    tmp = pc[0];
+                    pc[0] = pc[1];
+                    pc[1] = tmp;
+                }
+            }
+             */
+            pimg->initWithRawData((unsigned char*)pBuf, w * 4 * h, w, h, 8);
+            pimg->saveToFile(tmp);
+            pimg->release();
+            takeResource_callback(tmp,s_ResourceType,RESULT_OK);
+        }
+        else
+        {
+            CCLOG("imagePickerController new cocos2d::Image return null!");
+            takeResource_callback("imagePickerController pBuf == nullptr or pimg == nullptr",s_ResourceType,RESULT_ERROR);
+        }
+        
     }
+    //OnIOSReturnBuf(s_nBufType,s_nBufID,w,h,len,(char *)pBuf);
+    if (pNewBuf!=NULL) free(pNewBuf);
+//    [picker.view removeFromSuperview];
+//    [picker release];
+    
+//    if (popoverController!=NULL)
+//    {
+//        [popoverController dismissPopoverAnimated:YES];
+//    }
+
+    [self dismissModalViewControllerAnimated:YES];
 
     [s_pHelperView.view removeFromSuperview];
     [s_pHelperView release];
@@ -109,9 +152,16 @@ static int s_nBufID;
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-    [picker.view removeFromSuperview];
-    [picker release];
-    OnIOSReturn(RETURN_TYPE_TAKEPICTUREDIB,s_nBufID,0,0);
+ //   [picker.view removeFromSuperview];
+ //   [picker release];
+    [self dismissModalViewControllerAnimated:YES];
+    
+    [s_pHelperView.view removeFromSuperview];
+    [s_pHelperView release];
+    s_pHelperView=NULL;
+  
+    takeResource_callback("",s_ResourceType,RESULT_CANCEL);
+//    OnIOSReturn(RETURN_TYPE_TAKEPICTUREDIB,s_nBufID,0,0);
 }
 
 -(int)PickPicture
@@ -128,6 +178,7 @@ static int s_nBufID;
         [popoverController release];
         popoverController=NULL;
     }
+    /*
     if (fVersion>=7.0f || UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
         picker.view.frame=self.view.frame;
@@ -138,8 +189,12 @@ static int s_nBufID;
         popoverController = [[UIPopoverController alloc] initWithContentViewController:picker];
         [popoverController presentPopoverFromRect:CGRectMake(0, 0, 300, 300) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     }
+     */
+    [self presentModalViewController: picker animated: YES];
+    [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
     s_nBufID=s_nCurID++;
+    s_ResourceType = PICK_PICTURE;
     return s_nBufID;
 }
 
@@ -150,9 +205,12 @@ static int s_nBufID;
     picker.view.frame=self.view.frame;
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
     picker.allowsEditing=NO;
-    [self.view addSubview:picker.view];
+    //[self.view addSubview:picker.view];
+    [self presentModalViewController: picker animated: YES];
+    [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
     s_nBufID=s_nCurID++;
+    s_ResourceType = TAKE_PICTURE;
     return s_nBufID;
 }
 
@@ -196,8 +254,13 @@ static int s_nBufID;
 bool InitIOSHelper()
 {
     if (s_pHelperView!=NULL) return true;
+    cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+
+    static CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
     
-    static EAGLView *pOpenGLView=[EAGLView sharedEGLView];
+   //for cocos2d-x 2.2
+   // static EAGLView *pOpenGLView=[EAGLView sharedEGLView];
+    
     if (pOpenGLView==nil) return false;
     
     s_pHelperView=[[IOSHelperView alloc] initWithNibName:nil bundle:nil];
@@ -206,6 +269,7 @@ bool InitIOSHelper()
     s_pHelperView.view.frame=pOpenGLView.frame;
 
     [pOpenGLView addSubview:s_pHelperView.view];
+    
     return true;
 }
 
@@ -322,6 +386,19 @@ bool IOS_VoiceStartRecord(int cnChannel,int nRate,int cnBitPerSample)
         status = AudioQueueEnqueueBuffer(s_pRecordState->queue, s_pRecordState->buffers[i], 0, NULL);
         if (status) return false;
     }
+
+//    AudioSessionInitialize(NULL,
+//                           NULL,
+//                           nil,
+//                           NULL
+//                           );
+    UInt32 sessionCategory = kAudioSessionCategory_PlayAndRecord;
+    AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,
+                            sizeof(sessionCategory),
+                            &sessionCategory
+                            );
+    AudioSessionSetActive(true);
+    
     status = AudioQueueStart(s_pRecordState->queue, NULL);
     if (status) return false;
     s_pRecordState->runing = true;
