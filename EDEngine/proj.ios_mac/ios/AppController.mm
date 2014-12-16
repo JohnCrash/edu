@@ -68,6 +68,7 @@ static AppDelegate s_sharedApplication;
         [window setRootViewController:_viewController];
     }
 
+    [eaglView setMultipleTouchEnabled:YES];
     [window makeKeyAndVisible];
 
     [[UIApplication sharedApplication] setStatusBarHidden:true];
