@@ -101,16 +101,13 @@ function StudentSel:showparentview()
 		self._StudentSel:addChild(cur_view_student)
 		local local_dir = ljshell.getDirectory(ljshell.AppDir)
 		local file_path = local_dir.."cache/"..self._child_tb[i].uid..'.jpg'
-		print('self._child_tb[i].uid::'..self._child_tb[i].uid)
 		if kits.exist_file(file_path) then
-			print('1111111111')
 			showLogoPic(cur_view_student,file_path)
 		else
 			local send_url = download_log_url..self._child_tb[i].uid..'/99'
 			cache.request_nc(send_url,
 			function(b,t)
 					if b then
-						print('222222222222')
 						showLogoPic(cur_view_student,file_path)
 					else
 						kits.log("ERROR :  download_pic_url failed")
@@ -124,7 +121,7 @@ end
 
 local get_class_url = 'http://api.lejiaolexue.com/rest/user/'
 local get_stu_url = 'http://api.lejiaolexue.com/rest/zone/'
-local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/'
+local get_uesr_info_url = 'http://app.lejiaolexue.com/exerbook2/count.ashx'
 local class_space = 10
 local student_space = 10
 
@@ -136,15 +133,19 @@ function StudentSel:update_view()
 	for i=#tb_view,1,-1 do
 --	for i=1 ,#tb_view do
 		if tb_view[i]:isVisible() == true then
+			
 			view_len = view_len + tb_view[i]:getContentSize().height + class_space
 		end
 	end
 	local size_scroll = view_class_all:getInnerContainerSize()
-
-	if size_scroll.height < view_len then
+	local size_view = view_class_all:getContentSize()
+	if size_view.height < view_len then
 		size_scroll.height = view_len
+	else
+		size_scroll.height = size_view.height
 	end
-	--print('size_scroll.height::'..size_scroll.height)
+	print('size_view.height::'..size_view.height)
+	print('size_scroll.height::'..size_scroll.height)
 	view_class_all:setInnerContainerSize(size_scroll)
 	local posy = size_scroll.height
 	for i=1 ,#tb_view do
@@ -214,7 +215,8 @@ function StudentSel:show_class(class_tb)
 			local pic_student = uikits.child(cur_student,ui.PIC_STU_T)
 			local txt_student_name = uikits.child(cur_student,ui.TXT_STU_NAME)
 			local txt_num = uikits.child(cur_student,ui.TXT_STU_NUM)
-			txt_num:setVisible(false)
+			--txt_num:setVisible(false)
+			--txt_num:setString('0')
 			local send_url
 			local local_dir = ljshell.getDirectory(ljshell.AppDir)
 			local file_path = local_dir.."cache/"..student_tb[j].user_id..'.jpg'
@@ -231,23 +233,24 @@ function StudentSel:show_class(class_tb)
 						end
 					end,student_tb[j].user_id..'.jpg')			
 			end
-			send_url = get_uesr_info_url..student_tb[j].user_id
+			send_url = get_uesr_info_url..'?user_id='..student_tb[j].user_id
 			cache.request_json( send_url,function(t)
 				if t and type(t)=='table' then
 					if 	t.result ~= 0 then				
-						print(t.result.." : "..t.message)			
+						print(t.result.." : "..t.msg..'::student_tb[j].user_id::'..student_tb[j].user_id)			
 					else
-						if t.uig[1] then
-							txt_student_name:setString(t.uig[1].uname)
-							local button_pic = ccui.Button:create()
-							button_pic:setTouchEnabled(true)
-							button_pic.uid = student_tb[j].user_id
-							button_pic.name = t.uig[1].uname
-							button_pic:loadTextures(button_empty_path, button_empty_path, "")
-							button_pic:setPosition(cc.p(size_per_student.width/2,size_per_student.height/2))        
-							button_pic:addTouchEventListener(touchEventPic)
-							cur_student:addChild(button_pic)	
-						end
+						
+						txt_student_name:setString(t.name)
+						txt_num:setString(t.cnt_total)
+						local button_pic = ccui.Button:create()
+						button_pic:setTouchEnabled(true)
+						button_pic.uid = student_tb[j].user_id
+						button_pic.name = t.name
+						button_pic:loadTextures(button_empty_path, button_empty_path, "")
+						button_pic:setPosition(cc.p(size_per_student.width/2,size_per_student.height/2))        
+						button_pic:addTouchEventListener(touchEventPic)
+						cur_student:addChild(button_pic)	
+
 					end	
 				else
 					--既没有网络也没有缓冲
