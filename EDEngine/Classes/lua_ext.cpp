@@ -504,6 +504,27 @@ int cc_getScreenInfo(lua_State *L)
 #endif
 }
 
+int cc_setUIOrientation(lua_State *L)
+{
+	if (lua_isnumber(L, 1))
+	{
+		setUIOrientation(lua_tointeger(L,1));
+	}
+	else
+	{
+		CCLOG("cc_setUIOrientation first argument is number");
+	}
+	return 0;
+}
+
+int cc_getUIOrientation(lua_State *L)
+{
+	int ret = getUIOrientation();
+	lua_pushinteger(L, ret);
+	return 1;
+}
+
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -526,6 +547,9 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_getWindowInfo", cc_getWindowInfo);
 	lua_register(L, "cc_getScreenInfo", cc_getScreenInfo);
     lua_register(L, "cc_clock", cc_clock);
+	lua_register(L, "cc_setUIOrientation", cc_setUIOrientation);
+	lua_register(L, "cc_getUIOrientation", cc_getUIOrientation);
+
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

@@ -21,6 +21,9 @@
 #define RESULT_CANCEL (0)
 #define RESULT_ERROR (-2)
 
+void setUIOrientation( int m );
+int getUIOrientation();
+
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
 

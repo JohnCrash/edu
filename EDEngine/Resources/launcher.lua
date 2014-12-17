@@ -198,10 +198,10 @@ elseif app and string.len(app)>0 then
 			local s = kits.read_local_file("res/luacore/app.json")
 			if s then
 				local apps = json.decode( s )
-				if apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
+				if apps and apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
 					update.create{name=apps[app].name,updates=apps[app].updates,
 						run=function()
-							local a = require(app)
+							local a = require(apps[app].launch)
 							return a.create()
 						end}			
 				else

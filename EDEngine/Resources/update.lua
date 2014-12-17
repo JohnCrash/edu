@@ -398,8 +398,9 @@ function UpdateProgram:update()
 			else
 				kits.log("ERROR UpdateProgram:update pcall failed")
 				kits.log("error message:")
-				kits.log(tostring(scene))				
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."),请检查您的网络",2)
+				kits.log(tostring(scene))
+				local errmsg = tostring(scene)
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."\n"..errmsg.."),请检查您的网络",2)
 			end
 			return
 		end
