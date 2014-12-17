@@ -18,3 +18,6 @@ bool IOS_CopyToClipboard(const char *pszText);
 std::string IOS_CopyFromClipboard();
 bool IOS_IsPackageExist(const char *pszURL);
 bool IOS_StartApp(const char *pszURL);
+
+int TakePhoto();
+int PickPicture();

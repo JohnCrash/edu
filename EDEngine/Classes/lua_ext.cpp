@@ -19,6 +19,11 @@ extern int g_FrameHeight;
 extern bool g_Reset;
 #endif
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
 static int g_callref=LUA_REFNIL;
 
 struct TRS
@@ -226,6 +231,21 @@ static int cc_isobj(lua_State *L)
 	 else
 		 lua_pushboolean(L,true);
 	 return 1;
+}
+    
+static int cc_clock(lua_State *L)
+{
+    lua_Number clock;
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+    clock = (lua_Number)GetTickCount();
+    clock /= 1000;
+#else
+    timeval tv;
+    gettimeofday(&tv,NULL);
+    clock = (lua_Number)tv.tv_sec + (double)(tv.tv_usec)/1000000;
+#endif
+    lua_pushnumber(L,clock);
+    return 1;
 }
 /*
     1 = APP directory
@@ -505,6 +525,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_resetWindow", cc_resetWindow);
 	lua_register(L, "cc_getWindowInfo", cc_getWindowInfo);
 	lua_register(L, "cc_getScreenInfo", cc_getScreenInfo);
+    lua_register(L, "cc_clock", cc_clock);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

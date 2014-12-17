@@ -115,27 +115,41 @@ void AppDelegate::initLuaEngine()
     //window release
 	if(g_Mode=="window")
 	{
+		int w, h;
+		RECT rect;
+		HWND hwnd = GetDesktopWindow();
+		GetClientRect(hwnd, &rect);
+
 		if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
 		{
-			HWND hwnd = GetDesktopWindow();
-			RECT rect;
-			GetClientRect(hwnd,&rect);
 			int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
 			int width = rect.right-rect.left-2*borderHeight;
 			int height;
 			float v = (rect.bottom-rect.top)/(rect.right-rect.left);
+			w = width;
 			if( abs(v -9/16) > abs(v-3/4) )
 			{
 				glview->setFrameSize(width,width*3/4);
+				h = width * 3 / 4;
 			}
 			else
 			{
 				glview->setFrameSize(width,width*9/16);
+				h = width * 9 / 16;
 			}
 		}
 		else
 		{
 			glview->setFrameSize(g_FrameWidth,g_FrameHeight);
+			w = g_FrameWidth;
+			h = g_FrameHeight;
+		}
+		if (g_hMainWnd && hwnd )
+		{ //æ”÷–∑≈÷√
+			int x,y;
+			x = (abs(rect.right-rect.left)-w)/2;
+			y = 0;//(abs(rect.bottom-rect.top)-h)/2;
+			SetWindowPos(g_hMainWnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 		}
 	}
 #endif //_WIN32
