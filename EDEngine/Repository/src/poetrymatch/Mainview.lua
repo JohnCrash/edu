@@ -6,6 +6,8 @@ local cache = require "cache"
 local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local countryview = require "poetrymatch/Countryview"
+local battleview = require "poetrymatch/Battleview"
+
 
 local Mainview = class("Mainview")
 Mainview.__index = Mainview
@@ -163,7 +165,8 @@ function Mainview:init()
 	local but_duizhan = uikits.child(self._Mainview,ui.BUTTON_DUIZHAN)
 	uikits.event(but_duizhan,	
 		function(sender,eventType)	
-			
+			local scene_next = battleview.create(self)
+			uikits.pushScene(scene_next)	
 		end,"click")	
 		
 	local but_chuangguan = uikits.child(self._Mainview,ui.BUTTON_CHUANGGUAN)
@@ -176,8 +179,8 @@ function Mainview:init()
 	local but_leitai = uikits.child(self._Mainview,ui.BUTTON_LEITAI)
 	uikits.event(but_leitai,	
 		function(sender,eventType)	
-		--	local scene_next = countryview.create(self)
-		--	uikits.pushScene(scene_next)
+			local scene_next = countryview.create(self)
+			uikits.pushScene(scene_next)
 		end,"click")	
 	
 	

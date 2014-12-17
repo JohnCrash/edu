@@ -391,8 +391,8 @@ function EditPic:init()
 		texture.my_end = texture["end"]
 		texture:my_end()
 		--self.file_path = kits.get_local_directory()..'cache/screenshot.png'
-		temp_filename = os.time()..'.png'
-		texture:saveToFile(temp_filename, kCCImageFormatPNG)		
+		temp_filename = os.time()..'.jpg'
+		texture:saveToFile(temp_filename, kCCImageFormatJPEG)		
 		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
 	end
 --	button_cutpic:registerScriptTapHandler(Cut_pic)
