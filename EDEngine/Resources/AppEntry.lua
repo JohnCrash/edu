@@ -304,9 +304,11 @@ function AppEntry:init()
 		end}	
 
 	---[[-----------------------------------
+	local ti = os.clock()
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 	local laBattle = moLaBattle.Class:create()
 	bg:addChild(laBattle, 10)
+	print("time is %d", os.clock() - ti)
 
 
 	----------------]]

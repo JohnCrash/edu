@@ -493,7 +493,7 @@ end
 --自定义类型和自定义结构体的typename为table
 function lly.ensure(value, typename)
 	---[====[
-	if type(value) == nil or value == Lnull then return end --值为空则不进行检查
+	if value == nil or value == Lnull then return end --值为空则不进行检查
 
 	if type(typename) == "string" then 
 		if type(value) ~= typename and tolua.type(value) ~= typename then
