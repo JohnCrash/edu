@@ -11,4 +11,5 @@
 
 void ParseCommand( int argc,char *argv[] );
 
+void set_launch_by_url(const char *url);
 #endif /* defined(__EDEngine__parsparam__) */
