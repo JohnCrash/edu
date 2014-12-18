@@ -391,6 +391,18 @@ function lly.class(classname, super)
 	function cls:create(t)--返回class的对象
 		local pRet = self.new()
 
+		--检查是否有没有实现的纯虚函数
+		--遍历纯虚函数列表里面的文本，查看有无同样文本的函数在对象里
+		---[====[
+		if pRet.__pure_virtual_func_tab ~= nil then
+			for i, v in ipairs(pRet.__pure_virtual_func_tab) do
+				if type(pRet[v]) ~= "function" then
+					lly.error(v .. " is pure virtual func, must implement")
+				end
+			end
+		end
+		--]====]
+
 		---[====[
 		lly.finalizeInstance(pRet)--最终化对象
 		--]====]
@@ -484,6 +496,31 @@ function lly.const(table)
 	setmetatable(table, mt)
 	--]====]
 	return table
+end
+
+
+--设置纯虚函数
+--输入一个类和其函数的文本名，将这个函数称为此类的纯虚函数
+--纯虚函数必须实现，否则报错
+function lly.set_pure_virtual_function(class, strFunc)
+	---[====[
+	if type(class) ~= "table" or class.__cname == nil then 
+		lly.error("wrong class")
+	end
+
+	if type(strFunc) ~= "string" then 
+		lly.error("wrong strFunc")
+	end
+
+	--生成纯虚函数表
+	if class.__pure_virtual_func_tab == nil then
+		class.__pure_virtual_func_tab = {}
+	end
+
+	local nIndex = #class.__pure_virtual_func_tab + 1
+	class.__pure_virtual_func_tab[nIndex] = strFunc
+
+	--]====]
 end
 
 

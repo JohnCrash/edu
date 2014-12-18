@@ -1,5 +1,5 @@
 ---
---LaBattleResult.lua
+--LaBattleResultStory.lua
 --华夏诗魂的战斗结束图层
 --实际只是一个节点，里面包含UI层
 
@@ -8,6 +8,8 @@
 
 local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 local uikits = require "uikits"
+
+local moLaBattleResultBase = require "poetrymatch/BattleScene/LaBattleResultBase"
 
 lly.finalizeCurrentEnvironment()
 
@@ -60,13 +62,13 @@ local ui = lly.const{
 	BTN_CONFIRM_LOSE = "shibai/fanh",
 
 	--动画
-	ANIM_WIN_PNG = "poetrymatch/BattleScene/winAnim/shengli0.png",
-	ANIM_WIN_PLIST = "poetrymatch/BattleScene/winAnim/shengli0.plist",
-	ANIM_WIN_JSON = "poetrymatch/BattleScene/winAnim/shengli.ExportJson",
+	ANIM_WIN_PNG = "poetrymatch/BattleScene/anim_win/shengli0.png",
+	ANIM_WIN_PLIST = "poetrymatch/BattleScene/anim_win/shengli0.plist",
+	ANIM_WIN_JSON = "poetrymatch/BattleScene/anim_win/shengli.ExportJson",
 	
-	ANIM_LOSE_PNG = "poetrymatch/BattleScene/loseAnim/shibai0.png",
-	ANIM_LOSE_PLIST = "poetrymatch/BattleScene/loseAnim/shibai0.plist",
-	ANIM_LOSE_JSON = "poetrymatch/BattleScene/loseAnim/shibai.ExportJson",
+	ANIM_LOSE_PNG = "poetrymatch/BattleScene/anim_lose/shibai0.png",
+	ANIM_LOSE_PLIST = "poetrymatch/BattleScene/anim_lose/shibai0.plist",
+	ANIM_LOSE_JSON = "poetrymatch/BattleScene/anim_lose/shibai.ExportJson",
 }
 
 local CONST = lly.const{
@@ -75,14 +77,10 @@ local CONST = lly.const{
 	SHOW_GET_MOVE_TIME = 0.4,
 }
 
-local LaBattleResult = lly.class("LaBattleResult", function ()
-	return cc.Node:create()
-end)
+local LaBattleResultStory = lly.class("LaBattleResultStory", moLaBattleResultBase.Class)
 
-function LaBattleResult:ctor()
+function LaBattleResultStory:ctor()
 	return {
-		--UI
-		_wiRoot = Lnull,
 
 		--胜利层
 		_layWin = Lnull,
@@ -105,11 +103,8 @@ function LaBattleResult:ctor()
 		_artxtCardLevel = lly.array(3),
 		_arbarCardExp = lly.array(3),
 
-		_btnConfirmWin = Lnull,
-
 		--失败层
 		_layLose = Lnull,
-		_btnConfirmLose = Lnull,
 
 		--动画
 		_animWin = Lnull,
@@ -118,25 +113,11 @@ function LaBattleResult:ctor()
 	}
 end
 
-function LaBattleResult:init(tab)
-	repeat
-		if not self:initUI() then break end
-		if not self:initAnim() then break end
-
-		self._imgShowGet:setPositionY(
-			self._imgShowGet:getPositionY() - CONST.SHOW_GET_AREA_MOVE_Y)
-		self._animWin:setVisible(false)
-
-		self._layLose:setVisible(false)
-		self._animLose:setVisible(false)
-
-		return true
-	until true
-
-	return false
+function LaBattleResultStory:init(tab)
+	return self.super.init(self, tab)
 end
 
-function LaBattleResult:initUI()
+function LaBattleResultStory:initUI()
 	repeat
 		--UI
 		self._wiRoot = uikits.fromJson{file_9_16 = ui.FILE, file_3_4 = ui.FILE_3_4}
@@ -194,7 +175,7 @@ function LaBattleResult:initUI()
 	return false
 end
 
-function LaBattleResult:initAnim()
+function LaBattleResultStory:initAnim()
 	--胜利动画
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(
 		ui.ANIM_WIN_PNG, ui.ANIM_WIN_PLIST, ui.ANIM_WIN_JSON)
@@ -211,25 +192,25 @@ function LaBattleResult:initAnim()
     	self._wiRoot:getContentSize().width / 2,self._wiRoot:getContentSize().height / 2)
     self._wiRoot:addChild(self._animLose)
 
+    --位置和显示的初始化
+    self._imgShowGet:setPositionY(
+		self._imgShowGet:getPositionY() - CONST.SHOW_GET_AREA_MOVE_Y)
+	self._animWin:setVisible(false)
+
+	self._layLose:setVisible(false)
+	self._animLose:setVisible(false)
+
     return true
 end
 
 ----------------------------------------------
-function LaBattleResult:setWidget(filename)
-	local widget = uikits.child(self._wiRoot, filename)
-	if not widget then
-		lly.error("wrong widget filename", 3)
-	end
 
-	return widget
-end
-------------------------------------------------
 --获取数据
-function LaBattleResult:setData(table)
+function LaBattleResultStory:setData(table)
 
 end
 
-function LaBattleResult:win()
+function LaBattleResultStory:win()
 	--胜利动画回调
     self._animWin:getAnimation():setMovementEventCallFunc(
     	function (armature, movementType, movementID)
@@ -243,7 +224,7 @@ function LaBattleResult:win()
 	self._animWin:getAnimation():play("shengli", -1, 0)
 end
 
-function LaBattleResult:onWinAnimComplete()
+function LaBattleResultStory:onWinAnimComplete()
 	--飞入展示层
 	local acMove = cc.MoveBy:create(CONST.SHOW_GET_MOVE_TIME, 
 		cc.p(0, CONST.SHOW_GET_AREA_MOVE_Y))
@@ -257,7 +238,7 @@ function LaBattleResult:onWinAnimComplete()
 		cc.EaseExponentialOut:create(acMove)))
 end
 
-function LaBattleResult:lose()
+function LaBattleResultStory:lose()
 	self._animLose:getAnimation():setMovementEventCallFunc(
     	function (armature, movementType, movementID)
     		if movementType == ccs.MovementEventType.complete then
@@ -270,22 +251,12 @@ function LaBattleResult:lose()
 	self._animLose:getAnimation():play("shibai", -1, 0)
 end
 
-function LaBattleResult:onLoseAnimComplete()
+function LaBattleResultStory:onLoseAnimComplete()
 	self._layLose:setVisible(true)
 end
 
---设置胜利后的按钮的回调
-function LaBattleResult:setWinBtnFunc(func)
-	uikits.event(self._btnConfirmWin, func)
-end
-
---设置胜利后的按钮的回调
-function LaBattleResult:setLoseBtnFunc(func)
-	uikits.event(self._btnConfirmLose, func)
-end
-
 return {
-	Class = LaBattleResult,
+	Class = LaBattleResultStory,
 
 }
 

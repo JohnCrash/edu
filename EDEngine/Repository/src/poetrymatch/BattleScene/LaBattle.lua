@@ -15,10 +15,22 @@
 local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 local uikits = require "uikits"
 
-local moLaBattleResult = require "poetrymatch/BattleScene/LaBattleResult"
+--战斗类型
+local BATTLE_TYPE = {
+	STORY = 1, --故事模式（闯关）
+	FIGHT = 2, --对战模式
+	CHALLENGE = 3, --挑战模式（擂台）
+}
+
+--阵营类型
+local CAMP_TYPE = {
+	PLAYER = 1,
+	ENEMY = 2,
+	MAX = 3,
+}
 
 --题的类型
-local QUSE_TYPE = {
+local QUES_TYPE = {
 	SINGLE_CHOICE = 1, --单选
 	MULTIPLE_CHOICE = 2, --多选
 	YES_OR_NO = 3, --对错
@@ -33,6 +45,8 @@ local ui = lly.const{
 	FILE_3_4 = "",
 
 	--
+	IMG_BG = "beij",
+
 	LAY_CENTER_UI = "zhandou/centerUI",
 
 	TXT_PLYR_NAME = "zhandou/centerUI/womz",
@@ -96,8 +110,8 @@ local ui = lly.const{
 	TXT_LONG_CHOOSE_4 = "tiqu/shiju/s4/wen",
 
 	LAY_RIGHT_OR_WRONG = "tiqu/panduan", --对错题
-	CKB_LONG_RIGHT = "tiqu/panduan/dui",
-	CKB_LONG_WRONG = "tiqu/panduan/cuo",
+	CKB_RIGHT = "tiqu/panduan/dui",
+	CKB_WRONG = "tiqu/panduan/cuo",
 
 	LAY_FILL_IN_BLANK = "tiqu/tiankong", --填空题
 	IPT_FILL_IN_BLANK = "tiqu/tiankong/tk/wen",
@@ -133,6 +147,7 @@ local ui = lly.const{
 	BTN_CONFIRM = "wu/guanb",
 
 	--对话
+	LAY_TALK = "talk",
 	IMG_PLYR_TALK = "talk/wos",
 	IMG_ENEMY_TALK = "talk/dfs",
 
@@ -157,7 +172,7 @@ local CONST = lly.const{
 
 	--倒计时
 	CHANGE_CARD_TIME = 5,
-	ANSWER_TIME = 12,
+	ANSWER_TIME = 2,
 
 	--粒子效果
 	PARTICLE_WIND = "poetrymatch/BattleScene/Particles/hua.plist",
@@ -182,6 +197,8 @@ function LaBattle:ctor()
 		_wiRoot = Lnull,
 
 		--最上血条部分
+		_imgBG = Lnull, --背景
+
 		_layCenterUI = Lnull,
 
 		_txtPlyrName = Lnull,
@@ -229,8 +246,8 @@ function LaBattle:ctor()
 		_artxtLongChoose = lly.array(4), --4项
 
 		_layRightOrWrong = Lnull, --对错题
-		_ckbLongRight = Lnull,
-		_ckbLongWrong = Lnull,
+		_ckbRight = Lnull,
+		_ckbWrong = Lnull,
 
 		_layFillInBlank = Lnull, --填空题
 		_iptFillInBlank = Lnull,
@@ -256,10 +273,11 @@ function LaBattle:ctor()
 		_btnConfirm = Lnull,
 
 		--对话
+		_layTalk = Lnull,
 		_imgPlyrTalk = Lnull,
 		_imgEnemyTalk = Lnull,
 
-		_laResult = Lnull,
+		_laResult = Lnull, --三种不同的战斗给予不同的结果画面
 
 		--位置
 		_posPlyrCard = Lnull, --玩家卡牌原始位置
@@ -282,6 +300,9 @@ function LaBattle:ctor()
 		--离子
 		_layParticle = Lnull, --粒子效果所在层
 		_particle = Lnull,
+
+		--战斗类型
+		_nCurBattleType = BATTLE_TYPE.STORY,
 
 		--下个状态
 		_stateNext = Lnull, 
@@ -313,7 +334,10 @@ function LaBattle:ctor()
 		_nPlyrCurrentHP = 0, --玩家当前HP
 		_nEnemyCurrentHP = 0, --敌人当前HP
 
-		_nCurQuesType = QUSE_TYPE.SINGLE_CHOICE, --当前题类型
+		_nCurQuesType = QUES_TYPE.SINGLE_CHOICE, --当前题类型
+
+		--选择题答案
+		_arbChoise = lly.array(4)
 		
 	}
 end
@@ -385,6 +409,9 @@ function LaBattle:initUI()
 
 		if not self._wiRoot then break end
 		self:addChild(self._wiRoot, CONST.Z_UI)
+
+		--背景
+		self._imgBG = self:setWidget(ui.IMG_BG)
 
 		--最上血条部分
 		self._layCenterUI = self:setWidget(ui.LAY_CENTER_UI)
@@ -469,28 +496,22 @@ function LaBattle:initUI()
 
 		--对错
 		self._layRightOrWrong = self:setWidget(ui.LAY_RIGHT_OR_WRONG)
-		self._ckbLongRight = self:setWidget(ui.CKB_LONG_RIGHT)
-		self._ckbLongWrong = self:setWidget(ui.CKB_LONG_WRONG)
+		self._ckbRight = self:setWidget(ui.CKB_RIGHT)
+		self._ckbWrong = self:setWidget(ui.CKB_WRONG)
 
 		--uikits.event的回调
 		local function onClickYesOrNo(sender, eventType)
 			self:onClickYesOrNo(sender, eventType)			
 		end
 
-		uikits.event(self._ckbLongRight, onClickYesOrNo)
-		uikits.event(self._ckbLongWrong, onClickYesOrNo)
+		uikits.event(self._ckbRight, onClickYesOrNo)
+		uikits.event(self._ckbWrong, onClickYesOrNo)
 
 		--填空
 		self._layFillInBlank = self:setWidget(ui.LAY_FILL_IN_BLANK)
 		self._iptFillInBlank = self:setWidget(ui.IPT_FILL_IN_BLANK)
 
 		self._layShield = self:setWidget(ui.LAY_SHIELD)
-
-		---[[
-		self._layFillInBlank:setVisible(false)
-		self._layShortChoose:setVisible(false)
-		self._layLongChoose:setVisible(true)
-		--]]
 
 		--卡牌改变区
 		self._imgCardChangeArea = self:setWidget(ui.IMG_CARD_CHANGE_AREA)
@@ -540,6 +561,7 @@ function LaBattle:initUI()
 		self._btnConfirm = self:setWidget(ui.BTN_CONFIRM)
 
 		--对话
+		self._layTalk = self:setWidget(ui.LAY_TALK)
 		self._imgPlyrTalk = self:setWidget(ui.IMG_PLYR_TALK)
 		self._imgEnemyTalk = self:setWidget(ui.IMG_ENEMY_TALK)
 
@@ -547,7 +569,7 @@ function LaBattle:initUI()
 		self._layParticle = self:setWidget(ui.LAY_PARTICLE)
 
 		math.randomseed(os.time())
-		if math.random(2) == 1 then
+		if math.random(2) == 2 then
 			self._particle = cc.ParticleSystemQuad:create(CONST.PARTICLE_WIND)
 			self._particle:setPosition(
 				cc.Director:getInstance():getVisibleSize().width, 
@@ -562,22 +584,6 @@ function LaBattle:initUI()
 			self._particle:setScale(3.0)
 			self._layParticle:addChild(self._particle)
 		end
-
-		--结束图层初始化
-		self._laResult = moLaBattleResult.Class:create()
-		if not self._laResult then break end
-
-		self:addChild(self._laResult, CONST.Z_RESULT)
-		self._laResult:setVisible(false)
-
-		--结束图层的按钮的回调
-		self._laResult:setWinBtnFunc(function ()
-			lly.log("press win btn")
-		end)
-
-		self._laResult:setLoseBtnFunc(function ()
-			lly.log("press lose btn")
-		end)
 
 		return true
 	until true
@@ -605,6 +611,52 @@ function LaBattle:initUIWithData()
 		self._arbtnEnemySkill[1] = self:setWidget(ui.BTN_ENEMY_SKILL_1)
 		self._arbtnEnemySkill[2] = self:setWidget(ui.BTN_ENEMY_SKILL_2)
 		self._arbtnEnemySkill[3] = self:setWidget(ui.BTN_ENEMY_SKILL_3)
+
+		---[[
+		self._nCurBattleType = BATTLE_TYPE.CHALLENGE
+		--]]
+
+		--背景 根据战斗类型和关卡不同而不同
+		local strBGName = "poetrymatch/BattleScene/BG/"
+		if self._nCurBattleType == BATTLE_TYPE.STORY then
+			--根据关卡获得背景图片名称
+			strBGName = strBGName .. "duiz1.jpg"
+		elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
+			strBGName = strBGName .. "duiz1.jpg"
+		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then
+			strBGName = strBGName .. "leitzhandou.jpg"
+		else
+			lly.error("wrong BATTLE_TYPE")
+		end
+
+		self._imgBG:loadTexture(strBGName)
+
+		--结束图层初始化 根据战斗类型不同而不同
+		if self._nCurBattleType == BATTLE_TYPE.STORY then
+			local moLaBattleResultStory = require "poetrymatch/BattleScene/LaBattleResultStory"
+			self._laResult = moLaBattleResultStory.Class:create()
+
+		elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
+			local moLaBattleResultFight = require "poetrymatch/BattleScene/LaBattleResultFight"
+			self._laResult = moLaBattleResultFight.Class:create()
+
+		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then
+			local moLaBattleResultChallenge = require "poetrymatch/BattleScene/LaBattleResultChallenge"
+			self._laResult = moLaBattleResultChallenge.Class:create()
+
+		else
+			lly.error("wrong BATTLE_TYPE")
+		end
+
+		if not self._laResult then break end
+
+		self:addChild(self._laResult, CONST.Z_RESULT)
+		self._laResult:setVisible(false)
+
+		--结束图层的按钮的回调
+		self._laResult:setEndFunc(function ()
+			lly.log("press win btn")
+		end)
 
 		return true
 	until true
@@ -682,6 +734,7 @@ function LaBattle:initAnim()
 	self._btnGiveUp:setVisible(false)
 
 	--对话的位置安放好
+	self._layTalk:setVisible(true)
 	self._imgPlyrTalk:setVisible(true)
 	self._imgEnemyTalk:setVisible(true)
 	self._imgPlyrTalk:setPositionY(self._imgPlyrTalk:getPositionY() - self._nDisTalkMove)
@@ -707,7 +760,7 @@ function LaBattle:initData(data)
 	self._barEnemyHP:setPercent(100)
 
 	--设置回合数并展示
-	self._nRoundsNumber = 2
+	self._nRoundsNumber = 1
 	self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
 	return true
@@ -788,20 +841,85 @@ function LaBattle:useItem()
 
 end
 
---检测血量，如果一方血量小于等于0，则下个状态为输赢状态
-function LaBattle:checkHP()
-	lly.log("check: player HP %d (%d), enemy HP %d (%d)", 
-			self._nPlyrCurrentHP, self._barPlyrHP:getPercent(),
-			self._nEnemyCurrentHP, self._barEnemyHP:getPercent())
+--执行HP减少动画
+function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
+	lly.ensure(camp_type, "number")
+	lly.ensure(nHP, "number")
+	lly.ensure(func, "function")
+	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
+		lly.error("wrong type") 
+	end
+
+	--开始回调
+	func(self)
 end
 
 ---------------------------------------------------------
-function LaBattle:downloadEnemyQuestions()
+function LaBattle:downloadQuestion(camp_type)
+	lly.ensure(camp_type, "number")
+	if camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then lly.error("wrong type") end
+
+	local r = math.random(4)
+
+	if r == 1 then self._nCurQuesType = QUES_TYPE.SINGLE_CHOICE
+	elseif r == 2 then self._nCurQuesType = QUES_TYPE.MULTIPLE_CHOICE
+	elseif r == 3 then self._nCurQuesType = QUES_TYPE.YES_OR_NO
+	else  self._nCurQuesType = QUES_TYPE.FILL_IN_BLANK
+	end
+
 	self._bNextStateDataHasLoad = true
 end
 
-function LaBattle:checkPlayerAnswerAndDownloadPlayerQusetion()
+function LaBattle:checkAnswer()
 	self._bNextStateDataHasLoad = true
+end
+
+---------------------------------------------------------
+--写入题板
+function LaBattle:writeInQuestionArea()
+	--清空答案
+	for i = 1, 4 do self._arbChoise[i] = false end
+
+	self._layFillInBlank:setVisible(false)
+	self._layShortChoose:setVisible(false)
+	self._layLongChoose:setVisible(false)
+	self._layRightOrWrong:setVisible(false)
+
+	--显示相应答题区，清空题板上点击
+	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE
+		or self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
+		--判断答案长度，5个汉字或以下用短选择
+		if true then --短
+			self._layShortChoose:setVisible(true)
+
+			--写入选项
+
+			--清空
+			for i = 1, 4 do
+				self._arckbShortChoose[i]:setSelectedState(false)
+			end
+		else
+			self._layLongChoose:setVisible(true)
+
+			--写入选项
+
+			--清空
+			for i = 1, 4 do
+				self._arckbLongChoose[i]:setSelectedState(false)
+			end
+		end
+
+	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+		self._layRightOrWrong:setVisible(true)
+		self._ckbRight:setSelectedState(false)
+		self._ckbWrong:setSelectedState(false)
+
+	elseif self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
+		self._layFillInBlank:setVisible(true)
+		self._iptFillInBlank:setText("")
+	else
+		lly.error("wrong ques type")
+	end
 end
 
 
@@ -854,17 +972,75 @@ function LaBattle:onClickChangeCard(sender, eventType)
 end
 
 function LaBattle:onClickShortChoose(sender, eventType)
-	
-	
+	--判断是单选还是多选
+	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE then
+		for i = 1, 4 do
+			if sender ~= self._arckbShortChoose[i] then
+				self._arckbShortChoose[i]:setSelectedState(false)
+				self._arckbShortChoose[i]:setTouchEnabled(true)
+				self._arbChoise[i] = false
+			else
+				self._arckbShortChoose[i]:setTouchEnabled(false)
+				self._arbChoise[i] = true
+			end
+		end
+	elseif self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
+		for i = 1, 4 do
+			if sender ~= self._arckbShortChoose[i] then
+				self._arbChoise[i] = self._arckbShortChoose[i]:getSelectedState()
+			else
+				--此时eventtype为boolean值，选择为true，取消为false			
+				self._arbChoise[i] = eventType 
+			end
+		end
+	else
+		lly.error("wrong question type in short")
+	end
 end
 
 function LaBattle:onClickLongChoose(sender, eventType)
-	
-	
+	--判断是单选还是多选
+	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE then
+		for i = 1, 4 do
+			if sender ~= self._arckbLongChoose[i] then
+				self._arckbLongChoose[i]:setSelectedState(false)
+				self._arckbLongChoose[i]:setTouchEnabled(true)
+				self._arbChoise[i] = false
+			else
+				self._arckbLongChoose[i]:setTouchEnabled(false)
+				self._arbChoise[i] = true
+			end
+		end
+	elseif self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
+		for i = 1, 4 do
+			if sender ~= self._arckbLongChoose[i] then
+				self._arbChoise[i] = self._arckbLongChoose[i]:getSelectedState()
+			else
+				--此时eventtype为boolean值，选择为true，取消为false			
+				self._arbChoise[i] = eventType 
+			end
+		end
+	else
+		lly.error("wrong question type in long")
+	end	
 end
 
 function LaBattle:onClickYesOrNo(sender, eventType)
-	
+	if sender == self._ckbRight then
+		self._ckbRight:setTouchEnabled(false)
+		self._arbChoise[1] = true
+
+		self._ckbWrong:setSelectedState(false)
+		self._ckbWrong:setTouchEnabled(true)
+		self._arbChoise[2] = false
+	else
+		self._ckbRight:setSelectedState(false)
+		self._ckbRight:setTouchEnabled(true)
+		self._arbChoise[1] = false
+
+		self._ckbWrong:setTouchEnabled(false)
+		self._arbChoise[2] = true
+	end
 	
 end
 
@@ -922,6 +1098,9 @@ function LaBattle:prepare_S()
 	self._bCurStateIsEnding = false
 	self._bNextStateDataHasLoad = false
 
+	--展示回合数
+	self._atlasRounds:setString(tostring(self._nRoundsNumber))
+
 	--展示选择页面后开始倒计时
 	local acMoveCC = cc.MoveBy:create(CONST.CD_CHNG_MOVE_TIME, 
 		cc.p(0, self._nDisAreaMoveY))
@@ -936,7 +1115,7 @@ function LaBattle:prepare_S()
 		cc.EaseExponentialOut:create(acMoveCC), callfuncCountingdown)) 
 
 	--同时下载敌方的题
-	self:downloadEnemyQuestions()
+	self:downloadQuestion(CAMP_TYPE.ENEMY)
 end
 
 --结束准备
@@ -976,6 +1155,9 @@ function LaBattle:askByEnemy_S()
 	self._imgQuestionArea:setPositionX(
 		self._posQuestionArea.x + self._nDisQuestionAreaMoveX)
 	self._txtCountdown:setString(tostring(CONST.ANSWER_TIME))
+
+	--写入题板
+	self:writeInQuestionArea()
 
 	--展示敌方对话
 	local acMoveTalkFrom = cc.MoveBy:create(CONST.TALK_MOVE_TIME, cc.p(0, self._nDisTalkMove))
@@ -1032,33 +1214,12 @@ end
 function LaBattle:endPlayerAnswer()
 	lly.logCurLocAnd("end plyr anser")
 
-	--所有按钮不可点击
-
-
-	--防止重复点击
-	if self._bBuzyToEndingState then return end
-	self._bBuzyToEndingState = true
-
 	--结束计时
 	self:stopCountingdown()
-
-	do return end
 
 	--隐藏标识并结束动画
 	self._imgPlyrAnswerToken:setVisible(false)
 	self._imgPlyrAnswerToken:stopAllActions()
-
-	--变成半透明
-	local acFadeOut = cc.FadeTo:create(
-		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
-
-	local callfuncNextState = cc.CallFunc:create(function ()
-		self._bBuzyToEndingState = false
-		self._bCurStateIsEnding = true
-	end)
-
-	self._imgQuestionArea:runAction(cc.Sequence:create(
-		acFadeOut, callfuncNextState))
 
 	--颜色变暗
 	self._imgQuestionArea:setColor(
@@ -1066,9 +1227,11 @@ function LaBattle:endPlayerAnswer()
 
 	--打开屏蔽层
 	self._layShield:setVisible(true)
+
+	self._bCurStateIsEnding = true
 end
 
---敌人进攻
+--敌人进攻，同时提交答案，获得结果
 function LaBattle:attackByEnemy_S()
 	printState("attack by Enemy")
 
@@ -1078,10 +1241,22 @@ function LaBattle:attackByEnemy_S()
 	self._bNextStateDataHasLoad = false
 
 	--答题动画
-	self._bCurStateIsEnding = true
+	--变成半透明
+	local acFadeOut = cc.FadeTo:create(
+		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
 
-	--进行一部分动画，同时提交服务器答案等待验证，同时申请玩家出的题目
-	self:checkPlayerAnswerAndDownloadPlayerQusetion()
+	--攻击动画
+
+	--结束回调
+	local callfuncNextState = cc.CallFunc:create(function ()
+		self._bCurStateIsEnding = true
+	end)
+
+	self._imgQuestionArea:runAction(cc.Sequence:create(
+		acFadeOut, callfuncNextState))
+
+	--提交服务器答案等待验证
+	self:checkAnswer()
 
 end
 
@@ -1090,21 +1265,42 @@ function LaBattle:showResultOfPlayerAtk_S()
 	printState("show Result Of Player Atk")
 
 	--设置下个状态
-	--查看是否还有剩余体力，没有的话直接进入下一次敌人进攻
-	self._stateNext = state.endShowPlyrResult
+	self._stateNext = state.askByPlayer
+
+	--查看服务器返回的结果是否为结束，是的话进入结束画面
+
+	--查看是否还有剩余体力，没有的话直接进入下一次敌人进攻或者提示
+	
+	--状态
 	self._bCurStateIsEnding = false
+	self._bNextStateDataHasLoad = false
 
-	--根据结果展示谁减少HP，然后进入血量检测
-	self:checkHP()
-	self._bCurStateIsEnding = true
+	--获取谁减少了多少血
+	local nHPdecrease
+	local nWhosHPdecrease = CAMP_TYPE.PLAYER
 
+	--根据结果展示谁减少HP，然后执行回调
+	--如果结束就不执行endShowPlyrResult
+	local func
+
+	if self._stateNext == state.askByPlayer then
+		func = self.endShowPlyrResult
+	else
+		func = function (self) self._bCurStateIsEnding = true end
+	end
+	
+	self:doHPDecreseAnim(nWhosHPdecrease, nHPdecrease, func)
+
+	--如果继续，则获取玩家出的题
+	if self._stateNext == state.askByPlayer then
+		self:downloadQuestion(CAMP_TYPE.PLAYER)
+	else
+		self._bNextStateDataHasLoad = true
+	end 
+	
 end
 
-function LaBattle:endShowPlyrResult_S()
-	printState("show Result Of Player Atk")
-
-	self._stateNext = state.askByPlayer
-	self._bCurStateIsEnding = false
+function LaBattle:endShowPlyrResult()
 
 	--收起 *2是为了移走的速度更舒服
 	local acMoveCC = cc.MoveBy:create(
@@ -1137,6 +1333,15 @@ function LaBattle:askByPlayer_S()
 	self._imgQuestionArea:setPositionX(
 		self._posQuestionArea.x - self._nDisQuestionAreaMoveX)
 	self._txtCountdown:setString(tostring(CONST.ANSWER_TIME))
+
+	--打开屏蔽层
+	self._layShield:setVisible(true)
+
+	--隐藏确认按钮
+	self._btnQuestionCommit:setVisible(false)
+
+	--写入题板
+	self:writeInQuestionArea()
 
 	--展示玩家对话
 	local acMoveTalkFrom = cc.MoveBy:create(CONST.TALK_MOVE_TIME, cc.p(0, self._nDisTalkMove))
@@ -1186,16 +1391,12 @@ function LaBattle:waitingForEnemyAnswer_S()
 	--开始倒计时
 	self:beginCountingdown(CONST.ANSWER_TIME)
 
-	--根据服务器反馈的时间，时间到达后进入下个状态
+	--根据服务器反馈的时间，时间到达后显示其答案，并进入下个状态
 
 end
 
 function LaBattle:endEnemyAnswer()
 	lly.logCurLocAnd("end enemy anser")
-
-	--防止重复点击
-	if self._bBuzyToEndingState then return end
-	self._bBuzyToEndingState = true
 
 	--结束计时
 	self:stopCountingdown()
@@ -1204,24 +1405,12 @@ function LaBattle:endEnemyAnswer()
 	self._imgEnemyAnswerToken:setVisible(false)
 	self._imgEnemyAnswerToken:stopAllActions()
 
-	--变成半透明
-	local acFadeOut = cc.FadeTo:create(
-		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
-
-	local callfuncNextState = cc.CallFunc:create(function ()
-		self._bBuzyToEndingState = false
-		self._bCurStateIsEnding = true
-	end)
-
-	self._imgQuestionArea:runAction(cc.Sequence:create(
-		acFadeOut, callfuncNextState))
-
 	--颜色变暗
 	self._imgQuestionArea:setColor(
 		cc.c3b(CONST.QUES_COLOR, CONST.QUES_COLOR, CONST.QUES_COLOR))
 
-	--打开屏蔽层
-	self._layShield:setVisible(true)
+	--
+	self._bCurStateIsEnding = true
 end
 
 --玩家进攻
@@ -1231,10 +1420,25 @@ function LaBattle:attackByPlayer_S()
 	--设置下个状态
 	self._stateNext = state.showResultOfEnemyAtk
 	self._bCurStateIsEnding = false
-	--self._bNextStateDataHasLoad = false --敌人的答题结果已经加载
+	self._bNextStateDataHasLoad = false
 
 	--答题动画
-	self._bCurStateIsEnding = true
+	--变成半透明
+	local acFadeOut = cc.FadeTo:create(
+		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
+
+	--动画
+
+	--结束回调
+	local callfuncNextState = cc.CallFunc:create(function ()
+		self._bCurStateIsEnding = true
+	end)
+
+	self._imgQuestionArea:runAction(cc.Sequence:create(
+		acFadeOut, callfuncNextState))
+
+	--提交服务器答案等待验证
+	self:checkAnswer()
 
 end
 
@@ -1243,20 +1447,11 @@ function LaBattle:showResultOfEnemyAtk_S()
 	printState("show Result Of Enemy Atk")
 
 	--设置下个状态
-	self._stateNext = state.checkRoundsNumber
-	self._bCurStateIsEnding = false
+	self._stateNext = state.prepare
 
-	--根据结果展示谁减少HP，然后进入血量检测
-	self:checkHP()
-	self._bCurStateIsEnding = true
+	--查看服务器返回的结果是否为结束，是的话进入结束画面
 
-end
-
---回合数检测，在敌人进攻结果状态后检测
---计算回合数，如果回合数为1则进入结束判断，否则显示当前回合数后减少1
-function LaBattle:checkRoundsNumber_S()
-	printState("check Rounds Number")
-
+	--查看服务器返回的结果是否为回合结束，否则改变回合数的显示
 	if self._nRoundsNumber <= 1 then
 		--判断血量，玩家大算赢，小或者平算输
 		--血量按照比例判断
@@ -1272,17 +1467,39 @@ function LaBattle:checkRoundsNumber_S()
 
 	else
 		self._nRoundsNumber = self._nRoundsNumber - 1
-		self._atlasRounds:setString(tostring(self._nRoundsNumber))
-		self._stateNext = state.endShowEnemyResult
 	end
+
+	--状态
+	self._bCurStateIsEnding = false
+	self._bNextStateDataHasLoad = false
+
+	--获取谁减少了多少血
+	local nHPdecrease
+	local nWhosHPdecrease = CAMP_TYPE.ENEMY
+
+	--根据结果展示谁减少HP，然后执行回调
+	--如果结束就不执行endShowPlyrResult
+	local func
+
+	if self._stateNext == state.prepare then
+		func = self.endShowEnemyResult
+	else
+		func = function (self) self._bCurStateIsEnding = true end
+	end
+	
+	self:doHPDecreseAnim(nWhosHPdecrease, nHPdecrease, func)
+
+	--如果继续，则获取玩家出的题
+	if self._stateNext == state.prepare then
+		self:downloadQuestion(CAMP_TYPE.ENEMY)
+	else
+		self._bNextStateDataHasLoad = true
+	end 
+
 end
 
 --结束动画
-function LaBattle:endShowEnemyResult_S()
-	printState("show Result Of Player Atk")
-
-	self._stateNext = state.prepare
-	self._bCurStateIsEnding = false
+function LaBattle:endShowEnemyResult()
 
 	--收起 *2是为了移走的速度更舒服
 	local acMoveCC = cc.MoveBy:create(
@@ -1292,6 +1509,7 @@ function LaBattle:endShowEnemyResult_S()
 		self._imgQuestionArea:setOpacity(255)
 		self._imgQuestionArea:setColor(cc.c3b(255, 255, 255)) --恢复颜色
 		self._layShield:setVisible(false) --关闭屏蔽层
+		self._btnQuestionCommit:setVisible(true) --显示按钮
 		self._bCurStateIsEnding = true
 	end)
 
@@ -1329,13 +1547,10 @@ state = lly.const{
 	waitingForPlayerAnswer = LaBattle.waitingForPlayerAnswer_S,
 	attackByEnemy = LaBattle.attackByEnemy_S,
 	showResultOfPlayerAtk = LaBattle.showResultOfPlayerAtk_S,
-	endShowPlyrResult = LaBattle.endShowPlyrResult_S,
 	askByPlayer = LaBattle.askByPlayer_S,
 	waitingForEnemyAnswer = LaBattle.waitingForEnemyAnswer_S,
 	attackByPlayer = LaBattle.attackByPlayer_S,
 	showResultOfEnemyAtk = LaBattle.showResultOfEnemyAtk_S,
-	endShowEnemyResult = LaBattle.endShowEnemyResult_S,
-	checkRoundsNumber = LaBattle.checkRoundsNumber_S,
 	win = LaBattle.win_S,
 	lose = LaBattle.lose_S,
 }
