@@ -37,6 +37,34 @@
 // cocos2d application instance
 static AppDelegate s_sharedApplication;
 extern std::string g_Goback;
+extern std::string g_Launch;
+
+bool platformOpenURL( const char *url )
+{
+    return false;
+}
+/*
+ *  popup launch app
+ */
+static void doGoback()
+{
+    if( !g_Goback.empty() )
+    {
+        NSURL *url;
+        NSString *nsstr;
+        nsstr = [NSString stringWithFormat:@"%s://",g_Goback.c_str()];
+        url = [NSURL URLWithString:nsstr];
+        if( [[UIApplication sharedApplication] canOpenURL:url] )
+        {
+            [[UIApplication sharedApplication] openURL:url];
+        }
+        g_Goback = "";
+    }
+}
+static void onexit()
+{
+    doGoback();
+}
 /*
  *  switch lua application
  */
@@ -50,8 +78,9 @@ static bool requestURL( NSURL *url,bool isrunning )
         const char * purl = [surl cStringUsingEncoding:NSUTF8StringEncoding];
         if( purl )
         {
+            std::string oldLanuch = g_Launch;
             set_launch_by_url( purl);
-            if( isrunning )
+            if( isrunning && oldLanuch != g_Launch )
             {
                 //switch other application,restart
                 cocos2d::ScriptEngineManager::getInstance()->setScriptEngine(nullptr);
@@ -76,6 +105,7 @@ static bool requestURL( NSURL *url,bool isrunning )
     {
         requestURL( url,false );
     }
+    atexit(onexit);
     // Override point for customization after application launch.
 
     // Add the view controller's view to the window and display.
@@ -144,19 +174,7 @@ static bool requestURL( NSURL *url,bool isrunning )
      If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
      */
     cocos2d::Application::getInstance()->applicationDidEnterBackground();
-    if( !g_Goback.empty() )
-    {
-        
-        NSURL *url;
-        NSString *nsstr;
-        nsstr = [NSString ];
-        url = [NSURL URLWithString:nsstr];
-        if( [[UIApplication sharedApplication] canOpenURL:url] )
-        {
-            [[UIApplication sharedApplication] openURL:url];
-        }
-        g_Goback = "";
-    }
+    doGoback();
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {

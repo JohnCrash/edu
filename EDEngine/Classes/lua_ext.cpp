@@ -504,6 +504,21 @@ int cc_getScreenInfo(lua_State *L)
 #endif
 }
 
+static int cc_openURL(lua_State *L)
+{
+    if( lua_isstring(L, 1) )
+    {
+        bool ret = platformOpenURL(lua_tostring(L, 1));
+        lua_pushboolean(L,ret);
+    }
+    else
+    {
+        lua_pushboolean(L, false);
+        lua_pushstring(L,"cc_openURL invalid augument #1");
+    }
+    return 2;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -526,6 +541,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_getWindowInfo", cc_getWindowInfo);
 	lua_register(L, "cc_getScreenInfo", cc_getScreenInfo);
     lua_register(L, "cc_clock", cc_clock);
+    lua_register(L, "cc_openURL",cc_openURL);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

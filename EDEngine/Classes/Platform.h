@@ -21,6 +21,8 @@
 #define RESULT_CANCEL (0)
 #define RESULT_ERROR (-2)
 
+bool platformOpenURL( const char *url );
+
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
 
