@@ -21,6 +21,7 @@
 #define RESULT_CANCEL (0)
 #define RESULT_ERROR (-2)
 
+bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();
 
