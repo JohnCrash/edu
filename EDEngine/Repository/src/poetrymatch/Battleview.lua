@@ -14,6 +14,8 @@ local ui = {
 	
 	BUTTON_SEARCH = 'pipei',
 	VIEW_SEARCH_RES = 'duis',
+	BUTTON_RESEARCH = 'duis/huan',
+	TXT_TIME = 'duis/20s',
 	
 	BUTTON_QUIT = 'xinxi/fanhui',
 	BUTTON_JIANG = 'xinxi/jiang',
@@ -74,14 +76,54 @@ function Battleview:getdatabyurl()
 	end,'N')
 end
 
+local schedulerEntry
+local scheduler = cc.Director:getInstance():getScheduler()
+
+function Battleview:show_search_res()	
+	
+end
+
 function Battleview:init_gui()	
 	local view_search_res = uikits.child(self._Battleview,ui.VIEW_SEARCH_RES)
 	view_search_res:setVisible(false)
-	local but_search = uikits.child(self._Battleview,ui.BUTTON_SEARCH)
+	local but_re_search = uikits.child(self._Battleview,ui.BUTTON_RESEARCH)	
+	local txt_time = uikits.child(self._Battleview,ui.TXT_TIME)	
+	local choose_time
+	local but_search = uikits.child(self._Battleview,ui.BUTTON_SEARCH)	
+	
+	local function timer_update(time)
+		txt_time:setString(choose_time)
+		choose_time = choose_time -1
+		if schedulerEntry and choose_time < 0 then
+			view_search_res:setVisible(false)
+			but_search:setVisible(true)			
+			scheduler:unscheduleScriptEntry(schedulerEntry)
+			schedulerEntry = nil
+		end
+	end	
+	
+	uikits.event(but_re_search,	
+		function(sender,eventType)	
+			self:show_search_res()
+			choose_time = 10
+			txt_time:setString(choose_time)
+			choose_time = choose_time -1
+			if not schedulerEntry then
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
+			end
+		end,"click")	
+		
 	uikits.event(but_search,	
 		function(sender,eventType)	
+			self:show_search_res()
 			view_search_res:setVisible(true)
 			sender:setVisible(false)
+			choose_time = 10
+			txt_time:setString(choose_time)
+			choose_time = choose_time -1
+			if not schedulerEntry then
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
+			end
 		end,"click")	
 	
 end
