@@ -22,6 +22,8 @@
 #define RESULT_ERROR (-2)
 
 bool platformOpenURL( const char *url );
+void setUIOrientation( int m );
+int getUIOrientation();
 
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);

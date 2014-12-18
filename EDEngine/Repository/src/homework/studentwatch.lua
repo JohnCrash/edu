@@ -4,6 +4,7 @@ local kits = require "kits"
 local topics = require "homework/topics"
 local loadingbox = require "loadingbox"
 local json = require "json-c"
+local login = require "login"
 
 local ui = {
 	FILE = 'homework/yijiaokeguan.json',

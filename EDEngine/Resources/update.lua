@@ -6,12 +6,17 @@ local md5 = require "md5"
 local json = require "json-c"
 local resume = require "resume"
 
+if not kits.exist_file then
+	kits.exist_file = kits.exists_file
+end
+
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
-local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v6/'
-local local_server = 'http://192.168.2.211:81/lgh/v6/'
---local local_server = 'http://192.168.2.182/v6/'
+local versionNUM = resume.getversion()
+local liexue_server = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
+--local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
 local config_server = kits.config("update_server","get")
 if config_server and string.len(config_server)>10 then
@@ -388,13 +393,14 @@ function UpdateProgram:update()
 		if not self:check_update(self._args) then
 			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
-			if b then
+			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-			else
+			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed")
 				kits.log("error message:")
-				kits.log(tostring(scene))				
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."),请检查您的网络",2)
+				kits.log(tostring(scene))
+				local errmsg = tostring(scene)
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."\n"..errmsg.."),\n请检查您的网络",2)
 			end
 			return
 		end
@@ -450,13 +456,14 @@ function UpdateProgram:update()
 			kits.log('Update complate!')
 			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
-			if b then
+			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-			else
+			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed!")
 				kits.log("error message:")
 				kits.log(tostring(scene))
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name)..")",2)
+				local text = tostring(self._args.name).."\n"..tostring(scene)
+				self:ErrorAndExit('没有成功更新('..text..")",2)
 			end		
 		else
 			local b,e = update_one_by_one(self._oplist[self._count])

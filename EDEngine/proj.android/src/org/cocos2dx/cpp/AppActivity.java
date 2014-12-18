@@ -55,6 +55,8 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 //import org.cocos2dx.cpp.CrashHandler;
 
 public class AppActivity extends Cocos2dxActivity {
@@ -421,6 +423,46 @@ public class AppActivity extends Cocos2dxActivity {
 		return 1;
 	}
 	
+	/*
+	 * 切换方向
+	 */
+	public static void setUIOrientation( int m )
+	{
+		int orientation = myActivity.getRequestedOrientation();
+		if( m == 1 )
+		{ //横屏
+			 if(orientation !=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
+				 myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			}			
+		}else if( m == 2 )
+		{ //竖屏
+			 if(orientation !=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT){
+				 myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			}			
+		}
+	}
+	public static int getUIOrientation()
+	{
+		int orientation = myActivity.getRequestedOrientation();
+		int m = 1;
+		if(orientation !=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+			m = 1;
+		else if(orientation !=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+			m = 2;
+		return m;
+	}
+	public void onConfigurationChanged( Configuration  newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+	    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+	    	//do..
+	    	Log.w("onConfigurationChanged","SCREEN_ORIENTATION_LANDSCAPE");
+	    }
+	    else {
+	    	//do..
+	    	Log.w("onConfigurationChanged","SCREEN_ORIENTATION_PORTRAIT");
+	    }
+	}
 	//========================
 	// 传递参数
 	//========================

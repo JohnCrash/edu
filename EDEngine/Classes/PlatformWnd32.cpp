@@ -3,11 +3,74 @@
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
 #include "Files.h"
+#include "win32/glfw3native.h"
 
 #pragma comment (lib,"vfw32")
 #pragma comment (lib,"winmm.lib")
 #pragma comment (lib,"imm32.lib")
 
+extern std::string g_Mode;
+
+void setUIOrientation(int m)
+{
+	if (g_Mode == "window")
+	{
+		RECT rect;
+		HWND hwnd = GetDesktopWindow();
+		GetClientRect(hwnd, &rect);
+
+		auto pDirector = cocos2d::Director::getInstance();
+		auto glview = pDirector->getOpenGLView();
+		if (pDirector)
+		{
+			int h, w;
+			int borderHeight = 72;
+			if (m == 1)
+			{
+				w = rect.right - rect.left - 2 * borderHeight;
+				h =( w * 9 )/ 16;
+			}
+			else
+			{
+				h = abs(rect.bottom - rect.top) - borderHeight;
+				w = (h * 3 )/ 4;
+			}
+			auto resSize = glview->getDesignResolutionSize();
+			ResolutionPolicy resPolicy = glview->getResolutionPolicy();
+			glview->setFrameSize(w, h);
+			glview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
+			pDirector->setViewport();
+			cocos2d::Director::sharedDirector()->setProjection(cocos2d::Director::sharedDirector()->getProjection());
+
+			HWND glwnd = glfwGetWin32Window(glview->getWindow());
+			if (glwnd)
+			{
+				int x, y;
+				x = (abs(rect.right - rect.left) - w) / 2;
+				y = 0;
+				SetWindowPos(glwnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+			}
+		}
+	}
+}
+
+int getUIOrientation()
+{
+	if (g_Mode == "window")
+	{
+		auto pDirector = cocos2d::Director::getInstance();
+		if (pDirector)
+		{
+			auto glview = pDirector->getOpenGLView();
+			auto size = glview->getFrameSize();
+			if (size.width > size.height)
+				return 1;
+			else
+				return 2;
+		}
+	}
+	return 1;
+}
 //==========================
 // CCameraWin
 //==========================

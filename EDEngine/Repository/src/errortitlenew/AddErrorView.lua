@@ -205,9 +205,10 @@ function AddErrorView:init_gui_fun()
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
 						--file = res
-						local b,res = cc_adjustPhoto(res,1024)
+						local b,newRes = cc_adjustPhoto(res,1280)
+						kits.del_file( res )
 						if b then
-							local scene_next = editpic.create(self,res)		
+							local scene_next = editpic.create(self,newRes)		
 							uikits.pushScene(scene_next)	
 						else
 							messagebox(self,"错误","图像调整失败")
@@ -221,9 +222,10 @@ function AddErrorView:init_gui_fun()
 			cc_takeResource(PICK_PICTURE,function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
-						local b,res = cc_adjustPhoto(res,1024)
+						local b,newRes = cc_adjustPhoto(res,1280)
+						kits.del_file( res )
 						if b then
-							local scene_next = editpic.create(self,res)		
+							local scene_next = editpic.create(self,newRes)		
 							uikits.pushScene(scene_next)	
 						else
 							messagebox(self,"错误","图像调整失败")

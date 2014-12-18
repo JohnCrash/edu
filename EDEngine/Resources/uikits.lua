@@ -1025,7 +1025,14 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			if state == ccui.ScrollviewEventType.scrolling then
 				yy = cs.height - (size.height+y)
 				local actionTo2 = cc.RotateTo:create( 0.2, 90)
-				local actionTo = cc.RotateTo:create( 0.2, 90-180)				
+				local actionTo = cc.RotateTo:create( 0.2, 90-180)		
+				if yy > 1 then
+					if not self._refreshBeginTime then
+						self._refreshBeginTime = os.clock()
+					end
+				else
+					self._refreshBeginTime = nil
+				end
 				if yy>200 then
 					if self._refresh_flag == 0 then
 						self._refresh_flag = 1
@@ -1046,7 +1053,9 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 				arrow:setRotation(90)
 				text:setString(drap_text)		
 				if self._refresh_func and done == 1 then
-					self._refresh_func()
+					if self._refreshBeginTime and os.clock()-self._refreshBeginTime>0.6 then
+						self._refresh_func()
+					end
 					done = 0
 				end
 				done = 0

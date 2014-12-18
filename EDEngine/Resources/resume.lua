@@ -4,6 +4,8 @@ local ljshell = require "ljshell"
 
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
+local version = 7
+
 local function exist_file( file )
   local f = io.open(file, "rb")
   if f then f:close() end
@@ -53,6 +55,9 @@ local function isok()
 		if t.launcher==4 then
 			return false
 		elseif t.update==4 then
+			return false
+		end
+		if t.version ~= version then
 			return false
 		end
 	end
@@ -109,6 +114,7 @@ local function setflag()
 	local t = {}
 	t['launcher'] = 4
 	t['update'] = 4
+	t.version = version
 	save_resume_table(t)
 end
 
@@ -120,6 +126,13 @@ local function clearflag(key)
 	save_resume_table( t )
 end
 
+local function setvision( num )
+	local t = get_resume_table("resume.json")
+	t = t or {}
+	t.version = tostring(num)
+	save_resume_table( t )
+end
+
 if not g_isrun_resume then
 	g_isrun_resume = true
 	if not isok() then --如果系统奔溃
@@ -127,7 +140,13 @@ if not g_isrun_resume then
 	end
 	setflag()
 end
+
+local function getversion()
+	return version
+end
+
 return 
 {
 	clearflag = clearflag,
+	getversion = getversion,
 }

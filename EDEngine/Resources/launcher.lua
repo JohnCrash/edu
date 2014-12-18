@@ -7,6 +7,7 @@ local login = require "login"
 local update = require "update"
 local resume = require "resume"
 local cache = require "cache"
+local json = require "json-c"
 
 crash.open("launcher",1)
 
@@ -183,19 +184,34 @@ elseif app == 'suggestion' then
 			local suggestion = require "suggestion/SuggestionView.lua"
 			return suggestion.create()
 	end}	
+--[[
 elseif app == 'exerbooknew' then
 	update.create{name=app,updates={'errortitlenew','luacore'},
 		run=function()
 			local exerbooknew = require "errortitlenew/Loading"
 			return exerbooknew.create()
 	end}	
+--]]
 elseif app and string.len(app)>0 then
-	--任意启动
-	update.create{name=app,updates={app,'luacore'},
-		run=function()
-			local a = require(app)
-			return a.create()
-		end}
+	update.create{name=app.."_shell",updates={"luacore"},
+		run = function()
+			local s = kits.read_local_file("res/luacore/app.json")
+			if s then
+				local apps = json.decode( s )
+				if apps and apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
+					update.create{name=apps[app].name,updates=apps[app].updates,
+						run=function()
+							local a = require(apps[app].launch)
+							return a.create()
+						end}			
+				else
+					kits.log("ERROR : can not found applet : "..tostring(app))
+				end
+			else
+				kits.log("ERROR : can not read res/luacore/app.json")
+			end
+		end
+	}
 else
 	local ae = require "AppEntry"
 	mode = 2
