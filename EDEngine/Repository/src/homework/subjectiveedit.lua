@@ -552,9 +552,7 @@ function SubjectiveEdit:init_event()
 						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 						if result == RESULT_OK then
 							--file = res
-							local oldres = res
 							local b,res = cc_adjustPhoto(res,1280)
-							kits.del_file( oldres )
 							if b then
 									self:addphoto( res )
 									self:addphote_todata( res )
@@ -576,9 +574,7 @@ function SubjectiveEdit:init_event()
 				cc_takeResource(PICK_PICTURE,function(t,result,res)
 						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 						if result == RESULT_OK then
-							local oldres = res
 							local b,res = cc_adjustPhoto(res,1280)
-							kits.del_file( oldres )
 							if b then
 									self:addphoto( res )
 									self:addphote_todata( res )

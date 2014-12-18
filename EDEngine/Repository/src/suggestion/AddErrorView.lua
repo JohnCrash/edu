@@ -188,9 +188,7 @@ function AddErrorView:init()
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
 						--file = res
-						local oldres  = res
 						local b,res = cc_adjustPhoto(res,1280)
-						kits.del_file( oldres )
 						if b then
 							local scene_next = editpic.create(self,res)		
 							uikits.pushScene(scene_next)	
