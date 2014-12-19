@@ -5,6 +5,7 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
+local messagebox_ = require "messagebox"
 local editpic = require "errortitlenew/EditPic"
 local ljshell = require "ljshell"
 
@@ -101,7 +102,7 @@ function AddErrorView:adderrortitle()
 					print('t.id::'..t.id)
 				end
 			else
-				--��û������Ҳû�л���
+				--既没有网络也没有缓冲
 				messagebox.open(self,function(e)
 					if e == messagebox.TRY then
 						self:adderrortitle()
@@ -199,19 +200,26 @@ function AddErrorView:init_gui_fun()
 			local scene_next = editpic.create(self)		
 			uikits.pushScene(scene_next)						
 	end,"click")--]]
+	
+	local function messagebox(parent,title,text )
+		messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
+	end
+
 	if but_camera_pic then --zhaoxiang
 		uikits.event(but_camera_pic,function(sender)
 			cc_takeResource(TAKE_PICTURE,function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
-						--file = res
-						local b,res = cc_adjustPhoto(res,1280)
+						local b,newRes = cc_adjustPhoto(res,1280)
+						--kits.del_file( res )
 						if b then
-							local scene_next = editpic.create(self,res)		
+							local scene_next = editpic.create(self,newRes,res)		
 							uikits.pushScene(scene_next)	
 						else
-							messagebox(self,"错误","图像调整失败")
+							messagebox(self,"错误","请检查拍照设备是否正常")
 						end
+					elseif result == RESULT_ERROR then
+						messagebox(self,"错误","请检查设备是否正常")
 					end
 				end)			
 		end)	
@@ -221,13 +229,16 @@ function AddErrorView:init_gui_fun()
 			cc_takeResource(PICK_PICTURE,function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 					if result == RESULT_OK then
-						local b,res = cc_adjustPhoto(res,1280)
+						local b,newRes = cc_adjustPhoto(res,1280)
+						--kits.del_file( res )
 						if b then
-							local scene_next = editpic.create(self,res)		
+							local scene_next = editpic.create(self,newRes,res)		
 							uikits.pushScene(scene_next)	
 						else
-							messagebox(self,"错误","图像调整失败")
+							messagebox(self,"错误","请检查设备是否正常")
 						end
+					elseif result == RESULT_ERROR then
+						messagebox(self,"错误","请检查设备是否正常")
 					end					
 				end)			
 		end)	
