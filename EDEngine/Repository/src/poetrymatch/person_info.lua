@@ -1,4 +1,13 @@
-local g_person_name
+local kits = require "kits"
+local json = require "json-c"
+local login = require "login"
+local cache = require "cache"
+
+local g_person_info = {
+id = 149091,
+name = 'liyihang',
+lvl = 5,
+}
 local g_person_exp = {
 lvl = 5,
 cur_exp = 10,
@@ -18,41 +27,41 @@ local g_person_battle_cards = {'caoz','caoc'}
 local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
 local g_person_boss_info = {
 fengyang = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
 },
 fengyanga = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
 },
 fengyangb = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
 },
 fengyangc = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,},
+{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
+{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
 },
 }
-local function get_user_name()
-	local uname = ''
-	if g_person_name then
-		uname = g_person_name
+local function get_user_info()
+	local uname = {}
+	if g_person_info then
+		uname = g_person_info
 	end
 	return uname
 end
 
-local function set_user_name(uname)
-	if uname then
-		g_person_name = uname
+local function set_user_info(uinfo)
+	if uinfo then
+		g_person_info = uinfo
 		return true
 	else
 		return false
@@ -368,9 +377,39 @@ local function get_boss_info_by_id(id)
 	return boss_info
 end
 
+local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
+
+local function post_data_by_new_form(module_id,post_data,func)
+	local send_data = {}
+	send_data.v = {}
+	if post_data then
+		send_data.v = post_data
+	end
+	
+	if module_id then
+		send_data.m = module_id
+	else
+		func(false,'module_id is nil')
+		return
+	end
+	send_data.rid = os.time()
+	send_data.icp = false
+	local str_send_data = json.encode(send_data)
+	print('str_send_data::'..str_send_data)
+	cache.post(base_url,str_send_data,function(t,d)
+		print('d::'..d)
+		local tb_result = json.decode(d)
+		if t == true then
+			func(t,tb_result.v)
+		else
+			func(t,tb_result.msg)
+		end
+	end)		
+end
+
 return {
-	get_user_name = get_user_name,
-	set_user_name = set_user_name,
+	get_user_info = get_user_info,
+	set_user_info = set_user_info,
 	get_user_lvl_info = get_user_lvl_info,
 	set_user_lvl_info = set_user_lvl_info,	
 	get_user_silver = get_user_silver,
@@ -395,4 +434,5 @@ return {
 	set_all_section_info = set_all_section_info,
 	get_all_section_info = get_all_section_info,
 	get_boss_info_by_id = get_boss_info_by_id,
+	post_data_by_new_form = post_data_by_new_form,
 }

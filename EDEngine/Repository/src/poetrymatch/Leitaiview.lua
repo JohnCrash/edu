@@ -6,11 +6,11 @@ local cache = require "cache"
 local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
-local Battleview = class("Battleview")
-Battleview.__index = Battleview
+local Leitaiview = class("Leitaiview")
+Leitaiview.__index = Leitaiview
 local ui = {
-	Battleview_FILE = 'poetrymatch/duizhan.json',
-	Battleview_FILE_3_4 = 'poetrymatch/duizhan.json',
+	Leitaiview_FILE = 'poetrymatch/leitai.json',
+	Leitaiview_FILE_3_4 = 'poetrymatch/leitai.json',
 }
 
 local function loadArmature( name )
@@ -20,7 +20,7 @@ end
 
 function create()
 	local scene = cc.Scene:create()				
-	local cur_layer = uikits.extend(cc.Layer:create(),Battleview)		
+	local cur_layer = uikits.extend(cc.Layer:create(),Leitaiview)		
 	
 	scene:addChild(cur_layer)
 	
@@ -35,7 +35,7 @@ function create()
 	return scene	
 end
 
-function Battleview:getdatabyurl()
+function Leitaiview:getdatabyurl()
 
 	cache.request_json( get_uesr_info_url,function(t)
 		if t and type(t)=='table' then
@@ -68,24 +68,24 @@ function Battleview:getdatabyurl()
 	end,'N')
 end
 
-function Battleview:init()	
+function Leitaiview:init()	
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
 	else
 		uikits.initDR{width=1440,height=1080}
 	end
-	self._Battleview = uikits.fromJson{file_9_16=ui.Battleview_FILE,file_3_4=ui.Battleview_FILE_3_4}
-	self:addChild(self._Battleview)
+	self._Leitaiview = uikits.fromJson{file_9_16=ui.Leitaiview_FILE,file_3_4=ui.Leitaiview_FILE_3_4}
+	self:addChild(self._Leitaiview)
 	
 
 --	self:getdatabyurl()
---	local loadbox = Battleviewbox.open(self)
+--	local loadbox = Leitaiviewbox.open(self)
 --	local scene_next = WrongSubjectList.create()								
 --	cc.Director:getInstance():replaceScene(scene_next)	
 
 end
 
-function Battleview:release()
+function Leitaiview:release()
 
 end
 return {

@@ -7,6 +7,11 @@ local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local countryview = require "poetrymatch/Countryview"
 local battleview = require "poetrymatch/Battleview"
+local leitaiview = require "poetrymatch/Leitaiview"
+local noticeview = require "poetrymatch/Noticeview"
+local bagview = require "poetrymatch/Bagview"
+local mallview = require "poetrymatch/Mallview"
+local signview = require "poetrymatch/Signview"
 
 
 local Mainview = class("Mainview")
@@ -33,6 +38,10 @@ local ui = {
 	PIC_CARD = 'k1',
 	TXT_CARD_LVL = 'dj',
 	
+	BUTTON_QIANDAO = 'd_qd',
+	BUTTON_TONGZHI = 'd_tz',
+	BUTTON_BEIBAO = 'd_bb',
+	BUTTON_SHANGCHENG = 'd_sc',
 	BUTTON_DUIZHAN = 'duizhan',
 	BUTTON_CHUANGGUAN = 'chuangguan',
 	BUTTON_LEITAI = 'leitai',
@@ -179,10 +188,34 @@ function Mainview:init()
 	local but_leitai = uikits.child(self._Mainview,ui.BUTTON_LEITAI)
 	uikits.event(but_leitai,	
 		function(sender,eventType)	
-			local scene_next = countryview.create(self)
+			local scene_next = leitaiview.create(self)
 			uikits.pushScene(scene_next)
 		end,"click")	
-	
+
+	local but_qiandao = uikits.child(self._Mainview,ui.BUTTON_QIANDAO)
+	uikits.event(but_qiandao,	
+		function(sender,eventType)	
+			local scene_next = signview.create(self)
+			uikits.pushScene(scene_next)
+		end,"click")	
+	local but_tongzhi = uikits.child(self._Mainview,ui.BUTTON_TONGZHI)
+	uikits.event(but_tongzhi,	
+		function(sender,eventType)	
+			local scene_next = noticeview.create(self)
+			uikits.pushScene(scene_next)
+		end,"click")
+	local but_beibao = uikits.child(self._Mainview,ui.BUTTON_BEIBAO)
+	uikits.event(but_beibao,	
+		function(sender,eventType)	
+			local scene_next = bagview.create(self)
+			uikits.pushScene(scene_next)
+		end,"click")
+	local but_shangcheng = uikits.child(self._Mainview,ui.BUTTON_SHANGCHENG)
+	uikits.event(but_shangcheng,	
+		function(sender,eventType)	
+			local scene_next = mallview.create(self)
+			uikits.pushScene(scene_next)
+		end,"click")		
 	
 	local scheduler = cc.Director:getInstance():getScheduler()
 	--self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
@@ -218,12 +251,13 @@ function Mainview:init()
 			self:show_tili_num()
 			--self._txt_tili_time:setVisible(true)
 			if not schedulerEntry and self.tili_num < 100 then
-				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.1,false)
 			end
 			
 		end,"click")	
 	
 	local save_info = kits.config("tili_time",'get')
+	save_info = nil
 	if not save_info then
 		self.tili_num = 100
 		self.last_time = per_tili_reset_time -1

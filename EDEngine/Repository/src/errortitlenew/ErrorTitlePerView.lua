@@ -562,6 +562,7 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 				self.isneedupdate = false
 				for j=1,#sender.pic_name do
 					local file_path = local_dir.."cache/"..sender.pic_name[j]
+					--local b,newRes = cc_adjustPhoto(file_path,1280)
 					imgs[j] = file_path
 				end
 				local scene_next = imagepreview.create(1,imgs)	
