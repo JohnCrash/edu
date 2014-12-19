@@ -2,16 +2,16 @@ local kits = require "kits"
 local uikits = require "uikits"
 
 local ui = {
-	LOADBOX = 'homework/ladingbox.json',
+	LOADBOX = 'load/ladingbox.json',
 	LOADING = 'load/load.ExportJson',
-	FILE = 'homework/networkbox.json', --网络错误
-	FILE2 = 'homework/repairbox.json', --系统维护500
-	FILE3 = 'homework/tanchu.json',
+	FILE = 'messagebox/networkbox.json', --网络错误
+	FILE2 = 'messagebox/repairbox.json', --系统维护500
+	FILE3 = 'messagebox/tanchu.json',
 	EXIT = 'red_in/out',
 	TRY = 'red_in/again',
 	OK = 'qr',
 }
-local g_scale = 2
+
 local function messagebox( parent,func,dt,caption,text )
 	local s
 	if not parent then return end
@@ -61,9 +61,7 @@ local function messagebox( parent,func,dt,caption,text )
 	if parent.getContentSize then
 		size = parent:getContentSize()
 	else
-		size = uikits.screenSize()
-		size.width = size.width * g_scale
-		size.height = size.height * g_scale
+		size = uikits.getDR()
 	end
 	s:setPosition{x=size.width/2,y=size.height/2}
 	--居中显示

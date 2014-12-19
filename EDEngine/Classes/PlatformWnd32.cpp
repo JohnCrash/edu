@@ -71,6 +71,12 @@ int getUIOrientation()
 	}
 	return 1;
 }
+
+bool platformOpenURL(const char *url)
+{
+	ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOW);
+	return true;
+}
 //==========================
 // CCameraWin
 //==========================

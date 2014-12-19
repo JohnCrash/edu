@@ -57,6 +57,7 @@ import android.media.MediaRecorder;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+
 //import org.cocos2dx.cpp.CrashHandler;
 
 public class AppActivity extends Cocos2dxActivity {
@@ -422,7 +423,17 @@ public class AppActivity extends Cocos2dxActivity {
 		}
 		return 1;
 	}
-	
+	/*
+	 *  openURL
+	 */
+	public static void androidOpenURL( String url )
+	{
+		Uri uri = Uri.parse( url );
+		Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+		if (intent.resolveActivity(myActivity.getPackageManager()) != null) {
+			myActivity.startActivity(intent);
+		}
+	}
 	/*
 	 * ÇÐ»»·½Ïò
 	 */

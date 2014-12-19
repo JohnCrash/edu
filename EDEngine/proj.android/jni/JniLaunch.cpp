@@ -71,6 +71,20 @@ int getUIOrientation()
 	return -1;
 }
 
+bool platformOpenURL( const char *url )
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "()V")) 
+	{
+		jstring jstrurl=t.env->NewStringUTF(url);
+		t.env->CallStaticVoidMethod(t.classID,t.methodID,jstrurl);
+		t.env->DeleteLocalRef(t.classID);
+		t.env->DeleteLocalRef(jstrurl);
+		return true;
+	}
+	return false;
+}
+
 void takeResource( int mode )
 {
 	JniMethodInfo t;

@@ -15,7 +15,7 @@ local ui = {
 local function messagebox(parent,title,text )
 	messagebox_.open(parent,function()end,messagebox_.MESSAGE,tostring(title),tostring(text) )
 end
-local g_scale = 2
+
 local function open( parent,func )
 	if not parent then return end
 	if not cc_isobj(parent) then return end
@@ -28,9 +28,7 @@ local function open( parent,func )
 		if parent.getContentSize then
 			size = parent:getContentSize()
 		else
-			size = uikits.screenSize()
-			size.width = size.width * g_scale
-			size.height = size.height * g_scale
+			size = uikits.getDR()
 		end
 		_root:setPosition{x=size.width/2,y=size.height/2}	
 		parent:addChild(_root)
