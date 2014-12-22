@@ -892,6 +892,7 @@ local function pushScene( scene,transition,t )
 	else
 		Director:pushScene( scene )
 	end
+	cc.TextureCache:getInstance():removeUnusedTextures();
 	_pushNum = _pushNum + 1
 end
 
@@ -900,6 +901,11 @@ local function popScene()
 		local glview = Director:getOpenGLView()
 		glview:setIMEKeyboardState(false) 
 		Director:popScene()
+		--[[
+		popScene并不会马上释放场景，因此下面的调用并不会释放被弹出场景的材质内存
+		--]]
+		cc.TextureCache:getInstance():removeUnusedTextures();
+		--cc.TextureCache:getInstance():removeAllTextures();
 		_pushNum = _pushNum - 1
 	else
 		kits.log("ERROR popScene")

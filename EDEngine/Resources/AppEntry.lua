@@ -174,7 +174,7 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
-		
+	--[[	
 	local epbutton = uikits.button{caption='家长错题本',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -186,7 +186,8 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
---[[	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+		--]]
+	local epbutton = uikits.button{caption='错题',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
@@ -195,7 +196,7 @@ function AppEntry:init()
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
-		end}--]]		
+		end}
 	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)

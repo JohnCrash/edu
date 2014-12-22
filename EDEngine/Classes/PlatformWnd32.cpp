@@ -10,6 +10,45 @@
 #pragma comment (lib,"imm32.lib")
 
 extern std::string g_Mode;
+using namespace std;
+extern std::string toUTF8(const std::wstring& wstr);
+wstring toUnicode(const string& s)
+{
+	std::wstring wstr;
+	std::string str;
+
+	int len = MultiByteToWideChar(CP_ACP, 0, (char *)s.c_str(), -1, NULL, NULL);
+	if (len == 0)
+	{  //Ê§°Ü
+		return TEXT("");
+	}
+	wstr.resize(len);
+	len = MultiByteToWideChar(CP_ACP, 0, (char *)s.c_str(), -1, &wstr[0], wstr.size());
+	if (len == 0)
+	{ //Ê§°Ü
+		return TEXT("");
+	}
+	return wstr;
+}
+
+wstring utf8ToUnicode(const string& s)
+{
+	std::wstring wstr;
+	std::string str;
+
+	int len = MultiByteToWideChar(CP_UTF8, 0, (char *)s.c_str(), -1, NULL, NULL);
+	if (len == 0)
+	{  //Ê§°Ü
+		return TEXT("");
+	}
+	wstr.resize(len);
+	len = MultiByteToWideChar(CP_UTF8, 0, (char *)s.c_str(), -1, &wstr[0], wstr.size());
+	if (len == 0)
+	{ //Ê§°Ü
+		return TEXT("");
+	}
+	return wstr;
+}
 
 void setUIOrientation(int m)
 {
@@ -469,7 +508,10 @@ void takeResource( int mode )
 			return;
 		}
 
-		takeResource_callback(szPathName, PICK_PICTURE, RESULT_OK);
+		wstring wstr = toUnicode(szPathName);
+		
+		takeResource_callback(toUTF8(wstr).c_str(), PICK_PICTURE, RESULT_OK);
+		//takeResource_callback(szPathName, PICK_PICTURE, RESULT_OK);
 		bTaking = false;
 		//g_pTheApp->OnReturnBuf(RETURN_TYPE_PICKPICTURE, s_nCurID, 1, 0, strlen(szPathName) + 1, (char *)szPathName);
 

@@ -247,7 +247,7 @@ function SubjectiveEdit:addphoto( name )
 	if item then
 		item:setVisible(true)
 		local img = uikits.child(item,"tu1")
-		if FileUtils:isFileExist(name) then
+		if FileUtils:isFileExist(name) or kits.exist_file(name) or kits.exist_cache(name) then
 			img:loadTexture(name)
 			local size = img:getContentSize()
 			local scale
