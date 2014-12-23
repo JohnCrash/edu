@@ -19,7 +19,8 @@ local g_person_silver = 100
 local g_person_le_coin = 10
 
 local g_person_bag = {
-cards_table = {{id='caoz',lvl=5,cur_exp=10,max_exp=100},{id='caoa',lvl=10,cur_exp=20,max_exp=100},{id='caob',lvl=20,cur_exp=30,max_exp=100},{id='caoc',lvl=30,cur_exp=40,max_exp=100},},
+cards_table = {{id='caoz',lvl=5,cur_exp=10,max_exp=100,in_battle_list = 1,},{id='caoa',lvl=10,cur_exp=20,max_exp=100,in_battle_list = 0,},{id='caob',lvl=20,cur_exp=30,max_exp=100,in_battle_list = 0,},{id='caoc',lvl=30,cur_exp=40,max_exp=100,in_battle_list = 1,},},
+max_store_num = 5,
 equipment_table = {},
 skill_table = {},
 } -- 
@@ -193,7 +194,7 @@ local function get_all_card_in_bag()
 	if g_person_bag.cards_table then
 		cards_table = g_person_bag.cards_table
 	end
-	return cards_table
+	return cards_table,g_person_bag.max_store_num
 end
 
 local function get_card_in_bag_by_index(index)
@@ -267,7 +268,7 @@ local function get_all_card_in_battle()
 		for j=1,#g_person_battle_cards do
 			if v.id == g_person_battle_cards[j] then
 				local card_info = {}
-				card_info = g_person_bag.cards_table[j]
+				card_info = v
 				all_cards_table[#all_cards_table+1] = card_info
 				break
 			end

@@ -52,9 +52,9 @@ function Loading:init()
 	self._loading = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
 	self:addChild(self._loading)
 	
---[[	local scene_next = Mainview.create()		
-	cc.Director:getInstance():replaceScene(scene_next)	--]]
-	self:getdatabyurl()
+	local scene_next = Mainview.create()		
+	cc.Director:getInstance():replaceScene(scene_next)	
+	--self:getdatabyurl()
 --	local loadbox = loadingbox.open(self)
 --	local scene_next = WrongSubjectList.create()								
 --	cc.Director:getInstance():replaceScene(scene_next)	
