@@ -14,6 +14,77 @@ std::string g_Userid;
 std::string g_ExternalStorageDirectory;
 std::string g_RecordFile;
 	
+//设置屏幕方向
+void setUIOrientation( int m )
+{
+	JniMethodInfo t;
+	int w,h;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "setUIOrientation", "(I)V")) 
+	{
+		t.env->CallStaticVoidMethod(t.classID,t.methodID,m);
+		t.env->DeleteLocalRef(t.classID);
+	}
+	Director *pDirector = Director::getInstance();
+	if( pDirector )
+	{
+		GLView * pview = pDirector->getOpenGLView();
+		if( pview )
+		{
+			Size size = pview->getFrameSize();
+			
+			if( m == 1 )
+			{
+				if( size.width < size.height )
+				{
+					w = size.height;
+					h = size.width;
+				}
+			}
+			else
+			{
+				if( size.width > size.height )
+				{
+					w = size.height;
+					h = size.width;
+				}			
+			}
+			
+			Size resSize = pview->getDesignResolutionSize();
+			ResolutionPolicy resPolicy=pview->getResolutionPolicy();
+			pview->setFrameSize(w,h);
+			pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
+			pDirector->setViewport();
+			Director::sharedDirector()->setProjection(Director::sharedDirector()->getProjection());
+		}
+	}
+}
+
+int getUIOrientation()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "getUIOrientation", "()I")) 
+	{
+		int ret = t.env->CallStaticIntMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+		return ret;
+	}
+	return -1;
+}
+
+bool platformOpenURL( const char *url )
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "()V")) 
+	{
+		jstring jstrurl=t.env->NewStringUTF(url);
+		t.env->CallStaticVoidMethod(t.classID,t.methodID,jstrurl);
+		t.env->DeleteLocalRef(t.classID);
+		t.env->DeleteLocalRef(jstrurl);
+		return true;
+	}
+	return false;
+}
+
 void takeResource( int mode )
 {
 	JniMethodInfo t;

@@ -247,7 +247,7 @@ function SubjectiveEdit:addphoto( name )
 	if item then
 		item:setVisible(true)
 		local img = uikits.child(item,"tu1")
-		if FileUtils:isFileExist(name) then
+		if FileUtils:isFileExist(name) or kits.exist_file(name) or kits.exist_cache(name) then
 			img:loadTexture(name)
 			local size = img:getContentSize()
 			local scale
@@ -552,7 +552,7 @@ function SubjectiveEdit:init_event()
 						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 						if result == RESULT_OK then
 							--file = res
-							local b,res = cc_adjustPhoto(res,1024)
+							local b,res = cc_adjustPhoto(res,1280)
 							if b then
 									self:addphoto( res )
 									self:addphote_todata( res )
@@ -574,7 +574,7 @@ function SubjectiveEdit:init_event()
 				cc_takeResource(PICK_PICTURE,function(t,result,res)
 						kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 						if result == RESULT_OK then
-							local b,res = cc_adjustPhoto(res,1024)
+							local b,res = cc_adjustPhoto(res,1280)
 							if b then
 									self:addphoto( res )
 									self:addphote_todata( res )

@@ -11,7 +11,7 @@
   "designWidth": 1920,
   "textures": [],
   "texturesPng": [
-    "load.jpg",
+    "load.png",
     "company_logo.png"
   ],
   "version": "1.6.0.0",
@@ -64,7 +64,7 @@
           "capInsetsY": 0,
           "fileName": null,
           "fileNameData": {
-            "path": "load.jpg",
+            "path": "load.png",
             "plistFile": "",
             "resourceType": 0
           },

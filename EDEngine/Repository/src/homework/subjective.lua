@@ -1357,7 +1357,7 @@ function Subjective:init_gui()
 						cc_takeResource(TAKE_PICTURE,function(t,result,res)
 								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 								if result == RESULT_OK then
-									local b,res = cc_adjustPhoto(res,1024)
+									local b,res = cc_adjustPhoto(res,1280)
 									if b then
 										self:add_photo( res )
 										self:clear_current()
@@ -1383,7 +1383,7 @@ function Subjective:init_gui()
 						cc_takeResource(PICK_PICTURE,function(t,result,res)
 								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 								if result == RESULT_OK then
-									local b,res = cc_adjustPhoto(res,1024)
+									local b,res = cc_adjustPhoto(res,1280)
 									if b then
 										self:add_photo( res )
 										self:clear_current()

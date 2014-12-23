@@ -159,7 +159,7 @@ void AppDelegate::initLuaEngine()
 	{
 		if (g_FrameWidth <= 0 && g_FrameHeight <= 0)
 		{
-			glview->setFrameSize(1024,960);
+			glview->setFrameSize(1024,576);
 		}
 		else
 		{

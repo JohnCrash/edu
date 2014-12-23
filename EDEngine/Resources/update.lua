@@ -393,13 +393,14 @@ function UpdateProgram:update()
 		if not self:check_update(self._args) then
 			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
-			if b then
+			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-			else
+			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed")
 				kits.log("error message:")
-				kits.log(tostring(scene))				
-				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."),请检查您的网络",2)
+				kits.log(tostring(scene))
+				local errmsg = tostring(scene)
+				self:ErrorAndExit('没有成功更新('..tostring(self._args.name).."\n"..errmsg.."),\n请检查您的网络",2)
 			end
 			return
 		end
@@ -455,9 +456,9 @@ function UpdateProgram:update()
 			kits.log('Update complate!')
 			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
-			if b then
+			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-			else
+			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed!")
 				kits.log("error message:")
 				kits.log(tostring(scene))

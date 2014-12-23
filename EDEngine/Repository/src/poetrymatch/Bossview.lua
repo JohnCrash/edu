@@ -5,6 +5,8 @@ local login = require "login"
 local cache = require "cache"
 local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
+local readytoboss = require "poetrymatch/Readytoboss"
+
 
 local Bossview = class("Bossview")
 Bossview.__index = Bossview
@@ -99,6 +101,14 @@ function Bossview:getdatabyurl()
 	end,'N')
 end
 
+function Bossview:save_innerpos()
+	self.inner_posx,self.inner_posy = self.view_all_boss:getInnerContainer():getPosition()
+end
+
+function Bossview:set_innerpos()
+	self.view_all_boss:getInnerContainer():setPosition(cc.p(self.inner_posx,self.inner_posy))
+end
+
 local boss_space = 50
 
 function Bossview:show_boss_info(cur_boss_info)	
@@ -119,6 +129,9 @@ function Bossview:show_boss_info(cur_boss_info)
 		end
 		
 		self.view_boss_info:setVisible(false)
+		self:save_innerpos()
+		local scene_next = readytoboss.create(cur_boss_info)	
+		uikits.pushScene(scene_next)	
 	end,"click")
 	
 	uikits.event(but_hide_info,	
