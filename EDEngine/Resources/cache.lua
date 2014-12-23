@@ -213,7 +213,7 @@ local function request( url,func,priority )
 end
 
 local function request_json( url,func,priority )
-	local function json_proc(b)
+	local function json_proc(b,errmsg)
 		if b then
 			local data = get_data(url)
 			if data then
@@ -221,16 +221,16 @@ local function request_json( url,func,priority )
 				if t then
 					func(t)
 				else
-					func(false)
+					func(false,errmsg)
 					kits.log('ERROR : request_json json decode failed! url = '..tostring(url))
 					kits.log('data='..string.sub(tostring(data),1,128)..'...')
 				end
 			else
-				func(false)
+				func(false,errmsg)
 				kits.log('ERROR : request_json get_data = nil! url = '..tostring(url))
 			end
 		else
-			func(false)
+			func(false,errmsg)
 			kits.log('ERROR : request_json failed url = '..tostring(url))
 		end
 	end

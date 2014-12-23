@@ -25,6 +25,11 @@ bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();
 
+int getNetworkState();
+void registerNetworkStateListener();
+void unregisterNetworkStateListener();
+void networkStateChange(int state);
+
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
 

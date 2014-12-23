@@ -85,6 +85,42 @@ bool platformOpenURL( const char *url )
 	return false;
 }
 
+int getNetworkState()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "getNetworkState", "()I")) 
+	{
+		int ret = t.env->CallStaticIntMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+		return ret;
+	}
+	return -1;
+}
+
+void registerNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"registerNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
+void unregisterNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"unregisterNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
 void takeResource( int mode )
 {
 	JniMethodInfo t;
@@ -238,5 +274,9 @@ extern "C" {
     		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
     	}
 	}	
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_networkStateChangeEvent(JNIEnv *env,jobject thiz,int state)
+	{
+		networkStateChange(state);
+	}
 }
 
