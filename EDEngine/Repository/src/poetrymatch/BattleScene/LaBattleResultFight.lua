@@ -1,7 +1,6 @@
 ---
 --LaBattleResultFight.lua
---华夏诗魂的战斗结束图层
---实际只是一个节点，里面包含UI层
+--华夏诗魂的对战战斗结束图层
 
 --卢乐颜
 --2014.12.15
@@ -169,12 +168,16 @@ function LaBattleResultFight:win()
 end
 
 function LaBattleResultFight:onWinAnimComplete()
+	--延时
+	local acDelay = cc.DelayTime:create(0.2)
+
 	--飞入展示层
 	local acMove = cc.MoveBy:create(CONST.WIN_MOVE_TIME, 
 		cc.p(0, CONST.WIN_AREA_MOVE_Y))
 
 	--执行
 	self._layWin:runAction(cc.Sequence:create(
+		acDelay,
 		cc.EaseExponentialOut:create(acMove)))
 	
 end

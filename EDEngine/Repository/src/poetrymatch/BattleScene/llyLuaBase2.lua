@@ -459,7 +459,7 @@ function lly.struct(create_table_func)
 end
 
 --创建一个确定项目的数组，参数为取得数组的指针和数组的项目数
-function lly.array(number)
+function lly.array(number, default)
 	---[====[
 	if type(number) ~= "number" then 
 		lly.error("create array need a number param", 2)
@@ -467,12 +467,30 @@ function lly.array(number)
 	--]====]
 
 	local ar = {}
-
-	---[====[
-	for i = 1, number do
-		ar[i] = false
+	
+	if default then
+		if type(default) == "function" then
+			for i = 1, number do
+				ar[i] = default()
+			end
+		elseif type(default) == "table" then
+			for i = 1, number do
+				ar[i] = clone(default)
+			end
+		else
+			for i = 1, number do
+				ar[i] = default
+			end
+		end
+	else
+		---[====[
+		for i = 1, number do
+			ar[i] = false
+		end
+		--]====]
 	end
 
+	---[====[
 	lly.finalizeInstance(ar)
 	--]====]
 

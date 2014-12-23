@@ -161,7 +161,7 @@
         {
           "name": "Layer4",
           "parent": "",
-          "dI": 1,
+          "dI": 10,
           "x": 0.0,
           "y": 36.0,
           "z": 1,
@@ -340,7 +340,7 @@
         {
           "name": "shengli",
           "dr": 13,
-          "lp": true,
+          "lp": false,
           "to": 0,
           "drTW": 0,
           "twE": 0,
@@ -512,9 +512,30 @@
                   "cY": 1.0,
                   "kX": 0.0,
                   "kY": 0.0,
+                  "fi": 11,
+                  "twE": 0,
+                  "tweenFrame": true,
+                  "bd_src": 1,
+                  "bd_dst": 771
+                },
+                {
+                  "dI": 4,
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0,
+                  "cX": 1.0,
+                  "cY": 1.0,
+                  "kX": 0.0,
+                  "kY": 0.0,
                   "fi": 12,
                   "twE": 0,
                   "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  },
                   "bd_src": 1,
                   "bd_dst": 771
                 }
@@ -701,6 +722,12 @@
                   "fi": 12,
                   "twE": 0,
                   "tweenFrame": true,
+                  "color": {
+                    "a": 255,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  },
                   "bd_src": 1,
                   "bd_dst": 771
                 }
@@ -778,8 +805,8 @@
     },
     {
       "name": "x10010",
-      "width": 640.0,
-      "height": 320.0,
+      "width": 0.0,
+      "height": 0.0,
       "pX": 0.5,
       "pY": 0.5,
       "plistFile": ""
@@ -851,7 +878,7 @@
     {
       "name": "x10046",
       "width": 640.0,
-      "height": 480.0,
+      "height": 320.0,
       "pX": 0.5,
       "pY": 0.5,
       "plistFile": ""

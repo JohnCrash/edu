@@ -1,7 +1,7 @@
 ---
 --LaBattleResultChallenge.lua
---华夏诗魂的战斗结束图层
---实际只是一个节点，里面包含UI层
+--华夏诗魂的擂台战斗结束图层
+--
 
 --卢乐颜
 --2014.12.15
@@ -33,9 +33,11 @@ local ui = lly.const{
 	BTN_CONFIRM = "defen/hui",
 
 	--动画
-	ANIM_END_PNG = "poetrymatch/BattleScene/anim_win/shengli0.png",
-	ANIM_END_PLIST = "poetrymatch/BattleScene/anim_win/shengli0.plist",
-	ANIM_END_JSON = "poetrymatch/BattleScene/anim_win/shengli.ExportJson",
+	ANIM_END_PNG1 = "poetrymatch/BattleScene/anim_end/jieshu0.png",
+	ANIM_END_PLIST1 = "poetrymatch/BattleScene/anim_end/jieshu0.plist",
+	ANIM_END_PNG2 = "poetrymatch/BattleScene/anim_end/jieshu1.png",
+	ANIM_END_PLIST2 = "poetrymatch/BattleScene/anim_end/jieshu1.plist",
+	ANIM_END_JSON = "poetrymatch/BattleScene/anim_end/jieshu.ExportJson",
 }
 
 local CONST = lly.const{
@@ -103,9 +105,12 @@ end
 
 function LaBattleResultChallenge:initAnim()
 	--胜利动画
-	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(
-		ui.ANIM_END_PNG, ui.ANIM_END_PLIST, ui.ANIM_END_JSON)
-    self._animEnd = ccs.Armature:create("shengli")
+	ccs.ArmatureDataManager:getInstance():addSpriteFrameFromFile(
+		ui.ANIM_END_PLIST1, ui.ANIM_END_PNG1)
+	ccs.ArmatureDataManager:getInstance():addSpriteFrameFromFile(
+		ui.ANIM_END_PLIST2, ui.ANIM_END_PNG2)
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(ui.ANIM_END_JSON)
+    self._animEnd = ccs.Armature:create("jieshu")
     self._animEnd:setPosition(
     	self._wiRoot:getContentSize().width / 2,self._wiRoot:getContentSize().height / 2)
     self._wiRoot:addChild(self._animEnd)
@@ -136,16 +141,20 @@ function LaBattleResultChallenge:win()
 
     self._animEnd:setVisible(true)
 
-	self._animEnd:getAnimation():play("shengli", -1, 0)
+	self._animEnd:getAnimation():play("Animation1", -1, 0)
 end
 
 function LaBattleResultChallenge:onWinAnimComplete()
+	--延时
+	local acDelay = cc.DelayTime:create(0.2)
+
 	--飞入展示层
 	local acMove = cc.MoveBy:create(CONST.WIN_MOVE_TIME, 
 		cc.p(0, CONST.WIN_AREA_MOVE_Y))
 
 	--执行
 	self._layShow:runAction(cc.Sequence:create(
+		acDelay,
 		cc.EaseExponentialOut:create(acMove)))
 	
 end

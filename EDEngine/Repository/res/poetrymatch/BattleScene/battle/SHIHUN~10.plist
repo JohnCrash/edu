@@ -612,6 +612,44 @@
 				<key>offsetY</key>
 				<real>0</real>
 			</dict>
+			<key>qiy3.png</key>
+			<dict>
+				<key>width</key>
+				<integer>1063</integer>
+				<key>height</key>
+				<integer>127</integer>
+				<key>originalWidth</key>
+				<integer>1063</integer>
+				<key>originalHeight</key>
+				<integer>127</integer>
+				<key>x</key>
+				<integer>841</integer>
+				<key>y</key>
+				<integer>1783</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
+			<key>qiy4.png</key>
+			<dict>
+				<key>width</key>
+				<integer>1025</integer>
+				<key>height</key>
+				<integer>113</integer>
+				<key>originalWidth</key>
+				<integer>1025</integer>
+				<key>originalHeight</key>
+				<integer>113</integer>
+				<key>x</key>
+				<integer>841</integer>
+				<key>y</key>
+				<integer>1911</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
 			<key>tan2.png</key>
 			<dict>
 				<key>width</key>
@@ -645,6 +683,25 @@
 				<integer>1394</integer>
 				<key>y</key>
 				<integer>370</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
+			<key>jianhao.png</key>
+			<dict>
+				<key>width</key>
+				<integer>65</integer>
+				<key>height</key>
+				<integer>29</integer>
+				<key>originalWidth</key>
+				<integer>65</integer>
+				<key>originalHeight</key>
+				<integer>29</integer>
+				<key>x</key>
+				<integer>620</integer>
+				<key>y</key>
+				<integer>0</integer>
 				<key>offsetX</key>
 				<real>0</real>
 				<key>offsetY</key>

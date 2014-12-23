@@ -657,6 +657,12 @@
                   "fi": 13,
                   "twE": 0,
                   "tweenFrame": true,
+                  "color": {
+                    "a": 0,
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  },
                   "bd_src": 1,
                   "bd_dst": 771
                 }
@@ -811,8 +817,8 @@
     },
     {
       "name": "b (14)",
-      "width": 0.0,
-      "height": 0.0,
+      "width": 350.0,
+      "height": 350.0,
       "pX": 0.5,
       "pY": 0.5,
       "plistFile": ""
