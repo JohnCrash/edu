@@ -7270,6 +7270,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				524C26311A43BD81001349BC /* lua */,
 				52538F631A3593E0000E229F /* json-c.xcodeproj */,
 				527777441A3591B70048D357 /* gif.xcodeproj */,
 				527776321A3586CD0048D357 /* amrnb.xcodeproj */,
@@ -7369,6 +7370,13 @@
 			name = Icons;
 			path = ios;
 			sourceTree = SOURCE_ROOT;
+		};
+		524C26311A43BD81001349BC /* lua */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = lua;
+			sourceTree = "<group>";
 		};
 		52538F641A3593E0000E229F /* Products */ = {
 			isa = PBXGroup;
