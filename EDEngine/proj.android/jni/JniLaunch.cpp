@@ -24,39 +24,7 @@ void setUIOrientation( int m )
 		t.env->CallStaticVoidMethod(t.classID,t.methodID,m);
 		t.env->DeleteLocalRef(t.classID);
 	}
-	Director *pDirector = Director::getInstance();
-	if( pDirector )
-	{
-		GLView * pview = pDirector->getOpenGLView();
-		if( pview )
-		{
-			Size size = pview->getFrameSize();
-			
-			if( m == 1 )
-			{
-				if( size.width < size.height )
-				{
-					w = size.height;
-					h = size.width;
-				}
-			}
-			else
-			{
-				if( size.width > size.height )
-				{
-					w = size.height;
-					h = size.width;
-				}			
-			}
-			
-			Size resSize = pview->getDesignResolutionSize();
-			ResolutionPolicy resPolicy=pview->getResolutionPolicy();
-			pview->setFrameSize(w,h);
-			pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
-			pDirector->setViewport();
-			Director::sharedDirector()->setProjection(Director::sharedDirector()->getProjection());
-		}
-	}
+    cocos2dChangeOrientation( m );
 }
 
 int getUIOrientation()

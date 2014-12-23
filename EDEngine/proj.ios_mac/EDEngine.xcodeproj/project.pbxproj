@@ -7207,6 +7207,7 @@
 		080E96DDFE201D6D7F000001 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
 				52D5B1C61A36F65F000C5536 /* IOSHelper.h */,
 				52D5B1C71A36F65F000C5536 /* IOSHelper.mm */,
 				52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */,
@@ -7216,7 +7217,6 @@
 				503AE0FB17EB989F00D1A890 /* AppController.mm */,
 				503AE0FC17EB989F00D1A890 /* main.m */,
 				503AE0FE17EB989F00D1A890 /* RootViewController.h */,
-				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
 				52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */,
 				52D5B1AD1A36EB4D000C5536 /* parsparam.h */,
 			);
@@ -7241,8 +7241,8 @@
 				F5CC68F4199B8EE500145900 /* Console.h */,
 				F5CC68F5199B8EE500145900 /* lua_ext.h */,
 				F5CC68F6199B8EE500145900 /* lua_thread_curl.h */,
-				F5CC68F7199B8EE500145900 /* luaDebug.h */,
 				F5CC68F8199B8EE500145900 /* thread_curl.h */,
+				F5CC68F7199B8EE500145900 /* luaDebug.h */,
 				F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */,
 				F53B0FC41997A9AC007C8988 /* Console.cpp */,
 				F53B0FC51997A9AC007C8988 /* lua_ext.cpp */,
@@ -7270,6 +7270,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				524C26311A43BD81001349BC /* lua */,
 				52538F631A3593E0000E229F /* json-c.xcodeproj */,
 				527777441A3591B70048D357 /* gif.xcodeproj */,
 				527776321A3586CD0048D357 /* amrnb.xcodeproj */,
@@ -7369,6 +7370,13 @@
 			name = Icons;
 			path = ios;
 			sourceTree = SOURCE_ROOT;
+		};
+		524C26311A43BD81001349BC /* lua */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = lua;
+			sourceTree = "<group>";
 		};
 		52538F641A3593E0000E229F /* Products */ = {
 			isa = PBXGroup;

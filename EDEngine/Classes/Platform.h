@@ -24,6 +24,7 @@
 bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();
+void cocos2dChangeOrientation( int m );
 
 int getNetworkState();
 void registerNetworkStateListener();
