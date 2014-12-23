@@ -840,6 +840,14 @@ function TeacherList:add_level_item( level,v )
 			local text = uikits.child(item,'mingzi')
 			if text and v and v.name then
 				text:setString( v.name )
+				--调整大小
+				local size = text:getContentSize()
+				local old = item:getContentSize()
+				if size.width + old.height > old.width then
+					old.width = size.width + old.height
+					text:setPosition( cc.p(old.width/2,old.height/2) )
+					item:setContentSize( old )
+				end
 			end
 			uikits.event(item,function(sender,b)
 				self._selector[level] = v

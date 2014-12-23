@@ -39,6 +39,56 @@ int getUIOrientation()
 	return -1;
 }
 
+bool platformOpenURL( const char *url )
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "()V")) 
+	{
+		jstring jstrurl=t.env->NewStringUTF(url);
+		t.env->CallStaticVoidMethod(t.classID,t.methodID,jstrurl);
+		t.env->DeleteLocalRef(t.classID);
+		t.env->DeleteLocalRef(jstrurl);
+		return true;
+	}
+	return false;
+}
+
+int getNetworkState()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "getNetworkState", "()I")) 
+	{
+		int ret = t.env->CallStaticIntMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+		return ret;
+	}
+	return -1;
+}
+
+void registerNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"registerNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
+void unregisterNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"unregisterNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
 void takeResource( int mode )
 {
 	JniMethodInfo t;
@@ -192,5 +242,9 @@ extern "C" {
     		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
     	}
 	}	
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_networkStateChangeEvent(JNIEnv *env,jobject thiz,int state)
+	{
+		networkStateChange(state);
+	}
 }
 

@@ -348,7 +348,7 @@ end
 
 --不加引号的格式
 local function parse_rect( str )
-	local s,n1,n2,n3,n4 = string.match(str,'(%u).*(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
+	local s,n1,n2,n3,n4 = string.match(str,'(%u).(%-*%d+),(%-*%d+),(%-*%d+),(%-*%d+)')
 
 	if s and n1 and n2 and n3 and n4 then
 		return {x1=tonumber(n1),y1=tonumber(n2),x2=tonumber(n3),y2=tonumber(n4),c=s}

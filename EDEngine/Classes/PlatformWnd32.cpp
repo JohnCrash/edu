@@ -1,7 +1,7 @@
 #include "Platform.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
+#include "wininet.h"
 #include "Files.h"
 #include "win32/glfw3native.h"
 
@@ -10,6 +10,45 @@
 #pragma comment (lib,"imm32.lib")
 
 extern std::string g_Mode;
+using namespace std;
+extern std::string toUTF8(const std::wstring& wstr);
+wstring toUnicode(const string& s)
+{
+	std::wstring wstr;
+	std::string str;
+
+	int len = MultiByteToWideChar(CP_ACP, 0, (char *)s.c_str(), -1, NULL, NULL);
+	if (len == 0)
+	{  //Ê§°Ü
+		return TEXT("");
+	}
+	wstr.resize(len);
+	len = MultiByteToWideChar(CP_ACP, 0, (char *)s.c_str(), -1, &wstr[0], wstr.size());
+	if (len == 0)
+	{ //Ê§°Ü
+		return TEXT("");
+	}
+	return wstr;
+}
+
+wstring utf8ToUnicode(const string& s)
+{
+	std::wstring wstr;
+	std::string str;
+
+	int len = MultiByteToWideChar(CP_UTF8, 0, (char *)s.c_str(), -1, NULL, NULL);
+	if (len == 0)
+	{  //Ê§°Ü
+		return TEXT("");
+	}
+	wstr.resize(len);
+	len = MultiByteToWideChar(CP_UTF8, 0, (char *)s.c_str(), -1, &wstr[0], wstr.size());
+	if (len == 0)
+	{ //Ê§°Ü
+		return TEXT("");
+	}
+	return wstr;
+}
 
 void setUIOrientation(int m)
 {
@@ -71,6 +110,72 @@ int getUIOrientation()
 	}
 	return 1;
 }
+
+bool platformOpenURL(const char *url)
+{
+	ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOW);
+	return true;
+}
+
+int getNetworkState()
+{
+	DWORD dwOnline;
+	//IsNetworkAlive  or?
+	if (!InternetGetConnectedState(&dwOnline, 0))
+	{
+		if (dwOnline & INTERNET_CONNECTION_CONFIGURED)
+			return 1;
+		if (dwOnline & INTERNET_CONNECTION_MODEM)
+			return 2;
+		if (dwOnline & INTERNET_CONNECTION_LAN)
+			return 3;
+		if (dwOnline & INTERNET_CONNECTION_PROXY)
+			return 4;
+		return 0;
+	}
+	return -1;
+}
+
+static std::thread * s_pthread = nullptr;
+static bool s_Stop = false;
+static int s_CurState;
+
+static void listenerThread(void * p)
+{
+	while (!s_Stop)
+	{
+		int state = getNetworkState();
+		if (state != s_CurState)
+		{
+			s_CurState = state;
+			networkStateChange(state);
+		}
+		Sleep(10 * 1000); //5'sÒ»´Î
+	}
+}
+
+void registerNetworkStateListener()
+{
+	if (s_pthread == nullptr)
+	{
+		s_Stop = false;
+		s_CurState = getNetworkState();
+		s_pthread = new std::thread(listenerThread,nullptr);
+	}
+}
+
+void unregisterNetworkStateListener()
+{
+	if (s_pthread)
+	{
+		s_Stop = true;
+		if (s_pthread->joinable() )
+			s_pthread->join();
+		delete s_pthread;
+		s_pthread = nullptr;
+	}
+}
+
 //==========================
 // CCameraWin
 //==========================
@@ -463,7 +568,10 @@ void takeResource( int mode )
 			return;
 		}
 
-		takeResource_callback(szPathName, PICK_PICTURE, RESULT_OK);
+		wstring wstr = toUnicode(szPathName);
+		
+		takeResource_callback(toUTF8(wstr).c_str(), PICK_PICTURE, RESULT_OK);
+		//takeResource_callback(szPathName, PICK_PICTURE, RESULT_OK);
 		bTaking = false;
 		//g_pTheApp->OnReturnBuf(RETURN_TYPE_PICKPICTURE, s_nCurID, 1, 0, strlen(szPathName) + 1, (char *)szPathName);
 

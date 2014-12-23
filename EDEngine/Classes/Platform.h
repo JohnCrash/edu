@@ -26,6 +26,11 @@ void setUIOrientation( int m );
 int getUIOrientation();
 void cocos2dChangeOrientation( int m );
 
+int getNetworkState();
+void registerNetworkStateListener();
+void unregisterNetworkStateListener();
+void networkStateChange(int state);
+
 void takeResource( int mode );
 void takeResource_callback(std::string resource,int typeCode,int resultCode);
 

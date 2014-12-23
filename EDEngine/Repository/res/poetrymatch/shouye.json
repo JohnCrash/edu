@@ -11,9 +11,9 @@
   "designWidth": 1920,
   "textures": [],
   "texturesPng": [
-    "load.jpg",
+    "load.png",
     "company_logo.png",
-    "bj.jpg",
+    "bj.png",
     "sm.png",
     "back1.png",
     "dengji.png",
@@ -35,7 +35,6 @@
     "lt2.png",
     "kapai/sg-caoz2.png",
     "d_qd.png",
-    "d_qd2.png",
     "tis.png",
     "d_tz.png",
     "d_bb.png",
@@ -88,7 +87,7 @@
           "adaptScreen": false,
           "backGroundImage": null,
           "backGroundImageData": {
-            "path": "bj.jpg",
+            "path": "bj.png",
             "plistFile": "",
             "resourceType": 0
           },
@@ -1834,8 +1833,8 @@
           "capInsetsY": 0,
           "disabled": null,
           "disabledData": {
-            "path": "d_qd2.png",
-            "plistFile": "",
+            "path": null,
+            "plistFile": null,
             "resourceType": 0
           },
           "fontName": "微软雅黑",

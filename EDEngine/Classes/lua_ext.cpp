@@ -21,11 +21,12 @@ extern bool g_Reset;
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include <windows.h>
+extern std::wstring utf8ToUnicode(const std::string& s);
 #else
 #include <sys/time.h>
 #endif
 static int g_callref=LUA_REFNIL;
-
+static int g_callnsl = LUA_REFNIL;
 struct TRS
 {
 	std::string path;
@@ -58,7 +59,39 @@ static void takeResource_progressFunc(void *ptrs)
 		}
 	}
 }
-
+static void networkStateChange_progressFunc(void *p)
+{
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if (pEngine)
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if (pLuaStack)
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if (L && g_callnsl != LUA_REFNIL && p)
+			{
+				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callnsl);
+				lua_pushinteger(L, (int)p);
+				pLuaStack->executeFunction(2);
+				//lua_unref(L, g_callnsl);
+				//g_callnsl = LUA_REFNIL;
+			}
+		}
+	}
+}
+//网络发生改变是的回调。
+void networkStateChange(int state)
+{
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if (pDirector)
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if (scheduler)
+		{
+			scheduler->performFunctionInCocosThread_ext(networkStateChange_progressFunc, (void *)state);
+		}
+	}
+}
 void takeResource_callback(std::string resource,int typeCode,int resultCode)
 {
 	//call lua progress function
@@ -96,6 +129,21 @@ static int cc_launchparam(lua_State* L)
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+
+std::string toMutiByte(const std::wstring& wstr)
+{
+	std::string str;
+	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, NULL, NULL, NULL, NULL);
+	if (len == 0)
+	{
+		return "";
+	}
+	str.resize(len);
+	len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], str.size(), NULL, NULL);
+	if (str.back() == 0)
+		str.pop_back();
+	return str;
+}
 std::string getDirectory(EDDirectory edd)
 {
     std::string path;
@@ -394,13 +442,20 @@ int cc_adjustPhoto(lua_State *L)
 {
 	if (lua_isstring(L, 1) &&lua_isnumber(L,2) )
 	{
-		const char *fn = lua_tostring(L, 1);
-		if (IsFileExist(fn))
+		std::string fn = lua_tostring(L, 1);
+		//utf8 文件名
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+		/*	
+			windows 版本文件名是一个utf8编码的文件名，cocos2d需要一个utf8文件名，IsFileExist需要mutibyte
+		*/
+		std::wstring wfn = utf8ToUnicode(fn);
+		std::string fn_mt = toMutiByte(wfn);
+		if (IsFileExist(fn_mt.c_str()))
 		{
 			auto img = new CImageEx();
-			if (img->LoadFromFile(fn))
+			if (img->LoadFromFile(fn_mt.c_str()))
 			{
-				bool b = img->ReduceAndSaveToFile(fn,lua_tonumber(L,2),img->GetJpgOrientation());
+				bool b = img->ReduceAndSaveToFile(fn_mt, lua_tonumber(L, 2), img->GetJpgOrientation());
 				std::string tmp = img->GetTmpFile();
 				img->release();
 				lua_pushboolean(L, b);
@@ -421,6 +476,34 @@ int cc_adjustPhoto(lua_State *L)
 			lua_pushstring(L, "file not exist");
 			return 2;
 		}
+#else
+		if (IsFileExist(fn.c_str()))
+		{
+			auto img = new CImageEx();
+			if (img->LoadFromFile(fn.c_str()))
+			{
+				bool b = img->ReduceAndSaveToFile(fn, lua_tonumber(L, 2), img->GetJpgOrientation());
+				std::string tmp = img->GetTmpFile();
+				img->release();
+				lua_pushboolean(L, b);
+				lua_pushstring(L, tmp.c_str());
+				return 2;
+			}
+			else
+			{
+				img->release();
+				lua_pushboolean(L, false);
+				lua_pushstring(L, "load picture file error");
+				return 2;
+			}
+		}
+		else
+		{
+			lua_pushboolean(L, false);
+			lua_pushstring(L, "file not exist");
+			return 2;
+		}
+#endif
 	}
 	else
 	{
@@ -539,6 +622,33 @@ int cc_getUIOrientation(lua_State *L)
 	return 1;
 }
 
+int cc_getNetworkState(lua_State *L)
+{
+	lua_pushinteger(L, getNetworkState());
+	return 1;
+}
+
+int cc_registerNetworkStateListener(lua_State *L)
+{
+	if (lua_isfunction(L, 1))
+	{
+		lua_pushvalue(L, 1);
+		if (g_callnsl != LUA_REFNIL)
+			lua_unref(L, g_callnsl);
+		g_callnsl = luaL_ref(L, LUA_REGISTRYINDEX);
+		registerNetworkStateListener();
+	}
+	return 0;
+}
+
+int cc_unregisterNetworkStateListener(lua_State *L)
+{
+	if (g_callnsl != LUA_REFNIL)
+		lua_unref(L, g_callnsl);
+	g_callnsl = LUA_REFNIL;
+	unregisterNetworkStateListener();
+	return 0;
+}
 
 void luaopen_lua_exts(lua_State *L)
 {
@@ -565,6 +675,9 @@ void luaopen_lua_exts(lua_State *L)
     lua_register(L, "cc_openURL",cc_openURL);
 	lua_register(L, "cc_setUIOrientation", cc_setUIOrientation);
 	lua_register(L, "cc_getUIOrientation", cc_getUIOrientation);
+	lua_register(L, "cc_getNetworkState", cc_getNetworkState);
+	lua_register(L, "cc_registerNetworkStateListener", cc_registerNetworkStateListener);
+	lua_register(L, "cc_unregisterNetworkStateListener", cc_unregisterNetworkStateListener);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

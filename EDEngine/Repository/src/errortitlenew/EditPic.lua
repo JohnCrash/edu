@@ -20,12 +20,13 @@ local ui = {
 local EditPic = class("EditPic")
 EditPic.__index = EditPic
 
-function EditPic.create(parent_layer,file_path)
+function EditPic.create(parent_layer,file_path,file_path_src)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),EditPic)
 	scene:addChild(layer)
 	layer.parent_layer = parent_layer
 	layer.file_path = file_path
+	layer.file_path_src = file_path_src
 	
 	local function onNodeEvent(event)
 		if "enter" == event then
@@ -99,7 +100,7 @@ function EditPic:copyfile(src_file,dest_file)
 	local data
 	data = kits.read_file(src_file)
 	kits.write_file(dest_file,data)
-	os.remove(src_file)
+	--os.remove(src_file)
 end
 
 function EditPic:init()
@@ -175,8 +176,7 @@ function EditPic:init()
 	
 	local pic_size = back_pic:getContentSize()
 	local x1,x2,y1,y2
-	print('pic_size.width::'..pic_size.width..'::s.width::'..s.width)
-	print('pic_size.width::'..pic_size.width..'::s.width::'..s.width)
+	kits.log('pic_size.width::'..pic_size.width..'::s.width::'..pic_size.width)
 	if pic_size.width>s.width then
 		x1 = 0
 		x2 = s.width
@@ -322,28 +322,6 @@ function EditPic:init()
     buttonBL:addTouchEventListener(touchEvent)
     self._picview:addChild(buttonBL,1004,10001)
 	
---[[	local label_status_cut = cc.Sprite:create('errortitlenew/t4.png')
-	label_status_cut:setPosition(cc.p(s.width/2,s.height*4/5))
-	self._picview:addChild(label_status_cut,10)
-	local label_status_rota = cc.Sprite:create('errortitlenew/t3.png')
-	label_status_rota:setPosition(cc.p(s.width/2,s.height*4/5))
-	self._picview:addChild(label_status_rota,10)
-	local label_status_move = cc.Sprite:create('errortitlenew/t5.png')
-	label_status_move:setPosition(cc.p(s.width/2,s.height*4/5))
-	self._picview:addChild(label_status_move,10)
-	label_status_cut:setVisible(true)
-	label_status_rota:setVisible(false)
-	label_status_move:setVisible(false)
-	operate_type = 1--]]
-	
---[[	local menu = cc.Menu:create()
-	local button_cutpic = cc.MenuItemImage:create('errortitlenew/ti1.png', 'errortitlenew/ti2.png')
-	button_cutpic:setPosition(cc.p(100,100))
-	menu:addChild(button_cutpic)
-	menu:setPosition(cc.p(0, 0))
-	menu:setVisible(false)
-	self._picview:addChild(menu,10)--]]
-	
 	local function timer_update(time)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
 		cur_sence:setPosition(cc.p(old_pos_x,old_pos_y))
@@ -356,35 +334,69 @@ function EditPic:init()
 		local plat_path = cc.FileUtils:getInstance():getWritablePath()..temp_filename
 		self:copyfile(plat_path,self.file_path)
 
---[[		back_pic:loadTexture(self.file_path)
-		back_pic:setPosition(cc.p(s.width/2,s.height/2))
---		back_pic:addTouchEventListener(touchEventPic)
-		self._picview:addChild(back_pic,1,10001)
-		
-		--sel_rect_size = {x1 = s.width/2-100,y1 = s.height/2-100,x2 = s.width/2+100,y2=s.height/2+100}
-		sel_rect_size.x1 = s.width/2-100
-		sel_rect_size.y1 = s.height/2-100
-		sel_rect_size.x2 = s.width/2+100
-		sel_rect_size.y2 = s.height/2+100
-		self._picview:removeChildByTag(10000)
-		local sel_rect = uikits.rect{x1 = sel_rect_size.x1,y1 = sel_rect_size.y1,x2 = sel_rect_size.x2,y2=sel_rect_size.y2,color=cc.c3b(255,0,0),fillColor=cc.c4f(0,0,0,0),linewidth=10}
-		self._picview:addChild(sel_rect,1000,10000)	
-		buttonTL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y2)) 
-		buttonTR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y2)) 
-		buttonBR:setPosition(cc.p(sel_rect_size.x2,sel_rect_size.y1))  
-		buttonBL:setPosition(cc.p(sel_rect_size.x1,sel_rect_size.y1)) --]]
 		self:uploadpic()			
 		if schedulerEntry then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
 	end
 	
+	local function Cut_pic1()
+		local pic_size_show = back_pic:getContentSize()
+		
+		local pic_pos_show_x,pic_pos_show_y = back_pic:getPosition()
+		local layer_src = cc.Layer:create()
+		local pic_src = ccui.ImageView:create()
+		pic_src:loadTexture(self.file_path_src)
+		local pic_size_src = pic_src:getContentSize()
+		
+		layer_src:addChild(pic_src)
+		
+		local scale_show = pic_size_src.width/pic_size_show.width
+		local pic_pos_src_x = pic_size_src.width/2+(pic_pos_show_x-s.width/2)*scale_show
+		local pic_pos_src_y = pic_size_src.height/2+(pic_pos_show_y-s.height/2)*scale_show
+		print('s.width/2::'..s.width/2)
+		print('pic_pos_show_x::'..pic_pos_show_x)
+		print('pic_pos_src_x::'..pic_pos_src_x)
+		
+		local rect_w = (sel_rect_size.x2-sel_rect_size.x1)*scale_show
+		local rect_h = (sel_rect_size.y2-sel_rect_size.y1)*scale_show
+		local sel_range_x = 0
+		local sel_range_y = 0
+		if s.width/2 - x1 < pic_size_show.width/2 then
+			sel_range_x = pic_size_show.width/2 - (s.width/2 - x1)
+		end
+		if s.height/2 - y1 < pic_size_show.height/2 then
+			sel_range_y = pic_size_show.height/2 - (s.height/2 - y1)
+		end
+		print('sel_range_x::'..sel_range_x)
+		sel_range_x = sel_range_x+(sel_rect_size.x1 - x1)
+		sel_range_y = sel_range_y+(sel_rect_size.y1 - y1)
+		pic_pos_src_x = pic_pos_src_x-sel_range_x*scale_show
+		pic_pos_src_y = pic_pos_src_y-sel_range_y*scale_show
+		print('sel_range_x::'..sel_range_x)
+		print('pic_pos_src_x::'..pic_pos_src_x)
+		pic_src:setPosition(cc.p(pic_pos_src_x,pic_pos_src_y))
+
+		pic_src:setScale(back_pic:getScale())
+		pic_src:setRotation(back_pic:getRotation())
+		
+		local texture = cc.RenderTexture:create(rect_w,rect_h)
+
+		texture:begin()
+		pic_src:visit()
+		texture.my_end = texture["end"]
+		texture:my_end()
+		temp_filename = os.time()..'.jpg'
+		texture:saveToFile(temp_filename, kCCImageFormatJPEG)	
+		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
+	end
 	
 	local function Cut_pic()	
 		loadbox = loadingbox.open(self)
+
 		local texture = cc.RenderTexture:create(sel_rect_size.x2-sel_rect_size.x1,sel_rect_size.y2-sel_rect_size.y1)
 		local cur_sence = cc.Director:getInstance():getRunningScene()
-		old_pos_x, old_pos_y= cur_sence:getPosition()
+		old_pos_x,old_pos_y = cur_sence:getPosition()
 		cur_sence:setPosition(cc.p(0-sel_rect_size.x1, 0-sel_rect_size.y1))
 		texture:begin()
 		back_pic:visit()

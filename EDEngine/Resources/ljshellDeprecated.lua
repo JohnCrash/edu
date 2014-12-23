@@ -19,4 +19,10 @@ RESULT_ERROR = -2
 TAKE_PICTURE = 1
 PICK_PICTURE = 2
 
+--[[
+]]--
+if cc_clock then
+	os.clock = cc_clock
+end
+
 ljshell.initApp("EDEngine")

@@ -30,6 +30,7 @@ import java.security.Provider;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -45,24 +46,28 @@ import android.app.AlertDialog;
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.lib.Cocos2dxHelper;
+
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.database.Cursor;
-
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.content.BroadcastReceiver;
+
 //import org.cocos2dx.cpp.CrashHandler;
 
 public class AppActivity extends Cocos2dxActivity {
 	//======================
 	// JNI
 	//======================
+	private static native void networkStateChangeEvent(int state);
 	private static native void launchParam(final String launch,final String cookie,final String uid);
 	private static native void setExternalStorageDirectory(final String sd);
 	private static native void sendTakeResourceResult(int resultCode,int typeCode,final String res); 
@@ -422,7 +427,69 @@ public class AppActivity extends Cocos2dxActivity {
 		}
 		return 1;
 	}
-	
+	/*
+	 *  È¡ÍøÂç×´Ì¬ºÍ¼à¿ØÍøÂç×´Ì¬
+	 *  0Ã»ÓÐÍøÂç,1 wifi,2 mobile
+	 */
+	public static int getNetworkState()
+	{
+		int state = 0;
+		ConnectivityManager cmgr = (ConnectivityManager)myActivity.getSystemService(CONNECTIVITY_SERVICE);
+		if( cmgr == null )
+			return 0;
+		NetworkInfo networkInfo = cmgr.getActiveNetworkInfo();
+		if( networkInfo==null )
+			return 0; //Ã»ÓÐÍøÂç
+		NetworkInfo wifiInfo = cmgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		if( wifiInfo != null )
+			state |= wifiInfo.isAvailable()?1:0;
+		
+		NetworkInfo mobiInfo = cmgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		if( mobiInfo != null )
+			state |= mobiInfo.isAvailable()?2:0;
+		
+		return state;
+	}
+	static BroadcastReceiver connectionReceiver;
+	public static void registerNetworkStateListener()
+	{
+		if( connectionReceiver == null )
+		{
+			connectionReceiver =  new BroadcastReceiver() { 
+				@Override 
+				public void onReceive(android.content.Context context, Intent intent) {
+					int state = getNetworkState();
+					networkStateChangeEvent( state );
+				}
+			};
+		}
+		if( connectionReceiver != null )
+		{
+			IntentFilter intf = new IntentFilter();
+			intf.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+			myActivity.registerReceiver(connectionReceiver,intf);
+		}
+		else
+		{
+			Log.w("registerNetworkStateListener","connectionReceiver==null");
+		}
+	}
+	public static void unregisterNetworkStateListener()
+	{
+		if( connectionReceiver != null )
+			myActivity.unregisterReceiver(connectionReceiver);
+	}
+	/*
+	 *  openURL
+	 */
+	public static void androidOpenURL( String url )
+	{
+		Uri uri = Uri.parse( url );
+		Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+		if (intent.resolveActivity(myActivity.getPackageManager()) != null) {
+			myActivity.startActivity(intent);
+		}
+	}
 	/*
 	 * ÇÐ»»·½Ïò
 	 */

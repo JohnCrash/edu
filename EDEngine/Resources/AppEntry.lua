@@ -174,7 +174,7 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
-		
+	--[[	
 	local epbutton = uikits.button{caption='家长错题本',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -186,7 +186,8 @@ function AppEntry:init()
 				return Loading.create()
 			end}
 		end}
---[[	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+		--]]
+	local epbutton = uikits.button{caption='错题',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
@@ -195,7 +196,7 @@ function AppEntry:init()
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
-		end}--]]		
+		end}
 	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -233,22 +234,11 @@ function AppEntry:init()
 					kits.log('play fail')
 				end
 			end}	
-	local resetwindow = uikits.button{caption='重启改变尺寸',x=264*scale,y = 164*scale + 4*item_h,
+	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				local mode,width,height = cc_getWindowInfo()
-				print( 'mode = '..mode )
-				print( 'width = '..width )
-				print( 'height = '..height )
-				width,height = cc_getScreenInfo()
-				print( 'screenwidth = '..width )
-				print( 'screenheight = '..height )
---				if cc_resetWindow("window",480,640) then
-					local Director = cc.Director:getInstance()
-					local glview = Director:getOpenGLView()
-					glview:setFrameSize(480,640)	
---					Director:endToLua()
---				end
+				local messagebox = require "messagebox"
+				messagebox.open(bg,function()end,messagebox.REPAIR,"title","text")
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
