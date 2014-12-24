@@ -3,6 +3,7 @@ local kits = require "kits"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
 local cache = require "cache"
+local login = require "login"
 local messagebox = require "messagebox"
 --local answer = curweek or require "src/errortitile/answer"
 local StatisticsView = class("StatisticsView")

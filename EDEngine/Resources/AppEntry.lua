@@ -192,7 +192,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
 				run=function()
-				login.set_selector(3) 
+				login.set_selector(1) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
@@ -202,7 +202,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'poetrymatch','luacore'},
 				run=function()
-				login.set_selector(3) 
+				login.set_selector(2) 
 				local selstudent = require "poetrymatch/Loading"
 				return selstudent.create()
 			end}

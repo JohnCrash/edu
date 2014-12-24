@@ -28,6 +28,14 @@ local ui = {
 	VIEW_BUY_STORE = 'gun/zhenjia',
 	
 	VIEW_CARD_INFO = 'kpxiangq',
+	PIC_CARD_INFO = 'kpxiangq/kp',
+	TXT_CARD_INFO_LVL = 'kpxiangq/kp/dj',
+	TXT_CARD_INFO_NAME = 'kpxiangq/mz',
+	PIC_CARD_INFO_GOLD = 'kpxiangq/jing',
+	PIC_CARD_INFO_SILVER = 'kpxiangq/yin',
+	PIC_CARD_INFO_CU = 'kpxiangq/tong',
+	
+	
 	VIEW_SHI_INFO = 'shi',
 	VIEW_CARD_EXCHANGE = 'gengh',
 	VIEW_SKILL_INFO = 'jnxiangq',
@@ -140,14 +148,8 @@ function Bagview:show_le_coin()
 			
 		end,"click")
 end
---[[
 
-	VIEW_CARD_BAG = 'gun/k1',
-	PIC_CARD_BAG = 'gun/k1/kp',
-	TXT_CARD_BAG_LVL = 'gun/k1/kp/dj',
-	PIC_CARD_BAG_UPLVL = 'gun/k1/sjl',
-	VIEW_BUY_STORE = 'gun/zhenjia',--]]
-function Bagview:show_exchange_card()	
+function Bagview:show_exchange_card(id)	
 
 end
 	
@@ -155,8 +157,11 @@ function Bagview:buy_store()
 
 end
 	
-function Bagview:show_card_info()	
-
+function Bagview:show_card_info(id)	
+	self.view_bag:setVisible(false)
+	self.view_card_info:setVisible(true)
+	local card_info = person_info.get_card_in_bag_by_id(id)
+	
 end
 
 local card_space_shu = 42
@@ -241,9 +246,10 @@ function Bagview:show_bag_view()
 			local pic_name = all_card_info[i].id..'.png'
 			person_info.load_card_pic(pic_card_bag,pic_name)
 			txt_card_bag_lvl:setString(all_card_info[i].lvl)
+			pic_card_bag.id = all_card_info[i].id
 			uikits.event(pic_card_bag,	
 				function(sender,eventType)	
-					self:show_card_info()
+					self:show_card_info(sender.id)
 				end,"click")
 			pic_card_bag:setVisible(true)
 			txt_card_bag_lvl:setVisible(true)
@@ -265,13 +271,15 @@ function Bagview:show_bag_view()
 		cur_card:setPositionX(pos_x)
 		txt_card_lvl:setString(battle_cards[i].lvl)
 		local but_card_exchange = uikits.child(cur_card,ui.BUTTON_CARD_EXCHANGE)
+		but_card_exchange.id = battle_cards[i].id
+		cur_card.id = battle_cards[i].id
 		uikits.event(but_card_exchange,	
 			function(sender,eventType)	
-				self:show_exchange_card()
+				self:show_exchange_card(sender.id)
 			end,"click")
 		uikits.event(cur_card,	
 			function(sender,eventType)	
-				self:show_card_info()
+				self:show_card_info(sender.id)
 			end,"click")
 		cur_card:setVisible(true)
 		view_battle_list:addChild(cur_card)

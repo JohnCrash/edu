@@ -65,36 +65,24 @@ function create()
 end
 
 function Mainview:getdatabyurl()
+	local send_data
+	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
+		if t and t == true then
+			if t == true then
 
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
 			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+ 
+			end
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					uikits.popScene()
+				else
 					uikits.popScene()
 				end
-			end,messagebox.RETRY)	
+			end)
 		end
-	end,'N')
+	end)
 end
 local schedulerEntry = nil
 local per_tili_reset_time = 1*60
