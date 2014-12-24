@@ -558,7 +558,7 @@ function Batch:init_student_list_func()
 		for i,appr in pairs(appraise) do
 			local st = {}
 			for k,v in pairs(self._student_list_table) do
-				local score = v.real_score/total_score
+				local score = v.correct --v.real_score/total_score
 				if score >= appr.low and score < appr.up 
 				 and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
 					self._statuents_num = self._statuents_num + 1
@@ -576,7 +576,7 @@ function Batch:init_student_list_func()
 						[ui.STUDENT_COMMIT_TIME] = '',
 						[ui.STUDENT_TOPICS_NUM] = '',
 						[ui.STUDENT_SUBJECTIVE_NUM] = '',
-						[ui.STUDENT_SCORE] = tostring(math.floor(v.real_score/total_score))..'分',
+						[ui.STUDENT_SCORE] = tostring(math.floor(v.correct))..'%',
 						[ui.STUDENT_ICON] = function(child,item)
 								login.get_logo(v.student_id,function(filename)
 									if filename and child then

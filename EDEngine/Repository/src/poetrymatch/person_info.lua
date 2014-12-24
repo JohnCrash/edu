@@ -8,6 +8,7 @@ local g_person_info = {
 id = 149091,
 name = 'liyihang',
 lvl = 5,
+sex = 1, --1为女 ，2为男
 }
 local g_person_exp = {
 lvl = 5,
@@ -26,7 +27,7 @@ skill_table = {},
 } -- 
 
 local g_person_battle_cards = {'caoz','caoc'}
-local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
+local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
 local g_person_boss_info = {
 fengyang = {
 {id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
@@ -379,7 +380,8 @@ local function get_boss_info_by_id(id)
 	return boss_info
 end
 
-local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
+local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
+--local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
 local function post_data_by_new_form(module_id,post_data,func)
 	local send_data = {}

@@ -36,10 +36,77 @@ function create()
 	return scene	
 end
 
+function Loading:update_card_info()
+	local send_data
+	person_info.post_data_by_new_form('load_user_card_plate',send_data,function(t,v)
+		if t and t == true then
+			
+			
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
+				end
+			end)			
+		end
+	end)
+end
+
+function Loading:update_user_info()
+	local send_data
+	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
+		if t and t == true then
+			--local res = json.decode(v)
+			local user_info = {}
+			user_info.id = v.user_id
+			user_info.name = v.user_name
+			user_info.sex = v.sex
+			user_info.school_name = v.province_name..v.city_name..v.area_name..v.sch_name
+			person_info.set_user_info(user_info)
+			local lvl_info = {}
+			lvl_info.lvl = v.level
+			lvl_info.cur_exp = v.exper
+			lvl_info.max_exp = v.max_exper
+			person_info.set_user_lvl_info(lvl_info)
+			person_info.set_user_le_coin(v.hcoin)
+			person_info.set_user_silver(v.scoin)
+			self:update_card_info()
+			--[[local scene_next = Mainview.create()        
+			cc.Director:getInstance():replaceScene(scene_next)   --]]
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
+				end
+			end)
+		end
+	end)
+end
+
 function Loading:getdatabyurl()
 	local send_data
 	person_info.post_data_by_new_form('login',send_data,function(t,v)
-		print('t::'..t..'::v::'..v)
+		if t and t == true then
+			--local res = json.decode(v)
+			if v.v1 == true then
+				self:update_user_info()
+			else
+				local scene_next = Mainview.create()        
+				cc.Director:getInstance():replaceScene(scene_next)   
+			end
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					uikits.popScene()
+				else
+					uikits.popScene()
+				end
+			end)
+		end
 	end)
 end
 
@@ -51,10 +118,8 @@ function Loading:init()
 	end
 	self._loading = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
 	self:addChild(self._loading)
-	
-	local scene_next = Mainview.create()		
-	cc.Director:getInstance():replaceScene(scene_next)	
-	--self:getdatabyurl()
+
+	self:getdatabyurl()
 --	local loadbox = loadingbox.open(self)
 --	local scene_next = WrongSubjectList.create()								
 --	cc.Director:getInstance():replaceScene(scene_next)	

@@ -5,7 +5,7 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
-local adderrorview = require "errortitlenew/AddErrorView"
+local adderrorview = require "errortitlenew/AddErrorViewNoNet"
 local ljshell = require "ljshell"
 local imagepreview = require "errortitlenew/imagepreview"
 local ui = {
@@ -80,14 +80,14 @@ local ui = {
 	
 }
 
-local ErrorTitlePerView = class("ErrorTitlePerView")
-ErrorTitlePerView.__index = ErrorTitlePerView
+local ErrorTitlePerViewNoNet = class("ErrorTitlePerViewNoNet")
+ErrorTitlePerViewNoNet.__index = ErrorTitlePerViewNoNet
 
 local is_loading
 
-function ErrorTitlePerView.create(user_name)
+function ErrorTitlePerViewNoNet.create(user_name)
 	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),ErrorTitlePerView)
+	local layer = uikits.extend(cc.Layer:create(),ErrorTitlePerViewNoNet)
 	scene:addChild(layer)
 	layer.course_index = 0
 	layer.status_index = 0
@@ -113,7 +113,7 @@ function ErrorTitlePerView.create(user_name)
 	return scene
 end
 
-function ErrorTitlePerView:init_butlist()
+function ErrorTitlePerViewNoNet:init_butlist()
 --[[	local view_no_all = uikits.child(self._widget,ui.VIEW_NO_ALL_STA)
 	local view_no_yihui = uikits.child(self._widget,ui.VIEW_NO_YIHUI_STA)
 	local view_no_buhui = uikits.child(self._widget,ui.VIEW_NO_BUHUI_STA)
@@ -405,7 +405,7 @@ function ErrorTitlePerView:init_butlist()
 	end,"click")
 end
 
-function ErrorTitlePerView:show_checkview(cur_title_view,reason)
+function ErrorTitlePerViewNoNet:show_checkview(cur_title_view,reason)
 	local txt_reason_cuxin = uikits.child(cur_title_view,ui.TXT_CUXIN)
 	local txt_reason_lijie = uikits.child(cur_title_view,ui.TXT_LIJIE)
 	local txt_reason_gainian = uikits.child(cur_title_view,ui.TXT_GAINIAN)
@@ -510,17 +510,17 @@ local title_space_heng = 20
 local status_change_url = 'http://app.lejiaolexue.com/exerbook2/do.ashx?'
 local item_del_url = 'http://app.lejiaolexue.com/exerbook2/del.ashx?'
 
-function ErrorTitlePerView:save_innerpos()
+function ErrorTitlePerViewNoNet:save_innerpos()
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 	self.inner_posx,self.inner_posy = view_title:getInnerContainer():getPosition()
 end
 
-function ErrorTitlePerView:set_innerpos()
+function ErrorTitlePerViewNoNet:set_innerpos()
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 	view_title:getInnerContainer():setPosition(cc.p(self.inner_posx,self.inner_posy))
 end
 
-function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
+function ErrorTitlePerViewNoNet:show_picview(pic_view,pic_config_name,per_title_view)
 	local pos_start,pos_end
 	local function touchEventPic(sender,eventType)
 --[[		local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
@@ -535,33 +535,11 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 		elseif eventType == ccui.TouchEventType.ended then
 			pos_end = sender:getTouchBeganPosition()
 			if math.sqrt((pos_end.x-pos_start.x)*(pos_end.x-pos_start.x)+(pos_end.y-pos_start.y)*(pos_end.y-pos_start.y)) < 10 then
---[[				local loadbox = loadingbox.open(self)
-				is_loading = true
-				cache.request_nc(download_pic_big_url..sender.pic_name,
-				function(b,t)
-						if b then
-						--	local s_pic = picview:getContentSize()
-							self:save_innerpos()	
-							local local_dir = ljshell.getDirectory(ljshell.AppDir)
-							local file_path = local_dir.."cache/"..sender.pic_name
-						--	local file_path = kits.get_local_directory()..'res/errortitlenew/11.jpg'
-							local imgs = {}
-							imgs[1] = file_path
-							local scene_next = imagepreview.create(1,imgs,self)	
-							uikits.pushScene(scene_next)	
-						else
-							kits.log("ERROR :  download_pic_big_url failed")
-						end
-					is_loading = false
-					loadbox:removeFromParent()
-					end,sender.pic_name)		--]]	
-				--self:change_status_only()
-				local local_dir = ljshell.getDirectory(ljshell.AppDir)	
 				local imgs = {}	
 				self:save_innerpos()
 				self.isneedupdate = false
 				for j=1,#sender.pic_name do
-					local file_path = local_dir.."cache/"..sender.pic_name[j]
+					local file_path =sender.pic_name[j]
 					--local b,newRes = cc_adjustPhoto(file_path,1280)
 					imgs[j] = file_path
 				end
@@ -572,15 +550,12 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 		end
 		
 	end
-	
+	local pic_str = kits.read_local_file('errortitle/'..pic_config_name)
 	local pic_table = json.decode(pic_str)
 	for i=1,#pic_table do
 		local cur_pic = uikits.child(per_title_view,ui.PIC_VIEW)
 		cur_pic:setVisible(true)
-		local loadbox = loadingbox.circle( cur_pic )
-		is_loading = true
-		local local_dir = ljshell.getDirectory(ljshell.AppDir)
-		local file_path = local_dir.."cache/"..pic_table[i]
+		local file_path = pic_table[i]
 		if kits.exist_file(file_path) then
 			if i == #pic_table then
 				cur_pic:loadTexture(file_path)	
@@ -596,61 +571,14 @@ function ErrorTitlePerView:show_picview(pic_view,pic_str,per_title_view)
 				button_pic:addTouchEventListener(touchEventPic)
 				view_tu:addChild(button_pic)	
 			end
-			is_loading = false
-			loadbox:removeFromParent()
 		else
-			cache.request_nc(download_pic_big_url..pic_table[i],
-			function(b,t)
-					if b then
-	--[[					local new_pic = pic_view:clone()
-						local local_dir = ljshell.getDirectory(ljshell.AppDir)
-						local file_path = local_dir.."cache/"..pic_table[i]
-						new_pic:loadTexture(file_path)
-						local s_pic = new_pic:getContentSize()
-						local x_pic = new_pic:getPositionX()
-						x_pic = x_pic + (pic_space+s_pic.width)*(i-1)
-						new_pic:setPositionX(x_pic)
-						new_pic:setVisible(true)
-						--local pic_view = uikits.child(self._widget,ui.PIC_VIEW)
-						per_title_view:addChild(new_pic)
-						button_pic = ccui.Button:create()
-						button_pic:setTouchEnabled(true)
-						button_pic.pic_name = pic_table[i]
-						button_pic:loadTextures(button_empty_path, button_empty_path, "")
-						button_pic:setPosition(cc.p(s_pic.width/2,s_pic.height/2))        
-						button_pic:addTouchEventListener(touchEventPic)
-						new_pic:addChild(button_pic)	--]]
-						--local cur_pic = uikits.child(per_title_view,ui.PIC_VIEW)
-						if i == #pic_table then
---[[							local local_dir = ljshell.getDirectory(ljshell.AppDir)
-							local file_path = local_dir.."cache/"..pic_table[i]--]]
-							cur_pic:loadTexture(file_path)	
-							local view_tu = uikits.child(per_title_view,ui.VIEW_TU)
-							local s_tu_view = view_tu:getContentSize()
-							local s_pic = cur_pic:getContentSize()
-							cur_pic:setScale(s_tu_view.height/s_pic.height)	
-									
-							button_pic = ccui.Button:create()
-							button_pic:setTouchEnabled(true)
-							button_pic.pic_name = pic_table
-							button_pic:loadTextures(button_empty_path, button_empty_path, "")
-							button_pic:setPosition(cc.p(s_tu_view.width/2,s_tu_view.height/2))        
-							button_pic:addTouchEventListener(touchEventPic)
-							view_tu:addChild(button_pic)						
-						end
-					else
-						kits.log("ERROR :  download_pic_url failed")
-					end
-					is_loading = false
-					loadbox:removeFromParent()
-				end,pic_table[i])	
 		end	
 	end
 end
 
 
 
-function ErrorTitlePerView:update_title_save_pos(index)
+function ErrorTitlePerViewNoNet:update_title_save_pos(index)
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 --	view_title:removeChildByTag(index)
 	local end_index = 20*self.page_index
@@ -832,7 +760,7 @@ function ErrorTitlePerView:update_title_save_pos(index)
 	
 end
 
-function ErrorTitlePerView:show_title(is_has_title)
+function ErrorTitlePerViewNoNet:show_title(is_has_title)
 	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 	local per_title_src = uikits.child(self._widget,ui.PER_TITLE_VIEW)
 	--view_title:setVisible(false)
@@ -869,7 +797,8 @@ function ErrorTitlePerView:show_title(is_has_title)
 				
 				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
 				but_status.id = v.id
-				but_status.view = cur_title_view
+				--but_status.view = cur_title_view
+				but_status.status = v.status
 				if v.status == 1 then
 					but_status:setSelectedState(true)
 				elseif v.status == 2 then
@@ -881,51 +810,14 @@ function ErrorTitlePerView:show_title(is_has_title)
 				else
 					uikits.event(but_status,	
 						function(sender,eventType)	
-							if self.status_index == 1 then  --buhui
-								self.status_change.tag = 1
-								if self.status_change.id[sender.id] then
-									self.status_change.id[sender.id] = nil
-								else
-									self.status_change.id[sender.id] = sender.id
-								end
-							elseif self.status_index == 2 then --yihui
-								self.status_change.tag = 2
-								if self.status_change.id[sender.id] then
-									self.status_change.id[sender.id] = nil
-								else
-									self.status_change.id[sender.id] = sender.id
-								end
-							elseif self.status_index == 0 then --quanbu
-								local send_url = status_change_url..'id='..sender.id
-								if login.get_uid_type() ~= login.STUDENT then
-									send_url = send_url..'&user_id='..login.get_subuid()
-								end
-								local loadbox = loadingbox.open(self)
-								is_loading = true
-								self:show_emptyview_type(false)
-								cache.request_json( send_url,function(t)
-									if t and type(t)=='table' then
-										if t.result ~= 0 then
-											is_loading = false
-											loadbox:removeFromParent()
-											return false
-										else
-		
-										end
-									else
-										--既没有网络也没有缓冲
-										messagebox.open(self,function(e)
-											if e == messagebox.TRY then
-												self:adderrortitle()
-											elseif e == messagebox.CLOSE then
-												uikits.popScene()
-											end
-										end,messagebox.RETRY)	
-									end
-									is_loading = false
-									loadbox:removeFromParent()
-								end,'NC')			
+							if sender.status == 1 then
+								sender.status = 2
+							else
+								sender.status = 1
 							end
+							self.all_title_info_tb[sender.id].status = sender.status
+							local all_title_info_str = json.encode(self.all_title_info_tb)
+							kits.write_local_file('errortitle/config.json',all_title_info_str)
 					end)							
 				end		
 				
@@ -968,175 +860,12 @@ function ErrorTitlePerView:show_title(is_has_title)
 								
 				view_title:addChild(cur_title_view,1,100000+i)
 			end		
-		else
-			local size_per_view = per_title_src:getContentSize()
-			local size_title_view = view_title:getContentSize()
-			local row_num = #self.title_table/2	
-			row_num = math.ceil(row_num)
-			--local row_num = #self.title_table
-			
-			local size  = per_title_src:getContentSize()	
-			
-			local size_old = view_title:getInnerContainerSize()
-			local count_old = view_title:getChildrenCount()-1
-			view_title:setInnerContainerSize(cc.size(size_old.width,size_old.height+(size.height+title_space_shu)*row_num))
-			
-			local titleview = view_title:getChildren()
-			for i,obj in pairs(titleview) do
-				local per_size_old_x = titleview[i]:getPositionX()
-				local per_size_old_y = titleview[i]:getPositionY()+(size.height+title_space_shu)*row_num
-				titleview[i]:setPosition(cc.p(per_size_old_x,per_size_old_y))
-				--titleview[i]:setVisible(false)
-			end
-			for i,v in pairs(self.title_table) do
-				local cur_title_view
-				cur_title_view = per_title_src:clone()
-				
---[[				local but_del = uikits.child(cur_title_view,ui.BUTTON_DEL)
-				but_del.id = v.id
-				uikits.event(but_del,	
-					function(sender,eventType)	
-						local send_url = item_del_url..'id='..sender.id
-						local loadbox = loadingbox.open(self)
-						is_loading = true
-						self._empty:setVisible(false)
-						cache.request_json( send_url,function(t)
-							if t and type(t)=='table' then
-								if t.result ~= 0 then
-									is_loading = false
-									loadbox:removeFromParent()
-									return false
-								else
-									self.page_index = 1
-									self:update_title()						
-								end
-							else
-								--既没有网络也没有缓冲
-								messagebox.open(self,function(e)
-									if e == messagebox.TRY then
-										self:adderrortitle()
-									elseif e == messagebox.CLOSE then
-										uikits.popScene()
-									end
-								end,messagebox.RETRY)	
-							end
-							is_loading = false
-							loadbox:removeFromParent()
-						end,'N')			
-				end)		--]]
-				
-				local but_status = uikits.child(cur_title_view,ui.BUTTON_STA_HUI)
-				--but_del:addTouchEventListener(touchEventHui)
-				but_status.id = v.id
-				but_status.view = cur_title_view
-				if v.status == 1 then
-					but_status:setSelectedState(true)
-				elseif v.status == 2 then
-					but_status:setSelectedState(false)
-				end
-				if login.get_uid_type() == login.TEACHER then		
-					but_status:setEnabled(false)
-					but_status:setTouchEnabled(false)
-				else
-					uikits.event(but_status,	
-						function(sender,eventType)	
-							if self.status_index == 1 then  --buhui
-								self.status_change.tag = 1
-								if self.status_change.id[sender.id] then
-									self.status_change.id[sender.id] = nil
-								else
-									self.status_change.id[sender.id] = sender.id
-								end
-							elseif self.status_index == 2 then --yihui
-								self.status_change.tag = 2
-								if self.status_change.id[sender.id] then
-									self.status_change.id[sender.id] = nil
-								else
-									self.status_change.id[sender.id] = sender.id
-								end
-							elseif self.status_index == 0 then --quanbu
-								local send_url = status_change_url..'id='..sender.id
-								if login.get_uid_type() ~= login.STUDENT then
-									send_url = send_url..'&user_id='..login.get_subuid()
-								end
-								local loadbox = loadingbox.open(self)
-								is_loading = true
-								self:show_emptyview_type(false)
-								cache.request_json( send_url,function(t)
-									if t and type(t)=='table' then
-										if t.result ~= 0 then
-											is_loading = false
-											loadbox:removeFromParent()
-											return false
-										else	
-										end
-									else
-										--既没有网络也没有缓冲
-										messagebox.open(self,function(e)
-											if e == messagebox.TRY then
-												self:adderrortitle()
-											elseif e == messagebox.CLOSE then
-												uikits.popScene()
-											end
-										end,messagebox.RETRY)	
-									end
-									is_loading = false
-									loadbox:removeFromParent()
-								end,'NC')			
-							end
-					end)							
-				end
-			
-				local pic_course 
-				if v.course	== 1 then
-					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_CHN)
-				elseif v.course	== 2 then
-					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_MATH)
-				elseif v.course	== 3 then
-					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_ENG)
-				elseif v.course	== 4 then
-					pic_course = uikits.child(cur_title_view,ui.PIC_COURSE_OTHER)
-				end			
-				pic_course:setVisible(true)
-				
---[[				local txt_remark = uikits.child(cur_title_view,ui.TXT_REMARK)
-				txt_remark:setTouchEnabled(false)
-				if v.remark ~= '' then
-					txt_remark:setText(v.remark)
-				end
-				local check_view = uikits.child(cur_title_view,ui.CHECK_VIEW)--]]
-				self:show_checkview(cur_title_view,v.reason)
-				
-				local pic_view = uikits.child(cur_title_view,ui.PIC_VIEW)
-				pic_view:setVisible(false)
-				self:show_picview(pic_view,v.content,cur_title_view)
-
-				local pos_x = cur_title_view:getPositionX()
-				if i%2 == 1 then				
-				else
-					pos_x = pos_x + size_per_view.width+title_space_heng
-				end		
-				local cur_row = i/2
-				cur_row = math.ceil(cur_row)
-				
-				local pos_y = view_title:getInnerContainerSize().height-(size_per_view.height+ title_space_shu)*(cur_row+count_old/2)
-				print('pos_y::::'..pos_y)
-				cur_title_view:setPositionX(pos_x)		
-				cur_title_view:setPositionY(pos_y)	
-				cur_title_view:setVisible(true)
-
---[[				local pos_y = view_title:getInnerContainerSize().height-(size_per_view.height+ title_space_shu)*(i+count_old)	
-				cur_title_view:setPositionY(pos_y)	
-				cur_title_view:setVisible(true)--]]
-								
-				view_title:addChild(cur_title_view,1,100000+i+count_old)
-			end				
 		end
 
 	end
 end
 
-function ErrorTitlePerView:show_emptyview_type(is_show)
+function ErrorTitlePerViewNoNet:show_emptyview_type(is_show)
 	local view_no_all = uikits.child(self._widget,ui.VIEW_NO_ALL_STA)
 	local view_no_yihui = uikits.child(self._widget,ui.VIEW_NO_YIHUI_STA)
 	local view_no_buhui = uikits.child(self._widget,ui.VIEW_NO_BUHUI_STA)
@@ -1162,14 +891,14 @@ function ErrorTitlePerView:show_emptyview_type(is_show)
 	end
 end
 
-function ErrorTitlePerView:settitlecount()
+function ErrorTitlePerViewNoNet:settitlecount()
 	local txt_err_count = uikits.child(self._widget,ui.TXT_ERR_COUNT)
 	txt_err_count:setString(self.totalcount)
 end
 
 --local download_pic_url = 'http://file-stu.lejiaolexue.com/rest/dlimage/'
 local status_batch_change_url = 'http://app.lejiaolexue.com/exerbook2/do_batch2.ashx'
-function ErrorTitlePerView:change_status_only(layer_push)
+function ErrorTitlePerViewNoNet:change_status_only(layer_push)
 	
 	local send_data_src = {}
 	if self.status_change.tag >0 then
@@ -1235,7 +964,7 @@ function ErrorTitlePerView:change_status_only(layer_push)
 	self.status_change.id = {}
 end
 
-function ErrorTitlePerView:update_title()
+function ErrorTitlePerViewNoNet:update_title()
 	local send_data_src = {}
 	if self.status_change.tag >0 then
 		send_data_src = self.status_change.id
@@ -1290,8 +1019,8 @@ function ErrorTitlePerView:update_title()
 	self.status_change.id = {}
 end
 
-function ErrorTitlePerView:getdatabyurl()
-	local send_url = get_list_url
+function ErrorTitlePerViewNoNet:getdatabyurl()
+--[[	local send_url = get_list_url
 	send_url = send_url..'range=0'
 	send_url = send_url..'&course='..self.course_index
 	send_url = send_url..'&status='..self.status_index
@@ -1336,10 +1065,42 @@ function ErrorTitlePerView:getdatabyurl()
 		end
 		is_loading = false
 		loadbox:removeFromParent()
-	end,'NC')
+	end,'NC')--]]
+	self:show_emptyview_type(false)
+	local all_title_info_str = kits.read_local_file('errortitle/config.json')
+	self.all_title_info_tb = {}
+	if all_title_info_str then
+		self.all_title_info_tb = json.decode(all_title_info_str)
+	end
+	print('#self.all_title_info_tb::'..#self.all_title_info_tb)
+	if #self.all_title_info_tb == 0 then
+		self.totalcount = 0
+		self:show_title(false)
+	else
+		self.title_table = {}
+		for i=1,#self.all_title_info_tb do
+			print('self.course_index::'..self.course_index)
+			print('self.all_title_info_tb[i].course::'..self.all_title_info_tb[i].course)
+			print('self.status_index::'..self.status_index)
+			print('self.all_title_info_tb[i].status::'..self.all_title_info_tb[i].status)
+			if self.course_index == 0 or self.course_index == self.all_title_info_tb[i].course then
+				if self.status_index == 0 or self.status_index == self.all_title_info_tb[i].status then
+					self.title_table[#self.title_table+1] = self.all_title_info_tb[i]
+				end				
+			end
+		end
+		print('#self.title_table::'..#self.title_table)
+		self.totalcount = #self.title_table
+		if #self.title_table == 0 then
+			self:show_title(false)
+		else
+			self:show_title(true)
+		end
+	end
+	
 end
 
-function ErrorTitlePerView:init()
+function ErrorTitlePerViewNoNet:init()
 	if self.isneedupdate == false then
 		self._course_list:setVisible(false)
 		self._status_list:setVisible(false)
@@ -1393,7 +1154,7 @@ function ErrorTitlePerView:init()
 			self:change_status_only()	
 			--uikits.popScene()						
 	end,"click")	
-	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
+--[[	local view_title = 	uikits.child(self._widget,ui.VIEW_TITLE)
 
 	uikits.event(view_title,
 	function(sender,eventType)
@@ -1404,12 +1165,12 @@ function ErrorTitlePerView:init()
 				self:updatetitleview()				
 			end
 		end
-	end)	
+	end)	--]]
 	self:init_butlist()
 	self:update_title()	
 end
 
-function ErrorTitlePerView:updatetitleview()
+function ErrorTitlePerViewNoNet:updatetitleview()
 	
 	if self.page_index == self.totalpagecount then
 		return
@@ -1423,7 +1184,7 @@ function ErrorTitlePerView:updatetitleview()
 	end
 end	
 
-function ErrorTitlePerView:release()
+function ErrorTitlePerViewNoNet:release()
 	local save_info_tb = {}
 	save_info_tb.course_index = self.course_index
 	save_info_tb.status_index = self.status_index
@@ -1431,4 +1192,4 @@ function ErrorTitlePerView:release()
 	kits.config("et_init",save_info)
 end
 
-return ErrorTitlePerView
+return ErrorTitlePerViewNoNet
