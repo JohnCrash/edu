@@ -25,7 +25,7 @@ local function log_caller()
 	end
 end
 
-local function playSound( file )
+local function playSound( file,ismusic )
 	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
 		if string.lower(suffix) == '.amr' then
@@ -35,13 +35,16 @@ local function playSound( file )
 				return cc_playVoice(file)
 			end
 		else
-			return AudioEngine.playEffect( file )
+			if ismusic then
+				return AudioEngine.playMusic( file )
+			else
+				return AudioEngine.playEffect( file )
+			end
 		end
 	else
 		kits.log('ERROR playSound file not exist '..tostring(file))
 	end
 end
-
 
 local function voiceLength( file )
 	if kits.exist_file(file) or kits.exist_cache(file)  then
