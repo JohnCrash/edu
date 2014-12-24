@@ -332,7 +332,7 @@ function Subjective:load_voice(item,filename,suffix)
 		uikits.event(play,function(sender)
 			uikits.playSound( filename )
 		end)
-		local length = cc_getVoiceLength( filename )
+		local length = uikits.voiceLength( filename )--cc_getVoiceLength( filename )
 		txt:setString( kits.time_to_string_simple(math.floor(length)) )
 	end
 end
@@ -904,7 +904,8 @@ function Subjective:load_myanswer_from_table( t )
 					if suffix == '.png' or suffix == '.jpg' or suffix == '.gif' then
 						self:add_photo( s.filename,i )
 					elseif suffix == '.amr' then
-						local tlen = cc_getVoiceLength( kits.get_cache_path()..s.filename )
+						--local tlen = cc_getVoiceLength( kits.get_cache_path()..s.filename )
+						local tlen = uikits.voiceLength( kits.get_cache_path()..s.filename )
 						self:add_voice( s.filename,tlen,i )
 					else
 						kits.log("ERROR not support meida type "..tostring(suffix))
@@ -1075,7 +1076,13 @@ function Subjective:load_myanswer()
 				self:clear_current()
 				self:relayout_topics(self._current)				
 				return
+			else
+				--本地数据不对重新拉一遍
+				self:load_from_cloud()
 			end
+		else
+			--本地没有尝试从网上拉
+			self:load_from_cloud()
 		end
 	end
 end
@@ -1334,7 +1341,8 @@ function Subjective:init_gui()
 								function(b,file)
 									self._recording = nil
 									if b then
-										local tlen = cc_getVoiceLength(file)
+										--local tlen = cc_getVoiceLength(file)
+										local tlen = uikits.voiceLength(file)
 										self:add_voice( file,tlen )
 										self:clear_current()
 										self:relayout_topics( self._current )

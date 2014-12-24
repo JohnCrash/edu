@@ -13,6 +13,7 @@ local FileUtils = cc.FileUtils:getInstance()
 --local defaultFont="fonts/simfang.ttf"
 local defaultFont="Marker Felt"
 local defaultFontSize = 32
+local ismute
 
 local function log_caller()
 	local caller = debug.getinfo(3,'nSl')
@@ -26,6 +27,7 @@ local function log_caller()
 end
 
 local function playSound( file,ismusic )
+	if ismute then return end
 	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
 		if string.lower(suffix) == '.amr' then
@@ -75,10 +77,11 @@ local function stopAllSound()
 	cc_stopVoice()
 end
 
-local ismute
-
 local function muteSound( b )
 	ismute = b
+	if ismute then
+		stopAllSound()
+	end
 end
 
 local click_sounds = {
@@ -88,6 +91,10 @@ local click_sounds = {
 	'audio/right.mp3',
 	'audio/error.mp3',
 }
+
+local function setDefaultClickSound( idx,file )
+	click_sounds[idx] = file
+end
 
 local function playClickSound( idx )
 	if not ismute then
@@ -889,13 +896,18 @@ local function rect(t)
 end
 
 local _pushNum = 0
+local function replaceScene( scene )
+	Director:replaceScene( scene )
+	cc.TextureCache:getInstance():removeUnusedTextures()
+end
+
 local function pushScene( scene,transition,t )
 	if transition then
 		Director:pushScene( transition:create(t or 0.2,scene) )
 	else
 		Director:pushScene( scene )
 	end
-	cc.TextureCache:getInstance():removeUnusedTextures();
+	cc.TextureCache:getInstance():removeUnusedTextures()
 	_pushNum = _pushNum + 1
 end
 
@@ -907,7 +919,7 @@ local function popScene()
 		--[[
 		popScene并不会马上释放场景，因此下面的调用并不会释放被弹出场景的材质内存
 		--]]
-		cc.TextureCache:getInstance():removeUnusedTextures();
+		cc.TextureCache:getInstance():removeUnusedTextures()
 		--cc.TextureCache:getInstance():removeAllTextures();
 		_pushNum = _pushNum - 1
 	else
@@ -1866,6 +1878,7 @@ return {
 	delay_call = delay_call,
 	pushScene = pushScene,
 	popScene = popScene,
+	replaceScene = replaceScene,
 	relayout_h = relayout_h,
 	relayout_v = relayout_v,
 	initDR = InitDesignResolutionMode,
@@ -1892,6 +1905,7 @@ return {
 	scrollview_step_add = scrollview_step_add,
 	muteSound = muteSound,
 	playClickSound = playClickSound,
+	setClickSound = setClickSound,
 	animationFormJson = animationFormJson,
 	sequence_call = sequence_call,
 	FAIL = FAIL,
