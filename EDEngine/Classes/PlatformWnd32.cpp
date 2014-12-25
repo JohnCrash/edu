@@ -1,7 +1,7 @@
 #include "Platform.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
+#include "wininet.h"
 #include "Files.h"
 #include "win32/glfw3native.h"
 
@@ -116,6 +116,65 @@ bool platformOpenURL(const char *url)
 	ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOW);
 	return true;
 }
+
+int getNetworkState()
+{
+	DWORD dwOnline;
+	//IsNetworkAlive  or?
+	if (InternetGetConnectedState(&dwOnline, 0))
+	{
+		if (dwOnline & INTERNET_CONNECTION_CONFIGURED)
+			return 1;
+		if (dwOnline & INTERNET_CONNECTION_MODEM)
+			return 2;
+		if (dwOnline & INTERNET_CONNECTION_LAN)
+			return 1;
+		if (dwOnline & INTERNET_CONNECTION_PROXY)
+			return 3;
+	}
+	return 0;
+}
+
+static std::thread * s_pthread = nullptr;
+static bool s_Stop = false;
+static int s_CurState;
+
+static void listenerThread(void * p)
+{
+	while (!s_Stop)
+	{
+		int state = getNetworkState();
+		if (state != s_CurState)
+		{
+			s_CurState = state;
+			networkStateChange(state);
+		}
+		Sleep(10 * 1000); //5'sÒ»´Î
+	}
+}
+
+void registerNetworkStateListener()
+{
+	if (s_pthread == nullptr)
+	{
+		s_Stop = false;
+		s_CurState = getNetworkState();
+		s_pthread = new std::thread(listenerThread,nullptr);
+	}
+}
+
+void unregisterNetworkStateListener()
+{
+	if (s_pthread)
+	{
+		s_Stop = true;
+		if (s_pthread->joinable() )
+			s_pthread->join();
+		delete s_pthread;
+		s_pthread = nullptr;
+	}
+}
+
 //==========================
 // CCameraWin
 //==========================

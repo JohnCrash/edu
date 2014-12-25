@@ -16,37 +16,59 @@ local ui = {
 	TXT_SILVER_NUM = 'xinxi/yibi/zhi',
 	
 	VIEW_BAG = 'gun',
-	VIEW_BATTLE_LIST = 'gun/czk',
-	PIC_CARD_BATTLE = 'gun/czk/kp1',
+	VIEW_BATTLE_LIST = 'czk',
+	PIC_CARD_BATTLE = 'czk/kp1',
 	BUTTON_CARD_EXCHANGE = 'g1',
 	TXT_CARD_BATTLE_LVL = 'dj',
 	PIC_CARD_BATTLE_UPLVL = 'sjl',
-	VIEW_CARD_BAG = 'gun/k1',
+	VIEW_CARD_BAG = 'k1',
 	PIC_CARD_BAG = 'kp',
 	TXT_CARD_BAG_LVL = 'kp/dj',
 	PIC_CARD_BAG_UPLVL = 'sjl',
-	VIEW_BUY_STORE = 'gun/zhenjia',
+	VIEW_BUY_STORE = 'zhenjia',
 	
 	VIEW_CARD_INFO = 'kpxiangq',
+	PIC_CARD_INFO = 'kpxiangq/kp',
+	TXT_CARD_INFO_LVL = 'kpxiangq/kp/dj',
+	TXT_CARD_INFO_NAME = 'kpxiangq/mz',
+	PIC_CARD_INFO_GOLD = 'kpxiangq/jing',
+	PIC_CARD_INFO_SILVER = 'kpxiangq/yin',
+	PIC_CARD_INFO_CU = 'kpxiangq/tong',
+	
+	
 	VIEW_SHI_INFO = 'shi',
+	
 	VIEW_CARD_EXCHANGE = 'gengh',
+	TXT_CARD_EXCHANGE_WEN = 'wen',
+	VIEW_CARD_EXCHANGE_INFO = 'kp1',
+	TXT_CARD_EXCHANGE_LVL = 'dj',
+	TXT_CARD_EXCHANGE_NAME = 'mz',
+	
 	VIEW_SKILL_INFO = 'jnxiangq',
 	VIEW_LEARN_SKILL = 'xuexijn',
 	VIEW_NO_CARD = 'meiyyougenghuan',
+	PIC_SEX_MAN = 'xingbie2',
+	PIC_SEX_WOMAN = 'xingbie',
 	
 	BUTTON_LE = 'xinxi/lebi/jia',
 	TXT_LE_NUM = 'xinxi/lebi/zhi',	
 	BUTTON_QUIT = 'xinxi/fanhui',
 }
 
+local scheduler = cc.Director:getInstance():getScheduler()
+local schedulerEntry
+
 local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(name)
 		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
 end
 
-function create()
+function create(card_id)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),Bagview)		
+	if card_id then
+		cur_layer.card_id = card_id 	
+	end
 	
 	scene:addChild(cur_layer)
 	
@@ -140,38 +162,149 @@ function Bagview:show_le_coin()
 			
 		end,"click")
 end
---[[
 
-	VIEW_CARD_BAG = 'gun/k1',
-	PIC_CARD_BAG = 'gun/k1/kp',
-	TXT_CARD_BAG_LVL = 'gun/k1/kp/dj',
-	PIC_CARD_BAG_UPLVL = 'gun/k1/sjl',
-	VIEW_BUY_STORE = 'gun/zhenjia',--]]
-function Bagview:show_exchange_card()	
+local card_space_shu = 42
+local card_space_heng = 94
+local card_battle_space = 188
+local card_space_shu_exchange = 60	
+	
+function Bagview:show_exchange_card(id)	
+	self:resetgui()
+	--self.view_bag:setVisible(true)
+	local all_card_info = person_info.get_all_card_in_bag()
+	local battle_cards = person_info.get_all_card_in_battle()
+	if #battle_cards == #all_card_info then
+		self.temp_view = self.view_no_card:clone()
+		self.temp_view:setVisible(true)
+		self._Bagview:addChild(self.temp_view,0,10000)	
+		local pic_sex_man = uikits.child(self.temp_view,ui.PIC_SEX_MAN)
+		local pic_sex_woman = uikits.child(self.temp_view,ui.PIC_SEX_WOMAN)
+		pic_sex_man:setVisible(false)
+		pic_sex_woman:setVisible(false)
+		local user_info = person_info.get_user_info()
+		if user_info.sex == 1 then
+			pic_sex_man:setVisible(true)
+		else 
+			pic_sex_woman:setVisible(true)
+		end
+		self.but_quit.func = self.show_bag_view
+		return
+	end
+	
+	self.temp_view = self.view_card_exchange:clone()
+	self.temp_view:setVisible(true)
+	self._Bagview:addChild(self.temp_view,0,10000)
 
+	local func
+	local function timer_update(time)
+		func(self)
+		if schedulerEntry then
+			scheduler:unscheduleScriptEntry(schedulerEntry)
+		end
+	end	
+
+	local view_card_bag_src = uikits.child(self.temp_view,ui.VIEW_CARD_EXCHANGE_INFO)
+	local txt_card_wen = uikits.child(self.temp_view,ui.TXT_CARD_EXCHANGE_WEN)
+	local row_num = #all_card_info/2	
+	--local row_num = 18/5	
+	row_num = math.ceil(row_num)
+	
+	local pos_wen_x,pos_wen_y = txt_card_wen:getPosition()
+	view_card_bag_src:setVisible(false)
+	local size_scroll = self.temp_view:getInnerContainerSize()
+	local size_card_src = view_card_bag_src:getContentSize()
+	local pos_card_src_x,pos_card_src_y = view_card_bag_src:getPosition()
+	local size_exchange_view = self.temp_view:getContentSize()	
+	local pos_card_y_start = size_exchange_view.height - pos_card_src_y	
+	local pos_card_x_start = pos_card_src_x	
+	local pos_wen_y_start = size_exchange_view.height - pos_wen_y
+	if size_scroll.height < (pos_card_y_start + row_num*(size_card_src.height+card_space_shu_exchange) - size_card_src.height/2) then
+		size_scroll.height = pos_card_y_start + row_num*(size_card_src.height+card_space_shu_exchange) - size_card_src.height/2
+		self.temp_view:setInnerContainerSize(size_scroll)
+		txt_card_wen:setPosition(cc.p(pos_wen_x,size_scroll.height-pos_wen_y_start))	
+		pos_card_y_start = size_scroll.height-pos_card_y_start
+	else
+		pos_card_y_start = pos_card_src_y
+	end
+
+	local cur_row = 0
+	local cur_line = 5
+	for i=1,#all_card_info do
+--[[	for j=1,18 do
+		local i = 2--]]
+		if all_card_info[i].in_battle_list == 0 then
+			local cur_card = view_card_bag_src:clone()
+			cur_card:setVisible(true)
+			self.temp_view:addChild(cur_card)
+		
+			local txt_card_lvl = uikits.child(cur_card,ui.TXT_CARD_EXCHANGE_LVL)
+			local txt_card_name = uikits.child(cur_card,ui.TXT_CARD_EXCHANGE_NAME)
+			txt_card_name:setString(all_card_info[i].name)
+			if cur_line == 5 then
+				cur_line = 1
+				cur_row = cur_row + 1 
+			else
+				cur_line = cur_line + 1 
+			end
+			local cur_pos_x = pos_card_x_start +(size_card_src.width+card_space_heng)*(cur_line-1)
+			local cur_pos_y = pos_card_y_start -(size_card_src.height+card_space_shu_exchange)*(cur_row-1)
+			cur_card:setPosition(cc.p(cur_pos_x,cur_pos_y))
+			
+			local pic_name = all_card_info[i].id..'2.png'
+			person_info.load_card_pic(cur_card,pic_name)
+			txt_card_lvl:setString(all_card_info[i].lvl)
+			cur_card.in_id = all_card_info[i].id
+			cur_card.out_id = id
+			uikits.event(cur_card,	
+				function(sender,eventType)	
+					person_info.exchange_card_in_battle_by_id(sender.in_id,sender.out_id)
+					func = self.show_bag_view
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)					
+				end,"click")
+			cur_card:setVisible(true)
+			txt_card_lvl:setVisible(true)
+		end		
+	end
+	self.but_quit.func = self.show_bag_view
 end
 	
 function Bagview:buy_store()		
 
 end
 	
-function Bagview:show_card_info()	
+function Bagview:show_card_info(id)	
+	self:resetgui()
+	--self.view_bag:setVisible(true)
+	self.temp_view = self.view_card_info:clone()
+	self.temp_view:setVisible(true)
+	self._Bagview:addChild(self.temp_view,0,10000)
 
+	local card_info = person_info.get_card_in_bag_by_id(id)
+	self.but_quit.func = self.show_bag_view
 end
 
-local card_space_shu = 42
-local card_space_heng = 94
-local card_battle_space = 188
-
 function Bagview:show_bag_view()	
-	self.view_bag:setVisible(true)
+	self:resetgui()
+	--self.view_bag:setVisible(true)
+	self.temp_view = self.view_bag:clone()
+	self.temp_view:setVisible(true)
+	self._Bagview:addChild(self.temp_view,0,10000)
+	local id
+	local func
+	local function timer_update(time)
+		func(self,id)
+		if schedulerEntry then
+			scheduler:unscheduleScriptEntry(schedulerEntry)
+		end
+	end	
+	
 	local all_card_info,max_store_num = person_info.get_all_card_in_bag()
 	local battle_cards = person_info.get_all_card_in_battle()
-	local view_card_bag_src = uikits.child(self._Bagview,ui.VIEW_CARD_BAG)
-	local view_battle_list = uikits.child(self._Bagview,ui.VIEW_BATTLE_LIST)
-	local size_battle_list = view_battle_list:getContentSize()
-	local size_scroll = self.view_bag:getInnerContainerSize()
-	local size_bag_view = self.view_bag:getContentSize()
+	local view_card_bag_src = uikits.child(self.temp_view,ui.VIEW_CARD_BAG)
+	local view_battle_list = uikits.child(self.temp_view,ui.VIEW_BATTLE_LIST)
+	--local size_battle_list = view_battle_list:getContentSize()
+	local size_scroll = self.temp_view:getInnerContainerSize()
+	local size_bag_view = self.temp_view:getContentSize()
 	local size_card_src = view_card_bag_src:getContentSize()
 	local pos_battle_list_x,pos_battle_list_y = view_battle_list:getPosition()
 	local pos_card_src_x,pos_card_src_y = view_card_bag_src:getPosition()
@@ -180,7 +313,7 @@ function Bagview:show_bag_view()
 	local pos_battle_y_start = size_bag_view.height - pos_battle_list_y
 	
 	size_scroll.height = pos_card_y_start + row_num*(size_card_src.height+card_space_shu) - size_card_src.height/2
-	self.view_bag:setInnerContainerSize(size_scroll)
+	self.temp_view:setInnerContainerSize(size_scroll)
 	view_battle_list:setPosition(cc.p(pos_battle_list_x,size_scroll.height-pos_battle_y_start))
 	
 	pos_card_y_start = size_scroll.height-pos_card_y_start
@@ -192,7 +325,7 @@ function Bagview:show_bag_view()
 		if i>#all_card_info then
 			local cur_card = view_card_bag_src:clone()
 			cur_card:setVisible(true)
-			self.view_bag:addChild(cur_card)
+			self.temp_view:addChild(cur_card)
 			local pic_card_bag = uikits.child(cur_card,ui.PIC_CARD_BAG)
 			local txt_card_bag_lvl = uikits.child(cur_card,ui.TXT_CARD_BAG_LVL)
 			local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
@@ -214,17 +347,19 @@ function Bagview:show_bag_view()
 			if i == max_store_num+#battle_cards then
 				cur_pos_x = pos_card_x_start
 				cur_pos_y = pos_card_y_start -(size_card_src.height+card_space_shu)*(cur_row)
-				local view_buy_store = uikits.child(self._Bagview,ui.VIEW_BUY_STORE)
+				local view_buy_store = uikits.child(self.temp_view,ui.VIEW_BUY_STORE)
 				view_buy_store:setPosition(cc.p(cur_pos_x,cur_pos_y))
 				uikits.event(view_buy_store,	
 					function(sender,eventType)	
-						self:buy_store()
+						--self:buy_store()
+						func = self.buy_store
+						schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 					end,"click")			
 			end
 		elseif all_card_info[i].in_battle_list == 0 then
 			local cur_card = view_card_bag_src:clone()
 			cur_card:setVisible(true)
-			self.view_bag:addChild(cur_card)
+			self.temp_view:addChild(cur_card)
 			local pic_card_bag = uikits.child(cur_card,ui.PIC_CARD_BAG)
 			local txt_card_bag_lvl = uikits.child(cur_card,ui.TXT_CARD_BAG_LVL)
 			local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
@@ -241,9 +376,14 @@ function Bagview:show_bag_view()
 			local pic_name = all_card_info[i].id..'.png'
 			person_info.load_card_pic(pic_card_bag,pic_name)
 			txt_card_bag_lvl:setString(all_card_info[i].lvl)
+			pic_card_bag.id = all_card_info[i].id
+			print('all_card_info[i].lvl::'..all_card_info[i].lvl)
 			uikits.event(pic_card_bag,	
 				function(sender,eventType)	
-					self:show_card_info()
+					--self:show_card_info(sender.id)
+					id = sender.id
+					func = self.show_card_info
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 				end,"click")
 			pic_card_bag:setVisible(true)
 			txt_card_bag_lvl:setVisible(true)
@@ -251,7 +391,7 @@ function Bagview:show_bag_view()
 		end
 	end
 
-	local card_battle_src = uikits.child(self._Bagview,ui.PIC_CARD_BATTLE)
+	local card_battle_src = uikits.child(self.temp_view,ui.PIC_CARD_BATTLE)
 	card_battle_src:setVisible(false)
 
 	for i=1,#battle_cards do
@@ -265,18 +405,35 @@ function Bagview:show_bag_view()
 		cur_card:setPositionX(pos_x)
 		txt_card_lvl:setString(battle_cards[i].lvl)
 		local but_card_exchange = uikits.child(cur_card,ui.BUTTON_CARD_EXCHANGE)
+		but_card_exchange.id = battle_cards[i].id
+		cur_card.id = battle_cards[i].id
 		uikits.event(but_card_exchange,	
 			function(sender,eventType)	
-				self:show_exchange_card()
+				--self:show_exchange_card(sender.id)
+				id = sender.id
+				func = self.show_exchange_card
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 			end,"click")
 		uikits.event(cur_card,	
 			function(sender,eventType)	
-				self:show_card_info()
+				id = sender.id
+				func = self.show_card_info
+				--self:show_card_info(sender.id)
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 			end,"click")
 		cur_card:setVisible(true)
 		view_battle_list:addChild(cur_card)
 	end	
+	self.but_quit.func = uikits.popScene
 end
+
+function Bagview:resetgui()
+	if self.temp_view then
+		self._Bagview:removeChildByTag(10000)	
+		self.temp_view = nil
+	end
+	cc.TextureCache:getInstance():removeUnusedTextures()
+end	
 
 function Bagview:initgui()	
 	self.view_bag = uikits.child(self._Bagview,ui.VIEW_BAG)
@@ -297,7 +454,11 @@ function Bagview:initgui()
 		
 	self:show_silver()
 	self:show_le_coin()
-	self:show_bag_view()
+	if self.card_id then
+		self:show_card_info(self.card_id)
+	else
+		self:show_bag_view()
+	end
 end
 
 function Bagview:init()	
@@ -309,10 +470,12 @@ function Bagview:init()
 	self._Bagview = uikits.fromJson{file_9_16=ui.Bagview_FILE,file_3_4=ui.Bagview_FILE_3_4}
 	self:addChild(self._Bagview)
 	
-	local but_quit = uikits.child(self._Bagview,ui.BUTTON_QUIT)
-	uikits.event(but_quit,	
+	self.but_quit = uikits.child(self._Bagview,ui.BUTTON_QUIT)
+	uikits.event(self.but_quit,	
 		function(sender,eventType)	
-			uikits.popScene()
+			--sender.func(sender)
+			self.but_quit.func(self);
+			--uikits.popScene()
 		end,"click")
 		
 	self:initgui()

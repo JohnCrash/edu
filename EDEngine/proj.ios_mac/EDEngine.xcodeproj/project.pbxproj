@@ -42,6 +42,8 @@
 		50EF629917ECD46A001EB2F8 /* Icon-100.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF629517ECD46A001EB2F8 /* Icon-100.png */; };
 		50EF62A217ECD613001EB2F8 /* Icon-29.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF62A017ECD613001EB2F8 /* Icon-29.png */; };
 		50EF62A317ECD613001EB2F8 /* Icon-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 50EF62A117ECD613001EB2F8 /* Icon-50.png */; };
+		524C26501A497078001349BC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 524C264F1A497078001349BC /* Reachability.m */; };
+		524C26591A4973DF001349BC /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 524C26581A4973DF001349BC /* SystemConfiguration.framework */; };
 		52538F6E1A3595F9000E229F /* libcocos2dx Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775011A355B5F0048D357 /* libcocos2dx Mac.a */; };
 		52538F711A3595F9000E229F /* libluabindings Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527774EF1A355B470048D357 /* libluabindings Mac.a */; };
 		52538F721A359628000E229F /* libbox2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 527775071A355B5F0048D357 /* libbox2d Mac.a */; };
@@ -618,6 +620,9 @@
 		50EF629517ECD46A001EB2F8 /* Icon-100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-100.png"; sourceTree = "<group>"; };
 		50EF62A017ECD613001EB2F8 /* Icon-29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-29.png"; sourceTree = "<group>"; };
 		50EF62A117ECD613001EB2F8 /* Icon-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-50.png"; sourceTree = "<group>"; };
+		524C264E1A497078001349BC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reachability.h; path = ios/Reachability.h; sourceTree = SOURCE_ROOT; };
+		524C264F1A497078001349BC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Reachability.m; path = ios/Reachability.m; sourceTree = SOURCE_ROOT; };
+		524C26581A4973DF001349BC /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		52538F631A3593E0000E229F /* json-c.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "json-c.xcodeproj"; path = "../../../cocos2d-x/external/json-c/json-c/json-c.xcodeproj"; sourceTree = "<group>"; };
 		527776321A3586CD0048D357 /* amrnb.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = amrnb.xcodeproj; path = "../../../cocos2d-x/external/amrnb/amrnb/amrnb.xcodeproj"; sourceTree = "<group>"; };
 		527777441A3591B70048D357 /* gif.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = gif.xcodeproj; path = "../../../cocos2d-x/external/giflib/gif/gif.xcodeproj"; sourceTree = "<group>"; };
@@ -7136,6 +7141,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				524C26591A4973DF001349BC /* SystemConfiguration.framework in Frameworks */,
 				52D37CA71A394CD8007E0098 /* liblua.a in Frameworks */,
 				52D37CA61A393DF0007E0098 /* libluajit.a in Frameworks */,
 				52D37C8D1A3828C3007E0098 /* libwebp_arm64.a in Frameworks */,
@@ -7207,6 +7213,9 @@
 		080E96DDFE201D6D7F000001 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				524C264E1A497078001349BC /* Reachability.h */,
+				524C264F1A497078001349BC /* Reachability.m */,
+				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
 				52D5B1C61A36F65F000C5536 /* IOSHelper.h */,
 				52D5B1C71A36F65F000C5536 /* IOSHelper.mm */,
 				52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */,
@@ -7216,7 +7225,6 @@
 				503AE0FB17EB989F00D1A890 /* AppController.mm */,
 				503AE0FC17EB989F00D1A890 /* main.m */,
 				503AE0FE17EB989F00D1A890 /* RootViewController.h */,
-				503AE0FF17EB989F00D1A890 /* RootViewController.mm */,
 				52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */,
 				52D5B1AD1A36EB4D000C5536 /* parsparam.h */,
 			);
@@ -7241,8 +7249,8 @@
 				F5CC68F4199B8EE500145900 /* Console.h */,
 				F5CC68F5199B8EE500145900 /* lua_ext.h */,
 				F5CC68F6199B8EE500145900 /* lua_thread_curl.h */,
-				F5CC68F7199B8EE500145900 /* luaDebug.h */,
 				F5CC68F8199B8EE500145900 /* thread_curl.h */,
+				F5CC68F7199B8EE500145900 /* luaDebug.h */,
 				F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */,
 				F53B0FC41997A9AC007C8988 /* Console.cpp */,
 				F53B0FC51997A9AC007C8988 /* lua_ext.cpp */,
@@ -7270,6 +7278,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				524C26311A43BD81001349BC /* lua */,
 				52538F631A3593E0000E229F /* json-c.xcodeproj */,
 				527777441A3591B70048D357 /* gif.xcodeproj */,
 				527776321A3586CD0048D357 /* amrnb.xcodeproj */,
@@ -7288,6 +7297,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				524C26581A4973DF001349BC /* SystemConfiguration.framework */,
 				52D37C921A39384C007E0098 /* liblua.a */,
 				52D37C8F1A384DB3007E0098 /* libluajit.a */,
 				52D37C8B1A3828C3007E0098 /* libwebp_arm64.a */,
@@ -7369,6 +7379,13 @@
 			name = Icons;
 			path = ios;
 			sourceTree = SOURCE_ROOT;
+		};
+		524C26311A43BD81001349BC /* lua */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = lua;
+			sourceTree = "<group>";
 		};
 		52538F641A3593E0000E229F /* Products */ = {
 			isa = PBXGroup;
@@ -23877,6 +23894,7 @@
 				F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */,
 				52CDB2E41A35D6F5005C737B /* misc.cpp in Sources */,
 				F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */,
+				524C26501A497078001349BC /* Reachability.m in Sources */,
 				52CDB2DA1A35D6AB005C737B /* IDF.cpp in Sources */,
 				52D5B1CB1A36F65F000C5536 /* NativeHelperIOS.cpp in Sources */,
 				F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
@@ -23998,6 +24016,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
@@ -24058,6 +24077,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;

@@ -412,7 +412,9 @@ function WorkCommit:init()
 		self._scrollview:refresh( function(state)
 			self:init_commit_list(true)
 		end)
-
+		
+		uikits.enableMouseWheelIFWindows( self._scrollview )
+		
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,
 			function(sender)
@@ -858,6 +860,7 @@ function WorkCommit:commit()
 end
 
 function WorkCommit:release()
+	uikits.enableMouseWheelIFWindows()
 	if self._scID then
 		self:getScheduler():unscheduleScriptEntry(self._scID)
 		self._scID = nil

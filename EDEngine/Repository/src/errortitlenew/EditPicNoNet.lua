@@ -17,12 +17,12 @@ local ui = {
 	BUTTON_ROTA = 'mainmenu/xuan',
 }
 
-local EditPic = class("EditPic")
-EditPic.__index = EditPic
+local EditPicNoNet = class("EditPicNoNet")
+EditPicNoNet.__index = EditPicNoNet
 
-function EditPic.create(parent_layer,file_path,file_path_src)
+function EditPicNoNet.create(parent_layer,file_path,file_path_src)
 	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),EditPic)
+	local layer = uikits.extend(cc.Layer:create(),EditPicNoNet)
 	scene:addChild(layer)
 	layer.parent_layer = parent_layer
 	layer.file_path = file_path
@@ -59,51 +59,23 @@ local loadbox
 local url = 'http://file-stu.lejiaolexue.com/rest/user/upload/hw'
 local temp_filename
 local loadbox
-function EditPic:uploadpic()
+function EditPicNoNet:uploadpic()
 	local local_file = self.file_path
-	print('loacl_path::'..local_file)
-	print('layer.parent_layer::'..tostring(#self.parent_layer._piclist))
-	local data = kits.read_file( local_file )
-	if data then
-		cache.upload( url,self.file_path,data,
-			function(b,t)
-				if b then
-					if t.result==0 then
-						self.parent_layer._piclist[#self.parent_layer._piclist+1] = {}
-						self.parent_layer._piclist[#self.parent_layer._piclist].mini_src = t.md5
-						self.parent_layer._piclist[#self.parent_layer._piclist].file_path = self.file_path
-						self.parent_layer.isneedupdate = 2
-						uikits.popScene()
-						kits.log("ERROR : AddPic:AddPic upload result invalid::"..t.md5..'::'..t.width..'::'..t.height)
-					else
-						self.parent_layer.isneedupdate = 1
-						uikits.popScene()
-						kits.log("ERROR : AddPic:AddPic upload result invalid")
-					end
-				else
-					self.parent_layer.isneedupdate = 1
-					uikits.popScene()
-					kits.log("ERROR :  AddPic:AddPic upload failed")
-					kits.log("	local file "..local_file)
-					kits.log("	url "..url)
-				end
-			end)
-	else
-		self.parent_layer.isneedupdate = 1
-		loadbox:removeFromParent()
-		uikits.popScene()
-		print('ERROR :  AddPic:AddPic readfile failed')
-	end	
+	self.parent_layer._piclist[#self.parent_layer._piclist+1] = {}
+	self.parent_layer._piclist[#self.parent_layer._piclist].mini_src = ''
+	self.parent_layer._piclist[#self.parent_layer._piclist].file_path = self.file_path
+	self.parent_layer.isneedupdate = 2
+	uikits.popScene()
 end
 
-function EditPic:copyfile(src_file,dest_file)
+function EditPicNoNet:copyfile(src_file,dest_file)
 	local data
 	data = kits.read_file(src_file)
 	kits.write_file(dest_file,data)
 	os.remove(src_file)
 end
 
-function EditPic:init()
+function EditPicNoNet:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
 	else
@@ -330,7 +302,7 @@ function EditPic:init()
 		back_pic = ccui.ImageView:create()
 		back_pic:setTouchEnabled(false)
 		
-		self.file_path = kits.get_local_directory()..'cache/'..temp_filename
+		self.file_path = kits.get_local_directory()..'errortitle/'..temp_filename
 		local plat_path = cc.FileUtils:getInstance():getWritablePath()..temp_filename
 		self:copyfile(plat_path,self.file_path)
 
@@ -572,8 +544,8 @@ function EditPic:init()
 	end,"click")		
 end
 
-function EditPic:release()
+function EditPicNoNet:release()
 	
 end
 
-return EditPic
+return EditPicNoNet

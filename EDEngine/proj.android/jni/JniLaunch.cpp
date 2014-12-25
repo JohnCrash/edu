@@ -24,39 +24,7 @@ void setUIOrientation( int m )
 		t.env->CallStaticVoidMethod(t.classID,t.methodID,m);
 		t.env->DeleteLocalRef(t.classID);
 	}
-	Director *pDirector = Director::getInstance();
-	if( pDirector )
-	{
-		GLView * pview = pDirector->getOpenGLView();
-		if( pview )
-		{
-			Size size = pview->getFrameSize();
-			
-			if( m == 1 )
-			{
-				if( size.width < size.height )
-				{
-					w = size.height;
-					h = size.width;
-				}
-			}
-			else
-			{
-				if( size.width > size.height )
-				{
-					w = size.height;
-					h = size.width;
-				}			
-			}
-			
-			Size resSize = pview->getDesignResolutionSize();
-			ResolutionPolicy resPolicy=pview->getResolutionPolicy();
-			pview->setFrameSize(w,h);
-			pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
-			pDirector->setViewport();
-			Director::sharedDirector()->setProjection(Director::sharedDirector()->getProjection());
-		}
-	}
+    cocos2dChangeOrientation( m );
 }
 
 int getUIOrientation()
@@ -83,6 +51,42 @@ bool platformOpenURL( const char *url )
 		return true;
 	}
 	return false;
+}
+
+int getNetworkState()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "getNetworkState", "()I")) 
+	{
+		int ret = t.env->CallStaticIntMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+		return ret;
+	}
+	return -1;
+}
+
+void registerNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"registerNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
+void unregisterNetworkStateListener()
+{
+	JniMethodInfo jmi;
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"unregisterNetworkStateListener","()I"))
+	{
+		nRet=jmi.env->CallStaticIntMethod(jmi.classID,jmi.methodID);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
 }
 
 void takeResource( int mode )
@@ -238,5 +242,9 @@ extern "C" {
     		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
     	}
 	}	
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_networkStateChangeEvent(JNIEnv *env,jobject thiz,int state)
+	{
+		networkStateChange(state);
+	}
 }
 

@@ -65,36 +65,24 @@ function create()
 end
 
 function Mainview:getdatabyurl()
+	local send_data
+	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
+		if t and t == true then
+			if t == true then
 
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
 			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+ 
+			end
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					uikits.popScene()
+				else
 					uikits.popScene()
 				end
-			end,messagebox.RETRY)	
+			end)
 		end
-	end,'N')
+	end)
 end
 local schedulerEntry = nil
 local per_tili_reset_time = 1*60
@@ -137,6 +125,7 @@ function Mainview:show_cards()
 		local pic_name = all_battle_list[i].id..'2.png'
 		--pic_card:loadTexture(pic_path)
 		person_info.load_card_pic(pic_card,pic_name)
+		pic_card.id = all_battle_list[i].id
 		local txt_card_lvl = uikits.child(cur_card,ui.TXT_CARD_LVL)
 		local pos_y = cur_card:getPositionY()
 		local size_card = cur_card:getContentSize()
@@ -144,6 +133,11 @@ function Mainview:show_cards()
 		cur_card:setPositionY(pos_y)
 		txt_card_lvl:setString(all_battle_list[i].lvl)
 		cur_card:setVisible(true)
+		uikits.event(pic_card,	
+			function(sender,eventType)	
+				local scene_next = bagview.create(sender.id)
+				uikits.pushScene(scene_next)	
+			end,"click")	
 		self._Mainview:addChild(cur_card)
 	end
 end
@@ -174,46 +168,46 @@ function Mainview:init()
 	local but_duizhan = uikits.child(self._Mainview,ui.BUTTON_DUIZHAN)
 	uikits.event(but_duizhan,	
 		function(sender,eventType)	
-			local scene_next = battleview.create(self)
+			local scene_next = battleview.create()
 			uikits.pushScene(scene_next)	
 		end,"click")	
 		
 	local but_chuangguan = uikits.child(self._Mainview,ui.BUTTON_CHUANGGUAN)
 	uikits.event(but_chuangguan,	
 		function(sender,eventType)	
-			local scene_next = countryview.create(self)
+			local scene_next = countryview.create()
 			uikits.pushScene(scene_next)
 		end,"click")	
 		
 	local but_leitai = uikits.child(self._Mainview,ui.BUTTON_LEITAI)
 	uikits.event(but_leitai,	
 		function(sender,eventType)	
-			local scene_next = leitaiview.create(self)
+			local scene_next = leitaiview.create()
 			uikits.pushScene(scene_next)
 		end,"click")	
 
 	local but_qiandao = uikits.child(self._Mainview,ui.BUTTON_QIANDAO)
 	uikits.event(but_qiandao,	
 		function(sender,eventType)	
-			local scene_next = signview.create(self)
+			local scene_next = signview.create()
 			uikits.pushScene(scene_next)
 		end,"click")	
 	local but_tongzhi = uikits.child(self._Mainview,ui.BUTTON_TONGZHI)
 	uikits.event(but_tongzhi,	
 		function(sender,eventType)	
-			local scene_next = noticeview.create(self)
+			local scene_next = noticeview.create()
 			uikits.pushScene(scene_next)
 		end,"click")
 	local but_beibao = uikits.child(self._Mainview,ui.BUTTON_BEIBAO)
 	uikits.event(but_beibao,	
 		function(sender,eventType)	
-			local scene_next = bagview.create(self)
+			local scene_next = bagview.create()
 			uikits.pushScene(scene_next)
 		end,"click")
 	local but_shangcheng = uikits.child(self._Mainview,ui.BUTTON_SHANGCHENG)
 	uikits.event(but_shangcheng,	
 		function(sender,eventType)	
-			local scene_next = mallview.create(self)
+			local scene_next = mallview.create()
 			uikits.pushScene(scene_next)
 		end,"click")		
 	

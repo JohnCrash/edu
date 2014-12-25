@@ -26,7 +26,7 @@ extern std::wstring utf8ToUnicode(const std::string& s);
 #include <sys/time.h>
 #endif
 static int g_callref=LUA_REFNIL;
-
+static int g_callnsl = LUA_REFNIL;
 struct TRS
 {
 	std::string path;
@@ -59,7 +59,41 @@ static void takeResource_progressFunc(void *ptrs)
 		}
 	}
 }
-
+static int s_State = 0;
+static void networkStateChange_progressFunc(void *p)
+{
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if (pEngine)
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if (pLuaStack)
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if (L && g_callnsl != LUA_REFNIL && p)
+			{
+				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callnsl);
+				lua_pushinteger(L, s_State);
+				pLuaStack->executeFunction(2);
+				//lua_unref(L, g_callnsl);
+				//g_callnsl = LUA_REFNIL;
+			}
+		}
+	}
+}
+//网络发生改变是的回调。
+void networkStateChange(int state)
+{
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if (pDirector)
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if (scheduler)
+		{
+            s_State = state;
+			scheduler->performFunctionInCocosThread_ext(networkStateChange_progressFunc, nullptr);
+		}
+	}
+}
 void takeResource_callback(std::string resource,int typeCode,int resultCode)
 {
 	//call lua progress function
@@ -590,6 +624,33 @@ int cc_getUIOrientation(lua_State *L)
 	return 1;
 }
 
+int cc_getNetworkState(lua_State *L)
+{
+	lua_pushinteger(L, getNetworkState());
+	return 1;
+}
+
+int cc_registerNetworkStateListener(lua_State *L)
+{
+	if (lua_isfunction(L, 1))
+	{
+		lua_pushvalue(L, 1);
+		if (g_callnsl != LUA_REFNIL)
+			lua_unref(L, g_callnsl);
+		g_callnsl = luaL_ref(L, LUA_REGISTRYINDEX);
+		registerNetworkStateListener();
+	}
+	return 0;
+}
+
+int cc_unregisterNetworkStateListener(lua_State *L)
+{
+	if (g_callnsl != LUA_REFNIL)
+		lua_unref(L, g_callnsl);
+	g_callnsl = LUA_REFNIL;
+	unregisterNetworkStateListener();
+	return 0;
+}
 
 void luaopen_lua_exts(lua_State *L)
 {
@@ -616,6 +677,9 @@ void luaopen_lua_exts(lua_State *L)
     lua_register(L, "cc_openURL",cc_openURL);
 	lua_register(L, "cc_setUIOrientation", cc_setUIOrientation);
 	lua_register(L, "cc_getUIOrientation", cc_getUIOrientation);
+	lua_register(L, "cc_getNetworkState", cc_getNetworkState);
+	lua_register(L, "cc_registerNetworkStateListener", cc_registerNetworkStateListener);
+	lua_register(L, "cc_unregisterNetworkStateListener", cc_unregisterNetworkStateListener);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

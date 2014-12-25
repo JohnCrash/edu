@@ -164,6 +164,7 @@ function Batch:init_paper_list_by_table( p )
 	local paper_table = {}
 	self._objective_num = 0
 	self._subject_num = 0
+	
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
@@ -265,6 +266,7 @@ end
 
 function Batch:init_commits_list( t )
 	local count = 1
+	
 	self._commits:clear()
 	for k,v in pairs(t) do
 		if v.status==10 or v.status==11 then
@@ -313,7 +315,11 @@ function Batch:load_topics()
 			end
 			if t and type(t)=='table' then
 				table.sort(t,function(a,b)
-						return a.real_score < b.real_score
+						if a.correct and b.correct then
+							return a.correct < b.correct
+						else
+							return false
+						end
 					end)
 				self._student_list_table = t
 				local high,low,avg = 0,math.huge,0
@@ -321,12 +327,12 @@ function Batch:load_topics()
 				local high_time,low_time,avg_time = 0,math.huge,0
 				for k,v in pairs(t) do
 					if v.status and (v.status==10 or v.status==11) then
-						high = math.max(high,v.real_score)
-						low = math.min(low,v.real_score)
+						high = math.max(high,v.correct or 0)
+						low = math.min(low,v.correct or 0)
 						high_time = math.max(high_time,v.time)
 						low_time = math.min(low_time,v.time)
 						avg_time = avg_time + v.time
-						avg = avg + v.real_score
+						avg = avg + v.correct or 0
 						count = count + 1
 					end
 				end
@@ -356,6 +362,8 @@ function Batch:init_topics()
 	self._topicsview:setVisible(true)
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(false)
+	
+	uikits.enableMouseWheelIFWindows( self._topicsview )
 	
 	self:tips(1)
 	if self._init_topics_done then
@@ -411,6 +419,7 @@ end
 
 function Batch:load_subjective()
 	self._busy = true
+
 	self._subjectives:clear()
 	if self._exam_data == 'error' then 
 		kits.log("INFO : exam data download error")
@@ -532,6 +541,8 @@ function Batch:init_subjective()
 	self._subjectiveview:setVisible(true)
 	self._studentview:setVisible(false)
 	
+	uikits.enableMouseWheelIFWindows( self._subjectiveview )
+	
 	self:tips(2)
 	if self._init_subjective_done then
 	else
@@ -558,7 +569,7 @@ function Batch:init_student_list_func()
 		for i,appr in pairs(appraise) do
 			local st = {}
 			for k,v in pairs(self._student_list_table) do
-				local score = v.real_score/total_score
+				local score = v.correct --v.real_score/total_score
 				if score >= appr.low and score < appr.up 
 				 and (v.status==10 or v.status==11) then --FIXME:暂时将未提交的加入进去
 					self._statuents_num = self._statuents_num + 1
@@ -576,7 +587,7 @@ function Batch:init_student_list_func()
 						[ui.STUDENT_COMMIT_TIME] = '',
 						[ui.STUDENT_TOPICS_NUM] = '',
 						[ui.STUDENT_SUBJECTIVE_NUM] = '',
-						[ui.STUDENT_SCORE] = tostring(math.floor(v.real_score/total_score))..'分',
+						[ui.STUDENT_SCORE] = tostring(math.floor(v.correct))..'%',
 						[ui.STUDENT_ICON] = function(child,item)
 								login.get_logo(v.student_id,function(filename)
 									if filename and child then
@@ -610,6 +621,8 @@ function Batch:init_student_list()
 	self._topicsview:setVisible(false)
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(true)
+	
+	uikits.enableMouseWheelIFWindows( self._studentview )
 	
 	self:tips(3)
 	if self._init_student_done then
@@ -676,7 +689,7 @@ function Batch:init()
 end
 
 function Batch:release()
-	
+	uikits.enableMouseWheelIFWindows()
 end
 
 return Batch

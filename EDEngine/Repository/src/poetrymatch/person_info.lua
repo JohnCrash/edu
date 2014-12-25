@@ -8,6 +8,7 @@ local g_person_info = {
 id = 149091,
 name = 'liyihang',
 lvl = 5,
+sex = 1, --1为女 ，2为男
 }
 local g_person_exp = {
 lvl = 5,
@@ -19,7 +20,7 @@ local g_person_silver = 100
 local g_person_le_coin = 10
 
 local g_person_bag = {
-cards_table = {{id='caoz',lvl=5,cur_exp=10,max_exp=100,in_battle_list = 1,},{id='caoa',lvl=10,cur_exp=20,max_exp=100,in_battle_list = 0,},{id='caob',lvl=20,cur_exp=30,max_exp=100,in_battle_list = 0,},{id='caoc',lvl=30,cur_exp=40,max_exp=100,in_battle_list = 1,},},
+cards_table = {{id='caoz',name='caoz',lvl=5,cur_exp=10,max_exp=100,in_battle_list = 1,},{id='caoa',name='caoa',lvl=10,cur_exp=20,max_exp=100,in_battle_list = 0,},{id='caob',name='caob',lvl=20,cur_exp=30,max_exp=100,in_battle_list = 0,},{id='caoc',name='caoc',lvl=30,cur_exp=40,max_exp=100,in_battle_list = 1,},},
 max_store_num = 5,
 equipment_table = {},
 skill_table = {},
@@ -59,6 +60,12 @@ local function get_user_info()
 		uname = g_person_info
 	end
 	return uname
+end
+
+local function update_user_info_by_tag(tag,content)
+	if g_person_info[tag] and content then
+		g_person_info[tag] = content
+	end
 end
 
 local function set_user_info(uinfo)
@@ -208,6 +215,37 @@ local function get_card_in_bag_by_index(index)
 	return nil
 end
 
+local function update_card_in_bag_by_id(id,tag,content)
+	if id then
+		for i,v in ipairs(g_person_bag.cards_table) do
+			if v.id == id then
+				if tag then
+					if tag == 0 then
+						v = content
+					else
+						if v[tag] then
+							v[tag] = content
+						end
+					end
+				end
+			end
+		end		
+		g_person_bag.cards_table = card_info
+	end
+end
+
+local function del_card_in_bag_by_id(id)
+	local card_info = {}
+	if id then
+		for i,v in ipairs(g_person_bag.cards_table) do
+			if v.id ~= id then
+				card_info[#card_info+1] = v
+			end
+		end		
+		g_person_bag.cards_table = card_info
+	end
+end
+
 local function get_card_in_bag_by_id(id)
 	local card_info = {}
 	if id then
@@ -260,6 +298,30 @@ local function get_card_in_battle_by_index(index)
 		end
 	end
 	return nil
+end
+
+local function exchange_card_in_battle_by_id(in_id,out_id)
+	for i,v in ipairs(g_person_bag.cards_table) do
+		if in_id and v.id == in_id then
+			v.in_battle_list = 1
+		end
+		if out_id and v.id == out_id then
+			v.in_battle_list = 0
+		end
+	end
+	if out_id then
+		for i=1,#g_person_battle_cards do
+			if g_person_battle_cards[i] == out_id then
+				if in_id then
+					g_person_battle_cards[i] = in_id
+				end
+			end
+		end
+	else
+		if #g_person_battle_cards < 3 then
+			g_person_battle_cards[#g_person_battle_cards+1] = in_id
+		end
+	end
 end
 
 local function get_all_card_in_battle()
@@ -379,7 +441,8 @@ local function get_boss_info_by_id(id)
 	return boss_info
 end
 
-local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
+local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
+--local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
 local function post_data_by_new_form(module_id,post_data,func)
 	local send_data = {}
@@ -560,6 +623,7 @@ end
 return {
 	get_user_info = get_user_info,
 	set_user_info = set_user_info,
+	update_user_info_by_tag = update_user_info_by_tag,
 	get_user_lvl_info = get_user_lvl_info,
 	set_user_lvl_info = set_user_lvl_info,	
 	get_user_silver = get_user_silver,
@@ -573,10 +637,13 @@ return {
 	add_card_to_bag = add_card_to_bag,	
 	set_all_card_to_bag = set_all_card_to_bag,
 	get_all_card_in_bag = get_all_card_in_bag,	
+	update_card_in_bag_by_id = update_card_in_bag_by_id,
+	del_card_in_bag_by_id = del_card_in_bag_by_id,
 	get_card_in_bag_by_index = get_card_in_bag_by_index,	
 	add_card_to_battle_by_index = add_card_to_battle_by_index,
 	get_card_in_battle_by_index = get_card_in_battle_by_index,
 	get_card_in_bag_by_id = get_card_in_bag_by_id,
+	exchange_card_in_battle_by_id = exchange_card_in_battle_by_id,
 	get_all_card_in_battle = get_all_card_in_battle,
 	load_section_pic = load_section_pic,
 	load_skill_pic = load_skill_pic,

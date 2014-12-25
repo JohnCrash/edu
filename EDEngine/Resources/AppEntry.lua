@@ -12,7 +12,10 @@ local ui = {
 
 ----------------------------------
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Release
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -191,7 +194,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'errortitlenew','luacore'},
 				run=function()
-				login.set_selector(3) 
+				login.set_selector(1) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
@@ -201,27 +204,18 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='parenthw',updates={'poetrymatch','luacore'},
 				run=function()
-				login.set_selector(3) 
+				login.set_selector(2) 
 				local selstudent = require "poetrymatch/Loading"
 				return selstudent.create()
 			end}
 		end}
 	local g_last
-	local record =  uikits.button{caption='录音',x=264*scale,y = 64*scale + 4*item_h,
+	local record =  uikits.button{caption='取网络状态',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
 	uikits.event( record,
-		function(sender,eventType) 
-			RecordVoice.open(
-							bg,
-							function(b,file)
-								self._recording = nil
-								if b then
-									local tlen = cc_getVoiceLength(file)
-									g_last = file
-								end
-							end
-						) 
+		function(sender,eventType)
+			kits.log( cc_getNetworkState() )
 		end)	
 	local playsound = uikits.button{caption='播放',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,

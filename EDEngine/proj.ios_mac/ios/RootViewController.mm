@@ -26,6 +26,12 @@
 #import "RootViewController.h"
 #import "cocos2d.h"
 #import "CCEAGLView.h"
+/*
+ 1 横屏
+ 2 竖屏
+ */
+extern int g_OrientationMode;
+extern bool g_bAutorotate;
 
 @implementation RootViewController
 
@@ -55,18 +61,42 @@
 // Override to allow orientations other than the default portrait orientation.
 // This method is deprecated on ios6
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return UIInterfaceOrientationIsLandscape( interfaceOrientation );
+    if( g_OrientationMode == 2 )
+    {
+        if( interfaceOrientation == UIInterfaceOrientationPortrait ||
+           interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown )
+            return YES;
+    }
+    else
+    {
+        if( interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
+            interfaceOrientation == UIInterfaceOrientationLandscapeRight )
+            return YES;
+    }
+    return NO;
+//    return UIInterfaceOrientationIsLandscape( interfaceOrientation );
 }
 
 // For ios6, use supportedInterfaceOrientations & shouldAutorotate instead
 - (NSUInteger) supportedInterfaceOrientations{
 #ifdef __IPHONE_6_0
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    if( g_OrientationMode == 2 )
+    {
+        return UIInterfaceOrientationMaskPortrait;
+    }
+    else
+    {
+        return UIInterfaceOrientationMaskLandscape;
+    }
+   // return UIInterfaceOrientationMaskAllButUpsideDown;
 #endif
 }
 
 - (BOOL) shouldAutorotate {
-    return YES;
+    if( g_bAutorotate )
+        return YES;
+    else
+        return NO;
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {

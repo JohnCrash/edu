@@ -15,6 +15,43 @@ extern "C" {
 #define AMR_MAGIC_NUMBER "#!AMR\n"
 static CVoiceRecord *s_pVoiceRecord=NULL;
 
+void cocos2dChangeOrientation( int m )
+{
+    int w,h;
+    cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+    if( pDirector == nullptr )
+        return;
+    cocos2d::GLView * pview = pDirector->getOpenGLView();
+    if( pview )
+    {
+        cocos2d::Size size = pview->getFrameSize();
+        
+        if( m == 1 )
+        {
+            if( size.width < size.height )
+            {
+                w = size.height;
+                h = size.width;
+            }
+        }
+        else
+        {
+            if( size.width > size.height )
+            {
+                w = size.height;
+                h = size.width;
+            }
+        }
+        
+        cocos2d::Size resSize = pview->getDesignResolutionSize();
+        auto resPolicy=pview->getResolutionPolicy();
+        pview->setFrameSize(w,h);
+        pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
+        pDirector->setViewport();
+        cocos2d::Director::sharedDirector()->setProjection(cocos2d::Director::sharedDirector()->getProjection());
+    }
+}
+
 static bool IsValidParam(int cnChannel,int nRate,int cnBitPerSample)
 {
 	static int s_nValidRateList[]={11025,12000,8000,22050,44100,48000,32000,0};

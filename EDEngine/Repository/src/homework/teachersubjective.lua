@@ -265,6 +265,8 @@ function TeacherSubjective:init_gui()
 		end)
 	
 	self._subjectives = uikits.scroll(self._root,ui.SUBJECTIVE_LIST,ui.SUBJECTIVE_ITEM)
+
+	uikits.enableMouseWheelIFWindows(self._subjectives)
 	
 	self:init_student_list()
 	
@@ -313,7 +315,7 @@ function TeacherSubjective:init()
 end
 
 function TeacherSubjective:release()
-	
+	uikits.enableMouseWheelIFWindows()
 end
 
 return TeacherSubjective
