@@ -2021,17 +2021,39 @@ local types={
 	[5] = {name='填空',img=res_root..'write_item.png',
 				conv=function(s,e)
 					load_attachment(s,e,'edit_conv')
-					if s.cnt_answer then
-						e.options = s.cnt_answer					
-					elseif s.correct_answer and type(s.correct_answer)=='string' then
+					--判断是不是分数题
+					if s.correct_answer then
 						local ans = json.decode(s.correct_answer)
 						if ans and ans.answers and type(ans.answers)=='table' then
-							e.options = #ans.answers
+							if ans.answers[1] and ans.answers[1].value and type(ans.answers[1].value) == 'string' then
+								local str = ans.answers[1].value
+								local num1,num2,num3 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*~(%-*%+*%d*$*)%s*')
+								if num1 and num2 and num3 then
+									e.isFactor = true
+									e.options = 3
+								else
+									num1,num2 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*')
+									if num1 and num2 then
+										e.isFactor = true
+										e.options = 2
+									end
+								end
+							end
+						end
+					end
+					if not e.isFactor then
+						if s.cnt_answer then
+							e.options = s.cnt_answer					
+						elseif s.correct_answer and type(s.correct_answer)=='string' then
+							local ans = json.decode(s.correct_answer)
+							if ans and ans.answers and type(ans.answers)=='table' then
+								e.options = #ans.answers
+							else
+								e.options = 1
+							end
 						else
 							e.options = 1
 						end
-					else
-						e.options = 1
 					end
 					e.options = math.min(max_edit,e.options)
 					e.answer = parse_answer( s )

@@ -1300,6 +1300,9 @@ function Subjective:init_gui()
 			self._comment_view:relayout()
 			self._comment_item._isHidden = true
 		end
+		
+		uikits.enableMouseWheelIFWindows( self._main_view )
+		
 		self._topics_item = self._main_view:additem()
 		--题目视图
 		self._topics_view = uikits.scrollex(self._topics_item,nil,{ui.TOPICS_CLIP,ui.TOPICS_VOICE},
@@ -1486,6 +1489,7 @@ function Subjective:init_gui()
 end
 
 function Subjective:release()
+	uikits.enableMouseWheelIFWindows()
 	if self._scID then
 		self:getScheduler():unscheduleScriptEntry(self._scID)
 		self._scID = nil

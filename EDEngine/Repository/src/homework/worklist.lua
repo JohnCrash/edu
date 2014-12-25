@@ -329,6 +329,8 @@ function WorkList:init_new_list()
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._laStats_Stu:setVisible(false) --lly关闭统计层
+	
+	uikits.enableMouseWheelIFWindows( self._scrollview )
 	if not self._scID and not self._busy and self._mode ~= ui.NEW then -- and not self._busy then
 		if self._new_list_done then
 			self:Swap_list(ui.NEW)
@@ -841,7 +843,8 @@ function WorkList:init_history_list()
 	self._scrollview:setVisible(true)
 	self._setting:setVisible(false)
 	self._laStats_Stu:setVisible(false) --lly关闭统计层
-
+	
+	uikits.enableMouseWheelIFWindows( self._scrollview )
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then --and not self._busy then
 		if self._history_list_done then
 			self:Swap_list(ui.HISTORY)
@@ -1038,6 +1041,7 @@ end
 
 function WorkList:release()
 	self:clear_all_item()
+	uikits.enableMouseWheelIFWindows(nil)
 end
 
 return WorkList

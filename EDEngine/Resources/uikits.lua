@@ -15,6 +15,66 @@ local defaultFont="Marker Felt"
 local defaultFontSize = 32
 local ismute
 
+local listener_mouse
+local foucs_scrollview
+local scrolly_value = 100
+local function mouseWhellScroll( event )
+	if foucs_scrollview then
+		if cc_isobj(foucs_scrollview) then
+			local inner = foucs_scrollview:getInnerContainer()
+			local size = foucs_scrollview:getContentSize()
+			local isize = foucs_scrollview:getInnerContainerSize()
+			local x,y = inner:getPosition()
+
+			if isize.height <= size.height then
+				return --不需要滚动
+			end
+
+			y = y + event:getScrollY() * scrolly_value
+
+			if y > 0 then y = 0 end
+			if y < size.height - isize.height then 
+				y = size.height - isize.height
+			end
+
+			inner:setPosition(cc.p(x,y))
+		else
+			foucs_scrollview = nil
+		end
+	end
+end
+
+local function registerMouseEvent()
+	local platform = CCApplication:getInstance():getTargetPlatform()
+	if not listener_mouse and platform == kTargetWindows then
+		listener_mouse = cc.EventListenerMouse:create()
+		if listener_mouse then
+			listener_mouse:registerScriptHandler(mouseWhellScroll,cc.Handler.EVENT_MOUSE_SCROLL)	
+			local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+			directorEventDispatcher:addEventListenerWithFixedPriority(listener_mouse,1)		
+		end
+	end
+end
+
+local function enableMouseWheelIFWindows( scrollview,scrollspeed )
+	if scrollview==nil then
+		foucs_scrollview = nil
+		return
+	end
+	local platform = CCApplication:getInstance():getTargetPlatform()
+	if platform == kTargetWindows then
+		if scrollview and cc_type(scrollview) == 'ccui.ScrollView' then
+			pcall( registerMouseEvent )
+			foucs_scrollview = scrollview
+			scrolly_value = scrollspeed or scrolly_value
+		elseif type(scrollview)=='table' and scrollview._scrollview then
+			pcall( registerMouseEvent )
+			foucs_scrollview = scrollview._scrollview
+			scrolly_value = scrollspeed or scrolly_value
+		end
+	end
+end
+
 local function log_caller()
 	local caller = debug.getinfo(3,'nSl')
 	local func = debug.getinfo(2,'n')
@@ -1915,4 +1975,5 @@ return {
 	BEGIN = BEGIN,
 	END = END,
 	NEXT = NEXT,
+	enableMouseWheelIFWindows = enableMouseWheelIFWindows,
 }
