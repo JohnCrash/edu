@@ -1919,47 +1919,62 @@ local function setEditSpace( d )
 end
 
 local function edit_topics(layout,data)
-	if data.options then
-		data.my_answer = data.my_answer or {}
-		local _options = data._options
-		for i = 1,data.options do
-			if _options and _options[i] then
-				_options[i]:setVisible(true)
-				local e = uikits.child(_options[i],EditChildTag)
-				if data.my_answer[i] then
-					e:setText(data.my_answer[i])
-				else
-					e:setText('')
+	local function init_edit_tipics()
+		if data.options then
+			data.my_answer = data.my_answer or {}
+			local _options = data._options
+			for i = 1,data.options do
+				if _options and _options[i] then
+					_options[i]:setVisible(true)
+					local e
+					if cc_type(_options[i]) == 'ccui.TextField' then
+						e = _options[i]
+					else
+						e = uikits.child(_options[i],EditChildTag)
+					end
+					if data.my_answer[i] then
+						e:setText(data.my_answer[i])
+					else
+						e:setText('')
+						data.my_answer[i] = ''
+					end
+					uikits.event(e,
+							function(sender,eventType)
+								if eventType == ccui.TextFiledEventType.insert_text then
+									data.state = ui.STATE_FINISHED
+									data.my_answer[i] = sender:getStringValue()
+									call_answer_event(layout,data)
+								elseif eventType == ccui.TextFiledEventType.delete_backward then
+									data.state = ui.STATE_FINISHED
+									data.my_answer[i] = sender:getStringValue()
+									call_answer_event(layout,data)
+								end
+							end)	
 				end
-				uikits.event(e,
-						function(sender,eventType)
-							if eventType == ccui.TextFiledEventType.insert_text then
-								data.state = ui.STATE_FINISHED
-								data.my_answer[i] = sender:getStringValue()
-								call_answer_event(layout,data)
-							elseif eventType == ccui.TextFiledEventType.delete_backward then
-								data.state = ui.STATE_FINISHED
-								data.my_answer[i] = sender:getStringValue()
-								call_answer_event(layout,data)
-							end
-						end)	
-			end
-		end	
-		if _options and type(_options)=='table' then
-			local innparent = _options[1]:getParent()
-			local parent
-			if innparent then
-				parent = innparent:getParent()
-			end
-			if parent and cc_type(parent)=='ccui.ScrollView' then
-				local w,h
-				h = _options[1]:getContentSize().height
-				w = ((_options[1]:getContentSize().width)+EditSpace)*data.options+2*EditSpace
-				parent:setInnerContainerSize(cc.size(w,h))
-			end
-		end		
+			end	
+			if _options and type(_options)=='table' then
+				local innparent = _options[1]:getParent()
+				local parent
+				if innparent then
+					parent = innparent:getParent()
+				end
+				if parent and cc_type(parent)=='ccui.ScrollView' then
+					local w,h
+					h = _options[1]:getContentSize().height
+					w = ((_options[1]:getContentSize().width)+EditSpace)*data.options+2*EditSpace
+					parent:setInnerContainerSize(cc.size(w,h))
+				end
+			end		
+		end
 	end
-	cache_done(layout,data,relayout_topics)
+	
+	local function resans_done(layout,data)
+		init_edit_tipics()
+		relayout_topics(layout,data)
+	end
+	
+	init_edit_tipics()
+	cache_done(layout,data,resans_done)
 end
 --[[
 	conv(s,e) 输入的源数据，e是输出的数据
@@ -2025,23 +2040,59 @@ local types={
 					if s.correct_answer then
 						local ans = json.decode(s.correct_answer)
 						if ans and ans.answers and type(ans.answers)=='table' then
-							if ans.answers[1] and ans.answers[1].value and type(ans.answers[1].value) == 'string' then
-								local str = ans.answers[1].value
-								local num1,num2,num3 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*~(%-*%+*%d*$*)%s*')
-								if num1 and num2 and num3 then
-									e.isFactor = true
-									e.options = 3
-								else
-									num1,num2 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*')
-									if num1 and num2 then
-										e.isFactor = true
-										e.options = 2
-									end
+							e.options = 0
+							local haveEx
+							for k,v in pairs(ans.answers) do
+								if v and v.value and type(v.value) == 'string' then
+									local str = v.value
+									local num1,num2,num3 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*~(%-*%+*%d*$*)%s*')
+									if num1 and num2 and num3 then
+										e.isFraction = e.isFraction or {}
+										table.insert(e.isFraction,3)
+										e.options = e.options + 3
+									else
+										num1,num2 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*')
+										if num1 and num2 then
+											e.isFraction = e.isFraction or {}
+											table.insert(e.isFraction,2)
+											e.options = e.options + 2
+										else
+											haveEx = true
+										end
+									end									
+								end
+							end
+							--形如1,1~2的答案需要重新搜索
+							if e.isFraction and haveEx then
+								--重新搜索一遍
+								e.isFraction = {}
+								e.options = 0
+								for k,v in pairs(ans.answers) do
+									if v and v.value and type(v.value) == 'string' then
+										local str = v.value
+										local num1,num2,num3 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*~(%-*%+*%d*$*)%s*')
+										if num1 and num2 and num3 then
+											e.isFraction = e.isFraction or {}
+											table.insert(e.isFraction,3)
+											e.options = e.options + 3
+										else
+											num1,num2 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*')
+											if num1 and num2 then
+												e.isFraction = e.isFraction or {}
+												table.insert(e.isFraction,2)
+												e.options = e.options + 2
+											else
+												e.isFraction = e.isFraction or {}
+												table.insert(e.isFraction,1)
+												e.options = e.options + 1
+											end
+										end									
+									end								
 								end
 							end
 						end
 					end
-					if not e.isFactor then
+					if not e.isFraction then
 						if s.cnt_answer then
 							e.options = s.cnt_answer					
 						elseif s.correct_answer and type(s.correct_answer)=='string' then

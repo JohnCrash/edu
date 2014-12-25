@@ -951,7 +951,7 @@ function WorkList:add_item( t )
 	end
 	--分数
 	if t.real_score then
-		uikits.child(item,ui.SCORE):setString( tostring(t.correct or t.real_score or '') )
+		uikits.child(item,ui.SCORE):setString( tostring(t.correct or t.real_score or '').."%" )
 	end
 	--已经批改标记
 	if t.status and (t.status == 10 or  t.status == 11) then
