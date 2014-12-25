@@ -363,7 +363,7 @@ function Batch:init_topics()
 	self._subjectiveview:setVisible(false)
 	self._studentview:setVisible(false)
 	
-	uikits.enableMouseWheelIFWindows( self._subjective_root )
+	uikits.enableMouseWheelIFWindows( self._topicsview )
 	
 	self:tips(1)
 	if self._init_topics_done then

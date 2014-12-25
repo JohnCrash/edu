@@ -249,12 +249,13 @@ function StudentWatch:init()
 			end
 		--列表视图
 		self._papers = uikits.scroll(self._root,ui.LIST,ui.ITEM)
+		uikits.enableMouseWheelIFWindows(self._papers)
 	end
 	self:init_data()
 end
 
 function StudentWatch:release()
-	
+	uikits.enableMouseWheelIFWindows()
 end
 
 return StudentWatch
