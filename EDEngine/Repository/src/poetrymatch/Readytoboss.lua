@@ -124,8 +124,53 @@ function Readytoboss:show_zhunbei()
 		choose_time = choose_time -1
 		if schedulerEntry and choose_time < 0 then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
-			schedulerEntry = nil			
+			schedulerEntry = nil
+
+			---[[ by luleyan! -------------------------	
+			local sc = cc.Scene:create()
+			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+
+			--传入战斗层的数据包
+			local dataTable = {}
+			--[[数据
+			dataTable.battle_type = 1
+			dataTable.rounds_number = 
+
+			dataTable.plyr_hp =
+			dataTable.enmey_hp = 
+			dataTable.ar_vit = {1, 2, 3}
+			dataTable.ar_card_id = {1, 2, 3}
+			dataTable.ar_skill_id
+			 = {1, 2, 3}
+			--参数
+			player_info = {}
 			
+			player_info.lvl = int
+			player_info.img = path
+			player_info.name = string
+
+			card_list = {id,id,id}
+			id lvl skill hp tili 
+
+
+
+			dataTable.plyr_img_id = 
+			dataTable.enemy_img_id =
+			dataTable.plyr_name = 
+			dataTable.enemy_name =
+			dataTable.plyr_lv = 
+			dataTable.enemy_lv = 
+			dataTable.ar_card_img_id = {}
+			dataTable.ar_card_lv = {}
+			dataTable.ar_skill_img_id = {}
+			--]]
+
+			--生成战斗层场景
+			local laBattle = moLaBattle.Class:create(dataTable)
+			sc:addChild(laBattle)
+			cc.Director:getInstance():pushScene(sc)
+			--]]---------------------------------------
+
 		end
 	end	
 		
