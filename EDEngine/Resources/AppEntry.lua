@@ -12,10 +12,6 @@ local ui = {
 
 ----------------------------------
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Release
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -287,7 +283,7 @@ function AppEntry:init()
 			end
 		end}	
 
-	--[[-----------------------------------
+	---[[-----------------------------------
 	local ti = os.clock()
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 	local laBattle = moLaBattle.Class:create()

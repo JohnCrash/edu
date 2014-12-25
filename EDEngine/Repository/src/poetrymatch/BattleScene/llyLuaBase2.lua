@@ -95,6 +95,11 @@ function lly.logTable(t, index)
 		index = 1
 	end
 
+	if t == nil then 
+		lly.log(_space .. "table is nil") 
+		return
+	end
+
 	for k,v in pairs(t) do
 		if type(v) ~= "table" then
 			lly.log(_space .. tostring(k) .. "  " .. tostring(v))

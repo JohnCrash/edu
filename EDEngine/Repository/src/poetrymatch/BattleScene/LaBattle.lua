@@ -381,6 +381,7 @@ function LaBattle:ctor()
 
 		--各种属性-----------------------------------------------
 		_nCurBattleType = BATTLE_TYPE.STORY, --战斗类型
+		_nCurStageID = 0, --关卡/擂台id
 
 		_nRoundsNumber = 0, --回合数
 
@@ -388,7 +389,7 @@ function LaBattle:ctor()
 		_nPlyrHPCeiling = 0, --玩家HP上限
 		_nPlyrCurrentHP = 0, --玩家当前HP
 		
-		_arnPlyrCardID = lly.array(3), --卡牌
+		_arnPlyrCardID = lly.array(3, 0), --卡牌
 
 		_arnPlyrCardVIT = lly.array(3), --体力
 		_arnPlyrCardVITMax = lly.array(3),
@@ -406,15 +407,16 @@ function LaBattle:ctor()
 		--当前-------------------------------------------------------
 		_nCurCardIndex = 1, --当前卡牌
 		_nCurQuesType = QUES_TYPE.SINGLE_CHOICE, --当前题类型
-
-		--选择题答案
-		_arbChoise = lly.array(4),
-		_strAnswer = "", --填空题答案
+		_nCurQuesID = 0,
 
 		--当前问题
 		_strQuesTitle = "",
 		_strQuesContent = "",
 		_arstrQuesChoose = lly.array(4),
+
+		--选择题答案
+		_arbChoise = lly.array(4),
+		_strAnswer = "", --填空题答案
 
 		--电脑的答题时间
 		_nCOMAnswerSpendTime = 3,
@@ -493,7 +495,7 @@ function LaBattle:init(tab)
 	return false
 end
 
---需要战斗类型，回合数，各种读秒，最大血量，卡牌体力最大数，技能id
+--需要战斗类型，关卡id, 回合数，最大血量，卡牌体力最大数，卡牌id，技能id
 function LaBattle:initData(data)
 	
 	self._nCurBattleType = BATTLE_TYPE.STORY
@@ -1234,7 +1236,7 @@ function LaBattle:downloadQuestion(camp_type, callback)
 	lly.ensure(camp_type, "number")
 	if camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then lly.error("wrong type") end
 
-	---[[
+	--[[
 	local r = math.random(4)
 
 	if r == 1 then self._nCurQuesType = QUES_TYPE.SINGLE_CHOICE
@@ -1245,42 +1247,51 @@ function LaBattle:downloadQuestion(camp_type, callback)
 	--]]
 
 	--制作数据结构
-	local sendedTable = {
-		curr_type = 0, --战斗类型
-		type_id = 0, --阵营
-		skill_id = 0,
-		card_plate_id = 0, --自己卡牌的id
-		attack_card_plate_id = 0 --对方卡牌id
-	}
-	print("here")
+	local sendedTable = {}
+	sendedTable.game_range = self._nCurBattleType --战斗类型
+	sendedTable.road_block_id = self._nCurStageID --关卡/擂台id
+	sendedTable.camp_type = camp_type
+
+	if camp_type == CAMP_TYPE.PLAYER then
+		sendedTable.attack_card_plate_id = self._nEnemyCardID --对方卡牌id
+		sendedTable.card_plate_id = self._arnPlyrCardID[self._nCurCardIndex] --自己卡牌的id	
+	else
+		sendedTable.attack_card_plate_id = self._arnPlyrCardID[self._nCurCardIndex] --对方卡牌id
+		sendedTable.card_plate_id = self._nEnemyCardID--自己卡牌的id
+	end
+	
 	---[[发送数据，_nCurBattleType, camp_type, cardID, otherCardID, skill
 	moperson_info.post_data_by_new_form(
 		"get_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-			--[[
-			if bSuc then
-				lly.logTable(result)
+			if not bSuc then lly.log(result) end
 
-				--解析获得的table
-				--当前题的id
-				--当前题类型
-				--标题
-				--内容
-				--选项
-				--电脑的答案
-				self._arbChoise = 0
+			lly.logTable(result)
 
-				--电脑答题的时间
-				self._nCOMAnswerSpendTime = 0
+			--解析获得的table
+			--当前题的id
+			self._nCurQuesID = result.question_bank_id
 
-
-				--执行回调
-				callback()
-			else
-				lly.log(result)
+			--当前题类型
+			if result.question_type >= 4 then --4以上全是填空题
+				result.question_type = 4
 			end
-			--]]
+			
+			self._nCurQuesType = result.question_type
+
+			--标题
+			--内容
+			--选项
+			--电脑的答案
+			self._arbChoise = 0
+
+			--电脑答题的时间
+			self._nCOMAnswerSpendTime = 0
+
+
+			--执行回调
+			--callback()
 		end
 	)
 	--]]
