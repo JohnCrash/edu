@@ -285,7 +285,9 @@ function TeacherList:init_ready_batch()
 	self._release:setVisible(false)
 	self._statistics_root:setVisible(false)
 	self._gray_bar:setVisible(true)
-
+	
+	uikits.enableMouseWheelIFWindows( self._scrollview )
+	
 	if not self._scID and not self._busy and self._mode ~=  ui.READYBATCH then
 		if self._ready_batch_is_done then
 			self._scrollview:swap()
@@ -312,6 +314,8 @@ function TeacherList:init_ready_release()
 	self._gray_bar:setVisible(false)
 	self._laStats_Tchr:setVisible(false) --lly关闭统计层
 	
+	uikits.enableMouseWheelIFWindows( self._release )
+	
 	if self._selector == nil or self._selector[1] == nil then
 		self._confirm_item = {}	
 		local but_queren = uikits.child(self._release,ui.TOPICS_SELECT_QUEREN)
@@ -337,6 +341,8 @@ function TeacherList:init_ready_history()
 	self._gray_bar:setVisible(true)
 	self._laStats_Tchr:setVisible(false) --lly关闭统计层
 
+	uikits.enableMouseWheelIFWindows( self._scrollview )
+	
 	if not self._scID and not self._busy and self._mode ~= ui.HISTORY then
 		self._mode = ui.HISTORY
 		
@@ -1283,6 +1289,7 @@ end
 function TeacherList:release()
 	local default_scale = topics.get_default_scale()
 	topics.set_scale(default_scale)
+	uikits.enableMouseWheelIFWindows( nil )
 end
 
 return TeacherList

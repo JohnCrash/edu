@@ -433,7 +433,6 @@ public class AppActivity extends Cocos2dxActivity {
 	 */
 	public static int getNetworkState()
 	{
-		int state = 0;
 		ConnectivityManager cmgr = (ConnectivityManager)myActivity.getSystemService(CONNECTIVITY_SERVICE);
 		if( cmgr == null )
 			return 0;
@@ -442,13 +441,19 @@ public class AppActivity extends Cocos2dxActivity {
 			return 0; //Ã»ÓÐÍøÂç
 		NetworkInfo wifiInfo = cmgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		if( wifiInfo != null )
-			state |= wifiInfo.isAvailable()?1:0;
+		{
+			if(  wifiInfo.isAvailable() )
+				return 1;
+		}
 		
 		NetworkInfo mobiInfo = cmgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 		if( mobiInfo != null )
-			state |= mobiInfo.isAvailable()?2:0;
+		{
+			if( mobiInfo.isConnected() )
+				return 2;
+		}
 		
-		return state;
+		return 0;
 	}
 	static BroadcastReceiver connectionReceiver;
 	public static void registerNetworkStateListener()

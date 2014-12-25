@@ -59,6 +59,7 @@ static void takeResource_progressFunc(void *ptrs)
 		}
 	}
 }
+static int s_State = 0;
 static void networkStateChange_progressFunc(void *p)
 {
 	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
@@ -71,7 +72,7 @@ static void networkStateChange_progressFunc(void *p)
 			if (L && g_callnsl != LUA_REFNIL && p)
 			{
 				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callnsl);
-				lua_pushinteger(L, (int)p);
+				lua_pushinteger(L, s_State);
 				pLuaStack->executeFunction(2);
 				//lua_unref(L, g_callnsl);
 				//g_callnsl = LUA_REFNIL;
@@ -88,7 +89,8 @@ void networkStateChange(int state)
 		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
 		if (scheduler)
 		{
-			scheduler->performFunctionInCocosThread_ext(networkStateChange_progressFunc, (void *)state);
+            s_State = state;
+			scheduler->performFunctionInCocosThread_ext(networkStateChange_progressFunc, nullptr);
 		}
 	}
 }

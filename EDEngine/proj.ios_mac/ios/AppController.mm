@@ -29,6 +29,7 @@
 #import "RootViewController.h"
 #import "parsparam.h"
 #import "Platform.h"
+#import "Reachability.h"
 
 @implementation AppController
 
@@ -86,6 +87,48 @@ bool platformOpenURL( const char *strurl )
         return true;
     }
     return false;
+}
+/*
+ * 取网络状态，没有网络返回0,wifi=1,gprs/3g/4g=2
+ * 错误返回-1
+ */
+int getNetworkState()
+{
+    int state = [[Reachability reachabilityForLocalWiFi] currentReachabilityStatus];
+    if( state != NotReachable )
+    {
+        if( state == ReachableViaWiFi)
+            return 1;
+        else if( state == ReachableViaWWAN )
+            return 2;
+        else
+            return 1;
+    }
+    if( [[Reachability reachabilityForInternetConnection] currentReachabilityStatus] != NotReachable )
+        return 2;
+    return 0;
+}
+
+/*
+ * 监听网络状态变化，发生变化调用networkStateChange
+ */
+bool s_isRegister = false;
+void registerNetworkStateListener()
+{
+    if( s_isRegister )
+        return;
+    s_isRegister = true;
+    [[NSNotificationCenter defaultCenter] addObserver:s_myAppController
+                                             selector:@selector(reachabilityChanged)
+                                                 name: kReachabilityChangedNotification
+                                               object: nil];
+}
+void unregisterNetworkStateListener()
+{
+    if( !s_isRegister )
+        return;
+    [[NSNotificationCenter defaultCenter] removeObserver:s_myAppController];
+    s_isRegister = false;
 }
 /*
  *  popup launch app
@@ -252,5 +295,7 @@ static bool requestURL( NSURL *url,bool isrunning )
     [super dealloc];
 }
 
-
+- (void)reachabilityChanged:(NSNotification *)note {
+    networkStateChange(getNetworkState());
+}
 @end

@@ -45,8 +45,13 @@ local ui = {
 	OPTION_NO = 'option_wrong',
 	OPTION_NO_SUPPORT = 'option_not',
 	EDIT_TOPICS = 'edit_topics',
+	EDIT_TOPICS2 = 'edit_topics2',
+	EDIT_TOPICS3 = 'edit_topics3',
 	EDIT_TOPICS_ITEM = 'option_write_1',
 	EDIT_TOPICS_NUMBER = 'num',
+	FRACTION_LEFT = 'option_write_1/answer_text3',
+	FRACTION_UP = 'option_write_1/answer_text',
+	FRACTION_DOWN = 'option_write_1/answer_text2',
 	LINK_TEXT = 'option_connection',
 	DRAG_TEXT = 'option_drag',
 	POSITION_TEXT = 'option_position',
@@ -139,10 +144,49 @@ function WorkFlow:commit_topics( v )
 		answer = v.my_answer
 	elseif v and v.my_answer and type(v.my_answer)=='table' then
 		answer = ''
-		for i,v in pairs(v.my_answer) do
-			if v then
-				if i ~= 1 then answer = answer..',' end
-				answer = answer..tostring(v)
+		if v.isFraction then
+			local idx = 1
+			for k,s in pairs(v.isFraction) do
+				if s == 2 then
+					if idx+1 <= #v.my_answer then
+						if string.len(answer) > 0 then
+							answer = answer..','
+						end					
+						answer = answer..v.my_answer[idx]..'~'..v.my_answer[idx+1]
+						idx = idx + 2
+					else
+						kits.log("ERROR : Fraction my_answer invalide value 2")
+					end
+				elseif s == 3 then
+					if idx+2 <= #v.my_answer then
+						if string.len(answer) > 0 then
+							answer = answer..','
+						end
+						answer = answer..v.my_answer[idx]..'~'..v.my_answer[idx+1]..'~'..v.my_answer[idx+2]
+						idx = idx + 3
+					else
+						kits.log("ERROR : Fraction my_answer invalide value 3")
+					end	
+				elseif s == 1 then
+					if idx <= #v.my_answer then
+						if string.len(answer) > 0 then
+							answer = answer..','
+						end
+						answer = answer..v.my_answer[idx]
+						idx = idx + 1	
+					else
+						kits.log("ERROR : Fraction my_answer invalide value 4")
+					end
+				else
+					kits.log("ERROR : Fraction invalide value" )
+				end
+			end
+		else
+			for i,v in pairs(v.my_answer) do
+				if v then
+					if i ~= 1 then answer = answer..',' end
+					answer = answer..tostring(v)
+				end
 			end
 		end
 	else
@@ -407,8 +451,29 @@ function WorkFlow:load_cloud_answer( e )
 							if t and type(t)=='table' and t.answers and type(t.answers)=='table' then
 								kits.log('	CLOUD ANSWER:'..result.detail.answer )
 								e.my_answer = {}
-								for i,v in pairs(t.answers) do
-									e.my_answer[i] = v.value
+								if e.isFraction then
+									--分数题
+									for i,v in pairs(t.answers) do
+										local str = v.value
+										local num1,num2,num3 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*~(%-*%+*%d*$*)%s*')
+										if num1 and num2 and num3 then
+											table.insert(e.my_answer,num1)
+											table.insert(e.my_answer,num2)
+											table.insert(e.my_answer,num3)
+										else
+											num1,num2 = string.match( str,'%s*(%-*%+*%d*$*)%s*~%s*(%-*%+*%d*$*)%s*')
+											if num1 and num2 then
+												table.insert(e.my_answer,num1)
+												table.insert(e.my_answer,num2)
+											else
+												table.insert(e.my_answer,str)
+											end
+										end
+									end
+								else
+									for i,v in pairs(t.answers) do
+										e.my_answer[i] = v.value
+									end
 								end
 								if has_answer(e.my_answer) then
 									e.state = ui.STATE_FINISHED
@@ -797,6 +862,20 @@ function WorkFlow:init_anser_gui()
 		end
 		table.insert(self._option_edit,op)
 	end
+	--保存初始位置
+	self._option_edit_pts = {}
+	for i,v in pairs(self._option_edit) do
+		local x,y = v:getPosition()
+		table.insert(self._option_edit_pts,{x=x,y=y})
+	end
+	--分数题
+	self._option_edit_view2 = uikits.child(a,ui.EDIT_TOPICS2)
+	self._option_edit_view3 = uikits.child(a,ui.EDIT_TOPICS3)
+	--保存初始位置
+	local x,y = self._option_edit_view2:getPosition()
+	self._option_edit_2_pts = {x=x,y=y}
+	x,y = self._option_edit_view3:getPosition()
+	self._option_edit_3_pts = {x=x,y=y}
 	
 	self._topics_num = uikits.child(self._root,ui.TOPICS_NUM)
 	if self._topics_num then
@@ -808,6 +887,21 @@ end
 function WorkFlow:clear_all_option_check()
 	for i = 1,#self._option_img do
 		self._option_img[i]:setSelectedState(false)
+	end
+end
+
+--将编辑框位置重置会原始状态
+function WorkFlow:resetOptionEditPosition()
+	if self._option_edit_pts then
+		for i,v in pairs(self._option_edit_pts) do
+			if self._option_edit and self._option_edit[i] then
+				self._option_edit[i]:setPosition( v )
+			end
+		end
+	end
+	if self._option_edit_view2 and self._option_edit_view3 then
+		self._option_edit_view2:setPosition(self._option_edit_2_pts)
+		self._option_edit_view3:setPosition(self._option_edit_3_pts)
 	end
 end
 
@@ -831,6 +925,9 @@ function WorkFlow:set_anwser_field( i )
 			for i=1,#self._option_edit do
 				self._option_edit[i]:setVisible(false)
 			end
+			self._option_edit_view2:setVisible(false)
+			self._option_edit_view3:setVisible(false)
+			self:resetOptionEditPosition()
 			self._option_link:setVisible(false)
 			self._option_yes:setVisible(false)
 			self._option_no:setVisible(false)			
@@ -838,6 +935,12 @@ function WorkFlow:set_anwser_field( i )
 			self._option_sort:setVisible(false)
 			self._option_position:setVisible(false)
 			self._option_not_support:setVisible(false)
+			if self.switch_remove_list then
+				for i,v in pairs(self.switch_remove_list) do
+					v:removeFromParent()
+				end
+				self.switch_remove_list = {}
+			end
 		end
 		local t = self._data[i].item_type
 		
@@ -869,10 +972,109 @@ function WorkFlow:set_anwser_field( i )
 					data._options[i] = self._option_img[i]
 				end
 			elseif t==5 then --填空
-				self._option_edit_view:setVisible(true)
-				data._options = {}
-				for i=1,#self._option_edit do
-					data._options[i] = self._option_edit[i]
+				if data.isFraction then
+					--======
+					--分数题
+					--======
+					data._options = {}
+					local offsetx
+					local space = 100
+					local edit_use = 1
+					local is3used
+					local is2used
+					local function calc_offsetx( item,id )
+						if item and cc_isobj(item) then
+							if not offsetx then
+								if id then
+									item = uikits.child(item,id)
+								end
+								if item then
+									local ap = item:getAnchorPoint()
+									local size = item:getContentSize()
+									local x,y = item:getPosition()
+									offsetx = x + size.width * (1-ap.x)
+								else
+									kits.log("ERROR : calc_offsetx item = nil")
+								end
+							else
+								--偏移
+								if id then
+									child = uikits.child(item,id)
+								end								
+								if not child then 
+									child = item
+								end
+								
+								local x,y = item:getPosition()
+								--local edit = uikits.child(item,ui.EDIT_TOPICS_ITEM) 
+								local size = child:getContentSize()
+								local ap = child:getAnchorPoint()
+								x = offsetx + size.width*ap.x + space
+								offsetx = x + size.width*(1-ap.x)
+								item:setPosition( cc.p(x,y) )							
+							end					
+						else
+							kits.log("ERROR : calc_offsetx item = nil")
+						end
+					end
+					
+					for i,v in pairs(data.isFraction) do
+						if v == 2 then
+							local item
+							if not is2used then
+								item = self._option_edit_view2
+								is2used = true
+							else
+								local parent = self._option_edit_view2:getParent()
+								item = self._option_edit_view2:clone()
+								parent:addChild(item)
+								self.switch_remove_list = self.switch_remove_list or {}
+								table.insert(self.switch_remove_list,item)
+							end
+							calc_offsetx( item,ui.EDIT_TOPICS_ITEM )
+							item:setVisible(true)
+							table.insert(data._options,uikits.child(item,ui.FRACTION_UP) )
+							table.insert(data._options,uikits.child(item,ui.FRACTION_DOWN))
+						elseif v == 3 then
+							local item
+							if not is3used then
+								item = self._option_edit_view3
+								is3used = true
+							else
+								local parent = self._option_edit_view3:getParent()
+								item = self._option_edit_view3:clone()
+								parent:addChild( item )
+								self.switch_remove_list = self.switch_remove_list or {}
+								table.insert(self.switch_remove_list,item)							
+							end
+							calc_offsetx( item,ui.EDIT_TOPICS_ITEM )					
+							item:setVisible(true)
+							table.insert(data._options,uikits.child(item,ui.FRACTION_LEFT) )
+							table.insert(data._options,uikits.child(item,ui.FRACTION_UP) )
+							table.insert(data._options,uikits.child(item,ui.FRACTION_DOWN))	
+						elseif v == 1 then
+							--这是一个普通编辑框
+							local item
+							item = self._option_edit[edit_use]
+							calc_offsetx( item )
+							self._option_edit_view:setVisible(true)
+							item:setVisible(true)							
+							table.insert(data._options,item)
+							edit_use = edit_use + 1
+						else
+							kits.log("ERROR : can not support data.options > 3")
+						end
+					end
+					--=========
+					--分数题结束
+					--=========
+				else
+					--正常填空
+					self._option_edit_view:setVisible(true)
+					data._options = {}
+					for i=1,#self._option_edit do
+						data._options[i] = self._option_edit[i]
+					end
 				end
 			end
 			local function layout_scroll_arrow(layout_local,data)

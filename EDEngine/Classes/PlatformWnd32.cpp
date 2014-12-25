@@ -121,19 +121,18 @@ int getNetworkState()
 {
 	DWORD dwOnline;
 	//IsNetworkAlive  or?
-	if (!InternetGetConnectedState(&dwOnline, 0))
+	if (InternetGetConnectedState(&dwOnline, 0))
 	{
 		if (dwOnline & INTERNET_CONNECTION_CONFIGURED)
 			return 1;
 		if (dwOnline & INTERNET_CONNECTION_MODEM)
 			return 2;
 		if (dwOnline & INTERNET_CONNECTION_LAN)
-			return 3;
+			return 1;
 		if (dwOnline & INTERNET_CONNECTION_PROXY)
-			return 4;
-		return 0;
+			return 3;
 	}
-	return -1;
+	return 0;
 }
 
 static std::thread * s_pthread = nullptr;
