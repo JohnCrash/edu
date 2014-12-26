@@ -132,7 +132,7 @@
     "dx4.png",
     "dx5.png"
   ],
-  "version": "1.5.0.0",
+  "version": "1.6.0.0",
   "widgetTree": {
     "classname": "Panel",
     "name": null,

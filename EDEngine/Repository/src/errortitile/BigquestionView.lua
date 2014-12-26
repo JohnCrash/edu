@@ -237,7 +237,12 @@ function BigquestionView:init()
 	but_more:addChild(but_more.share_box)	
 	local but_sendtofriend = but_more.share_box:getChildByTag(660)
 	local but_sendtogroup = but_more.share_box:getChildByTag(659)
-	
+	but_sendtofriend:setEnabled(false)
+	but_sendtofriend:setBright(false)
+	but_sendtofriend:setTouchEnabled(false)
+	but_sendtogroup:setEnabled(false)
+	but_sendtogroup:setBright(false)
+	but_sendtogroup:setTouchEnabled(false)
 	--设置收藏按钮功能
 	uikits.event(but_collect,
 		function(sender,eventType)

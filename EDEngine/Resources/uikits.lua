@@ -13,6 +13,67 @@ local FileUtils = cc.FileUtils:getInstance()
 --local defaultFont="fonts/simfang.ttf"
 local defaultFont="Marker Felt"
 local defaultFontSize = 32
+local ismute
+
+local listener_mouse
+local foucs_scrollview
+local scrolly_value = 100
+local function mouseWhellScroll( event )
+	if foucs_scrollview then
+		if cc_isobj(foucs_scrollview) then
+			local inner = foucs_scrollview:getInnerContainer()
+			local size = foucs_scrollview:getContentSize()
+			local isize = foucs_scrollview:getInnerContainerSize()
+			local x,y = inner:getPosition()
+
+			if isize.height <= size.height then
+				return --不需要滚动
+			end
+
+			y = y + event:getScrollY() * scrolly_value
+
+			if y > 0 then y = 0 end
+			if y < size.height - isize.height then 
+				y = size.height - isize.height
+			end
+
+			inner:setPosition(cc.p(x,y))
+		else
+			foucs_scrollview = nil
+		end
+	end
+end
+
+local function registerMouseEvent()
+	local platform = CCApplication:getInstance():getTargetPlatform()
+	if not listener_mouse and platform == kTargetWindows then
+		listener_mouse = cc.EventListenerMouse:create()
+		if listener_mouse then
+			listener_mouse:registerScriptHandler(mouseWhellScroll,cc.Handler.EVENT_MOUSE_SCROLL)	
+			local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+			directorEventDispatcher:addEventListenerWithFixedPriority(listener_mouse,1)		
+		end
+	end
+end
+
+local function enableMouseWheelIFWindows( scrollview,scrollspeed )
+	if scrollview==nil then
+		foucs_scrollview = nil
+		return
+	end
+	local platform = CCApplication:getInstance():getTargetPlatform()
+	if platform == kTargetWindows then
+		if scrollview and cc_type(scrollview) == 'ccui.ScrollView' then
+			pcall( registerMouseEvent )
+			foucs_scrollview = scrollview
+			scrolly_value = scrollspeed or scrolly_value
+		elseif type(scrollview)=='table' and scrollview._scrollview then
+			pcall( registerMouseEvent )
+			foucs_scrollview = scrollview._scrollview
+			scrolly_value = scrollspeed or scrolly_value
+		end
+	end
+end
 
 local function log_caller()
 	local caller = debug.getinfo(3,'nSl')
@@ -26,6 +87,7 @@ local function log_caller()
 end
 
 local function playSound( file,ismusic )
+	if ismute then return end
 	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
 		if string.lower(suffix) == '.amr' then
@@ -75,10 +137,11 @@ local function stopAllSound()
 	cc_stopVoice()
 end
 
-local ismute
-
 local function muteSound( b )
 	ismute = b
+	if ismute then
+		stopAllSound()
+	end
 end
 
 local click_sounds = {
@@ -88,6 +151,10 @@ local click_sounds = {
 	'audio/right.mp3',
 	'audio/error.mp3',
 }
+
+local function setDefaultClickSound( idx,file )
+	click_sounds[idx] = file
+end
 
 local function playClickSound( idx )
 	if not ismute then
@@ -889,13 +956,18 @@ local function rect(t)
 end
 
 local _pushNum = 0
+local function replaceScene( scene )
+	Director:replaceScene( scene )
+	cc.TextureCache:getInstance():removeUnusedTextures()
+end
+
 local function pushScene( scene,transition,t )
 	if transition then
 		Director:pushScene( transition:create(t or 0.2,scene) )
 	else
 		Director:pushScene( scene )
 	end
-	cc.TextureCache:getInstance():removeUnusedTextures();
+	cc.TextureCache:getInstance():removeUnusedTextures()
 	_pushNum = _pushNum + 1
 end
 
@@ -907,7 +979,7 @@ local function popScene()
 		--[[
 		popScene并不会马上释放场景，因此下面的调用并不会释放被弹出场景的材质内存
 		--]]
-		cc.TextureCache:getInstance():removeUnusedTextures();
+		cc.TextureCache:getInstance():removeUnusedTextures()
 		--cc.TextureCache:getInstance():removeAllTextures();
 		_pushNum = _pushNum - 1
 	else
@@ -1866,6 +1938,7 @@ return {
 	delay_call = delay_call,
 	pushScene = pushScene,
 	popScene = popScene,
+	replaceScene = replaceScene,
 	relayout_h = relayout_h,
 	relayout_v = relayout_v,
 	initDR = InitDesignResolutionMode,
@@ -1892,6 +1965,7 @@ return {
 	scrollview_step_add = scrollview_step_add,
 	muteSound = muteSound,
 	playClickSound = playClickSound,
+	setClickSound = setClickSound,
 	animationFormJson = animationFormJson,
 	sequence_call = sequence_call,
 	FAIL = FAIL,
@@ -1901,4 +1975,5 @@ return {
 	BEGIN = BEGIN,
 	END = END,
 	NEXT = NEXT,
+	enableMouseWheelIFWindows = enableMouseWheelIFWindows,
 }

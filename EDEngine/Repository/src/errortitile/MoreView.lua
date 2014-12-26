@@ -15,7 +15,7 @@ local ui = {
 	statistics_but = '878/882',
 	back_but = '878/4791',
 	music_but = '1051/1056',
-	exit_but = '1051/3665',
+	--exit_but = '1051/3665',
 	
 	MAINMENU43 = '1430',
 	wronglist43_but = '1430/1432',
@@ -83,8 +83,8 @@ function MoreView:init()
 		print("MoreView get error!")
 		return
 	end		
-	if _G.user_status == 1 then
-		if login.get_uid_type() == login.STUDENT then
+	if login.get_uid_type() == login.STUDENT then
+		if _G.screen_type == 1 then
 			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more.json")
 		else		
 			self._widget = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/more43.json")
@@ -110,7 +110,7 @@ function MoreView:init()
 		end)
 	end
 	
-	local but_exit
+--[[	local but_exit
 	but_exit = uikits.child(self._widget,ui.exit_but)
 	
 	local function exitCallback(sender, eventType) 	
@@ -118,7 +118,7 @@ function MoreView:init()
 			kits.quit()
         end
     end						
-	but_exit:addTouchEventListener(exitCallback)			
+	but_exit:addTouchEventListener(exitCallback)	--]]		
 	--self.statistics_view = ccs.GUIReader:getInstance():widgetFromJsonFile("errortitile/TheWrong/Export/statistics_les.json")
 	--self._widget:addChild(self.statistics_view)
 	--处理切换首页按钮

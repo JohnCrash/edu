@@ -26,6 +26,9 @@ void setUIOrientation( int m );
 int getUIOrientation();
 void cocos2dChangeOrientation( int m );
 
+void ShockPhonePattern( int *pattern,int n );
+void ShockPhoneDelay( int t );
+
 int getNetworkState();
 void registerNetworkStateListener();
 void unregisterNetworkStateListener();

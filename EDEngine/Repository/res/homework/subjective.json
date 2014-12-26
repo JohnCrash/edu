@@ -346,7 +346,7 @@
     "bianji2.png",
     "delete.png"
   ],
-  "version": "1.5.0.0",
+  "version": "1.6.0.0",
   "widgetTree": {
     "classname": "Panel",
     "name": null,
@@ -801,7 +801,7 @@
               "capInsetsWidth": 1,
               "capInsetsX": 0,
               "capInsetsY": 0,
-              "clipAble": true,
+              "clipAble": false,
               "colorType": 1,
               "direction": 2,
               "editorClipAble": false,
@@ -3405,7 +3405,7 @@
           "clipAble": true,
           "colorType": 1,
           "direction": 1,
-          "editorClipAble": false,
+          "editorClipAble": true,
           "innerHeight": 960,
           "innerWidth": 1920,
           "layoutType": 0,
