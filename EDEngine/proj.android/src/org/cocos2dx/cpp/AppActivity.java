@@ -29,6 +29,7 @@ package org.cocos2dx.cpp;
 import java.security.Provider;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -60,6 +61,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.content.BroadcastReceiver;
+import android.os.Vibrator;
 
 //import org.cocos2dx.cpp.CrashHandler;
 
@@ -426,6 +428,45 @@ public class AppActivity extends Cocos2dxActivity {
 			s_bPlaying=false;
 		}
 		return 1;
+	}
+	/*
+	 * 震动
+	 */
+	private static Vibrator vibrator;
+	private static long [] s_pattern = null;
+	private static int s_patidx = 0;
+	//使用两个函数绕过传递数组
+	public static void InitShockPattern( long p )
+	{
+		if( s_pattern == null )
+			s_pattern = new long[64];
+		s_patidx = 1;
+		s_pattern[0] = p;
+	}
+	public static void addShockPattern( long p )
+	{
+		if( s_patidx < 64 )
+		{
+			s_pattern[s_patidx] = p;
+			s_patidx++;
+		}
+	}
+	public static void ShockPhone()
+	{
+		if( vibrator == null)
+			vibrator = (Vibrator)myActivity.getSystemService(Context.VIBRATOR_SERVICE);
+		vibrator.vibrate(s_pattern, s_patidx);
+	}
+	public static void ShockPhoneDelay( long time )
+	{
+		if( vibrator == null)
+			vibrator = (Vibrator)myActivity.getSystemService(Context.VIBRATOR_SERVICE);
+		vibrator.vibrate(time);		
+	}
+	public static void stopShockPhone()
+	{
+		if( vibrator != null)
+			vibrator.cancel();
 	}
 	/*
 	 *  取网络状态和监控网络状态
