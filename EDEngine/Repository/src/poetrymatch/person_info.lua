@@ -232,7 +232,7 @@ local function update_card_in_bag_by_id(id,tag,content)
 				end
 			end
 		end		
-		g_person_bag.cards_table = card_info
+		--g_person_bag.cards_table = card_info
 	end
 end
 

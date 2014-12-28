@@ -409,6 +409,7 @@ function Bagview:show_skill_mall()
 			txt_skill_name:setString(skill_list[i].skill_name)		
 			txt_skill_pay:setString(skill_list[i].price)		
 			pic_skill.id = skill_list[i].skill_id
+			but_skill_pay.id = skill_list[i].skill_id
 			uikits.event(pic_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
@@ -417,7 +418,16 @@ function Bagview:show_skill_mall()
 				end,"click")	
 			uikits.event(but_skill_pay,	
 				function(sender,eventType)	
-								
+					local sel_skill_info = person_info.get_skill_info_by_id(sender.id)
+					local new_skill_info = {}
+					new_skill_info.skill_id = sel_skill_info.skill_id
+					new_skill_info.skill_name = sel_skill_info.skill_name
+					new_skill_info.skill_des = sel_skill_info.skill_des
+					self.card_info.skills[#self.card_info.skills+1] = new_skill_info
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					func = self.show_card_info
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
 				end,"click")	
 			
 		end
@@ -435,7 +445,7 @@ function Bagview:show_card_info(id)
 	local callback_type = 1
 	local callback_id
 	local function timer_update(time)
-		func(self,id,callback_type)
+		func(self,callback_id,callback_type)
 		if schedulerEntry then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
@@ -598,7 +608,18 @@ function Bagview:show_card_info(id)
 	txt_card_info_skill_reset:setString(card_info.skill_reset_pay)
 	uikits.event(but_card_info_skill_reset,	
 		function(sender,eventType)	
-			
+			person_info.messagebox(self,person_info.RESET_SKILL,function(e)
+				if e == person_info.OK then
+					self.card_info.skills={}
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					func = self.show_card_info
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+				else
+
+				end
+			end)
+		
 		end,"click")		
 	but_card_info_skill_src:setVisible(false)
 	but_card_info_skill_empty_src:setVisible(false)	
@@ -617,6 +638,7 @@ function Bagview:show_card_info(id)
 			uikits.event(but_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
+					print('callback_id::'..callback_id)
 					func = self.show_skill_info
 					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)					
 				end,"click")	
