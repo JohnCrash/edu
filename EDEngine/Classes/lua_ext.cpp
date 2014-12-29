@@ -652,6 +652,16 @@ int cc_unregisterNetworkStateListener(lua_State *L)
 	return 0;
 }
 
+int cc_shock(lua_State *L)
+{
+	if( lua_isnumber(L,1) )
+	{
+		int delay = lua_tonumber(L,1);
+		ShockPhoneDelay( delay );
+	}
+	return 0;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -680,6 +690,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_getNetworkState", cc_getNetworkState);
 	lua_register(L, "cc_registerNetworkStateListener", cc_registerNetworkStateListener);
 	lua_register(L, "cc_unregisterNetworkStateListener", cc_unregisterNetworkStateListener);
+	lua_register(L, "cc_shock", cc_shock);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

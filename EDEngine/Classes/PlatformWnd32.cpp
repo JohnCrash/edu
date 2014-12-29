@@ -135,6 +135,14 @@ int getNetworkState()
 	return 0;
 }
 
+void ShockPhonePattern( int *pattern,int n )
+{
+}
+
+void ShockPhoneDelay( int t )
+{
+}
+
 static std::thread * s_pthread = nullptr;
 static bool s_Stop = false;
 static int s_CurState;

@@ -39,9 +39,13 @@ local ui = {
 	TXT_CARD_LVL = 'dj',
 	
 	BUTTON_QIANDAO = 'd_qd',
+	PIC_QIANDAO = 'd_qd/tis',
 	BUTTON_TONGZHI = 'd_tz',
+	PIC_TONGZHI = 'd_tz/tis',
 	BUTTON_BEIBAO = 'd_bb',
+	PIC_BEIBAO = 'd_bb/tis',
 	BUTTON_SHANGCHENG = 'd_sc',
+	PIC_SHANGCHENG = 'd_sc/tis',
 	BUTTON_DUIZHAN = 'duizhan',
 	BUTTON_CHUANGGUAN = 'chuangguan',
 	BUTTON_LEITAI = 'leitai',
@@ -122,7 +126,7 @@ function Mainview:show_cards()
 	for i=1,#all_battle_list do
 		local cur_card = card_view_src:clone()
 		local pic_card = uikits.child(cur_card,ui.PIC_CARD)
-		local pic_name = all_battle_list[i].id..'2.png'
+		local pic_name = all_battle_list[i].id..'b.png'
 		--pic_card:loadTexture(pic_path)
 		person_info.load_card_pic(pic_card,pic_name)
 		pic_card.id = all_battle_list[i].id
@@ -142,7 +146,34 @@ function Mainview:show_cards()
 	end
 end
 
+function Mainview:shwo_push_info()	
+	local pic_qiandao = uikits.child(self._Mainview,ui.PIC_QIANDAO)
+	local pic_tongzhi = uikits.child(self._Mainview,ui.PIC_TONGZHI)
+	local pic_beibao = uikits.child(self._Mainview,ui.PIC_BEIBAO)
+	local pic_shangcheng = uikits.child(self._Mainview,ui.PIC_SHANGCHENG)
+	local user_info = person_info.get_user_info()
+	if user_info.has_msg == 1 then
+		pic_tongzhi:setVisible(true)
+	else
+		pic_tongzhi:setVisible(false)
+	end
+	
+	if user_info.has_sign == 1 then
+		pic_qiandao:setVisible(true)
+	else
+		pic_qiandao:setVisible(false)
+	end
+	
+	if user_info.has_product == 1 then
+		pic_shangcheng:setVisible(true)
+	else
+		pic_shangcheng:setVisible(false)
+	end	
+	pic_beibao:setVisible(false)
+end
+
 function Mainview:init_gui()	
+	self:shwo_push_info()
 	self:show_tili_num()
 	self:show_level()
 	self:show_silver()

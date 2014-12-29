@@ -67,38 +67,62 @@ function create(country_name,country_id)
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
+local boss_info = {}
+function Bossview:update_user_boss_info()
+	local send_data = {}
+	send_data.v1 = self.country_id
+	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
+		if t and t == true then
+			
+--[[			for i=1,#v do
+				local cur_section_info = {}
+				--cur_section_info.id = v[i].road_block_id
+				cur_section_info.id = 'fengyang'
+				cur_section_info.name = v[i].road_block_name
+				cur_section_info.star_all = 0
+				if v[i].road_block_tot_star then
+					cur_section_info.star_all = v[i].road_block_tot_star
+				end
+				cur_section_info.des = v[i].road_block_des
+				section_info[#section_info+1] = cur_section_info
+			end
+			self:get_user_section_info()--]]
+			if v then
+				boss_info = v				
+			end
+			self:show_boss()
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:getdatabyurl()
+				else
+					self:getdatabyurl()
+				end
+			end)
+		end		
+	end)
+end
 
 function Bossview:getdatabyurl()
+	local send_data = {}
+	send_data.v1 = self.country_id
+	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
+		if t and t == true then
+			if v then
 
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+				person_info.set_boss_info_by_id(self.country_id,v)				
+			end
+			self:update_user_boss_info()
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:getdatabyurl()
+				else
+					self:getdatabyurl()
 				end
-			end,messagebox.RETRY)	
-		end
-	end,'N')
+			end)
+		end		
+	end)
 end
 
 function Bossview:save_innerpos()
@@ -111,7 +135,7 @@ end
 
 local boss_space = 50
 
-function Bossview:show_boss_info(cur_boss_info)	
+function Bossview:show_boss_info(cur_boss_info,is_has_star)	
 	self.view_boss_info:setVisible(true)
 	local but_start_battle = uikits.child(self._Bossview,ui.BUTTON_START_BATTLE)
 	local but_hide_info = uikits.child(self._Bossview,ui.BUTTON_HIDE_INFO)
@@ -120,17 +144,17 @@ function Bossview:show_boss_info(cur_boss_info)
 	
 		local save_info = kits.config("tili_time",'get')
 		local save_info_tb = json.decode(save_info)
-		if save_info_tb.last_tili_num < cur_boss_info.tili then
+		if save_info_tb.last_tili_num < cur_boss_info.need_physical_power then
 			print('tili not enough!!!!')
 		else
-			save_info_tb.last_tili_num = save_info_tb.last_tili_num - cur_boss_info.tili
+			save_info_tb.last_tili_num = save_info_tb.last_tili_num - cur_boss_info.need_physical_power
 			save_info = json.encode(save_info_tb)
 			kits.config("tili_time",save_info)
 		end
 		
 		self.view_boss_info:setVisible(false)
 		self:save_innerpos()
-		local scene_next = readytoboss.create(cur_boss_info)	
+		local scene_next = readytoboss.create(cur_boss_info,is_has_star)	
 		uikits.pushScene(scene_next)	
 	end,"click")
 	
@@ -138,52 +162,52 @@ function Bossview:show_boss_info(cur_boss_info)
 	function(sender,eventType)	
 		self.view_boss_info:setVisible(false)
 	end,"click")
-	
+	print('cur_boss_info.need_physical_power::'..cur_boss_info.need_physical_power)
 	local txt_tili_num = uikits.child(self._Bossview,ui.TXT_TILI_NUM)
-	txt_tili_num:setString(cur_boss_info.tili)
+	txt_tili_num:setString(cur_boss_info.need_physical_power)
 	local txt_boss_name = uikits.child(self._Bossview,ui.TXT_BOSS_NAME)
-	txt_boss_name:setString(cur_boss_info.name)
+	txt_boss_name:setString(cur_boss_info.card_plate_name)
 	local pic_pz_gold = uikits.child(self._Bossview,ui.PIC_PINZHI_GOLD)
 	local pic_pz_silver = uikits.child(self._Bossview,ui.PIC_PINZHI_SILVER)
 	local pic_pz_cu = uikits.child(self._Bossview,ui.PIC_PINZHI_CU)
 	pic_pz_gold:setVisible(false)
 	pic_pz_silver:setVisible(false)
 	pic_pz_cu:setVisible(false)
-	if cur_boss_info.pinzhi == 3 then
+	if cur_boss_info.card_material == 3 then
 		pic_pz_gold:setVisible(true)
-	elseif cur_boss_info.pinzhi == 2 then
+	elseif cur_boss_info.card_material == 2 then
 		pic_pz_silver:setVisible(true)
-	elseif cur_boss_info.pinzhi == 1 then
+	elseif cur_boss_info.card_material == 1 then
 		pic_pz_cu:setVisible(true)
 	end
 	local txt_shenli_num = uikits.child(self._Bossview,ui.TXT_SHENLI_NUM)
-	txt_shenli_num:setString(cur_boss_info.shenli)
+	txt_shenli_num:setString(cur_boss_info.card_plate_magic)
 
 	local txt_hp_num = uikits.child(self._Bossview,ui.TXT_HP_NUM)
-	txt_hp_num:setString(cur_boss_info.hp)
+	txt_hp_num:setString(cur_boss_info.card_plate_blood)
 	local txt_hp_ex_num = uikits.child(self._Bossview,ui.TXT_HP_EX_NUM)
-	if cur_boss_info.hp_ex ~= 0 then
-		txt_hp_ex_num:setString('+'..cur_boss_info.hp_ex)
+	if cur_boss_info.card_plate_blood_added and cur_boss_info.card_plate_blood_added ~= 0 then
+		txt_hp_ex_num:setString('+'..cur_boss_info.card_plate_blood_added)
 		txt_hp_ex_num:setVisible(true)	
 	else
 		txt_hp_ex_num:setVisible(false)		
 	end
 	
 	local txt_ap_num = uikits.child(self._Bossview,ui.TXT_AP_NUM)
-	txt_ap_num:setString(cur_boss_info.ap)
+	txt_ap_num:setString(cur_boss_info.card_plate_attack)
 	local txt_ap_ex_num = uikits.child(self._Bossview,ui.TXT_AP_EX_NUM)
-	if cur_boss_info.ap_ex ~= 0 then
-		txt_ap_ex_num:setString('+'..cur_boss_info.ap_ex)
+	if cur_boss_info.card_plate_attack_added and cur_boss_info.card_plate_attack_added ~= 0 then
+		txt_ap_ex_num:setString('+'..cur_boss_info.card_plate_attack_added)
 		txt_ap_ex_num:setVisible(true)	
 	else
 		txt_ap_ex_num:setVisible(false)		
 	end
 	
 	local txt_mp_num = uikits.child(self._Bossview,ui.TXT_MP_NUM)
-	txt_mp_num:setString(cur_boss_info.mp)
+	txt_mp_num:setString(cur_boss_info.card_plate_wit)
 	local txt_mp_ex_num = uikits.child(self._Bossview,ui.TXT_MP_EX_NUM)
-	if cur_boss_info.mp_ex ~= 0 then
-		txt_mp_ex_num:setString('+'..cur_boss_info.mp_ex)
+	if cur_boss_info.card_plate_wit_added and cur_boss_info.card_plate_wit_added ~= 0 then
+		txt_mp_ex_num:setString('+'..cur_boss_info.card_plate_wit_added)
 		txt_mp_ex_num:setVisible(true)	
 	else
 		txt_mp_ex_num:setVisible(false)		
@@ -192,9 +216,9 @@ function Bossview:show_boss_info(cur_boss_info)
 	local txt_star1_condition = uikits.child(self._Bossview,ui.TXT_STAR1_CONDITION)
 	local txt_star2_condition = uikits.child(self._Bossview,ui.TXT_STAR2_CONDITION)
 	local txt_star3_condition = uikits.child(self._Bossview,ui.TXT_STAR3_CONDITION)
-	txt_star1_condition:setString(cur_boss_info.star1)
-	txt_star2_condition:setString(cur_boss_info.star2)
-	txt_star3_condition:setString(cur_boss_info.star3)
+	txt_star1_condition:setString(cur_boss_info.star1_desc)
+	txt_star2_condition:setString(cur_boss_info.star2_desc)
+	txt_star3_condition:setString(cur_boss_info.star3_desc)
 end
 
 function Bossview:show_boss()	
@@ -220,49 +244,54 @@ function Bossview:show_boss()
 		local cur_boss = view_per_boss_src:clone()
 		cur_boss:setVisible(true)
 		self.view_all_boss:addChild(cur_boss)
-		cur_boss.boos_info = all_boss_info[i]
+		cur_boss.card_info = all_boss_info[i]
 		cur_boss:setPositionX(pos_x+(size_per_view.width+boss_space)*(i-1))
 		uikits.event(cur_boss,	
 		function(sender,eventType)	
-			self:show_boss_info(sender.boos_info)
+			self:show_boss_info(sender.card_info,sender.is_has_star)
 		end,"click")
-
-		local n_pic_name = all_boss_info[i].id..'.png'
-		local c_pic_name = all_boss_info[i].id..'4.png'
+		local n_pic_name = all_boss_info[i].card_plate_id..'a.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'d.png'
+--[[		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'--]]
 		person_info.load_card_pic(cur_boss,n_pic_name,n_pic_name,c_pic_name)
-		if all_boss_info[i].is_admit == 1 then
-			cur_boss:setEnabled(true)
-			cur_boss:setBright(true)
-			cur_boss:setTouchEnabled(true)	
-		else
-			cur_boss:setEnabled(false)
-			cur_boss:setBright(false)
-			cur_boss:setTouchEnabled(false)	
-		end
-
 		local star1 = uikits.child(cur_boss,ui.CHECK_STAR1)
 		local star2 = uikits.child(cur_boss,ui.CHECK_STAR2)
 		local star3 = uikits.child(cur_boss,ui.CHECK_STAR3)
 		star1:setSelectedState(false)
 		star2:setSelectedState(false)
 		star3:setSelectedState(false)
-		if all_boss_info[i].star_has >0 then
-			star1:setSelectedState(true)
-			if all_boss_info[i].star_has >1 then
-				star2:setSelectedState(true)
-				if all_boss_info[i].star_has >2 then
-					star3:setSelectedState(true)
+		if boss_info[i] and type(boss_info[i]) == 'table' then
+			cur_boss:setEnabled(true)
+			cur_boss:setBright(true)
+			cur_boss:setTouchEnabled(true)	
+			if boss_info[i].tot_gain_star >0 then
+				star1:setSelectedState(true)
+				if boss_info[i].tot_gain_star >1 then
+					star2:setSelectedState(true)
+					if boss_info[i].tot_gain_star >2 then
+						star3:setSelectedState(true)
+					end
 				end
+				cur_boss.is_has_star = true
+			else
+				cur_boss.is_has_star = false
 			end
+		else
+			cur_boss.is_has_star = false
+			cur_boss:setEnabled(false)
+			cur_boss:setBright(false)
+			cur_boss:setTouchEnabled(false)	
 		end
-		
+
 		local txt_boss_lvl = uikits.child(cur_boss,ui.TXT_BOSS_LVL)
-		txt_boss_lvl:setString(all_boss_info[i].lvl)
+		txt_boss_lvl:setString(all_boss_info[i].card_plate_level)
 	end
 end
 
 function Bossview:init_gui()	
-	self:show_boss()
+	--self:show_boss()
+	self:getdatabyurl()
 end
 
 function Bossview:init()	
@@ -286,7 +315,7 @@ function Bossview:init()
 			uikits.popScene()
 		end,"click")
 	local pic_bg = uikits.child(self._Bossview,ui.PIC_BG)
-	local pic_name = self.country_id..'_bg.jpg'
+	local pic_name = self.country_id..'a.png'
 	person_info.load_section_pic(pic_bg,pic_name)
 	
 	self:init_gui()

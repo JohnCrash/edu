@@ -89,6 +89,49 @@ void unregisterNetworkStateListener()
     }
 }
 
+void ShockPhonePattern( int *pattern,int n )
+{
+	JniMethodInfo jmi;
+	if( n > 0 )
+	{
+		for( int i = 0;i < n;++i )
+		{
+			if( i == 0 )
+			{
+				if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"InitShockPattern","(I)V"))
+				{
+					jmi.env->CallStaticVoidMethod(jmi.classID,jmi.methodID,pattern[i]);
+					jmi.env->DeleteLocalRef(jmi.classID);
+				}
+			}
+			else
+			{
+				if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"addShockPattern","(I)V"))
+				{
+					jmi.env->CallStaticVoidMethod(jmi.classID,jmi.methodID,pattern[i]);
+					jmi.env->DeleteLocalRef(jmi.classID);
+				}			
+			}
+		}
+		if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"ShockPhone","()V"))
+		{
+			jmi.env->CallStaticVoidMethod(jmi.classID,jmi.methodID);
+			jmi.env->DeleteLocalRef(jmi.classID);
+		}
+	}
+}
+
+void ShockPhoneDelay( int t )
+{
+	JniMethodInfo jmi;
+
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"ShockPhoneDelay","(I)V"))
+	{
+		jmi.env->CallStaticVoidMethod(jmi.classID,jmi.methodID,t);
+		jmi.env->DeleteLocalRef(jmi.classID);
+    }
+}
+
 void takeResource( int mode )
 {
 	JniMethodInfo t;
