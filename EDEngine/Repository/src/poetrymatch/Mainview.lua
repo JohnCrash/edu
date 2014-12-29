@@ -126,7 +126,7 @@ function Mainview:show_cards()
 	for i=1,#all_battle_list do
 		local cur_card = card_view_src:clone()
 		local pic_card = uikits.child(cur_card,ui.PIC_CARD)
-		local pic_name = all_battle_list[i].id..'2.png'
+		local pic_name = all_battle_list[i].id..'b.png'
 		--pic_card:loadTexture(pic_path)
 		person_info.load_card_pic(pic_card,pic_name)
 		pic_card.id = all_battle_list[i].id

@@ -250,8 +250,8 @@ function Bossview:show_boss()
 		function(sender,eventType)	
 			self:show_boss_info(sender.boos_info)
 		end,"click")
-		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
-		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'
+		local n_pic_name = all_boss_info[i].card_plate_id..'a.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'d.png'
 --[[		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
 		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'--]]
 		person_info.load_card_pic(cur_boss,n_pic_name,n_pic_name,c_pic_name)
@@ -265,11 +265,11 @@ function Bossview:show_boss()
 			cur_boss:setEnabled(true)
 			cur_boss:setBright(true)
 			cur_boss:setTouchEnabled(true)	
-			if all_boss_info[i].star_has >0 then
+			if boss_info[i].tot_gain_star >0 then
 				star1:setSelectedState(true)
-				if all_boss_info[i].star_has >1 then
+				if all_boss_info[i].tot_gain_star >1 then
 					star2:setSelectedState(true)
-					if all_boss_info[i].star_has >2 then
+					if all_boss_info[i].tot_gain_star >2 then
 						star3:setSelectedState(true)
 					end
 				end

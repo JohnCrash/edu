@@ -292,7 +292,7 @@ function Bagview:show_exchange_card(id)
 			local cur_pos_y = pos_card_y_start -(size_card_src.height+card_space_shu_exchange)*(cur_row-1)
 			cur_card:setPosition(cc.p(cur_pos_x,cur_pos_y))
 			
-			local pic_name = all_card_info[i].id..'2.png'
+			local pic_name = all_card_info[i].id..'b.png'
 			person_info.load_card_pic(cur_card,pic_name)
 			txt_card_lvl:setString(all_card_info[i].lvl)
 			cur_card.in_id = all_card_info[i].id
@@ -467,7 +467,7 @@ function Bagview:show_card_info(id)
 	local pic_card_info_gold = uikits.child(self.temp_view,ui.PIC_CARD_INFO_GOLD)
 	local pic_card_info_silver = uikits.child(self.temp_view,ui.PIC_CARD_INFO_SILVER)
 	local pic_card_info_cu = uikits.child(self.temp_view,ui.PIC_CARD_INFO_CU)
-	local pic_name = card_info.id..'.png'
+	local pic_name = card_info.id..'a.png'
 	person_info.load_card_pic(pic_card_info,pic_name)
 	txt_card_info_lvl:setString(card_info.lvl)
 	txt_card_info_name:setString(card_info.name)
@@ -757,7 +757,7 @@ function Bagview:show_bag_view()
 			local cur_pos_y = pos_card_y_start -(size_card_src.height+card_space_shu)*(cur_row-1)
 			cur_card:setPosition(cc.p(cur_pos_x,cur_pos_y))
 			
-			local pic_name = all_card_info[i].id..'.png'
+			local pic_name = all_card_info[i].id..'a.png'
 			person_info.load_card_pic(pic_card_bag,pic_name)
 			txt_card_bag_lvl:setString(all_card_info[i].lvl)
 			pic_card_bag.id = all_card_info[i].id
@@ -780,7 +780,7 @@ function Bagview:show_bag_view()
 
 	for i=1,#battle_cards do
 		local cur_card = card_battle_src:clone()
-		local pic_name = battle_cards[i].id..'2.png'
+		local pic_name = battle_cards[i].id..'b.png'
 		person_info.load_card_pic(cur_card,pic_name)
 		local txt_card_lvl = uikits.child(cur_card,ui.TXT_CARD_BATTLE_LVL)
 		local pos_x = cur_card:getPositionX()
