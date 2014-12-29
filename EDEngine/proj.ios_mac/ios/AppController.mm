@@ -30,6 +30,7 @@
 #import "parsparam.h"
 #import "Platform.h"
 #import "Reachability.h"
+#import "AudioToolbox/AudioToolbox.h"
 
 @implementation AppController
 
@@ -51,28 +52,59 @@ void setUIOrientation( int m )
 {
     if( g_OrientationMode != m )
     {
-        g_OrientationMode = m;
-        g_bAutorotate = false;
-        if( m == 2 )
+        int iOSVersion = [[[UIDevice currentDevice] systemVersion] integerValue];
+        if( iOSVersion <8 )
         {
-            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait];
-            s_myAppController.viewController.view.transform = CGAffineTransformIdentity;
-        }
-        else
+            g_OrientationMode = m;
+            g_bAutorotate = false;
+            if( m == 2 )
+            {
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait];
+                s_myAppController.viewController.view.transform = CGAffineTransformIdentity;
+            }
+            else
+            {
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight];
+                s_myAppController.viewController.view.transform = CGAffineTransformMakeRotation(M_PI/2);
+            }
+            g_bAutorotate = true;
+            CGRect rect = s_myAppController.viewController.view.bounds;
+            s_myAppController.viewController.view.bounds = CGRectMake(0,0,rect.size.height,rect.size.width);
+          // [s_myAppController.window setFrame:[[UIScreen mainScreen] bounds]];
+        }else
         {
-            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight];
-            s_myAppController.viewController.view.transform = CGAffineTransformMakeRotation(M_PI/2);
+            g_OrientationMode = m;
+            NSNumber *value;
+            if( m == 2 )
+                value = [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
+            else
+                value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight];
+            [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
         }
-        g_bAutorotate = true;
-        CGRect rect = s_myAppController.viewController.view.bounds;
-        s_myAppController.viewController.view.bounds = CGRectMake(0,0,rect.size.height,rect.size.width);
         cocos2dChangeOrientation( m );
     }
 }
 
 int getUIOrientation()
 {
+    NSLog(@"%s",[[[UIDevice currentDevice] systemName] cStringUsingEncoding:NSUTF8StringEncoding]);
+    NSLog(@"%s",[[[UIDevice currentDevice] systemVersion] cStringUsingEncoding:NSUTF8StringEncoding]);
     return g_OrientationMode;
+}
+
+int getDeviceOrientation()
+{
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    if( orientation == UIDeviceOrientationPortrait||orientation == UIDeviceOrientationPortraitUpsideDown)
+    {
+        return 2;
+    }
+    else
+    {
+        return 1;
+    }
+    //[[UIApplication sharedApplication] statusBarOrientation];
 }
 
 bool platformOpenURL( const char *strurl )
@@ -87,6 +119,17 @@ bool platformOpenURL( const char *strurl )
         return true;
     }
     return false;
+}
+/*
+ * 震动,ios不支持震动时长和震动模式
+ */
+void ShockPhoneDelay( int t )
+{
+    AudioServicesPlaySystemSound ( kSystemSoundID_Vibrate);
+}
+void ShockPhonePattern( int *pattern,int n )
+{
+    AudioServicesPlaySystemSound ( kSystemSoundID_Vibrate);
 }
 /*
  * 取网络状态，没有网络返回0,wifi=1,gprs/3g/4g=2
