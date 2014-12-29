@@ -443,6 +443,12 @@ local function get_boss_info_by_id(id)
 	return boss_info
 end
 
+local function set_boss_info_by_id(id,boss_info) 
+	if boss_info and  type(boss_info) == 'table' then
+		g_person_boss_info[id] = boss_info
+	end
+end
+
 local function set_skill_list(skill_list)
 	if skill_list and type(skill_list) == 'table' then
 		g_person_skill_list = skill_list
@@ -680,6 +686,7 @@ return {
 	set_all_section_info = set_all_section_info,
 	get_all_section_info = get_all_section_info,
 	get_boss_info_by_id = get_boss_info_by_id,
+	set_boss_info_by_id = set_boss_info_by_id,
 	set_skill_list = set_skill_list,
 	get_skill_list = get_skill_list,
 	get_skill_info_by_id = get_skill_info_by_id,

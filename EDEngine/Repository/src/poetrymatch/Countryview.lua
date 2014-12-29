@@ -88,7 +88,7 @@ function Countryview:getdatabyurl()
 			for i=1,#v do
 				local cur_section_info = {}
 				--cur_section_info.id = v[i].road_block_id
-				cur_section_info.id = '10'
+				cur_section_info.id = '8'
 				cur_section_info.name = v[i].road_block_name
 				cur_section_info.star_all = 0
 				if v[i].road_block_tot_star then

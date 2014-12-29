@@ -322,8 +322,12 @@ function Bagview:show_skill_info(id,back_type)
 	local txt_skill_name = uikits.child(self.temp_view,ui.TXT_SKILL_INFO_NAME)
 	local txt_skill_des = uikits.child(self.temp_view,ui.TXT_SKILL_INFO_DES)
 	local skill_info = person_info.get_skill_info_by_id(id)
-	print('skill_info.skill_name::'..skill_info.skill_name)
-	print('skill_info.skill_des::'..skill_info.skill_des)
+
+	local n_pic_name = skill_info.skill_id..'a.png'
+	local d_pic_name = skill_info.skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+	local d_pic_name = '1b.png'--]]
+	person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
 	txt_skill_name:setString(skill_info.skill_name)
 	txt_skill_des:setString(skill_info.skill_des)
 	if back_type == 1 then
@@ -408,6 +412,11 @@ function Bagview:show_skill_mall()
 			local txt_skill_pay = uikits.child(cur_skill,ui.TXT_LEARN_SKILL_PAY)	
 			txt_skill_name:setString(skill_list[i].skill_name)		
 			txt_skill_pay:setString(skill_list[i].price)		
+			local n_pic_name = skill_list[i].skill_id..'a.png'
+			local d_pic_name = skill_list[i].skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+			local d_pic_name = '1b.png'--]]
+			person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
 			pic_skill.id = skill_list[i].skill_id
 			but_skill_pay.id = skill_list[i].skill_id
 			uikits.event(pic_skill,	
@@ -631,9 +640,10 @@ function Bagview:show_card_info(id)
 		if card_info.skills[i] then
 			but_skill = but_card_info_skill_src:clone()
 			but_skill.id = card_info.skills[i].skill_id
-			--local pic_name = card_info.skills[i].skill_id..'.png'
-			local n_pic_name = '1a.png'
-			local d_pic_name = '1b.png'
+			local n_pic_name = card_info.skills[i].skill_id..'a.png'
+			local d_pic_name = card_info.skills[i].skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+			local d_pic_name = '1b.png'--]]
 			person_info.load_skill_pic(but_skill,n_pic_name,n_pic_name,d_pic_name)
 			uikits.event(but_skill,	
 				function(sender,eventType)	

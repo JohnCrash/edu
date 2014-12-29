@@ -67,11 +67,11 @@ function create(country_name,country_id)
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
-
-function Bossview:getdatabyurl()
+local boss_info = {}
+function Bossview:update_user_boss_info()
 	local send_data = {}
 	send_data.v1 = self.country_id
-	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
+	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
 		if t and t == true then
 			
 --[[			for i=1,#v do
@@ -87,7 +87,32 @@ function Bossview:getdatabyurl()
 				section_info[#section_info+1] = cur_section_info
 			end
 			self:get_user_section_info()--]]
+			if v then
+				boss_info = v				
+			end
 			self:show_boss()
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:getdatabyurl()
+				else
+					self:getdatabyurl()
+				end
+			end)
+		end		
+	end)
+end
+
+function Bossview:getdatabyurl()
+	local send_data = {}
+	send_data.v1 = self.country_id
+	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
+		if t and t == true then
+			if v then
+
+				person_info.set_boss_info_by_id(self.country_id,v)				
+			end
+			self:update_user_boss_info()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
@@ -225,36 +250,36 @@ function Bossview:show_boss()
 		function(sender,eventType)	
 			self:show_boss_info(sender.boos_info)
 		end,"click")
-
-		local n_pic_name = all_boss_info[i].id..'.png'
-		local c_pic_name = all_boss_info[i].id..'4.png'
+		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'
+--[[		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'--]]
 		person_info.load_card_pic(cur_boss,n_pic_name,n_pic_name,c_pic_name)
-		if all_boss_info[i].is_admit == 1 then
-			cur_boss:setEnabled(true)
-			cur_boss:setBright(true)
-			cur_boss:setTouchEnabled(true)	
-		else
-			cur_boss:setEnabled(false)
-			cur_boss:setBright(false)
-			cur_boss:setTouchEnabled(false)	
-		end
-
 		local star1 = uikits.child(cur_boss,ui.CHECK_STAR1)
 		local star2 = uikits.child(cur_boss,ui.CHECK_STAR2)
 		local star3 = uikits.child(cur_boss,ui.CHECK_STAR3)
 		star1:setSelectedState(false)
 		star2:setSelectedState(false)
 		star3:setSelectedState(false)
-		if all_boss_info[i].star_has >0 then
-			star1:setSelectedState(true)
-			if all_boss_info[i].star_has >1 then
-				star2:setSelectedState(true)
-				if all_boss_info[i].star_has >2 then
-					star3:setSelectedState(true)
+		if boss_info[i] and type(boss_info[i]) == 'table' then
+			cur_boss:setEnabled(true)
+			cur_boss:setBright(true)
+			cur_boss:setTouchEnabled(true)	
+			if all_boss_info[i].star_has >0 then
+				star1:setSelectedState(true)
+				if all_boss_info[i].star_has >1 then
+					star2:setSelectedState(true)
+					if all_boss_info[i].star_has >2 then
+						star3:setSelectedState(true)
+					end
 				end
 			end
+		else
+			cur_boss:setEnabled(false)
+			cur_boss:setBright(false)
+			cur_boss:setTouchEnabled(false)	
 		end
-		
+
 		local txt_boss_lvl = uikits.child(cur_boss,ui.TXT_BOSS_LVL)
 		txt_boss_lvl:setString(all_boss_info[i].lvl)
 	end
