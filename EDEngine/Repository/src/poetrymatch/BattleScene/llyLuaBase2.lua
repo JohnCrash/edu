@@ -84,8 +84,8 @@ function lly.logTable(t, index)
 		lly.log("TABLE:")
 	end
 
-	local space = "    "
-	local _space = ""
+	local space = "   "
+	local _space = " "
 	if index ~= nil then
 		for i = 1, index do
 			_space = _space .. space
@@ -102,7 +102,8 @@ function lly.logTable(t, index)
 
 	for k,v in pairs(t) do
 		if type(v) ~= "table" then
-			lly.log(_space .. tostring(k) .. "  " .. tostring(v))
+			lly.log("%s%s[%s]      %s[%s]", 
+				_space, tostring(k), type(k), tostring(v), type(v))
 		else
 			lly.log(_space .. "T[".. tostring(k) .. "]------------------")
 			lly.logTable(v, index)
@@ -182,7 +183,8 @@ local ID_table = {}
 --]====]
 
 --最终化
---注意：如果userdata的tolua.type一致，则会使用同一个元表，这意味着自己继承一个类，比如layer，所有layer的元表会改变
+--注意：如果userdata的tolua.type一致，则会使用同一个元表，
+--      这意味着自己继承一个类，比如layer，所有layer的元表会改变
 --     	因此，在isModify_table中，我使用tolua.type(ins)获得同类的元表并记录，在index中检测是否是同种元表
 --		另外利用__ID获得当前对象的唯一值，以防止对象之间相互影响
 function lly.finalizeInstance(ins)
@@ -445,7 +447,7 @@ function lly.struct(create_table_func)
 	stru.__ID = getUniqueID()
 	--]====]
 
-	--工厂函数，创建对象
+	--工厂函数，创建对象，t为构造函数的给定值
 	function stru:create()--返回struct的对象
 		local pRet = self.table_ctor()
 		if type(pRet) == "table" then
@@ -557,22 +559,21 @@ function lly.ensure(value, typename)
 
 	if type(typename) == "string" then 
 		if type(value) ~= typename and tolua.type(value) ~= typename then
-			lly.error("ensure wrong: value is a " .. type(value) .. 
-				", but it must be a " .. typename, 2)
+			lly.error("value is a " .. type(value) .. ", but it must be a " .. typename, 2)
 		end
 
 	elseif type(typename) == "table" then
 		if value.__ctype == 1 or value.__ctype == 2 then --ctype == 1 or 2则为class，3是struct
 			if value.class == nil then --instance是对象
-				lly.error("ensure wrong: value must be a instance", 2)
+				lly.error("value must be a instance", 2)
 			end
 
 			if typename.__ctype == nil or typename.class ~= nil then --class是类
-				lly.error("ensure wrong: value must be a class", 2)
+				lly.error("typename must be a class", 2)
 			end
 
 			if value.__ctype ~= typename.__ctype then
-				lly.error("ensure wrong: value must belong to this class", 2)
+				lly.error("value must belong to this class", 2)
 			end
 
 			local cname = value.__cname
@@ -581,7 +582,7 @@ function lly.ensure(value, typename)
 					if value.super ~= false then --检测是否还有父类
 						cname = value.super.__cname
 					else
-						lly.error("ensure wrong: value must belong to this class", 2)						
+						lly.error("value must belong to this class", 2)						
 					end
 				else break end
 			end

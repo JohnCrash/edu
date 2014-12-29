@@ -3,18 +3,18 @@
 --华夏诗魂的战斗图层
 --实际只是一个节点，里面包含UI层
 --里面利用消息在update中实现大循环，
---包括
---	进入，开场动画（请求问题），敌人出题，玩家答题，
---	准备战斗动画（给结果），战斗动画，玩家出题，
---	电脑答题（请求问题并给结果），战斗动画（请求问题），
---	胜利，失败，结果展示和处理，退出	
+	
 --_S表示此方法为状态
 --卢乐颜
 --2014.12.10
 
 local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 local uikits = require "uikits"
+
 local moperson_info = require "poetrymatch/person_info"
+local moSkill = require "poetrymatch/BattleScene/SkillList"
+
+lly.finalizeCurrentEnvironment()
 
 --战斗类型
 local BATTLE_TYPE = {
@@ -36,10 +36,7 @@ local QUES_TYPE = {
 	MULTIPLE_CHOICE = 2, --多选
 	YES_OR_NO = 3, --对错
 	FILL_IN_BLANK = 4, --填空
-	MAX = 5,
 }
-
-lly.finalizeCurrentEnvironment()
 
 local ui = lly.const{
 	FILE = "poetrymatch/BattleScene/battle/zhandou.ExportJson",
@@ -174,6 +171,8 @@ local ui = lly.const{
 	ANIM_ATK_PLIST4 = "poetrymatch/BattleScene/anim_atk/gongji3.plist",
 	ANIM_ATK_PNG5 = "poetrymatch/BattleScene/anim_atk/gongji4.png",
 	ANIM_ATK_PLIST5 = "poetrymatch/BattleScene/anim_atk/gongji4.plist",
+	ANIM_ATK_PNG6 = "poetrymatch/BattleScene/anim_atk/gongji5.png",
+	ANIM_ATK_PLIST6 = "poetrymatch/BattleScene/anim_atk/gongji5.plist",
 
 	ANIM_ATK_JSON = "poetrymatch/BattleScene/anim_atk/gongji.ExportJson",
 
@@ -409,10 +408,15 @@ function LaBattle:ctor()
 		_nCurQuesType = QUES_TYPE.SINGLE_CHOICE, --当前题类型
 		_nCurQuesID = 0,
 
+		--当前技能
+		_nCurSkillID = 0, --当前技能id
+		_nCurSkillCastCamp = 0, --技能释放的阵营
+
 		--当前问题
 		_strQuesTitle = "",
 		_strQuesContent = "",
 		_arstrQuesChoose = lly.array(4),
+		_arstrQuesChooseMark = lly.array(4), --选择题选项的标记，用于回传服务器
 
 		--选择题答案
 		_arbChoise = lly.array(4),
@@ -423,6 +427,12 @@ function LaBattle:ctor()
 
 		_bComputerBeginThink = false, --电脑开始思考
 		_nThkBgnTime = 0, --开始思考的时间
+
+		--电脑已经答了多少，这个数值是为了让电脑模拟人的答题
+		--单选，对错：电脑在一个随机时间点下自己的选择，数据+1，然后不再响应
+		--多选：电脑依次点击自己的选择，当数据等于总选择数时不再响应
+		--填空，电脑依次填入文字，当数据等于答案文字总数时不再响应
+		_nCOMNeedAnswer = 0, 
 		
 	}
 end
@@ -890,6 +900,8 @@ function LaBattle:initAnim()
 		ui.ANIM_ATK_PLIST4, ui.ANIM_ATK_PNG4)
 	ccs.ArmatureDataManager:getInstance():addSpriteFrameFromFile(
 		ui.ANIM_ATK_PLIST5, ui.ANIM_ATK_PNG5)
+	ccs.ArmatureDataManager:getInstance():addSpriteFrameFromFile(
+		ui.ANIM_ATK_PLIST6, ui.ANIM_ATK_PNG6)
 
 	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(ui.ANIM_ATK_JSON)
     self._anim = ccs.Armature:create("gongji")
@@ -1029,26 +1041,93 @@ function LaBattle:onTimeEnd()
 
 end
 
+--开始电脑思考
+function LaBattle:beginComputerAnswer()
+	self._bComputerBeginThink = true
+end
+
 --电脑思考中
 function LaBattle:excuteComputerThinking()
 	if not self._bComputerBeginThink then return end
 
-	if self._nSecondLeft == 0 then --要求在倒计时中
+	--要求在倒计时中
+	if self._nSecondLeft == 0 then 
 		self._bComputerBeginThink = false
 		return
 	end
 
-	if self._nThkBgnTime == 0 then --初始化
+	--初始化
+	if self._nThkBgnTime == 0 then 
 		self._nThkBgnTime = self._nSecondLeft
+		math.randomseed(os.time())
 		return
 	end
 
-	if self._nThkBgnTime - self._nSecondLeft >= self._nCOMAnswerSpendTime then
+	--电脑在随机时间显示出自己的答案
+	if self._nThkBgnTime - self._nSecondLeft < self._nCOMAnswerSpendTime then
+
+		if self._nCOMNeedAnswer <= 0 then return end
+
+		local rate = 
+			(self._nSecondLeft - self._nThkBgnTime + self._nCOMAnswerSpendTime) / 
+			self._nCOMNeedAnswer
+		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
+		local rWrite = math.random(rate)
+			
+		if rWrite == 1 then
+			if self._nCurQuesType ~= QUES_TYPE.FILL_IN_BLANK then
+				for i = 1, 4 do
+					if self._arbChoise[i] == true then
+						self._arckbShortChoose:setSelectedState(true)
+						self._arckbLongChoose:setSelectedState(true)
+						self._arbChoise[i] = false
+						break
+					end
+				end
+			else
+				self._iptFillInBlank:setText(string.sub(
+					self._strAnswer,
+					1,
+					(string.len(self._strAnswer) - self._nCOMNeedAnswer + 1) * 3
+				))
+			end
+
+			self._nCOMNeedAnswer = self._nCOMNeedAnswer - 1
+
+		end
+
+	else --结束
 		self:onComputerThinkingEnd()
 
 		self._bComputerBeginThink = false
 		self._nThkBgnTime = 0
 	end
+end
+
+--电脑思考后显示结果
+function LaBattle:onComputerThinkingEnd()
+	lly.log("onComputerThinkingEnd")
+
+	--显示结果
+	if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
+		self._iptFillInBlank:setText(self._strAnswer)
+	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+		if lly._arbChoise[1] == true then
+			self._ckbRight:setSelectedState(true)
+		end
+
+		if lly._arbChoise[2] == true then
+			self._ckbWrong:setSelectedState(true)
+		end
+	else
+		for k, v in pairs(lly._arbChoise) do
+			self._arckbShortChoose[k]:setSelectedState(v)
+			self._arckbLongChoose[k]:setSelectedState(v)
+		end
+	end
+
+	--结束
+	self:endEnemyAnswer()
 end
 
 --执行判断对错的动画
@@ -1061,7 +1140,8 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	end
 
 	local bRight = true
-	local nHPdecrease = 0
+	local nPlyrHPdec = 0
+	local nEnemyHPdec = 0
 	local nextState
 
 	--获取服务器中本题是否正确，谁减少多少血，转到什么状态
@@ -1079,8 +1159,8 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 		end
 	end
 
-	--如果正确，则对方掉血，否则自己
-	if bRight then
+	--如果正确，则本方执行攻击动画，否则对方进行
+	if not bRight then
 		if camp_type == CAMP_TYPE.PLAYER then
 			camp_type = CAMP_TYPE.ENEMY
 		else
@@ -1106,17 +1186,61 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	function (armature, movementType, movementID)
 		if movementType == ccs.MovementEventType.complete then
 			self._animJudge:setVisible(false)
-			self:doHPDecreseAnim(camp_type, nHPdecrease, func)
+			self:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		end
 	end)
 
 	return nextState, isEnd
 end
 
---执行HP减少动画
-function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
+--执行攻击前动画
+--参数：谁进行攻击，双方减少后的血量，回调
+function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+	--没有攻击前技能
+	if self._nCurSkillID == 0 or 
+		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack == "" then
+		self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		return
+	end
+
+	--计算技能展示位置
+	local posSkill
+	local n = 1
+	if self._nCurSkillCastCamp == CAMP_TYPE.PLAYER then
+		n = n * -1
+	end
+
+	if moSkill.SKILL[self._nCurSkillID].eAim == moSkill.AIM.ENEMY then
+		n = n * -1
+	end
+
+	if n == 1 then
+		posSkill = self._posPlyrCard
+	else
+		posSkill = self._posEnemyCard
+	end
+
+	--执行技能
+	self._anim:setVisible(true)
+	self._anim:setPosition(posSkill)
+	self._anim:getAnimation():play(
+		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack, -1, 0)
+
+	--回调
+	self._anim:getAnimation():setMovementEventCallFunc(
+	function (armature, movementType, movementID)
+		if movementType == ccs.MovementEventType.complete then
+			self._anim:setVisible(false)
+			self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		end
+	end)
+end
+
+--执行HP减少动画，参数：谁进行攻击，双方减少后的血量，回调
+function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	lly.ensure(camp_type, "number")
-	lly.ensure(nHP, "number")
+	lly.ensure(nPlyrHPdec, "number")
+	lly.ensure(nEnemyHPdec, "number")
 	lly.ensure(func, "function")
 	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
 		lly.error("wrong type")
@@ -1124,7 +1248,6 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 
 	local posAnimFrom
 	local posAnimTo
-	local posAnimSlowTo
 
 	local decreaseHPCard
 	local posDereaseHPToken
@@ -1133,14 +1256,22 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 	local HPDifference
 	local persent
 
-	--动画是玩家指向敌人的，如果是玩家费血，要反转动画
+	--设置攻击方向	
 	if camp_type == CAMP_TYPE.PLAYER then
-		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE)
 
-		posAnimFrom = cc.pSub(self._posEnemyCard, cc.p(160, 0))
-		posAnimTo = cc.pAdd(self._posPlyrCard, cc.p(160, 0))
-		posAnimSlowTo = cc.pSub(self._posPlyrCard, cc.p(80, 0))
+		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
 
+		posAnimFrom = self._posPlyrCard
+		posAnimTo = self._posEnemyCard	
+	else
+		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE) --动画是玩家指向敌人的，如果是玩家费血，要反转动画
+
+		posAnimFrom = self._posEnemyCard
+		posAnimTo = self._posPlyrCard
+	end
+
+	--设置费血的阵营(暂无双方同时减血的情况)
+	if nPlyrHPdec > nEnemyHPdec then --玩家减血
 		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
 		posDereaseHPToken = self._posPlyrDecreaseHP
 
@@ -1149,14 +1280,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 		persent = 100 * nHP / self._nPlyrHPCeiling
 
 		self._nPlyrCurrentHP = nHP
-
 	else
-		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
-
-		posAnimFrom = cc.pAdd(self._posPlyrCard, cc.p(160, 0))
-		posAnimTo = cc.pSub(self._posEnemyCard, cc.p(160, 0))
-		posAnimSlowTo = cc.pAdd(self._posEnemyCard, cc.p(80, 0))
-
 		decreaseHPCard = self._imgEnemyCard
 		posDereaseHPToken = self._posEnemyDecreaseHP
 
@@ -1164,7 +1288,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 		HPDifference = self._nEnemyCurrentHP - nHP
 		persent = 100 * nHP / self._nEnemyHPCeiling
 
-		self._nEnemyCurrentHP = nHP
+		self._nEnemyCurrentHP = nHP	
 	end
 
 	--初始化
@@ -1174,10 +1298,28 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 	self._layDecHP:setPosition(posDereaseHPToken)
 	self._atlasDecHP:setString(tostring(HPDifference))
 
+	--选择攻击动画和攻击结束，如果没有则执行普通攻击
+	local strAnimAtk
+	local strAnimAtkEnd
+	if self._nCurSkillID ~= 0 then
+		if moSkill.SKILL[self._nCurSkillID].strAnim_attack == "" then
+			strAnimAtk = moSkill.ATK
+		else
+			strAnimAtk = moSkill.SKILL[self._nCurSkillID].strAnim_attack
+		end
+
+		if moSkill.SKILL[self._nCurSkillID].strAnim_effect == "" then
+			strAnimAtkEnd = moSkill.ATK_END
+		else
+			strAnimAtkEnd = moSkill.SKILL[self._nCurSkillID].strAnim_effect
+		end
+	else
+		strAnimAtk = moSkill.ATK
+		strAnimAtkEnd = moSkill.ATK_END
+	end
+
 	--飞出武器
-	local rAtk = math.random(3)
-	local atk_anim_name_tab = {"hj", "lj", "bj"}
-	self._anim:getAnimation():play(atk_anim_name_tab[rAtk], -1, 0)
+	self._anim:getAnimation():play(strAnimAtk, -1, 0)
 
 	--同时移动武器（加速）
 	local acMoveFast = cc.EaseExponentialIn:create(
@@ -1186,18 +1328,13 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 	--然后回调
 	local callfunc = cc.CallFunc:create(function ()
 
-		--爆炸
-		local expl_anim_name_tab = {"g1", "g2", "g4"}
-		self._anim:getAnimation():play(expl_anim_name_tab[rAtk], -1, 0) 
+		--攻击后的效果
+		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0) 
 
 		--显示
 		decreaseHPBar:setPercent(persent)
 		self._layDecHP:setVisible(true)
 	end)
-
-	--同时爆炸的惯性移动
-	local acMoveSlow = cc.EaseSineOut:create(
-		cc.MoveTo:create(1.0, posAnimSlowTo))
 
 	--同时显示费血
 	local acMoveHPShow = cc.MoveBy:create(0.5, cc.p(0, self._nDisDecHPMoveY))
@@ -1208,43 +1345,88 @@ function LaBattle:doHPDecreseAnim(camp_type, nHP, func)
 	local acShake = cc.Sequence:create(
 		acMoveLeft, acMoveRight, acMoveLeft:clone())
 
+	--延时
+	local acDelay = cc.DelayTime:create(0.5)
+
 	--然后结束
 	local callfuncEnd = cc.CallFunc:create(function ()
 		self._anim:setVisible(false)
 		self._layDecHP:setVisible(false)
+
+		--清空技能的使用
+		self._nCurSkillID = 0
+
+		--回调
 		func(self)
 	end)
 
-	--移动到敌人身上后减速，同时执行效果，同时显示费血，同时晃动
+	---[[移动到敌人身上后减速，同时执行效果，同时显示费血，同时晃动
 	self:runAction(
 		cc.Sequence:create(
 			cc.TargetedAction:create(self._anim, acMoveFast),
 			callfunc,
 			cc.Spawn:create(
-				cc.TargetedAction:create(self._anim, acMoveSlow),
 				cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
 				cc.TargetedAction:create(decreaseHPCard, acShake)
 			),
+			acDelay,
 			callfuncEnd
 		)
 	)
-	
+	--]]
 end
 
 ---------------------------------------------------------
-function LaBattle:downloadQuestion(camp_type, callback)
+--上传战斗初始设置
+function LaBattle:uploadBattleInitSet()
+	--制作数据结构
+	local sendedTable = {}
+	sendedTable.v1 = self._nEnemyCardID --被攻打卡牌id
+	sendedTable.v2 = self._nCurStageID --关卡/擂台id
+	sendedTable.v3 = self._nCurBattleType --战斗类型
+
+	--发送数据
+	moperson_info.post_data_by_new_form(
+		"set_UnderAttackCardPlate", --业务名
+		sendedTable, --数据
+		function (bSuc, result) --结果回调
+			if not bSuc then lly.log(result) end
+			if result and result.v1 then
+				self._bNextStateDataHasLoad = true
+			else
+				--重新发送
+				--self:uploadBattleInitSet()
+			end
+		end
+	)	
+end
+
+--上传当前回合设置
+function LaBattle:uploadCurRoundSet()
+	--制作数据结构
+	local sendedTable = {}
+	sendedTable.v1 = self._arnPlyrCardID[self._nCurCardIndex] --当前卡牌id
+
+	--发送数据
+	moperson_info.post_data_by_new_form(
+		"set_curr_attack_card", --业务名
+		sendedTable, --数据
+		function (bSuc, result) --结果回调
+			if not bSuc then lly.log(result) end
+
+			if result and result.v1 then
+				self._bNextStateDataHasLoad = true
+			else
+				--重新发送
+				--self:uploadCurRoundSet()
+			end
+		end
+	)	
+end
+
+function LaBattle:downloadQuestion(camp_type)
 	lly.ensure(camp_type, "number")
 	if camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then lly.error("wrong type") end
-
-	--[[
-	local r = math.random(4)
-
-	if r == 1 then self._nCurQuesType = QUES_TYPE.SINGLE_CHOICE
-	elseif r == 2 then self._nCurQuesType = QUES_TYPE.MULTIPLE_CHOICE
-	elseif r == 3 then self._nCurQuesType = QUES_TYPE.YES_OR_NO
-	else  self._nCurQuesType = QUES_TYPE.FILL_IN_BLANK
-	end
-	--]]
 
 	--制作数据结构
 	local sendedTable = {}
@@ -1260,7 +1442,7 @@ function LaBattle:downloadQuestion(camp_type, callback)
 		sendedTable.card_plate_id = self._nEnemyCardID--自己卡牌的id
 	end
 	
-	---[[发送数据，_nCurBattleType, camp_type, cardID, otherCardID, skill
+	--发送数据，_nCurBattleType, camp_type, cardID, otherCardID, skill
 	moperson_info.post_data_by_new_form(
 		"get_question", --业务名
 		sendedTable, --数据
@@ -1269,36 +1451,125 @@ function LaBattle:downloadQuestion(camp_type, callback)
 
 			lly.logTable(result)
 
-			--解析获得的table
-			--当前题的id
-			self._nCurQuesID = result.question_bank_id
-
-			--当前题类型
-			if result.question_type >= 4 then --4以上全是填空题
-				result.question_type = 4
-			end
-			
-			self._nCurQuesType = result.question_type
-
-			--标题
-			--内容
-			--选项
-			--电脑的答案
-			self._arbChoise = 0
-
-			--电脑答题的时间
-			self._nCOMAnswerSpendTime = 0
-
-
-			--执行回调
-			--callback()
+			--处理结果
+			self:onGetQuestion(result, camp_type)
 		end
-	)
-	--]]
-	
+	)	
 end
 
-function LaBattle:checkAnswer()
+function LaBattle:onGetQuestion(result, camp_type)
+	--解析获得的table
+	--当前题的id
+	self._nCurQuesID = result.question.question_bank_id
+
+	--当前题类型
+	if result.question.question_type >= 4 then --4以上全是填空题
+		result.question.question_type = 4
+	end
+
+	self._nCurQuesType = result.question.question_type
+
+	--标题
+	self._strQuesTitle = result.question.question_title
+	
+	--内容
+	self._strQuesContent = result.question.question
+
+	--选项
+	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE or
+		self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
+		for i = 1, 4 do
+			self._arstrQuesChoose[i] = result.options[i].option_value
+			self._arstrQuesChooseMark[i] = result.options[i].option_mark
+		end
+	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+		self._arstrQuesChooseMark[1] = "1"
+		self._arstrQuesChooseMark[2] = "2"
+	end
+
+	if camp_type == CAMP_TYPE.PLAYER then --人取题时会带上电脑答案
+
+		--电脑的答案
+		self._strAnswer = result.question.correct_answer
+
+		--拆解答案
+		if self._strAnswer then
+
+			if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE then
+				self._nCOMNeedAnswer = 1
+
+				for i = 1, 4 do
+					if self._arstrQuesChooseMark[i] == self._strAnswer then
+						self._arbChoise[i] = true
+						break
+					end
+				end
+			elseif self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
+				self._nCOMNeedAnswer = 0
+
+				local tabAnswer = {}
+				local i = 1
+				local e = 1
+				while true do
+					e = string.find(self._nCOMNeedAnswer, ",", i)
+					if not e then
+						table.insert(string.sub(self._nCOMNeedAnswer, i))
+						break
+					end
+					table.insert(string.sub(self._nCOMNeedAnswer, i, e - 1))
+					i = e + 1
+				end
+
+				for i, v in ipairs(tabAnswer) do
+					for i = 1, 4 do
+						if self._arstrQuesChooseMark[i] == v then
+							self._arbChoise[i] = true
+							self._nCOMNeedAnswer = self._nCOMNeedAnswer + 1
+						end
+					end
+				end
+
+			elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+				self._nCOMNeedAnswer = 1
+				self._arbChoise[tonumber(self._strAnswer)] = true
+			else
+				local num = string.len(self._strAnswer)
+				if num % 3 ~= 0 then
+					self._nCOMNeedAnswer = 0
+				else
+					self._nCOMNeedAnswer = num / 3
+				end
+			end
+		end
+
+		--电脑答题的时间
+		self._nCOMAnswerSpendTime = result.answer_spend_timespan
+
+	end
+
+	--结束-------------------
+	self._bNextStateDataHasLoad = true
+end
+
+function LaBattle:checkAnswer(camp_type)
+	--人答题需要把答案转成字符串，而电脑已经有了所以不用
+	if camp_type == CAMP_TYPE.PLAYER then
+		if self._nCurQuesType ~= QUES_TYPE.FILL_IN_BLANK then
+			local split = ""
+			for i = 1, 4 do
+				if self._arbChoise[i] == true then
+					self._strAnswer = self._strAnswer .. split .. self._arstrQuesChooseMark[i]
+					split = ","
+				end
+			end
+		elseif self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
+			self._strAnswer = self._iptFillInBlank:getStringValue()
+		end
+	end
+	
+	--发送
+
+	--结束
 	self._bNextStateDataHasLoad = true
 end
 
@@ -1319,19 +1590,21 @@ function LaBattle:clearQuestionArea()
 
 	--清空答案
 	for i = 1, 4 do self._arbChoise[i] = false end
+
+	self._strAnswer = ""
 end
 
 --写入题板
 function LaBattle:writeInQuestionArea()
-	local fadeIn = cc.fadeIn:create(0.2)
+	local fadeIn = cc.FadeIn:create(0.1)
 
 	--写入题目
-	self._txtQuestionTitle:setString("这个是标题")
+	self._txtQuestionTitle:setString(self._strQuesTitle)
 	self._txtQuestionTitle:setOpacity(0)
 	self._txtQuestionTitle:runAction(fadeIn:clone())
 
 	--写入题干
-	self._txtQuestionContent:setString("这个是内容啊这个是内容")
+	self._txtQuestionContent:setString(self._strQuesContent)
 	self._txtQuestionContent:setOpacity(0)
 	self._txtQuestionContent:runAction(fadeIn:clone())
 	
@@ -1339,10 +1612,22 @@ function LaBattle:writeInQuestionArea()
 	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE
 		or self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
 		--判断答案长度，5个汉字或以下用短选择
-		if true then --短
+		--utf8汉字占3个字符，因此5个字要小于等于15
+		local bLong = false
+		for i = 1, 4 do
+			if string.len(self._arstrQuesChoose[i]) > 15 then
+				bLong = true
+				break
+			end
+		end
+
+		if bLong == false then --短
 			self._layShortChoose:setVisible(true)
 
 			--写入选项
+			for i = 1, 4 do
+				self._artxtShortChoose[i]:setString(self._arstrQuesChoose[i])
+			end
 
 			--清空
 			for i = 1, 4 do
@@ -1358,6 +1643,9 @@ function LaBattle:writeInQuestionArea()
 			self._layLongChoose:setVisible(true)
 
 			--写入选项
+			for i = 1, 4 do
+				self._artxtLongChoose[i]:setString(self._arstrQuesChoose[i])
+			end
 
 			--清空
 			for i = 1, 4 do
@@ -1410,16 +1698,13 @@ function LaBattle:onClickChangeCard(sender, eventType)
 	self._bBuzyToChangeCard = true
 	self._bForbidEnterNextState = true
 
-	--让自己不能点击，其他的复选框可以点击
+	--使其他的按钮取消选中状态，禁止点击自己和其他的选择按钮
 	for i = 1, 3 do
-		if self._arckbCard[i] == sender then
-			sender:setTouchEnabled(false)
-		else
+		if self._arckbCard[i] ~= sender then
 			self._arckbCard[i]:setSelectedState(false)
-			if self._arnPlyrCardVIT[i] ~= 0 then
-				self._arckbCard[i]:setTouchEnabled(true)
-			end
 		end
+			
+		self._arckbCard[i]:setTouchEnabled(false)
 	end
 	
 	--[[
@@ -1445,6 +1730,13 @@ function LaBattle:onClickChangeCard(sender, eventType)
 
 	local callFunc = cc.CallFunc:create(function ()
 		self._arimgPlyrCard[self._nCurCardIndex]:setLocalZOrder(CONST.Z_CARD_NORMAL)
+
+		--让自己不能点击，其他的复选框可以点击
+		for i = 1, 3 do
+			if i ~= nextCardIndex and self._arnPlyrCardVIT[i] ~= 0 then
+				self._arckbCard[i]:setTouchEnabled(true)
+			end
+		end
 
 		--更换技能，隐藏以前的，显示现在的
 		for i = 1, 3 do
@@ -1489,23 +1781,65 @@ function LaBattle:onClickSkill(camp_type, skillIndex)
 	lly.log("click %d ==> %d ==> %d", 
 		camp_type, self._nCurCardIndex, skillIndex)
 
-	--根据索引获得技能
+	--根据索引获得技能id
 
 	--使用技能
 
 end
 
 --使用技能
-function LaBattle:useSkill()
+function LaBattle:useSkill(camp_type, skillID)
 	private.printState("use Skill")
 
 	--禁止进入下个状态
 	self._bForbidEnterNextState = true
 
-	--进行动画（完成是检查请求是否完成，完成则取消禁止）
+	--记录
+	self._nCurSkillID = skillID
+	self._nCurSkillCastCamp = camp_type
 
-	--请求服务器（完成是检查动画是否完成，完成则取消禁止）
+	--如果是直接技能则在此通信（完成时检查动画是否完成，完成则取消禁止）
+	if moSkill.SKILL[self._nCurSkillID] == moSkill.TYPE.DIRECT then
+		self._bFinishSkillCmnction = false
+		self:sendMsgWhenUseSkill()
+	end
 
+	---[[进行动画（完成时检查请求是否完成，完成则取消禁止）
+	self._bFinishSkillAnim = false
+	self._anim:setVisible(true)
+	self._anim:getAnimation():play(moSkill.SKILL[self._nCurSkillID].strAnim_init, -1, 0)
+	self._anim:getAnimation():setMovementEventCallFunc(
+	function (armature, movementType, movementID)
+		if movementType == ccs.MovementEventType.complete then
+			self._anim:setVisible(false)
+			self._bFinishSkillAnim = true
+			self:excuteSkillEffect()
+		end
+	end)
+	--]]
+
+end
+
+--通信
+function LaBattle:sendMsgWhenUseSkill()
+	self._bFinishSkillCmnction = true
+	self:excuteSkillEffect()
+end
+
+--执行动画并通信后
+function LaBattle:excuteSkillEffect()
+	--必须完成通信和通信
+	if self._bFinishSkillAnim == false or self._bFinishSkillCmnction == false then 
+		return
+	end
+
+	--如果是直接技能，则执行技能效果，同时改变数值
+	if moSkill.SKILL[self._nCurSkillID] == moSkill.TYPE.DIRECT then
+		self._nCurSkillID = 0
+		self._bForbidEnterNextState = false
+	else
+		self._bForbidEnterNextState = false
+	end	
 end
 
 --点击放弃按钮时
@@ -1587,18 +1921,20 @@ end
 function LaBattle:onClickYesOrNo(sender, eventType)
 	if sender == self._ckbRight then
 		self._ckbRight:setTouchEnabled(false)
-		self._arbChoise[1] = true
 
 		self._ckbWrong:setSelectedState(false)
 		self._ckbWrong:setTouchEnabled(true)
+
+		self._arbChoise[1] = true
 		self._arbChoise[2] = false
 	else
 		self._ckbRight:setSelectedState(false)
 		self._ckbRight:setTouchEnabled(true)
-		self._arbChoise[1] = false
 
 		self._ckbWrong:setTouchEnabled(false)
+
 		self._arbChoise[2] = true
+		self._arbChoise[1] = false
 	end
 	
 end
@@ -1612,6 +1948,7 @@ function LaBattle:playEnterAnim_S()
 	--设置下个状态
 	self._stateNext = state.prepare
 	self._bCurStateIsEnding = false
+	self._bNextStateDataHasLoad = false
 
 	--执行动画，完成后ending为true
 	--淡入
@@ -1647,6 +1984,9 @@ function LaBattle:playEnterAnim_S()
 			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][3], acSkFadeIn:clone()),
 			cc.TargetedAction:create(self._arbtnEnemySkill[3], acSkFadeIn:clone())),
 		callFunc))
+
+	--上传战斗初始设置
+	self:uploadBattleInitSet()
 end
 
 --玩家准备出题，选择人物，选择技能
@@ -1657,6 +1997,7 @@ function LaBattle:prepare_S()
 	--设置下个状态
 	self._stateNext = state.askByEnemy
 	self._bCurStateIsEnding = false
+	self._bNextStateDataHasLoad = false --end时进行通信
 
 	--展示回合数
 	self._atlasRounds:setString(tostring(self._nRoundsNumber))
@@ -1748,7 +2089,10 @@ function LaBattle:endPrepare()
 	end)
 
 	self._imgCardChangeArea:runAction(cc.Sequence:create(
-		cc.EaseSineIn:create(acMoveCC), callfuncNextState)) 
+		cc.EaseSineIn:create(acMoveCC), callfuncNextState))
+
+	--上传
+	self:uploadCurRoundSet()
 end
 
 --没体力后
@@ -1811,11 +2155,8 @@ function LaBattle:askByEnemy_S()
 			cc.EaseExponentialOut:create(acMoveQuseAreaFrom)),
 		callfunc))
 
-	--获取题目，获取后执行回调
-	self:downloadQuestion(CAMP_TYPE.ENEMY, function ()
-		self:writeInQuestionArea()
-		self._bNextStateDataHasLoad = true
-	end)
+	--获取题目，获取后load为true
+	self:downloadQuestion(CAMP_TYPE.ENEMY)
 
 end
 
@@ -1827,8 +2168,11 @@ function LaBattle:waitingForPlayerAnswer_S()
 	self._stateCurrent = self._stateNext
 
 	--设置下个状态
-	self._stateNext = state.attackByEnemy
+	self._stateNext = state.commitPlyrAnswer
 	self._bCurStateIsEnding = false
+
+	--显示题目
+	self:writeInQuestionArea()
 
 	--开启玩家答题状态标识
 	self._imgPlyrAnswerToken:setPosition(self._posPlyrAnswerToken)
@@ -1865,12 +2209,12 @@ function LaBattle:endPlayerAnswer()
 end
 
 --敌人进攻，同时提交答案，获得结果
-function LaBattle:attackByEnemy_S()
-	private.printState("attack by Enemy")
+function LaBattle:commitPlyrAnswer_S()
+	private.printState("commit Plyr Answer")
 	self._stateCurrent = self._stateNext
 
 	--设置下个状态
-	self._stateNext = state.showResultOfEnemyAtk
+	self._stateNext = state.showResultOfPlyrAnswer
 	self._bCurStateIsEnding = false
 	self._bNextStateDataHasLoad = false
 
@@ -1895,14 +2239,14 @@ function LaBattle:attackByEnemy_S()
 		callfuncNextState
 	))
 
-	--提交服务器答案等待验证
-	self:checkAnswer()
+	--提交服务器答案等待验证（人的答案）
+	self:checkAnswer(CAMP_TYPE.PLAYER)
 
 end
 
 --玩家进攻结果
-function LaBattle:showResultOfEnemyAtk_S()
-	private.printState("show Result Of enemy Atk")
+function LaBattle:showResultOfPlyrAnswer_S()
+	private.printState("show Result Of Plyr Answer")
 	self._stateCurrent = self._stateNext
 
 	--设置下个状态
@@ -1913,7 +2257,7 @@ function LaBattle:showResultOfEnemyAtk_S()
 
 	--输入谁回答的题，根据服务器返回，判断对错，然后执行减少HP的动画
 	--如果得到的是结束，就返回结束状态，否则返回空
-	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.PLAYER, self.endShowEnemyResult)
+	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.PLAYER, self.endShowPlyrAnswerResult)
 
 	if nextState then 
 		self._stateNext = nextState
@@ -1931,7 +2275,7 @@ function LaBattle:showResultOfEnemyAtk_S()
 	end
 end
 
-function LaBattle:endShowEnemyResult()
+function LaBattle:endShowPlyrAnswerResult()
 
 	--收起 *2是为了移走的速度更舒服
 	local acMoveCC = cc.MoveBy:create(
@@ -1995,11 +2339,8 @@ function LaBattle:askByPlayer_S()
 			cc.EaseExponentialOut:create(acMoveQuseAreaFrom)),
 		callfunc))
 
-	--获取问题，获取后把题目显示在答题板上，然后hasload为true
-	self:downloadQuestion(CAMP_TYPE.PLAYER, function ()
-		self:writeInQuestionArea()
-		self._bNextStateDataHasLoad = true
-	end)
+	--获取问题，然后hasload为true
+	self:downloadQuestion(CAMP_TYPE.PLAYER)
 
 end
 
@@ -2009,8 +2350,11 @@ function LaBattle:waitingForEnemyAnswer_S()
 	self._stateCurrent = self._stateNext
 
 	--设置下个状态
-	self._stateNext = state.attackByPlayer
+	self._stateNext = state.commitEnemyAnswer
 	self._bCurStateIsEnding = false
+
+	--显示题目
+	self:writeInQuestionArea()
 
 	--开启敌人答题状态标识
 	self._imgEnemyAnswerToken:setPosition(self._posEnemyAnswerToken)
@@ -2026,37 +2370,6 @@ function LaBattle:waitingForEnemyAnswer_S()
 
 	--根据服务器反馈的时间，时间到达后显示其答案，并进入下个状态
 	self:beginComputerAnswer()
-end
-
---开始电脑思考
-function LaBattle:beginComputerAnswer()
-	self._bComputerBeginThink = true
-end
-
---电脑思考后显示结果
-function LaBattle:onComputerThinkingEnd()
-	lly.log("onComputerThinkingEnd")
-
-	--显示结果
-	if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
-		self._iptFillInBlank:setText(self._strAnswer)
-	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
-		if lly._arbChoise[1] == true then
-			self._ckbRight:setSelectedState(true)
-		end
-
-		if lly._arbChoise[2] == true then
-			self._ckbWrong:setSelectedState(true)
-		end
-	else
-		for k, v in pairs(lly._arbChoise) do
-			self._arckbShortChoose[k]:setSelectedState(v)
-			self._arckbLongChoose[k]:setSelectedState(v)
-		end
-	end
-
-	--结束
-	self:endEnemyAnswer()
 end
 
 function LaBattle:endEnemyAnswer()
@@ -2078,12 +2391,12 @@ function LaBattle:endEnemyAnswer()
 end
 
 --玩家进攻
-function LaBattle:attackByPlayer_S()
-	private.printState("attack by player")
+function LaBattle:commitEnemyAnswer_S()
+	private.printState("commit Enemy Answer")
 	self._stateCurrent = self._stateNext
 
 	--设置下个状态
-	self._stateNext = state.showResultOfPlayerAtk
+	self._stateNext = state.showResultOfEnemyAnswer
 	self._bCurStateIsEnding = false
 	self._bNextStateDataHasLoad = false
 
@@ -2107,13 +2420,13 @@ function LaBattle:attackByPlayer_S()
 		cc.TargetedAction:create(self._imgEnemyTalkAfter, acTalkMove),
 		callfuncNextState))
 
-	--提交服务器答案等待验证
-	self:checkAnswer()
+	--提交服务器答案等待验证(电脑的答案)
+	self:checkAnswer(CAMP_TYPE.ENEMY)
 
 end
 
 --玩家进攻结果
-function LaBattle:showResultOfPlayerAtk_S()
+function LaBattle:showResultOfEnemyAnswer_S()
 	private.printState("show Result Of player Atk")
 	self._stateCurrent = self._stateNext
 
@@ -2126,7 +2439,7 @@ function LaBattle:showResultOfPlayerAtk_S()
 	--输入谁回答的题，根据服务器返回，判断对错，然后执行减少HP的动画
 	--如果得到的是结束，就返回结束状态，否则返回空
 	--返回值isEnd，表示是否因为没有回合数而结束
-	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.ENEMY, self.endShowPlayerResult)
+	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.ENEMY, self.endShowEnemyAnwserResult)
 
 	if nextState then self._stateNext = nextState end
 
@@ -2134,7 +2447,7 @@ function LaBattle:showResultOfPlayerAtk_S()
 end
 
 --结束动画
-function LaBattle:endShowPlayerResult()
+function LaBattle:endShowEnemyAnwserResult()
 
 	--收起 *2是为了移走的速度更舒服
 	local acMoveCC = cc.MoveBy:create(
@@ -2194,12 +2507,12 @@ state = lly.const{
 	prepare = LaBattle.prepare_S,
 	askByEnemy = LaBattle.askByEnemy_S,
 	waitingForPlayerAnswer = LaBattle.waitingForPlayerAnswer_S,
-	attackByEnemy = LaBattle.attackByEnemy_S,
-	showResultOfEnemyAtk = LaBattle.showResultOfEnemyAtk_S,
+	commitPlyrAnswer = LaBattle.commitPlyrAnswer_S,
+	showResultOfPlyrAnswer = LaBattle.showResultOfPlyrAnswer_S,
 	askByPlayer = LaBattle.askByPlayer_S,
 	waitingForEnemyAnswer = LaBattle.waitingForEnemyAnswer_S,
-	attackByPlayer = LaBattle.attackByPlayer_S,
-	showResultOfPlayerAtk = LaBattle.showResultOfPlayerAtk_S,
+	commitEnemyAnswer = LaBattle.commitEnemyAnswer_S,
+	showResultOfEnemyAnswer = LaBattle.showResultOfEnemyAnswer_S,
 	win = LaBattle.win_S,
 	lose = LaBattle.lose_S,
 }

@@ -464,6 +464,9 @@ local function post_data_by_new_form(module_id,post_data,func)
 	cache.post(base_url,str_send_data,function(t,d)
 		print('d::'..d)
 		local tb_result = json.decode(d)
+
+		if not tb_result then return end
+		
 		if t == true then
 			func(t,tb_result.v)
 		else
