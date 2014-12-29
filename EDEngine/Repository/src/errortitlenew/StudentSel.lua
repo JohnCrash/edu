@@ -113,7 +113,7 @@ function StudentSel:showparentview()
 						kits.log("ERROR :  download_pic_url failed")
 					end
 					is_loading = false
-					loadbox:removeFromParent()
+					--loadbox:removeFromParent()
 				end,self._child_tb[i].uid..'.jpg')			
 		end
 	end

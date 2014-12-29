@@ -18,6 +18,8 @@ local ui = {
 	TXT_STAR_NUM = 'xing',
 	BUTTON_QUIT = 'xinxi/fanhui',
 	FUR_COUNTRY_VIEW = 'guanka/kg1_0',
+	PIC_MAN = 'guanka/xingbie2',
+	PIC_WOMAN = 'guanka/xingbie',
 }
 
 function create()
@@ -36,6 +38,7 @@ function create()
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
+local section_info = {}
 
 function Countryview:get_user_section_info()
 	local send_data
@@ -50,6 +53,17 @@ function Countryview:get_user_section_info()
 				cur_section_info.des = v[i].road_block_des
 				section_info[#section_info+1] = cur_section_info
 			end--]]
+			for i=1 ,#section_info do
+				if v[i] then
+					section_info[i].star_has = v[i].tot_gain_star
+					section_info[i].is_admit = 1
+				else
+					section_info[i].star_has = 0
+					section_info[i].is_admit = 0					
+				end
+			end
+			person_info.set_all_section_info(section_info)
+			section_info = {}
 			self:show_country()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
@@ -68,12 +82,16 @@ function Countryview:getdatabyurl()
 	local send_data
 	person_info.post_data_by_new_form('get_road_block',send_data,function(t,v)
 		if t and t == true then
-			local section_info = {}
+			
 			for i=1,#v do
 				local cur_section_info = {}
-				cur_section_info.id = v[i].road_block_id
+				--cur_section_info.id = v[i].road_block_id
+				cur_section_info.id = 'fengyang'
 				cur_section_info.name = v[i].road_block_name
-				cur_section_info.star_all = v[i].road_block_tot_Star
+				cur_section_info.star_all = 0
+				if v[i].road_block_tot_star then
+					cur_section_info.star_all = v[i].road_block_tot_star
+				end
 				cur_section_info.des = v[i].road_block_des
 				section_info[#section_info+1] = cur_section_info
 			end
@@ -160,6 +178,16 @@ function Countryview:show_country()
 end
 
 function Countryview:init_gui()	
+	local pic_man = uikits.child(self._Countryview,ui.PIC_MAN)
+	local pic_woman = uikits.child(self._Countryview,ui.PIC_WOMAN)
+	pic_man:setVisible(false)
+	pic_woman:setVisible(false)
+	local user_info = person_info.get_user_info()
+	if user_info.sex == 1 then
+		pic_man:setVisible(true)
+	else 
+		pic_woman:setVisible(true)
+	end
 	self:getdatabyurl()
 end
 

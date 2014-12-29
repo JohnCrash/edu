@@ -286,7 +286,7 @@ function Bossview:init()
 			uikits.popScene()
 		end,"click")
 	local pic_bg = uikits.child(self._Bossview,ui.PIC_BG)
-	local pic_name = self.country_id..'_bg.jpg'
+	local pic_name = self.country_id..'_bg.png'
 	person_info.load_section_pic(pic_bg,pic_name)
 	
 	self:init_gui()
