@@ -135,7 +135,7 @@ end
 
 local boss_space = 50
 
-function Bossview:show_boss_info(cur_boss_info)	
+function Bossview:show_boss_info(cur_boss_info,is_has_star)	
 	self.view_boss_info:setVisible(true)
 	local but_start_battle = uikits.child(self._Bossview,ui.BUTTON_START_BATTLE)
 	local but_hide_info = uikits.child(self._Bossview,ui.BUTTON_HIDE_INFO)
@@ -144,17 +144,17 @@ function Bossview:show_boss_info(cur_boss_info)
 	
 		local save_info = kits.config("tili_time",'get')
 		local save_info_tb = json.decode(save_info)
-		if save_info_tb.last_tili_num < cur_boss_info.tili then
+		if save_info_tb.last_tili_num < cur_boss_info.need_physical_power then
 			print('tili not enough!!!!')
 		else
-			save_info_tb.last_tili_num = save_info_tb.last_tili_num - cur_boss_info.tili
+			save_info_tb.last_tili_num = save_info_tb.last_tili_num - cur_boss_info.need_physical_power
 			save_info = json.encode(save_info_tb)
 			kits.config("tili_time",save_info)
 		end
 		
 		self.view_boss_info:setVisible(false)
 		self:save_innerpos()
-		local scene_next = readytoboss.create(cur_boss_info)	
+		local scene_next = readytoboss.create(cur_boss_info,is_has_star)	
 		uikits.pushScene(scene_next)	
 	end,"click")
 	
@@ -162,52 +162,52 @@ function Bossview:show_boss_info(cur_boss_info)
 	function(sender,eventType)	
 		self.view_boss_info:setVisible(false)
 	end,"click")
-	
+	print('cur_boss_info.need_physical_power::'..cur_boss_info.need_physical_power)
 	local txt_tili_num = uikits.child(self._Bossview,ui.TXT_TILI_NUM)
-	txt_tili_num:setString(cur_boss_info.tili)
+	txt_tili_num:setString(cur_boss_info.need_physical_power)
 	local txt_boss_name = uikits.child(self._Bossview,ui.TXT_BOSS_NAME)
-	txt_boss_name:setString(cur_boss_info.name)
+	txt_boss_name:setString(cur_boss_info.card_plate_name)
 	local pic_pz_gold = uikits.child(self._Bossview,ui.PIC_PINZHI_GOLD)
 	local pic_pz_silver = uikits.child(self._Bossview,ui.PIC_PINZHI_SILVER)
 	local pic_pz_cu = uikits.child(self._Bossview,ui.PIC_PINZHI_CU)
 	pic_pz_gold:setVisible(false)
 	pic_pz_silver:setVisible(false)
 	pic_pz_cu:setVisible(false)
-	if cur_boss_info.pinzhi == 3 then
+	if cur_boss_info.card_material == 3 then
 		pic_pz_gold:setVisible(true)
-	elseif cur_boss_info.pinzhi == 2 then
+	elseif cur_boss_info.card_material == 2 then
 		pic_pz_silver:setVisible(true)
-	elseif cur_boss_info.pinzhi == 1 then
+	elseif cur_boss_info.card_material == 1 then
 		pic_pz_cu:setVisible(true)
 	end
 	local txt_shenli_num = uikits.child(self._Bossview,ui.TXT_SHENLI_NUM)
-	txt_shenli_num:setString(cur_boss_info.shenli)
+	txt_shenli_num:setString(cur_boss_info.card_plate_magic)
 
 	local txt_hp_num = uikits.child(self._Bossview,ui.TXT_HP_NUM)
-	txt_hp_num:setString(cur_boss_info.hp)
+	txt_hp_num:setString(cur_boss_info.card_plate_blood)
 	local txt_hp_ex_num = uikits.child(self._Bossview,ui.TXT_HP_EX_NUM)
-	if cur_boss_info.hp_ex ~= 0 then
-		txt_hp_ex_num:setString('+'..cur_boss_info.hp_ex)
+	if cur_boss_info.card_plate_blood_added and cur_boss_info.card_plate_blood_added ~= 0 then
+		txt_hp_ex_num:setString('+'..cur_boss_info.card_plate_blood_added)
 		txt_hp_ex_num:setVisible(true)	
 	else
 		txt_hp_ex_num:setVisible(false)		
 	end
 	
 	local txt_ap_num = uikits.child(self._Bossview,ui.TXT_AP_NUM)
-	txt_ap_num:setString(cur_boss_info.ap)
+	txt_ap_num:setString(cur_boss_info.card_plate_attack)
 	local txt_ap_ex_num = uikits.child(self._Bossview,ui.TXT_AP_EX_NUM)
-	if cur_boss_info.ap_ex ~= 0 then
-		txt_ap_ex_num:setString('+'..cur_boss_info.ap_ex)
+	if cur_boss_info.card_plate_attack_added and cur_boss_info.card_plate_attack_added ~= 0 then
+		txt_ap_ex_num:setString('+'..cur_boss_info.card_plate_attack_added)
 		txt_ap_ex_num:setVisible(true)	
 	else
 		txt_ap_ex_num:setVisible(false)		
 	end
 	
 	local txt_mp_num = uikits.child(self._Bossview,ui.TXT_MP_NUM)
-	txt_mp_num:setString(cur_boss_info.mp)
+	txt_mp_num:setString(cur_boss_info.card_plate_wit)
 	local txt_mp_ex_num = uikits.child(self._Bossview,ui.TXT_MP_EX_NUM)
-	if cur_boss_info.mp_ex ~= 0 then
-		txt_mp_ex_num:setString('+'..cur_boss_info.mp_ex)
+	if cur_boss_info.card_plate_wit_added and cur_boss_info.card_plate_wit_added ~= 0 then
+		txt_mp_ex_num:setString('+'..cur_boss_info.card_plate_wit_added)
 		txt_mp_ex_num:setVisible(true)	
 	else
 		txt_mp_ex_num:setVisible(false)		
@@ -216,9 +216,9 @@ function Bossview:show_boss_info(cur_boss_info)
 	local txt_star1_condition = uikits.child(self._Bossview,ui.TXT_STAR1_CONDITION)
 	local txt_star2_condition = uikits.child(self._Bossview,ui.TXT_STAR2_CONDITION)
 	local txt_star3_condition = uikits.child(self._Bossview,ui.TXT_STAR3_CONDITION)
-	txt_star1_condition:setString(cur_boss_info.star1)
-	txt_star2_condition:setString(cur_boss_info.star2)
-	txt_star3_condition:setString(cur_boss_info.star3)
+	txt_star1_condition:setString(cur_boss_info.star1_desc)
+	txt_star2_condition:setString(cur_boss_info.star2_desc)
+	txt_star3_condition:setString(cur_boss_info.star3_desc)
 end
 
 function Bossview:show_boss()	
@@ -244,11 +244,11 @@ function Bossview:show_boss()
 		local cur_boss = view_per_boss_src:clone()
 		cur_boss:setVisible(true)
 		self.view_all_boss:addChild(cur_boss)
-		cur_boss.boos_info = all_boss_info[i]
+		cur_boss.card_info = all_boss_info[i]
 		cur_boss:setPositionX(pos_x+(size_per_view.width+boss_space)*(i-1))
 		uikits.event(cur_boss,	
 		function(sender,eventType)	
-			self:show_boss_info(sender.boos_info)
+			self:show_boss_info(sender.card_info,sender.is_has_star)
 		end,"click")
 		local n_pic_name = all_boss_info[i].card_plate_id..'a.png'
 		local c_pic_name = all_boss_info[i].card_plate_id..'d.png'
@@ -267,21 +267,25 @@ function Bossview:show_boss()
 			cur_boss:setTouchEnabled(true)	
 			if boss_info[i].tot_gain_star >0 then
 				star1:setSelectedState(true)
-				if all_boss_info[i].tot_gain_star >1 then
+				if boss_info[i].tot_gain_star >1 then
 					star2:setSelectedState(true)
-					if all_boss_info[i].tot_gain_star >2 then
+					if boss_info[i].tot_gain_star >2 then
 						star3:setSelectedState(true)
 					end
 				end
+				cur_boss.is_has_star = true
+			else
+				cur_boss.is_has_star = false
 			end
 		else
+			cur_boss.is_has_star = false
 			cur_boss:setEnabled(false)
 			cur_boss:setBright(false)
 			cur_boss:setTouchEnabled(false)	
 		end
 
 		local txt_boss_lvl = uikits.child(cur_boss,ui.TXT_BOSS_LVL)
-		txt_boss_lvl:setString(all_boss_info[i].lvl)
+		txt_boss_lvl:setString(all_boss_info[i].card_plate_level)
 	end
 end
 
