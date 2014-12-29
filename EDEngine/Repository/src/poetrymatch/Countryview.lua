@@ -17,6 +17,8 @@ local ui = {
 	BUTTON_COUNTRY = 'bt',
 	TXT_STAR_NUM = 'xing',
 	BUTTON_QUIT = 'xinxi/fanhui',
+	BUTTON_PAIHANG = 'xinxi/chuanggph',
+	
 	FUR_COUNTRY_VIEW = 'guanka/kg1_0',
 	PIC_MAN = 'guanka/xingbie2',
 	PIC_WOMAN = 'guanka/xingbie',
@@ -86,7 +88,7 @@ function Countryview:getdatabyurl()
 			for i=1,#v do
 				local cur_section_info = {}
 				--cur_section_info.id = v[i].road_block_id
-				cur_section_info.id = 'fengyang'
+				cur_section_info.id = '8'
 				cur_section_info.name = v[i].road_block_name
 				cur_section_info.star_all = 0
 				if v[i].road_block_tot_star then
@@ -146,7 +148,7 @@ function Countryview:show_country()
 		if all_country_info[i].is_admit == 1 then
 			person_info.load_section_pic(pic_country,pic_name_def)
 		else
-			pic_name_dis = all_country_info[i].id..'2.png'
+			pic_name_dis = all_country_info[i].id..'b.png'
 			person_info.load_section_pic(pic_country,pic_name_def,pic_name_def,pic_name_dis)
 			pic_country:setEnabled(false)
 			pic_country:setBright(false)
@@ -210,6 +212,13 @@ function Countryview:init()
 		function(sender,eventType)	
 			uikits.popScene()
 		end,"click")
+
+	local but_paihang = uikits.child(self._Countryview,ui.BUTTON_PAIHANG)
+	uikits.event(but_paihang,	
+		function(sender,eventType)	
+			
+		end,"click")
+
 	self.guanka_view = uikits.child(self._Countryview,ui.GUANKA_VIEW)
 	self:init_gui()
 --	self:getdatabyurl()

@@ -67,38 +67,62 @@ function create(country_name,country_id)
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
+local boss_info = {}
+function Bossview:update_user_boss_info()
+	local send_data = {}
+	send_data.v1 = self.country_id
+	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
+		if t and t == true then
+			
+--[[			for i=1,#v do
+				local cur_section_info = {}
+				--cur_section_info.id = v[i].road_block_id
+				cur_section_info.id = 'fengyang'
+				cur_section_info.name = v[i].road_block_name
+				cur_section_info.star_all = 0
+				if v[i].road_block_tot_star then
+					cur_section_info.star_all = v[i].road_block_tot_star
+				end
+				cur_section_info.des = v[i].road_block_des
+				section_info[#section_info+1] = cur_section_info
+			end
+			self:get_user_section_info()--]]
+			if v then
+				boss_info = v				
+			end
+			self:show_boss()
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:getdatabyurl()
+				else
+					self:getdatabyurl()
+				end
+			end)
+		end		
+	end)
+end
 
 function Bossview:getdatabyurl()
+	local send_data = {}
+	send_data.v1 = self.country_id
+	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
+		if t and t == true then
+			if v then
 
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+				person_info.set_boss_info_by_id(self.country_id,v)				
+			end
+			self:update_user_boss_info()
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:getdatabyurl()
+				else
+					self:getdatabyurl()
 				end
-			end,messagebox.RETRY)	
-		end
-	end,'N')
+			end)
+		end		
+	end)
 end
 
 function Bossview:save_innerpos()
@@ -226,43 +250,44 @@ function Bossview:show_boss()
 		function(sender,eventType)	
 			self:show_boss_info(sender.boos_info)
 		end,"click")
-
-		local n_pic_name = all_boss_info[i].id..'.png'
-		local c_pic_name = all_boss_info[i].id..'4.png'
+		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'
+--[[		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
+		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'--]]
 		person_info.load_card_pic(cur_boss,n_pic_name,n_pic_name,c_pic_name)
-		if all_boss_info[i].is_admit == 1 then
-			cur_boss:setEnabled(true)
-			cur_boss:setBright(true)
-			cur_boss:setTouchEnabled(true)	
-		else
-			cur_boss:setEnabled(false)
-			cur_boss:setBright(false)
-			cur_boss:setTouchEnabled(false)	
-		end
-
 		local star1 = uikits.child(cur_boss,ui.CHECK_STAR1)
 		local star2 = uikits.child(cur_boss,ui.CHECK_STAR2)
 		local star3 = uikits.child(cur_boss,ui.CHECK_STAR3)
 		star1:setSelectedState(false)
 		star2:setSelectedState(false)
 		star3:setSelectedState(false)
-		if all_boss_info[i].star_has >0 then
-			star1:setSelectedState(true)
-			if all_boss_info[i].star_has >1 then
-				star2:setSelectedState(true)
-				if all_boss_info[i].star_has >2 then
-					star3:setSelectedState(true)
+		if boss_info[i] and type(boss_info[i]) == 'table' then
+			cur_boss:setEnabled(true)
+			cur_boss:setBright(true)
+			cur_boss:setTouchEnabled(true)	
+			if all_boss_info[i].star_has >0 then
+				star1:setSelectedState(true)
+				if all_boss_info[i].star_has >1 then
+					star2:setSelectedState(true)
+					if all_boss_info[i].star_has >2 then
+						star3:setSelectedState(true)
+					end
 				end
 			end
+		else
+			cur_boss:setEnabled(false)
+			cur_boss:setBright(false)
+			cur_boss:setTouchEnabled(false)	
 		end
-		
+
 		local txt_boss_lvl = uikits.child(cur_boss,ui.TXT_BOSS_LVL)
 		txt_boss_lvl:setString(all_boss_info[i].lvl)
 	end
 end
 
 function Bossview:init_gui()	
-	self:show_boss()
+	--self:show_boss()
+	self:getdatabyurl()
 end
 
 function Bossview:init()	
@@ -286,7 +311,7 @@ function Bossview:init()
 			uikits.popScene()
 		end,"click")
 	local pic_bg = uikits.child(self._Bossview,ui.PIC_BG)
-	local pic_name = self.country_id..'_bg.png'
+	local pic_name = self.country_id..'a.png'
 	person_info.load_section_pic(pic_bg,pic_name)
 	
 	self:init_gui()

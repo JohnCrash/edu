@@ -322,8 +322,12 @@ function Bagview:show_skill_info(id,back_type)
 	local txt_skill_name = uikits.child(self.temp_view,ui.TXT_SKILL_INFO_NAME)
 	local txt_skill_des = uikits.child(self.temp_view,ui.TXT_SKILL_INFO_DES)
 	local skill_info = person_info.get_skill_info_by_id(id)
-	print('skill_info.skill_name::'..skill_info.skill_name)
-	print('skill_info.skill_des::'..skill_info.skill_des)
+
+	local n_pic_name = skill_info.skill_id..'a.png'
+	local d_pic_name = skill_info.skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+	local d_pic_name = '1b.png'--]]
+	person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
 	txt_skill_name:setString(skill_info.skill_name)
 	txt_skill_des:setString(skill_info.skill_des)
 	if back_type == 1 then
@@ -408,7 +412,13 @@ function Bagview:show_skill_mall()
 			local txt_skill_pay = uikits.child(cur_skill,ui.TXT_LEARN_SKILL_PAY)	
 			txt_skill_name:setString(skill_list[i].skill_name)		
 			txt_skill_pay:setString(skill_list[i].price)		
+			local n_pic_name = skill_list[i].skill_id..'a.png'
+			local d_pic_name = skill_list[i].skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+			local d_pic_name = '1b.png'--]]
+			person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
 			pic_skill.id = skill_list[i].skill_id
+			but_skill_pay.id = skill_list[i].skill_id
 			uikits.event(pic_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
@@ -417,7 +427,16 @@ function Bagview:show_skill_mall()
 				end,"click")	
 			uikits.event(but_skill_pay,	
 				function(sender,eventType)	
-								
+					local sel_skill_info = person_info.get_skill_info_by_id(sender.id)
+					local new_skill_info = {}
+					new_skill_info.skill_id = sel_skill_info.skill_id
+					new_skill_info.skill_name = sel_skill_info.skill_name
+					new_skill_info.skill_des = sel_skill_info.skill_des
+					self.card_info.skills[#self.card_info.skills+1] = new_skill_info
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					func = self.show_card_info
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
 				end,"click")	
 			
 		end
@@ -435,7 +454,7 @@ function Bagview:show_card_info(id)
 	local callback_type = 1
 	local callback_id
 	local function timer_update(time)
-		func(self,id,callback_type)
+		func(self,callback_id,callback_type)
 		if schedulerEntry then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
@@ -598,7 +617,18 @@ function Bagview:show_card_info(id)
 	txt_card_info_skill_reset:setString(card_info.skill_reset_pay)
 	uikits.event(but_card_info_skill_reset,	
 		function(sender,eventType)	
-			
+			person_info.messagebox(self,person_info.RESET_SKILL,function(e)
+				if e == person_info.OK then
+					self.card_info.skills={}
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					func = self.show_card_info
+					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+				else
+
+				end
+			end)
+		
 		end,"click")		
 	but_card_info_skill_src:setVisible(false)
 	but_card_info_skill_empty_src:setVisible(false)	
@@ -610,13 +640,15 @@ function Bagview:show_card_info(id)
 		if card_info.skills[i] then
 			but_skill = but_card_info_skill_src:clone()
 			but_skill.id = card_info.skills[i].skill_id
-			--local pic_name = card_info.skills[i].skill_id..'.png'
-			local n_pic_name = '1a.png'
-			local d_pic_name = '1b.png'
+			local n_pic_name = card_info.skills[i].skill_id..'a.png'
+			local d_pic_name = card_info.skills[i].skill_id..'b.png'
+--[[			local n_pic_name = '1a.png'
+			local d_pic_name = '1b.png'--]]
 			person_info.load_skill_pic(but_skill,n_pic_name,n_pic_name,d_pic_name)
 			uikits.event(but_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
+					print('callback_id::'..callback_id)
 					func = self.show_skill_info
 					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)					
 				end,"click")	

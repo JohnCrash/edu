@@ -232,7 +232,7 @@ local function update_card_in_bag_by_id(id,tag,content)
 				end
 			end
 		end		
-		g_person_bag.cards_table = card_info
+		--g_person_bag.cards_table = card_info
 	end
 end
 
@@ -441,6 +441,12 @@ local function get_boss_info_by_id(id)
 		boss_info = g_person_boss_info[id]
 	end 
 	return boss_info
+end
+
+local function set_boss_info_by_id(id,boss_info) 
+	if boss_info and  type(boss_info) == 'table' then
+		g_person_boss_info[id] = boss_info
+	end
 end
 
 local function set_skill_list(skill_list)
@@ -680,6 +686,7 @@ return {
 	set_all_section_info = set_all_section_info,
 	get_all_section_info = get_all_section_info,
 	get_boss_info_by_id = get_boss_info_by_id,
+	set_boss_info_by_id = set_boss_info_by_id,
 	set_skill_list = set_skill_list,
 	get_skill_list = get_skill_list,
 	get_skill_info_by_id = get_skill_info_by_id,

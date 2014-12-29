@@ -5,6 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local messagebox = require "messagebox"
 local Mainview = require "poetrymatch/Mainview"
+local Guideview = require "poetrymatch/Guideview"
 local person_info = require "poetrymatch/Person_info"
 
 local Loading = class("Loading")
@@ -43,8 +44,14 @@ function Loading:update_skill_list()
 			if v and v.list and type(v.list) == 'table' then
 				person_info.set_skill_list(v.list)
 			end
-			local scene_next = Mainview.create()        
-			cc.Director:getInstance():replaceScene(scene_next)  
+			if self.is_need_guide == true then
+				local scene_next = Guideview.create()        
+				cc.Director:getInstance():replaceScene(scene_next)  				
+			else
+				local scene_next = Mainview.create()        
+				cc.Director:getInstance():replaceScene(scene_next)  
+			end
+
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
@@ -131,6 +138,9 @@ function Loading:update_user_info()
 			user_info.name = v.user_name
 			user_info.sex = v.sex
 			user_info.school_name = v.province_name..v.city_name..v.area_name..v.sch_name
+			user_info.has_msg = v.has_msg
+			user_info.has_sign = v.has_sign
+			user_info.has_product = v.new_product
 			person_info.set_user_info(user_info)
 			local lvl_info = {}
 			lvl_info.lvl = v.level
@@ -160,11 +170,11 @@ function Loading:getdatabyurl()
 		if t and t == true then
 			--local res = json.decode(v)
 			if v.v1 == true then
-				self:update_user_info()
+				self.is_need_guide = false
 			else
-				local scene_next = Mainview.create()        
-				cc.Director:getInstance():replaceScene(scene_next)   
+				self.is_need_guide = true
 			end
+			self:update_user_info()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
