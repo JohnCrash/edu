@@ -154,7 +154,7 @@ function Bossview:show_boss_info(cur_boss_info,is_has_star)
 		
 		self.view_boss_info:setVisible(false)
 		self:save_innerpos()
-		local scene_next = readytoboss.create(cur_boss_info,is_has_star)	
+		local scene_next = readytoboss.create(cur_boss_info,is_has_star,self.country_id)	
 		uikits.pushScene(scene_next)	
 	end,"click")
 	
