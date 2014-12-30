@@ -162,43 +162,52 @@ function Readytoboss:show_zhunbei()
 			local sc = cc.Scene:create()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 
+			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
+
 			--传入战斗层的数据包
-			local dataTable = {}
-			--[[数据
-			dataTable.battle_type = 1
-			dataTable.rounds_number = 
+			local data = {}
 
-			dataTable.plyr_hp =
-			dataTable.enmey_hp = 
-			dataTable.ar_vit = {1, 2, 3}
-			dataTable.ar_card_id = {1, 2, 3}
-			dataTable.ar_skill_id
-			 = {1, 2, 3}
-			--参数
-			player_info = {}
+			---[[数据
+			data.battle_type = moLaBattle.BATTLE_TYPE.STORY --闯关模式入口
+
+			--玩家信息
+			data.plyr_id = self.user_info.user_id
+			data.plyr_name = self.user_info.user_name
+			data.plyr_sex = self.user_info.sex --用于选择玩家的头像时
+			data.plyr_lv = self.user_info.level
+
+			--玩家卡牌信息
+			data.card = {}
+			for i = 1, 3 do
+				data.card[i] = {}
+				data.card[i].id = cardTable[i].card_plate_id
+				data.card[i].lv = cardTable[i].card_plate_level
+				data.card[i].hp = cardTable[i].card_plate_blood.basic_val +
+					cardTable[i].card_plate_blood.added_val --基础血量加额外血量
+				data.card[i].skill_id = {}
+				for j = 1, 3 do
+					data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
+				end
+			end
 			
-			player_info.lvl = int
-			player_info.img = path
-			player_info.name = string
+			--敌人和关卡信息
+			data.stageID = --关卡id
+			data.rounds_number = self.bot_info.need_round_num --回合数
 
-			card_list = {id,id,id}
-			id lvl skill hp tili 
+			data.enemy_id = self.bot_info.card_plate_id
+			data.enemy_name = self.bot_info.card_plate_name
+			data.enemy_lv = self.bot_info.card_plate_level
+			data.enemy_hp = self.bot_info.card_plate_blood + 
+				self.bot_info.card_plate_blood_added --基础血量加额外血量
+
+			data.enemy_skill_id = {"?", "?", "?"} --暂无
 
 
 
-			dataTable.plyr_img_id = 
-			dataTable.enemy_img_id =
-			dataTable.plyr_name = 
-			dataTable.enemy_name =
-			dataTable.plyr_lv = 
-			dataTable.enemy_lv = 
-			dataTable.ar_card_img_id = {}
-			dataTable.ar_card_lv = {}
-			dataTable.ar_skill_img_id = {}
 			--]]
 
 			--生成战斗层场景
-			local laBattle = moLaBattle.Class:create(dataTable)
+			local laBattle = moLaBattle.Class:create(data)
 			sc:addChild(laBattle)
 			cc.Director:getInstance():pushScene(sc)
 			--]]---------------------------------------

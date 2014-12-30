@@ -66,6 +66,7 @@ local ui = lly.const{
 	IMG_PLYR_CARD = "zhandou/wokp",
 	IMG_PLYR_ANSWER_TOKEN = "zhandou/wod",
 	TXT_PLYR_CARD_LEVEL = "zhandou/wokp/dj",
+	TXT_PLYR_CARD_LEVEL_WROD = "dj",
 	BTN_PLYR_SKILL_1 = "zhandou/jns2",
 	BTN_PLYR_SKILL_2 = "zhandou/jns1",
 	BTN_PLYR_SKILL_3 = "zhandou/jns3",
@@ -369,6 +370,10 @@ function LaBattle:ctor()
 		_bBuzyToChangeCard = false,
 		_bBuzyToEndingState = false,
 
+		--技能释放时使用
+		_bFinishSkillCmnction = true,
+		_bFinishSkillAnim = true,
+
 		--是否还有体力
 		_bHasVIT = true,
 
@@ -508,26 +513,42 @@ end
 --需要战斗类型，关卡id, 回合数，最大血量，卡牌体力最大数，卡牌id，技能id
 function LaBattle:initData(data)
 	
-	self._nCurBattleType = BATTLE_TYPE.STORY
+	self._nCurBattleType = data.battle_type
+
+	--关卡id
+	self._nCurStageID = data.stageID
 
 	--设置回合数并展示
-	self._nRoundsNumber = 5
-
-	--设置各种读秒数
+	self._nRoundsNumber = data.rounds_number
 
 	--HP补满
-	self._nPlyrHPCeiling = 100
-	self._nEnemyHPCeiling = 50
+	self._nPlyrHPCeiling = data.card[1].hp + data.card[2].hp + data.card[3].hp
+	self._nEnemyHPCeiling = data.enemy_hp
 	self._nPlyrCurrentHP = self._nPlyrHPCeiling
 	self._nEnemyCurrentHP = self._nEnemyHPCeiling
 
-	--体力
+	--卡牌id
 	for i = 1, 3 do
-		self._arnPlyrCardVIT[i] = 1
+		self._arnPlyrCardID[i] = data.card[i].id
+	end
+	self._nEnemyCardID = data.enemy_id
+	
+	--体力（目前最大值永远为6）
+	for i = 1, 3 do
 		self._arnPlyrCardVITMax[i] = 6
+		self._arnPlyrCardVIT[i] = self._arnPlyrCardVITMax[i]
 	end
 
 	--技能
+	for i = 1, 3 do
+		for j = 1, 3 do
+			self._ararnPlyrSkillID[i][j] = data.card[i].skill_id[j]
+		end
+	end
+
+	for i = 1, 3 do
+		self._arnEnemySkillID[i] = enemy_skill_id[i]
+	end
 
 	return true
 end
@@ -584,9 +605,7 @@ function LaBattle:initUI()
 		self._arbtnEnemySkill[3] = self:setWidget(ui.BTN_ENEMY_SKILL_3)
 
 		for i = 1, 3 do
-			uikits.event(self._arbtnEnemySkill[i], function (sender)
-				self:onClickSkill(CAMP_TYPE.ENEMY, i)
-			end)
+			self._arbtnEnemySkill[i]:setTouchEnabled(false)
 		end
 
 		--玩家卡牌
@@ -765,7 +784,7 @@ function LaBattle:initUI()
 end
 
 --需要头像，名称，等级，卡牌图片，卡牌等级，技能图片
-function LaBattle:initUIWithData()
+function LaBattle:initUIWithData(data)
 	repeat
 		--血量和回合数
 		self._barPlyrHP:setPercent(100 * self._nPlyrCurrentHP / self._nPlyrHPCeiling)
@@ -773,7 +792,12 @@ function LaBattle:initUIWithData()
 
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
-		--头像
+		--头像，名字，等级 --玩家只分男女
+		if data.plyr_sex == 1 then
+		else
+		end
+
+		moperson_info.load_card_pic(self._imgEnemyPortrait, data.enemy_id .. "b.png")
 
 		--新建另两张卡牌，由第一张复制
 		local layBattle = self:setWidget(ui.LAY_BATTLE)
@@ -782,9 +806,14 @@ function LaBattle:initUIWithData()
 			self._arimgPlyrCard[i] = self._arimgPlyrCard[1]:clone()
 			self._arimgPlyrCard[i]:setPosition(cc.p(-1000, -1000))
 			layBattle:addChild(self._arimgPlyrCard[i])
+			self._artxtPlyrCardLevel[i] = self._arimgPlyrCard[i]:getChildByName(CONST.TXT_PLYR_CARD_LEVEL_WROD)
 		end
 
 		--卡牌的等级和图片
+		for i = 1, 3 do
+			self._artxtPlyrCardLevel[i]:setString(tostring(data.card[i].lv))
+			moperson_info.load_card_pic(self._arimgPlyrCard[i], data.card[i].id .. "a.png")
+		end
 		
 		--新建另两张卡牌的技能，由第一张复制，并先隐藏
 		for i = 1, 3 do
@@ -798,11 +827,28 @@ function LaBattle:initUIWithData()
 		end
 
 		--玩家技能
+		for i = 1, 3 do
+			for j = 1, 3 do
+				if self._ararnPlyrSkillID[i][j] ~= 0 then
+					moperson_info.load_skill_pic(self._ararbtnPlyrSkill[i][j], 
+						self._ararnPlyrSkillID[i][j] .. "a.png", 
+						"", 
+						self._ararnPlyrSkillID[i][j] .. "b.png")
+				else
+					self._ararbtnPlyrSkill[i][j]:setVisible(false) --没有技能则隐藏
+			end
+		end
 
 		--敌人卡牌和其等级
+		self._txtEnemyCardLevel:setString(tostring(data.enemy_lv))
+		moperson_info.load_card_pic(self._arimgPlyrCard[i], data.card[i].id .. "a.png")
 
-		--敌人技能
+		--敌人技能(暂无)
+		for i = 1, 3 do
+			self._arbtnEnemySkill[i]:setVisible(false)
 
+		end
+		
 		--背景 根据战斗类型和关卡不同而不同
 		local strBGName = "poetrymatch/BattleScene/BG/"
 		if self._nCurBattleType == BATTLE_TYPE.STORY then
@@ -1781,10 +1827,11 @@ function LaBattle:onClickSkill(camp_type, skillIndex)
 	lly.log("click %d ==> %d ==> %d", 
 		camp_type, self._nCurCardIndex, skillIndex)
 
-	--根据索引获得技能id
+	--根据索引获得技能id 
+	local skillID = self._ararnPlyrSkillID[self._nCurCardIndex][skillIndex]
 
 	--使用技能
-
+	self:useSkill(camp_type, skillID)
 end
 
 --使用技能
@@ -2519,5 +2566,6 @@ state = lly.const{
 
 return {
 	Class = LaBattle,
+	BATTLE_TYPE = BATTLE_TYPE,
 }
 
