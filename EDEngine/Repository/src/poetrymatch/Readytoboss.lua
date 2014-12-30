@@ -44,11 +44,12 @@ local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
 end
 
-function create(bot_info,is_has_star)
+function create(bot_info,is_has_star,country_id)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),Readytoboss)		
 	cur_layer.bot_info = bot_info
 	cur_layer.is_has_star = is_has_star
+	cur_layer.country_id
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -88,6 +89,7 @@ function Readytoboss:show_gushi()
 	local function turn_to_next()
 		if content_index > #self.bot_info.dialog then
 			self:show_zhunbei()
+			return
 		end
 		if self.bot_info.dialog[content_index].dialogue_role == 2 then
 			txt_user_content:setString(self.bot_info.dialog[content_index].dialogue_content)

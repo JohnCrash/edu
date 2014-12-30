@@ -81,7 +81,6 @@ local talk_content = {
 {id=0,data='你不放牛了？'},
 {id=2,data='当然，不放了。但你要帮我，和我一块把牛牵回去，还得在路上把它给喂饱了。然后，我就带你去找李白、杜甫他们。'},
 {id=0,data='好！小事一件，就这么说定了。'},
-
 }
 
 local function loadArmature( name )
@@ -144,6 +143,7 @@ function Guideview:show_talk()
 					local scene_next = Mainview.create()        
 					cc.Director:getInstance():replaceScene(scene_next) 
 				end,"click")
+			return
 		end
 
 		if talk_content[content_index].id == 0 then
