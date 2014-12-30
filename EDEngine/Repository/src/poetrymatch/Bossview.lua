@@ -254,7 +254,7 @@ function Bossview:show_boss()
 		local c_pic_name = all_boss_info[i].card_plate_id..'d.png'
 --[[		local n_pic_name = all_boss_info[i].card_plate_id..'.png'
 		local c_pic_name = all_boss_info[i].card_plate_id..'4.png'--]]
-		person_info.load_card_pic(cur_boss,n_pic_name,n_pic_name,c_pic_name)
+		person_info.load_card_pic(cur_boss,n_pic_name,'',c_pic_name)
 		local star1 = uikits.child(cur_boss,ui.CHECK_STAR1)
 		local star2 = uikits.child(cur_boss,ui.CHECK_STAR2)
 		local star3 = uikits.child(cur_boss,ui.CHECK_STAR3)

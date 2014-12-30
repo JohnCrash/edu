@@ -12,9 +12,6 @@ local ui = {
 	Bagview_FILE = 'poetrymatch/beibao.json',
 	Bagview_FILE_3_4 = 'poetrymatch/beibao.json',
 	
-	BUTTON_SILVER = 'xinxi/yibi/jia',
-	TXT_SILVER_NUM = 'xinxi/yibi/zhi',
-	
 	VIEW_BAG = 'gun',
 	VIEW_BATTLE_LIST = 'czk',
 	PIC_CARD_BATTLE = 'czk/kp1',
@@ -91,7 +88,9 @@ local ui = {
 	VIEW_NO_CARD = 'meiyyougenghuan',
 	PIC_SEX_MAN = 'xingbie2',
 	PIC_SEX_WOMAN = 'xingbie',
-	
+
+	BUTTON_SILVER = 'xinxi/yibi/jia',
+	TXT_SILVER_NUM = 'xinxi/yibi/zhi',	
 	BUTTON_LE = 'xinxi/lebi/jia',
 	TXT_LE_NUM = 'xinxi/lebi/zhi',	
 	BUTTON_QUIT = 'xinxi/fanhui',
