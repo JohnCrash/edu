@@ -91,8 +91,12 @@
     "kapai/t_libai.png",
     "rens.png",
     "dtz.png",
-    "jineng/jn_s1.png",
-    "jineng/jn_s2.png",
+    "jineng/pozlg.png",
+    "jineng/xuanyj.png",
+    "jineng/leihj.png",
+    "jineng/tianjhy.png",
+    "jineng/ruangs.png",
+    "jineng/yixd.png",
     "tan1.png",
     "jishiqi.png",
     "tijiao1.png",
@@ -225,8 +229,8 @@
     "jlk.png",
     "lebi.png",
     "yinbi.png",
-    "lingqu2.png",
-    "lingqu.png"
+    "lingqu.png",
+    "lingqu2.png"
   ],
   "version": "1.6.0.0",
   "widgetTree": {
@@ -1102,18 +1106,18 @@
         }
       },
       {
-        "classname": "CheckBox",
+        "classname": "Button",
         "name": null,
         "children": [],
         "options": {
-          "__type": "CheckBoxSurrogate:#EditorCommon.JsonModel.Component.GUI",
-          "classname": "CheckBox",
-          "name": "lingq",
+          "__type": "ButtonSurrogate:#EditorCommon.JsonModel.Component.GUI",
+          "classname": "Button",
+          "name": "lingqu",
           "ZOrder": 0,
-          "actiontag": 2126331,
+          "actiontag": 7089989,
           "anchorPointX": 0.5,
           "anchorPointY": 0.5,
-          "classType": "CocoStudio.EngineAdapterWrap.CSCheckBox",
+          "classType": "CocoStudio.EngineAdapterWrap.CSButton",
           "colorB": 255,
           "colorG": 255,
           "colorR": 255,
@@ -1124,8 +1128,8 @@
           "ignoreSize": true,
           "layoutParameter": null,
           "opacity": 255,
-          "positionPercentX": 0.625,
-          "positionPercentY": 0.3074074,
+          "positionPercentX": 0.6244792,
+          "positionPercentY": 0.2888889,
           "positionType": 0,
           "rotation": 0,
           "scaleX": 1,
@@ -1133,44 +1137,45 @@
           "sizePercentX": 0.136979163,
           "sizePercentY": 0.07685185,
           "sizeType": 0,
-          "tag": 3781,
+          "tag": 7651,
           "touchAble": true,
           "useMergedTexture": false,
           "visible": true,
           "width": 263,
-          "x": 1200,
-          "y": 332,
-          "backGroundBox": null,
-          "backGroundBoxData": {
+          "x": 1199,
+          "y": 312,
+          "capInsetsHeight": 1,
+          "capInsetsWidth": 1,
+          "capInsetsX": 0,
+          "capInsetsY": 0,
+          "disabled": null,
+          "disabledData": {
             "path": "lingqu2.png",
             "plistFile": "",
             "resourceType": 0
           },
-          "backGroundBoxDisabled": null,
-          "backGroundBoxDisabledData": {
-            "path": null,
-            "plistFile": null,
-            "resourceType": 0
-          },
-          "backGroundBoxSelected": null,
-          "backGroundBoxSelectedData": {
-            "path": "lingqu2.png",
-            "plistFile": "",
-            "resourceType": 0
-          },
-          "frontCross": null,
-          "frontCrossData": {
+          "fontName": "微软雅黑",
+          "fontSize": 14,
+          "fontType": 0,
+          "normal": null,
+          "normalData": {
             "path": "lingqu.png",
             "plistFile": "",
             "resourceType": 0
           },
-          "frontCrossDisabled": null,
-          "frontCrossDisabledData": {
-            "path": null,
-            "plistFile": null,
+          "pressed": null,
+          "pressedData": {
+            "path": "lingqu.png",
+            "plistFile": "",
             "resourceType": 0
           },
-          "selectedState": true
+          "scale9Enable": false,
+          "scale9Height": 83,
+          "scale9Width": 263,
+          "text": "",
+          "textColorB": 255,
+          "textColorG": 255,
+          "textColorR": 255
         }
       }
     ],
