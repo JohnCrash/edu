@@ -98,6 +98,9 @@
 		52D5B1BE1A36EE5D000C5536 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D5B1BD1A36EE5D000C5536 /* MediaPlayer.framework */; };
 		52D5B1CA1A36F65F000C5536 /* IOSHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C71A36F65F000C5536 /* IOSHelper.mm */; };
 		52D5B1CB1A36F65F000C5536 /* NativeHelperIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */; };
+		52D917B01A5235A600144A84 /* luacore in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AD1A5235A500144A84 /* luacore */; };
+		52D917B11A5235A600144A84 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AE1A5235A500144A84 /* res */; };
+		52D917B21A5235A600144A84 /* src in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AF1A5235A500144A84 /* src */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -7111,6 +7114,9 @@
 		52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeHelperIOS.cpp; path = ios/NativeHelperIOS.cpp; sourceTree = SOURCE_ROOT; };
 		52D5B1C91A36F65F000C5536 /* NativeHelperIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeHelperIOS.h; path = ios/NativeHelperIOS.h; sourceTree = SOURCE_ROOT; };
 		52D5B1EA1A36FDC3000C5536 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Classes/Platform.h; sourceTree = "<group>"; };
+		52D917AD1A5235A500144A84 /* luacore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = luacore; path = iOS_errortitle_resources/luacore; sourceTree = "<group>"; };
+		52D917AE1A5235A500144A84 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = iOS_errortitle_resources/res; sourceTree = "<group>"; };
+		52D917AF1A5235A500144A84 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = iOS_errortitle_resources/src; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		BF1C47EA1293683800B63C5D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -7278,6 +7284,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				52D917AD1A5235A500144A84 /* luacore */,
+				52D917AE1A5235A500144A84 /* res */,
+				52D917AF1A5235A500144A84 /* src */,
 				524C26311A43BD81001349BC /* lua */,
 				52538F631A3593E0000E229F /* json-c.xcodeproj */,
 				527777441A3591B70048D357 /* gif.xcodeproj */,
@@ -23843,6 +23852,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52D917B01A5235A600144A84 /* luacore in Resources */,
+				52D917B11A5235A600144A84 /* res in Resources */,
+				52D917B21A5235A600144A84 /* src in Resources */,
 				5087E78117EB970100C73F5D /* Icon-120.png in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,
@@ -24017,8 +24029,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Xiong Liyong (LVN4F49N48)";
 				COMPRESS_PNG_FILES = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
@@ -24066,7 +24077,7 @@
 					"/Users/john/source/cocos2d-x/external/lua/lua/prebuilt/ios",
 				);
 				OTHER_LDFLAGS = "";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "7ed49f35-879d-49ce-ac1c-afef649bc61f";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -24078,8 +24089,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				COMPRESS_PNG_FILES = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -24126,7 +24136,7 @@
 					"/Users/john/source/cocos2d-x/external/lua/lua/prebuilt/ios",
 				);
 				OTHER_LDFLAGS = "";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "7ed49f35-879d-49ce-ac1c-afef649bc61f";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -24224,6 +24234,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Xiong Liyong (LVN4F49N48)";
 				COPY_PHASE_STRIP = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -24246,6 +24257,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7ed49f35-879d-49ce-ac1c-afef649bc61f";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -24275,6 +24287,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7ed49f35-879d-49ce-ac1c-afef649bc61f";
 				SDKROOT = macosx;
 				VALIDATE_PRODUCT = YES;
 			};

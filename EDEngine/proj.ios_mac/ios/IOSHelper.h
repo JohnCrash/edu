@@ -21,3 +21,5 @@ bool IOS_StartApp(const char *pszURL);
 
 int TakePhoto();
 int PickPicture();
+
+void setMutiTouchEnabled( bool b );

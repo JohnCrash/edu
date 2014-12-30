@@ -251,7 +251,9 @@ static bool requestURL( NSURL *url,bool isrunning )
                                    multiSampling: NO
                                  numberOfSamples: 0];
 
-    // Use RootViewController manage CCEAGLView 
+    [eaglView setMultipleTouchEnabled:YES];
+    
+    // Use RootViewController manage CCEAGLView
     _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
     _viewController.wantsFullScreenLayout = YES;
     _viewController.view = eaglView;
@@ -267,7 +269,6 @@ static bool requestURL( NSURL *url,bool isrunning )
         [window setRootViewController:_viewController];
     }
 
-    [eaglView setMultipleTouchEnabled:YES];
     [window makeKeyAndVisible];
 
     [[UIApplication sharedApplication] setStatusBarHidden:true];
