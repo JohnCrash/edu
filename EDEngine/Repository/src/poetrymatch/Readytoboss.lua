@@ -161,7 +161,6 @@ function Readytoboss:show_zhunbei()
 			schedulerEntry = nil
 
 			---[[ by luleyan! -------------------------
-			print("to here")
 			local sc = cc.Scene:create()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 

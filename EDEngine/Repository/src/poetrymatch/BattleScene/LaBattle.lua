@@ -399,8 +399,10 @@ function LaBattle:ctor()
 		
 		_arnPlyrCardID = lly.array(3, 0), --卡牌
 
-		_arnPlyrCardVIT = lly.array(3), --体力
-		_arnPlyrCardVITMax = lly.array(3),
+		_arnPlyrCardVIT = lly.array(3, 0), --体力
+		_arnPlyrCardVITMax = lly.array(3, 0),
+
+		_arnPlyrCardSP = lly.array(3, 0), --神力：1点神力可以使用一次技能
 
 		--技能
 		_ararnPlyrSkillID = lly.array(3, lly.array(3, 0)),
@@ -415,7 +417,7 @@ function LaBattle:ctor()
 		--当前-------------------------------------------------------
 		_nCurCardIndex = 1, --当前卡牌
 		_nCurQuesType = QUES_TYPE.SINGLE_CHOICE, --当前题类型
-		_nCurQuesID = 0,
+		_nCurQuesID = 0, --当前问题ID
 
 		--当前技能
 		_nCurSkillID = 0, --当前技能id
@@ -431,8 +433,13 @@ function LaBattle:ctor()
 		_arbChoise = lly.array(4),
 		_strAnswer = "", --填空题答案
 
+		_tabCurAnswerResult = {}, --判题后的结果
+		_nCurAnswerCamp = 0, --谁回答的题
+
 		--电脑的答题时间
 		_nCOMAnswerSpendTime = 3,
+
+		_arbChoiseForComAnser = lly.array(4), --用于电脑答多选题
 
 		_bComputerBeginThink = false, --电脑开始思考
 		_nThkBgnTime = 0, --开始思考的时间
@@ -549,6 +556,12 @@ function LaBattle:initData(data)
 	for i = 1, 3 do
 		self._arnPlyrCardVITMax[i] = 6
 		self._arnPlyrCardVIT[i] = self._arnPlyrCardVITMax[i]
+	end
+
+	--神力
+	for i = 1, 3 do
+		if data.card[i] == nil then break end
+		self._arnPlyrCardSP[i] = data.card[i].sp
 	end
 
 	--技能
@@ -1135,341 +1148,6 @@ function LaBattle:onTimeEnd()
 
 end
 
---开始电脑思考
-function LaBattle:beginComputerAnswer()
-	self._bComputerBeginThink = true
-end
-
---电脑思考中
-function LaBattle:excuteComputerThinking()
-	if not self._bComputerBeginThink then return end
-
-	--要求在倒计时中
-	if self._nSecondLeft == 0 then 
-		self._bComputerBeginThink = false
-		return
-	end
-
-	--初始化
-	if self._nThkBgnTime == 0 then 
-		self._nThkBgnTime = self._nSecondLeft
-		math.randomseed(os.time())
-		return
-	end
-
-	--电脑在随机时间显示出自己的答案
-	if self._nThkBgnTime - self._nSecondLeft < self._nCOMAnswerSpendTime then
-
-		if self._nCOMNeedAnswer <= 0 then return end
-
-		local rate = 
-			(self._nSecondLeft - self._nThkBgnTime + self._nCOMAnswerSpendTime) / 
-			self._nCOMNeedAnswer
-		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
-		local rWrite = math.random(rate)
-			
-		if rWrite == 1 then
-			if self._nCurQuesType ~= QUES_TYPE.FILL_IN_BLANK then
-				for i = 1, 4 do
-					if self._arbChoise[i] == true then
-						self._arckbShortChoose:setSelectedState(true)
-						self._arckbLongChoose:setSelectedState(true)
-						self._arbChoise[i] = false
-						break
-					end
-				end
-			else
-				self._iptFillInBlank:setText(string.sub(
-					self._strAnswer,
-					1,
-					(string.len(self._strAnswer) - self._nCOMNeedAnswer + 1) * 3
-				))
-			end
-
-			self._nCOMNeedAnswer = self._nCOMNeedAnswer - 1
-
-		end
-
-	else --结束
-		self:onComputerThinkingEnd()
-
-		self._bComputerBeginThink = false
-		self._nThkBgnTime = 0
-	end
-end
-
---电脑思考后显示结果
-function LaBattle:onComputerThinkingEnd()
-	lly.log("onComputerThinkingEnd")
-
-	--显示结果
-	if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
-		self._iptFillInBlank:setText(self._strAnswer)
-	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
-		if lly._arbChoise[1] == true then
-			self._ckbRight:setSelectedState(true)
-		end
-
-		if lly._arbChoise[2] == true then
-			self._ckbWrong:setSelectedState(true)
-		end
-	else
-		for k, v in pairs(lly._arbChoise) do
-			self._arckbShortChoose[k]:setSelectedState(v)
-			self._arckbLongChoose[k]:setSelectedState(v)
-		end
-	end
-
-	--结束
-	self:endEnemyAnswer()
-end
-
---执行判断对错的动画
---参数：谁回答的问题，最后回调的函数
---返回：谁减少HP，减少了多少
-function LaBattle:doCheckAnswerAnim(camp_type, func)
-	lly.ensure(camp_type, "number")
-	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
-		lly.error("wrong type")
-	end
-
-	local bRight = true
-	local nPlyrHPdec = 0
-	local nEnemyHPdec = 0
-	local nextState
-
-	--获取服务器中本题是否正确，谁减少多少血，转到什么状态
-
-
-	--判断回合数
-	local isEnd = false
-	if not nextState and self._nRoundsNumber <= 1 then		
-		isEnd = true
-		print(self._barPlyrHP:getPercent(), self._barEnemyHP:getPercent())
-		if self._barPlyrHP:getPercent() < self._barEnemyHP:getPercent() then
-			nextState = state.win
-		else
-			nextState = state.lose
-		end
-	end
-
-	--如果正确，则本方执行攻击动画，否则对方进行
-	if not bRight then
-		if camp_type == CAMP_TYPE.PLAYER then
-			camp_type = CAMP_TYPE.ENEMY
-		else
-			camp_type = CAMP_TYPE.PLAYER
-		end
-	end
-
-	--如果结束就不执行endShowPlyrResult
-	if nextState then
-		func = function (self) self._bCurStateIsEnding = true end
-	end
-
-	--动画
-	self._animJudge:setVisible(true)
-	if bRight then
-		self._animJudge:getAnimation():play("success", -1, 0)
-	else
-		self._animJudge:getAnimation():play("fail", -1, 0)
-	end
-
-	--回调	
-	self._animJudge:getAnimation():setMovementEventCallFunc(
-	function (armature, movementType, movementID)
-		if movementType == ccs.MovementEventType.complete then
-			self._animJudge:setVisible(false)
-			self:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
-		end
-	end)
-
-	return nextState, isEnd
-end
-
---执行攻击前动画
---参数：谁进行攻击，双方减少后的血量，回调
-function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
-	--没有攻击前技能
-	if self._nCurSkillID == 0 or 
-		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack == "" then
-		self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
-		return
-	end
-
-	--计算技能展示位置
-	local posSkill
-	local n = 1
-	if self._nCurSkillCastCamp == CAMP_TYPE.PLAYER then
-		n = n * -1
-	end
-
-	if moSkill.SKILL[self._nCurSkillID].eAim == moSkill.AIM.ENEMY then
-		n = n * -1
-	end
-
-	if n == 1 then
-		posSkill = self._posPlyrCard
-	else
-		posSkill = self._posEnemyCard
-	end
-
-	--执行技能
-	self._anim:setVisible(true)
-	self._anim:setPosition(posSkill)
-	self._anim:getAnimation():play(
-		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack, -1, 0)
-
-	--回调
-	self._anim:getAnimation():setMovementEventCallFunc(
-	function (armature, movementType, movementID)
-		if movementType == ccs.MovementEventType.complete then
-			self._anim:setVisible(false)
-			self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
-		end
-	end)
-end
-
---执行HP减少动画，参数：谁进行攻击，双方减少后的血量，回调
-function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
-	lly.ensure(camp_type, "number")
-	lly.ensure(nPlyrHPdec, "number")
-	lly.ensure(nEnemyHPdec, "number")
-	lly.ensure(func, "function")
-	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
-		lly.error("wrong type")
-	end
-
-	local posAnimFrom
-	local posAnimTo
-
-	local decreaseHPCard
-	local posDereaseHPToken
-	local decreaseHPBar
-
-	local HPDifference
-	local persent
-
-	--设置攻击方向	
-	if camp_type == CAMP_TYPE.PLAYER then
-
-		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
-
-		posAnimFrom = self._posPlyrCard
-		posAnimTo = self._posEnemyCard	
-	else
-		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE) --动画是玩家指向敌人的，如果是玩家费血，要反转动画
-
-		posAnimFrom = self._posEnemyCard
-		posAnimTo = self._posPlyrCard
-	end
-
-	--设置费血的阵营(暂无双方同时减血的情况)
-	if nPlyrHPdec > nEnemyHPdec then --玩家减血
-		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
-		posDereaseHPToken = self._posPlyrDecreaseHP
-
-		decreaseHPBar = self._barPlyrHP
-		HPDifference = self._nPlyrCurrentHP - nPlyrHPdec
-		persent = 100 * nPlyrHPdec / self._nPlyrHPCeiling
-
-		self._nPlyrCurrentHP = nPlyrHPdec
-	else
-		decreaseHPCard = self._imgEnemyCard
-		posDereaseHPToken = self._posEnemyDecreaseHP
-
-		decreaseHPBar = self._barEnemyHP
-		HPDifference = self._nEnemyCurrentHP - nEnemyHPdec
-		persent = 100 * nEnemyHPdec / self._nEnemyHPCeiling
-
-		self._nEnemyCurrentHP = nEnemyHPdec	
-	end
-
-	--初始化
-	self._anim:setPosition(posAnimFrom)
-	self._anim:setVisible(true)
-
-	self._layDecHP:setPosition(posDereaseHPToken)
-	self._atlasDecHP:setString(tostring(HPDifference))
-
-	--选择攻击动画和攻击结束，如果没有则执行普通攻击
-	local strAnimAtk
-	local strAnimAtkEnd
-	if self._nCurSkillID ~= 0 then
-		if moSkill.SKILL[self._nCurSkillID].strAnim_attack == "" then
-			strAnimAtk = moSkill.ATK
-		else
-			strAnimAtk = moSkill.SKILL[self._nCurSkillID].strAnim_attack
-		end
-
-		if moSkill.SKILL[self._nCurSkillID].strAnim_effect == "" then
-			strAnimAtkEnd = moSkill.ATK_END
-		else
-			strAnimAtkEnd = moSkill.SKILL[self._nCurSkillID].strAnim_effect
-		end
-	else
-		strAnimAtk = moSkill.ATK
-		strAnimAtkEnd = moSkill.ATK_END
-	end
-
-	--飞出武器
-	self._anim:getAnimation():play(strAnimAtk, -1, 0)
-
-	--同时移动武器（加速）
-	local acMoveFast = cc.EaseExponentialIn:create(
-		cc.MoveTo:create(0.8, posAnimTo))
-
-	--然后回调
-	local callfunc = cc.CallFunc:create(function ()
-
-		--攻击后的效果
-		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0) 
-
-		--显示
-		decreaseHPBar:setPercent(persent)
-		self._layDecHP:setVisible(true)
-	end)
-
-	--同时显示费血
-	local acMoveHPShow = cc.MoveBy:create(0.5, cc.p(0, self._nDisDecHPMoveY))
-
-	--同时晃动
-	local acMoveLeft = cc.MoveBy:create(0.05, cc.p(-10, 0))
-	local acMoveRight = cc.MoveBy:create(0.05, cc.p(20, 0))
-	local acShake = cc.Sequence:create(
-		acMoveLeft, acMoveRight, acMoveLeft:clone())
-
-	--延时
-	local acDelay = cc.DelayTime:create(0.5)
-
-	--然后结束
-	local callfuncEnd = cc.CallFunc:create(function ()
-		self._anim:setVisible(false)
-		self._layDecHP:setVisible(false)
-
-		--清空技能的使用
-		self._nCurSkillID = 0
-
-		--回调
-		func(self)
-	end)
-
-	---[[移动到敌人身上后减速，同时执行效果，同时显示费血，同时晃动
-	self:runAction(
-		cc.Sequence:create(
-			cc.TargetedAction:create(self._anim, acMoveFast),
-			callfunc,
-			cc.Spawn:create(
-				cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
-				cc.TargetedAction:create(decreaseHPCard, acShake)
-			),
-			acDelay,
-			callfuncEnd
-		)
-	)
-	--]]
-end
-
 ---------------------------------------------------------
 --上传战斗初始设置
 function LaBattle:uploadBattleInitSet()
@@ -1484,13 +1162,13 @@ function LaBattle:uploadBattleInitSet()
 		"set_under_attack_cardplate", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-			if not bSuc then lly.log(result) end
-			if result and result.v1 then
+			
+			if bSuc and result and result.v1 then
 				self._bNextStateDataHasLoad = true
 			else
-				--重新发送
-				--self:uploadBattleInitSet()
-			end
+				if not bSuc then lly.log(result) end
+				self:onNetError()
+			end			
 		end
 	)	
 end
@@ -1506,14 +1184,13 @@ function LaBattle:uploadCurRoundSet()
 		"set_user_attack_card", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-			if not bSuc then lly.log(result) end
 
-			if result and result.v1 then
+			if bSuc and result and result.v1 then
 				self._bNextStateDataHasLoad = true
 			else
-				--重新发送
-				--self:uploadCurRoundSet()
-			end
+				if not bSuc then lly.log(result) end
+				self:onNetError()
+			end	
 		end
 	)	
 end
@@ -1541,14 +1218,17 @@ function LaBattle:downloadQuestion(camp_type)
 		"get_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-			if not bSuc then lly.log(result) end
+			if bSuc and result then
+				lly.logTable(result)
 
-			lly.logTable(result)
-
-			--处理结果
-			self:onGetQuestion(result, camp_type)
+				--处理结果
+				self:onGetQuestion(result, camp_type)
+			else
+				if not bSuc then lly.log(result) end
+				self:onNetError()
+			end	
 		end
-	)	
+	)
 end
 
 function LaBattle:onGetQuestion(result, camp_type)
@@ -1623,9 +1303,15 @@ function LaBattle:onGetQuestion(result, camp_type)
 					end
 				end
 
+				for i = 1, 4 do --记录电脑的选择，用于一个一个答题时每答一个就取消一个
+					self._arbChoiseForComAnser[i] = self._arbChoise[i]
+				end
+
 			elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
 				self._nCOMNeedAnswer = 1
-				self._arbChoise[tonumber(self._strAnswer)] = true
+				local nAnswer = tonumber(self._strAnswer)
+				if type(nAnswer) ~= "number" then nAnswer = 1 end
+				self._arbChoise[nAnswer] = true
 			else
 				local num = string.len(self._strAnswer)
 				if num % 3 ~= 0 then
@@ -1660,11 +1346,311 @@ function LaBattle:checkAnswer(camp_type)
 			self._strAnswer = self._iptFillInBlank:getStringValue()
 		end
 	end
+
+	lly.logCurLocAnd(self._strAnswer)
 	
+	--准备数据
+	local sendedTable = {}
+	sendedTable.question_id = self._nCurQuesID
+	sendedTable.answer = self._strAnswer
+
+	if self._nCurSkillID ~= 0 then
+		sendedTable._nCurSkillID = self._nCurSkillID
+	end
+
 	--发送
+	moperson_info.post_data_by_new_form(
+		"judge_question", --业务名
+		sendedTable, --数据
+		function (bSuc, result) --结果回调
+			if bSuc and result then
+				lly.logTable(result)
+
+				--处理结果
+				self:onGetAnswerResult(result, camp_type)
+			else
+				if not bSuc then lly.log(result) end
+				self:onNetError()
+			end
+		end
+	)
+end
+
+function LaBattle:onGetAnswerResult(result, camp_type)
+
+	--1为正确，2为错误，其他未错误码
+	if not result.judge_result or result.judge_result > 2 then 
+		self:onNetError()
+		return
+	end
+
+	self._tabCurAnswerResult = result
+	self._nCurAnswerCamp = camp_type --记录下是谁回答的
 
 	--结束
 	self._bNextStateDataHasLoad = true
+end
+
+--执行判断对错的动画
+--参数：谁回答的问题，最后回调的函数
+--返回：转到什么状态，是否因为到了回合数而结束
+function LaBattle:doCheckAnswerAnim(camp_type, func)
+	lly.ensure(camp_type, "number")
+	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
+		lly.error("wrong type")
+	end
+
+	--验证下是否阵营和提交答案的阵营不一致，一般不会错
+	if camp_type ~= self._nCurAnswerCamp then lly.error("wrong anser camp") end
+
+	--获取服务器中本题是否正确，双方减少后有多少血，转到什么状态
+	local bRight = self._tabCurAnswerResult.judge_result == 1 and true or false
+	local nPlyrHPdec = self._tabCurAnswerResult.user_card_plate.CardTotBlood
+	local nEnemyHPdec = self._tabCurAnswerResult.under_attack_card_plate.CardTotBlood
+	local nextState
+
+	if nPlyrHPdec == 0 then
+		nextState = state.lose
+	elseif nEnemyHPdec == 0 then
+		nextState = state.win
+	end
+
+	--验证服务器回合数、卡牌体力和本地是否一致 --未做
+
+	--判断回合数
+	local isEnd = false
+	if not nextState and self._nRoundsNumber <= 1 then		
+		isEnd = true
+		print(self._barPlyrHP:getPercent(), self._barEnemyHP:getPercent())
+		if self._barPlyrHP:getPercent() < self._barEnemyHP:getPercent() then
+			nextState = state.win
+		else
+			nextState = state.lose
+		end
+	end
+
+	--如果答题正确，则反转攻击双方，答题的人出招
+	if not bRight then
+		if camp_type == CAMP_TYPE.PLAYER then
+			camp_type = CAMP_TYPE.ENEMY
+		else
+			camp_type = CAMP_TYPE.PLAYER
+		end
+	end
+
+	--如果结束就不执行endShowPlyrResult
+	if nextState then
+		func = function (self) self._bCurStateIsEnding = true end
+	end
+
+	--动画
+	self._animJudge:setVisible(true)
+	if bRight then
+		self._animJudge:getAnimation():play("success", -1, 0)
+	else
+		self._animJudge:getAnimation():play("fail", -1, 0)
+	end
+
+	--回调	
+	self._animJudge:getAnimation():setMovementEventCallFunc(
+	function (armature, movementType, movementID)
+		if movementType == ccs.MovementEventType.complete then
+			self._animJudge:setVisible(false)
+			self:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		end
+	end)
+
+	return nextState, isEnd
+end
+
+--执行攻击前动画
+--参数：谁进行攻击，双方减少后的血量，回调
+function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+	--没有攻击前技能
+	if self._nCurSkillID == 0 or 
+		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack == "" then
+		self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		return
+	end
+
+	--计算技能展示位置
+	local posSkill
+	local n = 1 --1为在玩家展示，-1是在敌人敌方
+	if self._nCurSkillCastCamp == CAMP_TYPE.ENEMY then
+		n = n * -1
+	end
+
+	--如果技能的目标是敌人，则再次反转到对方身上
+	if moSkill.SKILL[self._nCurSkillID].eAim == moSkill.AIM.ENEMY then
+		n = n * -1
+	end
+
+	if n == 1 then
+		posSkill = self._posPlyrCard
+	else
+		posSkill = self._posEnemyCard
+	end
+
+	--执行技能
+	self._anim:setVisible(true)
+	self._anim:setPosition(posSkill)
+	self._anim:getAnimation():play(
+		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack, -1, 0)
+
+	--回调
+	self._anim:getAnimation():setMovementEventCallFunc(
+	function (armature, movementType, movementID)
+		if movementType == ccs.MovementEventType.complete then
+			self._anim:setVisible(false)
+			self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		end
+	end)
+end
+
+--执行HP减少动画，参数：谁进行攻击，双方减少后的血量，回调
+function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+	lly.ensure(camp_type, "number")
+	lly.ensure(nPlyrHPdec, "number")
+	lly.ensure(nEnemyHPdec, "number")
+	lly.ensure(func, "function")
+	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
+		lly.error("wrong type")
+	end
+
+	local posAnimFrom
+	local posAnimTo
+
+	local decreaseHPCard
+	local posDereaseHPToken
+	local decreaseHPBar
+
+	local HPDifference
+	local persent
+
+	--设置攻击方向	
+	if camp_type == CAMP_TYPE.PLAYER then
+
+		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
+
+		posAnimFrom = self._posPlyrCard
+		posAnimTo = self._posEnemyCard	
+	else
+		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE) --动画是玩家指向敌人的，如果是玩家费血，要反转动画
+
+		posAnimFrom = self._posEnemyCard
+		posAnimTo = self._posPlyrCard
+	end
+
+	--设置费血的阵营(暂无双方同时减血的情况)
+	if self._nPlyrCurrentHP - nPlyrHPdec > self._nEnemyCurrentHP - nEnemyHPdec then --玩家减血
+		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
+		posDereaseHPToken = self._posPlyrDecreaseHP
+
+		decreaseHPBar = self._barPlyrHP
+		HPDifference = self._nPlyrCurrentHP - nPlyrHPdec
+		persent = 100 * nPlyrHPdec / self._nPlyrHPCeiling
+
+		self._nPlyrCurrentHP = nPlyrHPdec
+	else
+		decreaseHPCard = self._imgEnemyCard
+		posDereaseHPToken = self._posEnemyDecreaseHP
+
+		decreaseHPBar = self._barEnemyHP
+		HPDifference = self._nEnemyCurrentHP - nEnemyHPdec
+		persent = 100 * nEnemyHPdec / self._nEnemyHPCeiling
+
+		self._nEnemyCurrentHP = nEnemyHPdec	
+	end
+
+	--初始化
+	self._anim:setPosition(posAnimFrom)
+	self._anim:setVisible(true)
+
+	self._layDecHP:setPosition(posDereaseHPToken)
+	self._atlasDecHP:setString(tostring(HPDifference))
+
+	--选择攻击动画和攻击结束，如果没有则执行普通攻击
+	local strAnimAtk
+	local strAnimAtkEnd
+	if self._nCurSkillID ~= 0 then
+		if moSkill.SKILL[self._nCurSkillID].strAnim_attack == "" then
+			strAnimAtk = moSkill.ATK
+		else
+			strAnimAtk = moSkill.SKILL[self._nCurSkillID].strAnim_attack
+		end
+
+		if moSkill.SKILL[self._nCurSkillID].strAnim_effect == "" then
+			strAnimAtkEnd = moSkill.ATK_END
+		else
+			strAnimAtkEnd = moSkill.SKILL[self._nCurSkillID].strAnim_effect
+		end
+	else
+		strAnimAtk = moSkill.ATK
+		strAnimAtkEnd = moSkill.ATK_END
+	end
+
+	--飞出武器
+	self._anim:getAnimation():play(strAnimAtk, -1, 0)
+
+	--同时移动武器（加速）
+	local acMoveFast = cc.EaseExponentialIn:create(
+		cc.MoveTo:create(0.8, posAnimTo))
+
+	--然后回调
+	local callfunc = cc.CallFunc:create(function ()
+
+		--攻击后的效果
+		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE) --先反转到正常状态
+		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0) 
+
+		--显示
+		decreaseHPBar:setPercent(persent)
+		self._layDecHP:setVisible(true)
+	end)
+
+	--同时显示费血
+	local acMoveHPShow = cc.MoveBy:create(0.5, cc.p(0, self._nDisDecHPMoveY))
+
+	--同时晃动
+	local acMoveLeft = cc.MoveBy:create(0.05, cc.p(-10, 0))
+	local acMoveRight = cc.MoveBy:create(0.05, cc.p(20, 0))
+	local acShake = cc.Sequence:create(
+		acMoveLeft, acMoveRight, acMoveLeft:clone())
+
+	--延时
+	local acDelay = cc.DelayTime:create(0.5)
+
+	--然后结束
+	local callfuncEnd = cc.CallFunc:create(function ()
+		self._anim:setVisible(false)
+		self._layDecHP:setVisible(false)
+
+		--清空技能的使用
+		self._nCurSkillID = 0
+
+		--回调
+		func(self)
+	end)
+
+	---[[移动到敌人身上后减速，同时执行效果，同时显示费血，同时晃动
+	self:runAction(
+		cc.Sequence:create(
+			cc.TargetedAction:create(self._anim, acMoveFast),
+			callfunc,
+			cc.Spawn:create(
+				cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
+				cc.TargetedAction:create(decreaseHPCard, acShake)
+			),
+			acDelay,
+			callfuncEnd
+		)
+	)
+	--]]
+end
+
+--处理网络错误
+function LaBattle:onNetError()
+	lly.error("net error")
 end
 
 ---------------------------------------------------------
@@ -1783,6 +1769,104 @@ function LaBattle:getTalkAction()
 
 	return cc.Sequence:create(acMoveTalkFrom, delay, acMoveTalkTo)
 end
+
+--开始电脑思考
+function LaBattle:beginComputerAnswer()
+	self._bComputerBeginThink = true
+end
+
+--电脑思考中
+function LaBattle:excuteComputerThinking()
+	if not self._bComputerBeginThink then return end
+
+	--要求在倒计时中
+	if self._nSecondLeft == 0 then 
+		self._bComputerBeginThink = false
+		return
+	end
+
+	--初始化
+	if self._nThkBgnTime == 0 then 
+		self._nThkBgnTime = self._nSecondLeft
+		math.randomseed(os.time())
+		return
+	end
+
+	--电脑在随机时间显示出自己的答案
+	if self._nThkBgnTime - self._nSecondLeft < self._nCOMAnswerSpendTime then
+
+		if self._nCOMNeedAnswer <= 0 then return end
+
+		local rate = 
+			(self._nSecondLeft - self._nThkBgnTime + self._nCOMAnswerSpendTime) / 
+			self._nCOMNeedAnswer
+		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
+		local rWrite = math.random(rate)
+			
+		if rWrite == 1 then --也就是rate分之一的概率执行以下代码
+			lly.logCurLocAnd("type is %d", self._nCurQuesType)
+
+			if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
+				self._iptFillInBlank:setText(string.sub(
+					self._strAnswer,
+					1,
+					(string.len(self._strAnswer) - self._nCOMNeedAnswer + 1) * 3
+				))
+			elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+				if self._arbChoise[1] == true then
+					self._ckbRight:setSelectedState(true)
+				else
+					self._ckbWrong:setSelectedState(true)
+				end
+			else
+				for i = 1, 4 do
+					if self._arbChoiseForComAnser[i] == true then
+						self._arckbShortChoose:setSelectedState(true)
+						self._arckbLongChoose:setSelectedState(true)
+						self._arbChoiseForComAnser[i] = false
+						break
+					end
+				end
+			end
+
+			self._nCOMNeedAnswer = self._nCOMNeedAnswer - 1
+
+		end
+
+	else --结束
+		self:onComputerThinkingEnd()
+
+		self._bComputerBeginThink = false
+		self._nThkBgnTime = 0
+	end
+end
+
+--电脑思考后显示结果
+function LaBattle:onComputerThinkingEnd()
+	lly.log("onComputerThinkingEnd: %d", self._nCurQuesType)
+
+	--显示结果
+	if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
+		self._iptFillInBlank:setText(self._strAnswer)
+	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
+		if self._arbChoise[1] == true then
+			self._ckbRight:setSelectedState(true)
+		end
+
+		if self._arbChoise[2] == true then
+			self._ckbWrong:setSelectedState(true)
+		end
+	else
+		for k, v in pairs(self._arbChoise) do
+			self._arckbShortChoose[k]:setSelectedState(v)
+			self._arckbLongChoose[k]:setSelectedState(v)
+		end
+	end
+
+	--结束
+	self:endEnemyAnswer()
+end
+
 ----------------------------------------------------------
 --点击换牌按钮时
 function LaBattle:onClickChangeCard(sender, eventType)
@@ -1875,23 +1959,28 @@ function LaBattle:onClickSkill(camp_type, skillIndex)
 	lly.log("click %d ==> %d ==> %d", 
 		camp_type, self._nCurCardIndex, skillIndex)
 
-	--根据索引获得技能id 
-	local skillID = self._ararnPlyrSkillID[self._nCurCardIndex][skillIndex]
-
 	--使用技能
-	self:useSkill(camp_type, skillID)
+	self:useSkill(camp_type, self._nCurCardIndex, skillID)
 end
 
 --使用技能
-function LaBattle:useSkill(camp_type, skillID)
+function LaBattle:useSkill(camp_type, cardIndex, skillIndex)
 	private.printState("use Skill")
 
 	--禁止进入下个状态
 	self._bForbidEnterNextState = true
 
-	--记录
-	self._nCurSkillID = skillID
+	--记录 --根据索引获得技能id
+	self._nCurSkillID = self._ararnPlyrSkillID[self._nCurCardIndex][skillIndex]
 	self._nCurSkillCastCamp = camp_type
+
+	--减少神力，神力为0时把按钮变灰
+	self._arnPlyrCardSP[self._nCurCardIndex] = self._arnPlyrCardSP[self._nCurCardIndex] - 1
+	if self._arnPlyrCardSP[self._nCurCardIndex] == 0 then
+		for i = 1, 3 do
+			self._ararbtnPlyrSkill[self._nCurCardIndex][i]:setBright(false)
+		end
+	end
 
 	--如果是直接技能则在此通信（完成时检查动画是否完成，完成则取消禁止）
 	if moSkill.SKILL[self._nCurSkillID] == moSkill.TYPE.DIRECT then
@@ -2566,6 +2655,10 @@ function LaBattle:win_S()
 	self._stateCurrent = self._stateNext
 
 	self._bCurStateIsEnding = false
+
+	--传输结果
+	local sendedTable = {}
+	sendedTable.
 
 	--启动胜利页面
 	self._laResult:setVisible(true)
