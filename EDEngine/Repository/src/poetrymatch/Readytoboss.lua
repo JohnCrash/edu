@@ -49,7 +49,7 @@ function create(bot_info,is_has_star,country_id)
 	local cur_layer = uikits.extend(cc.Layer:create(),Readytoboss)		
 	cur_layer.bot_info = bot_info
 	cur_layer.is_has_star = is_has_star
-	cur_layer.country_id
+	cur_layer.country_id = country_id
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -160,7 +160,8 @@ function Readytoboss:show_zhunbei()
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 			schedulerEntry = nil
 
-			---[[ by luleyan! -------------------------	
+			---[[ by luleyan! -------------------------
+			print("to here")
 			local sc = cc.Scene:create()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 
@@ -170,30 +171,36 @@ function Readytoboss:show_zhunbei()
 			local data = {}
 
 			---[[数据
-			data.battle_type = moLaBattle.BATTLE_TYPE.STORY --闯关模式入口
+			data.battle_type = moLaBattle.BATTLE_TYPE.STORY --闯关模式入口--
 
 			--玩家信息
-			data.plyr_id = self.user_info.user_id
-			data.plyr_name = self.user_info.user_name
+			data.plyr_id = self.user_info.id
+			data.plyr_name = self.user_info.name
 			data.plyr_sex = self.user_info.sex --用于选择玩家的头像时
-			data.plyr_lv = self.user_info.level
+
+			data.plyr_lv = person_info.get_user_lvl_info().lvl
 
 			--玩家卡牌信息
 			data.card = {}
 			for i = 1, 3 do
-				data.card[i] = {}
-				data.card[i].id = cardTable[i].card_plate_id
-				data.card[i].lv = cardTable[i].card_plate_level
-				data.card[i].hp = cardTable[i].card_plate_blood.basic_val +
-					cardTable[i].card_plate_blood.added_val --基础血量加额外血量
-				data.card[i].skill_id = {}
-				for j = 1, 3 do
-					data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
+				if cardTable[i] ~= nil then
+					data.card[i] = {}
+					data.card[i].id = cardTable[i].id
+					data.card[i].lv = cardTable[i].lvl
+					data.card[i].name = cardTable[i].name
+					data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex--基础血量加额外血量
+					data.card[i].sp = cardTable[i].sp --神力
+					data.card[i].skill_id = {}
+					for j = 1, 3 do
+						if cardTable[i].skils[j] ~= nil then
+							data.card[i].skill_id[j] = cardTable[i].skils[j].skill_id
+						end
+					end
 				end
 			end
 			
 			--敌人和关卡信息
-			data.stageID = --关卡id
+			data.stageID = self.country_id --关卡id
 			data.rounds_number = self.bot_info.need_round_num --回合数
 
 			data.enemy_id = self.bot_info.card_plate_id
@@ -202,9 +209,11 @@ function Readytoboss:show_zhunbei()
 			data.enemy_hp = self.bot_info.card_plate_blood + 
 				self.bot_info.card_plate_blood_added --基础血量加额外血量
 
-			data.enemy_skill_id = {"?", "?", "?"} --暂无
-
-
+			data.enemy_skill_id = {
+				self.bot_info.skills[1],
+				self.bot_info.skills[2],
+				self.bot_info.skills[3]
+			}
 
 			--]]
 

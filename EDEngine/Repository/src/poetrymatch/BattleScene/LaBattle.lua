@@ -50,8 +50,10 @@ local ui = lly.const{
 	LAY_CENTER_UI = "zhandou/centerUI",
 
 	TXT_PLYR_NAME = "zhandou/centerUI/womz",
-	IMG_PLYR_PORTRAIT = "zhandou/wo",
-	TXT_PLYR_LEVEL = "zhandou/wo/dj",
+	IMG_PLYR_PORTRAIT_girl = "zhandou/wo2",
+	TXT_PLYR_LEVEL_girl = "zhandou/wo2/dj",
+	IMG_PLYR_PORTRAIT_boy = "zhandou/wo",
+	TXT_PLYR_LEVEL_boy = "zhandou/wo/dj",
 	BAR_PLYR_HP = "zhandou/centerUI/xuet/jd",
 
 	TXT_ENEMY_NAME = "zhandou/centerUI/duifmz",
@@ -240,8 +242,10 @@ function LaBattle:ctor()
 		_layCenterUI = Lnull,
 
 		_txtPlyrName = Lnull,
-		_imgPlyrPortrait = Lnull,
-		_txtPlyrLevel = Lnull,
+		_imgPlyrPortrait_girl = Lnull,
+		_imgPlyrPortrait_boy = Lnull,
+		_txtPlyrLevel_girl = Lnull,
+		_txtPlyrLevel_boy = Lnull,
 		_barPlyrHP = Lnull,
 
 		_txtEnemyName = Lnull,
@@ -399,14 +403,14 @@ function LaBattle:ctor()
 		_arnPlyrCardVITMax = lly.array(3),
 
 		--技能
-		_ararnPlyrSkillID = lly.array(3, lly.array(3)),
+		_ararnPlyrSkillID = lly.array(3, lly.array(3, 0)),
 
 		--敌人属性
 		_nEnemyHPCeiling = 0, --敌人HP上限
 		_nEnemyCurrentHP = 0, --敌人当前HP
 
 		_nEnemyCardID = 0, --卡牌
-		_arnEnemySkillID = 0, --技能
+		_arnEnemySkillID = lly.array(3, 0), --技能
 
 		--当前-------------------------------------------------------
 		_nCurCardIndex = 1, --当前卡牌
@@ -449,12 +453,15 @@ local private = {}
 --传入一个初始化数据
 function LaBattle:init(tab)
 	repeat
+		lly.log("labattle begin")
+		lly.logTable(tab)
+
 		--初始化数据
-		if not self:initData() then break end
+		if not self:initData(tab) then break end
 
 		--UI
 		if not self:initUI() then break end
-		if not self:initUIWithData() then break end
+		if not self:initUIWithData(tab) then break end
 		
 		--初始化基本位置
 		if not self:initPosition() then break end
@@ -522,13 +529,18 @@ function LaBattle:initData(data)
 	self._nRoundsNumber = data.rounds_number
 
 	--HP补满
-	self._nPlyrHPCeiling = data.card[1].hp + data.card[2].hp + data.card[3].hp
+	for i = 1, 3 do
+		if data.card[i] == nil then break end
+		self._nPlyrHPCeiling = self._nPlyrHPCeiling + data.card[i].hp
+	end
+
 	self._nEnemyHPCeiling = data.enemy_hp
 	self._nPlyrCurrentHP = self._nPlyrHPCeiling
 	self._nEnemyCurrentHP = self._nEnemyHPCeiling
 
 	--卡牌id
 	for i = 1, 3 do
+		if data.card[i] == nil then break end
 		self._arnPlyrCardID[i] = data.card[i].id
 	end
 	self._nEnemyCardID = data.enemy_id
@@ -541,13 +553,16 @@ function LaBattle:initData(data)
 
 	--技能
 	for i = 1, 3 do
+		if data.card[i] == nil then break end
 		for j = 1, 3 do
-			self._ararnPlyrSkillID[i][j] = data.card[i].skill_id[j]
+			if data.card[i].skill_id[j] ~= nil then
+				self._ararnPlyrSkillID[i][j] = data.card[i].skill_id[j]
+			end
 		end
 	end
 
 	for i = 1, 3 do
-		self._arnEnemySkillID[i] = enemy_skill_id[i]
+		self._arnEnemySkillID[i] = data.enemy_skill_id[i]
 	end
 
 	return true
@@ -567,7 +582,8 @@ function LaBattle:initUI()
 		self._layCenterUI = self:setWidget(ui.LAY_CENTER_UI)
 
 		self._txtPlyrName = self:setWidget(ui.TXT_PLYR_NAME)
-		self._txtPlyrLevel = self:setWidget(ui.TXT_PLYR_LEVEL)
+		self._txtPlyrLevel_girl = self:setWidget(ui.TXT_PLYR_LEVEL_girl)
+		self._txtPlyrLevel_boy = self:setWidget(ui.TXT_PLYR_LEVEL_boy)
 		self._barPlyrHP = self:setWidget(ui.BAR_PLYR_HP)
 
 		self._txtEnemyName = self:setWidget(ui.TXT_ENEMY_NAME)
@@ -578,7 +594,8 @@ function LaBattle:initUI()
 		self._atlasRounds = self:setWidget(ui.ATLAS_ROUNDS)
 
 		--头像
-		self._imgPlyrPortrait = self:setWidget(ui.IMG_PLYR_PORTRAIT)
+		self._imgPlyrPortrait_girl = self:setWidget(ui.IMG_PLYR_PORTRAIT_girl)
+		self._imgPlyrPortrait_boy = self:setWidget(ui.IMG_PLYR_PORTRAIT_boy)
 		self._imgEnemyPortrait = self:setWidget(ui.IMG_ENEMY_PORTRAIT)
 
 		--玩家
@@ -792,25 +809,40 @@ function LaBattle:initUIWithData(data)
 
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
-		--头像，名字，等级 --玩家只分男女
-		if data.plyr_sex == 1 then
+		--头像 --玩家只分男女
+		if data.plyr_sex == 1 then --根据person_info 1为女 2为男
+			self._imgPlyrPortrait_girl:setVisible(true)
+			self._imgPlyrPortrait_boy:setVisible(false)
 		else
+			self._imgPlyrPortrait_girl:setVisible(false)
+			self._imgPlyrPortrait_boy:setVisible(true)
 		end
 
 		moperson_info.load_card_pic(self._imgEnemyPortrait, data.enemy_id .. "b.png")
+
+		--名字和等级
+		self._txtPlyrName:setString(data.plyr_name)
+		self._txtEnemyName:setString(data.enemy_name)
+
+		self._txtPlyrLevel_girl:setString(tostring(data.plyr_lv))
+		self._txtPlyrLevel_boy:setString(tostring(data.plyr_lv))
+		self._txtEnemyLevel:setString(tostring(data.enemy_lv))
 
 		--新建另两张卡牌，由第一张复制
 		local layBattle = self:setWidget(ui.LAY_BATTLE)
 
 		for i = 2, 3 do
+			if data.card[i] == nil then break end
 			self._arimgPlyrCard[i] = self._arimgPlyrCard[1]:clone()
 			self._arimgPlyrCard[i]:setPosition(cc.p(-1000, -1000))
 			layBattle:addChild(self._arimgPlyrCard[i])
-			self._artxtPlyrCardLevel[i] = self._arimgPlyrCard[i]:getChildByName(CONST.TXT_PLYR_CARD_LEVEL_WROD)
+			self._artxtPlyrCardLevel[i] = uikits.child(
+				self._arimgPlyrCard[i], CONST.TXT_PLYR_CARD_LEVEL_WROD)
 		end
 
 		--卡牌的等级和图片
 		for i = 1, 3 do
+			if data.card[i] == nil then break end
 			self._artxtPlyrCardLevel[i]:setString(tostring(data.card[i].lv))
 			moperson_info.load_card_pic(self._arimgPlyrCard[i], data.card[i].id .. "a.png")
 		end
@@ -828,6 +860,7 @@ function LaBattle:initUIWithData(data)
 
 		--玩家技能
 		for i = 1, 3 do
+			if data.card[i] == nil then break end
 			for j = 1, 3 do
 				if self._ararnPlyrSkillID[i][j] ~= 0 then
 					moperson_info.load_skill_pic(self._ararbtnPlyrSkill[i][j], 
@@ -836,17 +869,32 @@ function LaBattle:initUIWithData(data)
 						self._ararnPlyrSkillID[i][j] .. "b.png")
 				else
 					self._ararbtnPlyrSkill[i][j]:setVisible(false) --没有技能则隐藏
+				end
 			end
 		end
 
 		--敌人卡牌和其等级
 		self._txtEnemyCardLevel:setString(tostring(data.enemy_lv))
-		moperson_info.load_card_pic(self._arimgPlyrCard[i], data.card[i].id .. "a.png")
+		moperson_info.load_card_pic(self._imgEnemyCard, data.enemy_id .. "a.png")
 
 		--敌人技能(暂无)
 		for i = 1, 3 do
-			self._arbtnEnemySkill[i]:setVisible(false)
+			if data.enemy_skill_id[i] ~= nil then
+				self._arbtnEnemySkill[i]:setVisible(false)
+			else
+				self._arbtnEnemySkill[i]:setVisible(false)
+			end
+		end
 
+		--卡牌改变区
+		for i = 1, 3 do
+			if data.card[i] ~= nil then
+				moperson_info.load_card_pic(self._arimgCardPortrait[i], data.card[i].id .. "b.png")
+				self._artxtCardLevel[i]:setString(tostring(data.card[i].lv))
+				self._artxtCardName[i]:setString(data.card[i].name)
+			else
+				self._arckbCard[i]:setVisible(false)
+			end
 		end
 		
 		--背景 根据战斗类型和关卡不同而不同
@@ -1322,19 +1370,19 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		posDereaseHPToken = self._posPlyrDecreaseHP
 
 		decreaseHPBar = self._barPlyrHP
-		HPDifference = self._nPlyrCurrentHP - nHP
-		persent = 100 * nHP / self._nPlyrHPCeiling
+		HPDifference = self._nPlyrCurrentHP - nPlyrHPdec
+		persent = 100 * nPlyrHPdec / self._nPlyrHPCeiling
 
-		self._nPlyrCurrentHP = nHP
+		self._nPlyrCurrentHP = nPlyrHPdec
 	else
 		decreaseHPCard = self._imgEnemyCard
 		posDereaseHPToken = self._posEnemyDecreaseHP
 
 		decreaseHPBar = self._barEnemyHP
-		HPDifference = self._nEnemyCurrentHP - nHP
-		persent = 100 * nHP / self._nEnemyHPCeiling
+		HPDifference = self._nEnemyCurrentHP - nEnemyHPdec
+		persent = 100 * nEnemyHPdec / self._nEnemyHPCeiling
 
-		self._nEnemyCurrentHP = nHP	
+		self._nEnemyCurrentHP = nEnemyHPdec	
 	end
 
 	--初始化
@@ -1433,7 +1481,7 @@ function LaBattle:uploadBattleInitSet()
 
 	--发送数据
 	moperson_info.post_data_by_new_form(
-		"set_UnderAttackCardPlate", --业务名
+		"set_under_attack_cardplate", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
 			if not bSuc then lly.log(result) end
@@ -1455,7 +1503,7 @@ function LaBattle:uploadCurRoundSet()
 
 	--发送数据
 	moperson_info.post_data_by_new_form(
-		"set_curr_attack_card", --业务名
+		"set_user_attack_card", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
 			if not bSuc then lly.log(result) end
@@ -1524,7 +1572,7 @@ function LaBattle:onGetQuestion(result, camp_type)
 	--选项
 	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE or
 		self._nCurQuesType == QUES_TYPE.MULTIPLE_CHOICE then
-		for i = 1, 4 do
+		for i = 1, #result.options do
 			self._arstrQuesChoose[i] = result.options[i].option_value
 			self._arstrQuesChooseMark[i] = result.options[i].option_mark
 		end
