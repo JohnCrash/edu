@@ -11,6 +11,14 @@ Noticeview.__index = Noticeview
 local ui = {
 	Noticeview_FILE = 'poetrymatch/tongzhi.json',
 	Noticeview_FILE_3_4 = 'poetrymatch/tongzhi.json',
+	
+	VIEW_NOTICE = 'gun',
+	VIEW_NOTICE_SRC = 'gun/tz1',
+	TXT_TITLE = 'leitbt',
+	TXT_CONTENT = 'wen',
+	TXT_DATE = 'sj',
+	
+	BUTTON_QUIT = 'xinxi/fanhui',
 }
 
 local function loadArmature( name )
@@ -34,38 +42,57 @@ function create()
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
+local notice_space = 50
+function Noticeview:show_notice(notice_info)	
+	local notice_view = uikits.child(self._Noticeview,ui.VIEW_NOTICE)	
+	local notice_view_src = uikits.child(self._Noticeview,ui.VIEW_NOTICE_SRC)	
+	notice_view_src:setVisible(false)
+	local row_num = #notice_info	
+	local size_scroll = notice_view:getInnerContainerSize()
+	local size_notice_view = notice_view:getContentSize()
+	local size_notice_view_src = notice_view_src:getContentSize()
+	local pos_src_y = notice_view_src:getPositionY()
+	local pos_start_y = size_notice_view.height-pos_src_y
+	if (size_notice_view_src.height+notice_space)*row_num >size_notice_view.height then
+		size_scroll.height = (size_notice_view_src.height+notice_space)*row_num
+		notice_view:setInnerContainerSize(size_scroll)
+		pos_start_y = size_scroll.height - pos_start_y
+	else
+		pos_start_y = pos_src_y
+	end
+	for i=1,row_num do
+		local cur_notice = notice_view_src:clone()
+		cur_notice:setVisible(true)
+		notice_view:addChild(cur_notice)
+		local pos_y = pos_start_y - (i-1)*(size_notice_view_src.height+notice_space)
+		cur_notice:setPositionY(pos_y)
+		local txt_title = uikits.child(cur_notice,ui.TXT_TITLE)
+		local txt_content = uikits.child(cur_notice,ui.TXT_CONTENT)
+		local txt_date = uikits.child(cur_notice,ui.TXT_DATE)
+		txt_title:setString(notice_info[i].title)
+		txt_content:setString(notice_info[i].msg)
+		txt_date:setString(notice_info[i].send_time)
+		
+	end
+end
 
 function Noticeview:getdatabyurl()
-
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+	local send_data
+	person_info.post_data_by_new_form('get_msg',send_data,function(t,v)
+		if t and t == true then
+			if v and type(v) == 'table' then
+				self:show_notice(v)
+			end
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
 				end
-			end,messagebox.RETRY)	
+			end)
 		end
-	end,'N')
+	end)
 end
 
 function Noticeview:init()	
@@ -76,12 +103,13 @@ function Noticeview:init()
 	end
 	self._Noticeview = uikits.fromJson{file_9_16=ui.Noticeview_FILE,file_3_4=ui.Noticeview_FILE_3_4}
 	self:addChild(self._Noticeview)
-	
+	local but_quit = uikits.child(self._Noticeview,ui.BUTTON_QUIT)
+	uikits.event(but_quit,	
+		function(sender,eventType)	
+			uikits.popScene()
+		end,"click")		
 
---	self:getdatabyurl()
---	local loadbox = Noticeviewbox.open(self)
---	local scene_next = WrongSubjectList.create()								
---	cc.Director:getInstance():replaceScene(scene_next)	
+	self:getdatabyurl()
 
 end
 

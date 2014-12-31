@@ -354,7 +354,7 @@ local function load_card_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = card_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = card_root_path..filename2
@@ -380,7 +380,7 @@ local function load_section_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = section_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = section_root_path..filename2
@@ -406,7 +406,7 @@ local function load_skill_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = skill_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = skill_root_path..filename2
