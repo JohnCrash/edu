@@ -1,5 +1,7 @@
 #include "AssetsManager.h"
 
+MySpaceBegin
+
 USING_NS_CC;
 USING_NS_CC_EXT;
 
@@ -135,3 +137,4 @@ int register_assetsmanager_test_sample(lua_State* L)
     tolua_endmodule(L);
     return 0;
 }
+MySpaceEnd

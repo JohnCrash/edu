@@ -31,23 +31,24 @@
 #import "Platform.h"
 #import "Reachability.h"
 #import "AudioToolbox/AudioToolbox.h"
+#import "staticlib.h"
 
-@implementation AppController
+UsingMySpace;
+
+@implementation AppController_v3
 
 #pragma mark -
 #pragma mark Application lifecycle
 
+MySpaceBegin
 // cocos2d application instance
-static AppDelegate s_sharedApplication;
+#ifndef EmbedCocos2d
+static AppDelegate_v3 s_sharedApplication;
+#endif
 extern std::string g_Goback;
 extern std::string g_Launch;
-static AppController *s_myAppController = nullptr;
-/*
- 1 横屏
- 2 竖屏
- */
-int g_OrientationMode = 1;
-bool g_bAutorotate = true;
+static AppController_v3 *s_myAppController = nullptr;
+
 void setUIOrientation( int m )
 {
     if( g_OrientationMode != m )
@@ -173,6 +174,7 @@ void unregisterNetworkStateListener()
     [[NSNotificationCenter defaultCenter] removeObserver:s_myAppController];
     s_isRegister = false;
 }
+
 /*
  *  popup launch app
  */
@@ -209,7 +211,7 @@ static bool requestURL( NSURL *url,bool isrunning )
         if( purl )
         {
             std::string oldLanuch = g_Launch;
-            set_launch_by_url( purl);
+            MySpace::set_launch_by_url( purl);
             if( isrunning && oldLanuch != g_Launch )
             {
                 //switch other application,restart
@@ -221,6 +223,8 @@ static bool requestURL( NSURL *url,bool isrunning )
     }
     return false;
 }
+
+MySpaceEnd
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
 {
@@ -254,7 +258,7 @@ static bool requestURL( NSURL *url,bool isrunning )
     [eaglView setMultipleTouchEnabled:YES];
     
     // Use RootViewController manage CCEAGLView
-    _viewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
+    _viewController = [[RootViewController_v3 alloc] initWithNibName:nil bundle:nil];
     _viewController.wantsFullScreenLayout = YES;
     _viewController.view = eaglView;
     // Set RootViewController to window
@@ -275,8 +279,13 @@ static bool requestURL( NSURL *url,bool isrunning )
 
     // IMPORTANT: Setting the GLView should be done after creating the RootViewController
     cocos2d::GLView *glview = cocos2d::GLView::createWithEAGLView(eaglView);
+    /*
+     如果end被调用就直接退出eixt(0);
+     定制函数
+    */
+    glview->ifEndToExit(true);
     cocos2d::Director::getInstance()->setOpenGLView(glview);
-
+    cocos2d::Director::getInstance()->setEndAfterCall(nullptr);
     cocos2d::Application::getInstance()->run();
 
     return YES;

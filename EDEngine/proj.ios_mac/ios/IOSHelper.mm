@@ -10,6 +10,8 @@
 #import <AudioToolbox/AudioFile.h>
 #import <AudioToolbox/AudioToolbox.h>
 
+UsingMySpace;
+
 #define	RETURN_TYPE_TAKEPICTURE		1
 #define	RETURN_TYPE_PICKPICTURE		2
 
@@ -33,9 +35,11 @@ static UIPopoverController *popoverController=NULL;
     [super didReceiveMemoryWarning];
 }
 
+MySpaceBegin
 void OnIOSReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
 void OnIOSReturn(int nType,int nID,int nParam1,int nParam2);
 char *AdjustRawBufOrientation(char *pSrcBuf,int *pWidth,int *pHeight,int nAngle,bool bMirror);
+MySpaceEnd
 
 static int s_nCurID=1;
 static int s_nBufType;
@@ -268,6 +272,8 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
 }
 
 @end
+
+MySpaceBegin
 
 bool InitIOSHelper()
 {
@@ -579,3 +585,5 @@ bool OpenURL(const char *pszURL)
     NSURL *url=[NSURL URLWithString:str];
     return [[UIApplication sharedApplication] openURL:url];
 }
+
+MySpaceEnd

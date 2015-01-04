@@ -10,11 +10,19 @@
 #include "cocos2d.h"
 #include <string>
 
+MySpaceBegin
+
 std::string g_Cookie;
 std::string g_Launch;
 std::string g_Userid;
 std::string g_Mode;
 std::string g_Goback;
+/*
+ 1 横屏
+ 2 竖屏
+ */
+int g_OrientationMode = 1;
+bool g_bAutorotate = true;
 
 typedef std::pair<std::string,std::string> tKeyV;
 
@@ -99,3 +107,5 @@ void set_launch_by_url(const char *url)
         CCLOG("ERROR : handleURL invalide url %s",url );
     }
 }
+
+MySpaceEnd

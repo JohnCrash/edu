@@ -1,5 +1,7 @@
 #include "Console.h"
 
+MySpaceBegin
+
 Console::Console()
 {
 }
@@ -57,3 +59,4 @@ bool Console::init()
 	return true;
 }
 
+MySpaceEnd

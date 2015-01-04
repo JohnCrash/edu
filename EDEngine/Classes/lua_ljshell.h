@@ -1,8 +1,9 @@
 #ifndef _LUA_LJSHELL_EXT_
 #define _LUA_LJSHELL_EXT_
-
+#include "staticlib.h"
 #include <string>
 
+MySpaceBegin
 #if __cplusplus
 extern "C" {
 #endif
@@ -35,4 +36,5 @@ enum LJDirectory
 std::string getLjShellDirectory(LJDirectory edd);
 void InitEngineDirectory();
 
+MySpaceEnd
 #endif

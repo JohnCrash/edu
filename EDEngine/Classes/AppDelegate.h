@@ -1,5 +1,6 @@
 #ifndef  _APP_DELEGATE_H_
 #define  _APP_DELEGATE_H_
+#include "staticlib.h"
 
 #include "cocos2d.h"
 #include "Console.h"
@@ -7,6 +8,7 @@
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
 
+MySpaceBegin
 USING_NS_CC;
 
 extern bool g_Quit;
@@ -27,11 +29,11 @@ extern HWND g_hMainWnd;
 
 The reason for implement as private inheritance is to hide some interface call by Director.
 */
-class  AppDelegate : private cocos2d::Application
+class  AppDelegate_v3 : private cocos2d::Application
 {
 public:
-    AppDelegate();
-    virtual ~AppDelegate();
+    AppDelegate_v3();
+    virtual ~AppDelegate_v3();
 
     /**
     @brief    Implement Director and Scene init code here.
@@ -70,5 +72,6 @@ private:
 	*/
 };
 
+MySpaceEnd
 #endif // _APP_DELEGATE_H_
 

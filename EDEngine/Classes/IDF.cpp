@@ -1,6 +1,8 @@
 #include "IDF.h"
 #include "MD5.h"
 
+MySpaceBegin
+
 CIDFList::CIDFList()
 {
 	m_pBuf=NULL;
@@ -566,3 +568,4 @@ bool CIDF::SaveFile()
 	return true;
 }
 */
+MySpaceEnd

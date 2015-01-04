@@ -1,5 +1,6 @@
 #ifndef _LUA_THREAD_CURL_
 #define _LUA_THREAD_CURL_
+#include "staticlib.h"
 
 #if __cplusplus
 extern "C" {

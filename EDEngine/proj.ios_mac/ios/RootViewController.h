@@ -24,9 +24,10 @@
  ****************************************************************************/
 
 #import <UIKit/UIKit.h>
+#import "staticlib.h"
 
 
-@interface RootViewController : UIViewController {
+@interface RootViewController_v3 : UIViewController {
 
 }
 - (BOOL) prefersStatusBarHidden;

@@ -3,6 +3,7 @@
 #include "IDF.h"
 #include "Files.h"
 
+MySpaceBegin
 #define min(a,b) a>b?b:a
 
 static void StrToLower(std::string & str)
@@ -595,3 +596,4 @@ GLubyte *CRenderTextureEx::GetData(bool bFlip)
 	Rect rc(0,0,size.width,size.height);
 	return GetSubData(rc,(int)size.width,(int)size.height,1.0f);
 }
+MySpaceEnd

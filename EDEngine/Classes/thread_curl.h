@@ -2,12 +2,14 @@
 */
 #ifndef _MY_THREAD_CURL_H_
 #define _MY_THREAD_CURL_H_
+#include "staticlib.h"
+
 #include <string>
 #include <vector>
 #include <thread>
 
-namespace kits
-{
+MySpaceBegin
+
 enum CURL_METHOD
 {
 	GET,
@@ -95,6 +97,6 @@ struct curl_t
 
 void do_thread_curl( curl_t *pct );
 
-}
+MySpaceEnd
 
 #endif
