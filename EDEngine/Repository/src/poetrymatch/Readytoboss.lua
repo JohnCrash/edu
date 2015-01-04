@@ -49,7 +49,7 @@ function create(bot_info,is_has_star,country_id)
 	local cur_layer = uikits.extend(cc.Layer:create(),Readytoboss)		
 	cur_layer.bot_info = bot_info
 	cur_layer.is_has_star = is_has_star
-	cur_layer.country_id
+	cur_layer.country_id = country_id
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
