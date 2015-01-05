@@ -72,7 +72,7 @@ function Bossview:update_user_boss_info()
 	local send_data = {}
 	send_data.v1 = self.country_id
 	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			
 --[[			for i=1,#v do
 				local cur_section_info = {}
@@ -107,7 +107,7 @@ function Bossview:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = self.country_id
 	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			if v then
 
 				person_info.set_boss_info_by_id(self.country_id,v)				

@@ -57,7 +57,7 @@ end
 function create()
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),Mallview)		
-	cur_layer.sel_pinzhi = 1
+	cur_layer.sel_pinzhi = 0
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -81,8 +81,8 @@ function Mallview:show_silver()
 --	but_silver:setVisible(false)
 	uikits.event(but_silver,	
 		function(sender,eventType)	
-			sender:setEnabled(false)
-			sender:setTouchEnabled(false)
+			self._Mallview:setEnabled(false)
+			self._Mallview:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
 				person_info.messagebox(self,person_info.NO_LE,function(e)
@@ -91,6 +91,8 @@ function Mallview:show_silver()
 					else
 						print('bbbbbbbbbbbb')
 					end
+					self._Mallview:setEnabled(true)
+					self._Mallview:setTouchEnabled(true)	
 				end)
 			else
 				le_num = le_num -10 
@@ -101,8 +103,7 @@ function Mallview:show_silver()
 				person_info.set_user_silver(silver_num)
 				person_info.set_user_le_coin(le_num)
 			end
-			sender:setEnabled(true)
-			sender:setTouchEnabled(true)			
+	
 		end,"click")
 end
 
@@ -153,9 +154,9 @@ function Mallview:show_card_info(id)
 	txt_card_name:setString(cur_card_info.pro_name)
 	txt_card_des:setString(cur_card_info.description)
 	txt_card_ap:setString(cur_card_info.card_plate_attack)
-	txt_card_mp:setString(cur_card_info.card_plate_magic)
+	txt_card_sp:setString(cur_card_info.card_plate_magic)
 	txt_card_hp:setString(cur_card_info.card_plate_blood)
-	txt_card_sp:setString(cur_card_info.card_plate_wit)
+	txt_card_mp:setString(cur_card_info.card_plate_wit)
 	txt_card_pp:setString(cur_card_info.card_plate_pomes)
 	txt_card_pay:setString(cur_card_info.price)
 	
@@ -169,10 +170,21 @@ function Mallview:show_card_info(id)
 	elseif cur_card_info.card_material == 1 then
 		pic_card_cu:setVisible(true)
 	end		
+	but_card_buy.cur_info = cur_card_info
 	uikits.event(but_card_buy,	
 		function(sender,eventType)	
-			func = self.show_all_card
-			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
+			local silver_num = person_info.get_user_silver()
+			if silver_num < sender.cur_info.price then
+				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				silver_num = silver_num-sender.card_info.price
+				person_info.set_user_silver(silver_num)
+				self:show_silver()
+				uikits.popScene()
+			end								
 		end,"click")		
 	self.but_quit.func = self.show_mall_card
 end
@@ -197,7 +209,7 @@ function Mallview:show_all_card()
 		end
 	end	
 	cleartitle()	
-	local card_space_heng = 20
+	local card_space_heng = 100
 	local card_space_shu = 20
 	local card_num = 0
 
@@ -212,7 +224,7 @@ function Mallview:show_all_card()
 			card_num = card_num +1
 		end
 	end
-	local row_num = card_num/6	
+	local row_num = card_num/5	
 	row_num = math.ceil(row_num)
 	
 	local pos_wen_x,pos_wen_y = txt_wen:getPosition()
@@ -243,14 +255,14 @@ function Mallview:show_all_card()
 		pos_card_y_start = pos_card_src_y
 	end
 	local cur_row = 0
-	local cur_line = 6
+	local cur_line = 5
 	for i=1,#self.card_info do
 		local bag_card_info = person_info.get_card_in_bag_by_id(self.card_info[i].card_plate_id)
 		if not bag_card_info then
 			local cur_card = view_card_src:clone()
 			cur_card:setVisible(true)
 			self.temp_view:addChild(cur_card,0,100000+i)			
-			if cur_line == 6 then
+			if cur_line == 5 then
 				cur_line = 1
 				cur_row = cur_row + 1 
 			else
@@ -272,7 +284,7 @@ function Mallview:show_all_card()
 
 			person_info.load_card_pic(pic_card,n_pic_name)
 			pic_card.id = i
-			but_card_pay.id = self.card_info[i].card_plate_id
+			but_card_pay.cur_info = self.card_info[i]
 			uikits.event(pic_card,	
 				function(sender,eventType)	
 					id = sender.id
@@ -281,8 +293,19 @@ function Mallview:show_all_card()
 				end,"click")	
 			uikits.event(but_card_pay,	
 				function(sender,eventType)	
-
-					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
+					local silver_num = person_info.get_user_silver()
+					if silver_num < sender.cur_info.price then
+						person_info.messagebox(self,person_info.NO_SILVER,function(e)
+							if e == person_info.OK then
+							end
+						end)	
+					else
+						silver_num = silver_num-sender.card_info.price
+						person_info.set_user_silver(silver_num)
+						self:show_silver()
+						uikits.popScene()
+					end
+					--schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
 				end,"click")				
 		end
 		
@@ -352,7 +375,7 @@ function Mallview:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = self.sel_pinzhi
 	person_info.post_data_by_new_form('get_product_cards',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			if v and type(v) == 'table' then
 				self.card_info = v
 				self:show_all_card()			

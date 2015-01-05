@@ -46,7 +46,7 @@ end
 function Signview:sign()
 	local send_data
 	person_info.post_data_by_new_form('sign_submit',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			uikits.popScene()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
@@ -90,7 +90,7 @@ end
 function Signview:getdatabyurl()
 	local send_data
 	person_info.post_data_by_new_form('sign_detail',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			if v and type(v) == 'table' then
 				self:show_info(v)
 			end

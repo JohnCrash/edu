@@ -68,26 +68,7 @@ function create()
 	return scene	
 end
 
-function Mainview:getdatabyurl()
-	local send_data
-	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
-		if t and t == true then
-			if t == true then
 
-			else
- 
-			end
-		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
-				if e == person_info.OK then
-					uikits.popScene()
-				else
-					uikits.popScene()
-				end
-			end)
-		end
-	end)
-end
 local schedulerEntry = nil
 local per_tili_reset_time = 1*60
 
@@ -111,12 +92,46 @@ function Mainview:show_silver()
 	local silver_num = person_info.get_user_silver()
 	local txt_silver = uikits.child(self._Mainview,ui.TXT_SILVER_NUM)
 	txt_silver:setString(silver_num)
+
+	local but_silver = uikits.child(self._Mainview,ui.BUTTON_SILVER)
+--	but_silver:setVisible(false)
+	uikits.event(but_silver,	
+		function(sender,eventType)	
+--[[			self._Mainview:setEnabled(false)
+			self._Mainview:setTouchEnabled(false)--]]
+			local le_num = person_info.get_user_le_coin()
+			if le_num < 10 then
+				person_info.messagebox(self._Mainview,person_info.NO_LE,function(e)
+					if e == person_info.OK then
+						print('aaaaaaaaaaaa')
+					else
+						print('bbbbbbbbbbbb')
+					end
+--[[					self._Mainview:setEnabled(true)
+					self._Mainview:setTouchEnabled(true)--]]	
+				end)
+			else
+				le_num = le_num -10 
+				silver_num = silver_num + 1000
+				local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+				txt_le:setString(le_num)
+				txt_silver:setString(silver_num)
+				person_info.set_user_silver(silver_num)
+				person_info.set_user_le_coin(le_num)
+			end		
+		end,"click")
 end
 
 function Mainview:show_le_coin()
 	local le_num = person_info.get_user_le_coin()
 	local txt_le = uikits.child(self._Mainview,ui.TXT_LE_NUM)
 	txt_le:setString(le_num)
+	local but_le = uikits.child(self._Mainview,ui.BUTTON_LE)
+	but_le:setVisible(false)
+	uikits.event(but_le,	
+		function(sender,eventType)	
+			
+		end,"click")
 end
 local card_space = 1
 function Mainview:show_cards()
@@ -272,12 +287,33 @@ function Mainview:init()
 	
 	uikits.event(but_tili_add,	
 		function(sender,eventType)	
-			self.tili_num = self.tili_num -1
-			self:show_tili_num()
-			--self._txt_tili_time:setVisible(true)
+			local silver_num = person_info.get_user_silver()
+			if silver_num < 500 then
+				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+						if e == person_info.OK then
+						end
+					end)	
+			else
+				if self.tili_num >0 then
+					person_info.messagebox(self,person_info.HAS_TILI,function(e)
+							if e == person_info.OK then
+								self.tili_num = 100
+								self:show_tili_num()
+								silver_num = silver_num-500
+								person_info.set_user_silver(silver_num)
+								self:show_silver()
+							else
+								
+							end
+						end)			
+				else
+				
+				end
+			end
+--[[			--self._txt_tili_time:setVisible(true)
 			if not schedulerEntry and self.tili_num < 100 then
 				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.1,false)
-			end
+			end--]]
 			
 		end,"click")	
 	

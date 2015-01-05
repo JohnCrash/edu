@@ -79,7 +79,7 @@ end
 function Noticeview:getdatabyurl()
 	local send_data
 	person_info.post_data_by_new_form('get_msg',send_data,function(t,v)
-		if t and t == true then
+		if t and t == 200 then
 			if v and type(v) == 'table' then
 				self:show_notice(v)
 			end
