@@ -206,12 +206,16 @@ function AppEntry:init()
 			end}
 		end}
 	local g_last
-	local record =  uikits.button{caption='取网络状态',x=264*scale,y = 64*scale + 4*item_h,
+	local record =  uikits.button{caption='TEST',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
 	uikits.event( record,
 		function(sender,eventType)
-			kits.log( cc_getNetworkState() )
+			update.create{name='test',updates={'test','luacore'},
+				run=function()
+					local test = require "test/test"
+					return test.create()
+				end}
 		end)	
 	local playsound = uikits.button{caption='播放',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
