@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local Mainview = require "poetrymatch/Mainview"
 local Guideview = require "poetrymatch/Guideview"
 local person_info = require "poetrymatch/Person_info"
@@ -38,11 +37,12 @@ function create()
 end
 
 function Loading:update_skill_list()
-	local send_data
-	person_info.post_data_by_new_form('get_skills',send_data,function(t,v)
-		if t and t == true then
-			if v and v.list and type(v.list) == 'table' then
-				person_info.set_skill_list(v.list)
+	local send_data = {}
+	send_data.v1 = '1'
+	person_info.post_data_by_new_form(self._loading,'get_products',send_data,function(t,v)
+		if t and t == 200 then
+			if v and type(v) == 'table' then
+				person_info.set_skill_list(v)
 			end
 			if self.is_need_guide == true then
 				local scene_next = Guideview.create()        
@@ -53,7 +53,7 @@ function Loading:update_skill_list()
 			end
 
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -66,8 +66,8 @@ end
 
 function Loading:update_card_info()
 	local send_data
-	person_info.post_data_by_new_form('load_user_card_plate',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._loading,'load_user_card_plate',send_data,function(t,v)
+		if t and t == 200 then
 			local all_card_info = {}
 			local all_battle_list = {}
 			for i=1,#v do
@@ -83,18 +83,18 @@ function Loading:update_card_info()
 				cur_card_info.ap_ex = v[i].card_plate_attack.added_val
 				cur_card_info.ap_ex_max = v[i].card_plate_attack.can_be_val
 				cur_card_info.ap_pay = v[i].attack_coin.coin_val
-				cur_card_info.mp = v[i].card_plate_magic.basic_val
-				cur_card_info.mp_ex = v[i].card_plate_magic.added_val
-				cur_card_info.mp_ex_max = v[i].card_plate_magic.can_be_val
-				cur_card_info.mp_pay = v[i].magic_coin.coin_val
+				cur_card_info.sp = v[i].card_plate_magic.basic_val
+				cur_card_info.sp_ex = v[i].card_plate_magic.added_val
+				cur_card_info.sp_ex_max = v[i].card_plate_magic.can_be_val
+				cur_card_info.sp_pay = v[i].magic_coin.coin_val
 				cur_card_info.hp = v[i].card_plate_blood.basic_val
 				cur_card_info.hp_ex = v[i].card_plate_blood.added_val
 				cur_card_info.hp_ex_max = v[i].card_plate_blood.can_be_val
 				cur_card_info.hp_pay = v[i].blood_coin.coin_val
-				cur_card_info.sp = v[i].card_plate_wit.basic_val
-				cur_card_info.sp_ex = v[i].card_plate_wit.added_val
-				cur_card_info.sp_ex_max = v[i].card_plate_wit.can_be_val
-				cur_card_info.sp_pay = v[i].wit_coin.coin_val
+				cur_card_info.mp = v[i].card_plate_wit.basic_val
+				cur_card_info.mp_ex = v[i].card_plate_wit.added_val
+				cur_card_info.mp_ex_max = v[i].card_plate_wit.can_be_val
+				cur_card_info.mp_pay = v[i].wit_coin.coin_val
 				cur_card_info.pp = v[i].card_plate_pomes.basic_val
 				cur_card_info.pp_ex = v[i].card_plate_pomes.added_val
 				cur_card_info.pp_ex_max = v[i].card_plate_pomes.can_be_val
@@ -117,7 +117,7 @@ function Loading:update_card_info()
 			person_info.set_all_card_to_bag(all_card_info)
  			self:update_skill_list()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -130,8 +130,8 @@ end
 
 function Loading:update_user_info()
 	local send_data
-	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._loading,'load_user_info_wealth',send_data,function(t,v)
+		if t and t == 200 then
 			--local res = json.decode(v)
 			local user_info = {}
 			user_info.id = v.user_id
@@ -149,11 +149,12 @@ function Loading:update_user_info()
 			person_info.set_user_lvl_info(lvl_info)
 			person_info.set_user_le_coin(v.hcoin)
 			person_info.set_user_silver(v.scoin)
+			person_info.set_max_store_num(v.store_num)
 			self:update_card_info()
 			--[[local scene_next = Mainview.create()        
 			cc.Director:getInstance():replaceScene(scene_next)   --]]
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -166,8 +167,8 @@ end
 
 function Loading:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('login',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._loading,'login',send_data,function(t,v)
+		if t and t == 200 then
 			--local res = json.decode(v)
 			if v.v1 == true then
 				self.is_need_guide = false
@@ -176,7 +177,7 @@ function Loading:getdatabyurl()
 			end
 			self:update_user_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					uikits.popScene()
 				else
