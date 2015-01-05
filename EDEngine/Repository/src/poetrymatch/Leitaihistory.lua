@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Leitaihistory = class("Leitaihistory")
@@ -88,11 +87,11 @@ end
 
 function Leitaihistory:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('my_defense',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Leitaihistory,'my_defense',send_data,function(t,v)
 		if t and t == 200 then
 			self:show_info(v)
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Leitaihistory,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

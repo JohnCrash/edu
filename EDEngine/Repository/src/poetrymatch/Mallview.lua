@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Mallview = class("Mallview")
@@ -85,7 +84,7 @@ function Mallview:show_silver()
 			self._Mallview:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
-				person_info.messagebox(self,person_info.NO_LE,function(e)
+				person_info.messagebox(self._Mallview,person_info.NO_LE,function(e)
 					if e == person_info.OK then
 						print('aaaaaaaaaaaa')
 					else
@@ -175,7 +174,7 @@ function Mallview:show_card_info(id)
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < sender.cur_info.price then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Mallview,person_info.NO_SILVER,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -295,7 +294,7 @@ function Mallview:show_all_card()
 				function(sender,eventType)	
 					local silver_num = person_info.get_user_silver()
 					if silver_num < sender.cur_info.price then
-						person_info.messagebox(self,person_info.NO_SILVER,function(e)
+						person_info.messagebox(self._Mallview,person_info.NO_SILVER,function(e)
 							if e == person_info.OK then
 							end
 						end)	
@@ -374,14 +373,14 @@ end
 function Mallview:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = self.sel_pinzhi
-	person_info.post_data_by_new_form('get_product_cards',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Mallview,'get_product_cards',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				self.card_info = v
 				self:show_all_card()			
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

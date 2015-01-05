@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local bossview = require "poetrymatch/Bossview"
 local chuangguanrank = require "poetrymatch/Chuangguanrank"
@@ -46,7 +45,7 @@ local section_info = {}
 
 function Countryview:get_user_section_info()
 	local send_data
-	person_info.post_data_by_new_form('get_user_road_block',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Countryview,'get_user_road_block',send_data,function(t,v)
 		if t and t == 200 then
 --[[			local section_info = {}
 			for i=1,#v do
@@ -70,7 +69,7 @@ function Countryview:get_user_section_info()
 			section_info = {}
 			self:show_country()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Countryview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:get_user_section_info()
 				else
@@ -84,7 +83,7 @@ end
 
 function Countryview:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('get_road_block',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Countryview,'get_road_block',send_data,function(t,v)
 		if t and t == 200 then
 			for i=1,#v do
 				local cur_section_info = {}
@@ -100,7 +99,7 @@ function Countryview:getdatabyurl()
 			end
 			self:get_user_section_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Countryview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

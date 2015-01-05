@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local battlereward = require "poetrymatch/Battlereward"
 
@@ -80,7 +79,7 @@ local scheduler = cc.Director:getInstance():getScheduler()
 
 function Battleview:show_search_res()	
 	local send_data = {}
-	person_info.post_data_by_new_form('select_opponent',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Battleview,'select_opponent',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				local pic_bot1 = uikits.child(self._Battleview,ui.PIC_BOT1)
@@ -118,7 +117,7 @@ function Battleview:show_search_res()
 					person_info.load_logo_pic(pic_bot1,v[1].user_id)
 				else
 					pic_bot1:setVisible(false)
-					person_info.messagebox(self,person_info.BATTLE_SEARCH_ERROR,function(e)
+					person_info.messagebox(self._Battleview,person_info.BATTLE_SEARCH_ERROR,function(e)
 						if e == person_info.OK then
 							local view_search_res = uikits.child(self._Battleview,ui.VIEW_SEARCH_RES)
 							local but_search = uikits.child(self._Battleview,ui.BUTTON_SEARCH)								
@@ -152,7 +151,7 @@ function Battleview:show_search_res()
 				end
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_school_rank()
 				else
@@ -165,7 +164,7 @@ end
 
 function Battleview:show_person_rank()
 	local send_data = {}
-	person_info.post_data_by_new_form('get_batter_world_heroes',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Battleview,'get_batter_world_heroes',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				local view_person_rank = uikits.child(self._Battleview,ui.VIEW_PERSON_RANK)
@@ -196,7 +195,7 @@ function Battleview:show_person_rank()
 				--view_person_rank:removeFromParent()	
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_person_rank()
 				else
@@ -209,7 +208,7 @@ end
 
 function Battleview:show_school_rank()
 	local send_data = {}
-	person_info.post_data_by_new_form('get_batter_sch_heroes',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Battleview,'get_batter_sch_heroes',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				local view_school_rank = uikits.child(self._Battleview,ui.VIEW_SCHOOL_RANK)
@@ -235,7 +234,7 @@ function Battleview:show_school_rank()
 				--view_school_rank:removeFromParent()	
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_school_rank()
 				else
@@ -248,7 +247,7 @@ end
 
 function Battleview:show_personal_info()
 	local send_data = {}
-	person_info.post_data_by_new_form('get_battle_week_user',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Battleview,'get_battle_week_user',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 					local txt_win_num = uikits.child(self._Battleview,ui.TXT_USER_WIN_NUM)	
@@ -263,7 +262,7 @@ function Battleview:show_personal_info()
 					txt_user_rank:setString(v.user_rank)
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_school_rank()
 				else

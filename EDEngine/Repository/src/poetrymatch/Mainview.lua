@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local countryview = require "poetrymatch/Countryview"
 local battleview = require "poetrymatch/Battleview"
@@ -289,13 +288,13 @@ function Mainview:init()
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < 500 then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Mainview,person_info.NO_SILVER,function(e)
 						if e == person_info.OK then
 						end
 					end)	
 			else
 				if self.tili_num >0 then
-					person_info.messagebox(self,person_info.HAS_TILI,function(e)
+					person_info.messagebox(self._Mainview,person_info.HAS_TILI,function(e)
 							if e == person_info.OK then
 								self.tili_num = 100
 								self:show_tili_num()

@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Leitaischrank = class("Leitaischrank")
@@ -75,11 +74,11 @@ end
 function Leitaischrank:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = self.leitai_id
-	person_info.post_data_by_new_form('get_defense_sch_leaderboard',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Leitaischrank,'get_defense_sch_leaderboard',send_data,function(t,v)
 		if t and t == 200 then
 			self:show_info(v)
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Leitaischrank,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

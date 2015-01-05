@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Chuangguanrank = class("Chuangguanrank")
@@ -104,11 +103,11 @@ end
 
 function Chuangguanrank:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('get_user_roadblock_exper_rank',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Chuangguanrank,'get_user_roadblock_exper_rank',send_data,function(t,v)
 		if t and t == 200 then
 			self:show_info(v)
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Chuangguanrank,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

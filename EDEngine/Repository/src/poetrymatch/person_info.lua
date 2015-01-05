@@ -527,7 +527,7 @@ end
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
-local function post_data_by_new_form(module_id,post_data,func)
+local function post_data_by_new_form(parent,module_id,post_data,func)
 	local send_data = {}
 	send_data.v = {}
 	if post_data then
@@ -553,11 +553,11 @@ local function post_data_by_new_form(module_id,post_data,func)
 			elseif 	tb_result.c < 600 and tb_result.c > 200 then
 				if tb_result.c == 505 then
 					local send_data
-					post_data_by_new_form('login',send_data,function(t,v)
+					post_data_by_new_form(parent,'login',send_data,function(t,v)
 						if t and t == 200 then
-							post_data_by_new_form(module_id,post_data,func)
+							post_data_by_new_form(parent,module_id,post_data,func)
 						else
-							messagebox(self,NETWORK_ERROR,function(e)
+							messagebox(parent,NETWORK_ERROR,function(e)
 								if e == OK then
 									
 								end
@@ -565,7 +565,7 @@ local function post_data_by_new_form(module_id,post_data,func)
 						end
 					end)
 				else
-					messagebox(self,SER_ERROR,function(e)
+					messagebox(parent,SER_ERROR,function(e)
 						if e == OK then
 							
 						end
@@ -576,9 +576,9 @@ local function post_data_by_new_form(module_id,post_data,func)
 			end
 		else
 			--func(tb_result.c,tb_result.msg)
-			messagebox(self,NETWORK_ERROR,function(e)
+			messagebox(parent,NETWORK_ERROR,function(e)
 				if e == RETRY then
-					post_data_by_new_form(module_id,post_data,func)
+					post_data_by_new_form(parent,module_id,post_data,func)
 				end
 			end)
 		end
@@ -755,19 +755,15 @@ local function messagebox(parent,flag,func,txt_title,txt_content)
 	end
 	s:setPosition{x=size.width/2,y=size.height/2}
 	local viewParent=parent:getParent()
-	if viewParent then
-		viewParent:addChild( s,9999 )	
-		parent:setEnabled(false)
-		parent:setTouchEnabled(false)
-		but_confirm.parent = parent
-		but_giveup.parent = parent
-		but_know.parent = parent
-		but_ok.parent = parent
-		but_retry.parent = parent
-		but_good.parent = parent
-	else
-		parent:addChild( s,9999 )	
-	end
+	viewParent:addChild( s,9999 )	
+	parent:setEnabled(false)
+	parent:setTouchEnabled(false)
+	but_confirm.parent = parent
+	but_giveup.parent = parent
+	but_know.parent = parent
+	but_ok.parent = parent
+	but_retry.parent = parent
+	but_good.parent = parent
 	s:setEnabled(true)
 	s:setTouchEnabled(true)
 end

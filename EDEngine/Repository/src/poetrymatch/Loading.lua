@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local Mainview = require "poetrymatch/Mainview"
 local Guideview = require "poetrymatch/Guideview"
 local person_info = require "poetrymatch/Person_info"
@@ -40,7 +39,7 @@ end
 function Loading:update_skill_list()
 	local send_data = {}
 	send_data.v1 = '1'
-	person_info.post_data_by_new_form('get_products',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._loading,'get_products',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				person_info.set_skill_list(v)
@@ -54,7 +53,7 @@ function Loading:update_skill_list()
 			end
 
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -67,7 +66,7 @@ end
 
 function Loading:update_card_info()
 	local send_data
-	person_info.post_data_by_new_form('load_user_card_plate',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._loading,'load_user_card_plate',send_data,function(t,v)
 		if t and t == 200 then
 			local all_card_info = {}
 			local all_battle_list = {}
@@ -118,7 +117,7 @@ function Loading:update_card_info()
 			person_info.set_all_card_to_bag(all_card_info)
  			self:update_skill_list()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -131,7 +130,7 @@ end
 
 function Loading:update_user_info()
 	local send_data
-	person_info.post_data_by_new_form('load_user_info_wealth',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._loading,'load_user_info_wealth',send_data,function(t,v)
 		if t and t == 200 then
 			--local res = json.decode(v)
 			local user_info = {}
@@ -155,7 +154,7 @@ function Loading:update_user_info()
 			--[[local scene_next = Mainview.create()        
 			cc.Director:getInstance():replaceScene(scene_next)   --]]
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:update_user_info()
 				else
@@ -168,7 +167,7 @@ end
 
 function Loading:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('login',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._loading,'login',send_data,function(t,v)
 		if t and t == 200 then
 			--local res = json.decode(v)
 			if v.v1 == true then
@@ -178,7 +177,7 @@ function Loading:getdatabyurl()
 			end
 			self:update_user_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					uikits.popScene()
 				else

@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Bagview = class("Bagview")
@@ -136,39 +135,6 @@ function create(card_id)
 	return scene	
 end
 
-function Bagview:getdatabyurl()
-
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
-		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
-				end
-			end,messagebox.RETRY)	
-		end
-	end,'N')
-end
-
 function Bagview:show_silver()
 	local silver_num = person_info.get_user_silver()
 	local txt_silver = uikits.child(self._Bagview,ui.TXT_SILVER_NUM)
@@ -182,7 +148,7 @@ function Bagview:show_silver()
 			self._Bagview:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
-				person_info.messagebox(self,person_info.NO_LE,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
 					if e == person_info.OK then
 						print('aaaaaaaaaaaa')
 					else
@@ -323,7 +289,7 @@ end
 function Bagview:buy_store()	
 	local le_num = person_info.get_user_le_coin()
 	if le_num < 5 then	
-		person_info.messagebox(self,person_info.NO_LE,function(e)
+		person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
 			if e == person_info.OK then
 				print('aaaaaaaaaaaa')
 			else
@@ -367,11 +333,11 @@ function Bagview:show_shi_des(id)
 	
 	local send_data = {}
 	send_data.v1 = id
-	person_info.post_data_by_new_form('poems_detail',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Bagview,'poems_detail',send_data,function(t,v)
 		if t and t == 200 then
 			show_shi_des_gui(v)
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_shi_des(id)
 				else
@@ -459,11 +425,11 @@ function Bagview:show_shi_list()
 	
 	local send_data = {}
 	send_data.v1 = self.card_id
-	person_info.post_data_by_new_form('get_user_card_plate_poems',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Bagview,'get_user_card_plate_poems',send_data,function(t,v)
 		if t and t == 200 then
 			show_shi(v)
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_shi_list()
 				else
@@ -624,7 +590,7 @@ function Bagview:show_card_info(id)
 		local send_data = {}
 		send_data.v1 = self.card_id
 		send_data.v2 = id
-		person_info.post_data_by_new_form('user_cardplate_oper',send_data,function(t,v)
+		person_info.post_data_by_new_form(self._Bagview,'user_cardplate_oper',send_data,function(t,v)
 			if t and t == 200 then
 				if id == 6 then
 					self.card_info.skills={}
@@ -689,7 +655,7 @@ function Bagview:show_card_info(id)
 				end
 				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
 			else
-				person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 					if e == person_info.OK then
 						--self:cost_thing(id)
 					else
@@ -735,7 +701,7 @@ function Bagview:show_card_info(id)
 	uikits.event(but_card_info_del,	
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
-				person_info.messagebox(self,person_info.DEL_CARD,function(e)
+				person_info.messagebox(self._Bagview,person_info.DEL_CARD,function(e)
 					if e == person_info.OK then
 						cost_thing(7)
 					else
@@ -766,7 +732,7 @@ function Bagview:show_card_info(id)
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < card_info.ap_pay then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -797,7 +763,7 @@ function Bagview:show_card_info(id)
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < card_info.hp_pay then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -828,7 +794,7 @@ function Bagview:show_card_info(id)
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < card_info.mp_pay then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -859,7 +825,7 @@ function Bagview:show_card_info(id)
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < card_info.pp_pay then
-				person_info.messagebox(self,person_info.NO_SILVER,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -890,7 +856,7 @@ function Bagview:show_card_info(id)
 		function(sender,eventType)	
 			local le_num = person_info.get_user_le_coin()
 			if le_num < card_info.sp_pay then
-				person_info.messagebox(self,person_info.NO_LE,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
 					if e == person_info.OK then
 					end
 				end)	
@@ -906,11 +872,11 @@ function Bagview:show_card_info(id)
 	txt_card_info_skill_reset:setString(card_info.skill_reset_pay)
 	uikits.event(but_card_info_skill_reset,	
 		function(sender,eventType)	
-			person_info.messagebox(self,person_info.RESET_SKILL,function(e)
+			person_info.messagebox(self._Bagview,person_info.RESET_SKILL,function(e)
 				if e == person_info.OK then
 					local silver_num = person_info.get_user_silver()
 					if silver_num < card_info.skill_reset_pay then
-						person_info.messagebox(self,person_info.NO_SILVER,function(e)
+						person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
 							if e == person_info.OK then
 							end
 						end)	

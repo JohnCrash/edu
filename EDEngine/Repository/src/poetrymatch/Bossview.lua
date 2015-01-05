@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local readytoboss = require "poetrymatch/Readytoboss"
 
@@ -71,7 +70,7 @@ local boss_info = {}
 function Bossview:update_user_boss_info()
 	local send_data = {}
 	send_data.v1 = self.country_id
-	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Bossview,'load_user_attack_road_block_cardplate',send_data,function(t,v)
 		if t and t == 200 then
 			
 --[[			for i=1,#v do
@@ -92,7 +91,7 @@ function Bossview:update_user_boss_info()
 			end
 			self:show_boss()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else
@@ -106,7 +105,7 @@ end
 function Bossview:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = self.country_id
-	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Bossview,'load_road_block_guard_card',send_data,function(t,v)
 		if t and t == 200 then
 			if v then
 
@@ -114,7 +113,7 @@ function Bossview:getdatabyurl()
 			end
 			self:update_user_boss_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else

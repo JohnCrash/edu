@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local leitaiperrank = require "poetrymatch/Leitaiperrank"
 local leitaischrank = require "poetrymatch/Leitaischrank"
@@ -222,13 +221,13 @@ function Leitaiview:show_card_info()
 		end 
 	end	
 	
-	person_info.post_data_by_new_form('defense_most_students',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Leitaiview,'defense_most_students',send_data,function(t,v)
 		if t and t == 200 then
 			if v then
 				show_classmate(v)
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:show_card_info()
 				else
@@ -388,14 +387,14 @@ end
 function Leitaiview:get_lei_info(lei_id)
 	local send_data = {}
 	send_data.v1 = lei_id
-	person_info.post_data_by_new_form('load_defense_card_plate',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Leitaiview,'load_defense_card_plate',send_data,function(t,v)
 		if t and t == 200 then
 			if v then
 				self.lei_info = v[1]
 				self:show_lei_info()
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:get_lei_info()
 				else
@@ -474,7 +473,7 @@ end
 function Leitaiview:getdatabyurl()
 	local send_data = {}
 	send_data.v1 = '1'
-	person_info.post_data_by_new_form('load_defense_possy',send_data,function(t,v)
+	person_info.post_data_by_new_form(self._Leitaiview,'load_defense_possy',send_data,function(t,v)
 		if t and t == 200 then
 			if v then
 				self.all_info = v
@@ -483,7 +482,7 @@ function Leitaiview:getdatabyurl()
 				self.view_no:setVisible(true)
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
 					self:getdatabyurl()
 				else
