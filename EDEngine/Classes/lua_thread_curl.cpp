@@ -4,6 +4,8 @@
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
 
+MySpaceBegin
+
 #if __cplusplus
 extern "C" {
 #endif
@@ -14,9 +16,10 @@ extern "C" {
 #endif
 
 #define LUA_CURL_HANDLE "lua_curl_t"
+    
 struct lua_curl_t
 {
-	kits::curl_t *ptc;
+	curl_t *ptc;
 };
 
 static void lua_mainThread_progressFunc( void *ptr )
@@ -30,7 +33,7 @@ static void lua_mainThread_progressFunc( void *ptr )
 			lua_State *L = pLuaStack->getLuaState();
 			if( L )
 			{
-				kits::curl_t *ptc = (kits::curl_t *)ptr;
+				curl_t *ptc = (curl_t *)ptr;
 				if( ptc && ptc->ref != LUA_REFNIL && 
 					ptc->this_ref != LUA_REFNIL &&
 					L == (lua_State *)ptc->user_data )
@@ -40,8 +43,8 @@ static void lua_mainThread_progressFunc( void *ptr )
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->this_ref);
 					pLuaStack->executeFunction(1);
 					//lua_call(L,1,0);
-					if( ptc->lua_state == kits::OK ||  ptc->lua_state == kits::FAILED ||
-						ptc->lua_state == kits::CANCEL )
+					if( ptc->lua_state == OK ||  ptc->lua_state == FAILED ||
+						ptc->lua_state == CANCEL )
 					{//进度函数将不再被调用,释放引用
 						lua_unref( L,ptc->this_ref );
 						ptc->this_ref = LUA_REFNIL;
@@ -51,14 +54,14 @@ static void lua_mainThread_progressFunc( void *ptr )
 		}
 	}
 	//if L==nillptr?
-	kits::curl_t *ptc = (kits::curl_t *)ptr;
+    curl_t *ptc = (curl_t *)ptr;
 	if( ptc )
 	{
 		ptc->release();
 	}
 }
 
-static void lua_progressFunc( kits::curl_t * ptc )
+static void lua_progressFunc( curl_t * ptc )
 {
 	//call lua progress function
 	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
@@ -84,11 +87,11 @@ static void lua_progressFunc( kits::curl_t * ptc )
 		....
 	}
 */
-static void httppost_param(lua_State *L,int i,kits::curl_t *pct)
+static void httppost_param(lua_State *L,int i,curl_t *pct)
 {
 	if(lua_istable(L,i))
 	{
-		kits::post_t item;
+		post_t item;
 
 		lua_pushstring(L,"copyname");
 		lua_gettable(L,i);
@@ -133,7 +136,7 @@ static void httppost_param(lua_State *L,int i,kits::curl_t *pct)
 		pct->posts.push_back(item);
 	}
 }
-static void httppost_params(lua_State *L,int i,kits::curl_t *pct)
+static void httppost_params(lua_State *L,int i,curl_t *pct)
 {
 	if( lua_istable(L,i) )
 	{
@@ -160,26 +163,26 @@ static int do_curl(lua_State *L)
 		
 		if( method && url )
 		{
-			kits::CURL_METHOD m;
+			CURL_METHOD m;
 			if( strcmp("GET",method)==0 )
-				m = kits::GET;
+				m = GET;
 			else if( strcmp("POST",method)==0 )
 			{
-				m = kits::POST;
+				m = POST;
 			}
 			else if(strcmp("HTTPPOST",method) == 0 )
 			{
-				m = kits::HTTPPOST;
+				m = HTTPPOST;
 			}
 			else
-				m = kits::GET;
+				m = GET;
 			std::string cookie;
 			if( lua_isstring(L,3) )
 				cookie = luaL_checkstring(L,3);
 			
-			kits::curl_t *pct = new kits::curl_t(m,url,cookie);
+			curl_t *pct = new curl_t(m,url,cookie);
 			pct->retain();
-			if( m == kits::POST )
+			if( m == POST )
 			{ //post form
 				if( lua_isstring(L,5) )
 				{
@@ -190,7 +193,7 @@ static int do_curl(lua_State *L)
 				{
 					pct->content_type = lua_tostring(L, 6);
 				}
-			}else if( m == kits::HTTPPOST )
+			}else if( m == HTTPPOST )
 			{
 				httppost_params(L,5,pct);
 			}
@@ -212,7 +215,7 @@ static int do_curl(lua_State *L)
 			plct->ptc = pct;
 			luaL_getmetatable(L,LUA_CURL_HANDLE);
 			lua_setmetatable(L,-2);
-			kits::do_thread_curl( pct );
+			do_thread_curl( pct );
 		}else
 		{
 			lua_pushnil(L);
@@ -227,23 +230,23 @@ static int do_curl(lua_State *L)
 	}
 	return 2;
 }
-static int lua_pushState(lua_State *L,kits::curl_t *ptc)
+static int lua_pushState(lua_State *L,curl_t *ptc)
 {
 	switch(ptc->lua_state)
 	{
-	case kits::INIT:
+	case INIT:
 		lua_pushstring(L,"INIT");
 		break;
-	case kits::FAILED:
+	case FAILED:
 		lua_pushstring(L,"FAILED");
 		break;
-	case kits::LOADING:
+	case LOADING:
 		lua_pushstring(L,"LOADING");
 		break;
-	case kits::CANCEL:
+	case CANCEL:
 		lua_pushstring(L,"CANCEL");
 		break;
-	case kits::OK:
+	case OK:
 		lua_pushstring(L,"OK");
 		break;
 	default:
@@ -268,7 +271,7 @@ static int lua_curl_restart(lua_State *L)
 	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
 	if( c && c->ptc )
 	{
-		if( c->ptc->state != kits::LOADING &&
+		if( c->ptc->state != LOADING &&
 			c->ptc->bfastEnd == true && 
 			c->ptc->size < c->ptc->usize &&
 			c->ptc->usize > 0 )
@@ -277,8 +280,8 @@ static int lua_curl_restart(lua_State *L)
 			delete c->ptc->pthread;
 			c->ptc->pthread = nullptr;
 			c->ptc->bfastEnd = false;
-			c->ptc->state = kits::INIT;
-			kits::do_thread_curl( c->ptc );
+			c->ptc->state = INIT;
+			do_thread_curl( c->ptc );
 			lua_pushboolean(L,true);
 			return 1;
 		}
@@ -292,7 +295,7 @@ static int lua_curl_index(lua_State *L)
 	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
 	if( c && c->ptc )
 	{
-		kits::curl_t *ptc = (kits::curl_t *)c->ptc;
+		curl_t *ptc = (curl_t *)c->ptc;
 		if( c )
 		{
 			if( lua_isstring(L,2) )
@@ -339,10 +342,10 @@ static int lua_curl_index(lua_State *L)
 					{
 						switch( ptc->method )
 						{
-						case kits::GET:
+						case GET:
 							lua_pushstring(L,"GET");
 							break;
-						case kits::POST:
+						case POST:
 							lua_pushstring(L,"POST");
 							break;
 						default:
@@ -437,4 +440,5 @@ int luaopen_threadcurl( lua_State *L )
 }
 #if __cplusplus
 }
+MySpaceEnd
 #endif

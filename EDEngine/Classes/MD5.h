@@ -1,8 +1,10 @@
 #ifndef __MD5_H__
 #define __MD5_H__
-
+#include "staticlib.h"
 #include <string>
 #include <stdio.h>
+
+MySpaceBegin
 
 typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
@@ -57,4 +59,6 @@ void GetCheckSumStr16(const char *pSrc,int len,char *pDst);
 
 bool IsLittleEndian();
 std::string CreateRandomString();
+
+MySpaceEnd
 #endif // __MD5_H__

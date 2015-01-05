@@ -11,6 +11,14 @@ Signview.__index = Signview
 local ui = {
 	Signview_FILE = 'poetrymatch/qiandao.json',
 	Signview_FILE_3_4 = 'poetrymatch/qiandao.json',
+	TXT_SIGN_DAYS = 'ts',
+	TXT_SIGN_RANK = 'pm',
+	TXT_SILVER_NUM = 'hd2/yinbi',
+	TXT_LE_NUM = 'hd1/lebi',
+	PIC_USER_MAN = 'xingbie2',
+	PIC_USER_WOMAN = 'xingbie',
+	BUTTON_SIGN = 'lingqu',
+	BUTTON_QUIT = 'xinxi/fanhui',
 }
 
 local function loadArmature( name )
@@ -35,37 +43,67 @@ function create()
 	return scene	
 end
 
-function Signview:getdatabyurl()
-
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
+function Signview:sign()
+	local send_data
+	person_info.post_data_by_new_form('sign_submit',send_data,function(t,v)
+		if t and t == true then
+			uikits.popScene()
 		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
 				end
-			end,messagebox.RETRY)	
+			end)
 		end
-	end,'N')
+	end)
+end
+
+function Signview:show_info(sign_info)
+	local txt_days = uikits.child(self._Signview,ui.TXT_SIGN_DAYS)
+	local txt_rank = uikits.child(self._Signview,ui.TXT_SIGN_RANK)
+	local txt_silver_num = uikits.child(self._Signview,ui.TXT_SILVER_NUM)
+	local txt_le_num = uikits.child(self._Signview,ui.TXT_LE_NUM)
+	txt_days:setString(sign_info.days)
+	txt_rank:setString(sign_info.rank)
+	txt_silver_num:setString(sign_info.scoin)
+	txt_le_num:setString(sign_info.hcoin)
+	local but_sign = uikits.child(self._Signview,ui.BUTTON_SIGN)
+	if sign_info.can_sign == 0 then
+		but_sign:setEnabled(false)
+		but_sign:setBright(false)
+		but_sign:setTouchEnabled(false)
+	else
+		but_sign:setEnabled(true)
+		but_sign:setBright(true)
+		but_sign:setTouchEnabled(true)	
+	end
+	
+	uikits.event(but_sign,	
+		function(sender,eventType)	
+			self:sign()
+		end,"click")	
+		
+end
+
+function Signview:getdatabyurl()
+	local send_data
+	person_info.post_data_by_new_form('sign_detail',send_data,function(t,v)
+		if t and t == true then
+			if v and type(v) == 'table' then
+				self:show_info(v)
+			end
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
+				end
+			end)
+		end
+	end)
 end
 
 function Signview:init()	
@@ -76,13 +114,23 @@ function Signview:init()
 	end
 	self._Signview = uikits.fromJson{file_9_16=ui.Signview_FILE,file_3_4=ui.Signview_FILE_3_4}
 	self:addChild(self._Signview)
-	
+	self:getdatabyurl()
 
---	self:getdatabyurl()
---	local loadbox = Signviewbox.open(self)
---	local scene_next = WrongSubjectList.create()								
---	cc.Director:getInstance():replaceScene(scene_next)	
-
+	local pic_user_woman = uikits.child(self._Signview,ui.PIC_USER_WOMAN)
+	local pic_user_man = uikits.child(self._Signview,ui.PIC_USER_MAN)
+	self.user_info = person_info.get_user_info()
+	if self.user_info.sex == 1 then
+		pic_user_man:setVisible(true)
+		pic_user_woman:setVisible(false)
+	else
+		pic_user_man:setVisible(false)
+		pic_user_woman:setVisible(true)	
+	end	
+	local but_quit = uikits.child(self._Signview,ui.BUTTON_QUIT)
+	uikits.event(but_quit,	
+		function(sender,eventType)	
+			uikits.popScene()
+		end,"click")	
 end
 
 function Signview:release()

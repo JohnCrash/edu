@@ -10,6 +10,8 @@
 #import <AudioToolbox/AudioFile.h>
 #import <AudioToolbox/AudioToolbox.h>
 
+UsingMySpace;
+
 #define	RETURN_TYPE_TAKEPICTURE		1
 #define	RETURN_TYPE_PICKPICTURE		2
 
@@ -33,14 +35,21 @@ static UIPopoverController *popoverController=NULL;
     [super didReceiveMemoryWarning];
 }
 
+MySpaceBegin
 void OnIOSReturnBuf(int nType,int nID,int nParam1,int nParam2,int lenBuf,char *pBuf);
 void OnIOSReturn(int nType,int nID,int nParam1,int nParam2);
 char *AdjustRawBufOrientation(char *pSrcBuf,int *pWidth,int *pHeight,int nAngle,bool bMirror);
+MySpaceEnd
 
 static int s_nCurID=1;
 static int s_nBufType;
 static int s_nBufID;
 static int s_ResourceType = TAKE_PICTURE;
+
+static void SendToLua(std::string resource,int typeCode,int resultCode)
+{
+    takeResource_callback(resource,typeCode,resultCode);
+}
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
@@ -124,43 +133,56 @@ static int s_ResourceType = TAKE_PICTURE;
             pimg->initWithRawData((unsigned char*)pBuf, w * 4 * h, w, h, 8);
             pimg->saveToFile(tmp);
             pimg->release();
-            takeResource_callback(tmp,s_ResourceType,RESULT_OK);
+            SendToLua(tmp,s_ResourceType,RESULT_OK);
         }
         else
         {
             CCLOG("imagePickerController new cocos2d::Image return null!");
-            takeResource_callback("imagePickerController pBuf == nullptr or pimg == nullptr",s_ResourceType,RESULT_ERROR);
+            SendToLua("imagePickerController pBuf == nullptr or pimg == nullptr",s_ResourceType,RESULT_ERROR);
         }
         
     }
     //OnIOSReturnBuf(s_nBufType,s_nBufID,w,h,len,(char *)pBuf);
     if (pNewBuf!=NULL) free(pNewBuf);
-//    [picker.view removeFromSuperview];
-//    [picker release];
-    
-//    if (popoverController!=NULL)
-//    {
-//        [popoverController dismissPopoverAnimated:YES];
-//    }
 
-    [self dismissModalViewControllerAnimated:YES];
+    [picker.view removeFromSuperview];
+    [picker release];
+    
+    if (popoverController!=NULL)
+    {
+        [popoverController dismissPopoverAnimated:YES];
+    }
+
+ //   [self dismissModalViewControllerAnimated:YES];
 
     [s_pHelperView.view removeFromSuperview];
+ //   [s_pHelperView.view.superview removeFromSuperview];
     [s_pHelperView release];
     s_pHelperView=NULL;
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
- //   [picker.view removeFromSuperview];
- //   [picker release];
-    [self dismissModalViewControllerAnimated:YES];
+    [picker.view removeFromSuperview];
+    [picker release];
+    
+    if (popoverController!=NULL)
+    {
+        [popoverController dismissPopoverAnimated:YES];
+    }
     
     [s_pHelperView.view removeFromSuperview];
     [s_pHelperView release];
     s_pHelperView=NULL;
-  
-    takeResource_callback("",s_ResourceType,RESULT_CANCEL);
+
+    /*
+    [self dismissModalViewControllerAnimated:YES];
+    
+    [s_pHelperView.view removeFromSuperview];
+    [s_pHelperView.view.superview removeFromSuperview];
+     */
+    
+    SendToLua("",s_ResourceType,RESULT_CANCEL);
 //    OnIOSReturn(RETURN_TYPE_TAKEPICTUREDIB,s_nBufID,0,0);
 }
 
@@ -178,7 +200,7 @@ static int s_ResourceType = TAKE_PICTURE;
         [popoverController release];
         popoverController=NULL;
     }
-    /*
+
     if (fVersion>=7.0f || UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
         picker.view.frame=self.view.frame;
@@ -189,9 +211,9 @@ static int s_ResourceType = TAKE_PICTURE;
         popoverController = [[UIPopoverController alloc] initWithContentViewController:picker];
         [popoverController presentPopoverFromRect:CGRectMake(0, 0, 300, 300) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     }
-     */
-    [self presentModalViewController: picker animated: YES];
-    [picker release];
+    
+//    [self presentModalViewController: picker animated: YES];
+//    [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
     s_nBufID=s_nCurID++;
     s_ResourceType = PICK_PICTURE;
@@ -205,9 +227,9 @@ static int s_ResourceType = TAKE_PICTURE;
     picker.view.frame=self.view.frame;
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
     picker.allowsEditing=NO;
-    //[self.view addSubview:picker.view];
-    [self presentModalViewController: picker animated: YES];
-    [picker release];
+    [self.view addSubview:picker.view];
+   // [self presentModalViewController: picker animated: YES];
+   // [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
     s_nBufID=s_nCurID++;
     s_ResourceType = TAKE_PICTURE;
@@ -251,12 +273,14 @@ static int s_ResourceType = TAKE_PICTURE;
 
 @end
 
+MySpaceBegin
+
 bool InitIOSHelper()
 {
     if (s_pHelperView!=NULL) return true;
     cocos2d::Director *pDirector = cocos2d::Director::getInstance();
 
-    static CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
+    CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
     
    //for cocos2d-x 2.2
    // static EAGLView *pOpenGLView=[EAGLView sharedEGLView];
@@ -273,6 +297,20 @@ bool InitIOSHelper()
     return true;
 }
 
+void setMutiTouchEnabled( bool b )
+{
+    cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+    CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
+    if( pOpenGLView )
+    {
+        [pOpenGLView setMultipleTouchEnabled:YES];
+        UIWindow* window = [UIApplication sharedApplication].windows[0];
+        if( window )
+        {
+            [window setMultipleTouchEnabled:YES];
+        }
+    }
+}
 //	return:
 //	<0		error
 //	0		abort
@@ -547,3 +585,5 @@ bool OpenURL(const char *pszURL)
     NSURL *url=[NSURL URLWithString:str];
     return [[UIApplication sharedApplication] openURL:url];
 }
+
+MySpaceEnd

@@ -5,6 +5,9 @@
 
 #include "IOSHelper.h"
 #include "cocos2d.h"
+
+MySpaceBegin
+
 USING_NS_CC;
 
 //#include "AppDelegateBase.h"
@@ -269,6 +272,7 @@ std::string CopyFromClipboard()
 
 int PickDocFile()
 {
+    return -1;
 }
 
 bool SendSMSMsg(const char *pszPhoneNo,const char *pszMsg)
@@ -280,5 +284,5 @@ bool StartPhoneCall(const char *pszPhoneNo)
 {
 	return false;
 }
-
+MySpaceEnd
 #endif

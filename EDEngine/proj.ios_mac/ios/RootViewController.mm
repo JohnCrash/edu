@@ -26,14 +26,12 @@
 #import "RootViewController.h"
 #import "cocos2d.h"
 #import "CCEAGLView.h"
-/*
- 1 横屏
- 2 竖屏
- */
-extern int g_OrientationMode;
-extern bool g_bAutorotate;
+#import "staticlib.h"
+#import "parsparam.h"
 
-@implementation RootViewController
+UsingMySpace;
+
+@implementation RootViewController_v3
 
 /*
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -57,10 +55,24 @@ extern bool g_bAutorotate;
     [super viewDidLoad];
 }
 
+ 
 */
+
+/*
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    
+}
+*/
+
 // Override to allow orientations other than the default portrait orientation.
 // This method is deprecated on ios6
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  //  NSLog(@"statusBarOrientation %d",[[UIApplication sharedApplication] statusBarOrientation]);
+  //  NSLog(@"interfaceOrientation %d",interfaceOrientation);
+  //  [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+  //  UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+  //  NSLog(@"currentDevice Orientation %d",orientation );
+    
     if( g_OrientationMode == 2 )
     {
         if( interfaceOrientation == UIInterfaceOrientationPortrait ||
@@ -79,6 +91,9 @@ extern bool g_bAutorotate;
 
 // For ios6, use supportedInterfaceOrientations & shouldAutorotate instead
 - (NSUInteger) supportedInterfaceOrientations{
+ //   [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+ //   UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+ //   NSLog(@"currentDevice Orientation %d",orientation );
 #ifdef __IPHONE_6_0
     if( g_OrientationMode == 2 )
     {

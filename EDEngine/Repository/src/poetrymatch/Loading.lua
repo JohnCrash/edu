@@ -5,6 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local messagebox = require "messagebox"
 local Mainview = require "poetrymatch/Mainview"
+local Guideview = require "poetrymatch/Guideview"
 local person_info = require "poetrymatch/Person_info"
 
 local Loading = class("Loading")
@@ -35,17 +36,40 @@ function create()
 	cur_layer:registerScriptHandler(onNodeEvent)
 	return scene	
 end
---[[{id='caoz',name='caoz',lvl=5,cur_exp=10,max_exp=100,in_battle_list = 1,}
-{"user_id":149527,"card_plate_id":1,"card_material":1,"card_plate_name":"дам╞","is_main_card_plate":1,
-"card_plate_level":1,"card_plate_exper_curr":0,"card_plate_exper_max":50,"card_plate_exper":0,"card_plate_attack":7,
-"card_plate_magic":0,"card_plate_wit":8,"card_plate_pomes":3,"card_plate_blood":0,"description":"433",
-"attack_max":8,"blood_max":99,"magic_max":0,"wit_max":9,"pomes_max":3,"skill_max":3,"attack_coin":[2,10],
-"blood_coin":[2,10],"magic_coin":[1,10],"wit_coin":[2,10],"pomes_coin":[2,10],"relearn_coin":[2,10000]}--]]
+
+function Loading:update_skill_list()
+	local send_data
+	person_info.post_data_by_new_form('get_skills',send_data,function(t,v)
+		if t and t == true then
+			if v and v.list and type(v.list) == 'table' then
+				person_info.set_skill_list(v.list)
+			end
+			if self.is_need_guide == true then
+				local scene_next = Guideview.create()        
+				cc.Director:getInstance():replaceScene(scene_next)  				
+			else
+				local scene_next = Mainview.create()        
+				cc.Director:getInstance():replaceScene(scene_next)  
+			end
+
+		else
+			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+					self:update_user_info()
+				else
+					self:update_user_info()
+				end
+			end)
+		end
+	end)
+end
+
 function Loading:update_card_info()
 	local send_data
 	person_info.post_data_by_new_form('load_user_card_plate',send_data,function(t,v)
 		if t and t == true then
 			local all_card_info = {}
+			local all_battle_list = {}
 			for i=1,#v do
 				local cur_card_info = {}
 				cur_card_info.id = v[i].card_plate_id
@@ -55,31 +79,43 @@ function Loading:update_card_info()
 				cur_card_info.cur_exp = v[i].card_plate_exper_curr
 				cur_card_info.max_exp = v[i].card_plate_exper_max
 				cur_card_info.pinzhi = v[i].card_material
-				cur_card_info.ap = v[i].card_plate_attack
-				cur_card_info.ap_ex = v[i].attack_max
-				cur_card_info.ap_pay = v[i].attack_coin[2]
-				cur_card_info.mp = v[i].card_plate_magic
-				cur_card_info.mp_ex = v[i].magic_max
-				cur_card_info.mp_pay = v[i].magic_coin[2]
-				cur_card_info.hp = v[i].card_plate_blood
-				cur_card_info.hp_ex = v[i].blood_max
-				cur_card_info.hp_pay = v[i].blood_coin[2]
-				cur_card_info.sp = v[i].card_plate_wit
-				cur_card_info.sp_ex = v[i].wit_max
-				cur_card_info.sp_pay = v[i].wit_coin[2]
-				cur_card_info.pp = v[i].card_plate_pomes
-				cur_card_info.pp_ex = v[i].pomes_max
-				cur_card_info.pp_pay = v[i].pomes_coin[2]	
+				cur_card_info.ap = v[i].card_plate_attack.basic_val
+				cur_card_info.ap_ex = v[i].card_plate_attack.added_val
+				cur_card_info.ap_ex_max = v[i].card_plate_attack.can_be_val
+				cur_card_info.ap_pay = v[i].attack_coin.coin_val
+				cur_card_info.mp = v[i].card_plate_magic.basic_val
+				cur_card_info.mp_ex = v[i].card_plate_magic.added_val
+				cur_card_info.mp_ex_max = v[i].card_plate_magic.can_be_val
+				cur_card_info.mp_pay = v[i].magic_coin.coin_val
+				cur_card_info.hp = v[i].card_plate_blood.basic_val
+				cur_card_info.hp_ex = v[i].card_plate_blood.added_val
+				cur_card_info.hp_ex_max = v[i].card_plate_blood.can_be_val
+				cur_card_info.hp_pay = v[i].blood_coin.coin_val
+				cur_card_info.sp = v[i].card_plate_wit.basic_val
+				cur_card_info.sp_ex = v[i].card_plate_wit.added_val
+				cur_card_info.sp_ex_max = v[i].card_plate_wit.can_be_val
+				cur_card_info.sp_pay = v[i].wit_coin.coin_val
+				cur_card_info.pp = v[i].card_plate_pomes.basic_val
+				cur_card_info.pp_ex = v[i].card_plate_pomes.added_val
+				cur_card_info.pp_ex_max = v[i].card_plate_pomes.can_be_val
+				cur_card_info.pp_pay = v[i].pomes_coin.coin_val	
+				cur_card_info.skill_reset_pay = v[i].relearn_coin.coin_val
 				cur_card_info.skill_max = v[i].skill_max
 				cur_card_info.skills = {}
 				if v[i].skills then
 					cur_card_info.skils = v[i].skills	
 				end			
+				if cur_card_info.in_battle_list == 1 then
+					all_battle_list[#all_battle_list+1] = cur_card_info.id
+				end
 				all_card_info[#all_card_info+1] = cur_card_info
 			end
 			person_info.set_all_card_to_bag(all_card_info)
-			local scene_next = Mainview.create()        
-			cc.Director:getInstance():replaceScene(scene_next)   			
+			for i=1,#all_battle_list do
+				person_info.add_card_to_battle_by_index(all_battle_list[i],i)
+			end
+			person_info.set_all_card_to_bag(all_card_info)
+ 			self:update_skill_list()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
@@ -102,6 +138,9 @@ function Loading:update_user_info()
 			user_info.name = v.user_name
 			user_info.sex = v.sex
 			user_info.school_name = v.province_name..v.city_name..v.area_name..v.sch_name
+			user_info.has_msg = v.has_msg
+			user_info.has_sign = v.has_sign
+			user_info.has_product = v.new_product
 			person_info.set_user_info(user_info)
 			local lvl_info = {}
 			lvl_info.lvl = v.level
@@ -131,11 +170,11 @@ function Loading:getdatabyurl()
 		if t and t == true then
 			--local res = json.decode(v)
 			if v.v1 == true then
-				self:update_user_info()
+				self.is_need_guide = false
 			else
-				local scene_next = Mainview.create()        
-				cc.Director:getInstance():replaceScene(scene_next)   
+				self.is_need_guide = true
 			end
+			self:update_user_info()
 		else
 			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then

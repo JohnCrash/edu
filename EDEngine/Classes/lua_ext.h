@@ -1,6 +1,8 @@
 #ifndef _LUA_EXT_
 #define _LUA_EXT_
 
+#include "staticlib.h"
+
 #include <string>
 
 #if __cplusplus
@@ -16,6 +18,7 @@ void luaopen_lua_exts(lua_State *L);
 }
 #endif
 
+MySpaceBegin
 enum EDDirectory
 {
     APP_DIRECTORY = 1,
@@ -26,4 +29,5 @@ enum EDDirectory
 };
 
 std::string getDirectory(EDDirectory edd);
+MySpaceEnd
 #endif

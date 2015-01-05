@@ -1,9 +1,11 @@
 #ifndef __RENDERTEXTUREEX_H__
 #define __RENDERTEXTUREEX_H__
-
+#include "staticlib.h"
 #include "cocos2d.h"
 #include "misc.h"
 #include <string>
+
+MySpaceBegin
 
 USING_NS_CC;
 
@@ -64,4 +66,5 @@ protected:
 	std::string mTmpFile;
 };
 
+MySpaceEnd
 #endif // __RENDERTEXTUREEX_H__

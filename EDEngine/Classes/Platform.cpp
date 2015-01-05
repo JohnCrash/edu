@@ -12,6 +12,8 @@ extern "C" {
 }
 #endif
 
+MySpaceBegin
+
 #define AMR_MAGIC_NUMBER "#!AMR\n"
 static CVoiceRecord *s_pVoiceRecord=NULL;
 
@@ -666,3 +668,4 @@ void OnIOSReturn(int nType,int nID,int nParam1,int nParam2)
     //g_pTheApp->OnReturnBuf(nType,nID,nParam1,nParam2,0,NULL);
 }
 #endif
+MySpaceEnd

@@ -25,6 +25,11 @@ extern std::wstring utf8ToUnicode(const std::string& s);
 #else
 #include <sys/time.h>
 #endif
+
+UsingMySpace;
+
+MySpaceBegin
+
 static int g_callref=LUA_REFNIL;
 static int g_callnsl = LUA_REFNIL;
 struct TRS
@@ -704,4 +709,6 @@ void luaopen_lua_exts(lua_State *L)
 
 #if __cplusplus
 }
+
+MySpaceEnd
 #endif

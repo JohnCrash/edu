@@ -25,7 +25,9 @@ max_store_num = 5,
 equipment_table = {},
 skill_table = {},
 } -- 
-
+local g_person_skill_list = {
+	
+}
 local g_person_battle_cards = {'caoz','caoc'}
 local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
 local g_person_boss_info = {
@@ -230,7 +232,7 @@ local function update_card_in_bag_by_id(id,tag,content)
 				end
 			end
 		end		
-		g_person_bag.cards_table = card_info
+		--g_person_bag.cards_table = card_info
 	end
 end
 
@@ -352,7 +354,7 @@ local function load_card_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = card_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = card_root_path..filename2
@@ -378,7 +380,7 @@ local function load_section_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = section_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = section_root_path..filename2
@@ -404,7 +406,7 @@ local function load_skill_pic(handle,filename,filename1,filename2)
 			if filename1 then
 				file_down_path = skill_root_path..filename1
 			else
-				file_down_path = file_path
+				file_down_path = ''
 			end
 			if filename2 then
 				file_path_dis = skill_root_path..filename2
@@ -439,6 +441,39 @@ local function get_boss_info_by_id(id)
 		boss_info = g_person_boss_info[id]
 	end 
 	return boss_info
+end
+
+local function set_boss_info_by_id(id,boss_info) 
+	if boss_info and  type(boss_info) == 'table' then
+		g_person_boss_info[id] = boss_info
+	end
+end
+
+local function set_skill_list(skill_list)
+	if skill_list and type(skill_list) == 'table' then
+		g_person_skill_list = skill_list
+	end
+end
+
+local function get_skill_list()
+	local skill_list = {}
+	if g_person_skill_list then
+		skill_list = g_person_skill_list
+	end
+	return skill_list
+end
+
+local function get_skill_info_by_id(id)
+	local skill_info = {}
+	if g_person_skill_list then
+		for i=1,#g_person_skill_list do	
+			if g_person_skill_list[i].skill_id == id then
+				print(g_person_skill_list[i].skill_name)
+				skill_info = g_person_skill_list[i]
+			end
+		end	
+	end
+	return skill_info
 end
 
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
@@ -651,6 +686,10 @@ return {
 	set_all_section_info = set_all_section_info,
 	get_all_section_info = get_all_section_info,
 	get_boss_info_by_id = get_boss_info_by_id,
+	set_boss_info_by_id = set_boss_info_by_id,
+	set_skill_list = set_skill_list,
+	get_skill_list = get_skill_list,
+	get_skill_info_by_id = get_skill_info_by_id,
 	post_data_by_new_form = post_data_by_new_form,
 	messagebox = messagebox,
 	RETRY = RETRY,

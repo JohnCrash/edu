@@ -1,4 +1,7 @@
+#include "staticlib.h"
 #include <string>
+
+MySpaceBegin
 
 bool IOS_StartApp(const char *pszURI);
 
@@ -21,3 +24,7 @@ bool IOS_StartApp(const char *pszURL);
 
 int TakePhoto();
 int PickPicture();
+
+void setMutiTouchEnabled( bool b );
+
+MySpaceEnd
