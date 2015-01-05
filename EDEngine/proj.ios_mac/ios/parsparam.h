@@ -18,6 +18,7 @@ extern std::string g_Launch;
 extern std::string g_Userid;
 extern std::string g_Mode;
 extern std::string g_Goback;
+extern std::string g_Orientation;
 
 extern int g_OrientationMode;
 extern bool g_bAutorotate;

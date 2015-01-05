@@ -11,6 +11,7 @@
 #import "cocos2d.h"
 #import "AppDelegate.h"
 #import "RootViewController.h"
+#import "parsparam.h"
 
 UsingMySpace;
 
@@ -40,6 +41,7 @@ void* createV3EAGLView(void *window)
                                           sharegroup: nil
                                        multiSampling: NO
                                      numberOfSamples: 0];
+    [eaglView setMultipleTouchEnabled:YES];
     return (void*)eaglView;
 }
 
@@ -85,4 +87,21 @@ void foregroundV3Engine()
     cocos2d::Application::getInstance()->applicationWillEnterForeground();
 }
 
-
+void setLaunchParam(const std::string& appname,
+                    const std::string& userid,
+                    const std::string& cookie,
+                    const std::string& mode,
+                    const std::string& orientation)
+{
+    g_Launch = appname;
+    g_Userid = userid;
+    g_Cookie = cookie;
+    g_Mode = mode;
+    g_Orientation = orientation;
+    if( orientation=="portrait" )
+        g_OrientationMode = 2;
+    else if( orientation=="landscape" )
+        g_OrientationMode = 1;
+    else
+        g_OrientationMode = 1;
+}

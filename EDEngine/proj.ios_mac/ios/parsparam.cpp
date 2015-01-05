@@ -17,6 +17,7 @@ std::string g_Launch;
 std::string g_Userid;
 std::string g_Mode;
 std::string g_Goback;
+std::string g_Orientation;
 /*
  1 横屏
  2 竖屏
