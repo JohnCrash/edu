@@ -101,6 +101,30 @@
 		52D917B01A5235A600144A84 /* luacore in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AD1A5235A500144A84 /* luacore */; };
 		52D917B11A5235A600144A84 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AE1A5235A500144A84 /* res */; };
 		52D917B21A5235A600144A84 /* src in Resources */ = {isa = PBXBuildFile; fileRef = 52D917AF1A5235A500144A84 /* src */; };
+		52D917CE1A52778100144A84 /* Classes in Resources */ = {isa = PBXBuildFile; fileRef = 52D917CD1A52778100144A84 /* Classes */; };
+		52D9185E1A52A78500144A84 /* StaticLib.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 52D9185D1A52A78500144A84 /* StaticLib.h */; };
+		52D918601A52A78500144A84 /* StaticLib.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D9185F1A52A78500144A84 /* StaticLib.m */; };
+		52D918791A52A7BD00144A84 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 524C264F1A497078001349BC /* Reachability.m */; };
+		52D9187B1A52A7D400144A84 /* RootViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 503AE0FF17EB989F00D1A890 /* RootViewController.mm */; };
+		52D9187D1A52A7D800144A84 /* IOSHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C71A36F65F000C5536 /* IOSHelper.mm */; };
+		52D9187F1A52A7DC00144A84 /* NativeHelperIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1C81A36F65F000C5536 /* NativeHelperIOS.cpp */; };
+		52D918831A52A7E600144A84 /* parsparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */; };
+		52D918851A52A7FA00144A84 /* AppleBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */; };
+		52D918891A52A80300144A84 /* lua_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC51997A9AC007C8988 /* lua_ext.cpp */; };
+		52D9188A1A52A80300144A84 /* lua_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC61997A9AC007C8988 /* lua_json.cpp */; };
+		52D9188B1A52A80300144A84 /* lua_thread_curl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC71997A9AC007C8988 /* lua_thread_curl.cpp */; };
+		52D9188C1A52A80300144A84 /* thread_curl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC91997A9AC007C8988 /* thread_curl.cpp */; };
+		52D918931A52A81400144A84 /* PlatformApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */; };
+		52D918941A52A81400144A84 /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E31A35D6F5005C737B /* misc.cpp */; };
+		52D918951A52A81400144A84 /* Platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2E01A35D6C6005C737B /* Platform.cpp */; };
+		52D918961A52A81400144A84 /* IDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D71A35D6AB005C737B /* IDF.cpp */; };
+		52D918971A52A81400144A84 /* RenderTextureEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D91A35D6AB005C737B /* RenderTextureEx.cpp */; };
+		52D918981A52A81400144A84 /* MD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D41A35D638005C737B /* MD5.cpp */; };
+		52D918991A52A81400144A84 /* lua_ljshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2D11A35D61C005C737B /* lua_ljshell.cpp */; };
+		52D9189A1A52A81400144A84 /* Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52CDB2CE1A35D5CB005C737B /* Files.cpp */; };
+		52D918E91A5392A800144A84 /* Edenginev3.mm in Sources */ = {isa = PBXBuildFile; fileRef = 52D918E81A5392A800144A84 /* Edenginev3.mm */; };
+		52D91A181A53C70200144A84 /* AppController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 503AE0FB17EB989F00D1A890 /* AppController.mm */; };
+		52D91A591A53CBC000144A84 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AFAF8B316D35DE700DB1158 /* AppDelegate.cpp */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
 		BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1C47EA1293683800B63C5D /* QuartzCore.framework */; };
@@ -108,16 +132,12 @@
 		D44C620E132DFF430009C878 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44C620D132DFF430009C878 /* AVFoundation.framework */; };
 		D44C6210132DFF4E0009C878 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D44C620F132DFF4E0009C878 /* AudioToolbox.framework */; };
 		D6B0611B1803AB670077942B /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B0611A1803AB670077942B /* CoreMotion.framework */; };
-		F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */; };
-		F53B0FCB1997A9AC007C8988 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC41997A9AC007C8988 /* Console.cpp */; };
 		F53B0FCC1997A9AC007C8988 /* lua_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC51997A9AC007C8988 /* lua_ext.cpp */; };
 		F53B0FCD1997A9AC007C8988 /* lua_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC61997A9AC007C8988 /* lua_json.cpp */; };
 		F53B0FCE1997A9AC007C8988 /* lua_thread_curl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC71997A9AC007C8988 /* lua_thread_curl.cpp */; };
 		F53B0FD01997A9AC007C8988 /* thread_curl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC91997A9AC007C8988 /* thread_curl.cpp */; };
 		F5BA4CC9199A3B3B000B95B2 /* AppleBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */; };
 		F5BA4CCA199A3B3B000B95B2 /* AppleBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */; };
-		F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC31997A9AC007C8988 /* AssetsManager.cpp */; };
-		F5E0ED611997B21700B61F2E /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC41997A9AC007C8988 /* Console.cpp */; };
 		F5E0ED621997B21A00B61F2E /* lua_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC51997A9AC007C8988 /* lua_ext.cpp */; };
 		F5E0ED631997B21C00B61F2E /* lua_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC61997A9AC007C8988 /* lua_json.cpp */; };
 		F5E0ED641997B21F00B61F2E /* lua_thread_curl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53B0FC71997A9AC007C8988 /* lua_thread_curl.cpp */; };
@@ -581,6 +601,19 @@
 			remoteInfo = "CocosDenshion iOS";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		52D918591A52A78400144A84 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				52D9185E1A52A78500144A84 /* StaticLib.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1ACB3243164770DE00914215 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../../cocos2dx/platform/third_party/ios/libraries/libcurl.a; sourceTree = "<group>"; };
@@ -7117,6 +7150,22 @@
 		52D917AD1A5235A500144A84 /* luacore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = luacore; path = iOS_errortitle_resources/luacore; sourceTree = "<group>"; };
 		52D917AE1A5235A500144A84 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = iOS_errortitle_resources/res; sourceTree = "<group>"; };
 		52D917AF1A5235A500144A84 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = iOS_errortitle_resources/src; sourceTree = "<group>"; };
+		52D917C01A5271D900144A84 /* staticlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = staticlib.h; path = ../Classes/staticlib.h; sourceTree = "<group>"; };
+		52D917C81A52756900144A84 /* misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = misc.h; path = ../Classes/misc.h; sourceTree = "<group>"; };
+		52D917C91A5275DB00144A84 /* IDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDF.h; path = ../Classes/IDF.h; sourceTree = "<group>"; };
+		52D917CA1A52763A00144A84 /* MD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MD5.h; path = ../Classes/MD5.h; sourceTree = "<group>"; };
+		52D917CB1A52769100144A84 /* Files.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Files.h; path = ../Classes/Files.h; sourceTree = "<group>"; };
+		52D917CC1A5276C300144A84 /* lua_ljshell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lua_ljshell.h; path = ../Classes/lua_ljshell.h; sourceTree = "<group>"; };
+		52D917CD1A52778100144A84 /* Classes */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Classes; path = ../Classes; sourceTree = "<group>"; };
+		52D917D01A52854A00144A84 /* misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = misc.h; path = ../Classes/misc.h; sourceTree = "<group>"; };
+		52D9185B1A52A78500144A84 /* libEDEngine StaticLibrary.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libEDEngine StaticLibrary.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		52D9185D1A52A78500144A84 /* StaticLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StaticLib.h; sourceTree = "<group>"; };
+		52D9185F1A52A78500144A84 /* StaticLib.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StaticLib.m; sourceTree = "<group>"; };
+		52D9186B1A52A78500144A84 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52D918D71A53898D00144A84 /* ExportEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExportEngine.cpp; path = ../Classes/ExportEngine.cpp; sourceTree = "<group>"; };
+		52D918D81A53898D00144A84 /* ExportEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExportEngine.h; path = ../Classes/ExportEngine.h; sourceTree = "<group>"; };
+		52D918E81A5392A800144A84 /* Edenginev3.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Edenginev3.mm; path = ios/Edenginev3.mm; sourceTree = SOURCE_ROOT; };
+		52D919221A53986400144A84 /* Edenginev3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Edenginev3.h; path = ios/Edenginev3.h; sourceTree = SOURCE_ROOT; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		BF1C47EA1293683800B63C5D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -7213,6 +7262,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52D918581A52A78400144A84 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -7233,6 +7289,8 @@
 				503AE0FE17EB989F00D1A890 /* RootViewController.h */,
 				52D5B1AC1A36EB4D000C5536 /* parsparam.cpp */,
 				52D5B1AD1A36EB4D000C5536 /* parsparam.h */,
+				52D919221A53986400144A84 /* Edenginev3.h */,
+				52D918E81A5392A800144A84 /* Edenginev3.mm */,
 			);
 			name = ios;
 			path = Classes;
@@ -7241,6 +7299,13 @@
 		15AA9C4015B7EC450033D6C2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				52D917D01A52854A00144A84 /* misc.h */,
+				52D917CD1A52778100144A84 /* Classes */,
+				52D917CC1A5276C300144A84 /* lua_ljshell.h */,
+				52D917CB1A52769100144A84 /* Files.h */,
+				52D917CA1A52763A00144A84 /* MD5.h */,
+				52D917C91A5275DB00144A84 /* IDF.h */,
+				52D917C81A52756900144A84 /* misc.h */,
 				52D37C6F1A37D88A007E0098 /* PlatformApple.cpp */,
 				52D37C671A37D7DE007E0098 /* PlatformApple.h */,
 				52D5B1EA1A36FDC3000C5536 /* Platform.h */,
@@ -7267,6 +7332,9 @@
 				1AFAF8B416D35DE700DB1158 /* AppDelegate.h */,
 				F5BA4CC7199A3B3B000B95B2 /* AppleBundle.cpp */,
 				F5BA4CC8199A3B3B000B95B2 /* AppleBundle.h */,
+				52D917C01A5271D900144A84 /* staticlib.h */,
+				52D918D71A53898D00144A84 /* ExportEngine.cpp */,
+				52D918D81A53898D00144A84 /* ExportEngine.h */,
 			);
 			name = Classes;
 			path = ../classes;
@@ -7277,6 +7345,7 @@
 			children = (
 				1D6058910D05DD3D006BFB54 /* EDEngine iOS.app */,
 				5087E76F17EB910900C73F5D /* EDEngine Mac.app */,
+				52D9185B1A52A78500144A84 /* libEDEngine StaticLibrary.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -7294,6 +7363,8 @@
 				F5943B1E1998FADB00A4881E /* cocos2d_lua_bindings.xcodeproj */,
 				F5943AC61998F83500A4881E /* cocos2d_libs.xcodeproj */,
 				15AA9C4015B7EC450033D6C2 /* Classes */,
+				52D9185C1A52A78500144A84 /* StaticLib */,
+				52D918691A52A78500144A84 /* StaticLibTests */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				080E96DDFE201D6D7F000001 /* ios */,
 				503AE10617EB990700D1A890 /* mac */,
@@ -23357,6 +23428,31 @@
 			path = "travis-scripts";
 			sourceTree = "<group>";
 		};
+		52D9185C1A52A78500144A84 /* StaticLib */ = {
+			isa = PBXGroup;
+			children = (
+				52D9185D1A52A78500144A84 /* StaticLib.h */,
+				52D9185F1A52A78500144A84 /* StaticLib.m */,
+			);
+			path = StaticLib;
+			sourceTree = "<group>";
+		};
+		52D918691A52A78500144A84 /* StaticLibTests */ = {
+			isa = PBXGroup;
+			children = (
+				52D9186A1A52A78500144A84 /* Supporting Files */,
+			);
+			path = StaticLibTests;
+			sourceTree = "<group>";
+		};
+		52D9186A1A52A78500144A84 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				52D9186B1A52A78500144A84 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		78C7DDAA14EBA5050085D0C2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -23421,6 +23517,23 @@
 			productReference = 5087E76F17EB910900C73F5D /* EDEngine Mac.app */;
 			productType = "com.apple.product-type.application";
 		};
+		52D9185A1A52A78400144A84 /* EDEngine StaticLibrary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52D918771A52A78500144A84 /* Build configuration list for PBXNativeTarget "EDEngine StaticLibrary" */;
+			buildPhases = (
+				52D918571A52A78400144A84 /* Sources */,
+				52D918581A52A78400144A84 /* Frameworks */,
+				52D918591A52A78400144A84 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "EDEngine StaticLibrary";
+			productName = StaticLib;
+			productReference = 52D9185B1A52A78500144A84 /* libEDEngine StaticLibrary.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -23431,6 +23544,9 @@
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 34WPB2ZB3N;
+					};
+					52D9185A1A52A78400144A84 = {
+						CreatedOnToolsVersion = 6.1.1;
 					};
 				};
 			};
@@ -23497,6 +23613,7 @@
 			targets = (
 				1D6058900D05DD3D006BFB54 /* EDEngine iOS */,
 				5087E73D17EB910900C73F5D /* EDEngine Mac */,
+				52D9185A1A52A78400144A84 /* EDEngine StaticLibrary */,
 			);
 		};
 /* End PBXProject section */
@@ -23869,6 +23986,7 @@
 				5087E78217EB970100C73F5D /* Icon-144.png in Resources */,
 				50EF629817ECD46A001EB2F8 /* Icon-80.png in Resources */,
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
+				52D917CE1A52778100144A84 /* Classes in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
 				50EF629717ECD46A001EB2F8 /* Icon-58.png in Resources */,
 			);
@@ -23896,10 +24014,8 @@
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 				52D5B1AE1A36EB4D000C5536 /* parsparam.cpp in Sources */,
 				52CDB2DE1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
-				F53B0FCA1997A9AC007C8988 /* AssetsManager.cpp in Sources */,
 				52CDB2D51A35D638005C737B /* MD5.cpp in Sources */,
 				52D37C701A37D88A007E0098 /* PlatformApple.cpp in Sources */,
-				F53B0FCB1997A9AC007C8988 /* Console.cpp in Sources */,
 				52D5B1CA1A36F65F000C5536 /* IOSHelper.mm in Sources */,
 				F53B0FCC1997A9AC007C8988 /* lua_ext.cpp in Sources */,
 				F53B0FCD1997A9AC007C8988 /* lua_json.cpp in Sources */,
@@ -23924,9 +24040,7 @@
 				52CDB2E21A35D6C6005C737B /* Platform.cpp in Sources */,
 				52CDB2DF1A35D6AB005C737B /* RenderTextureEx.cpp in Sources */,
 				503AE10517EB98FF00D1A890 /* main.cpp in Sources */,
-				F5E0ED601997B21400B61F2E /* AssetsManager.cpp in Sources */,
 				52CDB2DB1A35D6AB005C737B /* IDF.cpp in Sources */,
-				F5E0ED611997B21700B61F2E /* Console.cpp in Sources */,
 				52CDB2D31A35D61C005C737B /* lua_ljshell.cpp in Sources */,
 				52CDB2D61A35D638005C737B /* MD5.cpp in Sources */,
 				52CDB2E51A35D6F5005C737B /* misc.cpp in Sources */,
@@ -23935,6 +24049,35 @@
 				F5E0ED641997B21F00B61F2E /* lua_thread_curl.cpp in Sources */,
 				F5E0ED661997B22400B61F2E /* thread_curl.cpp in Sources */,
 				F5BA4CCA199A3B3B000B95B2 /* AppleBundle.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52D918571A52A78400144A84 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52D91A181A53C70200144A84 /* AppController.mm in Sources */,
+				52D9188A1A52A80300144A84 /* lua_json.cpp in Sources */,
+				52D918791A52A7BD00144A84 /* Reachability.m in Sources */,
+				52D9187F1A52A7DC00144A84 /* NativeHelperIOS.cpp in Sources */,
+				52D918951A52A81400144A84 /* Platform.cpp in Sources */,
+				52D918971A52A81400144A84 /* RenderTextureEx.cpp in Sources */,
+				52D9187B1A52A7D400144A84 /* RootViewController.mm in Sources */,
+				52D918941A52A81400144A84 /* misc.cpp in Sources */,
+				52D918851A52A7FA00144A84 /* AppleBundle.cpp in Sources */,
+				52D918831A52A7E600144A84 /* parsparam.cpp in Sources */,
+				52D918601A52A78500144A84 /* StaticLib.m in Sources */,
+				52D9188C1A52A80300144A84 /* thread_curl.cpp in Sources */,
+				52D918931A52A81400144A84 /* PlatformApple.cpp in Sources */,
+				52D918991A52A81400144A84 /* lua_ljshell.cpp in Sources */,
+				52D9188B1A52A80300144A84 /* lua_thread_curl.cpp in Sources */,
+				52D9189A1A52A81400144A84 /* Files.cpp in Sources */,
+				52D918961A52A81400144A84 /* IDF.cpp in Sources */,
+				52D9187D1A52A7D800144A84 /* IOSHelper.mm in Sources */,
+				52D91A591A53CBC000144A84 /* AppDelegate.cpp in Sources */,
+				52D918981A52A81400144A84 /* MD5.cpp in Sources */,
+				52D918891A52A80300144A84 /* lua_ext.cpp in Sources */,
+				52D918E91A5392A800144A84 /* Edenginev3.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -24229,6 +24372,115 @@
 			};
 			name = Release;
 		};
+		52D9186C1A52A78500144A84 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_FILE32API,
+					CC_TARGET_OS_IPHONE,
+					"COCOS2D_DEBUG=1",
+					"CC_ENABLE_CHIPMUNK_INTEGRATION=1",
+					EmbedCocos2d,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s i386";
+			};
+			name = Debug;
+		};
+		52D9186D1A52A78500144A84 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_FILE32API,
+					CC_TARGET_OS_IPHONE,
+					"CC_ENABLE_CHIPMUNK_INTEGRATION=1",
+					"COCOS2D_DEBUG=1",
+					EmbedCocos2d,
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s i386";
+			};
+			name = Release;
+		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -24240,19 +24492,16 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../cocos2d",
-					"$(SRCROOT)/../cocos2d/cocos",
-					"$(SRCROOT)/../cocos2d/cocos/base",
-					"$(SRCROOT)/../cocos2d/cocos/physics",
-					"$(SRCROOT)/../cocos2d/cocos/math/kazmath",
-					"$(SRCROOT)/../cocos2d/cocos/2d",
-					"$(SRCROOT)/../cocos2d/cocos/ui",
-					"$(SRCROOT)/../cocos2d/cocos/network",
-					"$(SRCROOT)/../cocos2d/cocos/audio/include",
-					"$(SRCROOT)/../cocos2d/cocos/editor-support",
-					"$(SRCROOT)/../cocos2d/extensions",
-					"$(SRCROOT)/../cocos2d/external",
-					"$(SRCROOT)/../cocos2d/external/chipmunk/include/chipmunk",
+					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -24270,19 +24519,16 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../cocos2d",
-					"$(SRCROOT)/../cocos2d/cocos",
-					"$(SRCROOT)/../cocos2d/cocos/base",
-					"$(SRCROOT)/../cocos2d/cocos/physics",
-					"$(SRCROOT)/../cocos2d/cocos/math/kazmath",
-					"$(SRCROOT)/../cocos2d/cocos/2d",
-					"$(SRCROOT)/../cocos2d/cocos/ui",
-					"$(SRCROOT)/../cocos2d/cocos/network",
-					"$(SRCROOT)/../cocos2d/cocos/audio/include",
-					"$(SRCROOT)/../cocos2d/cocos/editor-support",
-					"$(SRCROOT)/../cocos2d/extensions",
-					"$(SRCROOT)/../cocos2d/external",
-					"$(SRCROOT)/../cocos2d/external/chipmunk/include/chipmunk",
+					"$(SRCROOT)/../../../cocos2d-x",
+					"$(SRCROOT)/../../../cocos2d-x/cocos",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/base",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/platform/ios",
+					"$(SRCROOT)/../../../cocos2d-x/external",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/luajit/include",
+					"$(SRCROOT)/../../../cocos2d-x/external/lua/tolua",
+					"$(SRCROOT)/../../../cocos2d-x/cocos/scripting/lua-bindings/manual",
+					"$(SRCROOT)/../../../cocos2d-x/coscos/scripting/lua-bindings/auto",
+					../Classes,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
@@ -24310,6 +24556,15 @@
 			buildConfigurations = (
 				5087E76D17EB910900C73F5D /* Debug */,
 				5087E76E17EB910900C73F5D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		52D918771A52A78500144A84 /* Build configuration list for PBXNativeTarget "EDEngine StaticLibrary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52D9186C1A52A78500144A84 /* Debug */,
+				52D9186D1A52A78500144A84 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

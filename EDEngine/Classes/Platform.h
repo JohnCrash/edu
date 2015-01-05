@@ -1,6 +1,8 @@
 #ifndef _PLATFORM_H_
 #define _PLATFORM_H_
 
+#include "staticlib.h"
+
 #include "cocos2d.h"
 #include <string>
 #include <thread>
@@ -21,6 +23,7 @@
 #define RESULT_CANCEL (0)
 #define RESULT_ERROR (-2)
 
+MySpaceBegin
 bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();
@@ -277,5 +280,5 @@ public:
 };
 
 #endif
-
+MySpaceEnd
 #endif

@@ -2,6 +2,8 @@
 #include "Files.h"
 #include "MD5.h"
 
+MySpaceBegin
+
 USING_NS_CC;
 
 CDirMng g_DirMng;
@@ -174,3 +176,5 @@ void luaopen_lua_ljshell(lua_State *L)
 #if __cplusplus
 }
 #endif
+
+MySpaceEnd

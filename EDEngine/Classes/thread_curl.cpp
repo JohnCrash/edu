@@ -13,8 +13,8 @@
 #include "curl/include/ios/curl/curl.h"
 #endif
 
-namespace kits
-{
+MySpaceBegin
+
 	typedef std::pair<size_t ,byte *> pair_t;
 	typedef std::vector<pair_t > vector_t;
 
@@ -286,4 +286,4 @@ namespace kits
 		}
 		pct->pthread = new std::thread(curl_thread_method,pct);
 	}
-}
+MySpaceEnd

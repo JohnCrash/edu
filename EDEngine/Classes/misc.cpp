@@ -1,6 +1,8 @@
 #include "misc.h"
 #include "errno.h"
 
+MySpaceBegin
+
 Sprite *SpriteFromImage(Image *pImage)
 {
 	Texture2D *pTexture = new Texture2D();
@@ -222,3 +224,4 @@ char *AdjustRawBufOrientation(char *pSrcBuf,int *pWidth,int *pHeight,int nAngle,
 	return pDstBuf;
 }
 
+MySpaceEnd

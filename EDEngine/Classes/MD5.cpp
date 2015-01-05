@@ -1,7 +1,10 @@
 #include "md5.h"
 #include "cocos2d.h"
+
+MySpaceBegin
+
 USING_NS_CC;
- 
+
 bool IsLittleEndian()
 {
 	int nTest=0x12345678;
@@ -603,3 +606,4 @@ unsigned char *sha1(const unsigned char *msg,size_t size,unsigned char *result)
 	zen_sha1_final(&ctx, msg, size, result);
 	return result;
 }
+MySpaceEnd

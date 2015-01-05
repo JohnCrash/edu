@@ -1,10 +1,11 @@
 #ifndef __IDF_H__
 #define __IDF_H__
-
+#include "staticlib.h"
 #include "cocos2d.h"
 
 USING_NS_CC;
 
+MySpaceBegin
 //JPG文件结构说明:
 //
 //	<Start Segment>	ff, d8
@@ -270,4 +271,5 @@ private:
 	bool m_bModified;
 };
 
+MySpaceEnd
 #endif // __IDF_H__

@@ -1,6 +1,8 @@
 #include "Files.h"
 #include "MD5.h"
 
+MySpaceBegin
+
 USING_NS_CC;
 
 #include "errno.h"
@@ -611,3 +613,4 @@ std::string CRscName::GetLocalPathName()
 
 	return str;
 }
+MySpaceEnd
