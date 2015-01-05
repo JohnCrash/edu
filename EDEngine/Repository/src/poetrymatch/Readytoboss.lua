@@ -156,7 +156,7 @@ function Readytoboss:show_zhunbei()
 	local function timer_update(time)
 		txt_time:setString(choose_time)
 		choose_time = choose_time -1
-		if schedulerEntry and choose_time < 5 then
+		if schedulerEntry and choose_time < 0 then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 			schedulerEntry = nil
 
@@ -166,6 +166,9 @@ function Readytoboss:show_zhunbei()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 
 			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
+
+			--local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+			--lly.logTable(cardTable)
 
 			--传入战斗层的数据包
 			local data = {}
@@ -197,8 +200,8 @@ function Readytoboss:show_zhunbei()
 					data.card[i].sp = cardTable[i].sp --神力
 					data.card[i].skill_id = {}
 					for j = 1, 3 do
-						if cardTable[i].skils[j] ~= nil then
-							data.card[i].skill_id[j] = cardTable[i].skils[j].skill_id
+						if cardTable[i].skills[j] ~= nil then
+							data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
 						end
 					end
 				end

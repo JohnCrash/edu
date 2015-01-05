@@ -893,7 +893,7 @@ function LaBattle:initUIWithData(data)
 		--敌人技能(暂无)
 		for i = 1, 3 do
 			if data.enemy_skill_id[i] ~= nil then
-				self._arbtnEnemySkill[i]:setVisible(false)
+				self._arbtnEnemySkill[i]:setVisible(true)
 			else
 				self._arbtnEnemySkill[i]:setVisible(false)
 			end
@@ -1419,8 +1419,8 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 
 	--获取服务器中本题是否正确，双方减少后有多少血，转到什么状态
 	local bRight = self._tabCurAnswerResult.judge_result == 1 and true or false
-	local nPlyrHPdec = self._tabCurAnswerResult.user_card_plate.CardTotBlood
-	local nEnemyHPdec = self._tabCurAnswerResult.under_attack_card_plate.CardTotBlood
+	local nPlyrHPdec = self._tabCurAnswerResult.user_card_plate.card_tot_blood
+	local nEnemyHPdec = self._tabCurAnswerResult.under_attack_card_plate.card_tot_blood
 	local nextState
 
 	if nPlyrHPdec == 0 then
@@ -1435,7 +1435,7 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	local isEnd = false
 	if not nextState and self._nRoundsNumber <= 1 then		
 		isEnd = true
-		print(self._barPlyrHP:getPercent(), self._barEnemyHP:getPercent())
+		
 		if self._barPlyrHP:getPercent() < self._barEnemyHP:getPercent() then
 			nextState = state.win
 		else
@@ -1829,7 +1829,8 @@ function LaBattle:excuteComputerThinking()
 		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
 		local rWrite = math.random(rate)
 			
-		if rWrite == 1 then --也就是rate分之一的概率执行以下代码
+		--if rWrite == 1 then --也就是rate分之一的概率执行以下代码
+		if true then
 			lly.logCurLocAnd("type is %d", self._nCurQuesType)
 
 			if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
@@ -1847,8 +1848,8 @@ function LaBattle:excuteComputerThinking()
 			else
 				for i = 1, 4 do
 					if self._arbChoiseForComAnser[i] == true then
-						self._arckbShortChoose:setSelectedState(true)
-						self._arckbLongChoose:setSelectedState(true)
+						self._arckbShortChoose[i]:setSelectedState(true)
+						self._arckbLongChoose[i]:setSelectedState(true)
 						self._arbChoiseForComAnser[i] = false
 						break
 					end
@@ -2174,6 +2175,7 @@ function LaBattle:playEnterAnim_S()
 
 	--显示技能
 	local acSkFadeIn = cc.FadeIn:create(0.2)
+	local acSkFadeIn2 = cc.FadeIn:create(0.01)
 
 	--结束，同时开启退出按钮
 	local callFunc = cc.CallFunc:create(function ()
@@ -2181,20 +2183,31 @@ function LaBattle:playEnterAnim_S()
 		self._bCurStateIsEnding = true
 	end)
 
+
 	self._layCenterUI:runAction(acUIFadeIn:clone())
 	self:runAction(cc.Sequence:create(
 		cc.Spawn:create(
 			cc.TargetedAction:create(self._arimgPlyrCard[1], cc.Spawn:create(acMovePC, acSaclePC)),
-			cc.TargetedAction:create(self._imgEnemyCard, cc.Spawn:create(acMoveEC, acSacleEC))),
+			cc.TargetedAction:create(self._imgEnemyCard, cc.Spawn:create(acMoveEC, acSacleEC))
+		),
 		cc.Spawn:create(
-			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][1], acSkFadeIn),
-			cc.TargetedAction:create(self._arbtnEnemySkill[1], acSkFadeIn:clone())),
+			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][1], 
+				self._ararnPlyrSkillID[1][1] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone()), 
+			cc.TargetedAction:create(self._arbtnEnemySkill[1], 
+				self._arnEnemySkillID[1] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone())
+		),
 		cc.Spawn:create(
-			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][2], acSkFadeIn:clone()),
-			cc.TargetedAction:create(self._arbtnEnemySkill[2], acSkFadeIn:clone())),
+			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][2], 
+				self._ararnPlyrSkillID[1][2] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone()),
+			cc.TargetedAction:create(self._arbtnEnemySkill[2], 
+				self._arnEnemySkillID[2] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone())
+		),
 		cc.Spawn:create(
-			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][3], acSkFadeIn:clone()),
-			cc.TargetedAction:create(self._arbtnEnemySkill[3], acSkFadeIn:clone())),
+			cc.TargetedAction:create(self._ararbtnPlyrSkill[1][3], 
+				self._ararnPlyrSkillID[1][3] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone()),
+			cc.TargetedAction:create(self._arbtnEnemySkill[3], 
+				self._arnEnemySkillID[3] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone())
+		),
 		callFunc))
 
 	--上传战斗初始设置

@@ -19,7 +19,8 @@ local lly = {
 	struct = true,
 	array = true,
 	const = true,
-	ensure = true
+	ensure = true,
+	assert = true
 }
 
 --代表空值，但是不释放对象
@@ -596,6 +597,14 @@ function lly.ensure(value, typename)
 		end
 	else
 		lly.error("ensure wrong: typename must be a string/table", 2)
+	end
+	--]====]
+end
+
+function lly.assert(func)
+	---[====[
+	if not func or not func() then
+		lly.error("assert wrong", 2)
 	end
 	--]====]
 end
