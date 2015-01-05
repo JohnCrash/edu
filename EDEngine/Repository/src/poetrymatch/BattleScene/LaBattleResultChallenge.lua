@@ -74,7 +74,7 @@ function LaBattleResultChallenge:init(tab)
 	return self.super.init(self, tab)
 end
 
-function LaBattleResultChallenge:initUI()
+function LaBattleResultChallenge:initUI(tab)
 	repeat
 		--UI
 		self._wiRoot = uikits.fromJson{file_9_16 = ui.FILE, file_3_4 = ui.FILE_3_4}

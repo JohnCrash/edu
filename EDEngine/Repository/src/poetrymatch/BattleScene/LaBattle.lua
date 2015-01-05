@@ -823,7 +823,7 @@ function LaBattle:initUIWithData(data)
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
 		--头像 --玩家只分男女
-		if data.plyr_sex == 1 then --根据person_info 1为女 2为男
+		if data.plyr_sex == 1 then --根据person_info 1为woman 2为man
 			self._imgPlyrPortrait_girl:setVisible(true)
 			self._imgPlyrPortrait_boy:setVisible(false)
 		else
@@ -928,7 +928,23 @@ function LaBattle:initUIWithData(data)
 		--结束图层初始化 根据战斗类型不同而不同
 		if self._nCurBattleType == BATTLE_TYPE.STORY then
 			local moLaBattleResultStory = require "poetrymatch/BattleScene/LaBattleResultStory"
-			self._laResult = moLaBattleResultStory.Class:create()
+
+			local sendedTable = {} --初始化数据
+			sendedTable.achievement = {data.gainStar1, data.gainStar2, data.gainStar3}
+			sendedTable.sex = data.plyr_sex
+			sendedTable.name = data.plyr_name
+			sendedTable.cardID = {
+				data.card[1] and data.card[1].id or 0, 
+				data.card[2] and data.card[2].id or 0, 
+				data.card[3] and data.card[3].id or 0
+			}
+			sendedTable.cardName = {
+				data.card[1] and data.card[1].name or "", 
+				data.card[2] and data.card[2].name or "",  
+				data.card[3] and data.card[3].name or ""
+			}			
+
+			self._laResult = moLaBattleResultStory.Class:create(sendedTable)
 
 		elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
 			local moLaBattleResultFight = require "poetrymatch/BattleScene/LaBattleResultFight"
@@ -1219,7 +1235,7 @@ function LaBattle:downloadQuestion(camp_type)
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
 			if bSuc and result then
-				lly.logTable(result)
+				--lly.logTable(result)
 
 				--处理结果
 				self:onGetQuestion(result, camp_type)
@@ -1275,6 +1291,7 @@ function LaBattle:onGetQuestion(result, camp_type)
 				for i = 1, 4 do
 					if self._arstrQuesChooseMark[i] == self._strAnswer then
 						self._arbChoise[i] = true
+						self._arbChoiseForComAnser[i] = true --记录电脑的选择，用于一个一个答题时每答一个就取消一个
 						break
 					end
 				end
@@ -1298,13 +1315,10 @@ function LaBattle:onGetQuestion(result, camp_type)
 					for i = 1, 4 do
 						if self._arstrQuesChooseMark[i] == v then
 							self._arbChoise[i] = true
+							self._arbChoiseForComAnser[i] = true --记录电脑的选择，用于一个一个答题时每答一个就取消一个
 							self._nCOMNeedAnswer = self._nCOMNeedAnswer + 1
 						end
 					end
-				end
-
-				for i = 1, 4 do --记录电脑的选择，用于一个一个答题时每答一个就取消一个
-					self._arbChoiseForComAnser[i] = self._arbChoise[i]
 				end
 
 			elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
@@ -1529,12 +1543,15 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 	--设置攻击方向	
 	if camp_type == CAMP_TYPE.PLAYER then
+		lly.logCurLocAnd("player attack")
 
 		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
 
 		posAnimFrom = self._posPlyrCard
 		posAnimTo = self._posEnemyCard	
 	else
+		lly.logCurLocAnd("enemy attack")
+
 		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE) --动画是玩家指向敌人的，如果是玩家费血，要反转动画
 
 		posAnimFrom = self._posEnemyCard
@@ -1543,6 +1560,8 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 	--设置费血的阵营(暂无双方同时减血的情况)
 	if self._nPlyrCurrentHP - nPlyrHPdec > self._nEnemyCurrentHP - nEnemyHPdec then --玩家减血
+		lly.logCurLocAnd("player hurt")
+
 		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
 		posDereaseHPToken = self._posPlyrDecreaseHP
 
@@ -1552,6 +1571,8 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 		self._nPlyrCurrentHP = nPlyrHPdec
 	else
+		lly.logCurLocAnd("enemy hurt")
+
 		decreaseHPCard = self._imgEnemyCard
 		posDereaseHPToken = self._posEnemyDecreaseHP
 
@@ -1608,9 +1629,6 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		self._layDecHP:setVisible(true)
 	end)
 
-	--同时显示费血
-	local acMoveHPShow = cc.MoveBy:create(0.5, cc.p(0, self._nDisDecHPMoveY))
-
 	--同时晃动
 	local acMoveLeft = cc.MoveBy:create(0.05, cc.p(-10, 0))
 	local acMoveRight = cc.MoveBy:create(0.05, cc.p(20, 0))
@@ -1618,7 +1636,16 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		acMoveLeft, acMoveRight, acMoveLeft:clone())
 
 	--延时
-	local acDelay = cc.DelayTime:create(0.5)
+	local acDelay = cc.DelayTime:create(0.2)
+
+	--在血条上扣除 回调
+	local callfuncHurt = cc.CallFunc:create(function ()
+		decreaseHPBar:setPercent(persent)
+		self._layDecHP:setVisible(true)
+	end)
+
+	--同时显示费血的数字
+	local acMoveHPShow = cc.MoveBy:create(0.5, cc.p(0, self._nDisDecHPMoveY))
 
 	--然后结束
 	local callfuncEnd = cc.CallFunc:create(function ()
@@ -1637,11 +1664,10 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		cc.Sequence:create(
 			cc.TargetedAction:create(self._anim, acMoveFast),
 			callfunc,
-			cc.Spawn:create(
-				cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
-				cc.TargetedAction:create(decreaseHPCard, acShake)
-			),
+			cc.TargetedAction:create(decreaseHPCard, acShake),
 			acDelay,
+			callfuncHurt,
+			cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
 			callfuncEnd
 		)
 	)
@@ -1960,7 +1986,7 @@ function LaBattle:onClickSkill(camp_type, skillIndex)
 		camp_type, self._nCurCardIndex, skillIndex)
 
 	--使用技能
-	self:useSkill(camp_type, self._nCurCardIndex, skillID)
+	self:useSkill(camp_type, self._nCurCardIndex, skillIndex)
 end
 
 --使用技能
@@ -1987,6 +2013,8 @@ function LaBattle:useSkill(camp_type, cardIndex, skillIndex)
 		self._bFinishSkillCmnction = false
 		self:sendMsgWhenUseSkill()
 	end
+
+	lly.logCurLocAnd("skill id is " .. self._nCurSkillID)
 
 	---[[进行动画（完成时检查请求是否完成，完成则取消禁止）
 	self._bFinishSkillAnim = false
@@ -2297,6 +2325,9 @@ function LaBattle:endPrepareWhenNoVIT()
 
 	self._imgTip:runAction(cc.Sequence:create(
 		cc.EaseSineIn:create(acMoveCC), callfuncNextState))
+
+	--上传
+	self:uploadCurRoundSet()
 end
 
 --敌方出题
@@ -2657,8 +2688,7 @@ function LaBattle:win_S()
 	self._bCurStateIsEnding = false
 
 	--传输结果
-	local sendedTable = {}
-	sendedTable.
+	self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
 
 	--启动胜利页面
 	self._laResult:setVisible(true)
@@ -2709,4 +2739,6 @@ return {
 	Class = LaBattle,
 	BATTLE_TYPE = BATTLE_TYPE,
 }
+
+
 

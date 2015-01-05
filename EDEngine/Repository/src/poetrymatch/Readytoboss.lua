@@ -156,11 +156,12 @@ function Readytoboss:show_zhunbei()
 	local function timer_update(time)
 		txt_time:setString(choose_time)
 		choose_time = choose_time -1
-		if schedulerEntry and choose_time < 0 then
+		if schedulerEntry and choose_time < 5 then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 			schedulerEntry = nil
 
 			---[[ by luleyan! -------------------------
+			local ti = os.clock()
 			local sc = cc.Scene:create()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 
@@ -171,6 +172,11 @@ function Readytoboss:show_zhunbei()
 
 			---[[数据
 			data.battle_type = moLaBattle.BATTLE_TYPE.STORY --闯关模式入口--
+
+			--获得星星条件
+			data.gainStar1 = self.bot_info.star1_desc
+			data.gainStar2 = self.bot_info.star2_desc
+			data.gainStar3 = self.bot_info.star3_desc
 
 			--玩家信息
 			data.plyr_id = self.user_info.id
@@ -220,6 +226,7 @@ function Readytoboss:show_zhunbei()
 			local laBattle = moLaBattle.Class:create(data)
 			sc:addChild(laBattle)
 			cc.Director:getInstance():pushScene(sc)
+			print(string.format("time is %f", os.clock() - ti))
 			--]]---------------------------------------
 
 		end

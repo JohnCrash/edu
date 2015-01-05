@@ -30,7 +30,7 @@ end
 
 function LaBattleResultBase:init(tab)
 	repeat
-		if not self:initUI() then break end
+		if not self:initUI(tab) then break end
 		if not self:initAnim() then break end
 
 		return true

@@ -232,7 +232,7 @@
 				<key>offsetY</key>
 				<real>0</real>
 			</dict>
-			<key>kapai/sg-caoz2.png</key>
+			<key>nan2.png</key>
 			<dict>
 				<key>width</key>
 				<integer>285</integer>
@@ -246,6 +246,25 @@
 				<integer>1713</integer>
 				<key>y</key>
 				<integer>286</integer>
+				<key>offsetX</key>
+				<real>0</real>
+				<key>offsetY</key>
+				<real>0</real>
+			</dict>
+			<key>kapai/sg-caoz2.png</key>
+			<dict>
+				<key>width</key>
+				<integer>285</integer>
+				<key>height</key>
+				<integer>285</integer>
+				<key>originalWidth</key>
+				<integer>285</integer>
+				<key>originalHeight</key>
+				<integer>285</integer>
+				<key>x</key>
+				<integer>1713</integer>
+				<key>y</key>
+				<integer>572</integer>
 				<key>offsetX</key>
 				<real>0</real>
 				<key>offsetY</key>

@@ -10,6 +10,8 @@ local uikits = require "uikits"
 
 local moLaBattleResultBase = require "poetrymatch/BattleScene/LaBattleResultBase"
 
+local moperson_info = require "poetrymatch/person_info"
+
 lly.finalizeCurrentEnvironment()
 
 local ui = lly.const{
@@ -33,7 +35,8 @@ local ui = lly.const{
 	TXT_GET_CARD = "shengli/huode/hd1_1/kapai",
 	IMG_GET_CARD = "shengli/huode/hd1_1/tu",
 
-	IMG_PLYR_PORTRAIT = "shengli/huode/wo",
+	IMG_PLYR_PORTRAIT_girl = "shengli/huode/wo",
+	IMG_PLYR_PORTRAIT_boy = "shengli/huode/wo2",
 	TXT_PLYR_NAME = "shengli/huode/wo/mz",
 	TXT_PLYR_LEVEL = "shengli/huode/wo/dj",
 	BAR_PLYR_EXP = "shengli/huode/wo/dengji/jidu",
@@ -92,7 +95,8 @@ function LaBattleResultStory:ctor()
 		_artxtGet = lly.array(3),
 		_imgGet = Lnull,
 
-		_imgPlyrPortrait = Lnull,
+		_imgPlyrPortraitBoy = Lnull,
+		_imgPlyrPortraitGirl = Lnull,
 		_txtPlyrName = Lnull,
 		_txtPlyrLevel = Lnull,
 		_barPlyrExp = Lnull,
@@ -108,15 +112,26 @@ function LaBattleResultStory:ctor()
 		--动画
 		_animWin = Lnull,
 		_animLose = Lnull,
+
+		--数据
+		_nUserID = 0,
+		_arnCardID = lly.array(3, 0),
 		
 	}
 end
 
 function LaBattleResultStory:init(tab)
-	return self.super.init(self, tab)
+	if not self.super.init(self, tab) then return false end
+
+	self._nUserID = tab.plyr_id
+	for i = 1, 3 do
+		self._arnCardID[i] = tab.cardID[i]
+	end
+	
+	return true
 end
 
-function LaBattleResultStory:initUI()
+function LaBattleResultStory:initUI(tab)
 	repeat
 		--UI
 		self._wiRoot = uikits.fromJson{file_9_16 = ui.FILE, file_3_4 = ui.FILE_3_4}
@@ -141,8 +156,11 @@ function LaBattleResultStory:initUI()
 		self._artxtGet[3] = self:setWidget(ui.TXT_GET_CARD)
 		self._imgGet = self:setWidget(ui.IMG_GET_CARD)
 
-		self._imgPlyrPortrait = self:setWidget(ui.IMG_PLYR_PORTRAIT)
+		self._imgPlyrPortraitBoy = self:setWidget(ui.IMG_PLYR_PORTRAIT_boy)
+		self._imgPlyrPortraitGirl = self:setWidget(ui.IMG_PLYR_PORTRAIT_girl)
+
 		self._txtPlyrName = self:setWidget(ui.TXT_PLYR_NAME)
+		
 		self._txtPlyrLevel = self:setWidget(ui.TXT_PLYR_LEVEL)
 		self._barPlyrExp = self:setWidget(ui.BAR_PLYR_EXP)
 
@@ -167,6 +185,35 @@ function LaBattleResultStory:initUI()
 		--失败层
 		self._layLose = self:setWidget(ui.LAY_LOSE)
 		self._btnConfirmLose = self:setWidget(ui.BTN_CONFIRM_LOSE)
+
+		--初始化
+		--先隐藏星星
+		for i = 1, 3 do self._arimgStar[i]:setVisible(false) end
+
+		--通关条件
+		for i = 1, 3 do
+			self._artxtAchievement[i]:setString(tab.achievement[i])
+		end
+
+		--头像分男女
+		if tab.sex and tab.sex == 1 then 
+			self._imgPlyrPortraitBoy:setVisible(false)
+			self._imgPlyrPortraitGirl:setVisible(true)
+		else
+			self._imgPlyrPortraitBoy:setVisible(true)
+			self._imgPlyrPortraitGirl:setVisible(false)
+		end
+
+		--玩家名字
+		self._txtPlyrName:setString(tab.name)
+
+		--卡牌头像 卡牌名字
+		for i = 1, 3 do
+			if tab.cardID[i] == nil then break end
+			self._artxtCardName[i]:setString(tab.cardName[i])
+			moperson_info.load_card_pic(self._arimgCard[i], tab.cardID[i] .. "b.png")
+		end
+
 
 		return true
 	until true
@@ -206,6 +253,26 @@ end
 
 --获取数据
 function LaBattleResultStory:setData(table)
+	--星数
+	local star = tonumber(table.star)
+	star = star > 3 and 3 or star
+	for i = 1, star do
+		self._arimgStar[i]:setVisible(true)
+	end
+	
+	--经验实时获取
+
+	--获取的物品和钱
+	self._artxtGet[1]:setString(table.user_gain_items.sliver_coin)
+	self._artxtGet[2]:setString(table.user_gain_items.le_coin)
+	if table.user_gain_items.gain_card_id ~= 0 then
+		moperson_info.load_card_pic(self._imgGet, table.user_gain_items.gain_card_id .. "a.png")
+		self._imgGet:setScale(0.2) --缩小成合适比例
+		self._imgGet:setString(tostring("no"))
+	else
+		self._imgGet:setVisible(false)
+		self._imgGet:setVisible(false)
+	end
 
 end
 
@@ -224,6 +291,39 @@ function LaBattleResultStory:win()
 end
 
 function LaBattleResultStory:onWinAnimComplete()
+	--获取经验值后开始动画
+	local sendedTable = {v1 = self._nUserID}
+	moperson_info.post_data_by_new_form(
+		"get_suerinfo_cardinfo", --业务名
+		sendedTable, --数据
+		function (bSuc, result) --结果回调
+			
+			if bSuc and result and result.v1 then
+				onDownloadExp(result)
+			else
+				if not bSuc then lly.log(result) end
+				self:onNetError()
+			end			
+		end
+	)	
+	
+end
+
+function LaBattleResultStory:onDownloadExp(result)
+	--赋值
+	self._txtPlyrLevel:setString(tostring(result.level))
+	self._barPlyrExp:setPercent(100 * result.exper / result.exper_max)
+
+	for i = 1, 3 do
+		for k, v in pairs(result.card_list) do
+			if self._arnCardID[i] == v.card_plate_id then
+				self._artxtCardLevel:setString(tostring(v.card_plate_level))
+				self._arbarCardExp:setPercent(100 * v.card_plate_exper / v.card_plate_exper_max)
+				break
+			end
+		end
+	end
+
 	--延时
 	local acDelay = cc.DelayTime:create(0.2)
 
