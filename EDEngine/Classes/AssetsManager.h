@@ -5,7 +5,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
+#include "staticlib.h"
 #include "cocos2d.h"
 #include "extensions/cocos-ext.h"
 
@@ -14,4 +14,6 @@ extern "C" {
 #include <sys/stat.h>
 #endif
 
+MySpaceBegin
 int register_assetsmanager_test_sample(lua_State* L);
+MySpaceEnd

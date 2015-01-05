@@ -5,7 +5,6 @@
 //  Created by zuzu on 14-8-12.
 //
 //
-
 #include "AppleBundle.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
@@ -13,6 +12,8 @@
 // This function will locate the path to our application on OS X,
 // unlike windows you can not rely on the curent working directory
 // for locating your configuration files and resources.
+MySpaceBegin
+
 std::string macBundlePath()
 {
     char path[1024];
@@ -27,4 +28,6 @@ std::string macBundlePath()
     CFRelease(cfStringRef);
     return std::string(path);
 }
+
+MySpaceEnd
 #endif

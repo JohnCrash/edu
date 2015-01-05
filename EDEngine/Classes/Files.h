@@ -2,8 +2,10 @@
 #define __LJFILES_H__
 
 //³£ÓÃº¯Êý¿â
-
+#include "staticlib.h"
 #include "cocos2d.h"
+
+MySpaceBegin
 
 #define	servertype_min			1
 
@@ -120,4 +122,5 @@ protected:
 	std::string m_strName;
 };
 
+MySpaceEnd
 #endif // __LJFILES_H__

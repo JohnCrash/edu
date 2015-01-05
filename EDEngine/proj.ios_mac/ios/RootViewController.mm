@@ -26,14 +26,12 @@
 #import "RootViewController.h"
 #import "cocos2d.h"
 #import "CCEAGLView.h"
-/*
- 1 横屏
- 2 竖屏
- */
-extern int g_OrientationMode;
-extern bool g_bAutorotate;
+#import "staticlib.h"
+#import "parsparam.h"
 
-@implementation RootViewController
+UsingMySpace;
+
+@implementation RootViewController_v3
 
 /*
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.

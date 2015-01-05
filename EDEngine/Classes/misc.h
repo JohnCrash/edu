@@ -2,8 +2,10 @@
 #define __LJMISC_H__
 
 //³£ÓÃº¯Êý¿â
-
+#include "staticlib.h"
 #include "cocos2d.h"
+
+MySpaceBegin
 
 USING_NS_CC;
 
@@ -22,5 +24,5 @@ char *AdjustRawBufOrientation(char *pSrcBuf,int *pWidth,int *pHeight,int nAngle,
 char *ReduceRawBuf(char *pSrc,int nSrcWidth,int nSrcHeight,int &nDstWidth,int &nDstHeight,int nMaxLineLength,bool bHasAlpha);
 
 
-
+MySpaceEnd
 #endif // __LJMISC_H__

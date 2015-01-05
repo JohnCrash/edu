@@ -4,7 +4,7 @@
 #include "lua_ext.h"
 #include "lua_ljshell.h"
 #include "luaDebug.h"
-#include "AssetsManager.h"
+//#include "AssetsManager.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "win32/glfw3native.h"
@@ -14,7 +14,9 @@
 #include "AppleBundle.h"
 #endif
 
+MySpaceBegin
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+
 HWND g_hMainWnd = NULL;
 
 std::string toUTF8( const std::wstring& wstr )
@@ -32,12 +34,12 @@ std::string toUTF8( const std::wstring& wstr )
 	return str;
 }
 #endif
-AppDelegate::AppDelegate()
+AppDelegate_v3::AppDelegate_v3()
 {
 
 }
 
-AppDelegate::~AppDelegate() 
+AppDelegate_v3::~AppDelegate_v3()
 {
 	//releaseInternalLuaEngine();
 }
@@ -48,7 +50,7 @@ extern bool g_Reset;
 extern int g_FrameWidth;
 extern int g_FrameHeight;
 #endif
-bool AppDelegate::applicationDidFinishLaunching() 
+bool AppDelegate_v3::applicationDidFinishLaunching()
 {
     // initialize director
     auto director = Director::getInstance();
@@ -88,7 +90,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     return true;
 }
 
-void AppDelegate::initLuaEngine()
+void AppDelegate_v3::initLuaEngine()
 {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
@@ -272,7 +274,7 @@ void AppDelegate::initLuaEngine()
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-std::string AppDelegate::getExeDir()
+std::string AppDelegate_v3::getExeDir()
 {
 	TCHAR cur[256];
 	GetModuleFileName(GetModuleHandle(NULL),cur,256);
@@ -286,7 +288,7 @@ std::string AppDelegate::getExeDir()
 		return exe;
 }
 
-void AppDelegate::InitForDebugMode()
+void AppDelegate_v3::InitForDebugMode()
 {
 	TCHAR cur[256];
 
@@ -303,18 +305,18 @@ void AppDelegate::InitForDebugMode()
 
 #endif
 
-void AppDelegate::registerHotkey()
+void AppDelegate_v3::registerHotkey()
 {
 	auto director = Director::getInstance();
 	auto pDispatcher = director->getEventDispatcher();
 	//ped->addEventListenerWithFixedPriority(this,0);
 	auto listener = EventListenerKeyboard::create();
-	listener->onKeyPressed = CC_CALLBACK_2(AppDelegate::onKeyPressed,this);
-	listener->onKeyReleased = CC_CALLBACK_2(AppDelegate::onKeyReleased,this);
+	listener->onKeyPressed = CC_CALLBACK_2(AppDelegate_v3::onKeyPressed,this);
+	listener->onKeyReleased = CC_CALLBACK_2(AppDelegate_v3::onKeyReleased,this);
 	pDispatcher->addEventListenerWithFixedPriority(listener,1);
 }
 
-void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
+void AppDelegate_v3::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
 {
 #ifdef USE_WIN32_CONSOLE
 	if(code==EventKeyboard::KeyCode::KEY_F9) //reset
@@ -331,12 +333,12 @@ void AppDelegate::onKeyPressed(cocos2d::EventKeyboard::KeyCode code,cocos2d::Eve
 #endif
 }
 
-void AppDelegate::onKeyReleased(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
+void AppDelegate_v3::onKeyReleased(cocos2d::EventKeyboard::KeyCode code,cocos2d::Event *pEvent)
 {
 }
 
 // This function will be called when the app is inactive. When comes a phone call,it's be invoked too
-void AppDelegate::applicationDidEnterBackground() {
+void AppDelegate_v3::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
@@ -344,9 +346,11 @@ void AppDelegate::applicationDidEnterBackground() {
 }
 
 // this function will be called when the app is active again
-void AppDelegate::applicationWillEnterForeground() {
+void AppDelegate_v3::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
+
+MySpaceEnd

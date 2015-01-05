@@ -1,6 +1,6 @@
 #ifndef  _NATIVE_HELPER_IOS_H_
 #define  _NATIVE_HELPER_IOS_H_
-
+#include "staticlib.h"
 //#include "NativeHelper.h"
 #include "Platform.h"
 
@@ -9,9 +9,12 @@
 //#include "ClientBase.h"
 //#include "../AMR/AMR.h"
 
+MySpaceBegin
+
 bool StartAppStore(const char *pszURI);
 bool StartAppStoreForRank(const char *pszURI);
 
+MySpaceEnd
 //-------------------------------------------------------------------------------------------------------------------------------------
 //	support
 //-------------------------------------------------------------------------------------------------------------------------------------

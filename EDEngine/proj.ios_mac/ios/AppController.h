@@ -1,12 +1,13 @@
 #import <UIKit/UIKit.h>
+#import "staticlib.h"
 
-@class RootViewController;
+@class RootViewController_v3;
 
-@interface AppController : NSObject <UIApplicationDelegate> {
+@interface AppController_v3 : NSObject <UIApplicationDelegate> {
     UIWindow *window;
 }
 
-@property(nonatomic, readonly) RootViewController* viewController;
+@property(nonatomic, readonly) RootViewController_v3* viewController;
 
 @end
 
