@@ -12,10 +12,10 @@ local ui = {
 	Noticeview_FILE_3_4 = 'poetrymatch/tongzhi.json',
 	
 	VIEW_NOTICE = 'gun',
-	VIEW_NOTICE_SRC = 'gun/tz1',
-	TXT_TITLE = 'leitbt',
-	TXT_CONTENT = 'wen',
-	TXT_DATE = 'sj',
+	VIEW_NOTICE_SRC = 'gun/tz',
+	TXT_TITLE = 'tz1/leitbt',
+	TXT_CONTENT = 'tz1/wen',
+	TXT_DATE = 'tz1/sj',
 	
 	BUTTON_QUIT = 'xinxi/fanhui',
 }

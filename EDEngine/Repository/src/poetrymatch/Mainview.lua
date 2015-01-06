@@ -112,7 +112,7 @@ function Mainview:show_silver()
 			else
 				le_num = le_num -10 
 				silver_num = silver_num + 1000
-				local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+				local txt_le = uikits.child(self._Mainview,ui.TXT_LE_NUM)
 				txt_le:setString(le_num)
 				txt_silver:setString(silver_num)
 				person_info.set_user_silver(silver_num)
