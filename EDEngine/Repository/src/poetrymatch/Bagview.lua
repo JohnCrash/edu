@@ -147,8 +147,6 @@ function Bagview:show_silver()
 --	but_silver:setVisible(false)
 	uikits.event(but_silver,	
 		function(sender,eventType)	
-			self._Bagview:setEnabled(false)
-			self._Bagview:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
 				person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
@@ -157,8 +155,6 @@ function Bagview:show_silver()
 					else
 						print('bbbbbbbbbbbb')
 					end
-					self._Bagview:setEnabled(true)
-					self._Bagview:setTouchEnabled(true)		
 				end)
 			else
 				le_num = le_num -10 
