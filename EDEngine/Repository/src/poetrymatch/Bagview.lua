@@ -70,11 +70,12 @@ local ui = {
 	
 	VIEW_SHI_INFO = 'shi',
 	VIEW_SHI_INFO_SRC = 'shi1',
-	VIEW_SHI_INFO_TITLE = 'taitou',
+	VIEW_SHI_INFO_TITLE = 'shim',
 	VIEW_SHI_INFO_CONTENT = 'shiju',
-	TXT_SHI_INFO_AUT_NAME = 'taitou/zuoz',
-	TXT_SHI_INFO_NAME = 'taitou/sm',
-	TXT_SHI_INFO_YEARS = 'taitou/caod',
+	VIEW_SHI_INFO_NAME = 'zuoz',
+	TXT_SHI_INFO_AUT_NAME = 'zuoz/zuoz',
+	TXT_SHI_INFO_NAME = 'shim/sm',
+	TXT_SHI_INFO_YEARS = 'zuoz/caod',
 	TXT_SHI_INFO_DATA = 'shiju/sj',
 --	VIEW_SHI_INFO_DES = 'yiwen',
 --	TXT_SHI_INFO_DES = 'yiwen/wen',
@@ -329,16 +330,20 @@ function Bagview:show_shi_des(id)
 				item:setVisible(true)	
 				local view_title = uikits.child(item,ui.VIEW_SHI_INFO_TITLE)	
 				local view_content = uikits.child(item,ui.VIEW_SHI_INFO_CONTENT)
+				local view_name = uikits.child(item,ui.VIEW_SHI_INFO_NAME)
+				view_name:setVisible(false)
 				view_title:setVisible(false)
 				view_content:setVisible(false)		
 				if data.poem_auther then
-					view_title:setVisible(true)
+					view_name:setVisible(true)
 					local txt_aut_name = uikits.child(item,ui.TXT_SHI_INFO_AUT_NAME)	
-					local txt_shi_name = uikits.child(item,ui.TXT_SHI_INFO_NAME)	
 					local txt_years = uikits.child(item,ui.TXT_SHI_INFO_YEARS)	
 					txt_aut_name:setString(data.poem_auther)
+					txt_years:setString(data.poem_dynasty)	
+				elseif data.poem_title then		
+					view_title:setVisible(true)
+					local txt_shi_name = uikits.child(item,ui.TXT_SHI_INFO_NAME)	
 					txt_shi_name:setString(data.poem_title)
-					txt_years:setString(data.poem_dynasty)					
 				else
 					view_content:setVisible(true)
 					local txt_data = uikits.child(item,ui.TXT_SHI_INFO_DATA)	
@@ -347,11 +352,13 @@ function Bagview:show_shi_des(id)
 				end,function(waitingNode,afterReflash)
 				local data = {}
 				data[1] = {}
-				data[1].poem_auther = shi_des.poem_auther
 				data[1].poem_title = shi_des.poem_title
-				data[1].poem_dynasty = shi_des.poem_dynasty
+				data[2] = {}
+				data[2].poem_auther = shi_des.poem_auther
+				data[2].poem_dynasty = shi_des.poem_dynasty
+
 				for i=1,#shi_des.poem_body do
-					data[i+1] = shi_des.poem_body[i]
+					data[i+2] = shi_des.poem_body[i]
 				end
 				afterReflash(data)
 			end)		
