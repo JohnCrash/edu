@@ -4,6 +4,7 @@ local login = require "login"
 local cache = require "cache"
 local uikits = require "uikits"
 local ljshell = require "ljshell"
+local loadingbox = require "loadingbox"
 
 local g_person_info = {
 id = 149091,
@@ -457,6 +458,7 @@ local function load_logo_pic(handle,uid)
 		showLogoPic(handle,file_path)
 		--handle:loadTexture(file_path)
 	else
+		local loadbox = loadingbox.circle(handle)
 		local send_url = download_log_url..uid..'/99'
 		cache.request_nc(send_url,
 		function(b,t)
@@ -466,6 +468,7 @@ local function load_logo_pic(handle,uid)
 				else
 					kits.log("ERROR :  download_pic_url failed")
 				end
+				loadbox:removeFromParent()
 			end,uid..'.jpg')			
 	end
 end
@@ -524,6 +527,7 @@ local function get_skill_info_by_id(id)
 	return skill_info
 end
 
+<<<<<<< HEAD
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
@@ -588,6 +592,8 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	end)		
 end
 
+=======
+>>>>>>> Release
 local ui = {
 	MSGBOX = 'poetrymatch/tanchu.json',
 	TITLE = 'tu/bt',
@@ -769,6 +775,69 @@ local function messagebox(parent,flag,func,txt_title,txt_content)
 	but_good.parent = parent
 	s:setEnabled(true)
 	s:setTouchEnabled(true)
+end
+
+local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
+--local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
+
+local function post_data_by_new_form(parent,module_id,post_data,func)
+	local send_data = {}
+	send_data.v = {}
+	if post_data then
+		send_data.v = post_data
+	end
+	
+	if module_id then
+		send_data.m = module_id
+	else
+		func(false,'module_id is nil')
+		return
+	end
+	send_data.rid = os.time()
+	send_data.icp = false
+	local str_send_data = json.encode(send_data)
+	local loadbox = loadingbox.open(parent)
+	print('str_send_data::'..str_send_data)
+	cache.post(base_url,str_send_data,function(t,d)
+		print('d::'..d)
+		local tb_result = json.decode(d)
+		if t == true then
+			if tb_result.c == 200 then
+				func(tb_result.c,tb_result.v)
+			elseif 	tb_result.c < 600 and tb_result.c > 200 then
+				if tb_result.c == 505 then
+					local send_data
+					post_data_by_new_form(parent,'login',send_data,function(t,v)
+						if t and t == 200 then
+							post_data_by_new_form(parent,module_id,post_data,func)
+						else
+							messagebox(parent,NETWORK_ERROR,function(e)
+								if e == OK then
+									
+								end
+							end)
+						end
+					end)
+				else
+					messagebox(parent,SER_ERROR,function(e)
+						if e == OK then
+							
+						end
+					end)				
+				end
+			elseif  tb_result.c > 599 then
+				func(tb_result.c,tb_result.msg)
+			end
+		else
+			--func(tb_result.c,tb_result.msg)
+			messagebox(parent,NETWORK_ERROR,function(e)
+				if e == RETRY then
+					post_data_by_new_form(parent,module_id,post_data,func)
+				end
+			end)
+		end
+		loadbox:removeFromParent()
+	end)		
 end
 
 local function createRankView(parent,viewPosition,viewSize,cellItem,setItem,reflash)
@@ -1096,7 +1165,7 @@ return {
 	NO_SILVER = NO_SILVER,
 	NO_LE = NO_LE,
 	NO_TILI = NO_TILI,
-	HAS_TILI = NO_TILI,
+	HAS_TILI = HAS_TILI,
 	DEL_CARD = DEL_CARD,
 	LEARN_SKILL = LEARN_SKILL,
 	RESET_SKILL = RESET_SKILL,

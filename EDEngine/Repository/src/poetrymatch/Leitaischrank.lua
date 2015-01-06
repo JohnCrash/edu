@@ -11,12 +11,12 @@ local ui = {
 	Leitaischrank_FILE = 'poetrymatch/xuexiaoph.json',
 	Leitaischrank_FILE_3_4 = 'poetrymatch/xuexiaoph.json',
 	VIEW_RANK = 'gun',
-	VIEW_PER_USER = 'gun/xs1',
+	VIEW_PER_USER = 'gun/xs',
 
-	TXT_USER_SCH = 'xues',
-	TXT_USER_RANK = 'quan/mc',
-	TXT_USER_SCORE = 'defen',
-	TXT_USER_NUM = 'rens',
+	TXT_USER_SCH = 'xs1/xues',
+	TXT_USER_RANK = 'xs1/quan/mc',
+	TXT_USER_SCORE = 'xs1/defen',
+	TXT_USER_NUM = 'xs1/rens',
 	
 	TXT_TITLE = 'xinxi/bt',
 	BUTTON_QUIT = 'xinxi/fanhui',

@@ -69,12 +69,15 @@ local ui = {
 	TXT_SHI_NAME = 'mz',
 	
 	VIEW_SHI_INFO = 'shi',
-	TXT_SHI_INFO_AUT_NAME = 'zuoz',
-	TXT_SHI_INFO_NAME = 'sm',
-	TXT_SHI_INFO_YEARS = 'caod',
-	TXT_SHI_INFO_DATA = 'sj',
-	VIEW_SHI_INFO_DES = 'yiwen',
-	TXT_SHI_INFO_DES = 'yiwen/wen',
+	VIEW_SHI_INFO_SRC = 'shi1',
+	VIEW_SHI_INFO_TITLE = 'taitou',
+	VIEW_SHI_INFO_CONTENT = 'shiju',
+	TXT_SHI_INFO_AUT_NAME = 'taitou/zuoz',
+	TXT_SHI_INFO_NAME = 'taitou/sm',
+	TXT_SHI_INFO_YEARS = 'taitou/caod',
+	TXT_SHI_INFO_DATA = 'shiju/sj',
+--	VIEW_SHI_INFO_DES = 'yiwen',
+--	TXT_SHI_INFO_DES = 'yiwen/wen',
 	
 	VIEW_CARD_EXCHANGE = 'gengh',
 	TXT_CARD_EXCHANGE_WEN = 'wen',
@@ -317,17 +320,46 @@ function Bagview:show_shi_des(id)
 		self.temp_view = self.view_shi_info:clone()
 		self.temp_view:setVisible(true)
 		self._Bagview:addChild(self.temp_view,0,10000)		
-		local txt_aut_name = uikits.child(self.temp_view,ui.TXT_SHI_INFO_AUT_NAME)
-		local txt_data = uikits.child(self.temp_view,ui.TXT_SHI_INFO_DATA)
-		local txt_name = uikits.child(self.temp_view,ui.TXT_SHI_INFO_NAME)
-		local txt_years = uikits.child(self.temp_view,ui.TXT_SHI_INFO_YEARS)
-		local txt_des = uikits.child(self.temp_view,ui.TXT_SHI_INFO_DES)
-		local view_des = uikits.child(self.temp_view,ui.VIEW_SHI_INFO_DES)
-		txt_aut_name:setString(shi_des.poem_auther)
-		txt_name:setString(shi_des.poem_title)
-		txt_years:setString(shi_des.poem_dynasty)
-		txt_des:setString(shi_des.poem_comment)
-		txt_data:setString(shi_des.poem_body..shi_des.poem_body..shi_des.poem_body)
+			
+		--local view_shi_info = uikits.child(self.temp_view,ui.VIEW_SHI_INFO)
+		local view_shi_info_src = uikits.child(self.temp_view,ui.VIEW_SHI_INFO_SRC)
+		local viewSize=self.temp_view:getContentSize()
+		local viewPosition=cc.p(self.temp_view:getPosition())
+		local viewParent=self.temp_view:getParent()
+
+		view_shi_info_src:setVisible(false)	
+		if shi_des and type(shi_des) == 'table' then
+			local view_person_rank1=person_info.createRankView(self.temp_view,viewPosition,viewSize,view_shi_info_src,function(item,data)
+				item:setVisible(true)	
+				local view_title = uikits.child(item,ui.VIEW_SHI_INFO_TITLE)	
+				local view_content = uikits.child(item,ui.VIEW_SHI_INFO_CONTENT)
+				view_title:setVisible(false)
+				view_content:setVisible(false)		
+				if data.poem_auther then
+					view_title:setVisible(true)
+					local txt_aut_name = uikits.child(item,ui.TXT_SHI_INFO_AUT_NAME)	
+					local txt_shi_name = uikits.child(item,ui.TXT_SHI_INFO_NAME)	
+					local txt_years = uikits.child(item,ui.TXT_SHI_INFO_YEARS)	
+					txt_aut_name:setString(data.poem_auther)
+					txt_shi_name:setString(data.poem_title)
+					txt_years:setString(data.poem_dynasty)					
+				else
+					view_content:setVisible(true)
+					local txt_data = uikits.child(item,ui.TXT_SHI_INFO_DATA)	
+					txt_data:setString(data)
+				end		
+				end,function(waitingNode,afterReflash)
+				local data = {}
+				data[1] = {}
+				data[1].poem_auther = shi_des.poem_auther
+				data[1].poem_title = shi_des.poem_title
+				data[1].poem_dynasty = shi_des.poem_dynasty
+				for i=1,#shi_des.poem_body do
+					data[i+1] = shi_des.poem_body[i]
+				end
+				afterReflash(data)
+			end)		
+		end		
 		self.but_quit.func = self.show_shi_list	
 	end
 	

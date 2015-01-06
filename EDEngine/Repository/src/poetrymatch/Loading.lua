@@ -65,7 +65,8 @@ function Loading:update_skill_list()
 end
 
 function Loading:update_card_info()
-	local send_data
+	local send_data = {}
+	send_data.v1 = 0
 	person_info.post_data_by_new_form(self._loading,'load_user_card_plate',send_data,function(t,v)
 		if t and t == 200 then
 			local all_card_info = {}
