@@ -80,8 +80,6 @@ function Mallview:show_silver()
 --	but_silver:setVisible(false)
 	uikits.event(but_silver,	
 		function(sender,eventType)	
-			self._Mallview:setEnabled(false)
-			self._Mallview:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
 				person_info.messagebox(self._Mallview,person_info.NO_LE,function(e)
@@ -90,8 +88,6 @@ function Mallview:show_silver()
 					else
 						print('bbbbbbbbbbbb')
 					end
-					self._Mallview:setEnabled(true)
-					self._Mallview:setTouchEnabled(true)	
 				end)
 			else
 				le_num = le_num -10 
