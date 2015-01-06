@@ -1175,6 +1175,7 @@ function LaBattle:uploadBattleInitSet()
 
 	--发送数据
 	moperson_info.post_data_by_new_form(
+		self._wiRoot,
 		"set_under_attack_cardplate", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
@@ -1197,6 +1198,7 @@ function LaBattle:uploadCurRoundSet()
 
 	--发送数据
 	moperson_info.post_data_by_new_form(
+		self._wiRoot,
 		"set_user_attack_card", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
@@ -1231,6 +1233,7 @@ function LaBattle:downloadQuestion(camp_type)
 	
 	--发送数据，_nCurBattleType, camp_type, cardID, otherCardID, skill
 	moperson_info.post_data_by_new_form(
+		self._wiRoot,
 		"get_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
@@ -1374,6 +1377,7 @@ function LaBattle:checkAnswer(camp_type)
 
 	--发送
 	moperson_info.post_data_by_new_form(
+		self._wiRoot,
 		"judge_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调

@@ -527,7 +527,7 @@ local function get_skill_info_by_id(id)
 	return skill_info
 end
 
-<<<<<<< HEAD
+
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
@@ -592,8 +592,6 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	end)		
 end
 
-=======
->>>>>>> Release
 local ui = {
 	MSGBOX = 'poetrymatch/tanchu.json',
 	TITLE = 'tu/bt',
