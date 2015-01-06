@@ -241,11 +241,12 @@ end
 
 function Readytoboss:init_gui()	
 	self.user_info = person_info.get_user_info()
-	if self.is_has_star == false and self.bot_info.dialog then
-		self:show_gushi()
-	else
-		self:show_zhunbei()
-	end
+--	if self.is_has_star == false and self.bot_info.dialog then
+--		self:show_gushi()
+--	else
+--		self:show_zhunbei()
+--	end
+	self:show_zhunbei()
 end
 
 function Readytoboss:init()	

@@ -207,7 +207,7 @@ local CONST = lly.const{
 
 	--倒计时
 	CHANGE_CARD_TIME = 18,
-	ANSWER_TIME = 10,
+	ANSWER_TIME = 5,
 
 	--粒子效果
 	PARTICLE_WIND = "poetrymatch/BattleScene/Particles/hua.plist",
@@ -1179,7 +1179,8 @@ function LaBattle:uploadBattleInitSet()
 		"set_under_attack_cardplate", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-			
+			private.printResult(bSuc)
+
 			if bSuc and result and result.v1 then
 				self._bNextStateDataHasLoad = true
 			else
@@ -1202,7 +1203,7 @@ function LaBattle:uploadCurRoundSet()
 		"set_user_attack_card", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
-
+			private.printResult(bSuc)
 			if bSuc and result and result.v1 then
 				self._bNextStateDataHasLoad = true
 			else
@@ -1237,8 +1238,9 @@ function LaBattle:downloadQuestion(camp_type)
 		"get_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
+			private.printResult(bSuc)
 			if bSuc and result then
-				--lly.logTable(result)
+				lly.logTable(result)
 
 				--处理结果
 				self:onGetQuestion(result, camp_type)
@@ -1363,8 +1365,6 @@ function LaBattle:checkAnswer(camp_type)
 			self._strAnswer = self._iptFillInBlank:getStringValue()
 		end
 	end
-
-	lly.logCurLocAnd(self._strAnswer)
 	
 	--准备数据
 	local sendedTable = {}
@@ -1381,6 +1381,8 @@ function LaBattle:checkAnswer(camp_type)
 		"judge_question", --业务名
 		sendedTable, --数据
 		function (bSuc, result) --结果回调
+			private.printResult(bSuc)
+
 			if bSuc and result then
 				lly.logTable(result)
 
@@ -1411,7 +1413,7 @@ end
 
 --执行判断对错的动画
 --参数：谁回答的问题，最后回调的函数
---返回：转到什么状态，是否因为到了回合数而结束
+--返回：因为空血转到什么状态，因为回合结束
 function LaBattle:doCheckAnswerAnim(camp_type, func)
 	lly.ensure(camp_type, "number")
 	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
@@ -1436,14 +1438,12 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	--验证服务器回合数、卡牌体力和本地是否一致 --未做
 
 	--判断回合数
-	local isEnd = false
+	local nextStateForEnd
 	if not nextState and self._nRoundsNumber <= 1 then		
-		isEnd = true
-		
-		if self._barPlyrHP:getPercent() < self._barEnemyHP:getPercent() then
-			nextState = state.win
+		if self._barPlyrHP:getPercent() > self._barEnemyHP:getPercent() then
+			nextStateForEnd = state.win
 		else
-			nextState = state.lose
+			nextStateForEnd = state.lose
 		end
 	end
 
@@ -1478,7 +1478,7 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 		end
 	end)
 
-	return nextState, isEnd
+	return nextState, nextStateForEnd
 end
 
 --执行攻击前动画
@@ -1547,14 +1547,14 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 	--设置攻击方向	
 	if camp_type == CAMP_TYPE.PLAYER then
-		lly.logCurLocAnd("player attack")
+		lly.log("player attack")
 
 		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE)
 
 		posAnimFrom = self._posPlyrCard
 		posAnimTo = self._posEnemyCard	
 	else
-		lly.logCurLocAnd("enemy attack")
+		lly.log("enemy attack")
 
 		self._anim:setScaleX(-CONST.FIGHT_ANIM_RATE) --动画是玩家指向敌人的，如果是玩家费血，要反转动画
 
@@ -1564,7 +1564,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 	--设置费血的阵营(暂无双方同时减血的情况)
 	if self._nPlyrCurrentHP - nPlyrHPdec > self._nEnemyCurrentHP - nEnemyHPdec then --玩家减血
-		lly.logCurLocAnd("player hurt")
+		lly.log("player hurt")
 
 		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
 		posDereaseHPToken = self._posPlyrDecreaseHP
@@ -1575,7 +1575,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 		self._nPlyrCurrentHP = nPlyrHPdec
 	else
-		lly.logCurLocAnd("enemy hurt")
+		lly.log("enemy hurt")
 
 		decreaseHPCard = self._imgEnemyCard
 		posDereaseHPToken = self._posEnemyDecreaseHP
@@ -1742,6 +1742,7 @@ function LaBattle:writeInQuestionArea()
 			--清空
 			for i = 1, 4 do
 				self._arckbShortChoose[i]:setSelectedState(false)
+				self._arckbShortChoose[i]:setTouchEnabled(true)
 			end
 
 			--动作
@@ -1760,6 +1761,7 @@ function LaBattle:writeInQuestionArea()
 			--清空
 			for i = 1, 4 do
 				self._arckbLongChoose[i]:setSelectedState(false)
+				self._arckbLongChoose[i]:setTouchEnabled(true)
 			end
 
 			--动作
@@ -1773,6 +1775,9 @@ function LaBattle:writeInQuestionArea()
 		self._layRightOrWrong:setVisible(true)
 		self._ckbRight:setSelectedState(false)
 		self._ckbWrong:setSelectedState(false)
+
+		self._ckbRight:setTouchEnabled(true)
+		self._ckbWrong:setTouchEnabled(true)
 
 		--动作
 		self._ckbRight:setOpacity(0)
@@ -1830,12 +1835,12 @@ function LaBattle:excuteComputerThinking()
 		local rate = 
 			(self._nSecondLeft - self._nThkBgnTime + self._nCOMAnswerSpendTime) / 
 			self._nCOMNeedAnswer
-		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
+		--lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
 		local rWrite = math.random(rate)
 			
-		--if rWrite == 1 then --也就是rate分之一的概率执行以下代码
-		if true then
-			lly.logCurLocAnd("type is %d", self._nCurQuesType)
+		if rWrite == 1 then --也就是rate分之一的概率执行以下代码
+		--if true then
+			--lly.logCurLocAnd("type is %d", self._nCurQuesType)
 
 			if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
 				self._iptFillInBlank:setText(string.sub(
@@ -2489,21 +2494,22 @@ function LaBattle:showResultOfPlyrAnswer_S()
 
 	--输入谁回答的题，根据服务器返回，判断对错，然后执行减少HP的动画
 	--如果得到的是结束，就返回结束状态，否则返回空
-	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.PLAYER, self.endShowPlyrAnswerResult)
+	local nextStateForDeath, nextStateForEnd = self:doCheckAnswerAnim(CAMP_TYPE.PLAYER, self.endShowPlyrAnswerResult)
 
-	if nextState then 
-		self._stateNext = nextState
+	--如果一方死亡
+	if nextStateForDeath then 
+		self._stateNext = nextStateForDeath
 		return
 	end
 
-	--如果没有体力了，则直接跳到玩家准备界面，在此处检测是否回合结束
+	--如果没有体力了，回合没结束就直接跳到玩家准备界面，否则直接结束
 	if self._bHasVIT == false then
-		if not isEnd then
+		if not nextStateForEnd then
 			self._nRoundsNumber = self._nRoundsNumber - 1
 			self._stateNext = state.prepare
+		else
+			self._stateNext = nextStateForEnd
 		end
-
-		return
 	end
 end
 
@@ -2671,11 +2677,15 @@ function LaBattle:showResultOfEnemyAnswer_S()
 	--输入谁回答的题，根据服务器返回，判断对错，然后执行减少HP的动画
 	--如果得到的是结束，就返回结束状态，否则返回空
 	--返回值isEnd，表示是否因为没有回合数而结束
-	local nextState, isEnd = self:doCheckAnswerAnim(CAMP_TYPE.ENEMY, self.endShowEnemyAnwserResult)
+	local nextState, isEndState = self:doCheckAnswerAnim(CAMP_TYPE.ENEMY, self.endShowEnemyAnwserResult)
 
 	if nextState then self._stateNext = nextState end
 
-	if not isEnd then self._nRoundsNumber = self._nRoundsNumber - 1 end
+	if isEndState then 
+		self._stateNext = isEndState
+	else
+		self._nRoundsNumber = self._nRoundsNumber - 1 
+	end
 end
 
 --结束动画
@@ -2735,6 +2745,10 @@ function private.printState(str)
 	local socket = require("socket")
 	socket.select(nil, nil, 1)
 	--]]
+end
+
+function private.printResult(str)
+	lly.log("result is " .. str)
 end
 
 state = lly.const{
