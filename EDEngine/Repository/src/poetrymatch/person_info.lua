@@ -549,7 +549,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	local str_send_data = json.encode(send_data)
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
-		print('d::'..d)
+		--print('d::'..d)
 		local tb_result = json.decode(d)
 
 		if not tb_result then return end
