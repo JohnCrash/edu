@@ -775,9 +775,6 @@ local function messagebox(parent,flag,func,txt_title,txt_content)
 	s:setTouchEnabled(true)
 end
 
-local scheduler = cc.Director:getInstance():getScheduler()
-local schedulerEntry
-
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
@@ -797,17 +794,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	send_data.rid = os.time()
 	send_data.icp = false
 	local str_send_data = json.encode(send_data)
-	local loadbox
-	
-	local function timer_update(time)
-		loadbox = loadingbox.circle(parent)
-		if schedulerEntry then
-			scheduler:unscheduleScriptEntry(schedulerEntry)
-			schedulerEntry = nil
-		end
-	end	
-
-	schedulerEntry = scheduler:scheduleScriptFunc(timer_update,2,false)	
+	local loadbox = loadingbox.open(parent)
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
 		print('d::'..d)
@@ -847,9 +834,6 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 				end
 			end)
 		end
-		if schedulerEntry then
-			scheduler:unscheduleScriptEntry(schedulerEntry)
-		end		
 		if loadbox then
 			loadbox:removeFromParent()
 		end
