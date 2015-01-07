@@ -1219,13 +1219,8 @@ function LaBattle:downloadQuestion(camp_type)
 	sendedTable.road_block_id = self._nCurStageID --关卡/擂台id
 	sendedTable.camp_type = camp_type
 
-	if camp_type == CAMP_TYPE.PLAYER then
-		sendedTable.attack_card_plate_id = self._nEnemyCardID --对方卡牌id
-		sendedTable.card_plate_id = self._arnPlyrCardID[self._nCurCardIndex] --自己卡牌的id	
-	else
-		sendedTable.attack_card_plate_id = self._arnPlyrCardID[self._nCurCardIndex] --对方卡牌id
-		sendedTable.card_plate_id = self._nEnemyCardID--自己卡牌的id
-	end
+	sendedTable.attack_card_plate_id = self._nEnemyCardID --对方卡牌id
+	sendedTable.card_plate_id = self._arnPlyrCardID[self._nCurCardIndex] --自己卡牌的id	
 	
 	--发送数据，_nCurBattleType, camp_type, cardID, otherCardID, skill
 	moperson_info.post_data_by_new_form(

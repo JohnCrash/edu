@@ -21,7 +21,7 @@ local g_person_silver = 100
 local g_person_le_coin = 10
 
 local g_person_bag = {
-cards_table = {{id='caoz',name='caoz',lvl=5,cur_exp=10,max_exp=100,in_battle_list = 1,},{id='caoa',name='caoa',lvl=10,cur_exp=20,max_exp=100,in_battle_list = 0,},{id='caob',name='caob',lvl=20,cur_exp=30,max_exp=100,in_battle_list = 0,},{id='caoc',name='caoc',lvl=30,cur_exp=40,max_exp=100,in_battle_list = 1,},},
+cards_table = {},
 max_store_num = 5,
 equipment_table = {},
 skill_table = {},
@@ -29,34 +29,11 @@ skill_table = {},
 local g_person_skill_list = {
 	
 }
-local g_person_battle_cards = {'caoz','caoc'}
-local g_person_section_info = {{id='fengyang',name='凤阳城',star_has=18,star_all=30,is_admit=1,},{id='fengyanga',name='凤阳城A',star_has=19,star_all=30,is_admit=1,},{id='fengyangb',name='凤阳城B',star_has=5,star_all=30,is_admit=1,},{id='fengyangc',name='凤阳城C',star_has=0,star_all=30,is_admit=0,},}
-local g_person_boss_info = {
-fengyang = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-},
-fengyanga = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-},
-fengyangb = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-},
-fengyangc = {
-{id='caoz',name='曹植铜',lvl=20,tili=12,pinzhi=1,shenli=1,hp=150,hp_ex=10,mp=100,mp_ex=10,ap=100,ap_ex=10,star1='1111',star2='1111',star3='1111',star_has=3,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoa',name='曹植银',lvl=30,tili=12,pinzhi=2,shenli=1,hp=250,hp_ex=20,mp=200,mp_ex=0,ap=200,ap_ex=10,star1='2222',star2='2222',star3='2222',star_has=2,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caob',name='曹植金',lvl=40,tili=12,pinzhi=3,shenli=1,hp=350,hp_ex=30,mp=300,mp_ex=0,ap=300,ap_ex=0,star1='3333',star2='3333',star3='3333',star_has=0,is_admit=1,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-{id='caoc',name='曹植金',lvl=50,tili=12,pinzhi=3,shenli=2,hp=450,hp_ex=40,mp=400,mp_ex=0,ap=400,ap_ex=0,star1='4444',star2='4444',star3='4444',star_has=0,is_admit=0,content={{id=149091,data='aaaaa'},{id=0,data='bbbbb'},{id=149091,data='ccccc'},{id=0,data='ddddd'},},},
-},
-}
+
+local g_person_battle_cards = {}
+local g_person_section_info = {}
+local g_person_boss_info = {}
+
 
 
 local function put_lading_circle( parent )
@@ -83,7 +60,7 @@ local function put_lading_circle( parent )
 end
 
 local function get_user_info()
-	local uname = {}
+	local uname
 	if g_person_info then
 		uname = g_person_info
 	end
@@ -106,7 +83,7 @@ local function set_user_info(uinfo)
 end
 
 local function get_user_lvl_info()
-	local ulvl_info = {}
+	local ulvl_info
 	if g_person_exp then
 		ulvl_info = g_person_exp
 	end
@@ -239,7 +216,7 @@ local function set_all_card_to_bag(cards_table)
 end
 
 local function get_all_card_in_bag()
-	local cards_table = {}
+	local cards_table
 	if g_person_bag.cards_table then
 		cards_table = g_person_bag.cards_table
 	end
@@ -247,7 +224,7 @@ local function get_all_card_in_bag()
 end
 
 local function get_card_in_bag_by_index(index)
-	local card_info = {}
+	local card_info
 	if index then
 		if g_person_bag.cards_table and g_person_bag.cards_table[index] then
 			card_info = g_person_bag.cards_table[index]
@@ -277,7 +254,7 @@ local function update_card_in_bag_by_id(id,tag,content)
 end
 
 local function del_card_in_bag_by_id(id)
-	local card_info = {}
+	local card_info
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
 			if v.id ~= id then
@@ -289,7 +266,7 @@ local function del_card_in_bag_by_id(id)
 end
 
 local function get_card_in_bag_by_id(id)
-	local card_info = {}
+	local card_info
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
 			if v.id == id then
@@ -318,6 +295,12 @@ end
 
 local function get_battle_list()
 
+	local battle_list
+	if g_person_battle_cards then
+		battle_list = g_person_battle_cards
+	end
+	return battle_list
+
 end
 
 local function add_card_to_battle_by_index(id,index)
@@ -333,7 +316,7 @@ local function add_card_to_battle_by_index(id,index)
 end
 
 local function get_card_in_battle_by_index(index)
-	local card_info = {}
+	local card_info
 	if g_person_battle_cards and g_person_battle_cards[index] then
 		local id = g_person_battle_cards[index]
 		for i,v in ipairs(g_person_bag.cards_table) do
@@ -378,7 +361,7 @@ local function get_all_card_in_battle()
 	for i,v in ipairs(g_person_bag.cards_table) do	
 		for j=1,#g_person_battle_cards do
 			if v.id == g_person_battle_cards[j] then
-				local card_info = {}
+				local card_info
 				card_info = v
 				all_cards_table[#all_cards_table+1] = card_info
 				break
@@ -509,13 +492,13 @@ local function set_all_section_info(all_section_info)
 end
 
 local function get_all_section_info()
-	local all_section_info = {}
+	local all_section_info
 	all_section_info = g_person_section_info
 	return all_section_info
 end
 
 local function get_boss_info_by_id(id)
-	local boss_info = {}
+	local boss_info
 	if g_person_boss_info[id] then
 		boss_info = g_person_boss_info[id]
 	end 
@@ -535,7 +518,7 @@ local function set_skill_list(skill_list)
 end
 
 local function get_skill_list()
-	local skill_list = {}
+	local skill_list
 	if g_person_skill_list then
 		skill_list = g_person_skill_list
 	end
@@ -543,7 +526,7 @@ local function get_skill_list()
 end
 
 local function get_skill_info_by_id(id)
-	local skill_info = {}
+	local skill_info
 	if g_person_skill_list then
 		for i=1,#g_person_skill_list do	
 			if g_person_skill_list[i].sub_id == id then
@@ -587,7 +570,7 @@ local BUY_SILVER = 13
 local DIY_MSG = 14
 
 local flag_dictionary = {
-{title = '啊！上不了网了',content='少侠，你的网络突然中断了，请检查一下网络，然后重试一下！',button_type = 1,}, --网络中断
+{title = '啊！上不了网了',content='少侠，你的网络突然中断了，请检查一下网络，然后重试一下！',button_type = 3,}, --网络中断
 {title = '出错啦',content='少侠，网络不给力，加载出错了，请重试一下！',button_type = 1,}, 						 --加载出错
 {title = '圣上有旨',content='少侠，今天外面阳光灿烂，出去晒晒太阳吧，让服务器休息一下！',button_type = 2,},	 --服务器维护
 {title = '你是高手',content='少侠，你的对战排名实在是太高，整个天朝都选不出人来和你对战了！请稍后再来试试吧！',button_type = 3,},	 --对战选不出人
@@ -1045,7 +1028,7 @@ end
 local function logTable(t, index)
 	---[====[
 	if index == nil then
-		self:log("TABLE:")
+		log("TABLE:")
 	end
 
 	local space = "   "
@@ -1060,17 +1043,17 @@ local function logTable(t, index)
 	end
 
 	if t == nil then 
-		self:log(_space .. "table is nil") 
+		log(_space .. "table is nil") 
 		return
 	end
 
 	for k,v in pairs(t) do
 		if type(v) ~= "table" then
-			self:log("%s%s[%s]      %s[%s]", 
+			log("%s%s[%s]      %s[%s]", 
 				_space, tostring(k), type(k), tostring(v), type(v))
 		else
-			self:log(_space .. "T[".. tostring(k) .. "]------------------")
-			Leitaiview:logTable(v, index)
+			log(_space .. "T[".. tostring(k) .. "]------------------")
+			logTable(v, index)
 		end
 	end
 

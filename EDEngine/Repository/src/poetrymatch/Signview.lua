@@ -46,13 +46,21 @@ function Signview:sign()
 	local send_data
 	person_info.post_data_by_new_form(self._Signview,'sign_submit',send_data,function(t,v)
 		if t and t == 200 then
+			if v.scoin then
+				person_info.add_user_silver(v.scoin)
+			end
+			if v.hcoin then
+				person_info.add_user_le_coin(v.scoin)
+			end
+			local user_info = person_info.get_user_info()
+			if user_info.has_sign == 1 then
+				user_info.has_sign = 0 
+				person_info.set_user_info(user_info)
+			end
 			uikits.popScene()
 		else
 			person_info.messagebox(self._Signview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
 				end
 			end)
 		end
@@ -96,9 +104,7 @@ function Signview:getdatabyurl()
 		else
 			person_info.messagebox(self._Signview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end

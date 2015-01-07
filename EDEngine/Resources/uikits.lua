@@ -98,7 +98,7 @@ local function playSound( file,ismusic )
 			end
 		else
 			if ismusic then
-				return AudioEngine.playMusic( file )
+				return AudioEngine.playMusic( file ,true)
 			else
 				return AudioEngine.playEffect( file )
 			end
@@ -122,6 +122,14 @@ local function voiceLength( file )
 		kits.log('ERROR voiceLength file not exist '..tostring(file))
 	end
 	return 0
+end
+
+local function pauseBGSound( )
+	AudioEngine.pauseMusic()
+end
+
+local function resumeBGSound( )
+	AudioEngine.resumeMusic()
 end
 
 local function pauseSound( id )
@@ -1950,6 +1958,8 @@ return {
 	isSoundPlaying = isSoundPlaying,
 	pauseSound = pauseSound,
 	playSound = playSound,
+	pauseBGSound = pauseBGSound,
+	resumeBGSound = resumeBGSound,
 	voiceLength = voiceLength,
 	stopAllSound = stopAllSound,
 	log_caller = log_caller,
@@ -1966,6 +1976,7 @@ return {
 	muteSound = muteSound,
 	playClickSound = playClickSound,
 	setClickSound = setClickSound,
+	setDefaultClickSound = setDefaultClickSound,
 	animationFormJson = animationFormJson,
 	sequence_call = sequence_call,
 	FAIL = FAIL,

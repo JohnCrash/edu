@@ -45,9 +45,7 @@ function Battlereward:sign()
 		else
 			person_info.messagebox(self._Battlereward,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end
@@ -79,9 +77,7 @@ function Battlereward:getdatabyurl()
 		else
 			person_info.messagebox(self._Battlereward,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end

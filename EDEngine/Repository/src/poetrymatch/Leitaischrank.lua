@@ -80,9 +80,7 @@ function Leitaischrank:getdatabyurl()
 		else
 			person_info.messagebox(self._Leitaischrank,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:getdatabyurl()
-				else
-					self:getdatabyurl()
+
 				end
 			end)
 		end

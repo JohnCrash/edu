@@ -153,9 +153,7 @@ function Battleview:show_search_res()
 		else
 			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_school_rank()
-				else
-					self:show_school_rank()
+
 				end
 			end)
 		end
@@ -197,9 +195,7 @@ function Battleview:show_person_rank()
 		else
 			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_person_rank()
-				else
-					self:show_person_rank()
+
 				end
 			end)
 		end
@@ -236,9 +232,7 @@ function Battleview:show_school_rank()
 		else
 			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_school_rank()
-				else
-					self:show_school_rank()
+
 				end
 			end)
 		end
@@ -264,9 +258,7 @@ function Battleview:show_personal_info()
 		else
 			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_school_rank()
-				else
-					self:show_school_rank()
+
 				end
 			end)
 		end
