@@ -36,6 +36,14 @@ local QUES_TYPE = {
 	MULTIPLE_CHOICE = 2, --多选
 	YES_OR_NO = 3, --对错
 	FILL_IN_BLANK = 4, --填空
+	MAX = 5,
+}
+
+--性别 根据person_info
+local SEX_TYPE = {
+	GIRL = 1,
+	BOY = 2,
+	MAX = 3,
 }
 
 local ui = lly.const{
@@ -207,11 +215,6 @@ local CONST = lly.const{
 
 	--倒计时
 	CHANGE_CARD_TIME = 18,
-	ANSWER_TIME = 5,
-
-	--粒子效果
-	PARTICLE_WIND = "poetrymatch/BattleScene/Particles/hua.plist",
-	PARTICLE_SNOW = "poetrymatch/BattleScene/Particles/xue.plist",
 
 	--
 	FIGHT_ANIM_RATE = 2.5,
@@ -382,6 +385,8 @@ function LaBattle:ctor()
 		_bHasVIT = true,
 
 		--倒计时-----------------------------------------------
+		_nCountingDownTime = 10, --总倒计时时间
+
 		_nSecondLeft = 0, --剩余时间
 
 		_fLastTime = 0, --上次时间
@@ -404,6 +409,8 @@ function LaBattle:ctor()
 
 		_arnPlyrCardSP = lly.array(3, 0), --神力：1点神力可以使用一次技能
 
+		_ePlyrSex = SEX_TYPE.GIRL,
+
 		--技能
 		_ararnPlyrSkillID = lly.array(3, lly.array(3, 0)),
 
@@ -413,6 +420,8 @@ function LaBattle:ctor()
 
 		_nEnemyCardID = 0, --卡牌
 		_arnEnemySkillID = lly.array(3, 0), --技能
+
+		_eEnemySex = SEX_TYPE.BOY,
 
 		--当前-------------------------------------------------------
 		_nCurCardIndex = 1, --当前卡牌
@@ -475,6 +484,9 @@ function LaBattle:init(tab)
 		
 		--初始化动画
 		if not self:initAnim() then break end
+
+		--播放音乐
+		self:playMusic()
 		
 		--开启更新函数
 		self:scheduleUpdateWithPriorityLua(function ()
@@ -575,8 +587,13 @@ function LaBattle:initData(data)
 	end
 
 	for i = 1, 3 do
+		if data.enemy_skill_id[i] == nil then break end
 		self._arnEnemySkillID[i] = data.enemy_skill_id[i]
 	end
+
+	--性别
+	self._ePlyrSex = data.plyr_sex
+	self._eEnemySex = 1 print("waring")
 
 	return true
 end
@@ -790,22 +807,9 @@ function LaBattle:initUI()
 		--离子效果 随机加载两种不同的效果
 		self._layParticle = self:setWidget(ui.LAY_PARTICLE)
 
-		math.randomseed(os.time())
-		if math.random(2) == 2 then
-			self._particle = cc.ParticleSystemQuad:create(CONST.PARTICLE_WIND)
-			self._particle:setPosition(
-				cc.Director:getInstance():getVisibleSize().width, 
-				cc.Director:getInstance():getVisibleSize().height / 2)
-			self._particle:setScale(3.0)
-			self._layParticle:addChild(self._particle)
-		else
-			self._particle = cc.ParticleSystemQuad:create(CONST.PARTICLE_SNOW)
-			self._particle:setPosition(
-				cc.Director:getInstance():getVisibleSize().width / 2, 
-				cc.Director:getInstance():getVisibleSize().height)
-			self._particle:setScale(3.0)
-			self._layParticle:addChild(self._particle)
-		end
+		self._particle = moperson_info.getParticleEffect()
+
+		self._layParticle:addChild(self._particle)
 
 		return true
 	until true
@@ -823,7 +827,7 @@ function LaBattle:initUIWithData(data)
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
 		--头像 --玩家只分男女
-		if data.plyr_sex == 1 then --根据person_info 1为woman 2为man
+		if data.plyr_sex == SEX_TYPE.GIRL then --根据person_info 1为woman 2为man
 			self._imgPlyrPortrait_girl:setVisible(true)
 			self._imgPlyrPortrait_boy:setVisible(false)
 		else
@@ -1178,15 +1182,10 @@ function LaBattle:uploadBattleInitSet()
 		self._wiRoot,
 		"set_under_attack_cardplate", --业务名
 		sendedTable, --数据
-		function (bSuc, result) --结果回调
-			private.printResult(bSuc)
-
-			if bSuc and result and result.v1 then
+		function (ErrorCode, result) --结果回调
+			self:onGetDataFromNet(ErrorCode, result, function ()
 				self._bNextStateDataHasLoad = true
-			else
-				if not bSuc then lly.log(result) end
-				self:onNetError()
-			end			
+			end)
 		end
 	)	
 end
@@ -1202,14 +1201,10 @@ function LaBattle:uploadCurRoundSet()
 		self._wiRoot,
 		"set_user_attack_card", --业务名
 		sendedTable, --数据
-		function (bSuc, result) --结果回调
-			private.printResult(bSuc)
-			if bSuc and result and result.v1 then
+		function (ErrorCode, result) --结果回调
+			self:onGetDataFromNet(ErrorCode, result, function ()
 				self._bNextStateDataHasLoad = true
-			else
-				if not bSuc then lly.log(result) end
-				self:onNetError()
-			end	
+			end)
 		end
 	)	
 end
@@ -1237,17 +1232,13 @@ function LaBattle:downloadQuestion(camp_type)
 		self._wiRoot,
 		"get_question", --业务名
 		sendedTable, --数据
-		function (bSuc, result) --结果回调
-			private.printResult(bSuc)
-			if bSuc and result then
+		function (ErrorCode, result) --结果回调
+			self:onGetDataFromNet(ErrorCode, result, function ()
 				lly.logTable(result)
 
 				--处理结果
 				self:onGetQuestion(result, camp_type)
-			else
-				if not bSuc then lly.log(result) end
-				self:onNetError()
-			end	
+			end)
 		end
 	)
 end
@@ -1281,6 +1272,9 @@ function LaBattle:onGetQuestion(result, camp_type)
 		self._arstrQuesChooseMark[1] = "1"
 		self._arstrQuesChooseMark[2] = "2"
 	end
+
+	--倒计时时间
+	self._nCountingDownTime = result.answer_spend_timespan
 
 	if camp_type == CAMP_TYPE.PLAYER then --人取题时会带上电脑答案
 
@@ -1341,13 +1335,39 @@ function LaBattle:onGetQuestion(result, camp_type)
 			end
 		end
 
-		--电脑答题的时间
-		self._nCOMAnswerSpendTime = result.answer_spend_timespan
+		--电脑答题的时间为总时间
+		self._nCOMAnswerSpendTime = 
+			LaBattle:calcComAnswerTime(result.answer_spend_timespan)
 
 	end
 
 	--结束-------------------
 	self._bNextStateDataHasLoad = true
+end
+
+--获取一个正态分布的数，参数为最大值，从0到最大值之间取值
+function LaBattle:calcComAnswerTime(num)
+	lly.ensure(num, "number")
+
+	math.randomseed(os.clock())
+
+	local function getRandomHalf(num, times)
+		if times == 0 then return num end
+
+		if math.random(2) == 1 then
+			return getRandomHalf(num - 1, times - 1)
+		else
+			return getRandomHalf(num + 1, times - 1)
+		end 
+	end
+
+	local re = getRandomHalf(num / 2, 10)
+
+	if re <= 0 then re = num / 2
+	elseif re > num then re = num / 2 
+	end
+
+	return re
 end
 
 function LaBattle:checkAnswer(camp_type)
@@ -1380,18 +1400,13 @@ function LaBattle:checkAnswer(camp_type)
 		self._wiRoot,
 		"judge_question", --业务名
 		sendedTable, --数据
-		function (bSuc, result) --结果回调
-			private.printResult(bSuc)
-
-			if bSuc and result then
+		function (ErrorCode, result) --结果回调
+			self:onGetDataFromNet(ErrorCode, result, function ()
 				lly.logTable(result)
 
 				--处理结果
 				self:onGetAnswerResult(result, camp_type)
-			else
-				if not bSuc then lly.log(result) end
-				self:onNetError()
-			end
+			end)
 		end
 	)
 end
@@ -1678,6 +1693,19 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	--]]
 end
 
+--获得网络数据后的回调 参数为获得数据后的回调函数
+function LaBattle:onGetDataFromNet(ErrorCode, result, func)
+	lly.ensure(ErrorCode, "number")
+	lly.ensure(func, "function")
+
+	if ErrorCode and ErrorCode == 200 and result then
+		func()	
+	else
+		lly.log("result is %d: %s", ErrorCode, result)
+		self:onNetError(ErrorCode, result)
+	end			
+end
+
 --处理网络错误
 function LaBattle:onNetError()
 	lly.error("net error")
@@ -1717,6 +1745,7 @@ function LaBattle:writeInQuestionArea()
 	self._txtQuestionContent:setString(self._strQuesContent)
 	self._txtQuestionContent:setOpacity(0)
 	self._txtQuestionContent:runAction(fadeIn:clone())
+
 	
 	--显示相应答题区，清空题板上点击
 	if self._nCurQuesType == QUES_TYPE.SINGLE_CHOICE
@@ -2161,6 +2190,42 @@ function LaBattle:onClickYesOrNo(sender, eventType)
 	
 end
 
+---------------------------------------------------------
+--播放音效
+--参数为音频名称，进行随机的数量（0为不随机），是否有性别区别，执行音效的阵营
+function LaBattle:playEffect(name, RandomNum, bHasSex, camp)
+	
+	local str = name
+
+	if RandomNum and RandomNum > 0 then
+		str = str .. tostring(math.random(RandomNum))
+	end
+
+	if bHasSex then
+		if camp == CAMP_TYPE.PLAYER then
+			str = str .. self._ePlyrSex == SEX_TYPE.GIRL and "_nv" or "_nan"
+		else
+			str = str .. self._eEnemySex == SEX_TYPE.GIRL and "_nv" or "_nan"
+		end
+	end
+
+	uikits.playSound("poetrymatch/audio/" .. str .. ".mp3")
+end
+
+--播放音乐
+function LaBattle:playMusic()
+
+	uikits.stopAllSound()
+
+	if self._nCurBattleType == BATTLE_TYPE.STORY then
+		uikits.playSound("poetrymatch/audio/music/bj4.mp3", true)
+	elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
+		uikits.playSound("poetrymatch/audio/music/bj5.mp3", true)
+	else 
+		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
+	end
+end
+
 ----------------------------------------------------------
 --开场动画状态
 function LaBattle:playEnterAnim_S()
@@ -2368,7 +2433,7 @@ function LaBattle:askByEnemy_S()
 	--初始化
 	self._imgQuestionArea:setPositionX(
 		self._posQuestionArea.x + self._nDisQuestionAreaMoveX)
-	self._txtCountdown:setString(tostring(CONST.ANSWER_TIME))
+	self._txtCountdown:setOpacity(0) --先隐藏
 
 	--清空题板
 	self:clearQuestionArea()
@@ -2420,8 +2485,15 @@ function LaBattle:waitingForPlayerAnswer_S()
 	self._imgPlyrAnswerToken:runAction(cc.RepeatForever:create(
 		cc.Sequence:create(move, move:reverse())))
 
-	--开始倒计时
-	self:beginCountingdown(CONST.ANSWER_TIME)
+	--显示后，开始倒计时
+	self._txtCountdown:setString(tostring(self._nCountingDownTime))
+
+	local fadeIn = cc.FadeIn:create(0.1)
+	local callForCount = cc.CallFunc:create(function ()
+		self:beginCountingdown(self._nCountingDownTime)
+	end)
+
+	self._txtCountdown:runAction(cc.Sequence:create(fadeIn, callForCount))
 
 end
 
@@ -2547,7 +2619,7 @@ function LaBattle:askByPlayer_S()
 	--初始化
 	self._imgQuestionArea:setPositionX(
 		self._posQuestionArea.x - self._nDisQuestionAreaMoveX)
-	self._txtCountdown:setString(tostring(CONST.ANSWER_TIME))
+	self._txtCountdown:setOpacity(0) --先隐藏
 
 	--打开屏蔽层
 	self._layShield:setVisible(true)
@@ -2603,8 +2675,15 @@ function LaBattle:waitingForEnemyAnswer_S()
 	self._imgEnemyAnswerToken:runAction(cc.RepeatForever:create(
 		cc.Sequence:create(move, move:reverse())))
 
-	--开始倒计时
-	self:beginCountingdown(CONST.ANSWER_TIME)
+	--显示后，开始倒计时
+	self._txtCountdown:setString(tostring(self._nCountingDownTime))
+
+	local fadeIn = cc.FadeIn:create(0.1)
+	local callForCount = cc.CallFunc:create(function ()
+		self:beginCountingdown(self._nCountingDownTime)
+	end)
+
+	self._txtCountdown:runAction(cc.Sequence:create(fadeIn, callForCount))
 
 	--根据服务器反馈的时间，时间到达后显示其答案，并进入下个状态
 	self:beginComputerAnswer()
@@ -2745,10 +2824,6 @@ function private.printState(str)
 	local socket = require("socket")
 	socket.select(nil, nil, 1)
 	--]]
-end
-
-function private.printResult(str)
-	lly.log("result is " .. str)
 end
 
 state = lly.const{

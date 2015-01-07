@@ -168,6 +168,7 @@ function Readytoboss:show_zhunbei()
 
 			--local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 			--lly.logTable(cardTable)
+			--lly.logTable(self.bot_info)
 
 			--传入战斗层的数据包
 			local data = {}
@@ -215,6 +216,7 @@ function Readytoboss:show_zhunbei()
 			data.enemy_lv = self.bot_info.card_plate_level
 			data.enemy_hp = self.bot_info.card_plate_blood + 
 				self.bot_info.card_plate_blood_added --基础血量加额外血量
+			--data.enemy_sex = 
 
 			data.enemy_skill_id = {
 				self.bot_info.skills[1],

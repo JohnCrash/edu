@@ -12,6 +12,7 @@ local ui = {
 
 ----------------------------------
 
+
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -291,7 +292,10 @@ function AppEntry:init()
 	print(string.format("time is %f", os.clock() - ti))
 
 
+
+
 	----------------]]
+
 
 	bg:addChild(resetwindow)
 	bg:addChild(playsound)

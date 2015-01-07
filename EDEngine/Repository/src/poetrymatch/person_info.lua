@@ -1076,6 +1076,37 @@ local function logTable(t, index)
 
 	--]====]
 end
+
+--粒子效果
+local PARTICLE_WIND = "poetrymatch/Particles/hua.plist"
+local PARTICLE_SNOW = "poetrymatch/Particles/xue.plist"
+
+local randomForParticle = 0
+local function getParticleEffect()
+
+	if randomForParticle == 0 then
+		math.randomseed(os.time())
+		randomForParticle = math.random(2)
+	end
+	
+	local _particle
+	if randomForParticle == 1 then
+		_particle = cc.ParticleSystemQuad:create(PARTICLE_WIND)
+		_particle:setPosition(
+			cc.Director:getInstance():getVisibleSize().width, 
+			cc.Director:getInstance():getVisibleSize().height / 2)
+		_particle:setScale(3.0)
+	else
+		_particle = cc.ParticleSystemQuad:create(PARTICLE_SNOW)
+		_particle:setPosition(
+			cc.Director:getInstance():getVisibleSize().width / 2, 
+			cc.Director:getInstance():getVisibleSize().height)
+		_particle:setScale(3.0)
+	end
+
+	return _particle
+end
+
 return {
 	get_user_info = get_user_info,
 	set_user_info = set_user_info,
@@ -1120,6 +1151,7 @@ return {
 	createRankView = createRankView,
 	logTable = logTable,
 	log = log,
+	getParticleEffect = getParticleEffect,
 	RETRY = RETRY,
 	OK = OK,
 	FAIL = FAIL,
