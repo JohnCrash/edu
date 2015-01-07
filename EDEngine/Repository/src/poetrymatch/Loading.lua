@@ -55,9 +55,7 @@ function Loading:update_skill_list()
 		else
 			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end
@@ -120,9 +118,7 @@ function Loading:update_card_info()
 		else
 			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)			
 		end
@@ -157,9 +153,7 @@ function Loading:update_user_info()
 		else
 			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end
@@ -167,6 +161,7 @@ function Loading:update_user_info()
 end
 
 function Loading:getdatabyurl()
+	kits.make_local_directory('poetrymatch')
 	local send_data
 	person_info.post_data_by_new_form(self._loading,'login',send_data,function(t,v)
 		if t and t == 200 then
@@ -180,9 +175,7 @@ function Loading:getdatabyurl()
 		else
 			person_info.messagebox(self._loading,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					uikits.popScene()
-				else
-					uikits.popScene()
+
 				end
 			end)
 		end
@@ -197,7 +190,10 @@ function Loading:init()
 	end
 	self._loading = uikits.fromJson{file_9_16=ui.LOADING_FILE,file_3_4=ui.LOADING_FILE_3_4}
 	self:addChild(self._loading)
-
+	local random_src = os.time()
+	local bg_music_index = random_src%3+1
+	uikits.setDefaultClickSound(1,'poetrymatch/audio/other/button.mp3')
+	uikits.playSound('poetrymatch/audio/music/bj'..bg_music_index..'.mp3',true)
 	self:getdatabyurl()
 --	local loadbox = loadingbox.open(self)
 --	local scene_next = WrongSubjectList.create()								

@@ -229,9 +229,7 @@ function Leitaiview:show_card_info()
 		else
 			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_card_info()
-				else
-					self:show_card_info()
+
 				end
 			end)
 		end
@@ -396,9 +394,7 @@ function Leitaiview:get_lei_info(lei_id)
 		else
 			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:get_lei_info()
-				else
-					self:get_lei_info()
+
 				end
 			end)
 		end
@@ -484,9 +480,7 @@ function Leitaiview:getdatabyurl()
 		else
 			person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:getdatabyurl()
-				else
-					self:getdatabyurl()
+
 				end
 			end)
 		end

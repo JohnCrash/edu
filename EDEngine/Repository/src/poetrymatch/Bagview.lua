@@ -158,13 +158,27 @@ function Bagview:show_silver()
 					end
 				end)
 			else
-				le_num = le_num -10 
-				silver_num = silver_num + 1000
-				local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
-				txt_le:setString(le_num)
-				txt_silver:setString(silver_num)
-				person_info.set_user_silver(silver_num)
-				person_info.set_user_le_coin(le_num)
+				local send_data = {}
+				send_data.v1 = 36
+				person_info.post_data_by_new_form(self._Bagview,'buy_products',send_data,function(t,v)
+					if t and t == 200 then
+						le_num = le_num -10 
+						silver_num = silver_num + 1000
+						local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+						txt_le:setString(le_num)
+						txt_silver:setString(silver_num)
+						person_info.set_user_silver(silver_num)
+						person_info.set_user_le_coin(le_num)
+					else
+						person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+							if e == person_info.OK then
+								
+							else
+								
+							end
+						end)							
+					end
+				end)
 			end	
 		end,"click")
 end
@@ -276,9 +290,26 @@ function Bagview:show_exchange_card(id)
 			cur_card.out_id = id
 			uikits.event(cur_card,	
 				function(sender,eventType)	
-					person_info.exchange_card_in_battle_by_id(sender.in_id,sender.out_id)
-					func = self.show_bag_view
-					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)					
+					local send_data = {}
+					local battle_list = person_info.get_battle_list()
+					for j=1,#battle_list do
+						if battle_list[j] == sender.out_id then
+							battle_list[j] = sender.in_id
+						end
+					end
+					send_data.v1 = battle_list
+					person_info.post_data_by_new_form(self._Bagview,'set_main_cardplate',send_data,function(t,v)
+							if t and t == 200 then
+								person_info.exchange_card_in_battle_by_id(sender.in_id,sender.out_id)
+								func = self.show_bag_view
+								schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+							else
+								person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+									if e == person_info.OK then
+									end
+								end)
+							end		
+						end)							
 				end,"click")
 			txt_card_lvl:setVisible(true)
 		end		
@@ -340,6 +371,7 @@ function Bagview:show_shi_des(id)
 					local txt_years = uikits.child(item,ui.TXT_SHI_INFO_YEARS)	
 					txt_aut_name:setString(data.poem_auther)
 					txt_years:setString(data.poem_dynasty)	
+					txt_aut_name:setPositionY(40)
 				elseif data.poem_title then		
 					view_title:setVisible(true)
 					local txt_shi_name = uikits.child(item,ui.TXT_SHI_INFO_NAME)	
@@ -374,9 +406,7 @@ function Bagview:show_shi_des(id)
 		else
 			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_shi_des(id)
-				else
-					self:show_shi_des(id)
+
 				end
 			end)
 		end
@@ -466,9 +496,7 @@ function Bagview:show_shi_list()
 		else
 			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:show_shi_list()
-				else
-					self:show_shi_list()
+
 				end
 			end)
 		end
@@ -692,9 +720,7 @@ function Bagview:show_card_info(id)
 			else
 				person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
 					if e == person_info.OK then
-						--self:cost_thing(id)
-					else
-						--self:cost_thing(id)
+
 					end
 				end)
 			end

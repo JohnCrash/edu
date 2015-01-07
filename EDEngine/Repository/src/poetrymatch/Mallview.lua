@@ -90,13 +90,27 @@ function Mallview:show_silver()
 					end
 				end)
 			else
-				le_num = le_num -10 
-				silver_num = silver_num + 1000
-				local txt_le = uikits.child(self._Mallview,ui.TXT_LE_NUM)
-				txt_le:setString(le_num)
-				txt_silver:setString(silver_num)
-				person_info.set_user_silver(silver_num)
-				person_info.set_user_le_coin(le_num)
+				local send_data = {}
+				send_data.v1 = 36
+				person_info.post_data_by_new_form(self._Mallview,'buy_products',send_data,function(t,v)
+					if t and t == 200 then
+						le_num = le_num -10 
+						silver_num = silver_num + 1000
+						local txt_le = uikits.child(self._Mallview,ui.TXT_LE_NUM)
+						txt_le:setString(le_num)
+						txt_silver:setString(silver_num)
+						person_info.set_user_silver(silver_num)
+						person_info.set_user_le_coin(le_num)
+					else
+						person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+							if e == person_info.OK then
+								
+							else
+								
+							end
+						end)							
+					end
+				end)
 			end
 	
 		end,"click")
@@ -166,7 +180,7 @@ function Mallview:show_card_info(id)
 		pic_card_cu:setVisible(true)
 	end		
 	but_card_buy.cur_info = cur_card_info
-	uikits.event(but_card_buy,	
+--[[	uikits.event(but_card_buy,	
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
 			if silver_num < sender.cur_info.price then
@@ -180,7 +194,60 @@ function Mallview:show_card_info(id)
 				self:show_silver()
 				uikits.popScene()
 			end								
-		end,"click")		
+		end,"click")	--]]	
+		local function touchEvent(sender,eventType)
+			if eventType == ccui.TouchEventType.began then
+				uikits.playSound('poetrymatch/audio/other/mai.mp3')
+			elseif eventType == ccui.TouchEventType.ended then
+				local silver_num = person_info.get_user_silver()
+				if silver_num < sender.cur_info.price then
+					person_info.messagebox(self._Mallview,person_info.NO_SILVER,function(e)
+						if e == person_info.OK then
+						end
+					end)	
+				else
+					local send_data = {}
+					send_data.v1 = sender.cur_info.card_plate_id
+					send_data.v2 = 1
+					person_info.post_data_by_new_form(self._Mallview,'buy_products',send_data,function(t,v)
+						if t and t == 200 then
+							
+							local send_data = {}
+							send_data.v1 = sender.cur_info.card_plate_id
+							person_info.post_data_by_new_form(self._Mallview,'load_user_card_plate',send_data,function(t,v)
+								if t and t == 200 then
+									if v and type(v) == 'table' then
+										person_info.add_card_to_bag(v[1])
+										silver_num = silver_num - sender.cur_info.price
+										person_info.set_user_silver(silver_num)
+										self:show_silver()
+										uikits.popScene()
+									end
+								else
+									person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+										if e == person_info.OK then
+											
+										else
+											
+										end
+									end)
+								end
+							end)
+
+						else
+							person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+								if e == person_info.OK then
+									
+								else
+									
+								end
+							end)
+						end
+					end)
+				end					
+			end
+		end   	
+		but_card_buy:addTouchEventListener(touchEvent)	
 	self.but_quit.func = self.show_mall_card
 end
 
@@ -286,7 +353,61 @@ function Mallview:show_all_card()
 					func = self.show_card_info
 					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)										
 				end,"click")	
-			uikits.event(but_card_pay,	
+				
+			local function touchEvent(sender,eventType)
+				if eventType == ccui.TouchEventType.began then
+					uikits.playSound('poetrymatch/audio/other/mai.mp3')
+				elseif eventType == ccui.TouchEventType.ended then
+					local silver_num = person_info.get_user_silver()
+					if silver_num < sender.cur_info.price then
+						person_info.messagebox(self._Mallview,person_info.NO_SILVER,function(e)
+							if e == person_info.OK then
+							end
+						end)	
+					else
+						local send_data = {}
+						send_data.v1 = sender.cur_info.card_plate_id
+						send_data.v2 = 1
+						person_info.post_data_by_new_form(self._Mallview,'buy_products',send_data,function(t,v)
+							if t and t == 200 then
+								
+								local send_data = {}
+								send_data.v1 = sender.cur_info.card_plate_id
+								person_info.post_data_by_new_form(self._Mallview,'load_user_card_plate',send_data,function(t,v)
+									if t and t == 200 then
+										if v and type(v) == 'table' then
+											person_info.add_card_to_bag(v[1])
+											silver_num = silver_num - sender.cur_info.price
+											person_info.set_user_silver(silver_num)
+											self:show_silver()
+											uikits.popScene()
+										end
+									else
+										person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+											if e == person_info.OK then
+												
+											else
+												
+											end
+										end)
+									end
+								end)
+
+							else
+								person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+									if e == person_info.OK then
+										
+									else
+										
+									end
+								end)
+							end
+						end)
+					end					
+				end
+			end   	
+			but_card_pay:addTouchEventListener(touchEvent)	
+			--[[uikits.event(but_card_pay,	
 				function(sender,eventType)	
 					local silver_num = person_info.get_user_silver()
 					if silver_num < sender.cur_info.price then
@@ -335,7 +456,7 @@ function Mallview:show_all_card()
 						end)
 					end
 					--schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
-				end,"click")				
+				end,"click")				--]]
 		end
 		
 	end	
@@ -406,15 +527,17 @@ function Mallview:getdatabyurl()
 	person_info.post_data_by_new_form(self._Mallview,'get_product_cards',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
+				local user_info = person_info.get_user_info()
+				if user_info.has_product == 1 then
+					user_info.has_product = 0 
+					person_info.set_user_info(user_info)
+				end
 				self.card_info = v
 				self:show_all_card()			
 			end
 		else
 			person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:getdatabyurl()
-				else
-					self:getdatabyurl()
 				end
 			end)
 		end

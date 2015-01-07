@@ -80,14 +80,17 @@ function Noticeview:getdatabyurl()
 	person_info.post_data_by_new_form(self._Noticeview,'get_msg',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
+				local user_info = person_info.get_user_info()
+				if user_info.has_sign == 1 then
+					user_info.has_sign = 0 
+					person_info.set_user_info(user_info)
+				end
 				self:show_notice(v)
 			end
 		else
 			person_info.messagebox(self._Noticeview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end

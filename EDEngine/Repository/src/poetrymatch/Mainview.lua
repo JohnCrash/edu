@@ -110,13 +110,27 @@ function Mainview:show_silver()
 					self._Mainview:setTouchEnabled(true)--]]	
 				end)
 			else
-				le_num = le_num -10 
-				silver_num = silver_num + 1000
-				local txt_le = uikits.child(self._Mainview,ui.TXT_LE_NUM)
-				txt_le:setString(le_num)
-				txt_silver:setString(silver_num)
-				person_info.set_user_silver(silver_num)
-				person_info.set_user_le_coin(le_num)
+				local send_data = {}
+				send_data.v1 = 36
+				person_info.post_data_by_new_form(self._Mainview,'buy_products',send_data,function(t,v)
+					if t and t == 200 then
+						le_num = le_num -10 
+						silver_num = silver_num + 1000
+						local txt_le = uikits.child(self._Mainview,ui.TXT_LE_NUM)
+						txt_le:setString(le_num)
+						txt_silver:setString(silver_num)
+						person_info.set_user_silver(silver_num)
+						person_info.set_user_le_coin(le_num)
+					else
+						person_info.messagebox(self._Mainview,person_info.NETWORK_ERROR,function(e)
+							if e == person_info.OK then
+								
+							else
+								
+							end
+						end)							
+					end
+				end)
 			end		
 		end,"click")
 end
@@ -186,17 +200,115 @@ function Mainview:shwo_push_info()
 	pic_beibao:setVisible(false)
 end
 
-function Mainview:init_gui()	
+function Mainview:show_tili()
+	self._txt_tili_num = uikits.child(self._Mainview,ui.TXT_TILI_NUM)
+	local but_tili_add = uikits.child(self._Mainview,ui.BUTTON_TILI_ADD)
+	local scheduler = cc.Director:getInstance():getScheduler()
+	local function timer_update(time)
+		self.last_time = self.last_time -1
+		if self.last_time < 0 then
+			self.last_time = per_tili_reset_time + self.last_time
+			self.tili_num = self.tili_num +1
+			--self._txt_tili_num:setString(self.tili_num)
+			self:show_tili_num()
+			if self.tili_num == 100 then
+			--	self._txt_tili_time:setVisible(false)
+				if schedulerEntry then
+					scheduler:unscheduleScriptEntry(schedulerEntry)
+					schedulerEntry = nil
+				end
+			end
+		end
+	end
+	
+	uikits.event(but_tili_add,	
+		function(sender,eventType)	
+			local silver_num = person_info.get_user_silver()
+			if silver_num < 500 then
+				person_info.messagebox(self._Mainview,person_info.NO_SILVER,function(e)
+						if e == person_info.OK then
+						end
+					end)	
+			else
+				if self.tili_num >0 then
+					person_info.messagebox(self._Mainview,person_info.HAS_TILI,function(e)
+							if e == person_info.OK then
+								self.tili_num = 100
+								self:show_tili_num()
+								silver_num = silver_num-500
+								person_info.set_user_silver(silver_num)
+								self:show_silver()
+							else
+								
+							end
+						end)			
+				else
+				
+				end
+			end
+		end,"click")	
+	
+	local save_info = kits.config("tili_time",'get')
+	save_info = nil
+	if not save_info then
+		self.tili_num = 100
+		self.last_time = per_tili_reset_time -1
+	else
+		local save_info_tb = json.decode(save_info)
+		if not save_info_tb.last_tili_num or not save_info_tb.last_tili_num or not save_info_tb.last_tili_num  then
+			self.tili_num = 100
+			self.last_time = per_tili_reset_time -1
+		else
+			self.tili_num = tonumber(save_info_tb.last_tili_num)
+			self.last_time = tonumber(save_info_tb.last_time)
+			local old_time = tonumber(save_info_tb.old_time)
+			local cur_time = os.time()
+			local save_sec
+			local save_min
+			
+			if self.tili_num < 100 then
+				local save_time = cur_time - old_time
+				if save_time > self.last_time then
+					save_time = save_time - self.last_time
+					self.tili_num = self.tili_num+1
+					save_sec = save_time%per_tili_reset_time
+					save_min = (save_time-save_sec)/per_tili_reset_time
+					if self.tili_num + save_min <100 then
+						self.tili_num = self.tili_num +save_min
+						self.last_time = save_sec
+					else
+						self.tili_num = 100
+						self.last_time = per_tili_reset_time -1
+					end
+				else
+					self.last_time = self.last_time - save_time
+				end
+			else
+				self.tili_num = 100
+				self.last_time = per_tili_reset_time -1			
+			end		
+		end
+	end
+	if not schedulerEntry and self.tili_num < 100 then
+		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
+	end
+	
+end
+
+function Mainview:init_gui()
+	self:show_tili()	
 	self:shwo_push_info()
 	self:show_tili_num()
 	self:show_level()
 	self:show_silver()
 	self:show_le_coin()
 	self:show_cards()
+
 end
 
 function Mainview:init()	
 	if self._Mainview then
+		self:init_gui()
 		return
 	end
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
@@ -259,113 +371,10 @@ function Mainview:init()
 			uikits.pushScene(scene_next)
 		end,"click")		
 	
-	local scheduler = cc.Director:getInstance():getScheduler()
-	--self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
-	self._txt_tili_num = uikits.child(self._Mainview,ui.TXT_TILI_NUM)
-	
-	local but_tili_add = uikits.child(self._Mainview,ui.BUTTON_TILI_ADD)
-	
-	local function timer_update(time)
-		self.last_time = self.last_time -1
-		if self.last_time < 0 then
-			self.last_time = per_tili_reset_time + self.last_time
-			self.tili_num = self.tili_num +1
-			--self._txt_tili_num:setString(self.tili_num)
-			self:show_tili_num()
-			if self.tili_num == 100 then
-			--	self._txt_tili_time:setVisible(false)
-				if schedulerEntry then
-					scheduler:unscheduleScriptEntry(schedulerEntry)
-					schedulerEntry = nil
-				end
-			end
-		end
---[[		local txt_sec
-		local txt_min
-		txt_sec = self.last_time%60
-		txt_min = (self.last_time-txt_sec)/60
-		self._txt_tili_time:setString(txt_min..':'..txt_sec)--]]
-	end
-	
-	uikits.event(but_tili_add,	
-		function(sender,eventType)	
-			local silver_num = person_info.get_user_silver()
-			if silver_num < 500 then
-				person_info.messagebox(self._Mainview,person_info.NO_SILVER,function(e)
-						if e == person_info.OK then
-						end
-					end)	
-			else
-				if self.tili_num >0 then
-					person_info.messagebox(self._Mainview,person_info.HAS_TILI,function(e)
-							if e == person_info.OK then
-								self.tili_num = 100
-								self:show_tili_num()
-								silver_num = silver_num-500
-								person_info.set_user_silver(silver_num)
-								self:show_silver()
-							else
-								
-							end
-						end)			
-				else
-				
-				end
-			end
---[[			--self._txt_tili_time:setVisible(true)
-			if not schedulerEntry and self.tili_num < 100 then
-				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.1,false)
-			end--]]
-			
-		end,"click")	
-	
-	local save_info = kits.config("tili_time",'get')
-	save_info = nil
-	if not save_info then
-		self.tili_num = 100
-		self.last_time = per_tili_reset_time -1
-	else
-		local save_info_tb = json.decode(save_info)
-		if not save_info_tb.last_tili_num or not save_info_tb.last_tili_num or not save_info_tb.last_tili_num  then
-			self.tili_num = 100
-			self.last_time = per_tili_reset_time -1
-		else
-			self.tili_num = tonumber(save_info_tb.last_tili_num)
-			self.last_time = tonumber(save_info_tb.last_time)
-			local old_time = tonumber(save_info_tb.old_time)
-			local cur_time = os.time()
-			local save_sec
-			local save_min
-			
-			if self.tili_num < 100 then
-				local save_time = cur_time - old_time
-				if save_time > self.last_time then
-					save_time = save_time - self.last_time
-					self.tili_num = self.tili_num+1
-					save_sec = save_time%per_tili_reset_time
-					save_min = (save_time-save_sec)/per_tili_reset_time
-					if self.tili_num + save_min <100 then
-						self.tili_num = self.tili_num +save_min
-						self.last_time = save_sec
-					else
-						self.tili_num = 100
-						self.last_time = per_tili_reset_time -1
-					end
-				else
-					self.last_time = self.last_time - save_time
-				end
-			else
-				self.tili_num = 100
-				self.last_time = per_tili_reset_time -1			
-			end		
-		end
-	end
 
 	self:init_gui()
-	if not schedulerEntry and self.tili_num < 100 then
-		schedulerEntry = scheduler:scheduleScriptFunc(timer_update,1,false)
-	end
-	
+	--self._txt_tili_time = uikits.child(self._Mainview,ui.TXT_TILI_TIME)
+
 end
 
 function Mainview:release()
