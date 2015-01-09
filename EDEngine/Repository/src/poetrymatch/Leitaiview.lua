@@ -247,7 +247,8 @@ function Leitaiview:show_sch_rank()
 end
 
 function Leitaiview:goto_battle()
-
+	local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+	lly.logCurLocAnd(self.lei_info.defense_id)
 end
 
 function Leitaiview:show_lei_info()
@@ -302,7 +303,7 @@ function Leitaiview:show_lei_info()
 			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)				
 		end,"click")	
 	uikits.event(but_sch_rank,	
-		function(sender,eventType)	
+		function(sender,eventType)
 			func = self.show_sch_rank
 			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)				
 		end,"click")	

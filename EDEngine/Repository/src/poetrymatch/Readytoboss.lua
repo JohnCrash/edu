@@ -160,15 +160,15 @@ function Readytoboss:show_zhunbei()
 			schedulerEntry = nil
 
 			---[[ by luleyan! -------------------------
-			local ti = os.clock()
+			--local ti = os.clock()
 			local sc = cc.Scene:create()
 			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
 
 			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
 
-			local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+			--local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 			--lly.logTable(cardTable)
-			lly.logTable(self.bot_info)
+			--lly.logTable(self.bot_info)
 
 			--传入战斗层的数据包
 			local data = {}
@@ -230,7 +230,7 @@ function Readytoboss:show_zhunbei()
 			local laBattle = moLaBattle.Class:create(data)
 			sc:addChild(laBattle)
 			cc.Director:getInstance():pushScene(sc)
-			print(string.format("time is %f", os.clock() - ti))
+			--print(string.format("time is %f", os.clock() - ti))
 			--]]---------------------------------------
 
 		end

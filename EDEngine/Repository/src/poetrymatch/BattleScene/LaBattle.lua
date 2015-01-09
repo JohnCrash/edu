@@ -216,7 +216,7 @@ local CONST = lly.const{
 	QUES_COLOR = 150,
 
 	--倒计时
-	CHANGE_CARD_TIME = 18,
+	CHANGE_CARD_TIME = 15,
 
 	--
 	FIGHT_ANIM_RATE = 2.5,
@@ -385,6 +385,9 @@ function LaBattle:ctor()
 
 		--是否还有体力
 		_bHasVIT = true,
+
+		--是否播放过倒计时的语音
+		_bHasTalkedWhenCountdown = false,
 
 		--倒计时-----------------------------------------------
 		_nCountingDownTime = 10, --总倒计时时间
@@ -706,7 +709,6 @@ function LaBattle:initUI()
 		self._btnQuestionCommit = self:setWidget(ui.BTN_QUESTION_COMMIT)
 
 		uikits.event(self._btnQuestionCommit, function (sender)
-			uikits.stopAllEffects()
 			if self._stateCurrent == state.waitingForPlayerAnswer then
 				self:endPlayerAnswer()
 			elseif self._stateCurrent == state.waitingForEnemyAnswer then
@@ -809,9 +811,6 @@ function LaBattle:initUI()
 			--要是有特效等无法进入下个场景时点击无效
 			if self._bForbidEnterNextState then return end
 
-			--停止音效
-			uikits.stopAllEffects()
-
 			--收起人物选择框后进入下个场景
 			self:endPrepare()
 		end
@@ -824,7 +823,6 @@ function LaBattle:initUI()
 		self._btnConfirm = self:setWidget(ui.BTN_CONFIRM)
 
 		uikits.event(self._btnConfirm, function ()
-			uikits.stopAllEffects()
 			self:endPrepareWhenNoVIT()
 		end)
 
@@ -968,6 +966,7 @@ function LaBattle:initUIWithData(data)
 
 			local sendedTable = {} --初始化数据
 			sendedTable.achievement = {data.gainStar1, data.gainStar2, data.gainStar3}
+			sendedTable.plyr_id = data.plyr_id
 			sendedTable.sex = data.plyr_sex
 			sendedTable.name = data.plyr_name
 			sendedTable.cardID = {
@@ -1163,6 +1162,7 @@ function LaBattle:beginCountingdown(second)
 
 	self._nSecondLeft = second
 	self._fLastTime = 0
+	self._bHasTalkedWhenCountdown = false
 end
 
 --停止倒计时
@@ -1182,6 +1182,28 @@ function LaBattle:onTimePass()
 	elseif self._stateCurrent == state.waitingForPlayerAnswer or
 		self._stateCurrent == state.waitingForEnemyAnswer then
 		self._txtCountdown:setString(tostring(self._nSecondLeft))
+	end
+
+	--剩余10秒和剩余5秒时候播放语音
+	if self._stateCurrent == state.waitingForPlayerAnswer then
+		--答题20秒后
+		if self._nCountingDownTime - self._nSecondLeft == 20 and 
+			not self._bHasTalkedWhenCountdown then
+			self._bHasTalkedWhenCountdown = true
+			uikits.stopAllEffects()
+			self:playEffect("exercise/df10s", 3, true, CAMP_TYPE.ENEMY)
+		end
+
+		if self._nSecondLeft == 5 and not self._bHasTalkedWhenCountdown then
+			self._bHasTalkedWhenCountdown = true
+			uikits.stopAllEffects()
+			self:playEffect("exercise/5s", 0, true, CAMP_TYPE.PLAYER)
+		end
+	elseif self._stateCurrent == state.waitingForPlayerAnswer then
+		if self._nCountingDownTime - self._nSecondLeft == 20 then
+			uikits.stopAllEffects()
+			self:playEffect("exercise/wo10s", 3, true, CAMP_TYPE.ENEMY)
+		end
 	end
 end
 
@@ -1508,21 +1530,26 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	end
 
 	--动画
+	local nDelayTimeForEffect
 	self._animJudge:setVisible(true)
 	if bRight then
 		self._animJudge:getAnimation():play("success", -1, 0)
 		if camp_type == CAMP_TYPE.ENEMY then
 			self:playEffect("exercise/dfsuccess", 2, true, CAMP_TYPE.PLAYER)
+			nDelayTimeForEffect = 0.9
 		else
 			self:playEffect("exercise/success", 2, true, CAMP_TYPE.ENEMY)
+			nDelayTimeForEffect = 0.4
 		end
 		
 	else
 		self._animJudge:getAnimation():play("fail", -1, 0)
 		if camp_type == CAMP_TYPE.PLAYER then
 			self:playEffect("exercise/dffail", 2, true, CAMP_TYPE.PLAYER)
+			nDelayTimeForEffect = 0.9
 		else
 			self:playEffect("exercise/fail", 2, true, CAMP_TYPE.ENEMY)
+			nDelayTimeForEffect = 0.4
 		end
 	end
 
@@ -1532,9 +1559,8 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 		if movementType == ccs.MovementEventType.complete then
 
 			--延时后进入下一步
-			local delay = cc.DelayTime:create(0.8)
+			local delay = cc.DelayTime:create(nDelayTimeForEffect)
 			local call = cc.CallFunc:create(function ()
-				uikits.stopAllEffects()
 				self._animJudge:setVisible(false)
 				self:doAnimBeforeAtk(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
 			end)
@@ -1573,6 +1599,10 @@ function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, 
 	else
 		posSkill = self._posEnemyCard
 	end
+
+	--音效
+	uikits.stopAllEffects()
+	self:playEffect("skill/" .. moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack, 0)
 
 	--执行技能
 	self._anim:setVisible(true)
@@ -1694,11 +1724,13 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, 
 	end
 
 	--飞出武器
+	self._anim:getAnimation():setMovementEventCallFunc(function () end) --清空攻击后的回调
 	self._anim:getAnimation():play(strAnimAtk, -1, 0)
 
 	--武器音效和人声
+	uikits.stopAllEffects()
 	self:playEffect("skill/pt1", 0, true, camp_type)
-	self:playEffect("skill/pt2")
+	self:playEffect("skill/" .. strAnimAtk)
 
 
 	--同时移动武器（加速）
@@ -1713,7 +1745,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, 
 		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0)
 
 		--爆炸音效
-		self:playEffect("skill/pt3")
+		self:playEffect("skill/" .. strAnimAtkEnd)
 
 		--受伤音效
 		self:playEffect("skill/jiao", 2, true, eHurtCamp)
@@ -2160,18 +2192,23 @@ function LaBattle:useSkill(camp_type, cardIndex, skillIndex)
 
 	lly.logCurLocAnd("skill id is " .. self._nCurSkillID)
 
+	--动画音效
+	uikits.stopAllEffects()
+	self.playEffect("skill/" .. moSkill.SKILL[self._nCurSkillID].strAnim_init, 0, true, camp_type)
+
 	---[[进行动画（完成时检查请求是否完成，完成则取消禁止）
 	self._bFinishSkillAnim = false
 	self._anim:setVisible(true)
 	self._anim:getAnimation():play(moSkill.SKILL[self._nCurSkillID].strAnim_init, -1, 0)
 	self._anim:getAnimation():setMovementEventCallFunc(
-	function (armature, movementType, movementID)
-		if movementType == ccs.MovementEventType.complete then
-			self._anim:setVisible(false)
-			self._bFinishSkillAnim = true
-			self:excuteSkillEffect()
+		function (armature, movementType, movementID)
+			if movementType == ccs.MovementEventType.complete then
+				self._anim:setVisible(false)
+				self._bFinishSkillAnim = true
+				self:excuteSkillEffect()
+			end
 		end
-	end)
+	)
 	--]]
 
 end
@@ -2191,8 +2228,22 @@ function LaBattle:excuteSkillEffect()
 
 	--如果是直接技能，则执行技能效果，同时改变数值
 	if moSkill.SKILL[self._nCurSkillID] == moSkill.TYPE.DIRECT then
-		self._nCurSkillID = 0
-		self._bForbidEnterNextState = false
+
+		--动画音效
+		uikits.stopAllEffects()
+		self.playEffect("skill/" .. moSkill.SKILL[self._nCurSkillID].strAnim_effect, 0, true, camp_type)
+		
+		self._anim:getAnimation():play(moSkill.SKILL[self._nCurSkillID].strAnim_effect, -1, 0)
+		self._anim:getAnimation():setMovementEventCallFunc(
+			function (armature, movementType, movementID)
+				if movementType == ccs.MovementEventType.complete then
+
+					self._nCurSkillID = 0
+					self._bForbidEnterNextState = false
+
+				end
+			end
+		)
 	else
 		self._bForbidEnterNextState = false
 	end	
@@ -2384,6 +2435,7 @@ function LaBattle:prepare_S()
 			cc.p(0, self._nDisAreaMoveY))
 
 		if not self._bHasVIT then --第一次发现没体力，进行提示
+			self:playEffect("exercise/wu", 0, true, CAMP_TYPE.PLAYER)
 			self._imgTip:runAction(cc.EaseExponentialOut:create(acMoveCC))
 			self:beginCountingdown(CONST.CHANGE_CARD_TIME) --在后台倒计时
 
@@ -2514,6 +2566,7 @@ function LaBattle:askByEnemy_S()
 	local acTalkMove = self:getTalkAction()
 
 	--音效
+	uikits.stopAllEffects()
 	self:playEffect("exercise/dfs", 0, true, CAMP_TYPE.ENEMY)
 
 	--从右边（敌人方向）飞出答题板后
@@ -2611,6 +2664,7 @@ function LaBattle:commitPlyrAnswer_S()
 	local acTalkMove = self:getTalkAction(true)
 
 	--音效
+	uikits.stopAllEffects()
 	self:playEffect("exercise/wos2", 0, true, CAMP_TYPE.PLAYER)
 
 	--结束回调
@@ -2712,6 +2766,7 @@ function LaBattle:askByPlayer_S()
 	local acTalkMove = self:getTalkAction()
 
 	--对话音效
+	uikits.stopAllEffects()
 	self:playEffect("exercise/wos", 0, true, CAMP_TYPE.PLAYER)
 
 	--从左边（玩家方向）飞出答题板后
@@ -2807,6 +2862,7 @@ function LaBattle:commitEnemyAnswer_S()
 	local acTalkMove = self:getTalkAction(true)
 
 	--对话音效
+	uikits.stopAllEffects()
 	self:playEffect("exercise/dfs2", 0, true, CAMP_TYPE.ENEMY)
 
 	--结束回调
@@ -2877,6 +2933,10 @@ function LaBattle:win_S()
 
 	self._bCurStateIsEnding = false
 
+	--sound
+	uikits.stopAllEffects()
+	self:playEffect("exercise/shengli", 2, true, CAMP_TYPE.ENEMY)
+
 	--传输结果
 	self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
 
@@ -2890,6 +2950,10 @@ end
 function LaBattle:lose_S()
 	private.printState("lose")
 	self._stateCurrent = self._stateNext
+
+	--sound
+	uikits.stopAllEffects()
+	self:playEffect("exercise/shibai", 2, true, CAMP_TYPE.ENEMY)
 
 	self._bCurStateIsEnding = false
 
@@ -2935,11 +2999,11 @@ function static.playMusic(b, battleType)
 
 	uikits.stopAllSound()
 	uikits.stopMusic()
-battleType = 3
+
 	if not b then return end --b为false为停止音乐，则不往下继续走了
 	print("music is ", battleType)
 	if battleType == BATTLE_TYPE.STORY then
-		uikits.playSound("poetrymatch/audio/music/bj4.mp3", true)
+		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
 	elseif battleType == BATTLE_TYPE.FIGHT then
 		uikits.playSound("poetrymatch/audio/music/bj5.mp3", true)
 	else 

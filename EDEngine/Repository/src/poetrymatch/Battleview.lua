@@ -94,7 +94,8 @@ function Battleview:show_search_res()
 				
 				local function goto_battle(id) --Ω¯»Î’Ω∂∑
 					if id then
-						
+						local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+						lly.logCurLocAnd(id)
 					end
 				end
 				

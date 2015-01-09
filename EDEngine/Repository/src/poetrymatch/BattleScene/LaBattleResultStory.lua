@@ -135,7 +135,7 @@ function LaBattleResultStory:initUI(tab)
 	repeat
 		--UI
 		self._wiRoot = uikits.fromJson{file_9_16 = ui.FILE, file_3_4 = ui.FILE_3_4}
-
+		lly.logTable(tab)
 		if not self._wiRoot then break end
 		self:addChild(self._wiRoot)
 
@@ -168,13 +168,13 @@ function LaBattleResultStory:initUI(tab)
 		self._arimgCard[2] = self:setWidget(ui.IMG_CARD_2)
 		self._arimgCard[3] = self:setWidget(ui.IMG_CARD_3)
 
-		self._artxtCardName[1] = self:setWidget(ui.TXT_CARD_LEVEL_1)
-		self._artxtCardName[2] = self:setWidget(ui.TXT_CARD_LEVEL_2)
-		self._artxtCardName[3] = self:setWidget(ui.TXT_CARD_LEVEL_3)
+		self._artxtCardName[1] = self:setWidget(ui.TXT_CARD_NAME_1)
+		self._artxtCardName[2] = self:setWidget(ui.TXT_CARD_NAME_2)
+		self._artxtCardName[3] = self:setWidget(ui.TXT_CARD_NAME_3)
 
-		self._artxtCardLevel[1] = self:setWidget(ui.TXT_CARD_NAME_1)
-		self._artxtCardLevel[2] = self:setWidget(ui.TXT_CARD_NAME_2)
-		self._artxtCardLevel[3] = self:setWidget(ui.TXT_CARD_NAME_3)
+		self._artxtCardLevel[1] = self:setWidget(ui.TXT_CARD_LEVEL_1)
+		self._artxtCardLevel[2] = self:setWidget(ui.TXT_CARD_LEVEL_2)
+		self._artxtCardLevel[3] = self:setWidget(ui.TXT_CARD_LEVEL_3)
 
 		self._arbarCardExp[1] = self:setWidget(ui.BAR_CARD_EXP_1)
 		self._arbarCardExp[2] = self:setWidget(ui.BAR_CARD_EXP_2)
@@ -195,7 +195,7 @@ function LaBattleResultStory:initUI(tab)
 			self._artxtAchievement[i]:setString(tab.achievement[i])
 		end
 
-		local girl = 1
+		local girl = 2
 
 		--头像分男女
 		if tab.sex and tab.sex == girl then 
@@ -211,11 +211,13 @@ function LaBattleResultStory:initUI(tab)
 
 		--卡牌头像 卡牌名字
 		for i = 1, 3 do
-			if tab.cardID[i] == nil then break end
-			self._artxtCardName[i]:setString(tab.cardName[i])
-			moperson_info.load_card_pic(self._arimgCard[i], tab.cardID[i] .. "b.png")
+			if tab.cardID[i] == 0 then
+				self._arimgCard[i]:setVisible(false)
+			else
+				self._artxtCardName[i]:setString(tab.cardName[i])
+				moperson_info.load_card_pic(self._arimgCard[i], tab.cardID[i] .. "b.png")
+			end
 		end
-
 
 		return true
 	until true
@@ -270,10 +272,10 @@ function LaBattleResultStory:setData(table)
 	if table.user_gain_items.gain_card_id ~= 0 then
 		moperson_info.load_card_pic(self._imgGet, table.user_gain_items.gain_card_id .. "a.png")
 		self._imgGet:setScale(0.2) --缩小成合适比例
-		self._imgGet:setString(tostring("no"))
+		self._artxtGet[3]:setString("获得卡牌")
 	else
 		self._imgGet:setVisible(false)
-		self._imgGet:setVisible(false)
+		self._artxtGet[3]:setVisible(false)
 	end
 
 end
@@ -296,15 +298,16 @@ function LaBattleResultStory:onWinAnimComplete()
 	--获取经验值后开始动画
 	local sendedTable = {v1 = self._nUserID}
 	moperson_info.post_data_by_new_form(
-		"get_suerinfo_cardinfo", --业务名
+		self._wiRoot,
+		"get_userinfo_cardinfo", --业务名
 		sendedTable, --数据
-		function (bSuc, result) --结果回调
-			
-			if bSuc and result and result.v1 then
-				onDownloadExp(result)
+		function (ErrorCode, result) --结果回调
+			print(ErrorCode)
+			lly.logTable(result)
+			if ErrorCode == 200 and result then
+				self:onDownloadExp(result)
 			else
-				if not bSuc then lly.log(result) end
-				self:onNetError()
+				lly.error("net wrong" .. ErrorCode)
 			end			
 		end
 	)	
@@ -319,8 +322,8 @@ function LaBattleResultStory:onDownloadExp(result)
 	for i = 1, 3 do
 		for k, v in pairs(result.card_list) do
 			if self._arnCardID[i] == v.card_plate_id then
-				self._artxtCardLevel:setString(tostring(v.card_plate_level))
-				self._arbarCardExp:setPercent(100 * v.card_plate_exper / v.card_plate_exper_max)
+				self._artxtCardLevel[i]:setString(tostring(v.card_plate_level))
+				self._arbarCardExp[i]:setPercent(100 * v.card_plate_exper / v.card_plate_exper_max)
 				break
 			end
 		end

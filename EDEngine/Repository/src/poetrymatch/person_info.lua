@@ -764,6 +764,8 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 						end
 					end)
 				else
+					print('ERROR_CODE::::'..tb_result.c)
+					print('ERROR_MSG::::'..tb_result.msg)
 					messagebox(parent,SER_ERROR,function(e)
 						if e == OK then
 							
