@@ -99,6 +99,7 @@ function Loading:update_card_info()
 				cur_card_info.pp_ex_max = v[i].card_plate_pomes.can_be_val
 				cur_card_info.pp_pay = v[i].pomes_coin.coin_val	
 				cur_card_info.skill_reset_pay = v[i].relearn_coin.coin_val
+				cur_card_info.gender = v[i].gender
 				cur_card_info.skill_max = v[i].skill_max
 				cur_card_info.skills = {}
 				if v[i].skills then
@@ -107,6 +108,7 @@ function Loading:update_card_info()
 				if cur_card_info.in_battle_list == 1 then
 					all_battle_list[#all_battle_list+1] = cur_card_info.id
 				end
+
 				all_card_info[#all_card_info+1] = cur_card_info
 			end
 			person_info.set_all_card_to_bag(all_card_info)
@@ -147,6 +149,7 @@ function Loading:update_user_info()
 			person_info.set_user_le_coin(v.hcoin)
 			person_info.set_user_silver(v.scoin)
 			person_info.set_max_store_num(v.store_num)
+			person_info.set_user_tili(v.physical)
 			self:update_card_info()
 			--[[local scene_next = Mainview.create()        
 			cc.Director:getInstance():replaceScene(scene_next)   --]]

@@ -19,6 +19,8 @@ max_exp = 100,
 
 local g_person_silver = 100
 local g_person_le_coin = 10
+local g_person_tili = 0
+
 
 local g_person_bag = {
 cards_table = {},
@@ -78,6 +80,23 @@ local function set_user_info(uinfo)
 	else
 		return false
 	end
+end
+
+local function set_user_tili(tili_num)
+	if tili_num then
+		g_person_tili = tili_num
+		return true
+	else
+		return false
+	end
+end
+
+local function get_user_tili()
+	local tili_num
+	if g_person_tili then
+		tili_num = g_person_tili
+	end
+	return tili_num
 end
 
 local function get_user_lvl_info()
@@ -740,7 +759,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	local loadbox = put_lading_circle(parent)
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
-		print('d::'..d)
+		--print('d::'..d)
 		local tb_result = json.decode(d)
 		if t == true then
 			if tb_result.c == 200 then
@@ -1059,6 +1078,8 @@ return {
 	get_user_info = get_user_info,
 	set_user_info = set_user_info,
 	update_user_info_by_tag = update_user_info_by_tag,
+	set_user_tili = set_user_tili,
+	get_user_tili = get_user_tili,
 	get_user_lvl_info = get_user_lvl_info,
 	set_user_lvl_info = set_user_lvl_info,	
 	get_user_silver = get_user_silver,

@@ -128,7 +128,7 @@ function Guideview:show_talk()
 		pic_user_woman:setVisible(true)	
 	end
 	person_info.load_card_pic(pic_bot_daos,'daos.png')
-	person_info.load_card_pic(pic_bot_mut,'13.png')
+	person_info.load_card_pic(pic_bot_mut,'1c.png')
 	
 	local content_index = 1
 	

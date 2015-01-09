@@ -90,7 +90,7 @@ function Loading:getdatabyurl()
 		cache.request_json( get_uesr_info_url,function(t)
 			if t and type(t)=='table' then
 				if 	t.result ~= 0 then				
-					print(t.result.." : "..t.message)			
+					print(t.result.." : "..t.msg)			
 				else
 					if t.uig[1].user_role == 1 then	--xuesheng
 						login.set_uid_type(login.STUDENT)

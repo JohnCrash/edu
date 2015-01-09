@@ -190,10 +190,10 @@ function Countryview:init_gui()
 end
 
 function Countryview:init()	
-	if self._Countryview then
+--[[	if self._Countryview then
 		self:set_innerpos()
 		return
-	end
+	end--]]
 	
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}

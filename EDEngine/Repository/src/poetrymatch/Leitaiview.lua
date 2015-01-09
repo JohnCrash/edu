@@ -247,7 +247,34 @@ function Leitaiview:show_sch_rank()
 end
 
 function Leitaiview:goto_battle()
-
+	local silver_num = person_info.get_user_silver()
+	if silver_num < self.lei_info.consume_num then
+			person_info.messagebox(self._Leitaiview,person_info.NO_SILVER,function(e)
+				if e == person_info.OK then
+					
+				else
+					
+				end
+			end)					
+	else
+		local send_data = {}
+		send_data.v1 = self.lei_info.defense_id
+		person_info.post_data_by_new_form(self._Leitaiview,'attack_defense_possy_coin',send_data,function(t,v)
+			if t and t == 200 then
+				silver_num = silver_num - self.lei_info.consume_num
+				person_info.set_user_silver(silver_num)
+				
+			else
+				person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
+					if e == person_info.OK then
+						
+					else
+						
+					end
+				end)				
+			end
+		end)		
+	end
 end
 
 function Leitaiview:show_lei_info()
