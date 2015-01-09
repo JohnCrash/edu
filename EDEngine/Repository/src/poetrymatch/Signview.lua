@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Signview = class("Signview")
@@ -45,15 +44,23 @@ end
 
 function Signview:sign()
 	local send_data
-	person_info.post_data_by_new_form('sign_submit',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._Signview,'sign_submit',send_data,function(t,v)
+		if t and t == 200 then
+			if v.scoin then
+				person_info.add_user_silver(v.scoin)
+			end
+			if v.hcoin then
+				person_info.add_user_le_coin(v.scoin)
+			end
+			local user_info = person_info.get_user_info()
+			if user_info.has_sign == 1 then
+				user_info.has_sign = 0 
+				person_info.set_user_info(user_info)
+			end
 			uikits.popScene()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Signview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
 				end
 			end)
 		end
@@ -89,17 +96,15 @@ end
 
 function Signview:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('sign_detail',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._Signview,'sign_detail',send_data,function(t,v)
+		if t and t == 200 then
 			if v and type(v) == 'table' then
 				self:show_info(v)
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Signview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end

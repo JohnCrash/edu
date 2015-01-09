@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Bagview = class("Bagview")
@@ -63,7 +62,23 @@ local ui = {
 	BUTTON_CARD_INFO_SKILL_RESET = 'chongxjn',
 	TXT_CARD_INFO_SKILL_RESET = 'qian6',
 	
+	VIEW_SHI_LIST = 'shiji',
+	VIEW_SHI_DES = 'jianjie',
+	TXT_SHI_DES = 'jianjie/wen',
+	BUTTON_SHI_NAME = 'si1',
+	TXT_SHI_NAME = 'mz',
+	
 	VIEW_SHI_INFO = 'shi',
+	VIEW_SHI_INFO_SRC = 'shi1',
+	VIEW_SHI_INFO_TITLE = 'shim',
+	VIEW_SHI_INFO_CONTENT = 'shiju',
+	VIEW_SHI_INFO_NAME = 'zuoz',
+	TXT_SHI_INFO_AUT_NAME = 'zuoz/zuoz',
+	TXT_SHI_INFO_NAME = 'shim/sm',
+	TXT_SHI_INFO_YEARS = 'zuoz/caod',
+	TXT_SHI_INFO_DATA = 'shiju/sj',
+--	VIEW_SHI_INFO_DES = 'yiwen',
+--	TXT_SHI_INFO_DES = 'yiwen/wen',
 	
 	VIEW_CARD_EXCHANGE = 'gengh',
 	TXT_CARD_EXCHANGE_WEN = 'wen',
@@ -124,39 +139,6 @@ function create(card_id)
 	return scene	
 end
 
-function Bagview:getdatabyurl()
-
-	cache.request_json( get_uesr_info_url,function(t)
-		if t and type(t)=='table' then
-			if 	t.result ~= 0 then				
-				print(t.result.." : "..t.message)			
-			else
-				if t.uig[1].user_role == 1 then	--xuesheng
-					login.set_uid_type(login.STUDENT)
-					local scene_next = errortitleview.create(t.uig[1].uname)		
-					--uikits.pushScene(scene_next)						
-					cc.Director:getInstance():replaceScene(scene_next)	
-				elseif t.uig[1].user_role == 2 then	--jiazhang
-					login.set_uid_type(login.PARENT)
-					self:getdatabyparent()
-				elseif t.uig[1].user_role == 3 then	--laoshi
-					login.set_uid_type(login.TEACHER)
-					self:showteacherview()		
-				end
-			end	
-		else
-			--既没有网络也没有缓冲
-			messagebox.open(self,function(e)
-				if e == messagebox.TRY then
-					self:init()
-				elseif e == messagebox.CLOSE then
-					uikits.popScene()
-				end
-			end,messagebox.RETRY)	
-		end
-	end,'N')
-end
-
 function Bagview:show_silver()
 	local silver_num = person_info.get_user_silver()
 	local txt_silver = uikits.child(self._Bagview,ui.TXT_SILVER_NUM)
@@ -166,11 +148,9 @@ function Bagview:show_silver()
 --	but_silver:setVisible(false)
 	uikits.event(but_silver,	
 		function(sender,eventType)	
-			sender:setEnabled(false)
-			sender:setTouchEnabled(false)
 			local le_num = person_info.get_user_le_coin()
 			if le_num < 10 then
-				person_info.messagebox(self,person_info.NO_LE,function(e)
+				person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
 					if e == person_info.OK then
 						print('aaaaaaaaaaaa')
 					else
@@ -178,16 +158,28 @@ function Bagview:show_silver()
 					end
 				end)
 			else
-				le_num = le_num -10 
-				silver_num = silver_num + 1000
-				local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
-				txt_le:setString(le_num)
-				txt_silver:setString(silver_num)
-				person_info.set_user_silver(silver_num)
-				person_info.set_user_le_coin(le_num)
-			end
-			sender:setEnabled(true)
-			sender:setTouchEnabled(true)			
+				local send_data = {}
+				send_data.v1 = 36
+				person_info.post_data_by_new_form(self._Bagview,'buy_products',send_data,function(t,v)
+					if t and t == 200 then
+						le_num = le_num -10 
+						silver_num = silver_num + 1000
+						local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+						txt_le:setString(le_num)
+						txt_silver:setString(silver_num)
+						person_info.set_user_silver(silver_num)
+						person_info.set_user_le_coin(le_num)
+					else
+						person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+							if e == person_info.OK then
+								
+							else
+								
+							end
+						end)							
+					end
+				end)
+			end	
 		end,"click")
 end
 
@@ -298,9 +290,26 @@ function Bagview:show_exchange_card(id)
 			cur_card.out_id = id
 			uikits.event(cur_card,	
 				function(sender,eventType)	
-					person_info.exchange_card_in_battle_by_id(sender.in_id,sender.out_id)
-					func = self.show_bag_view
-					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)					
+					local send_data = {}
+					local battle_list = person_info.get_battle_list()
+					for j=1,#battle_list do
+						if battle_list[j] == sender.out_id then
+							battle_list[j] = sender.in_id
+						end
+					end
+					send_data.v1 = battle_list
+					person_info.post_data_by_new_form(self._Bagview,'set_main_cardplate',send_data,function(t,v)
+							if t and t == 200 then
+								person_info.exchange_card_in_battle_by_id(sender.in_id,sender.out_id)
+								func = self.show_bag_view
+								schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+							else
+								person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+									if e == person_info.OK then
+									end
+								end)
+							end		
+						end)							
 				end,"click")
 			txt_card_lvl:setVisible(true)
 		end		
@@ -308,8 +317,190 @@ function Bagview:show_exchange_card(id)
 	self.but_quit.func = self.show_bag_view
 end
 	
-function Bagview:buy_store()		
+function Bagview:buy_store()	
+	local le_num = person_info.get_user_le_coin()
+	if le_num < 5 then	
+		person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
+			if e == person_info.OK then
+				print('aaaaaaaaaaaa')
+			else
+				print('bbbbbbbbbbbb')
+			end
+		end)
+	else
+		local store_num = person_info.get_max_store_num()
+		if store_num then
+			store_num = store_num +5
+			person_info.set_max_store_num(store_num)
+		end
+		le_num = le_num -5 
+		local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+		txt_le:setString(le_num)
+		person_info.set_user_le_coin(le_num)
+		self:show_bag_view()	
+	end
+end
 
+function Bagview:show_shi_des(id)
+	
+	local function show_shi_des_gui(shi_des)
+		self:resetgui()
+		self.temp_view = self.view_shi_info:clone()
+		self.temp_view:setVisible(true)
+		self._Bagview:addChild(self.temp_view,0,10000)		
+			
+		--local view_shi_info = uikits.child(self.temp_view,ui.VIEW_SHI_INFO)
+		local view_shi_info_src = uikits.child(self.temp_view,ui.VIEW_SHI_INFO_SRC)
+		local viewSize=self.temp_view:getContentSize()
+		local viewPosition=cc.p(self.temp_view:getPosition())
+		local viewParent=self.temp_view:getParent()
+
+		view_shi_info_src:setVisible(false)	
+		if shi_des and type(shi_des) == 'table' then
+			local view_person_rank1=person_info.createRankView(self.temp_view,viewPosition,viewSize,view_shi_info_src,function(item,data)
+				item:setVisible(true)	
+				local view_title = uikits.child(item,ui.VIEW_SHI_INFO_TITLE)	
+				local view_content = uikits.child(item,ui.VIEW_SHI_INFO_CONTENT)
+				local view_name = uikits.child(item,ui.VIEW_SHI_INFO_NAME)
+				view_name:setVisible(false)
+				view_title:setVisible(false)
+				view_content:setVisible(false)		
+				if data.poem_auther then
+					view_name:setVisible(true)
+					local txt_aut_name = uikits.child(item,ui.TXT_SHI_INFO_AUT_NAME)	
+					local txt_years = uikits.child(item,ui.TXT_SHI_INFO_YEARS)	
+					txt_aut_name:setString(data.poem_auther)
+					txt_years:setString(data.poem_dynasty)	
+					txt_aut_name:setPositionY(40)
+				elseif data.poem_title then		
+					view_title:setVisible(true)
+					local txt_shi_name = uikits.child(item,ui.TXT_SHI_INFO_NAME)	
+					txt_shi_name:setString(data.poem_title)
+				else
+					view_content:setVisible(true)
+					local txt_data = uikits.child(item,ui.TXT_SHI_INFO_DATA)	
+					txt_data:setString(data)
+				end		
+				end,function(waitingNode,afterReflash)
+				local data = {}
+				data[1] = {}
+				data[1].poem_title = shi_des.poem_title
+				data[2] = {}
+				data[2].poem_auther = shi_des.poem_auther
+				data[2].poem_dynasty = shi_des.poem_dynasty
+
+				for i=1,#shi_des.poem_body do
+					data[i+2] = shi_des.poem_body[i]
+				end
+				afterReflash(data)
+			end)		
+		end		
+		self.but_quit.func = self.show_shi_list	
+	end
+	
+	local send_data = {}
+	send_data.v1 = id
+	person_info.post_data_by_new_form(self._Bagview,'poems_detail',send_data,function(t,v)
+		if t and t == 200 then
+			show_shi_des_gui(v)
+		else
+			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+
+				end
+			end)
+		end
+	end)	
+end
+
+function Bagview:show_shi_list()	
+
+	local shi_spcae_heng = 20
+	local shi_spcae_shu = 20
+	
+	local func
+	local id
+	local function timer_update(time)
+		func(self,id)
+		if schedulerEntry then
+			scheduler:unscheduleScriptEntry(schedulerEntry)
+		end
+	end		
+	
+	local function show_shi(shi_info)
+		self:resetgui()
+		self.temp_view = self.view_shi_list:clone()
+		self.temp_view:setVisible(true)
+		self._Bagview:addChild(self.temp_view,0,10000)		
+		local view_des = uikits.child(self.temp_view,ui.VIEW_SHI_DES)
+		local txt_shi_des = uikits.child(self.temp_view,ui.TXT_SHI_DES)	
+		txt_shi_des:setString(shi_info.auther_introduction)
+		local shi_name_src = uikits.child(self.temp_view,ui.BUTTON_SHI_NAME)	
+		shi_name_src:setVisible(false)
+		
+		if shi_info.list and type(shi_info.list) == 'table' then
+			local shi_name_list = shi_info.list
+			local row_num = #shi_name_list/3	
+			row_num = math.ceil(row_num)
+
+			local size_scroll = self.temp_view:getInnerContainerSize()
+			local size_name_src = shi_name_src:getContentSize()
+			local pos_name_src_x,pos_name_src_y = shi_name_src:getPosition()
+			local size_shi_view = self.temp_view:getContentSize()	
+			local pos_name_y_start = size_shi_view.height - pos_name_src_y	
+			local pos_name_x_start = pos_name_src_x	
+			local pos_des_y = view_des:getPositionY()
+			local pos_des_y_start = size_shi_view.height - pos_des_y
+			if size_scroll.height < (pos_name_y_start + row_num*(size_name_src.height+shi_spcae_shu)- size_name_src.height) then
+				size_scroll.height = pos_name_y_start + row_num*(size_name_src.height+shi_spcae_shu) - size_name_src.height
+				self.temp_view:setInnerContainerSize(size_scroll)
+				view_des:setPositionY(size_scroll.height-pos_des_y_start)	
+				pos_name_y_start = size_scroll.height-pos_name_y_start
+			else
+				pos_name_y_start = pos_name_src_y
+			end			
+			local cur_row = 0
+			local cur_line = 3
+			for i=1,#shi_name_list do
+				local cur_shi = shi_name_src:clone()
+				cur_shi:setVisible(true)
+				self.temp_view:addChild(cur_shi)			
+				if cur_line == 3 then
+					cur_line = 1
+					cur_row = cur_row + 1 
+				else
+					cur_line = cur_line + 1 
+				end		
+				local cur_pos_x = pos_name_x_start +(size_name_src.width+shi_spcae_heng)*(cur_line-1)
+				local cur_pos_y = pos_name_y_start -(size_name_src.height+shi_spcae_shu)*(cur_row-1)
+				cur_shi:setPosition(cc.p(cur_pos_x,cur_pos_y))	
+				local txt_cur_shi_name = uikits.child(cur_shi,ui.TXT_SHI_NAME)	
+				txt_cur_shi_name:setString(shi_name_list[i].poems_title)
+				cur_shi.id = shi_name_list[i].poems_id
+				uikits.event(cur_shi,	
+					function(sender,eventType)	
+						id = sender.id
+						func = self.show_shi_des
+						schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)										
+					end,"click")	
+			end
+		end
+		self.but_quit.func = self.show_card_info
+	end		
+	
+	local send_data = {}
+	send_data.v1 = self.card_id
+	person_info.post_data_by_new_form(self._Bagview,'get_user_card_plate_poems',send_data,function(t,v)
+		if t and t == 200 then
+			show_shi(v)
+		else
+			person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+				if e == person_info.OK then
+
+				end
+			end)
+		end
+	end)	
 end
 
 function Bagview:show_skill_info(id,back_type)		
@@ -322,13 +513,13 @@ function Bagview:show_skill_info(id,back_type)
 	local txt_skill_des = uikits.child(self.temp_view,ui.TXT_SKILL_INFO_DES)
 	local skill_info = person_info.get_skill_info_by_id(id)
 
-	local n_pic_name = skill_info.skill_id..'a.png'
-	local d_pic_name = skill_info.skill_id..'b.png'
+	local n_pic_name = skill_info.sub_id..'a.png'
+	local d_pic_name = skill_info.sub_id..'b.png'
 --[[			local n_pic_name = '1a.png'
 	local d_pic_name = '1b.png'--]]
 	person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
-	txt_skill_name:setString(skill_info.skill_name)
-	txt_skill_des:setString(skill_info.skill_des)
+	txt_skill_name:setString(skill_info.pro_name)
+	txt_skill_des:setString(skill_info.pro_desc)
 	if back_type == 1 then
 		self.but_quit.func = self.show_card_info
 	elseif back_type == 2 then
@@ -387,7 +578,7 @@ function Bagview:show_skill_mall()
 	for i=1,#skill_list do
 		local is_has_skill = false
 		for j=1 ,#self.card_info.skills do
-			if skill_list[i].skill_id == self.card_info.skills[j].skill_id then
+			if skill_list[i].sub_id == self.card_info.skills[j].skill_id then
 				is_has_skill = true
 				break
 			end
@@ -409,15 +600,15 @@ function Bagview:show_skill_mall()
 			local txt_skill_name = uikits.child(cur_skill,ui.TXT_LEARN_SKILL_NAME)			
 			local but_skill_pay = uikits.child(cur_skill,ui.BUTTON_LEARN_SKILL_PAY)
 			local txt_skill_pay = uikits.child(cur_skill,ui.TXT_LEARN_SKILL_PAY)	
-			txt_skill_name:setString(skill_list[i].skill_name)		
+			txt_skill_name:setString(skill_list[i].pro_name)		
 			txt_skill_pay:setString(skill_list[i].price)		
-			local n_pic_name = skill_list[i].skill_id..'a.png'
-			local d_pic_name = skill_list[i].skill_id..'b.png'
+			local n_pic_name = skill_list[i].sub_id..'a.png'
+			local d_pic_name = skill_list[i].sub_id..'b.png'
 --[[			local n_pic_name = '1a.png'
 			local d_pic_name = '1b.png'--]]
 			person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
-			pic_skill.id = skill_list[i].skill_id
-			but_skill_pay.id = skill_list[i].skill_id
+			pic_skill.id = skill_list[i].sub_id
+			but_skill_pay.id = skill_list[i].sub_id
 			uikits.event(pic_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
@@ -428,9 +619,9 @@ function Bagview:show_skill_mall()
 				function(sender,eventType)	
 					local sel_skill_info = person_info.get_skill_info_by_id(sender.id)
 					local new_skill_info = {}
-					new_skill_info.skill_id = sel_skill_info.skill_id
-					new_skill_info.skill_name = sel_skill_info.skill_name
-					new_skill_info.skill_des = sel_skill_info.skill_des
+					new_skill_info.skill_id = sel_skill_info.sub_id
+					new_skill_info.skill_name = sel_skill_info.pro_name
+					new_skill_info.skill_desc = sel_skill_info.pro_desc
 					self.card_info.skills[#self.card_info.skills+1] = new_skill_info
 					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
 					callback_id = self.card_id 
@@ -458,6 +649,84 @@ function Bagview:show_card_info(id)
 			scheduler:unscheduleScriptEntry(schedulerEntry)
 		end
 	end	
+	local function cost_thing(id)
+		local send_data = {}
+		send_data.v1 = self.card_id
+		send_data.v2 = id
+		person_info.post_data_by_new_form(self._Bagview,'user_cardplate_oper',send_data,function(t,v)
+			if t and t == 200 then
+				if id == 6 then
+					self.card_info.skills={}
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local silver_num = person_info.get_user_silver()
+					silver_num = silver_num-self.card_info.skill_reset_pay
+					person_info.set_user_silver(silver_num)
+					self:show_silver()
+					func = self.show_card_info
+				elseif id == 1 then
+					self.card_info.ap_ex = self.card_info.ap_ex_max
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local silver_num = person_info.get_user_silver()
+					silver_num = silver_num-self.card_info.ap_pay
+					person_info.set_user_silver(silver_num)
+					self:show_silver()
+					func = self.show_card_info
+				elseif id == 2 then
+					self.card_info.hp_ex = self.card_info.hp_ex_max
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local silver_num = person_info.get_user_silver()
+					silver_num = silver_num-self.card_info.hp_pay
+					person_info.set_user_silver(silver_num)
+					self:show_silver()
+					func = self.show_card_info
+				elseif id == 3 then
+					self.card_info.mp_ex = self.card_info.mp_ex_max
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local silver_num = person_info.get_user_silver()
+					silver_num = silver_num-self.card_info.mp_pay
+					person_info.set_user_silver(silver_num)
+					self:show_silver()
+					func = self.show_card_info
+				elseif id == 4 then
+					self.card_info.pp_ex = self.card_info.pp_ex_max
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local silver_num = person_info.get_user_silver()
+					silver_num = silver_num-self.card_info.pp_pay
+					person_info.set_user_silver(silver_num)
+					self:show_silver()
+					func = self.show_card_info		
+				elseif id == 5 then
+					self.card_info.sp_ex = self.card_info.sp_ex_max
+					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+					callback_id = self.card_id 
+					local le_num = person_info.get_user_le_coin()
+					le_num = le_num-self.card_info.sp_pay
+					person_info.set_user_le_coin(le_num)
+					self:show_le_coin()
+					func = self.show_card_info						
+				elseif id == 7 then
+					if self.card_info.in_battle_list == 1 then
+						person_info.exchange_card_in_battle_by_id(0,self.card_id)
+					end
+					person_info.del_card_in_bag_by_id(self.card_id)	
+					func = self.show_bag_view
+				end
+				schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+			else
+				person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+					if e == person_info.OK then
+
+					end
+				end)
+			end
+		end)
+	end		
+	
 	local card_info = person_info.get_card_in_bag_by_id(id)
 	self.card_info = card_info
 	local pic_card_info = uikits.child(self.temp_view,ui.PIC_CARD_INFO)
@@ -482,16 +751,24 @@ function Bagview:show_card_info(id)
 	end	
 
 	local but_card_info_show_shi = uikits.child(self.temp_view,ui.BUTTON_CARD_INFO_SHOW_SHI)
+	but_card_info_show_shi.id = card_info.id
 	local but_card_info_del = uikits.child(self.temp_view,ui.BUTTON_CARD_INFO_DEL)
+	but_card_info_del.id = card_info.id
 	uikits.event(but_card_info_show_shi,	
 		function(sender,eventType)	
-
---[[			func = self.buy_store
-			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)--]]
+			func = self.show_shi_list
+			schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 		end,"click")		
 	uikits.event(but_card_info_del,	
 		function(sender,eventType)	
-			
+			local silver_num = person_info.get_user_silver()
+				person_info.messagebox(self._Bagview,person_info.DEL_CARD,function(e)
+					if e == person_info.OK then
+						cost_thing(7)
+					else
+						
+					end
+				end)
 		end,"click")	
 
 	local pro_card_info_ap = uikits.child(self.temp_view,ui.PRO_CARD_INFO_AP)
@@ -514,7 +791,15 @@ function Bagview:show_card_info(id)
 	txt_card_info_ap_ex:setString(card_info.ap_pay)
 	uikits.event(but_card_info_ap_ex,	
 		function(sender,eventType)	
-			
+			local silver_num = person_info.get_user_silver()
+			if silver_num < card_info.ap_pay then
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				cost_thing(1)
+			end
 		end,"click")
 
 	local pro_card_info_hp = uikits.child(self.temp_view,ui.PRO_CARD_INFO_HP)
@@ -537,7 +822,15 @@ function Bagview:show_card_info(id)
 	end
 	uikits.event(but_card_info_hp_ex,	
 		function(sender,eventType)	
-			
+			local silver_num = person_info.get_user_silver()
+			if silver_num < card_info.hp_pay then
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				cost_thing(2)
+			end
 		end,"click")	
 
 	local pro_card_info_mp = uikits.child(self.temp_view,ui.PRO_CARD_INFO_MP)
@@ -560,7 +853,15 @@ function Bagview:show_card_info(id)
 	txt_card_info_mp_ex:setString(card_info.mp_pay)
 	uikits.event(but_card_info_mp_ex,	
 		function(sender,eventType)	
-			
+			local silver_num = person_info.get_user_silver()
+			if silver_num < card_info.mp_pay then
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				cost_thing(3)
+			end
 		end,"click")	
 
 	local pro_card_info_pp = uikits.child(self.temp_view,ui.PRO_CARD_INFO_PP)
@@ -583,7 +884,15 @@ function Bagview:show_card_info(id)
 	txt_card_info_pp_ex:setString(card_info.pp_pay)
 	uikits.event(but_card_info_pp_ex,	
 		function(sender,eventType)	
-			
+			local silver_num = person_info.get_user_silver()
+			if silver_num < card_info.pp_pay then
+				person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				cost_thing(4)
+			end
 		end,"click")	
 
 	local pro_card_info_sp = uikits.child(self.temp_view,ui.PRO_CARD_INFO_SP)
@@ -606,7 +915,15 @@ function Bagview:show_card_info(id)
 	txt_card_info_sp_ex:setString(card_info.sp_pay)
 	uikits.event(but_card_info_sp_ex,	
 		function(sender,eventType)	
-			
+			local le_num = person_info.get_user_le_coin()
+			if le_num < card_info.sp_pay then
+				person_info.messagebox(self._Bagview,person_info.NO_LE,function(e)
+					if e == person_info.OK then
+					end
+				end)	
+			else
+				cost_thing(5)
+			end
 		end,"click")	
 		
 	local but_card_info_skill_src = uikits.child(self.temp_view,ui.BUTTON_CARD_INFO_SKILL)
@@ -616,13 +933,17 @@ function Bagview:show_card_info(id)
 	txt_card_info_skill_reset:setString(card_info.skill_reset_pay)
 	uikits.event(but_card_info_skill_reset,	
 		function(sender,eventType)	
-			person_info.messagebox(self,person_info.RESET_SKILL,function(e)
+			person_info.messagebox(self._Bagview,person_info.RESET_SKILL,function(e)
 				if e == person_info.OK then
-					self.card_info.skills={}
-					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
-					callback_id = self.card_id 
-					func = self.show_card_info
-					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+					local silver_num = person_info.get_user_silver()
+					if silver_num < card_info.skill_reset_pay then
+						person_info.messagebox(self._Bagview,person_info.NO_SILVER,function(e)
+							if e == person_info.OK then
+							end
+						end)	
+					else
+						cost_thing(6)
+					end
 				else
 
 				end
@@ -734,7 +1055,6 @@ function Bagview:show_bag_view()
 				view_buy_store:setPosition(cc.p(cur_pos_x,cur_pos_y))
 				uikits.event(view_buy_store,	
 					function(sender,eventType)	
-						--self:buy_store()
 						func = self.buy_store
 						schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)
 					end,"click")			
@@ -826,6 +1146,8 @@ function Bagview:initgui()
 	self.view_skill_info = uikits.child(self._Bagview,ui.VIEW_SKILL_INFO)
 	self.view_learn_skill = uikits.child(self._Bagview,ui.VIEW_LEARN_SKILL)
 	self.view_no_card = uikits.child(self._Bagview,ui.VIEW_NO_CARD)
+	self.view_shi_list = uikits.child(self._Bagview,ui.VIEW_SHI_LIST)
+	
 
 	self.view_bag:setVisible(false)
 	self.view_card_info:setVisible(false)
@@ -834,6 +1156,7 @@ function Bagview:initgui()
 	self.view_skill_info:setVisible(false)
 	self.view_learn_skill:setVisible(false)
 	self.view_no_card:setVisible(false)
+	self.view_shi_list:setVisible(false)
 		
 	self:show_silver()
 	self:show_le_coin()
@@ -857,7 +1180,7 @@ function Bagview:init()
 	uikits.event(self.but_quit,	
 		function(sender,eventType)	
 			--sender.func(sender)
-			self.but_quit.func(self,self.card_id);
+			self.but_quit.func(self,self.card_id)
 			--uikits.popScene()
 		end,"click")
 		

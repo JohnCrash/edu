@@ -11,6 +11,11 @@
 #import <AudioToolbox/AudioToolbox.h>
 
 UsingMySpace;
+MySpaceBegin
+extern void statusbarOrientation();
+extern int getUIOrientation();
+extern void setRootControllerOrientation( int m,unsigned int orientation );
+MySpaceEnd
 
 #define	RETURN_TYPE_TAKEPICTURE		1
 #define	RETURN_TYPE_PICKPICTURE		2
@@ -20,15 +25,41 @@ UsingMySpace;
 
 #define RETURN_TYPE_RECORDDATA      10
 
-@interface IOSHelperView : UIViewController<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
+@interface NonRotatingUIImagePickerController : UIImagePickerController
+@end
+
+@implementation NonRotatingUIImagePickerController
+ 
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+ {
+ if( interfaceOrientation == UIInterfaceOrientationPortrait)
+     return YES;
+ return NO;
+ }
+ // For ios6, use supportedInterfaceOrientations & shouldAutorotate instead
+ - (NSUInteger) supportedInterfaceOrientations{
+ #ifdef __IPHONE_6_0
+ //return UIInterfaceOrientationMaskLandscape;
+ return UIInterfaceOrientationMaskPortrait;
+ #endif
+ }
+- (BOOL)shouldAutorotate
+{
+    return YES;
+}
+@end
+
+@interface IOSHelperView_v3 : UIViewController<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 {
 }
 @end
 
-static IOSHelperView *s_pHelperView=NULL;
+static IOSHelperView_v3 *s_pHelperView=NULL;
 static UIPopoverController *popoverController=NULL;
+static int s_orientationMode;
+static unsigned int s_orientation;
 
-@implementation IOSHelperView
+@implementation IOSHelperView_v3
 
 -(void) didReceiveMemoryWarning
 {
@@ -145,8 +176,7 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
     //OnIOSReturnBuf(s_nBufType,s_nBufID,w,h,len,(char *)pBuf);
     if (pNewBuf!=NULL) free(pNewBuf);
 
-    [picker.view removeFromSuperview];
-    [picker release];
+    [self closePickController:picker];
     
     if (popoverController!=NULL)
     {
@@ -155,25 +185,80 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
 
  //   [self dismissModalViewControllerAnimated:YES];
 
-    [s_pHelperView.view removeFromSuperview];
+//    [s_pHelperView.view removeFromSuperview];
  //   [s_pHelperView.view.superview removeFromSuperview];
+ //   [s_pHelperView release];
+ //   s_pHelperView=NULL;
+    //状态条被打开了这里关闭它
+}
+
+/*
+ * USE_ADDSUBVIEW 会出现一种现象，如果以landscape启动UIImagePickerController
+ * 取图库中的图片时窗口不能覆盖整个屏幕,照相模式则会不能触摸快门键和取消键。
+ * 如果以portrait方式启动则一切正常(环境是ipad iOS7)
+ * 同时USE_ADDSUBVIEW 在iOS8.1 iphone 5s上测试通过完全正常
+ * presentViewController 模式在ipad IOS7上一切正常，但是在iOS8.1 iphone 5s上
+ * 不能多次进入和退出后多点触摸失灵
+ */
+//#define USE_ADDSUBVIEW 1
+- (void)closePickController:(UIImagePickerController *)picker
+{
+    float iOSVersion=[[UIDevice currentDevice].systemVersion floatValue];
+    
+    if( iOSVersion >= 8 || UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+    {
+        [picker.view removeFromSuperview];
+        [picker release];
+    }
+    else
+    {
+        [self dismissViewControllerAnimated:YES completion:NULL];
+    }
+    [s_pHelperView.view removeFromSuperview];
     [s_pHelperView release];
-    s_pHelperView=NULL;
+    s_pHelperView = NULL;
+    
+    if( s_orientationMode >=0 )
+        setRootControllerOrientation( s_orientationMode,s_orientation ); //返回先前的模式
+    [[UIApplication sharedApplication] setStatusBarHidden: true];
+}
+
+- (void)openPickController :(UIImagePickerController *)picker needRotate: (bool)b
+{
+    float iOSVersion=[[UIDevice currentDevice].systemVersion floatValue];
+
+    if( iOSVersion >= 8 ||  UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+    {
+        picker.view.frame=self.view.frame;
+        [self.view addSubview:picker.view];
+    }
+    else
+    {
+        [self presentViewController:picker animated:YES completion:nil];
+    }
+    if( b )
+    {
+        s_orientationMode = getUIOrientation();
+        s_orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        setRootControllerOrientation( 2,UIInterfaceOrientationPortrait ); //强制竖屏
+    }
+    else
+        s_orientationMode = -1;
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-    [picker.view removeFromSuperview];
-    [picker release];
+    [self closePickController:picker];
     
     if (popoverController!=NULL)
     {
         [popoverController dismissPopoverAnimated:YES];
     }
-    
-    [s_pHelperView.view removeFromSuperview];
-    [s_pHelperView release];
-    s_pHelperView=NULL;
+    //状态条被打开了这里关闭它
+
+ //   [s_pHelperView.view removeFromSuperview];
+ //   [s_pHelperView release];
+ //   s_pHelperView=NULL;
 
     /*
     [self dismissModalViewControllerAnimated:YES];
@@ -188,10 +273,9 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
 
 -(int)PickPicture
 {
-    float fVersion=[[UIDevice currentDevice].systemVersion floatValue];
-    
-    UIImagePickerController *picker = [[UIImagePickerController alloc]init];
+    UIImagePickerController *picker = [[NonRotatingUIImagePickerController alloc]init];
     picker.delegate = self;
+    picker.view.frame=self.view.frame;
     picker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
     picker.allowsEditing=NO;
     
@@ -200,7 +284,8 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
         [popoverController release];
         popoverController=NULL;
     }
-
+/*
+#ifdef USE_ADDSUBVIEW
     if (fVersion>=7.0f || UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
         picker.view.frame=self.view.frame;
@@ -211,7 +296,12 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
         popoverController = [[UIPopoverController alloc] initWithContentViewController:picker];
         [popoverController presentPopoverFromRect:CGRectMake(0, 0, 300, 300) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     }
-    
+#else
+    [self presentViewController:picker animated:YES completion:nil];
+    //[self presentModalViewController:picker animated:YES];
+#endif
+ */
+    [self openPickController:picker needRotate:false];
 //    [self presentModalViewController: picker animated: YES];
 //    [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
@@ -222,13 +312,15 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
 
 -(int)TakePicture
 {
-	UIImagePickerController* picker = [[UIImagePickerController alloc]init];
+	UIImagePickerController* picker = [[NonRotatingUIImagePickerController alloc]init];
     picker.delegate = self;
     picker.view.frame=self.view.frame;
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
     picker.allowsEditing=NO;
-    [self.view addSubview:picker.view];
-   // [self presentModalViewController: picker animated: YES];
+    
+    [self openPickController:picker needRotate:true];
+
+    // [self presentModalViewController: picker animated: YES];
    // [picker release];
     s_nBufType=RETURN_TYPE_PICKPICTUREDIB;
     s_nBufID=s_nCurID++;
@@ -268,7 +360,24 @@ static void SendToLua(std::string resource,int typeCode,int resultCode)
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+    if( interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
+       interfaceOrientation == UIInterfaceOrientationLandscapeRight )
+        return YES;
+    return NO;
+}
+// For ios6, use supportedInterfaceOrientations & shouldAutorotate instead
+- (NSUInteger) supportedInterfaceOrientations{
+    //   [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    //   UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    //   NSLog(@"currentDevice Orientation %d",orientation );
+#ifdef __IPHONE_6_0
+    //return UIInterfaceOrientationMaskLandscape;
+    return UIInterfaceOrientationMaskPortrait;
+#endif
+}
+
+- (BOOL) shouldAutorotate {
+    return YES;
 }
 
 @end
@@ -278,6 +387,7 @@ MySpaceBegin
 bool InitIOSHelper()
 {
     if (s_pHelperView!=NULL) return true;
+    
     cocos2d::Director *pDirector = cocos2d::Director::getInstance();
 
     CCEAGLView *pOpenGLView = (CCEAGLView *)pDirector->getOpenGLView()->getEAGLView();
@@ -287,7 +397,7 @@ bool InitIOSHelper()
     
     if (pOpenGLView==nil) return false;
     
-    s_pHelperView=[[IOSHelperView alloc] initWithNibName:nil bundle:nil];
+    s_pHelperView=[[IOSHelperView_v3 alloc] initWithNibName:nil bundle:nil];
     s_pHelperView.wantsFullScreenLayout=NO;
     //s_pHelperView=[[[IOSHelperView alloc] initWithFrame:[[UIScreen mainScreen]bounds]];
     s_pHelperView.view.frame=pOpenGLView.frame;

@@ -53,7 +53,10 @@ void setUIOrientation( int m )
 {
     if( g_OrientationMode != m )
     {
-        int iOSVersion = [[[UIDevice currentDevice] systemVersion] integerValue];
+        /*
+        long iOSVersion = [[[UIDevice currentDevice] systemVersion] integerValue];
+        
+         //不能确定iOS在什么版本使用下面代码,实测在iOS7 iPad mini不工作.iOS8.1 iPhone不工作
         if( iOSVersion <8 )
         {
             g_OrientationMode = m;
@@ -72,7 +75,7 @@ void setUIOrientation( int m )
             CGRect rect = s_myAppController.viewController.view.bounds;
             s_myAppController.viewController.view.bounds = CGRectMake(0,0,rect.size.height,rect.size.width);
           // [s_myAppController.window setFrame:[[UIScreen mainScreen] bounds]];
-        }else
+        }else */
         {
             g_OrientationMode = m;
             NSNumber *value;
@@ -86,10 +89,28 @@ void setUIOrientation( int m )
     }
 }
 
+void statusbarOrientation()
+{
+    NSNumber *value;
+    if( g_OrientationMode == 2 )
+        value = [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
+    else
+        value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight];
+    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+}
+
+void setRootControllerOrientation( int m,unsigned int orientation )
+{
+    g_OrientationMode = m;
+    NSNumber *value;
+    value = [NSNumber numberWithInt:orientation];
+    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+}
+
 int getUIOrientation()
 {
-    NSLog(@"%s",[[[UIDevice currentDevice] systemName] cStringUsingEncoding:NSUTF8StringEncoding]);
-    NSLog(@"%s",[[[UIDevice currentDevice] systemVersion] cStringUsingEncoding:NSUTF8StringEncoding]);
+//    NSLog(@"%s",[[[UIDevice currentDevice] systemName] cStringUsingEncoding:NSUTF8StringEncoding]);
+//    NSLog(@"%s",[[[UIDevice currentDevice] systemVersion] cStringUsingEncoding:NSUTF8StringEncoding]);
     return g_OrientationMode;
 }
 

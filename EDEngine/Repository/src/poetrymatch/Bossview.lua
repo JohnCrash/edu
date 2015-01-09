@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local readytoboss = require "poetrymatch/Readytoboss"
 
@@ -71,8 +70,8 @@ local boss_info = {}
 function Bossview:update_user_boss_info()
 	local send_data = {}
 	send_data.v1 = self.country_id
-	person_info.post_data_by_new_form('load_user_attack_road_block_cardplate',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._Bossview,'load_user_attack_road_block_cardplate',send_data,function(t,v)
+		if t and t == 200 then
 			
 --[[			for i=1,#v do
 				local cur_section_info = {}
@@ -92,11 +91,9 @@ function Bossview:update_user_boss_info()
 			end
 			self:show_boss()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:getdatabyurl()
-				else
-					self:getdatabyurl()
+
 				end
 			end)
 		end		
@@ -104,25 +101,38 @@ function Bossview:update_user_boss_info()
 end
 
 function Bossview:getdatabyurl()
-	local send_data = {}
-	send_data.v1 = self.country_id
-	person_info.post_data_by_new_form('load_road_block_guard_card',send_data,function(t,v)
-		if t and t == true then
-			if v then
-
-				person_info.set_boss_info_by_id(self.country_id,v)				
-			end
+	local cache_data_boss_info = person_info.get_boss_info_by_id(self.country_id)
+	if cache_data_boss_info then
+		self:update_user_boss_info()
+	else
+		local file_data_boss_info = kits.read_local_file('poetrymatch/B'..self.country_id..'.json')
+		if file_data_boss_info then
+			local tb_file_data_boss_info = json.decode(file_data_boss_info)
+			
+			person_info.set_boss_info_by_id(self.country_id,tb_file_data_boss_info)	
 			self:update_user_boss_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
-				if e == person_info.OK then
-					self:getdatabyurl()
+			local send_data = {}
+			send_data.v1 = self.country_id
+			person_info.post_data_by_new_form(self._Bossview,'load_road_block_guard_card',send_data,function(t,v)
+				if t and t == 200 then
+					if v then
+						local tb_file_data_boss_info = v
+						local file_data_boss_info = json.encode(tb_file_data_boss_info)
+						kits.write_local_file('poetrymatch/B'..self.country_id..'.json',file_data_boss_info)
+						person_info.set_boss_info_by_id(self.country_id,v)				
+					end
+					self:update_user_boss_info()
 				else
-					self:getdatabyurl()
-				end
-			end)
-		end		
-	end)
+					person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
+						if e == person_info.OK then
+
+						end
+					end)
+				end		
+			end)			
+		end
+	end
 end
 
 function Bossview:save_innerpos()

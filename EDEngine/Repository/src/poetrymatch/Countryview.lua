@@ -3,9 +3,10 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 local bossview = require "poetrymatch/Bossview"
+local chuangguanrank = require "poetrymatch/Chuangguanrank"
+
 
 local Countryview = class("Countryview")
 Countryview.__index = Countryview
@@ -44,8 +45,8 @@ local section_info = {}
 
 function Countryview:get_user_section_info()
 	local send_data
-	person_info.post_data_by_new_form('get_user_road_block',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._Countryview,'get_user_road_block',send_data,function(t,v)
+		if t and t == 200 then
 --[[			local section_info = {}
 			for i=1,#v do
 				local cur_section_info = {}
@@ -68,11 +69,9 @@ function Countryview:get_user_section_info()
 			section_info = {}
 			self:show_country()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Countryview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:get_user_section_info()
-				else
-					self:get_user_section_info()
+
 				end
 			end)
 		end		
@@ -82,13 +81,12 @@ end
 
 function Countryview:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('get_road_block',send_data,function(t,v)
-		if t and t == true then
-			
+	person_info.post_data_by_new_form(self._Countryview,'get_road_block',send_data,function(t,v)
+		if t and t == 200 then
 			for i=1,#v do
 				local cur_section_info = {}
-				--cur_section_info.id = v[i].road_block_id
-				cur_section_info.id = '8'
+				cur_section_info.id = v[i].road_block_id
+				--cur_section_info.id = '8'
 				cur_section_info.name = v[i].road_block_name
 				cur_section_info.star_all = 0
 				if v[i].road_block_tot_star then
@@ -99,11 +97,8 @@ function Countryview:getdatabyurl()
 			end
 			self:get_user_section_info()
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Countryview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:getdatabyurl()
-				else
-					self:getdatabyurl()
 				end
 			end)
 		end		
@@ -138,6 +133,7 @@ function Countryview:show_country()
 	
 	self.guanka_view:setInnerContainerSize(size_scroll)
 	for i=1,#all_country_info do
+		person_info.logTable(all_country_info[i])
 		local cur_country = self.country_view:clone()
 		local pic_country = uikits.child(cur_country,ui.BUTTON_COUNTRY)
 		pic_country.name = all_country_info[i].name
@@ -149,7 +145,7 @@ function Countryview:show_country()
 			person_info.load_section_pic(pic_country,pic_name_def)
 		else
 			pic_name_dis = all_country_info[i].id..'b.png'
-			person_info.load_section_pic(pic_country,pic_name_def,pic_name_def,pic_name_dis)
+			person_info.load_section_pic(pic_country,pic_name_def,'',pic_name_dis)
 			pic_country:setEnabled(false)
 			pic_country:setBright(false)
 			pic_country:setTouchEnabled(false)	
@@ -216,7 +212,9 @@ function Countryview:init()
 	local but_paihang = uikits.child(self._Countryview,ui.BUTTON_PAIHANG)
 	uikits.event(but_paihang,	
 		function(sender,eventType)	
-			
+			self:save_innerpos()
+			local scene_next = chuangguanrank.create()	
+			uikits.pushScene(scene_next)	
 		end,"click")
 
 	self.guanka_view = uikits.child(self._Countryview,ui.GUANKA_VIEW)
