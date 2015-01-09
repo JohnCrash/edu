@@ -195,8 +195,10 @@ function LaBattleResultStory:initUI(tab)
 			self._artxtAchievement[i]:setString(tab.achievement[i])
 		end
 
+		local girl = 1
+
 		--头像分男女
-		if tab.sex and tab.sex == 1 then 
+		if tab.sex and tab.sex == girl then 
 			self._imgPlyrPortraitBoy:setVisible(false)
 			self._imgPlyrPortraitGirl:setVisible(true)
 		else

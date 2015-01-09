@@ -21,6 +21,7 @@ local BATTLE_TYPE = {
 	STORY = 1, --故事模式（闯关）
 	FIGHT = 2, --对战模式
 	CHALLENGE = 3, --挑战模式（擂台）
+	MAX = 4,
 }
 
 --阵营类型
@@ -41,8 +42,8 @@ local QUES_TYPE = {
 
 --性别 根据person_info
 local SEX_TYPE = {
-	GIRL = 1,
-	BOY = 2,
+	GIRL = 2,
+	BOY = 1,
 	MAX = 3,
 }
 
@@ -58,10 +59,10 @@ local ui = lly.const{
 	LAY_CENTER_UI = "zhandou/centerUI",
 
 	TXT_PLYR_NAME = "zhandou/centerUI/womz",
-	IMG_PLYR_PORTRAIT_girl = "zhandou/wo2",
-	TXT_PLYR_LEVEL_girl = "zhandou/wo2/dj",
-	IMG_PLYR_PORTRAIT_boy = "zhandou/wo",
-	TXT_PLYR_LEVEL_boy = "zhandou/wo/dj",
+	IMG_PLYR_PORTRAIT_girl = "zhandou/wo",
+	TXT_PLYR_LEVEL_girl = "zhandou/wo/dj",
+	IMG_PLYR_PORTRAIT_boy = "zhandou/wo2",
+	TXT_PLYR_LEVEL_boy = "zhandou/wo2/dj",
 	BAR_PLYR_HP = "zhandou/centerUI/xuet/jd",
 
 	TXT_ENEMY_NAME = "zhandou/centerUI/duifmz",
@@ -206,7 +207,8 @@ local CONST = lly.const{
 
 	CD_CHNG_MOVE_TIME = 0.4,
 	TALK_MOVE_TIME = 0.2,
-	TALK_DELAY_TIME = 0.7,
+	TALK_DELAY_TIME = 1.2,
+	TALK_DELAY_TIME_LONG = 2.4,
 	QUES_MOVE_TIME = 0.5,
 	QUES_FADE_TIME = 0.1,
 
@@ -465,6 +467,9 @@ end
 --私有函数
 local private = {}
 
+--静态函数
+local static = {}
+
 --------------------------------------------------------
 --传入一个初始化数据
 function LaBattle:init(tab)
@@ -485,8 +490,18 @@ function LaBattle:init(tab)
 		--初始化动画
 		if not self:initAnim() then break end
 
-		--播放音乐
-		self:playMusic()
+		--播放音乐在进入场景前
+		local function onNodeEvent(event)
+			if "enter" == event then
+				--播放音乐				
+				static.playMusic(true, tab.battle_type)
+			elseif "exit" == event then			
+				--停止音乐				
+				self:playMusic(false)
+
+			end
+		end
+		self:registerScriptHandler(onNodeEvent)
 		
 		--开启更新函数
 		self:scheduleUpdateWithPriorityLua(function ()
@@ -526,6 +541,18 @@ function LaBattle:init(tab)
 			self:excuteComputerThinking()
 
 		end, 0)
+
+		--测试中停止变更状态用
+		lly.startupKeyboardForTest(self, cc.KeyCode.KEY_S, function ()
+			print("key")
+			---[[
+			if self._bForbidEnterNextState == true then
+				self._bForbidEnterNextState = false
+			else
+				self._bForbidEnterNextState = true
+			end
+			--]]
+		end)
 
 		--self._nSecondLeft = 10
 		self._stateNext = state.playEnterAnim
@@ -592,8 +619,8 @@ function LaBattle:initData(data)
 	end
 
 	--性别
-	self._ePlyrSex = data.plyr_sex
-	self._eEnemySex = 1 print("waring")
+	self._ePlyrSex = SEX_TYPE.GIRL --data.plyr_sex
+	self._eEnemySex = SEX_TYPE.BOY print("waring")
 
 	return true
 end
@@ -679,6 +706,7 @@ function LaBattle:initUI()
 		self._btnQuestionCommit = self:setWidget(ui.BTN_QUESTION_COMMIT)
 
 		uikits.event(self._btnQuestionCommit, function (sender)
+			uikits.stopAllEffects()
 			if self._stateCurrent == state.waitingForPlayerAnswer then
 				self:endPlayerAnswer()
 			elseif self._stateCurrent == state.waitingForEnemyAnswer then
@@ -781,6 +809,9 @@ function LaBattle:initUI()
 			--要是有特效等无法进入下个场景时点击无效
 			if self._bForbidEnterNextState then return end
 
+			--停止音效
+			uikits.stopAllEffects()
+
 			--收起人物选择框后进入下个场景
 			self:endPrepare()
 		end
@@ -792,7 +823,8 @@ function LaBattle:initUI()
 		self._txtTip = self:setWidget(ui.TXT_TIP)
 		self._btnConfirm = self:setWidget(ui.BTN_CONFIRM)
 
-		uikits.event(self._btnConfirm, function () 
+		uikits.event(self._btnConfirm, function ()
+			uikits.stopAllEffects()
 			self:endPrepareWhenNoVIT()
 		end)
 
@@ -827,6 +859,7 @@ function LaBattle:initUIWithData(data)
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
 		--头像 --玩家只分男女
+		print("sex", data.plyr_sex)
 		if data.plyr_sex == SEX_TYPE.GIRL then --根据person_info 1为woman 2为man
 			self._imgPlyrPortrait_girl:setVisible(true)
 			self._imgPlyrPortrait_boy:setVisible(false)
@@ -1334,6 +1367,8 @@ function LaBattle:onGetQuestion(result, camp_type)
 		self._nCOMAnswerSpendTime = 
 			LaBattle:calcComAnswerTime(result.answer_spend_timespan)
 
+		lly.log("com answer time is %d", self._nCOMAnswerSpendTime)
+
 	end
 
 	--结束-------------------
@@ -1346,20 +1381,21 @@ function LaBattle:calcComAnswerTime(num)
 
 	math.randomseed(os.clock())
 
-	local function getRandomHalf(num, times)
+	local function getNormalVar(num, times)
 		if times == 0 then return num end
 
 		if math.random(2) == 1 then
-			return getRandomHalf(num - 1, times - 1)
+			return getNormalVar(num - 1, times - 1)
 		else
-			return getRandomHalf(num + 1, times - 1)
+			return getNormalVar(num + 1, times - 1)
 		end 
 	end
 
-	local re = getRandomHalf(num / 2, 10)
+	local re = getNormalVar(num / 2, 10) --20次正态分布
 
-	if re <= 0 then re = num / 2
-	elseif re > num then re = num / 2 
+	--往中间聚拢
+	if re <= num * 0.25 then re = re + num * 0.25
+	elseif re > num * 0.75 then re = re - num * 0.25
 	end
 
 	return re
@@ -1435,22 +1471,22 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 
 	--获取服务器中本题是否正确，双方减少后有多少血，转到什么状态
 	local bRight = self._tabCurAnswerResult.judge_result == 1 and true or false
-	local nPlyrHPdec = self._tabCurAnswerResult.user_card_plate.card_tot_blood
-	local nEnemyHPdec = self._tabCurAnswerResult.under_attack_card_plate.card_tot_blood
+	local nPlyrHPAfterDec = self._tabCurAnswerResult.user_card_plate.card_tot_blood
+	local nEnemyHPAfterDec = self._tabCurAnswerResult.under_attack_card_plate.card_tot_blood
 	local nextState
 
-	if nPlyrHPdec == 0 then
+	if nPlyrHPAfterDec == 0 then
 		nextState = state.lose
-	elseif nEnemyHPdec == 0 then
+	elseif nEnemyHPAfterDec == 0 then
 		nextState = state.win
 	end
 
 	--验证服务器回合数、卡牌体力和本地是否一致 --未做
 
-	--判断回合数
+	--判断回合数 玩家最终血量大于敌人算胜利
 	local nextStateForEnd
 	if not nextState and self._nRoundsNumber <= 1 then		
-		if self._barPlyrHP:getPercent() > self._barEnemyHP:getPercent() then
+		if nPlyrHPAfterDec > nEnemyHPAfterDec then
 			nextStateForEnd = state.win
 		else
 			nextStateForEnd = state.lose
@@ -1475,16 +1511,35 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	self._animJudge:setVisible(true)
 	if bRight then
 		self._animJudge:getAnimation():play("success", -1, 0)
+		if camp_type == CAMP_TYPE.ENEMY then
+			self:playEffect("exercise/dfsuccess", 2, true, CAMP_TYPE.PLAYER)
+		else
+			self:playEffect("exercise/success", 2, true, CAMP_TYPE.ENEMY)
+		end
+		
 	else
 		self._animJudge:getAnimation():play("fail", -1, 0)
+		if camp_type == CAMP_TYPE.PLAYER then
+			self:playEffect("exercise/dffail", 2, true, CAMP_TYPE.PLAYER)
+		else
+			self:playEffect("exercise/fail", 2, true, CAMP_TYPE.ENEMY)
+		end
 	end
 
 	--回调	
 	self._animJudge:getAnimation():setMovementEventCallFunc(
 	function (armature, movementType, movementID)
 		if movementType == ccs.MovementEventType.complete then
-			self._animJudge:setVisible(false)
-			self:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+
+			--延时后进入下一步
+			local delay = cc.DelayTime:create(0.8)
+			local call = cc.CallFunc:create(function ()
+				uikits.stopAllEffects()
+				self._animJudge:setVisible(false)
+				self:doAnimBeforeAtk(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
+			end)
+			
+			self:runAction(cc.Sequence:create(delay, call))
 		end
 	end)
 
@@ -1493,11 +1548,11 @@ end
 
 --执行攻击前动画
 --参数：谁进行攻击，双方减少后的血量，回调
-function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
 	--没有攻击前技能
 	if self._nCurSkillID == 0 or 
 		moSkill.SKILL[self._nCurSkillID].strAnim_beforeAttack == "" then
-		self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+		self:doHPDecreseAnim(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
 		return
 	end
 
@@ -1530,16 +1585,16 @@ function LaBattle:doAnimBeforeAtk(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	function (armature, movementType, movementID)
 		if movementType == ccs.MovementEventType.complete then
 			self._anim:setVisible(false)
-			self:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+			self:doHPDecreseAnim(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
 		end
 	end)
 end
 
 --执行HP减少动画，参数：谁进行攻击，双方减少后的血量，回调
-function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
+function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPAfterDec, nEnemyHPAfterDec, func)
 	lly.ensure(camp_type, "number")
-	lly.ensure(nPlyrHPdec, "number")
-	lly.ensure(nEnemyHPdec, "number")
+	lly.ensure(nPlyrHPAfterDec, "number")
+	lly.ensure(nEnemyHPAfterDec, "number")
 	lly.ensure(func, "function")
 	if camp_type and camp_type <= 0 or camp_type >= CAMP_TYPE.MAX then 
 		lly.error("wrong type")
@@ -1552,8 +1607,11 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	local posDereaseHPToken
 	local decreaseHPBar
 
+	local eHurtCamp
+
 	local HPDifference
 	local persent
+	local bIsDead = false --是否死亡 死亡会执行死亡动画
 
 	--设置攻击方向	
 	if camp_type == CAMP_TYPE.PLAYER then
@@ -1572,29 +1630,40 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 		posAnimTo = self._posPlyrCard
 	end
 
+	lly.log("plyr: %d > %d --- enemy: %d > %d", 
+		self._nPlyrCurrentHP, nPlyrHPAfterDec, self._nEnemyCurrentHP, nEnemyHPAfterDec)
+
 	--设置费血的阵营(暂无双方同时减血的情况)
-	if self._nPlyrCurrentHP - nPlyrHPdec > self._nEnemyCurrentHP - nEnemyHPdec then --玩家减血
+	if self._nPlyrCurrentHP - nPlyrHPAfterDec > self._nEnemyCurrentHP - nEnemyHPAfterDec then --玩家减血
 		lly.log("player hurt")
+
+		eHurtCamp = CAMP_TYPE.PLAYER
 
 		decreaseHPCard = self._arimgPlyrCard[self._nCurCardIndex]
 		posDereaseHPToken = self._posPlyrDecreaseHP
 
 		decreaseHPBar = self._barPlyrHP
-		HPDifference = self._nPlyrCurrentHP - nPlyrHPdec
-		persent = 100 * nPlyrHPdec / self._nPlyrHPCeiling
+		HPDifference = self._nPlyrCurrentHP - nPlyrHPAfterDec
+		persent = 100 * nPlyrHPAfterDec / self._nPlyrHPCeiling
 
-		self._nPlyrCurrentHP = nPlyrHPdec
+		self._nPlyrCurrentHP = nPlyrHPAfterDec
+
+		if nPlyrHPAfterDec <= 0 then bIsDead = true end
 	else
 		lly.log("enemy hurt")
+
+		eHurtCamp = CAMP_TYPE.ENEMY
 
 		decreaseHPCard = self._imgEnemyCard
 		posDereaseHPToken = self._posEnemyDecreaseHP
 
 		decreaseHPBar = self._barEnemyHP
-		HPDifference = self._nEnemyCurrentHP - nEnemyHPdec
-		persent = 100 * nEnemyHPdec / self._nEnemyHPCeiling
+		HPDifference = self._nEnemyCurrentHP - nEnemyHPAfterDec
+		persent = 100 * nEnemyHPAfterDec / self._nEnemyHPCeiling
 
-		self._nEnemyCurrentHP = nEnemyHPdec	
+		self._nEnemyCurrentHP = nEnemyHPAfterDec
+
+		if nEnemyHPAfterDec <= 0 then bIsDead = true end
 	end
 
 	--初始化
@@ -1627,6 +1696,11 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	--飞出武器
 	self._anim:getAnimation():play(strAnimAtk, -1, 0)
 
+	--武器音效和人声
+	self:playEffect("skill/pt1", 0, true, camp_type)
+	self:playEffect("skill/pt2")
+
+
 	--同时移动武器（加速）
 	local acMoveFast = cc.EaseExponentialIn:create(
 		cc.MoveTo:create(0.8, posAnimTo))
@@ -1636,7 +1710,13 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 
 		--攻击后的效果
 		self._anim:setScaleX(CONST.FIGHT_ANIM_RATE) --先反转到正常状态
-		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0) 
+		self._anim:getAnimation():play(strAnimAtkEnd, -1, 0)
+
+		--爆炸音效
+		self:playEffect("skill/pt3")
+
+		--受伤音效
+		self:playEffect("skill/jiao", 2, true, eHurtCamp)
 
 		--显示
 		decreaseHPBar:setPercent(persent)
@@ -1649,8 +1729,15 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 	local acShake = cc.Sequence:create(
 		acMoveLeft, acMoveRight, acMoveLeft:clone())
 
-	--延时
-	local acDelay = cc.DelayTime:create(0.2)
+	--延时或者消失(dead)
+	local acDelayOrFade
+
+	if bIsDead then
+		acDelayOrFade = cc.FadeOut:create(0.2)
+	else
+		acDelayOrFade = cc.DelayTime:create(0.2)
+	end
+	
 
 	--在血条上扣除 回调
 	local callfuncHurt = cc.CallFunc:create(function ()
@@ -1679,7 +1766,7 @@ function LaBattle:doHPDecreseAnim(camp_type, nPlyrHPdec, nEnemyHPdec, func)
 			cc.TargetedAction:create(self._anim, acMoveFast),
 			callfunc,
 			cc.TargetedAction:create(decreaseHPCard, acShake),
-			acDelay,
+			cc.TargetedAction:create(decreaseHPCard, acDelayOrFade),
 			callfuncHurt,
 			cc.TargetedAction:create(self._layDecHP, acMoveHPShow),
 			callfuncEnd
@@ -1821,9 +1908,9 @@ function LaBattle:writeInQuestionArea()
 	end
 end
 
-function LaBattle:getTalkAction()
+function LaBattle:getTalkAction(long)
 	local acMoveTalkFrom = cc.MoveBy:create(CONST.TALK_MOVE_TIME, cc.p(0, self._nDisTalkMove))
-	local delay = cc.DelayTime:create(CONST.TALK_DELAY_TIME)
+	local delay = cc.DelayTime:create(long and CONST.TALK_DELAY_TIME_LONG or CONST.TALK_DELAY_TIME)
 	local acMoveTalkTo = cc.MoveBy:create(CONST.TALK_MOVE_TIME,  cc.p(0, self._nDisTalkMove))
 
 	return cc.Sequence:create(acMoveTalkFrom, delay, acMoveTalkTo)
@@ -1836,6 +1923,7 @@ end
 
 --电脑思考中
 function LaBattle:excuteComputerThinking()
+
 	if not self._bComputerBeginThink then return end
 
 	--要求在倒计时中
@@ -1859,12 +1947,12 @@ function LaBattle:excuteComputerThinking()
 		local rate = 
 			(self._nSecondLeft - self._nThkBgnTime + self._nCOMAnswerSpendTime) / 
 			self._nCOMNeedAnswer
-		--lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
+		lly.log("need is %d, rate is %f", self._nCOMNeedAnswer, rate)
 		local rWrite = math.random(rate)
 			
 		if rWrite == 1 then --也就是rate分之一的概率执行以下代码
 		--if true then
-			--lly.logCurLocAnd("type is %d", self._nCurQuesType)
+			lly.logCurLocAnd("type is %d", self._nCurQuesType)
 
 			if self._nCurQuesType == QUES_TYPE.FILL_IN_BLANK then
 				self._iptFillInBlank:setText(string.sub(
@@ -1875,14 +1963,17 @@ function LaBattle:excuteComputerThinking()
 			elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
 				if self._arbChoise[1] == true then
 					self._ckbRight:setSelectedState(true)
+					uikits.playClickSound()
 				else
 					self._ckbWrong:setSelectedState(true)
+					uikits.playClickSound()
 				end
 			else
 				for i = 1, 4 do
 					if self._arbChoiseForComAnser[i] == true then
 						self._arckbShortChoose[i]:setSelectedState(true)
 						self._arckbLongChoose[i]:setSelectedState(true)
+						uikits.playClickSound()
 						self._arbChoiseForComAnser[i] = false
 						break
 					end
@@ -1910,16 +2001,35 @@ function LaBattle:onComputerThinkingEnd()
 		self._iptFillInBlank:setText(self._strAnswer)
 	elseif self._nCurQuesType == QUES_TYPE.YES_OR_NO then
 		if self._arbChoise[1] == true then
-			self._ckbRight:setSelectedState(true)
+			if self._ckbRight:getSelectedState() == false then
+				self._ckbRight:setSelectedState(true)
+				uikits.playClickSound()
+			end
 		end
 
 		if self._arbChoise[2] == true then
-			self._ckbWrong:setSelectedState(true)
+			if self._ckbWrong:getSelectedState() == false then
+				self._ckbWrong:setSelectedState(true)
+				uikits.playClickSound()
+			end
 		end
 	else
 		for k, v in pairs(self._arbChoise) do
 			self._arckbShortChoose[k]:setSelectedState(v)
 			self._arckbLongChoose[k]:setSelectedState(v)
+
+			--因为每在之前按下一个答案，对应的_arbChoiseForComAnser就变成false
+			--所以通过_arbChoiseForComAnser来判断是否还有没点下的答案
+			--有的话则发出点击的音效
+			local b
+			for i = 1, 4 do
+				if self._arbChoiseForComAnser[i] then
+					b = true
+					break
+				end
+			end
+
+			if b then uikits.playClickSound() end
 		end
 	end
 
@@ -2185,42 +2295,6 @@ function LaBattle:onClickYesOrNo(sender, eventType)
 	
 end
 
----------------------------------------------------------
---播放音效
---参数为音频名称，进行随机的数量（0为不随机），是否有性别区别，执行音效的阵营
-function LaBattle:playEffect(name, RandomNum, bHasSex, camp)
-	
-	local str = name
-
-	if RandomNum and RandomNum > 0 then
-		str = str .. tostring(math.random(RandomNum))
-	end
-
-	if bHasSex then
-		if camp == CAMP_TYPE.PLAYER then
-			str = str .. self._ePlyrSex == SEX_TYPE.GIRL and "_nv" or "_nan"
-		else
-			str = str .. self._eEnemySex == SEX_TYPE.GIRL and "_nv" or "_nan"
-		end
-	end
-
-	uikits.playSound("poetrymatch/audio/" .. str .. ".mp3")
-end
-
---播放音乐
-function LaBattle:playMusic()
-
-	uikits.stopAllSound()
-
-	if self._nCurBattleType == BATTLE_TYPE.STORY then
-		uikits.playSound("poetrymatch/audio/music/bj4.mp3", true)
-	elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
-		uikits.playSound("poetrymatch/audio/music/bj5.mp3", true)
-	else 
-		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
-	end
-end
-
 ----------------------------------------------------------
 --开场动画状态
 function LaBattle:playEnterAnim_S()
@@ -2326,6 +2400,9 @@ function LaBattle:prepare_S()
 				self._bBuzyToChangeCard = false --恢复可点击
 
 				self:beginCountingdown(CONST.CHANGE_CARD_TIME) --开启倒计时
+
+				--音效
+				self:playEffect("exercise/huiheqian", 0, true, CAMP_TYPE.PLAYER)
 
 				--如果体力不够则不可再点击头像
 				local nIndexHasVIT
@@ -2436,6 +2513,9 @@ function LaBattle:askByEnemy_S()
 	--展示敌方对话
 	local acTalkMove = self:getTalkAction()
 
+	--音效
+	self:playEffect("exercise/dfs", 0, true, CAMP_TYPE.ENEMY)
+
 	--从右边（敌人方向）飞出答题板后
 	local acMoveQuseAreaFrom = cc.MoveBy:create(CONST.QUES_MOVE_TIME, cc.p(-self._nDisQuestionAreaMoveX, 0))
 
@@ -2528,7 +2608,10 @@ function LaBattle:commitPlyrAnswer_S()
 		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
 
 	--对话
-	local acTalkMove = self:getTalkAction()
+	local acTalkMove = self:getTalkAction(true)
+
+	--音效
+	self:playEffect("exercise/wos2", 0, true, CAMP_TYPE.PLAYER)
 
 	--结束回调
 	local callfuncNextState = cc.CallFunc:create(function ()
@@ -2628,6 +2711,9 @@ function LaBattle:askByPlayer_S()
 	--对话
 	local acTalkMove = self:getTalkAction()
 
+	--对话音效
+	self:playEffect("exercise/wos", 0, true, CAMP_TYPE.PLAYER)
+
 	--从左边（玩家方向）飞出答题板后
 	local acMoveQuseAreaFrom = cc.MoveBy:create(CONST.QUES_MOVE_TIME, cc.p(self._nDisQuestionAreaMoveX, 0))
 
@@ -2676,12 +2762,12 @@ function LaBattle:waitingForEnemyAnswer_S()
 	local fadeIn = cc.FadeIn:create(0.1)
 	local callForCount = cc.CallFunc:create(function ()
 		self:beginCountingdown(self._nCountingDownTime)
+
+		--根据服务器反馈的时间，时间到达后显示其答案，并进入下个状态
+		self:beginComputerAnswer()
 	end)
 
 	self._txtCountdown:runAction(cc.Sequence:create(fadeIn, callForCount))
-
-	--根据服务器反馈的时间，时间到达后显示其答案，并进入下个状态
-	self:beginComputerAnswer()
 end
 
 function LaBattle:endEnemyAnswer()
@@ -2718,7 +2804,10 @@ function LaBattle:commitEnemyAnswer_S()
 		CONST.QUES_FADE_TIME, CONST.QUES_FADE)
 
 	--对话
-	local acTalkMove = self:getTalkAction()
+	local acTalkMove = self:getTalkAction(true)
+
+	--对话音效
+	self:playEffect("exercise/dfs2", 0, true, CAMP_TYPE.ENEMY)
 
 	--结束回调
 	local callfuncNextState = cc.CallFunc:create(function ()
@@ -2810,6 +2899,54 @@ function LaBattle:lose_S()
 
 end
 
+
+---------------------------------------------------------
+--播放音效
+--参数为音频名称，进行随机的数量（0为不随机），是否有性别区别，执行音效的阵营
+function LaBattle:playEffect(name, RandomNum, bHasSex, camp)
+	
+	local str = name
+
+	if RandomNum and RandomNum > 0 then
+		str = str .. tostring(math.random(RandomNum))
+	end
+
+	if bHasSex then
+		if camp == CAMP_TYPE.PLAYER then
+			str = str .. (self._ePlyrSex == SEX_TYPE.GIRL and "_nv" or "_nan")
+		else
+			str = str .. (self._eEnemySex == SEX_TYPE.GIRL and "_nv" or "_nan")
+		end
+	end
+
+	str = "poetrymatch/audio/" .. str .. ".mp3"
+	lly.log("effec: %s", str)
+	uikits.playSound(str)
+end
+
+--播放音乐 参数bool true为开启 false为停止
+--【【静态函数】】
+function static.playMusic(b, battleType)
+	---[=[
+	uikits.muteSound(false)
+	--]=]
+
+	lly.ensure(battleType, "number")
+
+	uikits.stopAllSound()
+	uikits.stopMusic()
+battleType = 3
+	if not b then return end --b为false为停止音乐，则不往下继续走了
+	print("music is ", battleType)
+	if battleType == BATTLE_TYPE.STORY then
+		uikits.playSound("poetrymatch/audio/music/bj4.mp3", true)
+	elseif battleType == BATTLE_TYPE.FIGHT then
+		uikits.playSound("poetrymatch/audio/music/bj5.mp3", true)
+	else 
+		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
+	end
+end
+
 ------------------------------------------------------
 --【私有函数】，打印当前状态
 function private.printState(str)
@@ -2839,6 +2976,7 @@ state = lly.const{
 return {
 	Class = LaBattle,
 	BATTLE_TYPE = BATTLE_TYPE,
+	playMusic = static.playMusic,
 }
 
 

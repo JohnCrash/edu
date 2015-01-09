@@ -166,9 +166,9 @@ function Readytoboss:show_zhunbei()
 
 			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
 
-			--local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+			local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 			--lly.logTable(cardTable)
-			--lly.logTable(self.bot_info)
+			lly.logTable(self.bot_info)
 
 			--传入战斗层的数据包
 			local data = {}

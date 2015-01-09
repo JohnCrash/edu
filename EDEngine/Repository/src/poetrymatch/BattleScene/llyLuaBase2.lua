@@ -505,6 +505,31 @@ function lly.array(number, default)
 	return ar
 end
 
+--枚举
+function lly.enum(tab)
+	---[====[
+	if type(tab) ~= "table" then 
+		lly.error("create enum need a table param", 2)
+	end
+	--]====]
+
+	local e = {}
+
+	for i, v in ipairs(tab) do
+		e[v] = i
+	end
+	
+	---[====[
+	e.__ctype = 4
+	--]====]
+
+	---[====[
+	lly.finalizeInstance(e)
+	--]====]
+
+	return e
+end
+
 --只读的table
 function lly.const(table)
 	---[====[
@@ -609,6 +634,21 @@ function lly.assert(func)
 	--]====]
 end
 
+function lly.startupKeyboardForTest(node, key, func)
+	---[====[
+	local function onKeyReleased(keyCode, event)
+		if keyCode == key then
+			func()
+		end
+	end
+
+    local listener = cc.EventListenerKeyboard:create()
+    listener:registerScriptHandler(onKeyReleased, cc.Handler.EVENT_KEYBOARD_RELEASED )
+
+    local eventDispatcher = node:getEventDispatcher()
+    eventDispatcher:addEventListenerWithFixedPriority(listener, 1)
+	--]====]
+end
 
 return lly
 

@@ -140,8 +140,17 @@ local function isSoundPlaying( id )
 	--cocos2d-x not support isPlaying?
 end
 
+local function stopMusic()
+	AudioEngine.stopMusic()
+end
+
+local function stopAllEffects()
+	AudioEngine.stopAllEffects()
+end
+
 local function stopAllSound()
 	AudioEngine.stopAllEffects()
+	AudioEngine.stopMusic()
 	cc_stopVoice()
 end
 
@@ -1961,6 +1970,8 @@ return {
 	pauseBGSound = pauseBGSound,
 	resumeBGSound = resumeBGSound,
 	voiceLength = voiceLength,
+	stopMusic = stopMusic,
+	stopAllEffects = stopAllEffects,
 	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,
