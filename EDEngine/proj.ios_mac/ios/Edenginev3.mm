@@ -13,6 +13,10 @@
 #import "RootViewController.h"
 #import "parsparam.h"
 
+MySpaceBegin
+extern void statusbarOrientation();
+MySpaceEnd
+
 UsingMySpace;
 
 static ONEXIT_t s_onExit = nullptr;
@@ -42,6 +46,7 @@ void* createV3EAGLView(void *window)
                                        multiSampling: NO
                                      numberOfSamples: 0];
     [eaglView setMultipleTouchEnabled:YES];
+
     return (void*)eaglView;
 }
 

@@ -249,17 +249,15 @@ function Mainview:show_tili()
 		end,"click")	
 	
 	local save_info = kits.config("tili_time",'get')
-	save_info = nil
+	--save_info = nil
+	self.tili_num = person_info.get_user_tili()
 	if not save_info then
-		self.tili_num = 100
 		self.last_time = per_tili_reset_time -1
 	else
 		local save_info_tb = json.decode(save_info)
 		if not save_info_tb.last_tili_num or not save_info_tb.last_tili_num or not save_info_tb.last_tili_num  then
-			self.tili_num = 100
 			self.last_time = per_tili_reset_time -1
 		else
-			self.tili_num = tonumber(save_info_tb.last_tili_num)
 			self.last_time = tonumber(save_info_tb.last_time)
 			local old_time = tonumber(save_info_tb.old_time)
 			local cur_time = os.time()
@@ -382,6 +380,7 @@ function Mainview:release()
 	save_info_tb.last_time = self.last_time
 	save_info_tb.old_time = os.time()
 	save_info_tb.last_tili_num = self.tili_num
+	person_info.get_user_tili(self.tili_num)
 	local save_info = json.encode(save_info_tb)
 	kits.config("tili_time",save_info)
 	local scheduler = cc.Director:getInstance():getScheduler()

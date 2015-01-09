@@ -19,6 +19,8 @@ max_exp = 100,
 
 local g_person_silver = 100
 local g_person_le_coin = 10
+local g_person_tili = 0
+
 
 local g_person_bag = {
 cards_table = {},
@@ -29,11 +31,9 @@ skill_table = {},
 local g_person_skill_list = {
 	
 }
-
 local g_person_battle_cards = {}
 local g_person_section_info = {}
 local g_person_boss_info = {}
-
 
 
 local function put_lading_circle( parent )
@@ -80,6 +80,23 @@ local function set_user_info(uinfo)
 	else
 		return false
 	end
+end
+
+local function set_user_tili(tili_num)
+	if tili_num then
+		g_person_tili = tili_num
+		return true
+	else
+		return false
+	end
+end
+
+local function get_user_tili()
+	local tili_num
+	if g_person_tili then
+		tili_num = g_person_tili
+	end
+	return tili_num
 end
 
 local function get_user_lvl_info()
@@ -294,13 +311,11 @@ local function update_card_info_by_id(id,card_info)
 end
 
 local function get_battle_list()
-
 	local battle_list
 	if g_person_battle_cards then
 		battle_list = g_person_battle_cards
 	end
 	return battle_list
-
 end
 
 local function add_card_to_battle_by_index(id,index)
@@ -744,7 +759,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	local loadbox = put_lading_circle(parent)
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
-	--	print('d::'..d)
+		--print('d::'..d)
 		local tb_result = json.decode(d)
 		if t == true then
 			if tb_result.c == 200 then
@@ -764,8 +779,6 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 						end
 					end)
 				else
-					print('ERROR_CODE::::'..tb_result.c)
-					print('ERROR_MSG::::'..tb_result.msg)
 					messagebox(parent,SER_ERROR,function(e)
 						if e == OK then
 							
@@ -1061,41 +1074,12 @@ local function logTable(t, index)
 
 	--]====]
 end
-
---粒子效果
-local PARTICLE_WIND = "poetrymatch/Particles/hua.plist"
-local PARTICLE_SNOW = "poetrymatch/Particles/xue.plist"
-
-local randomForParticle = 0
-local function getParticleEffect()
-
-	if randomForParticle == 0 then
-		math.randomseed(os.time())
-		randomForParticle = math.random(2)
-	end
-	
-	local _particle
-	if randomForParticle == 1 then
-		_particle = cc.ParticleSystemQuad:create(PARTICLE_WIND)
-		_particle:setPosition(
-			cc.Director:getInstance():getVisibleSize().width, 
-			cc.Director:getInstance():getVisibleSize().height / 2)
-		_particle:setScale(3.0)
-	else
-		_particle = cc.ParticleSystemQuad:create(PARTICLE_SNOW)
-		_particle:setPosition(
-			cc.Director:getInstance():getVisibleSize().width / 2, 
-			cc.Director:getInstance():getVisibleSize().height)
-		_particle:setScale(3.0)
-	end
-
-	return _particle
-end
-
 return {
 	get_user_info = get_user_info,
 	set_user_info = set_user_info,
 	update_user_info_by_tag = update_user_info_by_tag,
+	set_user_tili = set_user_tili,
+	get_user_tili = get_user_tili,
 	get_user_lvl_info = get_user_lvl_info,
 	set_user_lvl_info = set_user_lvl_info,	
 	get_user_silver = get_user_silver,
@@ -1136,7 +1120,6 @@ return {
 	createRankView = createRankView,
 	logTable = logTable,
 	log = log,
-	getParticleEffect = getParticleEffect,
 	RETRY = RETRY,
 	OK = OK,
 	FAIL = FAIL,
