@@ -3,7 +3,6 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local messagebox = require "messagebox"
 local person_info = require "poetrymatch/Person_info"
 
 local Noticeview = class("Noticeview")
@@ -13,10 +12,10 @@ local ui = {
 	Noticeview_FILE_3_4 = 'poetrymatch/tongzhi.json',
 	
 	VIEW_NOTICE = 'gun',
-	VIEW_NOTICE_SRC = 'gun/tz1',
-	TXT_TITLE = 'leitbt',
-	TXT_CONTENT = 'wen',
-	TXT_DATE = 'sj',
+	VIEW_NOTICE_SRC = 'gun/tz',
+	TXT_TITLE = 'tz1/leitbt',
+	TXT_CONTENT = 'tz1/wen',
+	TXT_DATE = 'tz1/sj',
 	
 	BUTTON_QUIT = 'xinxi/fanhui',
 }
@@ -78,17 +77,20 @@ end
 
 function Noticeview:getdatabyurl()
 	local send_data
-	person_info.post_data_by_new_form('get_msg',send_data,function(t,v)
-		if t and t == true then
+	person_info.post_data_by_new_form(self._Noticeview,'get_msg',send_data,function(t,v)
+		if t and t == 200 then
 			if v and type(v) == 'table' then
+				local user_info = person_info.get_user_info()
+				if user_info.has_sign == 1 then
+					user_info.has_sign = 0 
+					person_info.set_user_info(user_info)
+				end
 				self:show_notice(v)
 			end
 		else
-			person_info.messagebox(self,person_info.NETWORK_ERROR,function(e)
+			person_info.messagebox(self._Noticeview,person_info.NETWORK_ERROR,function(e)
 				if e == person_info.OK then
-					self:update_user_info()
-				else
-					self:update_user_info()
+
 				end
 			end)
 		end
