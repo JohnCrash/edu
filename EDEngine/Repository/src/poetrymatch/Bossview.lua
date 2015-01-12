@@ -181,7 +181,7 @@ function Bossview:show_boss_info(cur_boss_info,is_has_star)
 				if t and t == 200 then
 					self.view_boss_info:setVisible(false)
 					self:save_innerpos()
-					local scene_next = readytoboss.create(cur_boss_info,is_has_star,self.country_id)	
+					local scene_next = readytoboss.create(cur_boss_info,is_has_star,self.country_id,self.country_name)	
 					uikits.pushScene(scene_next)				
 				else
 					person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
