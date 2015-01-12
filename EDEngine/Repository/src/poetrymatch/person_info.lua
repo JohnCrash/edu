@@ -740,7 +740,7 @@ end
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
-local function post_data_by_new_form(parent,module_id,post_data,func)
+local function post_data_by_new_form(parent,module_id,post_data,func,is_not_loading)
 	local send_data = {}
 	send_data.v = {}
 	if post_data then
@@ -756,7 +756,10 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	send_data.rid = os.time()
 	send_data.icp = false
 	local str_send_data = json.encode(send_data)
-	local loadbox = put_lading_circle(parent)
+	local loadbox
+	if not is_not_loading then
+		loadbox = put_lading_circle(parent)
+	end
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
 		print('d::'..d)
