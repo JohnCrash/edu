@@ -1239,7 +1239,8 @@ function LaBattle:uploadBattleInitSet()
 			self:onGetDataFromNet(ErrorCode, result, function ()
 				self._bNextStateDataHasLoad = true
 			end)
-		end
+		end,
+		true --true为不进行转圈（loading动画）
 	)	
 end
 
@@ -1258,7 +1259,8 @@ function LaBattle:uploadCurRoundSet()
 			self:onGetDataFromNet(ErrorCode, result, function ()
 				self._bNextStateDataHasLoad = true
 			end)
-		end
+		end,
+		true --true为不进行转圈（loading动画）
 	)	
 end
 

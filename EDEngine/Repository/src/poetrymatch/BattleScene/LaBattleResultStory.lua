@@ -294,7 +294,8 @@ function LaBattleResultStory:setData(table)
 			if ErrorCode == 200 then
 				moperson_info.add_card_to_bag(result)
 			end
-		end
+		end,
+		true --true为不进行转圈（loading动画）
 	)	
 
 end
