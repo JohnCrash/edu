@@ -43,12 +43,13 @@ local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
 end
 
-function create(bot_info,is_has_star,country_id)
+function create(bot_info,is_has_star,country_id, country_name)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),Readytoboss)		
 	cur_layer.bot_info = bot_info
 	cur_layer.is_has_star = is_has_star
 	cur_layer.country_id = country_id
+	cur_layer.country_name = country_name
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -166,9 +167,9 @@ function Readytoboss:show_zhunbei()
 
 			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
 
-			--local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+			local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 			--lly.logTable(cardTable)
-			--lly.logTable(self.bot_info)
+			lly.logTable(self.bot_info)
 
 			--传入战斗层的数据包
 			local data = {}
@@ -216,20 +217,32 @@ function Readytoboss:show_zhunbei()
 			data.enemy_lv = self.bot_info.card_plate_level
 			data.enemy_hp = self.bot_info.card_plate_blood + 
 				self.bot_info.card_plate_blood_added --基础血量加额外血量
-			--data.enemy_sex = 
+			data.enemy_sex = self.bot_info.gender
 
 			data.enemy_skill_id = {
 				self.bot_info.skills[1],
 				self.bot_info.skills[2],
 				self.bot_info.skills[3]
-			}
+			}	
+
+			--退出
+			data.exitFunction = function ()
+				lly.logCurLocAnd("exit to bossview")
+				
+				--转景
+				local moBossview = require "poetrymatch/Bossview"
+
+				cc.Director:getInstance():replaceScene(
+					moBossview.create(self.country_name, self.country_id))
+
+			end
 
 			--]]
 
 			--生成战斗层场景
 			local laBattle = moLaBattle.Class:create(data)
 			sc:addChild(laBattle)
-			cc.Director:getInstance():pushScene(sc)
+			cc.Director:getInstance():replaceScene(sc)
 			--print(string.format("time is %f", os.clock() - ti))
 			--]]---------------------------------------
 

@@ -622,8 +622,8 @@ function LaBattle:initData(data)
 	end
 
 	--性别
-	self._ePlyrSex = SEX_TYPE.GIRL --data.plyr_sex
-	self._eEnemySex = SEX_TYPE.BOY print("waring")
+	self._ePlyrSex = data.plyr_sex
+	self._eEnemySex = data.enemy_sex
 
 	return true
 end
@@ -1000,9 +1000,7 @@ function LaBattle:initUIWithData(data)
 		self._laResult:setVisible(false)
 
 		--结束图层的按钮的回调
-		self._laResult:setEndFunc(function ()
-			lly.log("press win btn")
-		end)
+		self._laResult:setEndFunc(data.exitFunction)
 
 		return true
 	until true

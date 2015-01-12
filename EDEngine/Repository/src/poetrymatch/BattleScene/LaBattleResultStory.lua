@@ -278,6 +278,25 @@ function LaBattleResultStory:setData(table)
 		self._artxtGet[3]:setVisible(false)
 	end
 
+	--更新数据
+	moperson_info.add_user_silver(table.user_gain_items.sliver_coin)
+	moperson_info.add_user_le_coin(table.user_gain_items.le_coin)
+
+	local sendedTable = {v1 = table.user_gain_items.gain_card_id}
+	moperson_info.post_data_by_new_form(
+		self._wiRoot,
+		"load_user_card_plate", --业务名
+		sendedTable, --数据
+		function (ErrorCode, result) --结果回调
+			lly.logCurLocAnd("%d", ErrorCode)
+			lly.logTable(result)
+
+			if ErrorCode == 200 then
+				moperson_info.add_card_to_bag(result)
+			end
+		end
+	)	
+
 end
 
 function LaBattleResultStory:win()
@@ -344,6 +363,19 @@ function LaBattleResultStory:onDownloadExp(result)
 	self._imgShowGet:runAction(cc.Sequence:create(
 		acDelay,
 		cc.EaseExponentialOut:create(acMove)))
+
+	--更新数据
+	moperson_info.set_user_lvl_info{
+		lvl = result.level
+		cur_exp = result.exper
+		max_exp = result.exper_max
+	}
+
+	
+	for k, v in pairs(result.card_list) do
+		moperson_info.update_card_in_bag_by_id(v.card_plate_id, card_plate_level, v.card_plate_level)
+	end
+	
 end
 
 function LaBattleResultStory:lose()

@@ -263,7 +263,9 @@ function Leitaiview:goto_battle()
 			if t and t == 200 then
 				silver_num = silver_num - self.lei_info.consume_num
 				person_info.set_user_silver(silver_num)
-				
+				---[[luleyan!!!
+
+				--]]
 			else
 				person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 					if e == person_info.OK then
