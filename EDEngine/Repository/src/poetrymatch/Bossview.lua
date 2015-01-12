@@ -175,8 +175,8 @@ function Bossview:show_boss_info(cur_boss_info,is_has_star)
 			tili_num = tili_num - cur_boss_info.need_physical_power
 			person_info.set_user_tili(tili_num)
 			local send_data = {}
-			send_data.v1 = cur_boss_info.card_plate_id
-			send_data.v2 = self.country_id
+			send_data.v2 = cur_boss_info.card_plate_id
+			send_data.v1 = self.country_id
 			person_info.post_data_by_new_form(self._Bossview,'road_block_guard_card_physical_change',send_data,function(t,v)
 				if t and t == 200 then
 					self.view_boss_info:setVisible(false)
