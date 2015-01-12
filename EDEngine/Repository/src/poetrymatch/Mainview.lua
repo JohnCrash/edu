@@ -221,6 +221,28 @@ function Mainview:show_tili()
 		end
 	end
 	
+	local function buy_tili(silver_num)
+		local send_data = {}
+		send_data.v1 = 37
+		person_info.post_data_by_new_form(self._Mainview,'buy_products',send_data,function(t,v)
+			if t and t == 200 then
+				self.tili_num = 100
+				self:show_tili_num()
+				silver_num = silver_num-500
+				person_info.set_user_silver(silver_num)
+				self:show_silver()
+			else
+				person_info.messagebox(self._Mainview,person_info.NETWORK_ERROR,function(e)
+					if e == person_info.OK then
+						
+					else
+						
+					end
+				end)							
+			end
+		end)	
+	end
+
 	uikits.event(but_tili_add,	
 		function(sender,eventType)	
 			local silver_num = person_info.get_user_silver()
@@ -233,17 +255,13 @@ function Mainview:show_tili()
 				if self.tili_num >0 then
 					person_info.messagebox(self._Mainview,person_info.HAS_TILI,function(e)
 							if e == person_info.OK then
-								self.tili_num = 100
-								self:show_tili_num()
-								silver_num = silver_num-500
-								person_info.set_user_silver(silver_num)
-								self:show_silver()
+								buy_tili(silver_num)
 							else
 								
 							end
 						end)			
 				else
-				
+					buy_tili(silver_num)
 				end
 			end
 		end,"click")	
