@@ -227,6 +227,7 @@ function Mainview:show_tili()
 		person_info.post_data_by_new_form(self._Mainview,'buy_products',send_data,function(t,v)
 			if t and t == 200 then
 				self.tili_num = 100
+				person_info.set_user_tili(self.tili_num)
 				self:show_tili_num()
 				silver_num = silver_num-500
 				person_info.set_user_silver(silver_num)

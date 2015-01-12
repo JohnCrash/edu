@@ -100,7 +100,7 @@ function Loading:getdatabyurl()
 					elseif t.uig[1].user_role == 2 then	--jiazhang
 						login.set_uid_type(login.PARENT)
 						self:getdatabyparent()
-					elseif t.uig[1].user_role == 3 then	--laoshi
+					elseif t.uig[1].user_role == 3 or t.uig[1].user_role == 11 or t.uig[1].user_role == 12 or t.uig[1].user_role == 13 then	--laoshi
 						login.set_uid_type(login.TEACHER)
 						self:showteacherview()		
 					end
