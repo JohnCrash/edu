@@ -328,16 +328,30 @@ function Bagview:buy_store()
 			end
 		end)
 	else
-		local store_num = person_info.get_max_store_num()
-		if store_num then
-			store_num = store_num +5
-			person_info.set_max_store_num(store_num)
-		end
-		le_num = le_num -5 
-		local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
-		txt_le:setString(le_num)
-		person_info.set_user_le_coin(le_num)
-		self:show_bag_view()	
+		local send_data = {}
+		send_data.v1 = 25
+		person_info.post_data_by_new_form(self._Bagview,'buy_products',send_data,function(t,v)
+			if t and t == 200 then
+				local store_num = person_info.get_max_store_num()
+				if store_num then
+					store_num = store_num +5
+					person_info.set_max_store_num(store_num)
+				end
+				le_num = le_num -5 
+				local txt_le = uikits.child(self._Bagview,ui.TXT_LE_NUM)
+				txt_le:setString(le_num)
+				person_info.set_user_le_coin(le_num)
+				self:show_bag_view()	
+			else
+				person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+					if e == person_info.OK then
+						
+					else
+						
+					end
+				end)							
+			end
+		end)
 	end
 end
 
@@ -400,6 +414,7 @@ function Bagview:show_shi_des(id)
 	
 	local send_data = {}
 	send_data.v1 = id
+	send_data.v2 = self.card_id
 	person_info.post_data_by_new_form(self._Bagview,'poems_detail',send_data,function(t,v)
 		if t and t == 200 then
 			show_shi_des_gui(v)
@@ -609,6 +624,7 @@ function Bagview:show_skill_mall()
 			person_info.load_skill_pic(pic_skill,n_pic_name,n_pic_name,d_pic_name)
 			pic_skill.id = skill_list[i].sub_id
 			but_skill_pay.id = skill_list[i].sub_id
+			but_skill_pay.pro_id = skill_list[i].pro_id
 			uikits.event(pic_skill,	
 				function(sender,eventType)	
 					callback_id = sender.id
@@ -617,16 +633,33 @@ function Bagview:show_skill_mall()
 				end,"click")	
 			uikits.event(but_skill_pay,	
 				function(sender,eventType)	
-					local sel_skill_info = person_info.get_skill_info_by_id(sender.id)
-					local new_skill_info = {}
-					new_skill_info.skill_id = sel_skill_info.sub_id
-					new_skill_info.skill_name = sel_skill_info.pro_name
-					new_skill_info.skill_desc = sel_skill_info.pro_desc
-					self.card_info.skills[#self.card_info.skills+1] = new_skill_info
-					person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
-					callback_id = self.card_id 
-					func = self.show_card_info
-					schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)									
+					local send_data = {}
+					send_data.v1 = self.card_id
+					send_data.v2 = 8
+					send_data.v3 = sender.pro_id
+					person_info.post_data_by_new_form(self._Mallview,'user_cardplate_oper',send_data,function(t,v)
+						if t and t == 200 then
+							local sel_skill_info = person_info.get_skill_info_by_id(sender.id)
+							local new_skill_info = {}
+							new_skill_info.skill_id = sel_skill_info.sub_id
+							new_skill_info.skill_name = sel_skill_info.pro_name
+							new_skill_info.skill_desc = sel_skill_info.pro_desc
+							self.card_info.skills[#self.card_info.skills+1] = new_skill_info
+							person_info.update_card_in_bag_by_id(self.card_id,0,self.card_info)
+							callback_id = self.card_id 
+							func = self.show_card_info
+							schedulerEntry = scheduler:scheduleScriptFunc(timer_update,0.01,false)	
+
+						else
+							person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
+								if e == person_info.OK then
+									
+								else
+									
+								end
+							end)
+						end
+					end)				
 				end,"click")	
 			
 		end

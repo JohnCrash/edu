@@ -152,7 +152,7 @@ function Bossview:show_boss_info(cur_boss_info,is_has_star)
 	uikits.event(but_start_battle,	
 	function(sender,eventType)	
 	
-		local save_info = kits.config("tili_time",'get')
+--[[		local save_info = kits.config("tili_time",'get')
 		local save_info_tb = json.decode(save_info)
 		if save_info_tb.last_tili_num < cur_boss_info.need_physical_power then
 			print('tili not enough!!!!')
@@ -160,12 +160,40 @@ function Bossview:show_boss_info(cur_boss_info,is_has_star)
 			save_info_tb.last_tili_num = save_info_tb.last_tili_num - cur_boss_info.need_physical_power
 			save_info = json.encode(save_info_tb)
 			kits.config("tili_time",save_info)
+		end--]]
+
+		local tili_num = person_info.get_user_tili()
+		if tili_num < cur_boss_info.need_physical_power then
+				person_info.messagebox(self._Bossview,person_info.NO_TILI,function(e)
+					if e == person_info.OK then
+						
+					else
+						
+					end
+				end)					
+		else
+			tili_num = tili_num - cur_boss_info.need_physical_power
+			person_info.set_user_tili(tili_num)
+			local send_data = {}
+			send_data.v2 = cur_boss_info.card_plate_id
+			send_data.v1 = self.country_id
+			person_info.post_data_by_new_form(self._Bossview,'road_block_guard_card_physical_change',send_data,function(t,v)
+				if t and t == 200 then
+					self.view_boss_info:setVisible(false)
+					self:save_innerpos()
+					local scene_next = readytoboss.create(cur_boss_info,is_has_star,self.country_id,self.country_name)	
+					uikits.pushScene(scene_next)				
+				else
+					person_info.messagebox(self._Bossview,person_info.NETWORK_ERROR,function(e)
+						if e == person_info.OK then
+							
+						else
+							
+						end
+					end)				
+				end
+			end)		
 		end
-		
-		self.view_boss_info:setVisible(false)
-		self:save_innerpos()
-		local scene_next = readytoboss.create(cur_boss_info,is_has_star,self.country_id)	
-		uikits.pushScene(scene_next)	
 	end,"click")
 	
 	uikits.event(but_hide_info,	

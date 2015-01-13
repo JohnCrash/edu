@@ -188,9 +188,9 @@ function AppEntry:init()
 	local epbutton = uikits.button{caption='错题',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='parenthw',updates={'errortitlenew','luacore'},
+			update.create{name='errortitlenew',updates={'errortitlenew','luacore'},
 				run=function()
-				login.set_selector(3) 
+				login.set_selector(1) 
 				local selstudent = require "errortitlenew/Loading"
 				return selstudent.create()
 			end}
@@ -201,8 +201,8 @@ function AppEntry:init()
 			update.create{name='parenthw',updates={'poetrymatch','luacore'},
 				run=function()
 				login.set_selector(3) 
-				local selstudent = require "poetrymatch/Loading"
-				return selstudent.create()
+				local selstudent1 = require "poetrymatch/Loading"
+				return selstudent1.create()
 			end}
 		end}
 	local g_last

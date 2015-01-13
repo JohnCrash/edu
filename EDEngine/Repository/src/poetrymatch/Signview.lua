@@ -46,11 +46,11 @@ function Signview:sign()
 	local send_data
 	person_info.post_data_by_new_form(self._Signview,'sign_submit',send_data,function(t,v)
 		if t and t == 200 then
-			if v.scoin then
-				person_info.add_user_silver(v.scoin)
+			if self.sign_info.scoin then
+				person_info.add_user_silver(self.sign_info.scoin)
 			end
-			if v.hcoin then
-				person_info.add_user_le_coin(v.scoin)
+			if self.sign_info.hcoin then
+				person_info.add_user_le_coin(self.sign_info.scoin)
 			end
 			local user_info = person_info.get_user_info()
 			if user_info.has_sign == 1 then
@@ -68,6 +68,7 @@ function Signview:sign()
 end
 
 function Signview:show_info(sign_info)
+	self.sign_info = sign_info
 	local txt_days = uikits.child(self._Signview,ui.TXT_SIGN_DAYS)
 	local txt_rank = uikits.child(self._Signview,ui.TXT_SIGN_RANK)
 	local txt_silver_num = uikits.child(self._Signview,ui.TXT_SILVER_NUM)

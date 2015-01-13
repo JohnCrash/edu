@@ -79,6 +79,11 @@ local scheduler = cc.Director:getInstance():getScheduler()
 
 function Battleview:show_search_res()	
 	local send_data = {}
+	if self.bot_id then
+		send_data.v1 = self.bot_id
+	else
+		send_data.v1 = {}
+	end
 	person_info.post_data_by_new_form(self._Battleview,'select_opponent',send_data,function(t,v)
 		if t and t == 200 then
 			if v and type(v) == 'table' then
@@ -91,10 +96,27 @@ function Battleview:show_search_res()
 				local txt_bot_rank1 = uikits.child(self._Battleview,ui.TXT_BOT_RANK1)
 				local txt_bot_rank2 = uikits.child(self._Battleview,ui.TXT_BOT_RANK2)
 				local txt_bot_rank3 = uikits.child(self._Battleview,ui.TXT_BOT_RANK3)
-				
+				self.bot_id = {}
 				local function goto_battle(id) --Ω¯»Î’Ω∂∑
 					if id then
-						
+						local send_data = {}
+						if self.bot_id then
+							send_data.v1 = self.bot_id
+						end
+						send_data.v2 = id
+						person_info.post_data_by_new_form(self._Battleview,'select_opponent_confirm',send_data,function(t,v)
+							if t and t == 200 then
+								if v and type(v) == 'table' and v.v1 then
+								
+								end
+							else
+								person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
+									if e == person_info.OK then
+
+									end
+								end)	
+							end
+						end)
 					end
 				end
 				
@@ -115,7 +137,9 @@ function Battleview:show_search_res()
 					txt_bot_rank1:setString(v[1].user_rank)
 					pic_bot1.id = v[1].user_id
 					person_info.load_logo_pic(pic_bot1,v[1].user_id)
+					self.bot_id[1] = v[1].user_id
 				else
+					self.bot_id = nil
 					pic_bot1:setVisible(false)
 					person_info.messagebox(self._Battleview,person_info.BATTLE_SEARCH_ERROR,function(e)
 						if e == person_info.OK then
@@ -136,6 +160,7 @@ function Battleview:show_search_res()
 					pic_bot2.id = v[2].user_id	
 					pic_bot2:setVisible(true)
 					person_info.load_logo_pic(pic_bot2,v[2].user_id)
+					self.bot_id[2] = v[2].user_id
 				else
 					pic_bot2:setVisible(false)
 				end		
@@ -146,6 +171,7 @@ function Battleview:show_search_res()
 					pic_bot3.id = v[3].user_id
 					pic_bot3:setVisible(true)
 					person_info.load_logo_pic(pic_bot3,v[3].user_id)
+					self.bot_id[3] = v[3].user_id
 				else
 					pic_bot3:setVisible(false)				
 				end

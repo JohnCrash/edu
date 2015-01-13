@@ -90,7 +90,7 @@ function Loading:getdatabyurl()
 		cache.request_json( get_uesr_info_url,function(t)
 			if t and type(t)=='table' then
 				if 	t.result ~= 0 then				
-					print(t.result.." : "..t.message)			
+					print(t.result.." : "..t.msg)			
 				else
 					if t.uig[1].user_role == 1 then	--xuesheng
 						login.set_uid_type(login.STUDENT)
@@ -100,7 +100,7 @@ function Loading:getdatabyurl()
 					elseif t.uig[1].user_role == 2 then	--jiazhang
 						login.set_uid_type(login.PARENT)
 						self:getdatabyparent()
-					elseif t.uig[1].user_role == 3 then	--laoshi
+					elseif t.uig[1].user_role == 3 or t.uig[1].user_role == 11 or t.uig[1].user_role == 12 or t.uig[1].user_role == 13 then	--laoshi
 						login.set_uid_type(login.TEACHER)
 						self:showteacherview()		
 					end

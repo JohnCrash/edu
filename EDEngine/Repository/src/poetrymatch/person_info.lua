@@ -19,6 +19,8 @@ max_exp = 100,
 
 local g_person_silver = 100
 local g_person_le_coin = 10
+local g_person_tili = 0
+
 
 local g_person_bag = {
 cards_table = {},
@@ -78,6 +80,23 @@ local function set_user_info(uinfo)
 	else
 		return false
 	end
+end
+
+local function set_user_tili(tili_num)
+	if tili_num then
+		g_person_tili = tili_num
+		return true
+	else
+		return false
+	end
+end
+
+local function get_user_tili()
+	local tili_num
+	if g_person_tili then
+		tili_num = g_person_tili
+	end
+	return tili_num
 end
 
 local function get_user_lvl_info()
@@ -721,7 +740,7 @@ end
 local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
 --local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
-local function post_data_by_new_form(parent,module_id,post_data,func)
+local function post_data_by_new_form(parent,module_id,post_data,func,is_not_loading)
 	local send_data = {}
 	send_data.v = {}
 	if post_data then
@@ -737,7 +756,10 @@ local function post_data_by_new_form(parent,module_id,post_data,func)
 	send_data.rid = os.time()
 	send_data.icp = false
 	local str_send_data = json.encode(send_data)
-	local loadbox = put_lading_circle(parent)
+	local loadbox
+	if not is_not_loading then
+		loadbox = put_lading_circle(parent)
+	end
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
 		print('d::'..d)
@@ -1059,6 +1081,8 @@ return {
 	get_user_info = get_user_info,
 	set_user_info = set_user_info,
 	update_user_info_by_tag = update_user_info_by_tag,
+	set_user_tili = set_user_tili,
+	get_user_tili = get_user_tili,
 	get_user_lvl_info = get_user_lvl_info,
 	set_user_lvl_info = set_user_lvl_info,	
 	get_user_silver = get_user_silver,
