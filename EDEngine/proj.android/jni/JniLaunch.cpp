@@ -42,7 +42,7 @@ void setUIOrientation( int m )
 	while( !sWaitChangeEnd )
 	{
 		usleep(1);
-		if( count++ > 300 )
+		if( count++ > 2000 )
 			break;
 	}
 #endif	
@@ -63,7 +63,7 @@ int getUIOrientation()
 bool platformOpenURL( const char *url )
 {
 	JniMethodInfo t;
-	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "()V")) 
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "(Ljava/lang/String;)V")) 
 	{
 		jstring jstrurl=t.env->NewStringUTF(url);
 		t.env->CallStaticVoidMethod(t.classID,t.methodID,jstrurl);

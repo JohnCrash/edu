@@ -1009,7 +1009,11 @@ function AMouseScene:init_event()
 	self._listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
 	self._listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCHES_MOVED )
 	--鼠标
+	--老版本使用这种调用？
 	self._listener_mouse = cc.EventListenerMouse:create(1)
+	if not self._listener_mouse then
+		self._listener_mouse = cc.EventListenerMouse:create()
+	end
 	self._listener_mouse:registerScriptHandler(onMouseMoved,cc.Handler.EVENT_MOUSE_MOVE )
 	--键盘,Android返回
 	self._listener_keyboard = cc.EventListenerKeyboard:create()

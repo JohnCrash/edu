@@ -165,10 +165,10 @@ function Battleview:show_search_res()
 	end
 	person_info.post_data_by_new_form(self._Battleview,'select_opponent',send_data,function(t,v)
 		if t and t == 200 then
+			local pic_bot1 = uikits.child(self._Battleview,ui.PIC_BOT1)
+			local pic_bot2 = uikits.child(self._Battleview,ui.PIC_BOT2)
+			local pic_bot3 = uikits.child(self._Battleview,ui.PIC_BOT3)
 			if v and type(v) == 'table' then
-				local pic_bot1 = uikits.child(self._Battleview,ui.PIC_BOT1)
-				local pic_bot2 = uikits.child(self._Battleview,ui.PIC_BOT2)
-				local pic_bot3 = uikits.child(self._Battleview,ui.PIC_BOT3)
 				local txt_bot_name1 = uikits.child(self._Battleview,ui.TXT_BOT_NAME1)
 				local txt_bot_name2 = uikits.child(self._Battleview,ui.TXT_BOT_NAME2)
 				local txt_bot_name3 = uikits.child(self._Battleview,ui.TXT_BOT_NAME3)
@@ -191,7 +191,6 @@ function Battleview:show_search_res()
 									self:enterLaBattle(v)								
 									
 									--]]------------------------------------------------------------------------------------
-
 								end
 							else
 								person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)
@@ -259,6 +258,23 @@ function Battleview:show_search_res()
 				else
 					pic_bot3:setVisible(false)				
 				end
+			else
+				self.bot_id = nil
+				pic_bot1:setVisible(false)
+				pic_bot2:setVisible(false)
+				pic_bot3:setVisible(false)	
+				person_info.messagebox(self._Battleview,person_info.BATTLE_SEARCH_ERROR,function(e)
+					if e == person_info.OK then
+						local view_search_res = uikits.child(self._Battleview,ui.VIEW_SEARCH_RES)
+						local but_search = uikits.child(self._Battleview,ui.BUTTON_SEARCH)								
+						view_search_res:setVisible(false)
+						but_search:setVisible(true)			
+						if schedulerEntry then
+							scheduler:unscheduleScriptEntry(schedulerEntry)
+							schedulerEntry = nil								
+						end
+					end
+				end)			
 			end
 		else
 			person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)

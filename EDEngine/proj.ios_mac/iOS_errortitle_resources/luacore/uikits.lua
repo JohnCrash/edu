@@ -48,6 +48,9 @@ local function registerMouseEvent()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if not listener_mouse and platform == kTargetWindows then
 		listener_mouse = cc.EventListenerMouse:create()
+		if not listener_mouse then
+			listener_mouse = cc.EventListenerMouse:create(1)
+		end
 		if listener_mouse then
 			listener_mouse:registerScriptHandler(mouseWhellScroll,cc.Handler.EVENT_MOUSE_SCROLL)	
 			local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()

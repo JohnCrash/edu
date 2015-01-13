@@ -39,8 +39,6 @@ end
 
 local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 local get_child_info_url = 'http://api.lejiaolexue.com/rest/user/current/closefriend/child'
-local get_class_url = 'http://api.lejiaolexue.com/rest/user/145487/zone/class'
-local get_stu_url = 'http://api.lejiaolexue.com/rest/zone/145488/student/page=1&page_size=200'
 
 function Loading:showparentview()
 	if #self.childinfo == 1 then
