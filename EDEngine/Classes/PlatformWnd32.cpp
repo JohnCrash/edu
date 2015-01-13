@@ -9,6 +9,9 @@
 #pragma comment (lib,"winmm.lib")
 #pragma comment (lib,"imm32.lib")
 
+UsingMySpace;
+
+MySpaceBegin
 extern std::string g_Mode;
 using namespace std;
 extern std::string toUTF8(const std::wstring& wstr);
@@ -933,4 +936,5 @@ bool VoiceIsPlaying(const char *pszPathName)
 	if (s_pVoicePlay == NULL) return false;
 	return s_pVoicePlay->IsPlaying(pszPathName);
 }
+MySpaceEnd
 #endif

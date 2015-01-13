@@ -8,27 +8,26 @@
 #include "RenderTextureEx.h"
 #include "Files.h"
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 #include "AppleBundle.h"
 #endif
+
+UsingMySpace;
+MySpaceBegin
 extern std::string g_Mode;
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 extern int g_FrameWidth;
 extern int g_FrameHeight;
 extern bool g_Reset;
-#endif
-
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-#include <windows.h>
 extern std::wstring utf8ToUnicode(const std::string& s);
-#else
-#include <sys/time.h>
 #endif
-
-UsingMySpace;
-
-MySpaceBegin
 
 static int g_callref=LUA_REFNIL;
 static int g_callnsl = LUA_REFNIL;
@@ -122,10 +121,6 @@ static void pathsp(std::string& path)
 			path.pop_back();
 		}
 }
-
-extern std::string g_Cookie;
-extern std::string g_Launch;
-extern std::string g_Userid;
 
 static int cc_launchparam(lua_State* L)
 {

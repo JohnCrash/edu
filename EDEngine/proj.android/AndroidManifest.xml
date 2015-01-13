@@ -13,24 +13,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
-    <application android:label="@string/app_name"
-                 android:icon="@drawable/icon">
-
-            <!-- Tell NativeActivity the name of our .so -->
-            <meta-data android:name="android.app.lib_name"
-                       android:value="cocos2dcpp" />
-
-        <activity android:name="org.cocos2dx.cpp.AppActivity"
-                  android:label="@string/app_name"
-                  android:screenOrientation="sensorLandscape"
-                  android:configChanges="orientation" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-    </application>
-
     <supports-screens android:anyDensity="true"
                       android:smallScreens="true"
                       android:normalScreens="true"
@@ -38,4 +20,16 @@
                       android:xlargeScreens="true"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
+<application android:label="@string/app_name" android:icon="@drawable/icon">
+
+            <!-- Tell NativeActivity the name of our .so -->
+            <meta-data android:name="android.app.lib_name" android:value="cocos2dcpp" />
+
+        <activity android:name="org.cocos2dx.cpp.AppActivity" android:label="@string/app_name" android:screenOrientation="sensorLandscape" android:configChanges="orientation" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
 </manifest> 

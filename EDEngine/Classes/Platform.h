@@ -24,10 +24,19 @@
 #define RESULT_ERROR (-2)
 
 MySpaceBegin
+
+extern std::string g_Launch;
+extern std::string g_Cookie;
+extern std::string g_Userid;
+extern std::string g_ExternalStorageDirectory;
+extern std::string g_RecordFile;
+extern std::string g_Orientation;
+
 bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();
 void cocos2dChangeOrientation( int m );
+void cocos2dChangeOrientationBySize(int w, int h);
 
 void ShockPhonePattern( int *pattern,int n );
 void ShockPhoneDelay( int t );
@@ -80,6 +89,7 @@ public:
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 		::Sleep(m);
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+		usleep(m);
 #endif
 	}
 protected:
