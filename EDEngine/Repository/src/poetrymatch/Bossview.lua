@@ -18,7 +18,7 @@ local ui = {
 	TXT_BOSS_LVL = 'dengji',
 	CHECK_STAR1 = 'xx1',
 	CHECK_STAR2 = 'xx2',
-	CHECK_STAR3 = 'xx2',
+	CHECK_STAR3 = 'xx3',
 	PIC_BG = 'ditu',
 	
 	VIEW_BOSS_INFO = 'tan',

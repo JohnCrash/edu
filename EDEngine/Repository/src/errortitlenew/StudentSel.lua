@@ -14,13 +14,16 @@ local ui = {
 	PStudentSel_FILE = 'errortitlenew/haiz.json',
 	PStudentSel_FILE_3_4 = 'errortitlenew/haiz43.json',
 	
-	VIEW_STU = 'hz1',
+	VIEW_HAS_STU = 'haiz',
+	VIEW_NO_STU = 'jzmy',
+	VIEW_STU = 'haiz/hz1',
 	PIC_STU = 'toux',
 	TXT_STU = 'ming',
 	
 	TStudentSel_FILE = 'errortitlenew/banji.json',
 	TStudentSel_FILE_3_4 = 'errortitlenew/banji43.json',
 	
+	VIEW_NO_CLASS = 'lsmy',
 	VIEW_CLASS_ALL = 'xues',
 	VIEW_CLASS_TITLE = 'xues/bj',
 	CHECK_JT = 'zk',
@@ -59,6 +62,17 @@ local button_empty_path = 'errortitlenew/but_stu.png'
 local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
 
 function StudentSel:showparentview()
+	
+	local view_no_student = uikits.child(self._StudentSel,ui.VIEW_NO_STU)
+	local view_has_student = uikits.child(self._StudentSel,ui.VIEW_HAS_STU)
+	view_no_student:setVisible(false)
+	view_has_student:setVisible(false)
+	if #self._child_tb == 0 then
+		view_no_student:setVisible(true)
+		return
+	else
+		view_has_student:setVisible(true)
+	end
 	local view_student = uikits.child(self._StudentSel,ui.VIEW_STU)
 	view_student:setVisible(false)
 	local size_win = self._StudentSel:getContentSize()
@@ -163,7 +177,17 @@ function StudentSel:update_view()
 end
 
 function StudentSel:show_class(class_tb)
+	local view_no_class = uikits.child(self._StudentSel,ui.VIEW_NO_CLASS)
 	local view_class_all = uikits.child(self._StudentSel,ui.VIEW_CLASS_ALL)
+	view_no_class:setVisible(false)
+	view_class_all:setVisible(false)
+	if #class_tb == 0 then
+		view_no_class:setVisible(true)
+		return
+	else
+		view_class_all:setVisible(true)
+	end
+
 	local classtitle_src = uikits.child(self._StudentSel,ui.VIEW_CLASS_TITLE)
 	local student_view = uikits.child(self._StudentSel,ui.VIEW_STU_BY_CLASS)
 	local size_view_class_all = view_class_all:getContentSize()
@@ -234,6 +258,7 @@ function StudentSel:show_class(class_tb)
 					end,student_tb[j].user_id..'.jpg')			
 			end
 			send_url = get_uesr_info_url..'?user_id='..student_tb[j].user_id
+			print('send_url::'..send_url)
 			cache.request_json( send_url,function(t)
 				if t and type(t)=='table' then
 					if 	t.result ~= 0 then				
