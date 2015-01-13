@@ -226,14 +226,18 @@ function Readytoboss:show_zhunbei()
 			}	
 
 			--退出
+			local countryName = self.country_name
+			local countryID = self.country_id
 			data.exitFunction = function ()
 				lly.logCurLocAnd("exit to bossview")
-				
+				print(countryName)
+				print(countryID)
+
 				--转景
 				local moBossview = require "poetrymatch/Bossview"
 
 				cc.Director:getInstance():replaceScene(
-					moBossview.create(self.country_name, self.country_id))
+					moBossview.create(countryName, countryID))
 
 			end
 

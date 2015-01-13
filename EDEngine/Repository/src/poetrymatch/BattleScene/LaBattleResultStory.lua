@@ -282,21 +282,23 @@ function LaBattleResultStory:setData(table)
 	moperson_info.add_user_silver(table.user_gain_items.sliver_coin)
 	moperson_info.add_user_le_coin(table.user_gain_items.le_coin)
 
-	local sendedTable = {v1 = table.user_gain_items.gain_card_id}
-	moperson_info.post_data_by_new_form(
-		self._wiRoot,
-		"load_user_card_plate", --业务名
-		sendedTable, --数据
-		function (ErrorCode, result) --结果回调
-			lly.logCurLocAnd("%d", ErrorCode)
-			lly.logTable(result)
+	if table.user_gain_items.gain_card_id ~= 0 then
+		local sendedTable = {v1 = table.user_gain_items.gain_card_id}
+		moperson_info.post_data_by_new_form(
+			self._wiRoot,
+			"load_user_card_plate", --业务名
+			sendedTable, --数据
+			function (ErrorCode, result) --结果回调
+				lly.logCurLocAnd("%d", ErrorCode)
+				lly.logTable(result)
 
-			if ErrorCode == 200 then
-				moperson_info.add_card_to_bag(result)
-			end
-		end,
-		true --true为不进行转圈（loading动画）
-	)	
+				if ErrorCode == 200 then
+					moperson_info.add_card_to_bag(result)
+				end
+			end,
+			true --true为不进行转圈（loading动画）
+		)
+	end	
 
 end
 
@@ -322,14 +324,14 @@ function LaBattleResultStory:onWinAnimComplete()
 		"get_userinfo_cardinfo", --业务名
 		sendedTable, --数据
 		function (ErrorCode, result) --结果回调
-			print(ErrorCode)
 			lly.logTable(result)
 			if ErrorCode == 200 and result then
 				self:onDownloadExp(result)
 			else
 				lly.error("net wrong" .. ErrorCode)
 			end			
-		end
+		end,
+		true
 	)	
 	
 end
@@ -367,14 +369,14 @@ function LaBattleResultStory:onDownloadExp(result)
 
 	--更新数据
 	moperson_info.set_user_lvl_info{
-		lvl = result.level
-		cur_exp = result.exper
+		lvl = result.level,
+		cur_exp = result.exper,
 		max_exp = result.exper_max
 	}
 
 	
 	for k, v in pairs(result.card_list) do
-		moperson_info.update_card_in_bag_by_id(v.card_plate_id, card_plate_level, v.card_plate_level)
+		moperson_info.update_card_in_bag_by_id(v.card_plate_id, "card_plate_level", v.card_plate_level)
 	end
 	
 end

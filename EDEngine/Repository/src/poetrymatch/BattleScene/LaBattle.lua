@@ -431,6 +431,7 @@ function LaBattle:ctor()
 		--当前-------------------------------------------------------
 		_nCurCardIndex = 1, --当前卡牌
 		_nCurQuesType = QUES_TYPE.SINGLE_CHOICE, --当前题类型
+		_nCurQuesContentType = 1, --当前题的内容的类型
 		_nCurQuesID = 0, --当前问题ID
 
 		--当前技能
@@ -500,7 +501,7 @@ function LaBattle:init(tab)
 				static.playMusic(true, tab.battle_type)
 			elseif "exit" == event then			
 				--停止音乐				
-				self:playMusic(false)
+				static.playMusic(false)
 
 			end
 		end
@@ -946,19 +947,19 @@ function LaBattle:initUIWithData(data)
 		end
 		
 		--背景 根据战斗类型和关卡不同而不同
-		local strBGName = "poetrymatch/BattleScene/BG/"
+		
 		if self._nCurBattleType == BATTLE_TYPE.STORY then
 			--根据关卡获得背景图片名称
-			strBGName = strBGName .. "duiz1.jpg"
+			moperson_info.load_section_pic(self._imgBG, self._nCurStageID .. "a.png")
 		elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
-			strBGName = strBGName .. "duiz1.jpg"
+			local strBGName = "poetrymatch/BattleScene/BG/duiz1.jpg"
+			self._imgBG:loadTexture(strBGName)
 		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then
-			strBGName = strBGName .. "leitzhandou.jpg"
+			local strBGName = "poetrymatch/BattleScene/BG/leitzhandou.jpg"
+			self._imgBG:loadTexture(strBGName)
 		else
 			lly.error("wrong BATTLE_TYPE")
 		end
-
-		self._imgBG:loadTexture(strBGName)
 
 		--结束图层初始化 根据战斗类型不同而不同
 		if self._nCurBattleType == BATTLE_TYPE.STORY then
@@ -1289,7 +1290,8 @@ function LaBattle:downloadQuestion(camp_type)
 				--处理结果
 				self:onGetQuestion(result, camp_type)
 			end)
-		end
+		end,
+		true
 	)
 end
 
@@ -1460,7 +1462,8 @@ function LaBattle:checkAnswer(camp_type)
 				--处理结果
 				self:onGetAnswerResult(result, camp_type)
 			end)
-		end
+		end,
+		true
 	)
 end
 
@@ -2603,6 +2606,9 @@ function LaBattle:waitingForPlayerAnswer_S()
 
 	--显示题目
 	self:writeInQuestionArea()
+
+	--读题的音效
+	self:playEffect("wenti" .. self._nCurQuesContentType, 0, true, CAMP_TYPE.ENEMY)
 
 	--开启玩家答题状态标识
 	self._imgPlyrAnswerToken:setPosition(self._posPlyrAnswerToken)
