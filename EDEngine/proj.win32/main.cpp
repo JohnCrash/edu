@@ -3,10 +3,14 @@
 #include "AppDelegate.h"
 
 USING_NS_CC;
+
+
+UsingMySpace;
+
+MySpaceBegin
 #ifdef USE_WIN32_CONSOLE
 bool g_Quit = true;
 #endif
-
 std::string g_Cookie;
 std::string g_Launch;
 std::string g_Userid;
@@ -50,6 +54,7 @@ void ParseCommand(LPTSTR lpCmdLine)
 	CCLOG("userid=%s", g_Userid.c_str());
 	CCLOG("launch=%s", g_Launch.c_str());
 }
+MySpaceEnd
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -67,7 +72,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 #endif
 
 	// create the application instance
-	AppDelegate app;
+	AppDelegate_v3 app;
 	int ret;
 
 	std::wstring uri = TEXT("com.edengine.luacore.") + getParam(lpCmdLine, TEXT("launch="));

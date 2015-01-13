@@ -47,6 +47,7 @@ import android.app.AlertDialog;
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.lib.Cocos2dxHelper;
+import org.cocos2dx.lib.Cocos2dxCallback;
 
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -65,15 +66,16 @@ import android.os.Vibrator;
 
 //import org.cocos2dx.cpp.CrashHandler;
 
-public class AppActivity extends Cocos2dxActivity {
+public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	//======================
 	// JNI
 	//======================
 	private static native void networkStateChangeEvent(int state);
-	private static native void launchParam(final String launch,final String cookie,final String uid);
+	private static native void launchParam(final String launch,final String cookie,final String uid,final String orientation);
 	private static native void setExternalStorageDirectory(final String sd);
 	private static native void sendTakeResourceResult(int resultCode,int typeCode,final String res); 
 	private static native void sendVoiceRecordData(final int nType,final int nID,final int nParam1,final int nParam2,final int len,final byte[] pBytes);
+	private static native void cocos2dChangeOrientation( final int state,final int w,final int h);
 	//======================
 	// 拍照和取图库
 	//======================
@@ -530,8 +532,9 @@ public class AppActivity extends Cocos2dxActivity {
 	 */
 	public static void androidOpenURL( String url )
 	{
-		Uri uri = Uri.parse( url );
-		Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+		Log.d("androidOpenURL",url);
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(url));
 		if (intent.resolveActivity(myActivity.getPackageManager()) != null) {
 			myActivity.startActivity(intent);
 		}
@@ -539,6 +542,8 @@ public class AppActivity extends Cocos2dxActivity {
 	/*
 	 * 切换方向
 	 */
+	public int _isSetUIOrientation = -1;
+
 	public static void setUIOrientation( int m )
 	{
 		int orientation = myActivity.getRequestedOrientation();
@@ -546,13 +551,35 @@ public class AppActivity extends Cocos2dxActivity {
 		{ //横屏
 			 if(orientation !=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
 				 myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-			}			
+			}
+			else
+			 {
+				cocos2dChangeOrientation(0,0,0);
+			 }
 		}else if( m == 2 )
 		{ //竖屏
 			 if(orientation !=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT){
 				 myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			}			
+			}
+			else
+			 {
+				cocos2dChangeOrientation(0,0,0);
+			 }
+		}else
+		{
+			cocos2dChangeOrientation(0,0,0);
 		}
+		myActivity._isSetUIOrientation = 1;
+	}
+	//@Override
+	public void onSizeChanged( int width,int height )
+	{
+		if(_isSetUIOrientation == 1)
+		{
+			//发生屏幕旋转
+			cocos2dChangeOrientation( 1,width,height );
+		}
+		_isSetUIOrientation = -1;
 	}
 	public static int getUIOrientation()
 	{
@@ -583,6 +610,7 @@ public class AppActivity extends Cocos2dxActivity {
 		Intent mIntent = this.getIntent();  
 		String launch = mIntent.getStringExtra("launch");
 		String cookie = mIntent.getStringExtra("cookie");
+		String orientation = mIntent.getStringExtra("orientation");
 		int userid =  mIntent.getIntExtra("userid",0);
 		String uid;
 		uid = Integer.toString(userid);
@@ -590,7 +618,7 @@ public class AppActivity extends Cocos2dxActivity {
 		if( path.length()>0 && path.charAt(path.length()-1)!='/')
 			path += '/';
 		setExternalStorageDirectory( path );
-		launchParam(launch,cookie,uid);
+		launchParam(launch,cookie,uid,orientation);
 		//launchParam("errortitile","sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d");
 		}
 	/*
@@ -612,6 +640,7 @@ public class AppActivity extends Cocos2dxActivity {
     	myActivity = this;
     	getParameterByIntent(); //取启动参数
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
+        glSurfaceView.setActivityCallback( this );
         // TestCpp should create stencil buffer
         glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);
         //glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);

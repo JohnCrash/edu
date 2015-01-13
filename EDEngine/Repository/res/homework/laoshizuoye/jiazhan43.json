@@ -236,7 +236,7 @@
     "delete.png",
     "huitu.jpg",
     "bof1.png",
-    "GUI/image.png",
+    "C:\\Program Files\\CocoStudio\\EditorDefaultRes\\GUI/image.png",
     "past3.png",
     "tianjia2.png",
     "past2.png",
@@ -257,7 +257,7 @@
     "delete.png",
     "huitu.jpg",
     "bof1.png",
-    "GUI/image.png",
+    "C:\\Program Files\\CocoStudio\\EditorDefaultRes\\GUI/image.png",
     "past3.png",
     "tianjia2.png",
     "past2.png",
@@ -342,7 +342,7 @@
     "bo1.png",
     "bo2.png"
   ],
-  "version": "1.5.0.0",
+  "version": "1.6.0.0",
   "widgetTree": {
     "classname": "Panel",
     "name": null,

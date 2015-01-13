@@ -1,16 +1,13 @@
 #include "Files.h"
 #include "MD5.h"
-
-MySpaceBegin
-
-USING_NS_CC;
-
 #include "errno.h"
+
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <direct.h>
 #include "Shlobj.h"
 #pragma comment(lib,"Shell32")
 #endif
+
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 #include "sys/types.h"
 #include "sys/stat.h"
@@ -18,12 +15,18 @@ USING_NS_CC;
 #include "fcntl.h"
 #include <dirent.h>
 
+#endif
+
+MySpaceBegin
+
+USING_NS_CC;
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 extern std::string g_ExternalStorageDirectory;
 std::string GetSDCardDir()
 {
 	return g_ExternalStorageDirectory;
 }
-
 #endif
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
