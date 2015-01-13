@@ -9,6 +9,7 @@ local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 local uikits = require "uikits"
 
 local moLaBattleResultBase = require "poetrymatch/BattleScene/LaBattleResultBase"
+local moperson_info = require "poetrymatch/person_info"
 
 lly.finalizeCurrentEnvironment()
 
@@ -112,6 +113,14 @@ function LaBattleResultFight:initUI(tab)
 		self._layLose = self:setWidget(ui.LAY_LOSE)
 		self._btnConfirmLose = self:setWidget(ui.BTN_CONFIRM_LOSE)
 
+		--初始化
+		--名字和头像
+		self._txtPlyrName:setString(tab.name)
+		self._txtEnemyName:setString(tab.enemy_name)
+
+		moperson_info.load_logo_pic(self._imgPlyrPortrait, tab.plyr_id)
+		moperson_info.load_logo_pic(self._imgEnemyPortrait, tab.enemy_id)
+
 		return true
 	until true
 
@@ -150,7 +159,7 @@ end
 
 --获取数据
 function LaBattleResultFight:setData(table)
-
+	self._atlasRank:setData(table.ranking)
 end
 
 function LaBattleResultFight:win()

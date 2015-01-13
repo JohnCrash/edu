@@ -219,19 +219,21 @@ function Readytoboss:show_zhunbei()
 				self.bot_info.card_plate_blood_added --基础血量加额外血量
 			data.enemy_sex = self.bot_info.gender
 
-			data.enemy_skill_id = {
-				self.bot_info.skills[1],
-				self.bot_info.skills[2],
-				self.bot_info.skills[3]
-			}	
+			if self.bot_info.skills then
+				data.enemy_skill_id = {
+					self.bot_info.skills[1],
+					self.bot_info.skills[2],
+					self.bot_info.skills[3]
+				}
+			else
+				data.enemy_skill_id = {nil, nil, nil}
+			end
 
 			--退出
 			local countryName = self.country_name
 			local countryID = self.country_id
 			data.exitFunction = function ()
 				lly.logCurLocAnd("exit to bossview")
-				print(countryName)
-				print(countryID)
 
 				--转景
 				local moBossview = require "poetrymatch/Bossview"

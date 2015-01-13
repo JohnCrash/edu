@@ -401,7 +401,8 @@ function LaBattle:ctor()
 		_nCurBattleType = BATTLE_TYPE.STORY, --战斗类型
 		_nCurStageID = 0, --关卡/擂台id
 
-		_nRoundsNumber = 0, --回合数
+		_nRoundsNumber = 1, --回合数
+		_nRoundsNumberMax = 100, 
 
 		--人物属性
 		_nPlyrHPCeiling = 0, --玩家HP上限
@@ -548,7 +549,7 @@ function LaBattle:init(tab)
 
 		--测试中停止变更状态用
 		lly.startupKeyboardForTest(self, cc.KeyCode.KEY_S, function ()
-			print("key")
+			lly.log("key")
 			---[[
 			if self._bForbidEnterNextState == true then
 				self._bForbidEnterNextState = false
@@ -576,7 +577,7 @@ function LaBattle:initData(data)
 	self._nCurStageID = data.stageID
 
 	--设置回合数并展示
-	self._nRoundsNumber = data.rounds_number
+	self._nRoundsNumberMax = data.rounds_number
 
 	--HP补满
 	for i = 1, 3 do
@@ -597,7 +598,10 @@ function LaBattle:initData(data)
 	
 	--体力（目前最大值永远为6）
 	for i = 1, 3 do
-		self._arnPlyrCardVITMax[i] = 6
+		if data.card[i] ~= nil then
+			self._arnPlyrCardVITMax[i] = 6
+		end
+
 		self._arnPlyrCardVIT[i] = self._arnPlyrCardVITMax[i]
 	end
 
@@ -858,7 +862,6 @@ function LaBattle:initUIWithData(data)
 		self._atlasRounds:setString(tostring(self._nRoundsNumber))
 
 		--头像 --玩家只分男女
-		print("sex", data.plyr_sex)
 		if data.plyr_sex == SEX_TYPE.GIRL then --根据person_info 1为woman 2为man
 			self._imgPlyrPortrait_girl:setVisible(true)
 			self._imgPlyrPortrait_boy:setVisible(false)
@@ -985,7 +988,15 @@ function LaBattle:initUIWithData(data)
 
 		elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
 			local moLaBattleResultFight = require "poetrymatch/BattleScene/LaBattleResultFight"
-			self._laResult = moLaBattleResultFight.Class:create()
+			local sendedTable = {} --初始化数据
+
+			sendedTable.plyr_id = data.plyr_id
+			sendedTable.enemy_id = data.stageID --此时这里储存的是敌方玩家的userid
+
+			sendedTable.name = data.plyr_name
+			sendedTable.enemy_name = data.enemy_name
+			lly.logTable(sendedTable)
+			self._laResult = moLaBattleResultFight.Class:create(sendedTable)
 
 		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then
 			local moLaBattleResultChallenge = require "poetrymatch/BattleScene/LaBattleResultChallenge"
@@ -1232,9 +1243,16 @@ function LaBattle:uploadBattleInitSet()
 	sendedTable.v3 = self._nCurBattleType --战斗类型
 
 	--发送数据
+	local methodName
+	if self._nCurBattleType == BATTLE_TYPE.FIGHT then
+		methodName = "set_battle_user"
+	else
+		methodName = "set_under_attack_cardplate"
+	end
+
 	moperson_info.post_data_by_new_form(
 		self._wiRoot,
-		"set_under_attack_cardplate", --业务名
+		methodName, --业务名
 		sendedTable, --数据
 		function (ErrorCode, result) --结果回调
 			self:onGetDataFromNet(ErrorCode, result, function ()
@@ -1324,6 +1342,9 @@ function LaBattle:onGetQuestion(result, camp_type)
 		self._arstrQuesChooseMark[1] = "1"
 		self._arstrQuesChooseMark[2] = "2"
 	end
+
+	--内容类型，用于语音
+	self._nCurQuesContentType = result.question.question_model_id
 
 	--倒计时时间
 	self._nCountingDownTime = result.answer_spend_timespan
@@ -1510,7 +1531,7 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 
 	--判断回合数 玩家最终血量大于敌人算胜利
 	local nextStateForEnd
-	if not nextState and self._nRoundsNumber <= 1 then		
+	if not nextState and self._nRoundsNumber == self._nRoundsNumberMax then		
 		if nPlyrHPAfterDec > nEnemyHPAfterDec then
 			nextStateForEnd = state.win
 		else
@@ -2377,8 +2398,22 @@ function LaBattle:playEnterAnim_S()
 	--结束，同时开启退出按钮
 	local callFunc = cc.CallFunc:create(function ()
 		self._btnGiveUp:setVisible(true)
-		self._bCurStateIsEnding = true
 	end)
+
+	--长血动画
+	local scheduler
+	local i = 0
+	local update = function (time)
+		self._barPlyrHP:setPercent(i)
+		self._barEnemyHP:setPercent(i)
+		if i == 100 then
+			cc.Director:getInstance():getScheduler():unscheduleScriptEntry(scheduler)
+			self._bCurStateIsEnding = true
+		end
+		i = i + 1
+	end
+
+	scheduler = cc.Director:getInstance():getScheduler():scheduleScriptFunc(update, 0.01, false)
 
 
 	self._layCenterUI:runAction(acUIFadeIn:clone())
@@ -2608,7 +2643,7 @@ function LaBattle:waitingForPlayerAnswer_S()
 	self:writeInQuestionArea()
 
 	--读题的音效
-	self:playEffect("wenti" .. self._nCurQuesContentType, 0, true, CAMP_TYPE.ENEMY)
+	self:playEffect("questions/tiwen" .. self._nCurQuesContentType, 0, true, CAMP_TYPE.ENEMY)
 
 	--开启玩家答题状态标识
 	self._imgPlyrAnswerToken:setPosition(self._posPlyrAnswerToken)
@@ -2715,7 +2750,7 @@ function LaBattle:showResultOfPlyrAnswer_S()
 	--如果没有体力了，回合没结束就直接跳到玩家准备界面，否则直接结束
 	if self._bHasVIT == false then
 		if not nextStateForEnd then
-			self._nRoundsNumber = self._nRoundsNumber - 1
+			self._nRoundsNumber = self._nRoundsNumber + 1
 			self._stateNext = state.prepare
 		else
 			self._stateNext = nextStateForEnd
@@ -2909,7 +2944,7 @@ function LaBattle:showResultOfEnemyAnswer_S()
 	if isEndState then 
 		self._stateNext = isEndState
 	else
-		self._nRoundsNumber = self._nRoundsNumber - 1 
+		self._nRoundsNumber = self._nRoundsNumber + 1 
 	end
 end
 
@@ -2944,7 +2979,13 @@ function LaBattle:win_S()
 	self:playEffect("exercise/shengli", 2, true, CAMP_TYPE.ENEMY)
 
 	--传输结果
-	self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
+	if self._nCurBattleType == BATTLE_TYPE.STORY then
+		self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
+	elseif self._nCurBattleType == BATTLE_TYPE.FIHGT then
+		self._laResult:setData(self._tabCurAnswerResult.user_wealths_fight)
+	else
+
+	end
 
 	--启动胜利页面
 	self._laResult:setVisible(true)
@@ -3007,7 +3048,6 @@ function static.playMusic(b, battleType)
 	uikits.stopMusic()
 
 	if not b then return end --b为false为停止音乐，则不往下继续走了
-	print("music is ", battleType)
 	if battleType == BATTLE_TYPE.STORY then
 		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
 	elseif battleType == BATTLE_TYPE.FIGHT then
