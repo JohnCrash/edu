@@ -113,7 +113,7 @@
     "xz1.png",
     "xz2.png"
   ],
-  "version": "1.5.0.0",
+  "version": "1.6.0.0",
   "widgetTree": {
     "classname": "Panel",
     "name": null,
@@ -1126,7 +1126,7 @@
           "capInsetsWidth": 1,
           "capInsetsX": 0,
           "capInsetsY": 0,
-          "clipAble": true,
+          "clipAble": false,
           "colorType": 1,
           "direction": 1,
           "editorClipAble": false,

@@ -13,45 +13,90 @@ extern "C" {
 #endif
 
 MySpaceBegin
+USING_NS_CC;
 
 #define AMR_MAGIC_NUMBER "#!AMR\n"
 static CVoiceRecord *s_pVoiceRecord=NULL;
 
-void cocos2dChangeOrientation( int m )
+/*
+const char *policy_tostring(ResolutionPolicy rp)
 {
-    int w,h;
+	switch (rp)
+	{
+	case ResolutionPolicy::SHOW_ALL:
+		return "SHOW_ALL";
+	case ResolutionPolicy::EXACT_FIT:
+		return "EXACT_FIT";
+	case ResolutionPolicy::FIXED_HEIGHT:
+		return "FIXED_HEIGHT";
+	case ResolutionPolicy::FIXED_WIDTH:
+		return "FIXED_WIDTH";
+	case ResolutionPolicy::NO_BORDER:
+		return "NO_BORDER";
+	case ResolutionPolicy::UNKNOWN:
+		return "UNKNOWN";
+	}
+	return "";
+}
+*/
+
+void cocos2dChangeOrientationBySize( int w,int h )
+{
     cocos2d::Director *pDirector = cocos2d::Director::getInstance();
     if( pDirector == nullptr )
         return;
     cocos2d::GLView * pview = pDirector->getOpenGLView();
     if( pview )
     {
-        cocos2d::Size size = pview->getFrameSize();
-        
-        if( m == 1 )
-        {
-            if( size.width < size.height )
-            {
-                w = size.height;
-                h = size.width;
-            }
-        }
-        else
-        {
-            if( size.width > size.height )
-            {
-                w = size.height;
-                h = size.width;
-            }
-        }
-        
         cocos2d::Size resSize = pview->getDesignResolutionSize();
         auto resPolicy=pview->getResolutionPolicy();
         pview->setFrameSize(w,h);
         pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
         pDirector->setViewport();
-        cocos2d::Director::sharedDirector()->setProjection(cocos2d::Director::sharedDirector()->getProjection());
+		pDirector->setProjection(pDirector->getProjection());
     }
+}
+
+void cocos2dChangeOrientation(int m)
+{
+	int w, h;
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if (pDirector == nullptr)
+		return;
+	cocos2d::GLView * pview = pDirector->getOpenGLView();
+	if (pview)
+	{
+		cocos2d::Size size = pview->getFrameSize();
+
+		if (m == 1)
+		{
+			if (size.width < size.height)
+			{
+				w = size.height;
+				h = size.width;
+			}
+			else
+			{
+				w = size.width;
+				h = size.height;
+			}
+		}
+		else
+		{
+			if (size.width > size.height)
+			{
+				w = size.height;
+				h = size.width;
+			}
+			else
+			{
+				w = size.width;
+				h = size.height;
+			}
+		}
+
+		cocos2dChangeOrientationBySize(w,h);
+	}
 }
 
 static bool IsValidParam(int cnChannel,int nRate,int cnBitPerSample)

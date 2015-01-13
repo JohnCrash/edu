@@ -5,5 +5,12 @@
 		"updates":[
 			"errortitlenew"
 		]
+	},
+	"test":{
+		"name":"test",
+		"launch":"test/test",
+		"updates":[
+			"test"
+		]
 	}
 }

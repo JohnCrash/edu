@@ -5,8 +5,10 @@
 #include "../../Classes/Platform.h"
 
 using namespace cocos2d;
+UsingMySpace;
 
 #define  CLASS_NAME "org/cocos2dx/cpp/AppActivity"
+MySpaceBegin
 
 std::string g_Launch;
 std::string g_Cookie;
@@ -14,6 +16,7 @@ std::string g_Userid;
 std::string g_ExternalStorageDirectory;
 std::string g_RecordFile;
 	
+static bool sWaitChangeEnd = false;
 //设置屏幕方向
 void setUIOrientation( int m )
 {
@@ -24,7 +27,25 @@ void setUIOrientation( int m )
 		t.env->CallStaticVoidMethod(t.classID,t.methodID,m);
 		t.env->DeleteLocalRef(t.classID);
 	}
-    cocos2dChangeOrientation( m );
+/*
+	android 特有的问题
+		调用java 的 setUIOrientation，然后方向被改变(android旋转视图)
+		旋转完视图另一个线程调用Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation
+		如果不等调用结束就返回，可能发生线程冲突调用setDesignResolutionSize
+		比如你这么调用
+		setUIOrientation(1)
+		uikits.InitDR{width=960,height=540}
+*/	
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID	
+	sWaitChangeEnd = false;
+	int count = 0;
+	while( !sWaitChangeEnd )
+	{
+		usleep(1);
+		if( count++ > 2000 )
+			break;
+	}
+#endif	
 }
 
 int getUIOrientation()
@@ -42,7 +63,7 @@ int getUIOrientation()
 bool platformOpenURL( const char *url )
 {
 	JniMethodInfo t;
-	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "()V")) 
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "androidOpenURL", "(Ljava/lang/String;)V")) 
 	{
 		jstring jstrurl=t.env->NewStringUTF(url);
 		t.env->CallStaticVoidMethod(t.classID,t.methodID,jstrurl);
@@ -241,6 +262,9 @@ bool VoiceIsPlaying(const char *pszPathName)
     }
 	return nRet ? true : false;
 }
+
+MySpaceEnd
+
 extern "C" {
     JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid) 
 	{
@@ -289,5 +313,11 @@ extern "C" {
 	{
 		networkStateChange(state);
 	}
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation(JNIEnv *env,jobject thiz,int state,int w,int h)
+	{
+		if( state == 1 )
+			cocos2dChangeOrientationBySize(w,h);
+		sWaitChangeEnd = true;
+	}	
 }
 
