@@ -32,7 +32,7 @@ local CAMP_TYPE = lly.const{
 }
 
 --题的类型
-local QUES_TYPE = {
+local QUES_TYPE = lly.const{
 	SINGLE_CHOICE = 1, --单选
 	MULTIPLE_CHOICE = 2, --多选
 	YES_OR_NO = 3, --对错
@@ -41,7 +41,7 @@ local QUES_TYPE = {
 }
 
 --性别 根据person_info
-local SEX_TYPE = {
+local SEX_TYPE = lly.const{
 	GIRL = 2,
 	BOY = 1,
 	MAX = 3,
@@ -77,7 +77,6 @@ local ui = lly.const{
 	IMG_PLYR_CARD = "zhandou/wokp",
 	IMG_PLYR_ANSWER_TOKEN = "zhandou/wod",
 	TXT_PLYR_CARD_LEVEL = "zhandou/wokp/dj",
-	TXT_PLYR_CARD_LEVEL_WROD = "dj",
 	BTN_PLYR_SKILL_1 = "zhandou/jns2",
 	BTN_PLYR_SKILL_2 = "zhandou/jns1",
 	BTN_PLYR_SKILL_3 = "zhandou/jns3",
@@ -594,7 +593,7 @@ function LaBattle:initData(data)
 		if data.card[i] == nil then break end
 		self._arnPlyrCardID[i] = data.card[i].id
 	end
-	self._nEnemyCardID = data.enemy_id
+	self._nEnemyCardID = data.enemy_card_id
 	
 	--体力（目前最大值永远为6）
 	for i = 1, 3 do
@@ -888,8 +887,7 @@ function LaBattle:initUIWithData(data)
 			self._arimgPlyrCard[i] = self._arimgPlyrCard[1]:clone()
 			self._arimgPlyrCard[i]:setPosition(cc.p(-1000, -1000))
 			layBattle:addChild(self._arimgPlyrCard[i])
-			self._artxtPlyrCardLevel[i] = uikits.child(
-				self._arimgPlyrCard[i], CONST.TXT_PLYR_CARD_LEVEL_WROD)
+			self._artxtPlyrCardLevel[i] = self._arimgPlyrCard[i]:getChildByTag(490)
 		end
 
 		--卡牌的等级和图片
@@ -920,14 +918,15 @@ function LaBattle:initUIWithData(data)
 						"", 
 						self._ararnPlyrSkillID[i][j] .. "b.png")
 				else
-					self._ararbtnPlyrSkill[i][j]:setVisible(false) --没有技能则隐藏
+					--没有技能则隐藏，用另一方式隐藏，避免和其他的隐藏冲突
+					self._ararbtnPlyrSkill[i][j]:setPosition(cc.p(-1000, -1000)) 
 				end
 			end
 		end
 
 		--敌人卡牌和其等级
-		self._txtEnemyCardLevel:setString(tostring(data.enemy_lv))
-		moperson_info.load_card_pic(self._imgEnemyCard, data.enemy_id .. "a.png")
+		self._txtEnemyCardLevel:setString(tostring(data.enemy_card_lv))
+		moperson_info.load_card_pic(self._imgEnemyCard, data.enemy_card_id .. "a.png")
 
 		--敌人技能(暂无)
 		for i = 1, 3 do
@@ -2983,7 +2982,6 @@ function LaBattle:win_S()
 	if self._nCurBattleType == BATTLE_TYPE.STORY then
 		self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
 	elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
-		logTable(self._tabCurAnswerResult)
 		self._laResult:setData(self._tabCurAnswerResult.user_wealths_fight)
 	else
 

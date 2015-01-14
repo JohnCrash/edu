@@ -215,6 +215,9 @@ function Readytoboss:show_zhunbei()
 			data.enemy_id = self.bot_info.card_plate_id
 			data.enemy_name = self.bot_info.card_plate_name
 			data.enemy_lv = self.bot_info.card_plate_level
+			
+			data.enemy_card_id = self.bot_info.card_plate_id
+			data.enemy_card_lv = self.bot_info.card_plate_level
 			data.enemy_hp = self.bot_info.card_plate_blood + 
 				self.bot_info.card_plate_blood_added --基础血量加额外血量
 			data.enemy_sex = self.bot_info.gender

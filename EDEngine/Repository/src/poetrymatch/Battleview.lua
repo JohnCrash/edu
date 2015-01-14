@@ -122,12 +122,15 @@ function Battleview:enterLaBattle(result)
 	data.rounds_number = 100 --不计回合数，所以使用最大值
 
 	data.enemy_id = result.card_plate_id
-	data.enemy_name = result.card_plate_name
-	data.enemy_lv = result.card_plate_level
+	data.enemy_name = result.uname
+	data.enemy_lv = result.level
+
+	data.enemy_card_id = result.card_plate_id
+	data.enemy_card_lv = result.card_plate_level
 
 	--对战时候对方血量也是三张牌血量总和
 	data.enemy_hp = result.card_plate_blood
-	data.enemy_sex = result.gender
+	data.enemy_sex = result.card_gender
 
 	if result.skills then
 		data.enemy_skill_id = {

@@ -271,7 +271,7 @@ function LaBattleResultStory:setData(table)
 	self._artxtGet[2]:setString(table.user_gain_items.le_coin)
 	if table.user_gain_items.gain_card_id ~= 0 then
 		moperson_info.load_card_pic(self._imgGet, table.user_gain_items.gain_card_id .. "a.png")
-		self._imgGet:setScale(0.4) --缩小成合适比例
+		--self._imgGet:setScale(0.4) --缩小成合适比例
 		self._artxtGet[3]:setString("获得卡牌")
 	else
 		self._imgGet:setVisible(false)
