@@ -46,6 +46,9 @@ function Noticeview:show_notice(notice_info)
 	local notice_view = uikits.child(self._Noticeview,ui.VIEW_NOTICE)	
 	local notice_view_src = uikits.child(self._Noticeview,ui.VIEW_NOTICE_SRC)	
 	notice_view_src:setVisible(false)
+	if not notice_info then
+		return
+	end
 	local row_num = #notice_info	
 	local size_scroll = notice_view:getInnerContainerSize()
 	local size_notice_view = notice_view:getContentSize()
@@ -81,18 +84,27 @@ function Noticeview:getdatabyurl()
 		if t and t == 200 then
 			if v and type(v) == 'table' then
 				local user_info = person_info.get_user_info()
-				if user_info.has_sign == 1 then
-					user_info.has_sign = 0 
+				if user_info.has_msg == 1 then
+					user_info.has_msg = 0 
 					person_info.set_user_info(user_info)
 				end
 				self:show_notice(v)
 			end
 		else
-			person_info.messagebox(self._Noticeview,person_info.NETWORK_ERROR,function(e)
-				if e == person_info.OK then
+		
+			if t == 603 then
+				person_info.messagebox(self._Noticeview,person_info.DIY_MSG,function(e)
+					if e == person_info.OK then
+						uikits.popScene()
+					end
+				end,'ÌבÊ¾',v)				
+			else
+				person_info.messagebox(self._Noticeview,person_info.NETWORK_ERROR,function(e)
+					if e == person_info.OK then
 
-				end
-			end)
+					end
+				end)
+			end
 		end
 	end)
 end

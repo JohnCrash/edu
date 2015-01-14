@@ -211,7 +211,6 @@ function Mallview:show_card_info(id)
 					send_data.v2 = 1
 					person_info.post_data_by_new_form(self._Mallview,'buy_products',send_data,function(t,v)
 						if t and t == 200 then
-							
 							local send_data = {}
 							send_data.v1 = sender.cur_info.card_plate_id
 							person_info.post_data_by_new_form(self._Mallview,'load_user_card_plate',send_data,function(t,v)
@@ -221,7 +220,19 @@ function Mallview:show_card_info(id)
 										silver_num = silver_num - sender.cur_info.price
 										person_info.set_user_silver(silver_num)
 										self:show_silver()
-										uikits.popScene()
+										local send_data = {}
+										local battle_list = person_info.get_battle_list()
+										send_data.v1 = battle_list
+										person_info.post_data_by_new_form(self._Bagview,'set_main_cardplate',send_data,function(t,v)
+												if t and t == 200 then
+													uikits.popScene()
+												else
+													person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+														if e == person_info.OK then
+														end
+													end)
+												end		
+											end)	
 									end
 								else
 									person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
@@ -366,7 +377,7 @@ function Mallview:show_all_card()
 						end)	
 					else
 						local send_data = {}
-						send_data.v1 = sender.cur_info.card_plate_id
+						send_data.v1 = sender.cur_info.pro_id
 						send_data.v2 = 1
 						person_info.post_data_by_new_form(self._Mallview,'buy_products',send_data,function(t,v)
 							if t and t == 200 then
@@ -380,7 +391,19 @@ function Mallview:show_all_card()
 											silver_num = silver_num - sender.cur_info.price
 											person_info.set_user_silver(silver_num)
 											self:show_silver()
-											uikits.popScene()
+											local send_data = {}
+											local battle_list = person_info.get_battle_list()
+											send_data.v1 = battle_list
+											person_info.post_data_by_new_form(self._Bagview,'set_main_cardplate',send_data,function(t,v)
+													if t and t == 200 then
+														uikits.popScene()
+													else
+														person_info.messagebox(self._Bagview,person_info.NETWORK_ERROR,function(e)
+															if e == person_info.OK then
+															end
+														end)
+													end		
+												end)	
 										end
 									else
 										person_info.messagebox(self._Mallview,person_info.NETWORK_ERROR,function(e)
