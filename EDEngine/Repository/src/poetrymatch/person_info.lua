@@ -737,8 +737,8 @@ local function messagebox(parent,flag,func,txt_title,txt_content)
 end
 
 
---local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
-local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
+local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
+--local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
 
 local function post_data_by_new_form(parent,module_id,post_data,func,is_not_loading)
 	local send_data = {}

@@ -159,6 +159,7 @@ end
 
 --获取数据
 function LaBattleResultFight:setData(table)
+	lly.logTable(table)
 	self._atlasRank:setData(table.ranking)
 end
 

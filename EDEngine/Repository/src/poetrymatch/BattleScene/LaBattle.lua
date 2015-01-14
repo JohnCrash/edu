@@ -17,7 +17,7 @@ local moSkill = require "poetrymatch/BattleScene/SkillList"
 lly.finalizeCurrentEnvironment()
 
 --战斗类型
-local BATTLE_TYPE = {
+local BATTLE_TYPE = lly.const{
 	STORY = 1, --故事模式（闯关）
 	FIGHT = 2, --对战模式
 	CHALLENGE = 3, --挑战模式（擂台）
@@ -25,7 +25,7 @@ local BATTLE_TYPE = {
 }
 
 --阵营类型
-local CAMP_TYPE = {
+local CAMP_TYPE = lly.const{
 	PLAYER = 1,
 	ENEMY = 2,
 	MAX = 3,
@@ -2525,6 +2525,7 @@ function LaBattle:prepare_S()
 		end
 	else --第二次发现没体力则直接进行下面敌人的发问
 		self._bCurStateIsEnding = true
+		self._bNextStateDataHasLoad = true
 	end
 end
 
@@ -2981,7 +2982,8 @@ function LaBattle:win_S()
 	--传输结果
 	if self._nCurBattleType == BATTLE_TYPE.STORY then
 		self._laResult:setData(self._tabCurAnswerResult.user_wealths_story)
-	elseif self._nCurBattleType == BATTLE_TYPE.FIHGT then
+	elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
+		logTable(self._tabCurAnswerResult)
 		self._laResult:setData(self._tabCurAnswerResult.user_wealths_fight)
 	else
 
