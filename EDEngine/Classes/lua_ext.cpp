@@ -662,6 +662,15 @@ int cc_shock(lua_State *L)
 	return 0;
 }
 
+int cc_isdebug(lua_State *L)
+{
+#ifdef _DEBUG
+	lua_pushboolean(L,true);
+#else
+	lua_pushnil(L);
+#endif
+	return 1;
+}
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -691,6 +700,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_registerNetworkStateListener", cc_registerNetworkStateListener);
 	lua_register(L, "cc_unregisterNetworkStateListener", cc_unregisterNetworkStateListener);
 	lua_register(L, "cc_shock", cc_shock);
+	lua_register(L, "cc_isdebug", cc_isdebug);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
