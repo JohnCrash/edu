@@ -201,11 +201,53 @@ local function remove_user_le_coin(coin_num)
 end
 
 local function add_card_to_bag(card_info)
+	local ret = 0
 	if card_info then
-		g_person_bag.cards_table[#g_person_bag.cards_table+1] = card_info
-		return true
+		ret = 1
+		if #g_person_battle_cards < 3 then
+			g_person_battle_cards[#g_person_battle_cards+1] = card_info.card_plate_id
+			card_info.is_main_card_plate = 1
+			ret = 2
+		end
+		local cur_card_info = {}
+		cur_card_info.id = card_info.card_plate_id
+		cur_card_info.name = card_info.card_plate_name
+		cur_card_info.in_battle_list = card_info.is_main_card_plate  
+		cur_card_info.lvl = card_info.card_plate_level  
+		cur_card_info.cur_exp = card_info.card_plate_exper_curr
+		cur_card_info.max_exp = card_info.card_plate_exper_max
+		cur_card_info.pinzhi = card_info.card_material
+		cur_card_info.ap = card_info.card_plate_attack.basic_val
+		cur_card_info.ap_ex = card_info.card_plate_attack.added_val
+		cur_card_info.ap_ex_max = card_info.card_plate_attack.can_be_val
+		cur_card_info.ap_pay = card_info.attack_coin.coin_val
+		cur_card_info.sp = card_info.card_plate_magic.basic_val
+		cur_card_info.sp_ex = card_info.card_plate_magic.added_val
+		cur_card_info.sp_ex_max = card_info.card_plate_magic.can_be_val
+		cur_card_info.sp_pay = card_info.magic_coin.coin_val
+		cur_card_info.hp = card_info.card_plate_blood.basic_val
+		cur_card_info.hp_ex = card_info.card_plate_blood.added_val
+		cur_card_info.hp_ex_max = card_info.card_plate_blood.can_be_val
+		cur_card_info.hp_pay = card_info.blood_coin.coin_val
+		cur_card_info.mp = card_info.card_plate_wit.basic_val
+		cur_card_info.mp_ex = card_info.card_plate_wit.added_val
+		cur_card_info.mp_ex_max = card_info.card_plate_wit.can_be_val
+		cur_card_info.mp_pay = card_info.wit_coin.coin_val
+		cur_card_info.pp = card_info.card_plate_pomes.basic_val
+		cur_card_info.pp_ex = card_info.card_plate_pomes.added_val
+		cur_card_info.pp_ex_max = card_info.card_plate_pomes.can_be_val
+		cur_card_info.pp_pay = card_info.pomes_coin.coin_val	
+		cur_card_info.skill_reset_pay = card_info.relearn_coin.coin_val
+		cur_card_info.gender = card_info.gender
+		cur_card_info.skill_max = card_info.skill_max
+		cur_card_info.skills = {}
+		if card_info.skills then
+			cur_card_info.skills = card_info.skills	
+		end			
+		g_person_bag.cards_table[#g_person_bag.cards_table+1] = cur_card_info
+		return ret
 	else
-		return false
+		return ret
 	end
 end
 
@@ -271,7 +313,7 @@ local function update_card_in_bag_by_id(id,tag,content)
 end
 
 local function del_card_in_bag_by_id(id)
-	local card_info
+	local card_info = {}
 	if id then
 		for i,v in ipairs(g_person_bag.cards_table) do
 			if v.id ~= id then
@@ -582,7 +624,8 @@ local LEARN_SKILL = 10
 local RESET_SKILL = 11
 local BATTLE_GIVEUP = 12
 local BUY_SILVER = 13
-local DIY_MSG = 14
+local DEF_MSG = 14
+local DIY_MSG = 15
 
 local flag_dictionary = {
 {title = '啊！上不了网了',content='少侠，你的网络突然中断了，请检查一下网络，然后重试一下！',button_type = 3,}, --网络中断
@@ -694,8 +737,27 @@ local function messagebox(parent,flag,func,txt_title,txt_content)
 		else
 			content:setString(flag_dictionary[#flag_dictionary].content)
 		end
-		but_confirm:setVisible(true)
-		but_giveup:setVisible(true)
+		but_ok:setVisible(true)
+		s:setAnchorPoint{x=0.5,y=0.5}
+		local size
+		if parent.getContentSize then
+			size = parent:getContentSize()
+		else
+			size = uikits.getDR()
+		end
+		s:setPosition{x=size.width/2,y=size.height/2}
+		local viewParent=parent:getParent()
+		viewParent:addChild( s,9999 )	
+		parent:setEnabled(false)
+		parent:setTouchEnabled(false)
+		but_confirm.parent = parent
+		but_giveup.parent = parent
+		but_know.parent = parent
+		but_ok.parent = parent
+		but_retry.parent = parent
+		but_good.parent = parent
+		s:setEnabled(true)
+		s:setTouchEnabled(true)		
 		return
 	else
 		content:setString(flag_dictionary[flag].content)
@@ -1172,4 +1234,5 @@ return {
 	BATTLE_GIVEUP = BATTLE_GIVEUP,
 	BUY_SILVER = BUY_SILVER,
 	DIY_MSG = DIY_MSG,
+	DEF_MSG = DEF_MSG,
 }

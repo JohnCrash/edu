@@ -287,11 +287,6 @@ function Readytoboss:init()
 	self._view_gushi:setVisible(false)
 	self._view_zhunbei:setVisible(false)
 	self:init_gui()
---	self:getdatabyurl()
---	local loadbox = Readytobossbox.open(self)
---	local scene_next = WrongSubjectList.create()								
---	cc.Director:getInstance():replaceScene(scene_next)	
-
 end
 
 function Readytoboss:release()

@@ -149,6 +149,15 @@ end
 local card_space = 1
 function Mainview:show_cards()
 	local card_view_src = uikits.child(self._Mainview,ui.CARD_VIEW)
+	for i=1,3 do
+--[[		local card_temp = uikits.child(self._Mainview,10000+i)
+		if card_temp then
+			card_temp:removeFromParent()
+		else
+			break
+		end--]]
+		self._Mainview:removeChildByTag(10000+i)
+	end
 	card_view_src:setVisible(false)
 	local all_battle_list = person_info.get_all_card_in_battle()
 	for i=1,#all_battle_list do
@@ -170,7 +179,7 @@ function Mainview:show_cards()
 				local scene_next = bagview.create(sender.id)
 				uikits.pushScene(scene_next)	
 			end,"click")	
-		self._Mainview:addChild(cur_card)
+		self._Mainview:addChild(cur_card,1,10000+i)
 	end
 end
 
