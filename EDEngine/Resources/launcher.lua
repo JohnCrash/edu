@@ -110,7 +110,7 @@ if cookie and type(cookie)=='string' and string.len(cookie)>1 then
 	login.set_cookie( cookie )
 	kits.config("cookie",cookie)
 else
-	--app = 'amouse'
+	--app = 'test'
 	--[[
 	local ck = kits.config("cookie","get")
 	if ck then

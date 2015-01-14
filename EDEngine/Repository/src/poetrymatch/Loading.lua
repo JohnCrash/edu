@@ -103,7 +103,7 @@ function Loading:update_card_info()
 				cur_card_info.skill_max = v[i].skill_max
 				cur_card_info.skills = {}
 				if v[i].skills then
-					cur_card_info.skils = v[i].skills	
+					cur_card_info.skills = v[i].skills	
 				end			
 				if cur_card_info.in_battle_list == 1 then
 					all_battle_list[#all_battle_list+1] = cur_card_info.id
