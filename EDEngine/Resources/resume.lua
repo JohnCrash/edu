@@ -32,7 +32,7 @@ local function write_file( name,buf )
 	return true
   else
      --local file error?
-     print('Can not write file '..filename)
+     print('ERROR Can not write file '..filename)
 	 return false
   end
 end
@@ -46,7 +46,11 @@ end
 
 local function save_resume_table(t)
 	local result = json.encode(t)
-	write_file("resume.json",result)
+	if t then
+		write_file("resume.json",result)
+	else
+		print("ERROR save_resume_table t = nil")
+	end
 end
 
 local function isok()
@@ -79,7 +83,7 @@ local function del_file( name )
   if os.remove then
     return os.remove(filename)
   else
-    my_log('not found os.remove function')
+    print(' ERROR not found os.remove function')
   end
 end
 
