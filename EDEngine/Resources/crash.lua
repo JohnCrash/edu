@@ -36,6 +36,9 @@ local function report_bug(t)
 end
 
 local function report_export( errmsg,stack_level )
+	if cc_isdebug and cc_isdebug() then
+		return
+	end
 	local t = debug.getinfo(stack_level or 2,'Sl')
 	if t and t.source and t.currentline and last_source~=t.source and last_line~=t.currentline then
 		local bugs = {}

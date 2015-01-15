@@ -148,7 +148,13 @@ function WorkList:get_page( i,func )
 	if login.get_uid_type() == login.STUDENT then
 		url = worklist_url..'?p='..i
 	else
-		url = worklist_url..'?p='..i..'&uid='..login.get_subuid()
+		local subuid = login.get_subuid()
+		if subuid and i then
+			url = worklist_url..'?p='..i..'&uid='..subuid
+		else
+			url = worklist_url..'?p='..i --?
+			kits.log("error: WorkList:get_page subuid = nil")
+		end
 		--result = kits.read_cache(cache.get_name(worklist_url..'?uid='.._G.hw_cur_child_id))
 	end
 	--先尝试下载

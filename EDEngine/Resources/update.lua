@@ -466,19 +466,30 @@ function UpdateProgram:update()
 				self:ErrorAndExit('没有成功更新('..text..")",2)
 			end		
 		else
-			local b,e = update_one_by_one(self._oplist[self._count])
-			if not b then
-				local t = self._oplist[self._count]
-				if e==1 then --本地问题
-					self:ErrorAndExit('文件操作失败:'..tostring(t.download))
-				elseif e==2 then --网络问题
-					self:ErrorAndExit('下载失败:'..tostring(t.download))
-				elseif e==3 then --算法问题
-					self:ErrorAndExit('跟新出现错误')
-				else
-					self:ErrorAndExit('未知错误')
+			self._count = self._count - 1 --抵消上面的+1
+			for i=0,10 do --这样做主要是为了加快速度
+				self._count = self._count + 1
+				if self._count > self._maxcount then
+					return
 				end
-			end			
+				local b,e = update_one_by_one(self._oplist[self._count])
+				if not b then
+					local t = self._oplist[self._count]
+					if e==1 then --本地问题
+						self:ErrorAndExit('文件操作失败:'..tostring(t.download))
+						return
+					elseif e==2 then --网络问题
+						self:ErrorAndExit('下载失败:'..tostring(t.download))
+						return
+					elseif e==3 then --算法问题
+						self:ErrorAndExit('跟新出现错误')
+						return
+					else
+						self:ErrorAndExit('未知错误')
+						return
+					end
+				end
+			end
 		end
 	end
 end
