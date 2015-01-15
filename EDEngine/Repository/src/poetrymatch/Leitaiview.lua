@@ -264,7 +264,9 @@ function Leitaiview:goto_battle()
 				silver_num = silver_num - self.lei_info.consume_num
 				person_info.set_user_silver(silver_num)
 				---[[luleyan!!!
+				local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 
+				lly.logTable(v)
 				--]]
 			else
 				person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)

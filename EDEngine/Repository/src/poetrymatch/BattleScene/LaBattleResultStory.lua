@@ -293,7 +293,19 @@ function LaBattleResultStory:setData(table)
 				lly.logTable(result)
 
 				if ErrorCode == 200 then
-					moperson_info.add_card_to_bag(result)
+					local re = moperson_info.add_card_to_bag(result)
+					if re == 2 then
+						local send_data = {}
+						local battle_list = person_info.get_battle_list()
+						send_data.v1 = battle_list
+						person_info.post_data_by_new_form(
+							self._wiRoot,
+							'set_main_cardplate',
+							send_data,
+							function(t,v)
+								if not t or t ~= 200 then end	
+							end)
+					end
 				end
 			end,
 			true --true为不进行转圈（loading动画）
