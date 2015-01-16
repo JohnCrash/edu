@@ -263,7 +263,93 @@ function Leitaiview:goto_battle()
 			if t and t == 200 then
 				silver_num = silver_num - self.lei_info.consume_num
 				person_info.set_user_silver(silver_num)
-				
+				---[[luleyan!!!
+				local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+
+				lly.logTable(v)
+				lly.logTable(self.lei_info)
+
+				local userInfo = person_info.get_user_info()
+				local cardTable = person_info.get_all_card_in_battle() 
+
+				local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+
+				--构造初始化信息
+				local data = {}
+
+				data.battle_type = moLaBattle.BATTLE_TYPE.CHALLENGE --战斗类型：擂台
+
+				--个人信息
+				data.plyr_id = userInfo.id
+				data.plyr_name = userInfo.name
+				data.plyr_sex = userInfo.sex 
+
+				data.plyr_lv = person_info.get_user_lvl_info().lvl
+
+				--玩家卡牌信息
+				data.card = {}
+				for i = 1, 3 do
+					if cardTable[i] ~= nil then
+						data.card[i] = {}
+						data.card[i].id = cardTable[i].id
+						data.card[i].lv = cardTable[i].lvl
+						data.card[i].name = cardTable[i].name
+						data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex --基础血量加额外血量
+						data.card[i].sp = cardTable[i].sp --神力
+						data.card[i].skill_id = {}
+						for j = 1, 3 do
+							if cardTable[i].skills[j] ~= nil then
+								data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
+							end
+						end
+					end
+				end
+
+				--敌人
+				data.stageID = self.lei_info.defense_id --对战的场景id就是守关玩家的id
+				data.rounds_number = 100 --不计回合数，所以使用最大值
+
+				data.enemy_id = self.lei_info.card_plate_id
+				data.enemy_name = self.lei_info.card_plate_name
+				data.enemy_lv = self.lei_info.card_plate_level
+
+				data.enemy_card_id = self.lei_info.card_plate_id
+				data.enemy_card_lv = self.lei_info.card_plate_level
+
+				--擂台的血量也是基础量加上增加量
+				data.enemy_hp = 
+					self.lei_info.card_plate_blood.basic_val + 
+					self.lei_info.card_plate_blood.added_val
+
+				data.enemy_sex = self.lei_info.gender
+
+				if self.lei_info.skills then
+					data.enemy_skill_id = {
+						self.lei_info.skills[1],
+						self.lei_info.skills[2],
+						self.lei_info.skills[3]
+					}
+				else
+					data.enemy_skill_id = {nil, nil, nil}
+				end
+
+				--退出
+				data.exitFunction = function ()
+					lly.logCurLocAnd("exit to leitaiview")
+
+					--转景转回本场景
+					local moLeitaiview = require "poetrymatch/Leitaiview"
+					cc.Director:getInstance():replaceScene(moLeitaiview.create())
+				end
+
+				--进入
+				local sc = cc.Scene:create()
+
+				local laBattle = moLaBattle.Class:create(data)
+				sc:addChild(laBattle)
+				cc.Director:getInstance():replaceScene(sc)
+
+				--]]
 			else
 				person_info.messagebox(self._Leitaiview,person_info.NETWORK_ERROR,function(e)
 					if e == person_info.OK then
