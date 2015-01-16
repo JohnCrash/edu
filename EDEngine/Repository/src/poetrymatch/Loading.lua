@@ -5,7 +5,7 @@ local login = require "login"
 local cache = require "cache"
 local Mainview = require "poetrymatch/Mainview"
 local Guideview = require "poetrymatch/Guideview"
-local person_info = require "poetrymatch/Person_info"
+local person_info = require "poetrymatch/person_info"
 
 local Loading = class("Loading")
 Loading.__index = Loading
