@@ -3,7 +3,7 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local person_info = require "poetrymatch/Person_info"
+local person_info = require "poetrymatch/person_info"
 local battlereward = require "poetrymatch/Battlereward"
 
 
@@ -77,6 +77,89 @@ end
 local schedulerEntry
 local scheduler = cc.Director:getInstance():getScheduler()
 
+function Battleview:enterLaBattle(result)
+	local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+
+	lly.logTable(result)
+	local userInfo = person_info.get_user_info()
+	local cardTable = person_info.get_all_card_in_battle() --å¡ç‰Œä¿¡æ¯ç¼“å­˜
+
+	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+
+	--构造初始化信息
+	local data = {}
+
+	data.battle_type = moLaBattle.BATTLE_TYPE.FIGHT --å¯¹æˆ˜æ¨¡å¼å…¥å£--
+
+	--çŽ©å®¶ä¿¡æ¯
+	data.plyr_id = userInfo.id
+	data.plyr_name = userInfo.name
+	data.plyr_sex = userInfo.sex --ç”¨äºŽé€‰æ‹©çŽ©å®¶çš„å¤´åƒæ—¶
+
+	data.plyr_lv = person_info.get_user_lvl_info().lvl
+
+	--çŽ©å®¶å¡ç‰Œä¿¡æ¯
+	data.card = {}
+	for i = 1, 3 do
+		if cardTable[i] ~= nil then
+			data.card[i] = {}
+			data.card[i].id = cardTable[i].id
+			data.card[i].lv = cardTable[i].lvl
+			data.card[i].name = cardTable[i].name
+			data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex--åŸºç¡€è¡€é‡åŠ é¢å¤–è¡€é‡
+			data.card[i].sp = cardTable[i].sp --ç¥žåŠ›
+			data.card[i].skill_id = {}
+			for j = 1, 3 do
+				if cardTable[i].skills[j] ~= nil then
+					data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
+				end
+			end
+		end
+	end
+
+	--敌人
+	data.stageID = result.user_id --对战的场景id就是守关玩家的id
+	data.rounds_number = 100 --不计回合数，所以使用最大值
+
+	data.enemy_id = result.card_plate_id
+	data.enemy_name = result.uname
+	data.enemy_lv = result.level
+
+	data.enemy_card_id = result.card_plate_id
+	data.enemy_card_lv = result.card_plate_level
+
+	--对战时候对方血量也是三张牌血量总和
+	data.enemy_hp = result.card_plate_blood
+	data.enemy_sex = result.card_gender
+
+	if result.skills then
+		data.enemy_skill_id = {
+			result.skills[1],
+			result.skills[2],
+			result.skills[3]
+		}
+	else
+		data.enemy_skill_id = {nil, nil, nil}
+	end
+
+	--退出
+	data.exitFunction = function ()
+		lly.logCurLocAnd("exit to battleview")
+
+		--转景转回本场景
+		local moBattleview = require "poetrymatch/Battleview"
+		cc.Director:getInstance():replaceScene(moBattleview.create())
+	end
+
+	--进入
+	local sc = cc.Scene:create()
+
+	local laBattle = moLaBattle.Class:create(data)
+	sc:addChild(laBattle)
+	cc.Director:getInstance():replaceScene(sc)
+
+end
+
 function Battleview:show_search_res()	
 	local send_data = {}
 	if self.bot_id then
@@ -96,8 +179,9 @@ function Battleview:show_search_res()
 				local txt_bot_rank1 = uikits.child(self._Battleview,ui.TXT_BOT_RANK1)
 				local txt_bot_rank2 = uikits.child(self._Battleview,ui.TXT_BOT_RANK2)
 				local txt_bot_rank3 = uikits.child(self._Battleview,ui.TXT_BOT_RANK3)
+
 				self.bot_id = {}
-				local function goto_battle(id) --����ս��
+				local function goto_battle(id) --½øÈëÕ½¶·
 					if id then
 						local send_data = {}
 						if self.bot_id then
@@ -106,8 +190,11 @@ function Battleview:show_search_res()
 						send_data.v2 = id
 						person_info.post_data_by_new_form(self._Battleview,'select_opponent_confirm',send_data,function(t,v)
 							if t and t == 200 then
-								if v and type(v) == 'table' and v.v1 then
-								print('11111111111')
+								if v and type(v) == 'table' then
+									---[[luleyan!!!--------------------------------------------------------------------------
+									self:enterLaBattle(v)								
+									
+									--]]------------------------------------------------------------------------------------
 								end
 							else
 								person_info.messagebox(self._Battleview,person_info.NETWORK_ERROR,function(e)

@@ -3,7 +3,7 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local person_info = require "poetrymatch/Person_info"
+local person_info = require "poetrymatch/person_info"
 
 local Readytoboss = class("Readytoboss")
 Readytoboss.__index = Readytoboss
@@ -43,12 +43,13 @@ local function loadArmature( name )
 		ccs.ArmatureDataManager:getInstance():addArmatureFileInfo(name)	
 end
 
-function create(bot_info,is_has_star,country_id)
+function create(bot_info,is_has_star,country_id, country_name)
 	local scene = cc.Scene:create()				
 	local cur_layer = uikits.extend(cc.Layer:create(),Readytoboss)		
 	cur_layer.bot_info = bot_info
 	cur_layer.is_has_star = is_has_star
 	cur_layer.country_id = country_id
+	cur_layer.country_name = country_name
 	scene:addChild(cur_layer)
 	
 	local function onNodeEvent(event)
@@ -157,8 +158,103 @@ function Readytoboss:show_zhunbei()
 		choose_time = choose_time -1
 		if schedulerEntry and choose_time < 0 then
 			scheduler:unscheduleScriptEntry(schedulerEntry)
-			schedulerEntry = nil			
+			schedulerEntry = nil
+
+			---[[ by luleyan! -------------------------
+			--local ti = os.clock()
+			local sc = cc.Scene:create()
+			local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+
+			local cardTable = person_info.get_all_card_in_battle() --卡牌信息缓存
+
+			local lly = require "poetrymatch/BattleScene/llyLuaBase2"
+			--lly.logTable(cardTable)
+			lly.logTable(self.bot_info)
+
+			--传入战斗层的数据包
+			local data = {}
+
+			---[[数据
+			data.battle_type = moLaBattle.BATTLE_TYPE.STORY --闯关模式入口--
+
+			--获得星星条件
+			data.gainStar1 = self.bot_info.star1_desc
+			data.gainStar2 = self.bot_info.star2_desc
+			data.gainStar3 = self.bot_info.star3_desc
+
+			--玩家信息
+			data.plyr_id = self.user_info.id
+			data.plyr_name = self.user_info.name
+			data.plyr_sex = self.user_info.sex --用于选择玩家的头像时
+
+			data.plyr_lv = person_info.get_user_lvl_info().lvl
+
+			--玩家卡牌信息
+			data.card = {}
+			for i = 1, 3 do
+				if cardTable[i] ~= nil then
+					data.card[i] = {}
+					data.card[i].id = cardTable[i].id
+					data.card[i].lv = cardTable[i].lvl
+					data.card[i].name = cardTable[i].name
+					data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex --基础血量加额外血量
+					data.card[i].sp = cardTable[i].sp --神力
+					data.card[i].skill_id = {}
+					for j = 1, 3 do
+						if cardTable[i].skills[j] ~= nil then
+							data.card[i].skill_id[j] = cardTable[i].skills[j].skill_id
+						end
+					end
+				end
+			end
 			
+			--敌人和关卡信息
+			data.stageID = self.country_id --关卡id
+			data.rounds_number = self.bot_info.need_round_num --回合数
+
+			data.enemy_id = self.bot_info.card_plate_id
+			data.enemy_name = self.bot_info.card_plate_name
+			data.enemy_lv = self.bot_info.card_plate_level
+			
+			data.enemy_card_id = self.bot_info.card_plate_id
+			data.enemy_card_lv = self.bot_info.card_plate_level
+			data.enemy_hp = self.bot_info.card_plate_blood + 
+				self.bot_info.card_plate_blood_added --基础血量加额外血量
+			data.enemy_sex = self.bot_info.gender
+
+			if self.bot_info.skills then
+				data.enemy_skill_id = {
+					self.bot_info.skills[1],
+					self.bot_info.skills[2],
+					self.bot_info.skills[3]
+				}
+			else
+				data.enemy_skill_id = {nil, nil, nil}
+			end
+
+			--退出
+			local countryName = self.country_name
+			local countryID = self.country_id
+			data.exitFunction = function ()
+				lly.logCurLocAnd("exit to bossview")
+
+				--转景
+				local moBossview = require "poetrymatch/Bossview"
+
+				cc.Director:getInstance():replaceScene(
+					moBossview.create(countryName, countryID))
+
+			end
+
+			--]]
+
+			--生成战斗层场景
+			local laBattle = moLaBattle.Class:create(data)
+			sc:addChild(laBattle)
+			cc.Director:getInstance():replaceScene(sc)
+			--print(string.format("time is %f", os.clock() - ti))
+			--]]---------------------------------------
+
 		end
 	end	
 		
@@ -174,6 +270,7 @@ function Readytoboss:init_gui()
 	else
 		self:show_zhunbei()
 	end
+	self:show_zhunbei()
 end
 
 function Readytoboss:init()	

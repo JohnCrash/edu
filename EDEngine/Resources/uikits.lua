@@ -47,10 +47,7 @@ end
 local function registerMouseEvent()
 	local platform = CCApplication:getInstance():getTargetPlatform()
 	if not listener_mouse and platform == kTargetWindows then
-		listener_mouse = cc.EventListenerMouse:create(1)
-		if not self._listener_mouse then
-			self._listener_mouse = cc.EventListenerMouse:create()
-		end		
+		listener_mouse = cc.EventListenerMouse:create()
 		if listener_mouse then
 			listener_mouse:registerScriptHandler(mouseWhellScroll,cc.Handler.EVENT_MOUSE_SCROLL)	
 			local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
@@ -143,8 +140,17 @@ local function isSoundPlaying( id )
 	--cocos2d-x not support isPlaying?
 end
 
+local function stopMusic()
+	AudioEngine.stopMusic()
+end
+
+local function stopAllEffects()
+	AudioEngine.stopAllEffects()
+end
+
 local function stopAllSound()
 	AudioEngine.stopAllEffects()
+	AudioEngine.stopMusic()
 	cc_stopVoice()
 end
 
@@ -1964,6 +1970,8 @@ return {
 	pauseBGSound = pauseBGSound,
 	resumeBGSound = resumeBGSound,
 	voiceLength = voiceLength,
+	stopMusic = stopMusic,
+	stopAllEffects = stopAllEffects,
 	stopAllSound = stopAllSound,
 	log_caller = log_caller,
 	FACTOR_3_4 = FACTOR_3_4,

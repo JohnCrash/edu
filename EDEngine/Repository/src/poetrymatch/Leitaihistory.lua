@@ -3,7 +3,7 @@ local kits = require "kits"
 local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
-local person_info = require "poetrymatch/Person_info"
+local person_info = require "poetrymatch/person_info"
 
 local Leitaihistory = class("Leitaihistory")
 Leitaihistory.__index = Leitaihistory

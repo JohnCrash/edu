@@ -12,6 +12,7 @@ local ui = {
 
 ----------------------------------
 
+
 -----------------------------------
 
 local ljshell = require "ljshell"
@@ -195,15 +196,12 @@ function AppEntry:init()
 				return selstudent.create()
 			end}
 		end}
-	local pbutton = uikits.button{caption='家长作业本',x=64*scale,y = 64*scale + 7*item_h,
+	local pbutton = uikits.button{caption='卡牌',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='parenthw',updates={'poetrymatch','luacore'},
-				run=function()
 				login.set_selector(3) 
 				local selstudent1 = require "poetrymatch/Loading"
-				return selstudent1.create()
-			end}
+				uikits.pushScene( selstudent1.create() )
 		end}
 	local g_last
 	local record =  uikits.button{caption='TEST',x=264*scale,y = 64*scale + 4*item_h,
@@ -288,15 +286,17 @@ function AppEntry:init()
 		end}	
 
 	--[[-----------------------------------
-	local moLaStatisticsStudent = require "homework/lly/LaStatisticsStudent"
-	print("2hahahahah")
+	local ti = os.clock()
+	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
+	local laBattle = moLaBattle.Class:create()
+	bg:addChild(laBattle, 10)
+	print(string.format("time is %f", os.clock() - ti))
 
-	local layStats = moLaStatisticsStudent.Class:create()
-	bg:addChild(layStats, 100)
 
-	layStats:enter()
+
 
 	----------------]]
+
 
 	bg:addChild(resetwindow)
 	bg:addChild(playsound)
