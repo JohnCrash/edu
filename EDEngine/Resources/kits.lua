@@ -251,7 +251,7 @@ local function write_file( name,buf )
 	return true
   else
      --local file error?
-     my_log('Can not write file '..filename)
+     --my_log('Can not write file '..filename)
 	 return false
   end
 end
