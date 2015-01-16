@@ -4,7 +4,7 @@ local json = require "json-c"
 local login = require "login"
 local cache = require "cache"
 local Mainview = require "poetrymatch/Mainview"
-local person_info = require "poetrymatch/Person_info"
+local person_info = require "poetrymatch/person_info"
 
 local Guideview = class("Guideview")
 Guideview.__index = Guideview
