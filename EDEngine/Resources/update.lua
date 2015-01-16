@@ -298,11 +298,17 @@ function UpdateProgram:update_directory(dir)
 	end
 end
 
+local local_not_exist
 function UpdateProgram:NErrorCheckLocal(dir)
 	local src_local = local_dir..'src/'..dir..'/filelist.json' 
 	if not kits.exist_file( src_local ) then --看看有没有本地版本
+		local_not_exist = true
 		kits.log("INFO : not exists "..src_local)
-		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
+		if cc_getNetworkState() == 0 then --没有网络
+			self:ErrorAndExit('网络连接错误，请检查您的网络连接再试!'..tostring(dir))
+		else
+			self:ErrorAndExit('网络或者服务器异常,请稍后再试!'..tostring(dir))
+		end
 	end
 end
 
@@ -356,7 +362,7 @@ function UpdateProgram:check_directory(dir,n)
 		else
 			kits.log('ERROR check_directory request '..tostring(res_url)..' failed')
 			--网络失败，本机有没有
-			if n==2 then
+			if n==2 then				
 				self:NErrorCheckLocal(dir)
 			end
 			return false,1 --下传失败,本次不跟新
@@ -368,7 +374,7 @@ function UpdateProgram:check_update(t)
 	t.need_updates={}
 	kits.log("INFO check "..tostring(update_server))
 	for i,v in pairs(t.updates) do
-		local b,e = self:check_directory(v,1)
+		local b,e = self:check_directory(v,2)
 		if e then --如果网络错误不在等待，直接不跟新
 			--尝试使用外网的
 			outer = true
@@ -417,6 +423,8 @@ function UpdateProgram:update()
 		--不需要跟新直接启动
 		if not self:check_update(self._args) then
 			resume.clearflag("update") --update isok
+			if local_not_exist then return end --如果本地不存在
+			
 			local b,scene = pcall(self._args.run)
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
@@ -568,7 +576,7 @@ function UpdateProgram:init()
 			end)
 		uikits.event(self._try,function(sender)
 				self._exit:setVisible(false)
-				self._exit:setVisible(false)
+				self._try:setVisible(false)
 				self._mode = nil
 				self._text:setText("")
 			end)	
