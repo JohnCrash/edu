@@ -59,6 +59,7 @@ local ui = {
 	TXT_CARD_INFO_SP_EX = 'leb',
 	BUTTON_CARD_INFO_SKILL = 's1',
 	BUTTON_CARD_INFO_SKILL_EMPTY = 'jn0',
+	PIC_CARD_INFO_SKILL_RESET = 'yb5',
 	BUTTON_CARD_INFO_SKILL_RESET = 'chongxjn',
 	TXT_CARD_INFO_SKILL_RESET = 'qian6',
 	
@@ -1017,6 +1018,12 @@ function Bagview:show_card_info(id)
 		but_skill:setVisible(true)
 		self.temp_view:addChild(but_skill)	
 	end
+	if card_info.skill_max == 0 then
+		pic_card_info_skill_reset = uikits.child(self.temp_view,ui.PIC_CARD_INFO_SKILL_RESET)
+		pic_card_info_skill_reset:setVisible(false)
+		but_card_info_skill_reset:setVisible(false)
+		txt_card_info_skill_reset:setVisible(false)
+	end
 	self.but_quit.func = self.show_bag_view
 end
 
@@ -1065,7 +1072,7 @@ function Bagview:show_bag_view()
 			self.temp_view:addChild(cur_card)
 			local pic_card_bag = uikits.child(cur_card,ui.PIC_CARD_BAG)
 			local txt_card_bag_lvl = uikits.child(cur_card,ui.TXT_CARD_BAG_LVL)
-			local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
+			--local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
 			if cur_line == 5 then
 				cur_line = 1
 				cur_row = cur_row + 1 
@@ -1079,7 +1086,7 @@ function Bagview:show_bag_view()
 			if i>#all_card_info then
 				pic_card_bag:setVisible(false)
 				txt_card_bag_lvl:setVisible(false)
-				pic_card_bag_uplvl:setVisible(false)
+			--	pic_card_bag_uplvl:setVisible(false)
 			end		
 			if i == max_store_num+#battle_cards then
 				cur_pos_x = pos_card_x_start
@@ -1098,7 +1105,7 @@ function Bagview:show_bag_view()
 			self.temp_view:addChild(cur_card)
 			local pic_card_bag = uikits.child(cur_card,ui.PIC_CARD_BAG)
 			local txt_card_bag_lvl = uikits.child(cur_card,ui.TXT_CARD_BAG_LVL)
-			local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
+		--	local pic_card_bag_uplvl = uikits.child(cur_card,ui.PIC_CARD_BAG_UPLVL)
 			if cur_line == 5 then
 				cur_line = 1
 				cur_row = cur_row + 1 
@@ -1123,7 +1130,7 @@ function Bagview:show_bag_view()
 				end,"click")
 			pic_card_bag:setVisible(true)
 			txt_card_bag_lvl:setVisible(true)
-			pic_card_bag_uplvl:setVisible(true)
+		--	pic_card_bag_uplvl:setVisible(true)
 		end
 	end
 

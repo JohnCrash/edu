@@ -5,6 +5,7 @@ local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
 local loadingbox = require "loadingbox"
+local messagebox = require "messagebox"
 
 local ui = {
 	FILE = 'errortitlenew/editpic.json',

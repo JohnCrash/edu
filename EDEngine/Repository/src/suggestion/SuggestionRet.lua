@@ -4,6 +4,7 @@ local cache = require "cache"
 local kits = require "kits"
 local login = require "login"
 local json = require "json-c"
+local messagebox = require "messagebox"
 local loadingbox = require "loadingbox"
 
 
