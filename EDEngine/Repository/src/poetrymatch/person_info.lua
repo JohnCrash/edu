@@ -822,6 +822,8 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 	if not is_not_loading then
 		loadbox = put_lading_circle(parent)
 	end
+	parent:setEnabled(false)
+	parent:setTouchEnabled(false)
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
 		print('d::'..d)
@@ -861,6 +863,8 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 				end
 			end)
 		end
+		parent:setEnabled(true)
+		parent:setTouchEnabled(true)
 		if loadbox then
 			loadbox:removeFromParent()
 		end
