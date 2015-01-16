@@ -117,7 +117,9 @@ end
 --错误
 function lly.error(errorStr, n)
 	if not n then n = 2 end
-	error("(>_<)/" .. errorStr, n)
+	--error("(>_<)/" .. errorStr, n)
+
+	moKits.log("ERROR : " .. errorStr)
 end
 
 ---
