@@ -116,6 +116,8 @@ function LaBattleResultStory:ctor()
 		--数据
 		_nUserID = 0,
 		_arnCardID = lly.array(3, 0),
+
+		_nStarGain = 0, --获得的星星数量
 		
 	}
 end
@@ -258,11 +260,7 @@ end
 --获取数据
 function LaBattleResultStory:setData(table)
 	--星数
-	local star = tonumber(table.star)
-	star = star > 3 and 3 or star
-	for i = 1, star do
-		self._arimgStar[i]:setVisible(true)
-	end
+	self._nStarGain = tonumber(table.star)
 	
 	--经验实时获取
 
@@ -371,13 +369,47 @@ function LaBattleResultStory:onDownloadExp(result)
 		cc.p(0, CONST.SHOW_GET_AREA_MOVE_Y))
 
 	--点亮五星
+	local funcLightStar = cc.CallFunc:create(function ()
+		if self._nStarGain < 1 then return end
 
+		for i = 1, self._nStarGain do
+			self._arimgStar[i]:runAction(cc.Sequence:create(
+				cc.DelayTime:create((i - 1) * 0.15),
+				cc.Show:create(),
+				cc.RotateBy:create(0.4, 360)
+			))
+		end
+
+	end)
+	
 	--增加经验
+	local funcIncExp = cc.CallFunc:create(function ()
+		--[[
+		local scheduler
+		local i = 0
+		local update = function (time)
+			self._barPlyrHP:setPercent(i)
+			self._barEnemyHP:setPercent(i)
+			if i == 100 then
+				cc.Director:getInstance():getScheduler():unscheduleScriptEntry(scheduler)
+				self._bCurStateIsEnding = true
+			end
+			i = i + 1
+		end
+
+		scheduler = cc.Director:getInstance():getScheduler():scheduleScriptFunc(update, 0.01, false)
+
+
+		--]]
+	end)
 
 	--执行
 	self._imgShowGet:runAction(cc.Sequence:create(
 		acDelay,
-		cc.EaseExponentialOut:create(acMove)))
+		cc.EaseExponentialOut:create(acMove),
+		funcLightStar,
+		funcIncExp
+	))
 
 	--更新数据
 	moperson_info.set_user_lvl_info{

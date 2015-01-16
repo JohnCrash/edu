@@ -404,6 +404,7 @@ function LaBattle:ctor()
 		_nRoundsNumberMax = 100, 
 
 		--人物属性
+		_nPlyrID = 0, --玩家id
 		_nPlyrHPCeiling = 0, --玩家HP上限
 		_nPlyrCurrentHP = 0, --玩家当前HP
 		
@@ -574,6 +575,9 @@ function LaBattle:initData(data)
 
 	--关卡id
 	self._nCurStageID = data.stageID
+
+	--玩家id
+	self._nPlyrID = data.plyr_id
 
 	--设置回合数并展示
 	self._nRoundsNumberMax = data.rounds_number
@@ -999,7 +1003,12 @@ function LaBattle:initUIWithData(data)
 
 		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then
 			local moLaBattleResultChallenge = require "poetrymatch/BattleScene/LaBattleResultChallenge"
-			self._laResult = moLaBattleResultChallenge.Class:create()
+
+			local sendedTable = {} --初始化数据
+			sendedTable.plyr_id = data.plyr_id
+			sendedTable.name = data.plyr_name
+
+			self._laResult = moLaBattleResultChallenge.Class:create(sendedTable)
 
 		else
 			lly.error("wrong BATTLE_TYPE")
@@ -1512,7 +1521,7 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	end
 
 	--验证下是否阵营和提交答案的阵营不一致，一般不会错
-	if camp_type ~= self._nCurAnswerCamp then lly.error("wrong anser camp") end
+	if camp_type ~= self._nCurAnswerCamp then lly.onNetError() end
 
 	--获取服务器中本题是否正确，双方减少后有多少血，转到什么状态
 	local bRight = self._tabCurAnswerResult.judge_result == 1 and true or false
@@ -1526,16 +1535,32 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 		nextState = state.win
 	end
 
-	--验证服务器回合数、卡牌体力和本地是否一致 --未做
-
+	--使服务器回合数、卡牌体力和本地一致
+	self._nRoundsNumber = self._tabCurAnswerResult.under_attack_card_plate.round_num
+	
 	--判断回合数 玩家最终血量大于敌人算胜利
 	local nextStateForEnd
-	if not nextState and self._nRoundsNumber == self._nRoundsNumberMax then		
-		if nPlyrHPAfterDec > nEnemyHPAfterDec then
-			nextStateForEnd = state.win
-		else
-			nextStateForEnd = state.lose
-		end
+	if not nextState then
+		if self._nCurBattleType == BATTLE_TYPE.STORY then --故事模式有回合数限制
+			if self._nRoundsNumber >= self._nRoundsNumberMax then		
+				if nPlyrHPAfterDec > nEnemyHPAfterDec then
+					nextStateForEnd = state.win
+				else
+					nextStateForEnd = state.lose
+				end
+			end
+		elseif self._nCurBattleType == BATTLE_TYPE.CHALLENGE then --挑战模式有时间限制
+			if self._tabCurAnswerResult.user_wealths_challenge and 
+				self._tabCurAnswerResult.user_wealths_challenge.end_time == 2 then
+				if nPlyrHPAfterDec > nEnemyHPAfterDec then
+					--此处不用nextStateForEnd 是因为无论谁出题的时候到时间都结束，
+					--而nextStateForEnd会在2人全结束时结束
+					nextState = state.win 
+				else
+					nextState = state.lose
+				end
+			end
+		end --对战模式无限制
 	end
 
 	--如果答题正确，则反转攻击双方，答题的人出招
@@ -1548,7 +1573,7 @@ function LaBattle:doCheckAnswerAnim(camp_type, func)
 	end
 
 	--如果结束就不执行endShowPlyrResult
-	if nextState then
+	if nextState or nextStateForEnd then
 		func = function (self) self._bCurStateIsEnding = true end
 	end
 
@@ -2289,6 +2314,19 @@ end
 function LaBattle:onGiveUp()
 	self._stateNext = function () end
 	self:lose_S()
+
+	--如果是对战，还需要向服务器发送停止命令
+	if self._nCurBattleType == BATTLE_TYPE.FIGHT then
+		moperson_info.post_data_by_new_form(
+		self._wiRoot,
+		"quit_battle", --业务名
+		{v1 = self._nPlyrID}, --数据
+		function (ErrorCode, result) --结果回调
+			
+		end,
+		true --true为不进行转圈（loading动画）
+	)	
+	end
 end
 
 --点击短选项时
@@ -2394,20 +2432,16 @@ function LaBattle:playEnterAnim_S()
 	local acSkFadeIn = cc.FadeIn:create(0.2)
 	local acSkFadeIn2 = cc.FadeIn:create(0.01)
 
-	--结束，同时开启退出按钮
-	local callFunc = cc.CallFunc:create(function ()
-		self._btnGiveUp:setVisible(true)
-	end)
-
 	--长血动画
 	local scheduler
 	local i = 0
 	local update = function (time)
 		self._barPlyrHP:setPercent(i)
 		self._barEnemyHP:setPercent(i)
-		if i == 100 then
+		if i == 100 then --结束，同时开启退出按钮
 			cc.Director:getInstance():getScheduler():unscheduleScriptEntry(scheduler)
 			self._bCurStateIsEnding = true
+			self._btnGiveUp:setVisible(true) 
 		end
 		i = i + 1
 	end
@@ -2438,8 +2472,8 @@ function LaBattle:playEnterAnim_S()
 				self._ararnPlyrSkillID[1][3] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone()),
 			cc.TargetedAction:create(self._arbtnEnemySkill[3], 
 				self._arnEnemySkillID[3] ~= 0 and acSkFadeIn:clone() or acSkFadeIn2:clone())
-		),
-		callFunc))
+		)
+	))
 
 	--上传战斗初始设置
 	self:uploadBattleInitSet()
@@ -2984,7 +3018,8 @@ function LaBattle:win_S()
 	elseif self._nCurBattleType == BATTLE_TYPE.FIGHT then
 		self._laResult:setData(self._tabCurAnswerResult.user_wealths_fight)
 	else
-
+		self._tabCurAnswerResult.user_wealths_challenge.round_num = self._nRoundsNumber --同时传入进行的回合数
+		self._laResult:setData(self._tabCurAnswerResult.user_wealths_challenge)
 	end
 
 	--启动胜利页面
@@ -3003,6 +3038,11 @@ function LaBattle:lose_S()
 	self:playEffect("exercise/shibai", 2, true, CAMP_TYPE.ENEMY)
 
 	self._bCurStateIsEnding = false
+
+	if self._nCurBattleType == BATTLE_TYPE.CHALLENGE then --擂台失败同样需要设置数据
+		self._tabCurAnswerResult.user_wealths_challenge.round_num = self._nRoundsNumber --同时传入进行的回合数
+		self._laResult:setData(self._tabCurAnswerResult.user_wealths_challenge)
+	end
 
 	--启动失败页面
 	self._laResult:setVisible(true)
@@ -3049,7 +3089,7 @@ function static.playMusic(b, battleType)
 
 	if not b then return end --b为false为停止音乐，则不往下继续走了
 	if battleType == BATTLE_TYPE.STORY then
-		uikits.playSound("poetrymatch/audio/music/bj6.mp3", true)
+		uikits.playSound("poetrymatch/audio/music/bj4.mp3", true)
 	elseif battleType == BATTLE_TYPE.FIGHT then
 		uikits.playSound("poetrymatch/audio/music/bj5.mp3", true)
 	else 

@@ -147,7 +147,8 @@ function Battleview:enterLaBattle(result)
 		lly.logCurLocAnd("exit to battleview")
 
 		--转景转回本场景
-		cc.Director:getInstance():replaceScene(create())
+		local moBattleview = require "poetrymatch/Battleview"
+		cc.Director:getInstance():replaceScene(moBattleview.create())
 	end
 
 	--进入
@@ -155,7 +156,7 @@ function Battleview:enterLaBattle(result)
 
 	local laBattle = moLaBattle.Class:create(data)
 	sc:addChild(laBattle)
-	cc.Director:getInstance():pushScene(sc)
+	cc.Director:getInstance():replaceScene(sc)
 
 end
 

@@ -10,6 +10,7 @@ local lly = require "poetrymatch/BattleScene/llyLuaBase2"
 local uikits = require "uikits"
 
 local moLaBattleResultBase = require "poetrymatch/BattleScene/LaBattleResultBase"
+local moperson_info = require "poetrymatch/person_info"
 
 lly.finalizeCurrentEnvironment()
 
@@ -66,6 +67,8 @@ function LaBattleResultChallenge:ctor()
 
 		--动画
 		_animEnd = Lnull,
+
+		_time = 0
 		
 	}
 end
@@ -97,6 +100,13 @@ function LaBattleResultChallenge:initUI(tab)
 
 		self._btnConfirmWin = self:setWidget(ui.BTN_CONFIRM)
 
+		--初始化
+		self._txtPlyrName:setString(tab.name)
+		moperson_info.load_logo_pic(self._imgPlyrPortrait, tab.plyr_id)
+
+		--计算进入时间
+		self._time = os.clock()
+
 		return true
 	until true
 
@@ -126,8 +136,19 @@ end
 ----------------------------------------------
 
 --获取数据
-function LaBattleResultChallenge:setData(table)
+function LaBattleResultChallenge:setData(tab)
+	lly.logTable(tab)
+	self._txtScore:setString(tab.score)
+	self._txtRank:setString(tab.ranking)
+	self._txtContribution:setString(tab.devote_sch_score)
+	self._txtRoundNum:setString(tostring(tab.round_num))
+	self._txtCorrectNum:setString(tab.answer_rights_num)
 
+	--时间为自己计算出而不是从服务器获取
+	self._time = os.clock() - self._time 
+	local min = self._time / 60
+	local second = self._time % 60
+	self._txtTimeUsed:setString(string.format("%d分%d秒", min, second))
 end
 
 function LaBattleResultChallenge:win()

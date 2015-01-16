@@ -824,7 +824,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 	end
 	print('str_send_data::'..str_send_data)
 	cache.post(base_url,str_send_data,function(t,d)
-		--print('d::'..d)
+		print('d::'..d)
 		local tb_result = json.decode(d)
 		if t == true then
 			if tb_result.c == 200 then

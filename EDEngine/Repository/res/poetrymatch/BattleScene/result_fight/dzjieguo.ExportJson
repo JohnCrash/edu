@@ -7,8 +7,8 @@
     "actionlist": []
   },
   "dataScale": 1,
-  "designHeight": 1024,
-  "designWidth": 768,
+  "designHeight": 1080,
+  "designWidth": 1920,
   "textures": [
     "SHIHUN~10.plist"
   ],
@@ -888,10 +888,10 @@
       "backGroundImage": null,
       "backGroundImageData": null,
       "backGroundScale9Enable": false,
-      "bgColorB": 255,
-      "bgColorG": 200,
-      "bgColorOpacity": 0,
-      "bgColorR": 150,
+      "bgColorB": 0,
+      "bgColorG": 0,
+      "bgColorOpacity": 120,
+      "bgColorR": 0,
       "bgEndColorB": 255,
       "bgEndColorG": 200,
       "bgEndColorR": 150,

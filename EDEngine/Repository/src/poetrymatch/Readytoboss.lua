@@ -197,7 +197,7 @@ function Readytoboss:show_zhunbei()
 					data.card[i].id = cardTable[i].id
 					data.card[i].lv = cardTable[i].lvl
 					data.card[i].name = cardTable[i].name
-					data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex--基础血量加额外血量
+					data.card[i].hp = cardTable[i].hp + cardTable[i].hp_ex --基础血量加额外血量
 					data.card[i].sp = cardTable[i].sp --神力
 					data.card[i].skill_id = {}
 					for j = 1, 3 do
@@ -265,11 +265,11 @@ end
 
 function Readytoboss:init_gui()	
 	self.user_info = person_info.get_user_info()
---	if self.is_has_star == false and self.bot_info.dialog then
---		self:show_gushi()
---	else
---		self:show_zhunbei()
---	end
+	if self.is_has_star == false and self.bot_info.dialog then
+		self:show_gushi()
+	else
+		self:show_zhunbei()
+	end
 	self:show_zhunbei()
 end
 
