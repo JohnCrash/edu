@@ -5,6 +5,7 @@ local cache = require "cache"
 local md5 = require "md5"
 local json = require "json-c"
 local resume = require "resume"
+local mt = require "mt"
 
 if not kits.exist_file then
 	kits.exist_file = kits.exists_file
@@ -55,11 +56,13 @@ local function runScene( scene )
 	end
 end
 
+local thread_count = 0
+local download_error_table = {}
 local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
 --2网络问题，1本地问题，0没有问题，3算法结构问题
 local function download_file(t,m5)
-	local url = update_server..t
+	local url = kits.encode_space(update_server..t)
 	local local_file = local_dir..t..'_' --临时文件后面加个下划线
 	if kits.exist_file(local_file) then
 		local result = kits.read_file(local_file)
@@ -67,40 +70,59 @@ local function download_file(t,m5)
 			return true,0 --已经下载好了
 		end
 	end
-	local fbuf = kits.http_get(url)
-	if fbuf and (md5.sumhexa(fbuf)==m5 or not m5) then
-		if not kits.write_file(local_file,fbuf) then
-			--可能没有目录创建目录
-			local i = 1
-			local dirs = {}
-			while i do
-				local s = i
-				i = string.find(t,'/',i)
-				local e = i
-				if i then
-					table.insert(dirs,string.sub(t,s,e-1))
-					i = i + 1
+	
+	local mh,msg = mt.new('GET',url,'',function(obj)
+		if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED' then
+			if obj.state == 'OK' and obj.data then
+				if md5.sumhexa(obj.data)==m5 or not m5 then
+					if not kits.write_file(local_file,obj.data) then
+						--可能没有目录创建目录
+						local i = 1
+						local dirs = {}
+						while i do
+							local s = i
+							i = string.find(t,'/',i)
+							local e = i
+							if i then
+								table.insert(dirs,string.sub(t,s,e-1))
+								i = i + 1
+							end
+						end
+						local dir = local_dir
+						for k,v in pairs(dirs) do
+							dir = dir..v
+							kits.make_directory( dir )
+							dir = dir..'/'
+						end
+						--重新写入
+						if not kits.write_file(local_file,obj.data) then
+							--非正常结束,不能正常写入
+							kits.log('error download_file write file failed '..tostring(url))
+							table.insert(download_error_table,{file=t,md5=m5,err=1})
+						end
+					end
+					thread_count = thread_count - 1 --正常结束
+				else
+					--非正常结束校验错误
+					kits.log('error download_file verify md5 failed '..tostring(url))
+					table.insert(download_error_table,{file=t,md5=m5,err=2})
+					thread_count = thread_count - 1
 				end
+			else
+				--非正常结束FAILED or CANCEL
+				kits.log('error download_file failed '..tostring(url))
+				table.insert(download_error_table,{download=t,md5=m5,err=3})
+				thread_count = thread_count - 1
 			end
-			local dir = local_dir
-			for k,v in pairs(dirs) do
-				dir = dir..v
-				kits.make_directory( dir )
-				dir = dir..'/'
-			end
-			--重新写入
-			return kits.write_file(local_file,fbuf),1
 		end
-		return true,0
-	else
-		if not fbuf then
-			kits.log("ERROR request "..tostring(url).." failed")
-		else
-			kits.log("ERROR download_file md5 verify failed."..url)
-			kits.log("	'"..tostring(md5).."'")
-		end
+	end)
+	if not mh then
+		kits.log('ERROR : download failed url:'..tostring(url))
+		kits.log('	reason:'..tostring(msg))
+		return false,2 --没有正常启动
 	end
-	return false,2
+	thread_count = thread_count + 1 --正常启动
+	return true,0
 end
 
 local function download_one_by_one(t)
@@ -276,11 +298,17 @@ function UpdateProgram:update_directory(dir)
 	end
 end
 
+local local_not_exist
 function UpdateProgram:NErrorCheckLocal(dir)
 	local src_local = local_dir..'src/'..dir..'/filelist.json' 
 	if not kits.exist_file( src_local ) then --看看有没有本地版本
+		local_not_exist = true
 		kits.log("INFO : not exists "..src_local)
-		self:ErrorAndExit('网络或者服务器配置异常,请退出稍后再试!'..tostring(dir),2)
+		if cc_getNetworkState() == 0 then --没有网络
+			self:ErrorAndExit('网络连接错误，请检查您的网络连接再试!'..tostring(dir))
+		else
+			self:ErrorAndExit('网络或者服务器异常,请稍后再试!'..tostring(dir))
+		end
 	end
 end
 
@@ -334,7 +362,7 @@ function UpdateProgram:check_directory(dir,n)
 		else
 			kits.log('ERROR check_directory request '..tostring(res_url)..' failed')
 			--网络失败，本机有没有
-			if n==2 then
+			if n==2 then				
 				self:NErrorCheckLocal(dir)
 			end
 			return false,1 --下传失败,本次不跟新
@@ -346,7 +374,7 @@ function UpdateProgram:check_update(t)
 	t.need_updates={}
 	kits.log("INFO check "..tostring(update_server))
 	for i,v in pairs(t.updates) do
-		local b,e = self:check_directory(v,1)
+		local b,e = self:check_directory(v,2)
 		if e then --如果网络错误不在等待，直接不跟新
 			--尝试使用外网的
 			outer = true
@@ -381,6 +409,9 @@ function UpdateProgram:check_update(t)
 	return not (#t.need_updates == 0)
 end
 
+local try_count = 0
+local oplist
+local maxcount
 function UpdateProgram:update()
 	if self._mode==TRY then
 		return
@@ -392,6 +423,8 @@ function UpdateProgram:update()
 		--不需要跟新直接启动
 		if not self:check_update(self._args) then
 			resume.clearflag("update") --update isok
+			if local_not_exist then return end --如果本地不存在
+			
 			local b,scene = pcall(self._args.run)
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
@@ -416,15 +449,48 @@ function UpdateProgram:update()
 		kits.log("Ceck version done")
 		kits.log("Download file")
 	elseif self._step == 2 then --现在文件，将下载的文件存为临时文件
-		self._count = self._count+1
-		self._progress:setPercent(self._count*100/self._maxcount)
+		if thread_count >=10 then return end --队列满
+		
+		if self._count <= self._maxcount then
+			self._progress:setPercent(self._count*100/self._maxcount)
+			self._count = self._count+1
+		end
 		if self._count > self._maxcount then
-			--操作完成
-			self._step = 3
-			self._count = 0
-			self._progress:setPercent(0)
-			kits.log("Download file done")
-			kits.log("Operation file")
+			if thread_count <= 0 then
+				--操作完成
+				--检查错误列表，看看是否有没有下载的数据
+				if #download_error_table > 0 then
+					--有错误，将其重新加载到_oplist，然后继续下载
+					if try_count > 3 then --总是重试，次数太多
+						self:ErrorAndExit('下载失败，重试次数太多。',2)
+						return
+					end
+					kits.log("INFO : Try download again!")
+					self._count = 0
+					if not oplist then
+						oplist = self._oplist
+						maxcount = self._maxcount
+					end
+					self._oplist = download_error_table
+					thread_count = 0
+					download_error_table = {}
+					self._maxcount = #self._oplist
+					try_count = try_count + 1
+				else
+					--没有错误,进入下一个步骤
+					self._step = 3
+					self._count = 0
+					if oplist then
+						self._oplist = oplist
+						self._maxcount = maxcount
+					end
+					self._progress:setPercent(0)
+					kits.log("Download file done")
+					kits.log("Operation file")
+				end
+			else
+				--还有线程在工作等待全部线程结束
+			end
 		else
 			local b,e = download_one_by_one(self._oplist[self._count])
 			if not b then
@@ -510,7 +576,7 @@ function UpdateProgram:init()
 			end)
 		uikits.event(self._try,function(sender)
 				self._exit:setVisible(false)
-				self._exit:setVisible(false)
+				self._try:setVisible(false)
 				self._mode = nil
 				self._text:setText("")
 			end)	
