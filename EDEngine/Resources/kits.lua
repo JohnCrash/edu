@@ -531,6 +531,33 @@ local function get_tmp_path()
 	return tmp_dir
 end
 
+local function launch(app)
+	local update = require "update"
+	if update then
+		update.create{name=app.."_shell",updates={"luacore"},
+		run = function()
+			local s = kits.read_local_file("res/luacore/app.json")
+			if s then
+				local apps = json.decode( s )
+				if apps and apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
+					update.create{name=apps[app].name,updates=apps[app].updates,
+						run=function()
+							local a = require(apps[app].launch)
+							return a.create()
+						end}			
+				else
+					kits.log("ERROR : can not found applet : "..tostring(app))
+				end
+			else
+				kits.log("ERROR : can not read res/luacore/app.json")
+			end
+		end
+		}
+	else
+		log("ERROR launch failed,update = nil")
+	end
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -576,6 +603,7 @@ local exports = {
 	get_cache_path = get_cache_path,
 	get_tmp_path = get_tmp_path,
 	get_version = get_version,
+	launch = launch,
 }
 
 return exports
