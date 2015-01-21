@@ -7,6 +7,7 @@
 #include "Platform.h"
 #include "RenderTextureEx.h"
 #include "Files.h"
+#include "lua_multithread.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include <windows.h>
@@ -240,6 +241,7 @@ extern int luaopen_json( lua_State *L );
 static luaL_Reg luax_exts[] = {
     {"mt", luaopen_threadcurl},
 	{"json-c",luaopen_json},
+	{ "multithread", luaopen_multithread },
     {NULL, NULL}
 };
 

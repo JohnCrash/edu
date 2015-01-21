@@ -1,10 +1,8 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-//#include "SimpleAudioEngine.h"
 #include "lua_ext.h"
 #include "lua_ljshell.h"
 #include "luaDebug.h"
-//#include "AssetsManager.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "win32/glfw3native.h"

@@ -63,6 +63,9 @@
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
+    <ClCompile Include="..\Classes\lua_multithread.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -110,6 +113,9 @@
     <ClInclude Include="..\Classes\IDF.h" />
     <ClInclude Include="..\Classes\RenderTextureEx.h" />
     <ClInclude Include="..\Classes\misc.h" />
+    <ClInclude Include="..\Classes\lua_multithread.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">
