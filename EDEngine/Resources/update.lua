@@ -312,8 +312,44 @@ function UpdateProgram:NErrorCheckLocal(dir)
 	end
 end
 
+function UpdateProgram:get_resource_suffix( test )
+	local res_suffix
+	if not self._args.res_level or self._args.res_level==0 then --默认
+		res_suffix = 'res/'
+	else if self._args.res_level == 1 then
+		local Director = cc.Director:getInstance()
+		local glview = Director:getOpenGLView()
+		local ss = glview:getFrameSize()
+		local f = ss.height/ss.width
+		if f > (3/4+9/16)/2 then
+			res_suffix = "res43/"
+		else
+			res_suffix = "res169/"
+		end		
+	else if self._args.res_level > 1 then
+		local Director = cc.Director:getInstance()
+		local glview = Director:getOpenGLView()
+		local ss = glview:getFrameSize()
+		local f = ss.height/ss.width
+		local w = math.max(ss.height,ss.width)
+		if f > (3/4+9/16)/2 then
+			res_suffix = "res43"
+		else
+			res_suffix = "res169"
+		end		
+		if w >= 1280 then
+			res_suffix = res_suffix..'hd/'
+		else
+			res_suffix = res_suffix..'/'
+		end
+	end
+	kits.log("INFO luaapp resource redirect to "..res_suffix)
+	kits.log("INFO luaapp resource level :"..tostring(self._args.res_level))
+	return res_suffix;
+end
+
 function UpdateProgram:check_directory(dir,n)
-		local res_url = update_server..'res/'..dir..'/version.json'
+		local res_url = update_server..self:get_resource_suffix()..dir..'/version.json'
 		local src_url = update_server..'src/'..dir..'/version.json'
 		local res_local = local_dir..'res/'..dir..'/version.json'
 		local src_local = local_dir..'src/'..dir..'/version.json'
@@ -439,7 +475,7 @@ function UpdateProgram:update()
 		end
 		--收集目录中需要跟新个文件
 		for i,v in pairs(self._args.need_updates) do
-			self:update_directory('res/'..v)
+			self:update_directory(self:get_resource_suffix()..v)
 			self:update_directory('src/'..v)
 		end
 		self._maxcount = #self._oplist

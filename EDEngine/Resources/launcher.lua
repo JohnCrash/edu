@@ -202,7 +202,7 @@ elseif app and string.len(app)>0 then
 			if s then
 				local apps = json.decode( s )
 				if apps and apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
-					update.create{name=apps[app].name,updates=apps[app].updates,
+					update.create{name=apps[app].name,updates=apps[app].updates,res_level=apps.res_level,
 						run=function()
 							local a = require(apps[app].launch)
 							return a.create()

@@ -42,8 +42,7 @@ extern "C" {
 		{
 			lua_pushvalue(L, 1);
 			int ref = luaL_ref(L, LUA_REGISTRYINDEX);
-			//lua_State *newL = lua_newthread(L);
-			lua_State *newL = L;
+			lua_State *newL = lua_newthread(L);
 			mthread *pm = new mthread();
 			pm->ref = ref;
 			pm->L = newL;
