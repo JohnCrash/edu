@@ -316,7 +316,7 @@ function UpdateProgram:get_resource_suffix( test )
 	local res_suffix
 	if not self._args.res_level or self._args.res_level==0 then --默认
 		res_suffix = 'res/'
-	else if self._args.res_level == 1 then
+	elseif self._args.res_level == 1 then
 		local Director = cc.Director:getInstance()
 		local glview = Director:getOpenGLView()
 		local ss = glview:getFrameSize()
@@ -326,7 +326,7 @@ function UpdateProgram:get_resource_suffix( test )
 		else
 			res_suffix = "res169/"
 		end		
-	else if self._args.res_level > 1 then
+	elseif self._args.res_level > 1 then
 		local Director = cc.Director:getInstance()
 		local glview = Director:getOpenGLView()
 		local ss = glview:getFrameSize()
@@ -345,7 +345,7 @@ function UpdateProgram:get_resource_suffix( test )
 	end
 	kits.log("INFO luaapp resource redirect to "..res_suffix)
 	kits.log("INFO luaapp resource level :"..tostring(self._args.res_level))
-	return res_suffix;
+	return res_suffix
 end
 
 function UpdateProgram:check_directory(dir,n)
