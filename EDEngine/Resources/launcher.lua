@@ -98,10 +98,7 @@ local function onKeyRelease(key,event)
 	end
 end
 
-local listener_keyboard = cc.EventListenerKeyboard:create()
-listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
-local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
-directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+uikits.pushKeyboardListener( onKeyRelease )
 
 local app,cookie,uid = cc_launchparam()
 local scene

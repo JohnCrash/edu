@@ -9,6 +9,7 @@
 
 #define LUA_MT_HANDLE "lua_mt_t"
 
+MySpaceBegin
 #if __cplusplus
 extern "C" {
 #endif
@@ -96,3 +97,4 @@ extern "C" {
 #if __cplusplus
 }
 #endif
+MySpaceEnd

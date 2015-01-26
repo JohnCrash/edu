@@ -736,6 +736,27 @@ local function event( obj,func,eventType )
 	end
 end
 
+local _listenerStack = {}
+local function onKeyRelease(key,event)
+	local func = _listenerStack[#_listenerStack]
+	if  func then
+		func(key,event)
+	end
+end
+
+local listener_keyboard = cc.EventListenerKeyboard:create()
+listener_keyboard:registerScriptHandler(onKeyRelease,cc.Handler.EVENT_KEYBOARD_RELEASED )	
+local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+directorEventDispatcher:addEventListenerWithFixedPriority(listener_keyboard,1)
+
+local function pushKeyboardListener( func )
+	_listenerStack[#_listenerStack+1] = func
+end
+
+local function popKeyboardListener()
+	_listenerStack[#_listenerStack] = nil
+end
+
 local function delay_call( target,func,delay,param1,param2,param3 )
 	local obj = target
 	if not target then
@@ -2001,4 +2022,6 @@ return {
 	END = END,
 	NEXT = NEXT,
 	enableMouseWheelIFWindows = enableMouseWheelIFWindows,
+	pushKeyboardListener = pushKeyboardListener,
+	popKeyboardListener = popKeyboardListener,
 }
