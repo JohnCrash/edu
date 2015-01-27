@@ -4,7 +4,7 @@ local ljshell = require "ljshell"
 
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
-local version = 8
+local version = 7
 
 local function exist_file( file )
   local f = io.open(file, "rb")
