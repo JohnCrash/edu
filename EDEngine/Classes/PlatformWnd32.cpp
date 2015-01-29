@@ -53,6 +53,21 @@ wstring utf8ToUnicode(const string& s)
 	return wstr;
 }
 
+/*
+	百度语音识别,windows 没有
+*/
+void showBaiduVoice()
+{
+}
+
+void closeBaiduVoice()
+{
+}
+
+void showBaiduVoiceConfigure()
+{
+}
+
 void setUIOrientation(int m)
 {
 	if (g_Mode == "window")

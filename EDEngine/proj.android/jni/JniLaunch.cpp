@@ -15,7 +15,44 @@ std::string g_Cookie;
 std::string g_Userid;
 std::string g_ExternalStorageDirectory;
 std::string g_RecordFile;
-	
+
+/*
+	百度语音识别,显示百度语音识别界面
+*/
+void showBaiduVoice()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "showBaiduVoice", "()V")) 
+	{
+		t.env->CallStaticVoidMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+	}
+}
+/*
+	关闭百度语音识别界面,强制关闭.
+*/
+void closeBaiduVoice()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "closeBaiduVoice", "()V")) 
+	{
+		t.env->CallStaticVoidMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+	}
+}
+/*
+	打开百度语音配置界面
+*/
+void showBaiduVoiceConfigure()
+{
+	JniMethodInfo t;
+	if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "showBaiduVoiceConfigure", "()V")) 
+	{
+		t.env->CallStaticVoidMethod(t.classID,t.methodID);
+		t.env->DeleteLocalRef(t.classID);
+	}
+}
+
 static bool sWaitChangeEnd = false;
 //设置屏幕方向
 void setUIOrientation( int m )
@@ -319,5 +356,10 @@ extern "C" {
 			cocos2dChangeOrientationBySize(w,h);
 		sWaitChangeEnd = true;
 	}	
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_setBaiduResult(JNIEnv *env,jobject thiz,jstring text)
+	{
+		std::string str = cocos2d::JniHelper::jstring2string(text);
+		baiduVoiceResult( str );
+	}		
 }
 

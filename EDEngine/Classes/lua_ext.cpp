@@ -37,6 +37,7 @@ struct TRS
 	std::string path;
 	int result;
 	int type;
+	TRS(){}
 	TRS( int t,int r,std::string s ):type(t),result(r),path(s){}
 };
 
@@ -231,6 +232,46 @@ std::string getDirectory(EDDirectory edd)
     return path;
 }
 #endif
+
+static int g_callbaiduResult = LUA_REFNIL;
+static void baiduVoice_progressFunc(void *ptrs)
+{
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if( pEngine )
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if( pLuaStack )
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if( L && g_callbaiduResult != LUA_REFNIL && ptrs )
+			{
+				TRS *trs = (TRS*)ptrs;
+				lua_rawgeti(L, LUA_REGISTRYINDEX, g_callbaiduResult);
+				lua_pushstring(L,trs->path.c_str());
+				pLuaStack->executeFunction(1);
+				delete trs;
+				lua_unref(L,g_callbaiduResult);
+				g_callbaiduResult = LUA_REFNIL;
+			}
+		}
+	}
+}
+
+void baiduVoiceResult( std::string text )
+{
+	//call lua progress function
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if( pDirector )
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if( scheduler )
+		{
+			TRS * ptrs = new TRS();
+			ptrs->path = text;
+			scheduler->performFunctionInCocosThread_ext(baiduVoice_progressFunc,ptrs);
+		}
+	}
+}
 
 #if __cplusplus
 extern "C" {
@@ -673,6 +714,35 @@ int cc_isdebug(lua_State *L)
 #endif
 	return 1;
 }
+
+int cc_showBaiduVoice(lua_State *L)
+{
+	if( lua_isfunction(L,1) ){
+		lua_pushvalue(L, 1);
+		if (g_callbaiduResult != LUA_REFNIL)
+			lua_unref(L, g_callbaiduResult);
+		g_callbaiduResult = luaL_ref(L, LUA_REGISTRYINDEX);
+		
+		showBaiduVoice();
+		lua_pushboolean(L,true);
+	}
+	else
+		lua_pushboolean(L,false);
+	return 1;
+}
+
+int cc_closeBaiduVoice(lua_State *L)
+{
+	closeBaiduVoice();
+	return 0;
+}
+
+int cc_showBaiduVoiceConfigure(lua_State *L)
+{
+	showBaiduVoiceConfigure();
+	return 0;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -703,7 +773,10 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_unregisterNetworkStateListener", cc_unregisterNetworkStateListener);
 	lua_register(L, "cc_shock", cc_shock);
 	lua_register(L, "cc_isdebug", cc_isdebug);
-
+	lua_register(L, "cc_showBaiduVoice",cc_showBaiduVoice);
+	lua_register(L, "cc_closeBaiduVoice",cc_closeBaiduVoice);
+	lua_register(L, "cc_showBaiduVoiceConfigure",cc_showBaiduVoiceConfigure);
+	
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

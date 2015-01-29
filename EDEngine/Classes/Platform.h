@@ -32,6 +32,11 @@ extern std::string g_ExternalStorageDirectory;
 extern std::string g_RecordFile;
 extern std::string g_Orientation;
 
+void showBaiduVoice();
+void closeBaiduVoice();
+void showBaiduVoiceConfigure();
+void baiduVoiceResult( std::string text );
+
 bool platformOpenURL( const char *url );
 void setUIOrientation( int m );
 int getUIOrientation();

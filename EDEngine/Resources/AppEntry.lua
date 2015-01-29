@@ -129,6 +129,13 @@ function AppEntry:init()
 	local bg = uikits.layout{width=ss.width*scale,height=ss.height*scale}
 	local item_h = 64*scale
 	
+	local debugip = uikits.editbox{
+		caption = '192.168.2.*',
+		x=320*scale,y = 64*scale + 2*item_h,
+		width=128*scale,height=48*scale
+	}
+	debugip:setText("192.168.2.182")
+	
 	local amouse = uikits.button{caption='打地鼠',x=64*scale,y = 64*scale +5*item_h,
 	width=128*scale,height=48*scale,
 	eventClick=function(sender)
@@ -204,25 +211,27 @@ function AppEntry:init()
 				uikits.pushScene( selstudent1.create() )
 		end}
 	local g_last
-	local record =  uikits.button{caption='TEST',x=264*scale,y = 64*scale + 4*item_h,
+	local record =  uikits.button{caption='show BaiduVoice',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
+	local box = debugip
 	uikits.event( record,
 		function(sender,eventType)
-			update.create{name='test',updates={'test','luacore'},
-				run=function()
-					local test = require "test/test"
-					return test.create()
-				end}
+			if cc_showBaiduVoice then
+				cc_showBaiduVoice( function(text)
+					if cc_isobj(box) then
+						box:setText(text)
+					else
+						print(text)
+					end
+				end)
+			end
 		end)	
-	local playsound = uikits.button{caption='播放',x=464*scale,y = 164*scale + 4*item_h,
+	local playsound = uikits.button{caption='show BaiduVoice Configure',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				kits.log("play "..tostring(g_last))
-				if cc_playVoice(g_last) then
-					kits.log('play success')
-				else
-					kits.log('play fail')
+				if cc_showBaiduVoiceConfigure then
+					cc_showBaiduVoiceConfigure()
 				end
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,

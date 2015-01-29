@@ -34,6 +34,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.provider.MediaStore;
 
@@ -76,6 +78,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	private static native void sendTakeResourceResult(int resultCode,int typeCode,final String res); 
 	private static native void sendVoiceRecordData(final int nType,final int nID,final int nParam1,final int nParam2,final int len,final byte[] pBytes);
 	private static native void cocos2dChangeOrientation( final int state,final int w,final int h);
+	private static native void setBaiduResult( final String text );
 	//======================
 	// 拍照和取图库
 	//======================
@@ -648,5 +651,50 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 //        setEGLConfigChooser(int redSize, int greenSize, int blueSize, int alphaSize, int depthSize, int stencilSize)
 //        Install a config chooser which will choose a config with at least the specified depthSize and stencilSize, and exactly the specified redSize, greenSize, blueSize and alphaSize.
         return glSurfaceView;
+    }
+    /*
+     * 加入百度语音支持
+     */
+    private BaiduVoice _BaiduVoice  = new BaiduVoice(){
+		@Override
+		public void onBaiduResult( String t ){
+			setBaiduResult( t );
+		}
+    };
+    private static int SHOW_BAIDU_VOICE = 1;
+    private static int SHOW_BAIDU_VOICE_CONFIGURE = 2;
+    private static int SHOW_BAIDU_VOICE_CLOSE = 3;
+    private Handler _handler = new Handler(){
+    	@Override
+    	public void handleMessage(final Message msg){
+    		if( msg.what == SHOW_BAIDU_VOICE ){
+    	    	myActivity._BaiduVoice.show( myActivity );
+    		}else if( msg.what == SHOW_BAIDU_VOICE_CONFIGURE){
+    	    	myActivity._BaiduVoice.showConfig(myActivity);      			
+    		}else if( msg.what == SHOW_BAIDU_VOICE_CLOSE  ){
+    	    	myActivity._BaiduVoice.destory();
+    		}
+    	}
+    };    
+    public static void showBaiduVoice(){
+		Message msg = new Message();
+		msg.what = SHOW_BAIDU_VOICE;
+		myActivity._handler.sendMessage(msg);
+    }
+    public static void closeBaiduVoice(){
+		Message msg = new Message();
+		msg.what = SHOW_BAIDU_VOICE_CLOSE;
+		myActivity._handler.sendMessage(msg); 	
+    }
+    public static void showBaiduVoiceConfigure(){
+		Message msg = new Message();
+		msg.what = SHOW_BAIDU_VOICE_CONFIGURE;
+		myActivity._handler.sendMessage(msg); 	
+    }
+    @Override
+    protected void onDestroy(){
+    	if( _BaiduVoice != null )
+    		_BaiduVoice.destory();
+    	super.onDestroy();
     }
 }
