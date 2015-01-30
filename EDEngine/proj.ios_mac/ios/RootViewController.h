@@ -25,11 +25,21 @@
 
 #import <UIKit/UIKit.h>
 #import "staticlib.h"
+#ifdef _BAIDU_VOICE_
+#import "baidu/BDRecognizerViewDelegate.h"
+#endif
 
-
+#ifdef _BAIDU_VOICE_
+@interface RootViewController_v3 : UIViewController<BDRecognizerViewDelegate> {
+#else
 @interface RootViewController_v3 : UIViewController {
-
+#endif
 }
+    
+#ifdef _BAIDU_VOICE_
+@property (nonatomic, retain) BDRecognizerViewController *recognizerViewController;
+#endif
+    
 - (BOOL) prefersStatusBarHidden;
 
 @end

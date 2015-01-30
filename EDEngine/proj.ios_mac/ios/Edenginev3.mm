@@ -20,6 +20,12 @@ MySpaceEnd
 UsingMySpace;
 
 static ONEXIT_t s_onExit = nullptr;
+static RootViewController_v3 * s_viewController = nullptr;
+
+void * getCurrentRootViewController()
+{
+    return s_viewController;
+}
 
 static void onExit()
 {
@@ -52,7 +58,8 @@ void* createV3EAGLView(void *window)
 
 void *createV3Controller()
 {
-    return [[RootViewController_v3 alloc] initWithNibName:nil bundle:nil];
+    s_viewController = [[RootViewController_v3 alloc] initWithNibName:nil bundle:nil];
+    return s_viewController;
 }
 
 //启动cocos2d-x 3.2

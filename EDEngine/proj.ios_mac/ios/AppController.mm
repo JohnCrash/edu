@@ -49,6 +49,43 @@ extern std::string g_Goback;
 extern std::string g_Launch;
 static AppController_v3 *s_myAppController = nullptr;
 
+#ifdef _BAIDU_VOICE_
+/*
+ * 显示百度语音识别对话栏
+ */
+void showBaiduVoice()
+{
+    /*
+     单独运行的时候使用[s_myAppController.viewController showBaiduVoice]调用
+     植入到ljshell中使用下面的调用
+     */
+    RootViewController_v3 * viewController = (RootViewController_v3*)getCurrentRootViewController();
+    if( viewController )
+        [viewController showBaiduVoice];
+}
+/*
+ * 强制关闭百度语音识别对话栏
+ */
+void closeBaiduVoice()
+{
+    RootViewController_v3 * viewController = (RootViewController_v3*)getCurrentRootViewController();
+    if( viewController )
+        [viewController closeBaiduVoice];
+}
+
+/*
+ * 显示百度语音识别配置界面
+ */
+void showBaiduVoiceConfigure()
+{
+    
+}
+#else
+void showBaiduVoice(){}
+void closeBaiduVoice(){}
+void showBaiduVoiceConfigure(){}
+#endif
+
 void setUIOrientation( int m )
 {
     if( g_OrientationMode != m )
@@ -183,16 +220,19 @@ void registerNetworkStateListener()
     if( s_isRegister )
         return;
     s_isRegister = true;
+    //暂时没有实现,将reachabilityChanged移到viewController中实现
+    /* 单独启动时使用
     [[NSNotificationCenter defaultCenter] addObserver:s_myAppController
                                              selector:@selector(reachabilityChanged)
                                                  name: kReachabilityChangedNotification
                                                object: nil];
+    */
 }
 void unregisterNetworkStateListener()
 {
     if( !s_isRegister )
         return;
-    [[NSNotificationCenter defaultCenter] removeObserver:s_myAppController];
+    //[[NSNotificationCenter defaultCenter] removeObserver:s_myAppController];
     s_isRegister = false;
 }
 

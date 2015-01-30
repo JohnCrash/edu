@@ -28,6 +28,15 @@
 #import "CCEAGLView.h"
 #import "staticlib.h"
 #import "parsparam.h"
+#import "Platform.h"
+
+#ifdef _BAIDU_VOICE_
+#import "baidu/BDRecognizerViewController.h"
+#import "baidu/BDVRSConfig.h"
+
+#define API_KEY @"1hiGONxNPY4GEYg7Dwj19L3w"
+#define SECRET_KEY @"iXqgeznUL17nv3j8XRZCGyIkpTTeyYoO"
+#endif
 
 UsingMySpace;
 
@@ -63,6 +72,129 @@ UsingMySpace;
     
 }
 */
+- (void)closeBaiduVoice
+{
+    [_recognizerViewController cancel];
+}
+- (void)showBaiduVoice
+{
+    CGPoint pt = [self.view center];
+    pt.x -= 128;
+    pt.y -= 116;
+    BDRecognizerViewController *tmpRecognizerViewController = [[BDRecognizerViewController alloc] initWithOrigin:pt withTheme:[BDVRSConfig sharedInstance].theme];
+    
+    // 全屏UI
+    //if ([[BDVRSConfig sharedInstance].theme.name isEqualToString:@"全屏亮蓝"]) {
+    //    tmpRecognizerViewController.enableFullScreenMode = YES;
+    //}
+    tmpRecognizerViewController.enableFullScreenMode = NO;
+    
+    tmpRecognizerViewController.delegate = self;
+    self.recognizerViewController = tmpRecognizerViewController;
+    [tmpRecognizerViewController release];
+    
+    // 设置识别参数
+    BDRecognizerViewParamsObject *paramsObject = [[BDRecognizerViewParamsObject alloc] init];
+    
+    // 开发者信息，必须修改API_KEY和SECRET_KEY为在百度开发者平台申请得到的值，否则示例不能工作
+    paramsObject.apiKey = API_KEY;
+    paramsObject.secretKey = SECRET_KEY;
+    
+    // 设置是否需要语义理解，只在搜索模式有效
+    paramsObject.isNeedNLU = [BDVRSConfig sharedInstance].isNeedNLU;
+    
+    // 设置识别语言
+    paramsObject.language = (TBDVoiceRecognitionLanguage)[BDVRSConfig sharedInstance].recognitionLanguage;
+    
+    // 设置识别模式，分为搜索和输入
+    paramsObject.recogPropList = @[[BDVRSConfig sharedInstance].recognitionProperty];
+    
+    // 设置城市ID，当识别属性包含EVoiceRecognitionPropertyMap时有效
+    paramsObject.cityID = 1;
+    
+    // 开启联系人识别
+    //    paramsObject.enableContacts = YES;
+    
+    // 设置显示效果，是否开启连续上屏
+    if ([BDVRSConfig sharedInstance].resultContinuousShow)
+    {
+        paramsObject.resultShowMode = BDRecognizerResultShowModeContinuousShow;
+    }
+    else
+    {
+        paramsObject.resultShowMode = BDRecognizerResultShowModeWholeShow;
+    }
+    
+    // 设置提示音开关，是否打开，默认打开
+    if ([BDVRSConfig sharedInstance].uiHintMusicSwitch)
+    {
+        paramsObject.recordPlayTones = EBDRecognizerPlayTonesRecordPlay;
+    }
+    else
+    {
+        paramsObject.recordPlayTones = EBDRecognizerPlayTonesRecordForbidden;
+    }
+    
+    paramsObject.isShowTipAfter3sSilence = NO;
+    paramsObject.isShowHelpButtonWhenSilence = NO;
+    //    paramsObject.tipsTitle = @"可以使用如下指令记账";
+    //    paramsObject.tipsList = [NSArray arrayWithObjects:@"我要记账", @"买苹果花了十块钱", @"买牛奶五块钱", @"第四行滚动后可见", @"第五行是最后一行", nil];
+    
+    [_recognizerViewController startWithParams:paramsObject];
+    
+    [paramsObject release];
+}
+
+#ifdef _BAIDU_VOICE_
+#pragma mark - BDRecognizerViewDelegate
+- (void)onEndWithViews:(BDRecognizerViewController *)aBDRecognizerView withResults:(NSArray *)aResults
+{
+    if ([[BDVoiceRecognitionClient sharedInstance] getRecognitionProperty] != EVoiceRecognitionPropertyInput)
+    {
+        // 搜索模式下的结果为数组，示例为
+        // ["公园", "公元"]
+        NSMutableArray *audioResultData = (NSMutableArray *)aResults;
+        NSMutableString *tmpString = [[NSMutableString alloc] initWithString:@""];
+
+        for (int i=0; i < [audioResultData count]; i++)
+        {
+            [tmpString appendFormat:@"%@\r\n",[audioResultData objectAtIndex:i]];
+        }
+
+        //_resultView.text = [_resultView.text stringByAppendingString:tmpString];
+        //_resultView.text = [_resultView.text stringByAppendingString:@"\n"];
+        std::string result;
+        result = [[audioResultData objectAtIndex:0] cStringUsingEncoding:NSUTF8StringEncoding];
+        baiduVoiceResult(result);
+        [tmpString release];
+        }
+    else
+    {
+        // 输入模式下的结果为带置信度的结果，示例如下：
+        //  [
+        //      [
+        //         {
+        //             "百度" = "0.6055192947387695";
+        //         },
+        //         {
+        //             "摆渡" = "0.3625582158565521";
+        //         },
+        //      ]
+        //      [
+        //         {
+        //             "一下" = "0.7665404081344604";
+        //         }
+        //      ],
+        //   ]
+        NSString *tmpString = [[BDVRSConfig sharedInstance] composeInputModeResult:aResults];
+        std::string result;
+        result = [tmpString cStringUsingEncoding:NSUTF8StringEncoding];
+        baiduVoiceResult(result);
+        //_resultView.text = [_resultView.text stringByAppendingString:tmpString];
+        //_resultView.text = [_resultView.text stringByAppendingString:@"\n"];
+    }
+}
+#endif
 
 // Override to allow orientations other than the default portrait orientation.
 // This method is deprecated on ios6
@@ -152,6 +284,7 @@ UsingMySpace;
 
 
 - (void)dealloc {
+    [_recognizerViewController release];
     [super dealloc];
 }
 
