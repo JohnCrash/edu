@@ -1082,3 +1082,38 @@ isright -1
 
 取评论:
 http://new.www.lejiaolexue.com/exam/handler/examhandler.ashx?action=detail&exam_id=d12f00167f0f4fef843f3d1a18652e47&student_id=144973
+
+老师取学生做题信息
+http://new.www.lejiaolexue.com/exam/handler/ClassGroup.ashx?q=s&exam_id=2699c1a4eef74ebe8faa656258115cb0&c_id=145808&s_id=145839&t_id=145807&item_id=0b192c500be8cd5568758dd89d85ce32
+q=s
+exam_id考试id
+c_id班级id (class_id)
+s_id 学生id
+item_id 题的id
+返回结果:
+{
+    "answer": "{\"answers\":[{\"content\":null,\"id\":\"0\",\"value\":\"BCGH\"}]}",
+    "class_id": 145808,
+    "cnt_times": 1,
+    "comment": "",
+    "duration": 18,
+    "exam_id": "2699c1a4eef74ebe8faa656258115cb0",
+    "group_id": -1,
+    "isjudged": 1,
+    "isright": 0,
+    "item_id": "0b192c500be8cd5568758dd89d85ce32",
+    "item_score": 0,
+    "item_type": 10,
+    "paper_id": "348d4e0a720543f0ae51bd823400d6dd",
+    "part_id": 1,
+    "real_score": 0,
+    "school_id": 144976,
+    "score": 0,
+    "sort_stru": 1,
+    "status": 0,
+    "stru_id": 1,
+    "student_id": 145839,
+    "student_name": "王林丽",
+    "val_attach": " </attachments></root>",
+    "who_submit": 0
+}

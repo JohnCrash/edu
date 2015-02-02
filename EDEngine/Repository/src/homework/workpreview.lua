@@ -99,11 +99,12 @@ function Workpreview:load_original_data_from_table( data )
 				res[#res+1] = scrollView			
 			end
 		end
+		--[[
 		if b then
 			self._next_button:setVisible(false)
 			self._finish_button:setVisible(true)
 		end
-		
+		]]--
 	else
 		kits.log('	load_original_data_from_table decode_json faild')
 	end

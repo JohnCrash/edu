@@ -788,7 +788,6 @@ function AMouseScene:init_role()
 		self._xing:setAnchorPoint(cc.p(1,1))
 		self._xing:setPosition(p)
 	end
-	
 	if self._time_bar then
 		self._time_widget:addChild(self._worm,110)
 		local worm = self._time_widget:getChildByTag(359) --小虫
@@ -798,6 +797,14 @@ function AMouseScene:init_role()
 		worm:setVisible(false)
 		self._worm:setAnchorPoint(cc.p(0.8,0.5))
 		self._worm:setPosition(cc.p(x,y))
+		--退出
+		local exit_but = self._time_widget:getChildByTag(353)
+		if exit_but then
+			uikits.event(exit_but,function(sender)
+				self:game_start_Dialog()
+				--uikits.popScene()
+			end,"click")
+		end
 	end
 	--4个地鼠
 	self._amouse = {}

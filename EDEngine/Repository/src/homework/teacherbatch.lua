@@ -553,7 +553,7 @@ function Batch:init_subjective()
 end
 
 local appraise = {
-	[1] = {low=90,up=100,title = '优秀'},
+	[1] = {low=90,up=200,title = '优秀'},
 	[2] = {low=80,up=90,title = '优'},
 	[3] = {low=70,up=80,title = '良'},
 	[4] = {low=60,up=70,title = '中'},
