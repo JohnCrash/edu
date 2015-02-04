@@ -67,6 +67,13 @@ local ui = {
 	TOPICS_RATE = 'yanse/benban',
 	TOPICS_ITEM = 'ti',
 	TOPICS_TITLE = 'yanse',
+	TOPICS_ANSWER_SELECT = 'xuanz',
+	TOPICS_ANSWER_SELECT_A = 'xuanxiang',
+	TOPICS_ANSWER_EDIT = 'tiankong',
+	TOPICS_ANSWER_EDIT_ITEM1 = 'tk1',
+	TOPICS_ANSWER_EDIT_ITEM2 = 'tk2',
+	TOPICS_ANSWER_EDIT_ITEM3 = 'tk3',
+	TOPICS_ANSWER_JUDGE = 'PANDUAN',
 }
 
 local Batch = class("Batch")
@@ -90,6 +97,14 @@ function Batch.create(t,c)
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
+
+local HasAnswerPlane={
+	[1] = 1,
+	[2] = 2,
+	[3] = 3,
+	[5] = 5,
+	[6] = 6,
+}
 
 --和StudentWatch.lua add_paper_item相同
 function Batch:add_paper_item( topicType,topicID )
@@ -136,6 +151,31 @@ function Batch:add_paper_item( topicType,topicID )
 						end
 						if topics.types[topicType].conv(t,data) then
 							data.eventInitComplate = function(layout,data)
+								if HasAnswerPlane[topicType] then
+								--[[
+									local size = layout:getContentSize()
+									size.height = size.height + 100
+									layout:setContentSize(size)
+								--]]
+									local x,y = layout:getPosition()
+									kits.log("layout position : "..x..","..y)									
+									local parent = child:getParent()
+									if topicType==1 then
+										local plane = uikits.child(parent,ui.TOPICS_ANSWER_JUDGE)
+										plane:setVisible(true)
+										parent._answerPlane = plane
+									elseif topicType==2 or topicType==3 or topicType==6 then
+										local plane = uikits.child(parent,ui.TOPICS_ANSWER_SELECT)
+										plane:setVisible(true)
+										parent._answerPlane = plane
+									elseif topicType==5 then
+										local plane = uikits.child(parent,ui.TOPICS_ANSWER_EDIT)
+										plane:setVisible(true)
+										parent._answerPlane = plane
+										local x,y = plane:getPosition()
+										kits.log("edit position : "..x..","..y)
+									end
+								end
 								self:paper_relayout()
 							end
 							child:setEnabled(false) --禁止修改
@@ -219,9 +259,18 @@ function Batch:paper_relayout()
 				local size = layout:getContentSize()
 				local tsize = title:getContentSize()
 				local ox,oy = layout:getPosition()
-				title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
-				item:setContentSize(cc.size(item_size.width,
-					size.height+tsize.height+self._paper_item_space+self._paper_item_space2))
+				if item._answerPlane then
+					layout:setPosition(ox,oy)
+					title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
+					item:setContentSize(cc.size(item_size.width,
+						size.height+tsize.height+self._paper_item_space+self._paper_item_space2))					
+				else
+					oy = self._paper_item_space2
+					layout:setPosition(ox,oy)
+					title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
+					item:setContentSize(cc.size(item_size.width,
+						size.height+tsize.height+self._paper_item_space+self._paper_item_space2))
+				end
 			end
 		end
 		self._papers:relayout()
