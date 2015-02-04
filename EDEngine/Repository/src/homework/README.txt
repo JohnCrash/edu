@@ -1117,3 +1117,142 @@ item_id 题的id
     "val_attach": " </attachments></root>",
     "who_submit": 0
 }
+
+老师获取全班考试情况
+http://new.www.lejiaolexue.com/exam/handler/errorate.ashx?tch=144975&cls=144977&examId=00110fd6bd5a410dac4e686e086c109f&page=1&size=20
+参数说明:
+tch 老师id
+cls 班级id
+examld 考试id
+page=1 分页
+size  每页多少条
+返回一个json:
+state = 1已完成统计,0为批改状态
+error_rate 错误率0-100,浮点数
+total_pages 总页数
+{
+    "result": 0,
+    "msg": null,
+    "data": {
+        "state": 1,
+        "total_pages": 1,
+        "data": [
+            {
+                "exam_id": "00110fd6bd5a410dac4e686e086c109f",
+                "paper_id": "0938e3bdf5d347a0822c74c73c9243c6",
+                "teacher_id": 144975,
+                "item_guide": "",
+                "item_id": "a07d9f1749e2b10dde8e885ecc2fc6d8",
+                "course": 10002,
+                "item_id_num": 114901,
+                "difficulty": 50,
+                "item_type": 5,
+                "ref_item_id": "",
+                "parent_item_id": "",
+                "sub_count": 0,
+                "sub_sort": 0,
+                "user_author": 0,
+                "user_author_name": "",
+                "user_owner": 0,
+                "apply_year": 0,
+                "apply_area1": 0,
+                "apply_area2": 0,
+                "tag_detail": 1,
+                "tag_apply": 0,
+                "tag_method": 115,
+                "tag_open": 1,
+                "tag_original": 1,
+                "version": 1,
+                "content": "<div class=section1><div><p class=msonormal align=center style='margin:0cm;margin-bottom:.0001pt;\r\ntext-align:center'><span lang=en-us><img align=absmiddle width=600 height=300 src=c2bb20bfb1ac752d01826ccb6a037b2e.jpg></span></p><p><span style='font-size:13.5pt'>",
+                "options": "<root><item_type>0</item_type><sort_char></sort_char><drag_position>0</drag_position><options></options><options2></options2></root>",
+                "correct_answer": "<root><answers><answer id=\"0\" value=\"53\" /></answers></root>",
+                "explain": "<p style='margin:0cm;margin-bottom:.0001pt'>{b}<span lang=en-us\r\nstyle='font-size:18.0pt;font-family:楷体_gb2312;color:red'>11+11+15+16=53</span>{/b}{b}<span style='font-size:18.0pt;font-family:楷体_gb2312;color:red'>（厘米）</span>{/b}</p></div></div>",
+                "attachment": "<root><attachments></attachments></root>",
+                "cnt_view": 0,
+                "cnt_comment": 0,
+                "cnt_refer": 0,
+                "cnt_favor": 0,
+                "cnt_praise": 0,
+                "in_time_ts": 0,
+                "last_time_ts": 0,
+                "in_time": "2014-12-05T11:53:44.937",
+                "last_time": "2014-12-05T11:53:44.937",
+                "score": 0,
+                "cnt_answer": 0,
+                "error_rate": 100,
+                "answer_obj": null,
+                "item_name": "填空",
+                "difficulty_name": "中等",
+                "interact_type": 8,
+                "tag": 2,
+                "options_obj": {
+                    "item_type": 0,
+                    "sort_char": null,
+                    "drag_position": 0,
+                    "options": [],
+                    "options2": []
+                },
+                "attachment_obj": [],
+                "correct_answer_obj": []
+            },
+            {
+                "exam_id": "00110fd6bd5a410dac4e686e086c109f",
+                "paper_id": "0938e3bdf5d347a0822c74c73c9243c6",
+                "teacher_id": 144975,
+                "item_guide": "",
+                "item_id": "bdbeedb4969d0fdca21751928fd4bd92",
+                "course": 10002,
+                "item_id_num": 114902,
+                "difficulty": 50,
+                "item_type": 2,
+                "ref_item_id": "",
+                "parent_item_id": "",
+                "sub_count": 0,
+                "sub_sort": 0,
+                "user_author": 0,
+                "user_author_name": "",
+                "user_owner": 0,
+                "apply_year": 0,
+                "apply_area1": 0,
+                "apply_area2": 0,
+                "tag_detail": 1,
+                "tag_apply": 0,
+                "tag_method": 115,
+                "tag_open": 1,
+                "tag_original": 1,
+                "version": 1,
+                "content": "<div class=section1><div><p class=msonormal align=center style='margin:0cm;margin-bottom:.0001pt;\r\ntext-align:center'><span lang=en-us><img align=absmiddle width=607 height=330 src=2e5161ef68a84f17929559be458bdb48.png></span></p><p><span style='font-size:13.5pt'>",
+                "options": "<root><item_type>1</item_type><sort_char></sort_char><drag_position>0</drag_position><options><option id=\"1\"><![CDATA[]]></option><option id=\"2\"><![CDATA[]]></option><option id=\"3\"><![CDATA[]]></option><option id=\"4\"><![CDATA[]]></option></options><options2></options2></root>",
+                "correct_answer": "<root><answers><answer id=\"0\" value=\"A\" /></answers></root>",
+                "explain": "<p style='margin:0cm;margin-bottom:.0001pt'>{b}<span lang=en-us\r\nstyle='font-size:18.0pt;font-family:楷体_gb2312;color:red'>480+330+380+680+430+530=2830</span>{/b}{b}<span style='font-size:18.0pt;font-family:楷体_gb2312;color:red'>（米）</span>{/b}</p></div></div>",
+                "attachment": "<root><attachments></attachments></root>",
+                "cnt_view": 0,
+                "cnt_comment": 0,
+                "cnt_refer": 0,
+                "cnt_favor": 0,
+                "cnt_praise": 0,
+                "in_time_ts": 0,
+                "last_time_ts": 0,
+                "in_time": "2014-12-05T11:53:44.937",
+                "last_time": "2014-12-05T11:53:44.937",
+                "score": 0,
+                "cnt_answer": 0,
+                "error_rate": 100,
+                "answer_obj": null,
+                "item_name": "单选",
+                "difficulty_name": "中等",
+                "interact_type": 1,
+                "tag": 2,
+                "options_obj": {
+                    "item_type": 0,
+                    "sort_char": null,
+                    "drag_position": 0,
+                    "options": [],
+                    "options2": []
+                },
+                "attachment_obj": [],
+                "correct_answer_obj": []
+            }
+        ]
+    }
+}

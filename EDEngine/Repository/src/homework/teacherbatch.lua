@@ -259,18 +259,17 @@ function Batch:paper_relayout()
 				local size = layout:getContentSize()
 				local tsize = title:getContentSize()
 				local ox,oy = layout:getPosition()
+				local dh = 0
 				if item._answerPlane then
-					layout:setPosition(ox,oy)
-					title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
-					item:setContentSize(cc.size(item_size.width,
-						size.height+tsize.height+self._paper_item_space+self._paper_item_space2))					
+					local x,y = item._answerPlane:getPosition()
+					oy = y+item._answerPlane:getContentSize().height+self._paper_item_space
+					dh = item._answerPlane:getContentSize().height+self._paper_item_space
 				else
-					oy = self._paper_item_space2
-					layout:setPosition(ox,oy)
-					title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
-					item:setContentSize(cc.size(item_size.width,
-						size.height+tsize.height+self._paper_item_space+self._paper_item_space2))
+					oy = 0
 				end
+				layout:setPosition(ox,oy)
+				title:setPosition(cc.p(ox,oy+size.height+self._paper_item_space2))
+				item:setContentSize(cc.size(item_size.width,size.height+tsize.height+self._paper_item_space+self._paper_item_space2+dh))
 			end
 		end
 		self._papers:relayout()
