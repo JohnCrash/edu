@@ -175,7 +175,7 @@ function TeacherList:add_batch_item( v )
 					if dt > 0 then
 						child:setString( kits.time_to_string_simple(dt) )
 					else
-						child:setString('已过')
+						child:setString('已过期')
 					end
 				end
 			end,
@@ -1199,7 +1199,14 @@ function TeacherList:init()
 		if not self._root then
 			self:init_gui()
 		end
-		self:init_ready_batch()
+		
+		if self._mode == ui.HISTORY then
+			self:init_ready_history()
+		elseif self._mode == ui.READYBATCH then
+			self:init_ready_batch()
+		else
+			self:init_ready_batch()
+		end
 	else
 		local set_label_empty = uikits.child(self._release,ui.TOPICS_SET_LABEL_EMPTY)
 		local edit_homework_view = uikits.child(self._release,ui.TOPICS_EDIT_HOMEWORK_VIEW)
