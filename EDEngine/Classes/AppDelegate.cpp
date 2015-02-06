@@ -14,6 +14,10 @@
 
 MySpaceBegin
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include <string>
+
+extern std::wstring toUnicode(const std::string& s);
+extern std::wstring utf8ToUnicode(const std::string& s);
 
 HWND g_hMainWnd = NULL;
 
@@ -208,8 +212,15 @@ void AppDelegate_v3::initLuaEngine()
     glview->setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy::NO_BORDER);
 
 #ifndef _DEBUG
+	//Rlease version
 	InitEngineDirectory();
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
 	std::string wpath = getLjShellDirectory(App_DIRECTORY);
+#else
+	std::string path = getLjShellDirectory(App_DIRECTORY);
+	std::wstring unicpath = toUnicode(path);
+	std::string wpath = toUTF8(unicpath);
+#endif
 	pFileUtils->addSearchPath(wpath+"src/luacore",true);
 	pFileUtils->addSearchPath(wpath+"res/luacore",true);
 	pFileUtils->addSearchPath(wpath+"src");
@@ -229,10 +240,13 @@ void AppDelegate_v3::initLuaEngine()
 	pFileUtils->addSearchPath("src");
     pFileUtils->addSearchPath("res");
 #endif
-#else
+#else //_DEBUG
 #ifdef _PROGRAMFILES_DEBUG_
 	InitEngineDirectory();
-	std::string wpath = getLjShellDirectory(App_DIRECTORY);
+	std::string path = getLjShellDirectory(App_DIRECTORY);
+	std::wstring unicpath = toUnicode(path);
+	std::string wpath = toUTF8(unicpath);
+
 	pFileUtils->addSearchPath(wpath + "src/luacore", true);
 	pFileUtils->addSearchPath(wpath + "res/luacore", true);
 	pFileUtils->addSearchPath(wpath + "src");
@@ -246,16 +260,19 @@ void AppDelegate_v3::initLuaEngine()
 	pFileUtils->addSearchPath(exe + "src");
 	pFileUtils->addSearchPath(exe + "res");
 #else
+	//_DEBUG
 	InitEngineDirectory();
-	std::string wpath = getLjShellDirectory(App_DIRECTORY);
-	pFileUtils->addSearchPath(wpath+"cache");
+	std::string path = getLjShellDirectory(App_DIRECTORY);
+	std::wstring unicpath = toUnicode(path);
+	std::string wpath = toUTF8(unicpath);
+	pFileUtils->addSearchPath(wpath + "cache");
 	pFileUtils->addSearchPath(wpath);
 	std::string exe = getExeDir();
 	pFileUtils->addSearchPath(exe);
 	pFileUtils->addSearchPath(exe+"luacore");
 	pFileUtils->addSearchPath(exe+"luacore/res");
 	pFileUtils->addSearchPath(exe+"src");
-    pFileUtils->addSearchPath(exe+"res");	
+    pFileUtils->addSearchPath(exe+"res");
 #endif
 #endif
     
