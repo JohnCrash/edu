@@ -7,6 +7,7 @@ local loadingbox = require "loadingbox"
 local topics = require "homework/topics"
 local imagepreview = require "homework/imagepreview"
 local TeacherSubjective = require "homework/teachersubjective"
+local examView = require "homework/teacherworkview"
 
 local ui = {
 	FILE = 'homework/laoshizuoye/jinruzuoye.json',
@@ -329,7 +330,7 @@ function Batch:init_paper_list_by_table( p )
 	local paper_table = {}
 	self._objective_num = 0
 	self._subject_num = 0
-	
+	self._exam = {}
 	for k,v in pairs(p.part) do
 		for i,t in pairs(p.detail) do
 			if t.part_id == v.part_id then --属于这部分的
@@ -340,6 +341,7 @@ function Batch:init_paper_list_by_table( p )
 					self._objective_num = self._objective_num + 1
 				elseif topics.types[t.item_type] then
 					self._subject_num = self._subject_num + 1
+					table.insert(self._exam,item)
 				end
 			end
 		end
@@ -754,8 +756,9 @@ function Batch:init_student_list_func()
 					[ui.STUDENT_NUM] = tostring(#st)..'人',
 					[ui.STUDENT_APPR] = appr.title,
 				},2)
+				
 				for k,v in pairs(st) do
-					self._students:additem{
+					local item = self._students:additem{
 						[ui.STUDENT_NAME] = v.student_name,
 						[ui.STUDENT_COMMIT_TIME] = '',
 						[ui.STUDENT_TOPICS_NUM] = '',
@@ -770,6 +773,26 @@ function Batch:init_student_list_func()
 								end,3)
 						end
 					}
+					if item then
+						uikits.event(item,function(sender)
+							local cid = self._args_class.class_id
+							local uid = v.student_name
+							local examid = self._args.exam_id
+							local tid = self._args.teacher_id
+							if cid and uid and examid and tid and self._exam and self._exam_data then
+								uikits.pushScene(examView.create{
+									name=v.student_name,
+									uid=uid,
+									class_id=cid,
+									teacher_id = tid,
+									exam_id=examid,
+									exam=self._exam,
+									exam_data=self._exam_data})
+							else
+								kits.log("ERROR : invalid value uid = "..tostring(uid).." class_id = "..tostring(cid).." examid = "..tostring(examid))
+							end
+						end,"click")
+					end
 				end
 			end --for
 		end
