@@ -28,6 +28,8 @@ local ui = {
 	TOPICS_ANSWER_EDIT_ITEM2 = 'tk2',
 	TOPICS_ANSWER_EDIT_ITEM3 = 'tk3',
 	TOPICS_ANSWER_JUDGE = 'panduan',	
+	TOPICS_ANSWER_RIGHT = 'yanse/dui',
+	TOPICS_ANSWER_WRONG = 'yanse/cuo',
 }
 
 local TeacherWorkView = class("TeacherWorkView")
@@ -219,59 +221,79 @@ function TeacherWorkView:add_paper_item( topicType,topicID )
 				topicID
 				local loadbox = loadingbox.circle(child)
 				cache.request_json(url,function(t)
-					if loadbox and cc_isobj(loadbox) then
-						loadbox:removeFromParent()
-					else
-						return
-					end
-					if t then
-						local data = {}
-						if t.difficulty_name then
-							uikits.set(item,
-							{
-								[ui.TOPICS_DIFF] = t.difficulty_name
-							})
-						end
-						if topics.types[topicType].conv(t,data) then
-							data.eventInitComplate = function(layout,data)
-								if HasAnswerPlane[topicType] then
-									local x,y = layout:getPosition()						
-									local parent = child:getParent()
-									--将答案置于面板中
-									if topicType==1 then
-										local plane = uikits.child(parent,ui.TOPICS_ANSWER_JUDGE)
-										plane:setVisible(true)
-										parent._answerPlane = plane
-									elseif topicType==2 or topicType==3 or topicType==6 then
-										local plane = uikits.child(parent,ui.TOPICS_ANSWER_SELECT)
-										plane:setVisible(true)
-										parent._answerPlane = plane
-									elseif topicType==5 then
-										local plane = uikits.child(parent,ui.TOPICS_ANSWER_EDIT)
-										plane:setVisible(true)
-										parent._answerPlane = plane
-									end
-									setAnswerPlane(parent._answerPlane,data,topicType)
-								end
-								self:paper_relayout()
-							end
-							child:setEnabled(false) --禁止修改
-							--放入正确答案
-							if t.correct_answer and type(t.correct_answer)=='string' then
-								local asw = json.decode(t.correct_answer)
-								if asw and asw.answers and type(asw.answers)=='table'  then
-									data.my_answer = {}
-									for i,v in pairs(asw.answers) do
-										data.my_answer[i] = v.value
-									end
-								end
-							end
-							topics.types[topicType].init(child,data)
+					--t是题面
+					local answer_url = "http://new.www.lejiaolexue.com/exam/handler/ClassGroup.ashx?q=s&exam_id="..
+					self._args.exam_id.."&item_id="..
+					topicID.."&c_id="..
+					self._args.class_id.."&s_id="..
+					self._args.uid.."&t_id="..
+					self._args.teacher_id
+					cache.request_json(answer_url,function(a)
+						--a学生答案
+						if loadbox and cc_isobj(loadbox) then
+							loadbox:removeFromParent()
 						else
-							kits.log('')
+							return
 						end
-					end
-				end,"CN")
+						if t then
+							local data = {}
+							if t.difficulty_name then
+								uikits.set(item,
+								{
+									[ui.TOPICS_DIFF] = t.difficulty_name
+								})
+							end
+							if topics.types[topicType].conv(t,data) then
+								--标示对错
+								local right = uikits.child(item,ui.TOPICS_ANSWER_RIGHT)
+								local wrong = uikits.child(item,ui.TOPICS_ANSWER_WRONG)
+								if a.isright ~= 0 then
+									right:setVisible(true)
+									wrong:setVisible(false)
+								else
+									right:setVisible(false)
+									wrong:setVisible(true)								
+								end
+								data.eventInitComplate = function(layout,data)
+									if HasAnswerPlane[topicType] then
+										local x,y = layout:getPosition()						
+										local parent = child:getParent()
+										--将答案置于面板中
+										if topicType==1 then
+											local plane = uikits.child(parent,ui.TOPICS_ANSWER_JUDGE)
+											plane:setVisible(true)
+											parent._answerPlane = plane
+										elseif topicType==2 or topicType==3 or topicType==6 then
+											local plane = uikits.child(parent,ui.TOPICS_ANSWER_SELECT)
+											plane:setVisible(true)
+											parent._answerPlane = plane
+										elseif topicType==5 then
+											local plane = uikits.child(parent,ui.TOPICS_ANSWER_EDIT)
+											plane:setVisible(true)
+											parent._answerPlane = plane
+										end
+										setAnswerPlane(parent._answerPlane,data,topicType)
+									end
+									self:paper_relayout()
+								end
+								child:setEnabled(false) --禁止修改
+								--放入正确答案
+								if a.answer and type(a.answer)=='string' then
+									local asw = json.decode(a.answer)
+									if asw and asw.answers and type(asw.answers)=='table'  then
+										data.my_answer = {}
+										for i,v in pairs(asw.answers) do
+											data.my_answer[i] = v.value
+										end
+									end
+								end
+								topics.types[topicType].init(child,data)
+							else
+								kits.log('')
+							end
+						end
+					end) --cache_json
+				end,"CN") --cache_json
 			end
 		}
 	end

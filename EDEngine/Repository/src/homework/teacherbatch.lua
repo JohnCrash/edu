@@ -776,7 +776,7 @@ function Batch:init_student_list_func()
 					if item then
 						uikits.event(item,function(sender)
 							local cid = self._args_class.class_id
-							local uid = v.student_name
+							local uid = v.student_id
 							local examid = self._args.exam_id
 							local tid = self._args.teacher_id
 							if cid and uid and examid and tid and self._exam and self._exam_data then
