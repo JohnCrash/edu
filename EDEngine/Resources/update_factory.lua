@@ -17,26 +17,27 @@ end
 
 --[[
 检查类版本是否需要跟新
+通过func(id)通知结果,id是下面的一个值
 2本地存在，需要跟新
 1本地不存在，需要跟新
 0确定不需要跟新
 -1没有正确检查但有本地版本,
 -2没有正确检查并且不存在本地版本
 --]]
-local function CheckClassVersion( classId )
+local function CheckClassVersion( classId,func )
 	
 end
 
 --[[
-跟新类，成功返回true,失败返回false
+成功func(true),失败func(false)
 --]]
-local function UpdateClass( classId )
+local function UpdateClass( classId,func )
 end
 
 --[[
-跟新类的特定文件，成功返回true,失败返回false
+跟新类的特定文件，成功func(true),失败func(false)
 --]]
-local function UpdateClassFiles( classId,files )
+local function UpdateClassFiles( classId,func,files )
 end
 
 return {

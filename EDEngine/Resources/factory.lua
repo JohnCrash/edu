@@ -3,6 +3,7 @@ local json = require "json-c"
 local ljshell = require "ljshell"
 local kits = require "kits"
 local update = require "update_factory"
+local uikits = require "uikits"
 
 local s_gidcount = os.time()
 --从classId到类表的映射表
@@ -10,6 +11,14 @@ local _classes = {}
 --给定的classId是否已经进行了跟新
 local _updates = {}
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
+local ui = {
+	SPLASH_FILE = "res/splash/splash_1.json",
+	LOADING_FILE = "res/splash/laoding_1.json",
+	SPLASH_IMAGE = "Image_5",
+	SPLASH_TEXT = "Label_4",
+	LOADING_PROGRESSBAR = "ProgressBar_1",
+	LOADING_TEXT = "Label_2",
+}
 
 --产生一个唯一的ID字符串
 local function generateId()
@@ -143,15 +152,22 @@ local function launch(classId)
 		
 	end
 	--开启默认启动屏
-	local state = update.CheckClassVersion( classId )
-	if state ~= 0 then
-		if update.UpdateClassFiles( classId,{"depends.json","desc.json"}) then
-		elseif state == -2 or state == 1 then
-			--跟新失败,又不存在本地版本
-			kits.log("ERROR factory.launch failed.")
-			return false
+	local scene = cc.Scene:create()
+	local splash = uikits.fromJson{file=ui.SPLASH_FILE}
+	scene:addChild(splash)
+	uikits.pushScene(scene)
+	local function checkAndLoad()
+		local state = update.CheckClassVersion( classId )
+		if state ~= 0 then
+			if update.UpdateClassFiles( classId,{"depends.json","desc.json"}) then
+			elseif state == -2 or state == 1 then
+				--跟新失败,又不存在本地版本
+				kits.log("ERROR factory.launch failed.")
+				return false
+			end
 		end
 	end
+	uikits.delay_call(scene,checkAndLoad)
 end
 
 return {
