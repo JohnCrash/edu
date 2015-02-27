@@ -8,8 +8,9 @@ local uikits = require "uikits"
 local s_gidcount = os.time()
 --从classId到类表的映射表
 local _classes = {}
---给定的classId是否已经进行了跟新
+--给定的classId是否已经进行了跟新(本地版本和服务器版本的关系)
 local _updates = {}
+
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 local ui = {
 	SPLASH_FILE = "res/splash/splash_1.json",
@@ -50,35 +51,44 @@ local function hasLocalClass( classId )
 	end
 end
 
---跟新类，成功返回true,失败返回false
-local function UpdateClass( classId )
-	if _updates[classId] then return true end --已经跟新
-	
-	local state = update.CheckClassVersion( classId )
-	if state == 1 or state == 2 or state == -2 then
-		--需要跟新,-2再次尝试
-		local result = update.UpdateClass( classId )
-		if not result then
-			if state == 2 then
-				--跟新失败，但是有本地版本可以运行给出一个警告
-				kits.log("WARNING UpdateClass failed,but local version existed 2."..tostring(classId))
-			else
-				--跟新失败，同时没有本地版本可以运行
-				kits.log("ERROR UpdateClass failed,local version not exist")
-				return false			
+--[[跟新类，成功返回true,失败返回false
+	如果跟新完成可以进行加载类调用updateResult(true)
+	否则updateResult(false)
+--]]
+local function UpdateClass( classId,updateResult )
+	local function notify( state )
+		if state == 1 or state == 2 or state == -2 then
+			--需要跟新,-2再次尝试
+			local function updateComplete( result )
+				if not result then
+					if state == 2 then
+						--跟新失败，但是有本地版本可以运行给出一个警告
+						kits.log("WARNING UpdateClass failed,but local version existed 2."..tostring(classId))
+						updateResult(true)
+					else
+						--跟新失败，同时没有本地版本可以运行
+						kits.log("ERROR UpdateClass failed,local version not exist")
+						updateResult(false)
+					end
+				else
+					updateResult(true)
+				end
 			end
+			update.UpdateClass( classId,updateComplete )
+		elseif state == 0 then
+			--不需要跟新
+			_updates[classId] = 2
+			updateResult(true)
+		elseif state == -1 then
+			_updates[classId] = 1
+			kits.log("WARNING UpdateClass failed,but local version existed -1."..tostring(classId))
+			updateResult(true)
+		else
+			kits.log("ERROR UpdateClass unknow state")
+			updateResult(false)
 		end
-	elseif state == 0 then
-		--不需要跟新
-		_updates[classId] = 2
-	elseif state == -1 then
-		_updates[classId] = 1
-		kits.log("WARNING UpdateClass failed,but local version existed -1."..tostring(classId))
-	else
-		kits.log("ERROR UpdateClass unknow state")
-		return false
 	end
-	return true
+	return update.CheckClassVersion( classId,notify )
 end
 
 local function loadClassTable( scriptFile )
@@ -103,46 +113,77 @@ local function _readonly(t,k,v)
 end
 
 --向类表中加入新的类
-local function addClass( classId )
+local function addClass( classId,addClassResult )
 	--在_classes中存在表示已经跟新过
-	if _classes[classId] then return true end
+	if _classes[classId] then 
+		addClassResult(true)
+		return
+	end
 	
-	if not _updates[classId] then --已经进行了跟新
-		if not UpdateClass( classId )  then
-			return false 
+	local function loadClass( b )
+		if not b then 
+			addClassResult(false)
+			return 
+		end
+		local cls = loadClassDescription( classId )
+		if not cls then
+			kits.log("ERROR addClass failed,can not load class description file. "..tostring(classId))
+			addClassResult(false)
+			return
+		end
+		local function thisClass( b )
+			if cls.superid then
+				if _classes[cls.superid].class then
+					cls.super = _classes[cls.superid].class
+				else
+					--存在父类id却没有加载成功
+					kits.log("ERROR addClass class "..tostring(classId).." super class "..tostring(superid).." not exist")
+					addClassResult(false)
+					return
+				end
+			end		
+			cls.class = loadClassTable(cls.script)
+			if cls.class then
+				cls.class.this = cls.class
+				cls.class.super = cls.super
+				setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
+				setmetatable(cls,{__newindex=_readonly})
+				_classes[classId] = cls
+				addClassResult(true)
+			else
+				kits.log("ERROR "..tostring(classId).." is not exist.")
+				addClassResult(false)
+			end
+		end		
+		if cls.superid then --如果存在父类
+			addClass( cls.superid,thisClass )
+		else
+			thisClass(true)
 		end
 	end
 	
-	local cls = loadClassDescription( classId )
-	if not cls then
-		kits.log("ERROR addClass failed,can not load class description file. "..tostring(classId))
-		return false
-	end
-	if cls.superid and addClass( cls.superid ) then
-		cls.super = _classes[cls.superid].class
-	end
-	cls.class = loadClassTable(cls.script)
-	if cls.class then
-		cls.class.this = cls.class
-		cls.class.super = cls.super
-		setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
-		setmetatable(cls,{__newindex=_readonly})
-		_classes[classId] = cls
-		return true
+	if not _updates[classId] then
+		UpdateClass( classId,loadClass )
 	else
-		kits.log("ERROR "..tostring(classId).." is not exist.")
-	end
-	return false
+		--已经提前跟新好了
+		loadClass( true )
+	end	
 end
 
 --通过classId创建给定对象
-local function create(classId)
-	if addClass( classId ) then
-		local obj = {}
-		obj._cls = _classes[classId]
-		setmetatable(obj,{__index=obj._cls.class})
-		return obj
+local function create(classId,notify)
+	local function buildObject( b )
+		if b then --在列表中存在classId的类
+			local obj = {}
+			obj._cls = _classes[classId]
+			setmetatable(obj,{__index=obj._cls.class})
+			notify(obj)
+		else
+			kits.log("ERROR factory.create can not create object ."..tostring(classId))
+			notify()
+		end
 	end
+	addClass( classId,buildObject )
 end
 
 --启动一个classId
