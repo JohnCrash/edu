@@ -186,29 +186,52 @@ local function create(classId,notify)
 	addClass( classId,buildObject )
 end
 
---启动一个classId
+--启动一个classId,分成两个步骤
+--1.splash阶段，没有进度条仅仅有一个spalsh。完成检测和下载进度条类的功能。
+--2.progress阶段，进一步检测depends.json中的类并跟新。
+local function launchProgress(classId)
+end
+
 local function launch(classId)
 	if hasLocalClass( classId ) then
 		--如果已经存在本地版本，检查是否存在一个splash
 		
 	end
 	--开启默认启动屏
-	local scene = cc.Scene:create()
-	local splash = uikits.fromJson{file=ui.SPLASH_FILE}
-	scene:addChild(splash)
-	uikits.pushScene(scene)
-	local function checkAndLoad()
-		local state = update.CheckClassVersion( classId )
+	local scene
+	local splash
+	local function openSplash()
+		scene = cc.Scene:create()
+		splash = uikits.fromJson{file=ui.SPLASH_FILE}
+		scene:addChild(splash)
+		uikits.pushScene(scene)
+	end	
+	local function nextStep()
+		uikits.popScene()
+		launchProgress(classId)
+	end
+	local function checkResult( state )
 		if state ~= 0 then
-			if update.UpdateClassFiles( classId,{"depends.json","desc.json"}) then
-			elseif state == -2 or state == 1 then
-				--跟新失败,又不存在本地版本
-				kits.log("ERROR factory.launch failed.")
-				return false
+			local function downloadDepends( result )
+				if result then
+					nextStep()
+				elseif state == -1 or state == 2 then
+					--失败了但是有本地版本，也进入下一个阶段
+					nextStep()
+				else
+					--既不能跟新，也不没有本地版本
+					kits.log("ERROR factory.launch failed.")
+				end
 			end
+			update.UpdateClassFiles( classId,downloadDepends,{"depends.json","desc.json"})
+		else
+			--不需要跟新,进入下一个步骤
+			nextStep()
 		end
 	end
-	uikits.delay_call(scene,checkAndLoad)
+	
+	openSplash()
+	update.CheckClassVersion( classId,checkResult )
 end
 
 return {
