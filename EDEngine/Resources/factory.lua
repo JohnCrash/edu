@@ -4,6 +4,7 @@ local ljshell = require "ljshell"
 local kits = require "kits"
 local update = require "update_factory"
 local uikits = require "uikits"
+local types = require "types"
 
 local s_gidcount = os.time()
 --从classId到类表的映射表
@@ -133,7 +134,7 @@ local function addClass( classId,addClassResult )
 		end
 		local function thisClass( b )
 			if cls.superid then
-				if _classes[cls.superid].class then
+				if _classes[cls.superid] and _classes[cls.superid].class then
 					cls.super = _classes[cls.superid].class
 				else
 					--存在父类id却没有加载成功
@@ -186,6 +187,10 @@ local function create(classId,notify)
 	addClass( classId,buildObject )
 end
 
+--判断B是否继承自A
+local function isKindOf(B,A)
+end
+
 --启动一个classId,分成两个步骤
 --1.splash阶段，没有进度条仅仅有一个spalsh。完成检测和下载进度条类的功能。
 --2.progress阶段，进一步检测depends.json中的类并跟新。
@@ -200,6 +205,15 @@ local function launch(classId)
 	--开启默认启动屏
 	local scene
 	local splash
+	local function progressStep( progressObject )
+		if progressObject then
+			uikits.popScene()
+			launchProgress(classId)
+		else
+			--无论如何也应该有一个进度条场景，这里显然是一个错误。
+			kits.log("ERROR factory.launch failed.have not progress object")
+		end
+	end
 	local function openSplash()
 		scene = cc.Scene:create()
 		splash = uikits.fromJson{file=ui.SPLASH_FILE}
@@ -207,8 +221,15 @@ local function launch(classId)
 		uikits.pushScene(scene)
 	end	
 	local function nextStep()
-		uikits.popScene()
-		launchProgress(classId)
+		local cls = loadClassDescription(classId)
+		if cls and cls.progressid then
+			create( cls.progressid,progressStep )
+		elseif cls then
+			--使用默认的进度条
+			create( types.loading_scene,progressStep )
+		else
+			kits.log("ERROR factory.launch failed.can not load class description file."..tostring(classId))
+		end
 	end
 	local function checkResult( state )
 		if state ~= 0 then
@@ -237,6 +258,7 @@ end
 return {
 	generateId = generateId,
 	getClassDescription = getClassDescription,
+	isKindOf = isKindOf,
 	create = create,
 	launch = launch,
 	updateClass = updateClass,
