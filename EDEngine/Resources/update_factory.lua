@@ -35,6 +35,12 @@ local function UpdateClass( classId,func )
 end
 
 --[[
+跟新表中全部的类
+成功func(true),失败func(false)
+--]]
+local function UpdateClassByTable( classIds,func,progress )
+end
+--[[
 跟新类的特定文件，成功func(true),失败func(false)
 --]]
 local function UpdateClassFiles( classId,func,files )
@@ -43,6 +49,7 @@ end
 return {
 	CheckClassVersion = CheckClassVersion,
 	UpdateClass = UpdateClass,
+	UpdateClassByTable = UpdateClassByTable,
 	UpdateClassFiles = UpdateClassFiles,
 	getClassRootDirectory = getClassRootDirectory,
 }

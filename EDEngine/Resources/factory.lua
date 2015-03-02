@@ -4,23 +4,17 @@ local ljshell = require "ljshell"
 local kits = require "kits"
 local update = require "update_factory"
 local uikits = require "uikits"
-local types = require "types"
+local base = require "base"
 
 local s_gidcount = os.time()
 --从classId到类表的映射表
 local _classes = {}
 --给定的classId是否已经进行了跟新(本地版本和服务器版本的关系)
 local _updates = {}
-
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
-local ui = {
-	SPLASH_FILE = "res/splash/splash_1.json",
-	LOADING_FILE = "res/splash/laoding_1.json",
-	SPLASH_IMAGE = "Image_5",
-	SPLASH_TEXT = "Label_4",
-	LOADING_PROGRESSBAR = "ProgressBar_1",
-	LOADING_TEXT = "Label_2",
-}
+
+base.addBaseClass( _classes )
+
 
 --产生一个唯一的ID字符串
 local function generateId()
@@ -29,8 +23,8 @@ local function generateId()
 	return md5.sumhexa(t)
 end
 
-local function loadClassDescription( classId )
-	local df = update.getClassRootDirectory()..classId..'/desc.json'
+local function loadClassJson( classId,jsonFile )
+	local df = update.getClassRootDirectory()..classId..'/'..tostring(jsonFile)
 	local file = io.read( df,"rb" )
 	if file then
 		local all = file:read("*a")
@@ -40,6 +34,10 @@ local function loadClassDescription( classId )
 	else
 		kits.log("ERROR can not read file "..tostring(df))
 	end
+end
+
+local function loadClassDescription( classId )
+	return loadClassJson( classId,'desc.json' )
 end
 
 --检查存在本地类吗
@@ -110,7 +108,7 @@ local function loadClassTable( scriptFile )
 end
 
 local function _readonly(t,k,v)
-	kits.log("read only")
+	kits.log("ERROR read only")
 end
 
 --向类表中加入新的类
@@ -188,37 +186,85 @@ local function create(classId,notify)
 end
 
 --判断B是否继承自A
-local function isKindOf(B,A)
+local function isKindOf( B,A )
+	if B and A and _classes[B] then
+		local bcls = _classes[B]
+		if bcls.classid == A or bcls.superid = A then
+			return true
+		end
+		local pedigree = bcls.pedigree
+		if pedigree then
+			for k,v in pairs(pedigree) do
+				if v == A then
+					return true
+				end
+			end
+		end
+	end
+end
+
+--判断obj是否继承自A
+local function isInstanceOf(obj,A)
+	if obj and A and obj._cls then --obj必须是一个具体的对象
+		local BaseID
+		if A._cls then --A也是一个对象
+			BaseID = A._cls.classid
+		else
+			BaseID = A
+		end
+		return isKindOf(obj._cls.classid,BaseID)
+	end
 end
 
 --启动一个classId,分成两个步骤
 --1.splash阶段，没有进度条仅仅有一个spalsh。完成检测和下载进度条类的功能。
 --2.progress阶段，进一步检测depends.json中的类并跟新。
-local function launchProgress(classId)
-end
-
 local function launch(classId)
+	local splashid = base.splash_scene
 	if hasLocalClass( classId ) then
+		local cls = loadClassDescription(classId)
 		--如果已经存在本地版本，检查是否存在一个splash
-		
+		if cls.splashid and hasLocalClass(cls.splashid) then
+			splashid = cls.splashid
+		end
 	end
 	--开启默认启动屏
-	local scene
 	local splash
 	local function progressStep( progressObject )
-		if progressObject then
-			uikits.popScene()
+		if progressObject and isKindOf(progressObject,base.loading_scene) then
+			if splash then
+				uikits.popScene()
+			end
+			splash = 1 --标记已经不需要splash了
 			launchProgress(classId)
+			uikits.pushScene( progressObject.scene() )
+			local deps = loadClassJson(classId,'depends.json')
+			local function updateResult( b )
+				if b then
+				else
+					--跟新失败，并且没有本地版本
+				end
+			end
+			local function updateProgress( d )
+				progressObject.setProgressValue(d)
+			end
+			if deps then
+				update.UpdateClassByTable(deps,updateResult,updateProgress)
+			else
+				updateResult(true)
+			end
 		else
 			--无论如何也应该有一个进度条场景，这里显然是一个错误。
 			kits.log("ERROR factory.launch failed.have not progress object")
 		end
 	end
 	local function openSplash()
-		scene = cc.Scene:create()
-		splash = uikits.fromJson{file=ui.SPLASH_FILE}
-		scene:addChild(splash)
-		uikits.pushScene(scene)
+		create(splashid,function(obj)
+				if not splash then
+					splash = obj
+					uikits.pushScene( splash:createScene() )
+				end
+			end)
 	end	
 	local function nextStep()
 		local cls = loadClassDescription(classId)
@@ -226,7 +272,7 @@ local function launch(classId)
 			create( cls.progressid,progressStep )
 		elseif cls then
 			--使用默认的进度条
-			create( types.loading_scene,progressStep )
+			create( base.loading_scene,progressStep )
 		else
 			kits.log("ERROR factory.launch failed.can not load class description file."..tostring(classId))
 		end
@@ -259,6 +305,7 @@ return {
 	generateId = generateId,
 	getClassDescription = getClassDescription,
 	isKindOf = isKindOf,
+	isInstanceOf = isInstanceOf,
 	create = create,
 	launch = launch,
 	updateClass = updateClass,

@@ -218,7 +218,7 @@ local function exist_file( file )
 end
 
 local function local_exists( file )
-	return local_exists( local_dir..file )
+	return exist_file( local_dir..file )
 end
 
 local function read_file(name)
