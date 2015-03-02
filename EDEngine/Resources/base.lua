@@ -21,7 +21,7 @@ local base = {
 local root = {
 	classid = base.root,
 	name = "Root",
-	icon = "",
+	icon = "res/icon/root.png",
 	comment = "所有对象都是它的子类",
 	version = 1,
 	class = {
@@ -62,7 +62,7 @@ local splashScene = {
 	classid = base.splash_scene,
 	superid = base.root,
 	name = "SplashScene",
-	icon = "",
+	icon = "res/icon/splash_scene.png",
 	comment = "创建一个等待屏直到任务结束",
 	version = 1,
 	class = {
@@ -72,12 +72,26 @@ local splashScene = {
 			self._scene:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
 			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)
+			local function onNodeEvent(event)
+				local angle = 0
+				local N = 12
+				local function spin()
+					self._spin:setRotation( angle )
+					angle = angle + 360/N
+				end
+				local scheduler = obj:getScheduler()
+				local schedulerId
+				if event == 'enter' then
+					schedulerId = scheduler:scheduleScriptFunc(spin,0.8/N,false)	
+				elseif event == 'exit' then
+					scheduler:unscheduleScriptEntry(schedulerId)
+				end
+			end
+			self._scene:registerScriptHandler(onNodeEvent)
 			return self._scene
 		end,
 		setText = function(self,txt)
 			self._text:setString(txt)
-		end,
-		setBackground = function(self,res)
 		end,
 	}
 }
@@ -85,7 +99,7 @@ local loadingScene = {
 	classid = base.loading_scene,
 	superid = base.root,
 	name = "LoadingScene",
-	icon = "",
+	icon = "res/icon/loading_scene.png",
 	comment = "创建一个具有进度条的加载屏",
 	version = 1,
 	class = {
@@ -101,7 +115,7 @@ local messageBox = {
 	classid = base.message_box,
 	superid = base.root,
 	name = "MessageBox",
-	icon = "",
+	icon = "res/icon/message_box.png",
 	comment = "创建一个等待屏直到任务结束",
 	version = 1,
 	class = {
