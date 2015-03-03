@@ -15,7 +15,6 @@ local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
 base.addBaseClass( _classes )
 
-
 --产生一个唯一的ID字符串
 local function generateId()
 	local t = tostring(os.time())..tostring(s_gidcount)

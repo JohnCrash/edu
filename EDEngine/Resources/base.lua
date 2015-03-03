@@ -8,14 +8,19 @@ local ui = {
 	SPLASH_TEXT = "Label_4",
 	LOADING_PROGRESSBAR = "ProgressBar_1",
 	LOADING_TEXT = "Label_2",
+	MESSAGEBOX_FILE = "res/splash/messagebox",
+	BUTTON_OK = "Button_5",
+	BUTTON_CANCEL = "Button_6",
+	CAPTION_TEXT = "Label_8",
+	MESSAGE_TEXT = "Label_7",
 }
 
 --基类的名称映射表
 local base = {
-	root = "",
-	splash_scene = "",
-	loading_scene = "",
-	message_box = "",
+	root = "7c3064bb858e619b9f02fef85432f162",
+	splash_scene = "b50a67aa2ed2183bee9b804ce7dbdefd",
+	loading_scene = "8bb51443e440190b892996b8c2864672",
+	message_box = "8736daf38faaa28693f922843cc0c5aa",
 }
 
 local root = {
@@ -82,6 +87,7 @@ local splashScene = {
 				local scheduler = obj:getScheduler()
 				local schedulerId
 				if event == 'enter' then
+					uikits.initDR{width=960,height=640}
 					schedulerId = scheduler:scheduleScriptFunc(spin,0.8/N,false)	
 				elseif event == 'exit' then
 					scheduler:unscheduleScriptEntry(schedulerId)
@@ -104,10 +110,25 @@ local loadingScene = {
 	version = 1,
 	class = {
 		createScene = function(self)
+			self._scene = cc.Scene:create()
+			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
+			self._scene:addChild(self._loading)
+			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
+			self._progress = uikits.child(self._loading,ui.LOADING_PROGRESSBAR)
+			local function onNodeEvent(event)
+				if event == 'enter' then
+					uikits.initDR{width=960,height=640}
+				elseif event == 'exit' then
+				end			
+			end
+			self._scene:registerScriptHandler(onNodeEvent)
+			return self._scene
 		end,
 		setProgress = function( self,d )
+			self._progress:setPercent( d )
 		end,
 		setText = function( self,txt )
+			self._text:setString(txt)
 		end,
 	}
 }
@@ -119,7 +140,34 @@ local messageBox = {
 	comment = "创建一个等待屏直到任务结束",
 	version = 1,
 	class = {
-		open = function(self)
+		open = function(self,t)
+			self._scene = cc.Scene:create()
+			self._box = uikits.fromJson{file=self:getR(ui.MESSAGEBOX_FILE)}
+			self._scene:addChild(self._box)
+			self._text = uikits.child(self._box,ui.MESSAGE_TEXT)
+			self._caption = uikits.child(self._box,ui.CAPTION_TEXT)
+			self._ok = uikits.child(self._box,ui.BUTTON_OK)
+			self._cancel = uikits.child(self._box,ui.BUTTON_CANCEL)
+			
+			self._caption:setString( tostring(t.caption) )
+			self._text:setString( tostring(t.text) )
+			if t.okText then
+				self._ok:setTitleText( tostring(t.okText) )
+			end
+			if t.cancelText then
+				self._cancel:setTitleText( tostring(t.cancelText) )
+			end
+			uikits.event(self._ok,function(sender)
+				if t.onClick then
+					t.onClick( 'OK' )
+				end
+			end)
+			uikits.event(self._cancel,function(sender)
+				if t.onClick then
+					t.onClick( 'CANCEL' )
+				end			
+			end)
+			return self._scene			
 		end
 	}
 }
