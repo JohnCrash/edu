@@ -17,6 +17,17 @@ local function getServerRootDirectory()
 	return local_server.."class/"
 end
 
+local function deleteClassFile( classId,name )
+	local df = getClassRootDirectory()..classId..'/'..tostring(name)
+	kits.del_file( df )
+end
+
+local function renameClassFile( classId,old,new )
+	local o = getClassRootDirectory()..classId..'/'..tostring(old)
+	local n = getClassRootDirectory()..classId..'/'..tostring(new)
+	kits.rename_file(o,n)
+end
+
 local function writeClassFile( classId,jsonFile,buf )
 	local df = getClassRootDirectory()..classId..'/'..tostring(jsonFile)
 	local file = io.open(df,'wb')
@@ -37,6 +48,18 @@ local function loadClassJson( classId,jsonFile )
 		return destable
 	else
 		kits.log("ERROR can not read file "..tostring(df))
+	end
+end
+
+local function isExisted( classId,name,md5 )
+	local df = getClassRootDirectory()..classId..'/'..tostring(name)
+	local file = io.read( df,"rb" )
+	if file then
+		local all = file:read("*a")
+		file:close()
+		if md5.sumhexa(all) == md5 then
+			return true
+		end
 	end
 end
 
@@ -107,8 +130,12 @@ UpdateClassFiles有一个隐含规则，如果文件名结尾加入~
 将寻找下载去除~的文件名，但是存储时加入~
 例如下载文件{'depends.json~'},将下载depends.json并存储
 为depends.json~
+UpdateClassFiles的files可以有两种格式
+{'file1','file2'}
+{[1]={name='file1',md5=''}} 需要额外的校验
+如果isTemp=true,文件后面都相当于加入~
 --]]
-local function UpdateClassFiles( classId,func,files )
+local function UpdateClassFiles( classId,func,files,isTemp )
 	local function getRealName( v )
 		if string.sub(v,-1) == '~' then
 			return string.sub(v,0,-2)
@@ -119,10 +146,20 @@ local function UpdateClassFiles( classId,func,files )
 	local count = 0
 	local total = 0
 	for k,v in pairs(files) do
-		local name = getRealName( v )
-		local url = getServerRootDirectory()..classId..'/'..name
-		ut[v] = {url=url,readName=name,writeName=v}
-		total = total + 1
+		if type(v)=='table' then
+			if isTemp then v.name = v.name..'~' end
+			local name = getRealName( v.name )
+			local url = getServerRootDirectory()..classId..'/'..name
+			if not isExisted(classId,v.name,v.md5) then
+				ut[v] = {url=url,readName=name,writeName=v.name,md5=v.md5}
+				total = total + 1
+			end
+		else
+			local name = getRealName( v )
+			local url = getServerRootDirectory()..classId..'/'..name
+			ut[v] = {url=url,readName=name,writeName=v}
+			total = total + 1
+		end		
 	end
 	local trycount = 0
 	local function isalldown()
@@ -139,6 +176,12 @@ local function UpdateClassFiles( classId,func,files )
 			if not v.result then
 				request( v.url,function(b,data)
 						count = count + 1
+						if v.md5 and b then
+							if md5.sumhexa(data)~=v.md5 then
+								kits.log("WARNING UpdateClassFiles checksum failed!"..tostring(v.readName))
+								b = false
+							end
+						end
 						ut[v].result = b
 						if b then
 							writeClassFile(classId,v.writeName,data)
@@ -158,13 +201,91 @@ local function UpdateClassFiles( classId,func,files )
 			end
 		end
 	end
-	download()
+	if total == 0 then
+		func(true)
+	else
+		download()
+	end
 end
 
 --[[
 成功func(true),失败func(false)
 --]]
 local function UpdateClass( classId,func )
+	local delete_files = {}
+	local update_files
+	local function complete(b)
+		if b and update_files then
+			for k,v in pairs(delete_files) do
+				deleteClassFile( classId,v )
+			end
+			for k,v in pairs(update_files) do
+				deleteClassFile( classId,v.name )
+				renameClassFile( classId,v.name..'~',v.name )
+			end
+			func(true)
+		else
+			func(false)
+		end
+	end
+	local function build_fast_table(s)
+		local fast = {}
+		for k,v in pairs(s) do
+			if v.name and v.md5 then
+				fast[v.name] = v.md5
+			else
+				kits.log("ERROR UpdateClass local filelist.json file corruption")
+				kits.log("	classId="..tostring(classId))
+			end
+		end
+		return fast
+	end
+	local function different( l,r )
+		local result = {}
+		local fast_l = build_fast_table(l)
+		local fast_r = build_fast_table(r)
+		--sub operate
+		for k,v in pairs(l) do
+			if v.name and not fast_r[v.name] then
+				table.insert(delete_files,v.name)
+			end
+		end
+		--add operate
+		for k,v in pairs(r) do
+			if v.name and v.md5 then
+				if not fast_l[v.name] or (fast_l[v.name] and fast_l[v.name]~=v.md5) then
+					table.insert(result,v)
+				end
+			else
+				kits.log("ERROR UpdateClass remote filelist.json file corruption")
+				kits.log("	classId="..tostring(classId))			
+			end
+		end
+		return result
+	end
+	local function compare( b )
+		if b then
+			local local_list = loadClassJson( classId,'filelist.json' )
+			local remote_list = loadClassJson( classId,'filelist.json~' )
+			if remote_list then
+				if local_list then
+					update_files = differnet(local_list,remote_list)					
+				else
+					update_files = remote_list
+				end
+				UpdateClassFiles(classId,complete,update_files,true)
+			else
+				kits.log("ERROR UpdateClass decode error,filelist.json")
+				kits.log("	classId="..tostring(classId))
+				func(false)
+			end
+		else
+			kits.log('ERROR UpdateClass can not download filelist.json')
+			kits.log("	classId="..tostring(classId))
+			func(false)
+		end
+	end
+	UpdateClassFiles( classId,compare,{'filelist.json~'})
 end
 
 --[[
