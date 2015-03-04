@@ -117,20 +117,48 @@ local function UpdateClassFiles( classId,func,files )
 	end
 	local ut = {}
 	local count = 0
+	local total = 0
 	for k,v in pairs(files) do
 		local name = getRealName( v )
 		local url = getServerRootDirectory()..classId..'/'..name
-		ut[v] = {url=url,real=name,name=v}
-		request( url,function(b,data)
-			count = count + 1
-			ut[v].result = b
-			if b then
-				writeClassFile(classId,v,data)
-			end
-			if count == #ut then
-			end
-		end )
+		ut[v] = {url=url,readName=name,writeName=v}
+		total = total + 1
 	end
+	local trycount = 0
+	local function isalldown()
+		total = 0
+		for k,v in pairs(ut) do
+			if not v.result then
+				total = total + 1
+			end
+		end
+		return total == 0
+	end
+	local function download()
+		for k,v in pairs(ut) do
+			if not v.result then
+				request( v.url,function(b,data)
+						count = count + 1
+						ut[v].result = b
+						if b then
+							writeClassFile(classId,v.writeName,data)
+						end
+						if count == total then
+							if isalldown() then
+								func(true)
+							elseif trycount < 3 then
+								count = 0
+								trycount = trycount + 1
+								download()
+							else
+								func(false)
+							end
+						end
+				end )
+			end
+		end
+	end
+	download()
 end
 
 --[[
