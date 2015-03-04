@@ -5,6 +5,7 @@ local ljshell = require "ljshell"
 local resume = require "resume"
 local mt = require "mt"
 
+local _updates = {}
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 local liexue_server = "http://file.lejiaolexue.com/upgrade/luaapp/v"..resume.getversion().."/"
 local local_server = "http://192.168.2.211:81/lgh/v"..resume.getversion().."/"
@@ -226,7 +227,7 @@ end
 progress是一个进度回调，第一参数为一个0~1的数表示进度
 第二参数是表述字串
 --]]
-local function UpdateClass( classId,func,progress )
+local function UpdateClassRaw( classId,func,progress )
 	local delete_files = {}
 	local update_files
 	local function complete(b)
@@ -301,6 +302,49 @@ local function UpdateClass( classId,func,progress )
 		end
 	end
 	UpdateClassFiles( classId,compare,{'filelist.json'},true,progress)
+end
+
+--和UpdateClassRaw基本增加了version检查
+local UpdateClass( classId,updateResult,progress )
+	local function notify( state )
+		if state == 1 or state == 2 or state == -2 then
+			--需要跟新,-2再次尝试
+			local function updateComplete( result )
+				if not result then
+					if state == 2 then
+						--跟新失败，但是有本地版本可以运行给出一个警告
+						kits.log("WARNING UpdateClass failed,but local version existed 2."..tostring(classId))
+						_updates[classId] = 3	
+						updateResult(true)
+					else
+						--跟新失败，同时没有本地版本可以运行
+						kits.log("ERROR UpdateClass failed,local version not exist")
+						updateResult(false)
+					end
+				else
+					_updates[classId] = 3
+					updateResult(true)
+				end
+			end
+			UpdateClassRaw( classId,updateComplete,progress )
+		elseif state == 0 then
+			--不需要跟新
+			_updates[classId] = 2
+			updateResult(true)
+		elseif state == -1 then
+			_updates[classId] = 1
+			kits.log("WARNING UpdateClass failed,but local version existed -1."..tostring(classId))
+			updateResult(true)
+		else
+			kits.log("ERROR UpdateClass unknow state")
+			updateResult(false)
+		end
+	end
+	if _updates[classId] then
+		updateResult(true)
+	else
+		return CheckClassVersion( classId,notify )
+	end
 end
 
 --[[

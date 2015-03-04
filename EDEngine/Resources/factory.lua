@@ -9,8 +9,7 @@ local base = require "base"
 local s_gidcount = os.time()
 --从classId到类表的映射表
 local _classes = {}
---给定的classId是否已经进行了跟新(本地版本和服务器版本的关系)
-local _updates = {}
+
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
 base.addBaseClass( _classes )
@@ -34,46 +33,6 @@ local function hasLocalClass( classId )
 		file:close()
 		return true
 	end
-end
-
---[[跟新类，成功返回true,失败返回false
-	如果跟新完成可以进行加载类调用updateResult(true)
-	否则updateResult(false)
---]]
-local function UpdateClass( classId,updateResult )
-	local function notify( state )
-		if state == 1 or state == 2 or state == -2 then
-			--需要跟新,-2再次尝试
-			local function updateComplete( result )
-				if not result then
-					if state == 2 then
-						--跟新失败，但是有本地版本可以运行给出一个警告
-						kits.log("WARNING UpdateClass failed,but local version existed 2."..tostring(classId))
-						updateResult(true)
-					else
-						--跟新失败，同时没有本地版本可以运行
-						kits.log("ERROR UpdateClass failed,local version not exist")
-						updateResult(false)
-					end
-				else
-					updateResult(true)
-				end
-			end
-			update.UpdateClass( classId,updateComplete )
-		elseif state == 0 then
-			--不需要跟新
-			_updates[classId] = 2
-			updateResult(true)
-		elseif state == -1 then
-			_updates[classId] = 1
-			kits.log("WARNING UpdateClass failed,but local version existed -1."..tostring(classId))
-			updateResult(true)
-		else
-			kits.log("ERROR UpdateClass unknow state")
-			updateResult(false)
-		end
-	end
-	return update.CheckClassVersion( classId,notify )
 end
 
 local function loadClassTable( scriptFile )
@@ -147,12 +106,7 @@ local function addClass( classId,addClassResult )
 		end
 	end
 	
-	if not _updates[classId] then
-		UpdateClass( classId,loadClass )
-	else
-		--已经提前跟新好了
-		loadClass( true )
-	end	
+	update.UpdateClass( classId,loadClass )
 end
 
 --通过classId创建给定对象
