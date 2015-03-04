@@ -22,21 +22,8 @@ local function generateId()
 	return md5.sumhexa(t)
 end
 
-local function loadClassJson( classId,jsonFile )
-	local df = update.getClassRootDirectory()..classId..'/'..tostring(jsonFile)
-	local file = io.read( df,"rb" )
-	if file then
-		local all = file:read("*a")
-		file:close()
-		local destable = json.decode( all )
-		return destable
-	else
-		kits.log("ERROR can not read file "..tostring(df))
-	end
-end
-
 local function loadClassDescription( classId )
-	return loadClassJson( classId,'desc.json' )
+	return update.loadClassJson( classId,'desc.json' )
 end
 
 --检查存在本地类吗
@@ -237,7 +224,7 @@ local function launch(classId)
 			splash = 1 --标记已经不需要splash了
 			launchProgress(classId)
 			uikits.pushScene( progressObject.scene() )
-			local deps = loadClassJson(classId,'depends.json')
+			local deps = update.loadClassJson(classId,'depends.json~')
 			local function updateResult( b )
 				if b then
 				else
@@ -266,7 +253,7 @@ local function launch(classId)
 			end)
 	end	
 	local function nextStep()
-		local cls = loadClassDescription(classId)
+		local cls = update.loadClassJson(classId,'desc.json~')
 		if cls and cls.progressid then
 			create( cls.progressid,progressStep )
 		elseif cls then
@@ -289,7 +276,7 @@ local function launch(classId)
 					kits.log("ERROR factory.launch failed.")
 				end
 			end
-			update.UpdateClassFiles( classId,downloadDepends,{"depends.json","desc.json"})
+			update.UpdateClassFiles( classId,downloadDepends,{"depends.json~","desc.json~"})
 		else
 			--不需要跟新,进入下一个步骤
 			nextStep()
