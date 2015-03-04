@@ -134,13 +134,20 @@ UpdateClassFiles的files可以有两种格式
 {'file1','file2'}
 {[1]={name='file1',md5=''}} 需要额外的校验
 如果isTemp=true,文件后面都相当于加入~
+progress是一个进度回调，第一参数为一个0~1的数表示进度
+第二参数是表述字串
 --]]
-local function UpdateClassFiles( classId,func,files,isTemp )
+local function UpdateClassFiles( classId,func,files,isTemp,progress )
 	local function getRealName( v )
 		if string.sub(v,-1) == '~' then
 			return string.sub(v,0,-2)
 		else
 			return v
+	end
+	local function progressFunc(d,txt)
+		if progress then
+			progress(d,txt or '')
+		end
 	end
 	local ut = {}
 	local count = 0
@@ -176,6 +183,9 @@ local function UpdateClassFiles( classId,func,files,isTemp )
 			if not v.result then
 				request( v.url,function(b,data)
 						count = count + 1
+						if trycount==0 then
+							progressFunc( count/total,v.readName )
+						end
 						if v.md5 and b then
 							if md5.sumhexa(data)~=v.md5 then
 								kits.log("WARNING UpdateClassFiles checksum failed!"..tostring(v.readName))
@@ -188,6 +198,7 @@ local function UpdateClassFiles( classId,func,files,isTemp )
 						end
 						if count == total then
 							if isalldown() then
+								progressFunc(1)
 								func(true)
 							elseif trycount < 3 then
 								count = 0
@@ -202,14 +213,18 @@ local function UpdateClassFiles( classId,func,files,isTemp )
 		end
 	end
 	if total == 0 then
+		progressFunc(1)
 		func(true)
 	else
+		progressFunc(0)
 		download()
 	end
 end
 
 --[[
 成功func(true),失败func(false)
+progress是一个进度回调，第一参数为一个0~1的数表示进度
+第二参数是表述字串
 --]]
 local function UpdateClass( classId,func,progress )
 	local delete_files = {}
@@ -273,7 +288,7 @@ local function UpdateClass( classId,func,progress )
 				else
 					update_files = remote_list
 				end
-				UpdateClassFiles(classId,complete,update_files,true)
+				UpdateClassFiles(classId,complete,update_files,true,progress)
 			else
 				kits.log("ERROR UpdateClass decode error,filelist.json")
 				kits.log("	classId="..tostring(classId))
@@ -285,12 +300,14 @@ local function UpdateClass( classId,func,progress )
 			func(false)
 		end
 	end
-	UpdateClassFiles( classId,compare,{'filelist.json~'})
+	UpdateClassFiles( classId,compare,{'filelist.json'},true,progress)
 end
 
 --[[
 跟新表中全部的类
 成功func(true),失败func(false)
+progress是一个进度回调，第一参数为一个0~1的数表示进度
+第二参数是表述字串
 --]]
 local function UpdateClassByTable( classIds,func,progress )
 	local i = 1
@@ -298,7 +315,7 @@ local function UpdateClassByTable( classIds,func,progress )
 	local progressValue = 0
 	local function progressFunc( d,txt )
 		if progress then
-			progress( d,txt )
+			progress( d,txt or '' )
 		end
 	end
 	local function progressSubFunc( d,txt )
