@@ -211,7 +211,7 @@ end
 --[[
 成功func(true),失败func(false)
 --]]
-local function UpdateClass( classId,func )
+local function UpdateClass( classId,func,progress )
 	local delete_files = {}
 	local update_files
 	local function complete(b)
@@ -293,6 +293,41 @@ end
 成功func(true),失败func(false)
 --]]
 local function UpdateClassByTable( classIds,func,progress )
+	local i = 1
+	local N = #classIds
+	local progressValue = 0
+	local function progressFunc( d,txt )
+		if progress then
+			progress( d,txt )
+		end
+	end
+	local function progressSubFunc( d,txt )
+		progressValue = d/N+progressValue
+		progressFunc(progressValue,txt)
+	end
+	local function onResult(b)
+		if b then
+			if classIds[i+1] then
+				i=i+1
+				progressValue = (i-1)/N
+				progressFunc(progressValue,classIds[i])				
+				UpdateClass(classIds[i],onResult,progressSubFunc )
+			else
+				func(true)
+				progressFunc(1)
+			end
+		else
+			func(false)
+		end
+	end
+	if N>0 then
+		progressValue = (i-1)/N
+		progressFunc(progressValue,classIds[1])	
+		UpdateClass(classIds[1],onResult,progressSubFunc )
+	else
+		func(true)
+		progressFunc(1)
+	end
 end
 
 return {
