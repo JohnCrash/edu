@@ -18,9 +18,9 @@ local ui = {
 --基类的名称映射表
 local base = {
 	root = "7c3064bb858e619b9f02fef85432f162",
-	splash_scene = "b50a67aa2ed2183bee9b804ce7dbdefd",
-	loading_scene = "8bb51443e440190b892996b8c2864672",
-	message_box = "8736daf38faaa28693f922843cc0c5aa",
+	SplashScene = "b50a67aa2ed2183bee9b804ce7dbdefd",
+	LoadingScene = "8bb51443e440190b892996b8c2864672",
+	MessageBox = "8736daf38faaa28693f922843cc0c5aa",
 }
 
 local root = {
