@@ -139,6 +139,7 @@ progress是一个进度回调，第一参数为一个0~1的数表示进度
 第二参数是表述字串
 --]]
 local function UpdateClassFiles( classId,func,files,isTemp,progress )
+	local MAX_THREAD = 10
 	local function getRealName( v )
 		if string.sub(v,-1) == '~' then
 			return string.sub(v,0,-2)
@@ -159,66 +160,75 @@ local function UpdateClassFiles( classId,func,files,isTemp,progress )
 			local name = getRealName( v.name )
 			local url = getServerRootDirectory()..classId..'/'..name
 			if not isExisted(classId,v.name,v.md5) then
-				ut[v] = {url=url,readName=name,writeName=v.name,md5=v.md5}
-				total = total + 1
+				table.insert(ut,{url=url,readName=name,writeName=v.name,md5=v.md5,idx=total})
 			end
 		else
 			local name = getRealName( v )
 			local url = getServerRootDirectory()..classId..'/'..name
-			ut[v] = {url=url,readName=name,writeName=v}
-			total = total + 1
+			table.insert(ut,{url=url,readName=name,writeName=v,idx=total})
 		end		
 	end
+	total = #ut
 	local trycount = 0
-	local function isalldown()
-		total = 0
+	local director = cc.Director:getInstance()
+	local scheduler = director:getScheduler()
+	local thread = 0
+	local ndx = 0
+	local schedulerID
+	local function isAllDownAndPrepare()
+		count = 0
+		thread = 0
+		ndx = 0
+		local tryut = {}
 		for k,v in pairs(ut) do
 			if not v.result then
-				total = total + 1
+				table.insert(tryut,v)
 			end
 		end
-		return total == 0
+		ut = tryut
+		total = #ut
+		return total==0
 	end
-	local function download()
-		for k,v in pairs(ut) do
-			if not v.result then
-				request( v.url,function(b,data)
-						count = count + 1
-						if trycount==0 then
-							progressFunc( count/total,v.readName )
-						end
-						if v.md5 and b then
-							if md5.sumhexa(data)~=v.md5 then
-								kits.log("WARNING UpdateClassFiles checksum failed!"..tostring(v.readName))
-								b = false
-							end
-						end
-						ut[v].result = b
-						if b then
-							writeClassFile(classId,v.writeName,data)
-						end
-						if count == total then
-							if isalldown() then
-								progressFunc(1)
-								func(true)
-							elseif trycount < 3 then
-								count = 0
-								trycount = trycount + 1
-								download()
-							else
-								func(false)
-							end
-						end
-				end )
+	local function downloads()
+		if thread >= MAX_THREAD or ndx == total then return end
+		thread = thread + 1
+		ndx = ndx+1
+		local index = ndx
+		local v = ut[index]
+		request(v.url,function(b,data)
+			thread = thread - 1
+			count = count + 1
+			if v.md5 and b then
+				if md5.sumhexa(data)~=v.md5 then
+					kits.log("WARNING UpdateClassFiles checksum failed!"..tostring(v.readName))
+					b = false
+				end
 			end
-		end
+			v.result = b
+			if b then
+				writeClassFile(classId,v.writeName,data)
+			end
+			if count == total then
+				if isAllDownAndPrepare() then
+					progressFunc(1)
+					scheduler:unscheduleScriptEntry(schedulerID)
+					func(true)
+				elseif trycount < 3 then
+					trycount = trycount + 1
+				else
+					scheduler:unscheduleScriptEntry(schedulerID)
+					func(false)
+				end			
+			end
+		end)
 	end
+	
 	if total == 0 then
 		progressFunc(1)
 		func(true)
 	else
 		progressFunc(0)
-		download()
+		schedulerID = scheduler:scheduleScriptFunc(downloads,0.01,false)
 	end
 end
 
@@ -314,7 +324,7 @@ local UpdateClass( classId,updateResult,progress )
 					if state == 2 then
 						--跟新失败，但是有本地版本可以运行给出一个警告
 						kits.log("WARNING UpdateClass failed,but local version existed 2."..tostring(classId))
-						_updates[classId] = 3	
+						_updates[classId] = state
 						updateResult(true)
 					else
 						--跟新失败，同时没有本地版本可以运行
@@ -322,18 +332,18 @@ local UpdateClass( classId,updateResult,progress )
 						updateResult(false)
 					end
 				else
-					_updates[classId] = 3
+					_updates[classId] = state
 					updateResult(true)
 				end
 			end
 			UpdateClassRaw( classId,updateComplete,progress )
 		elseif state == 0 then
 			--不需要跟新
-			_updates[classId] = 2
+			_updates[classId] = state
 			updateResult(true)
 		elseif state == -1 then
-			_updates[classId] = 1
 			kits.log("WARNING UpdateClass failed,but local version existed -1."..tostring(classId))
+			_updates[classId] = state
 			updateResult(true)
 		else
 			kits.log("ERROR UpdateClass unknow state")
@@ -378,6 +388,7 @@ local function UpdateClassByTable( classIds,func,progress )
 				progressFunc(1)
 			end
 		else
+			kits.log("ERROR UpdateClassByTable failed."..tostring(classIds[i+1]))
 			func(false)
 		end
 	end
