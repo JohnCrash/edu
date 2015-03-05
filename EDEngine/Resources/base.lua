@@ -59,6 +59,19 @@ local root = {
 				end
 			end
 			return res
+		end,
+		isInstanceOf = function(self,A)
+			local cls = self._cls
+			if cls then
+				if cls.classid == A or cls.superid == A then
+					return true
+				end
+				if cls.pedigree then
+					for k,v in pairs(cls.pedigree) do
+						if v == A then return true end
+					end
+				end
+			end
 		end
 	}
 }

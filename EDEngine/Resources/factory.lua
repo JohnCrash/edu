@@ -67,7 +67,7 @@ local function addClass( classId,addClassResult )
 	local function loadClass( b )
 		if not b then 
 			addClassResult(false)
-			return 
+			return
 		end
 		local cls = loadClassDescription( classId )
 		if not cls then
