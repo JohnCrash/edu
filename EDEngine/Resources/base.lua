@@ -10,7 +10,6 @@ local ui = {
 	LOADING_TEXT = "Label_2",
 	MESSAGEBOX_FILE = "res/splash/messagebox",
 	BUTTON_OK = "Button_5",
-	BUTTON_CANCEL = "Button_6",
 	CAPTION_TEXT = "Label_8",
 	MESSAGE_TEXT = "Label_7",
 }
@@ -127,7 +126,7 @@ local loadingScene = {
 	comment = "创建一个具有进度条的加载屏",
 	version = 1,
 	class = {
-		createScene = function(self)
+		open = function(self)
 			self._scene = cc.Scene:create()
 			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
 			self._scene:addChild(self._loading)
@@ -140,7 +139,12 @@ local loadingScene = {
 				end			
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
-			return self._scene
+			uikits.pushScene(self._scene)
+		end,
+		close = function(self)
+			if self._scene then
+				uikits.popScene(self._scene)
+			end
 		end,
 		setProgress = function( self,d )
 			self._progress:setPercent( d )
@@ -159,33 +163,108 @@ local messageBox = {
 	version = 1,
 	class = {
 		open = function(self,t)
-			self._scene = cc.Scene:create()
+			if not t then return end
 			self._box = uikits.fromJson{file=self:getR(ui.MESSAGEBOX_FILE)}
-			self._scene:addChild(self._box)
 			self._text = uikits.child(self._box,ui.MESSAGE_TEXT)
 			self._caption = uikits.child(self._box,ui.CAPTION_TEXT)
 			self._ok = uikits.child(self._box,ui.BUTTON_OK)
-			self._cancel = uikits.child(self._box,ui.BUTTON_CANCEL)
 			
-			self._caption:setString( tostring(t.caption) )
-			self._text:setString( tostring(t.text) )
-			if t.okText then
-				self._ok:setTitleText( tostring(t.okText) )
-			end
-			if t.cancelText then
-				self._cancel:setTitleText( tostring(t.cancelText) )
-			end
-			uikits.event(self._ok,function(sender)
-				if t.onClick then
-					t.onClick( 'OK' )
+			self._caption:setString( t.caption or "" )
+			self._texts = {}
+			self._buttons = {}
+			if t.text and type(t.text)=='string' then
+				self._text:setString( t.text )
+				table.insert(self._texts,self._text)
+			elseif t.text and type(t.text)=='table' then
+				for k,v in pairs(t.text) do
+					local txt = self._text:clone()
+					txt:setString(v)
+					table.insert(self._texts,txt)
 				end
-			end)
-			uikits.event(self._cancel,function(sender)
-				if t.onClick then
-					t.onClick( 'CANCEL' )
-				end			
-			end)
-			return self._scene			
+			end
+			self._text:setVisible(false)
+			if t.button and type(t.button)=='number' then
+				local bt={"确定","取消","重试"}
+				for i = 1,t.button do
+					local but
+					if i==1 then
+						but = self._ok
+					else
+						but = self._ok:clone()
+					end
+					but:setTitleText(bt[i])
+					table.insert(self._buttons,but)					
+				end
+			elseif t.button and type(t.button)=='table' then
+				for i,v pairs(t.button) do
+					local but
+					if i==1 then
+						but = self._ok
+					else
+						but = self._ok:clone()
+					end
+					but:setTitleText(tostring(v))
+					table.insert(self._buttons,but)					
+				end
+			end
+			self:relayout()
+			local director = cc.Director:getInstance()
+			local scene = director:getRunningScene()
+			if scene then
+				self._scene = scene
+				scene:addChild(self._box)
+			else
+				self._scene = cc.Scene:create()
+				self._scene:addChild(self._box)
+				uikits.pushScene(self._scene)
+			end
+		end,
+		relayout=function(self)
+			local bhspace = 12 --按钮中的文字和边框两侧的间隔
+			local bvspace = 8 --上下的间隔
+			local space = 8
+			local title_height = 42
+			local H,W = space,space
+			local BW,BH = 0,0
+			--计算需要的空间
+			for i,v in pairs(self._buttons) do
+				local txt = v:getTitleText()
+				self._text:setString(txt)
+				local size = self._text:getContentSize()
+				size.width = size.width+bhspace*2
+				size.height = size.height+bvspace*2
+				v:setContentSize(size)
+				W = W+size.width+space
+				if i==1 then
+					H = H+size.height+space
+				end
+			end
+			BW = W-2*space
+			BH = H
+			for i,v in pairs(self._texts) do
+				local size = v:getContentSize()
+				W = math.max(W,size.width+2*space)
+				H = H+size.height+space
+			end
+			self._box:setContentSize(cc.Size(W,H+title_height))
+			--开始布局按钮
+			local ox = (W-BW)/2*space
+			for i,v in pairs(self._buttons) do
+				local x,y = v:getPosition()
+				local size = v:getContentSize()
+				v:setPosition(cc.p(ox,y))
+				ox = ox+size.width+space
+			end
+			--布局文本
+			local oy = BH
+			for i,v in pairs(self._texts) do
+				local x,y = v:getPosition()
+				local size = v:getContentSize()
+				v:setPosition(cc.p(x,oy))
+				oy = oy+size.height+space
+			end
+			--放置标题
+			self._caption:setPosition(cc.p(W/2,H+title_height/2))
 		end
 	}
 }
