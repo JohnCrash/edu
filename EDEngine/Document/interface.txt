@@ -1,8 +1,8 @@
-root(7c3064bb858e619b9f02fef85432f162)
+root (7c3064bb858e619b9f02fef85432f162)
 	getR(res) 取得资源res路径。
 	isInstanceOf(classid) 判断classid是否在对象的继承链中,或者说是不是一个classid对象.
 
-MessageBox(8736daf38faaa28693f922843cc0c5aa)
+MessageBox (8736daf38faaa28693f922843cc0c5aa)
 	open(t) 打开一个对话框。t有如下的项。
 	caption 标题必须是一个字符串
 	text 正文可以是一个字符串，也可以是一个字符数组{"line1","line2"}
@@ -12,14 +12,14 @@ MessageBox(8736daf38faaa28693f922843cc0c5aa)
 		index :button中的索引
 		button:button中的文字
 	
-LoadingScene(8bb51443e440190b892996b8c2864672)
+LoadingScene (8bb51443e440190b892996b8c2864672)
 	open() 打开一个Loading界面，它用来在加载时显示进度用的界面。
 		比如有一个旋转的圈表示程序还在运行。
 	close() 关闭Loading界面。
 	setProgress(d) 设置进度，d是一个0-1的数。
 	setText(txt) 加载中间过程的提示文本。
 	
-SplashScene(b50a67aa2ed2183bee9b804ce7dbdefd)
+SplashScene (b50a67aa2ed2183bee9b804ce7dbdefd)
 	open() 打开一个Splash界面，它用来在加载时显示的一个提示屏。
 		比如有一个旋转的圈表示程序还在运行。
 	close() 关闭Splash界面。

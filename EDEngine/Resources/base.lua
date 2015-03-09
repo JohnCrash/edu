@@ -84,7 +84,7 @@ local splashScene = {
 	comment = "创建一个等待屏直到任务结束",
 	version = 1,
 	class = {
-		createScene = function(self)
+		open = function(self)
 			self._scene = cc.Scene:create()
 			self._splash = uikits.fromJson{file=self:getR(ui.SPLASH_FILE)}
 			self._scene:addChild(self._splash)
@@ -107,7 +107,12 @@ local splashScene = {
 				end
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
-			return self._scene
+			uikits.pushScene(self._scene)
+		end,
+		close = function(self)
+			if self._scene then
+				uikits.popScene()
+			end
 		end,
 		setText = function(self,txt)
 			self._text:setString(txt)
