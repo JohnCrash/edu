@@ -24,6 +24,8 @@ local base = {
 	SplashScene = "b50a67aa2ed2183bee9b804ce7dbdefd",
 	LoadingScene = "8bb51443e440190b892996b8c2864672",
 	MessageBox = "8736daf38faaa28693f922843cc0c5aa",
+	Spin = "b34d6d7a5652cf3bbe6388d5770dbe95",
+	ProgressBox = "6e8c7a6612998e78186585e468010f95",
 }
 
 local root = {
@@ -357,6 +359,36 @@ local messageBox = {
 	}
 }
 
+local Spin ={
+	classid = base.Spin,
+	superid = base.root,
+	name = "Spin",
+	icon = "res/icon/spin.png",
+	comment = "在屏幕中间加入一个旋转圈用来等待一个任务",
+	version = 1,
+	class = {
+		open=function(self)
+		end,
+		close=function(self)
+		end,
+	}
+}
+
+local ProgressBox={
+	classid = base.ProgressBox,
+	superid = base.root,
+	name = "ProgressBox",
+	icon = "res/icon/progressbox.png",
+	comment = "一个有进度条的对话栏",
+	version = 1,
+	class = {
+		open=function(self)
+		end,
+		close=function(self)
+		end,	
+	}
+}
+
 local function _readonly(t,k,v)
 	kits.log("ERROR read only")
 end
@@ -383,6 +415,8 @@ local function addBaseClass(_classes)
 	addClass(base.SplashScene,splashScene)
 	addClass(base.LoadingScene,loadingScene)
 	addClass(base.MessageBox,messageBox)
+	addClass(base.Spin,Spin)
+	addClass(base.ProgressBox,ProgressBox)
 end
 
 base.addBaseClass = addBaseClass

@@ -232,7 +232,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 				local factory = require "factory"
 				local base = require "base"
-				--[[ 测试MessageBox
+				---[[ 测试MessageBox
 				factory.create(base.MessageBox,function(obj)
 					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
 					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)
@@ -252,7 +252,7 @@ function AppEntry:init()
 					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]
-				---[[ 测试LoadingScene
+				--[[ 测试LoadingScene
 				factory.create(base.LoadingScene,function(obj)
 					obj:open()
 					obj:setText("准备")

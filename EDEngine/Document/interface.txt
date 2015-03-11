@@ -4,11 +4,11 @@ root (7c3064bb858e619b9f02fef85432f162)
 
 MessageBox (8736daf38faaa28693f922843cc0c5aa)
 	open(t) 打开一个对话框。t有如下的项。
-	caption 标题必须是一个字符串
-	text 正文可以是一个字符串，也可以是一个字符数组{"line1","line2"}
-	button 按钮数组,{"OK","Cancel"}或者也可以是一个整数1代表{"确定"}
-		2代表{"确定","取消"},3代表{"确定","取消","重试"}
-	onClick(index,button) 点击事件，当消息栏的按钮被按下时。
+		caption 标题必须是一个字符串
+		text 正文可以是一个字符串，也可以是一个字符数组{"line1","line2"}
+		button 按钮数组,{"OK","Cancel"}或者也可以是一个整数1代表{"确定"}
+			2代表{"确定","取消"},3代表{"确定","取消","重试"}
+		onClick(index,button) 点击事件，当消息栏的按钮被按下时。
 		index :button中的索引
 		button:button中的文字
 	
@@ -24,3 +24,12 @@ SplashScene (b50a67aa2ed2183bee9b804ce7dbdefd)
 		比如有一个旋转的圈表示程序还在运行。
 	close() 关闭Splash界面。
 	setText(txt) 加载中间过程的提示文本。
+
+Spin (b34d6d7a5652cf3bbe6388d5770dbe95)
+	open() 在屏幕的中间显示一个旋转的圈。
+	close() 关闭Spin
+	
+ProgressBox (6e8c7a6612998e78186585e468010f95)
+	open(t) 打开一个具有进度条的对话栏。
+	close() 关闭对话栏。
+	setProgress(d) 设置进度，d是一个0-1的数。
