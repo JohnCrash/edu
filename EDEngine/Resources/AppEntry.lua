@@ -232,14 +232,29 @@ function AppEntry:init()
 		eventClick=function(sender)
 				local factory = require "factory"
 				local base = require "base"
+				--[[ 测试MessageBox
 				factory.create(base.MessageBox,function(obj)
 					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)print(txt)end}
-					print(obj._cls.classid)
-					obj._cls.classid = "1"
-					print(obj._cls.classid)
-					obj._cls.abc = "abc"
+					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)
+						
+					end}
 				end)
+				--]]
+				--[[ 测试SplashScene
+				factory.create(base.SplashScene,function(obj)
+					obj:open()
+					uikits.delay_call(nil,function()obj:close()end,3)
+				end)
+				--]]
+				---[[ 测试LoadingScene
+				factory.create(base.LoadingScene,function(obj)
+					obj:open()
+					for i=1,10 do
+						uikits.delay_call(nil,function()obj:setProgress(i/10) end,3*i/10)
+					end
+					uikits.delay_call(nil,function()obj:close()end,3)
+				end)
+				--]]				
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,

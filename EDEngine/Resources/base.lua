@@ -89,27 +89,33 @@ local splashScene = {
 			self._scene:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
 			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)
+			local scheduler = self._scene:getScheduler()
+			local schedulerId		
+			local oldDR
 			local function onNodeEvent(event)
 				local angle = 0
 				local N = 12
 				local function spin()
 					self._spin:setRotation( angle )
-					angle = angle + 360/N
+					angle = angle - 360/N
 				end
-				local scheduler = obj:getScheduler()
-				local schedulerId
 				if event == 'enter' then
-					uikits.initDR{width=960,height=640}
+					oldDR=uikits.getDR()
+					uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
 					schedulerId = scheduler:scheduleScriptFunc(spin,0.8/N,false)	
 				elseif event == 'exit' then
-					scheduler:unscheduleScriptEntry(schedulerId)
+					if schedulerId then
+						uikits.initDR(oldDR)
+						scheduler:unscheduleScriptEntry(schedulerId)
+						schedulerId = nil
+					end
 				end
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
 			uikits.pushScene(self._scene)
 		end,
 		close = function(self)
-			if self._scene then
+			if self._scene then	
 				uikits.popScene()
 			end
 		end,
@@ -132,10 +138,13 @@ local loadingScene = {
 			self._scene:addChild(self._loading)
 			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
 			self._progress = uikits.child(self._loading,ui.LOADING_PROGRESSBAR)
+			local oldDR
 			local function onNodeEvent(event)
 				if event == 'enter' then
-					uikits.initDR{width=960,height=640}
+					oldDR=uikits.getDR()
+					uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
 				elseif event == 'exit' then
+					uikits.initDR(oldDR)
 				end			
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
@@ -187,9 +196,6 @@ local messageBox = {
 			end
 			self._text:setVisible(false)
 			local function click(i,v)
-				if t.onClick then
-					t.onClick(i,v)
-				end
 				if self._root then
 					uikits.delay_call(parent,function()	
 												if self._root then
@@ -199,6 +205,9 @@ local messageBox = {
 														uikits.popScene()
 													end
 												end
+												if t.onClick then
+													t.onClick(i,v)
+												end												
 											end,0)	
 				end
 			end

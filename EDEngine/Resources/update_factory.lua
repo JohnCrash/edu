@@ -92,6 +92,10 @@ end
 -2没有正确检查并且不存在本地版本
 --]]
 local function CheckClassVersion( classId,func )
+	if not classId then
+		kits.log("ERROR update_factory.CheckClassVersion classId=nil")
+		return
+	end
 	local df = getClassRootDirectory()..classId..'desc.json'
 	local isexist = kits.exist_file(df)
 	local url = getServerRootDirectory()..classId..'version.json'
