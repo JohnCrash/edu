@@ -37,7 +37,7 @@ end
 
 local function loadClassTable( scriptFile )
 	local function protected_func( file )
-		local mod = require file
+		local mod = require(file)
 		local obj
 		if mod and type( mod ) == 'table' then
 			obj = mod
@@ -54,6 +54,15 @@ end
 
 local function _readonly(t,k,v)
 	kits.log("ERROR read only")
+end
+local function readOnly(t)
+	local proxy = {}
+	local mt={
+		__index=t,
+		__newindex=_readonly,
+	}
+	setmetatable(proxy,mt)
+	return proxy
 end
 
 --向类表中加入新的类
@@ -91,8 +100,7 @@ local function addClass( classId,addClassResult )
 				cls.class.this = cls.class
 				cls.class.super = cls.super
 				setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
-				setmetatable(cls,{__newindex=_readonly})
-				_classes[classId] = cls
+				_classes[classId] = readOnly(cls)
 				addClassResult(true)
 			else
 				kits.log("ERROR "..tostring(classId).." is not exist.")
@@ -129,7 +137,7 @@ end
 local function isKindOf( B,A )
 	if B and A and _classes[B] then
 		local bcls = _classes[B]
-		if bcls.classid == A or bcls.superid = A then
+		if bcls.classid == A or bcls.superid == A then
 			return true
 		end
 		local pedigree = bcls.pedigree
@@ -160,7 +168,7 @@ end
 --1.splash阶段，没有进度条仅仅有一个spalsh。完成检测和下载进度条类的功能。
 --2.progress阶段，进一步检测depends.json中的类并跟新。
 local function launch(classId)
-	local splashid = base.splash_scene
+	local splashid = base.SplashScene
 	if hasLocalClass( classId ) then
 		local cls = loadClassDescription(classId)
 		--如果已经存在本地版本，检查是否存在一个splash
@@ -171,13 +179,13 @@ local function launch(classId)
 	--开启默认启动屏
 	local splash
 	local function progressStep( progressObject )
-		if progressObject and isKindOf(progressObject,base.loading_scene) then
+		if progressObject and isKindOf(progressObject,base.LoadingScene) then
 			if splash then
-				uikits.popScene()
+				splash:close()
 			end
 			splash = 1 --标记已经不需要splash了
 			launchProgress(classId)
-			uikits.pushScene( progressObject.scene() )
+			progressObject:open()
 			local deps = update.loadClassJson(classId,'depends.json~')
 			local function updateResult( b )
 				if b then
@@ -186,7 +194,7 @@ local function launch(classId)
 				end
 			end
 			local function updateProgress( d )
-				progressObject.setProgressValue(d)
+				progressObject.setProgress(d)
 			end
 			if deps then
 				update.UpdateClassByTable(deps,updateResult,updateProgress)
@@ -202,7 +210,7 @@ local function launch(classId)
 		create(splashid,function(obj)
 				if not splash then
 					splash = obj
-					uikits.pushScene( splash:createScene() )
+					splash:open()
 				end
 			end)
 	end	
@@ -212,7 +220,7 @@ local function launch(classId)
 			create( cls.progressid,progressStep )
 		elseif cls then
 			--使用默认的进度条
-			create( base.loading_scene,progressStep )
+			create( base.LoadingScene,progressStep )
 		else
 			kits.log("ERROR factory.launch failed.can not load class description file."..tostring(classId))
 		end

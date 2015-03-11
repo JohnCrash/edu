@@ -8,7 +8,7 @@ local ui = {
 	SPLASH_TEXT = "Label_4",
 	LOADING_PROGRESSBAR = "ProgressBar_1",
 	LOADING_TEXT = "Label_2",
-	MESSAGEBOX_FILE = "res/splash/messagebox",
+	MESSAGEBOX_FILE = "res/splash/messagebox.json",
 	BUTTON_OK = "Button_5",
 	CAPTION_TEXT = "Label_8",
 	MESSAGE_TEXT = "Label_7",
@@ -76,7 +76,7 @@ local root = {
 }
 
 local splashScene = {
-	classid = base.splash_scene,
+	classid = base.SplashScene,
 	superid = base.root,
 	name = "SplashScene",
 	icon = "res/icon/splash_scene.png",
@@ -119,7 +119,7 @@ local splashScene = {
 	}
 }
 local loadingScene = {
-	classid = base.loading_scene,
+	classid = base.LoadingScene,
 	superid = base.root,
 	name = "LoadingScene",
 	icon = "res/icon/loading_scene.png",
@@ -155,7 +155,7 @@ local loadingScene = {
 	}
 }
 local messageBox = {
-	classid = base.message_box,
+	classid = base.MessageBox,
 	superid = base.root,
 	name = "MessageBox",
 	icon = "res/icon/message_box.png",
@@ -168,21 +168,40 @@ local messageBox = {
 			self._text = uikits.child(self._box,ui.MESSAGE_TEXT)
 			self._caption = uikits.child(self._box,ui.CAPTION_TEXT)
 			self._ok = uikits.child(self._box,ui.BUTTON_OK)
-			
 			self._caption:setString( t.caption or "" )
 			self._texts = {}
 			self._buttons = {}
 			if t.text and type(t.text)=='string' then
-				self._text:setString( t.text )
-				table.insert(self._texts,self._text)
+				local txt = self._text:clone()
+				txt:setString( t.text )
+				self._box:addChild(txt)
+				table.insert(self._texts,txt)
 			elseif t.text and type(t.text)=='table' then
-				for k,v in pairs(t.text) do
+				for k=#t.text,1,-1 do
+					local v = t.text[k]
 					local txt = self._text:clone()
 					txt:setString(v)
+					self._box:addChild(txt)
 					table.insert(self._texts,txt)
 				end
 			end
 			self._text:setVisible(false)
+			local function click(i,v)
+				if t.onClick then
+					t.onClick(i,v)
+				end
+				if self._root then
+					uikits.delay_call(parent,function()	
+												if self._root then
+													self._root:removeFromParent()	
+													self._root = nil
+													if self._needpop	then
+														uikits.popScene()
+													end
+												end
+											end,0)	
+				end
+			end
 			if t.button and type(t.button)=='number' then
 				local bt={"确定","取消","重试"}
 				for i = 1,t.button do
@@ -191,19 +210,27 @@ local messageBox = {
 						but = self._ok
 					else
 						but = self._ok:clone()
+						self._box:addChild(but)
 					end
-					but:setTitleText(bt[i])
+					but:setTitleText(tostring(bt[i]))
+					uikits.event(but,function()
+						click(i,bt[i])
+					end)
 					table.insert(self._buttons,but)					
 				end
 			elseif t.button and type(t.button)=='table' then
-				for i,v pairs(t.button) do
+				for i,v in pairs(t.button) do
 					local but
 					if i==1 then
 						but = self._ok
 					else
 						but = self._ok:clone()
+						self._box:addChild(but)
 					end
 					but:setTitleText(tostring(v))
+					uikits.event(but,function()
+						click(i,tostring(v))
+					end)					
 					table.insert(self._buttons,but)					
 				end
 			end
@@ -212,18 +239,24 @@ local messageBox = {
 			local scene = director:getRunningScene()
 			if scene then
 				self._scene = scene
-				scene:addChild(self._box)
+				self._root = ccui.Layout:create()
+				self._root:addChild(self._box)
+				scene:addChild(self._root)
+				self._root:setTouchEnabled(true)
+				self._root:setContentSize(uikits.getDR())
 			else
 				self._scene = cc.Scene:create()
 				self._scene:addChild(self._box)
+				self._root = self._box
+				self._needpop = true
 				uikits.pushScene(self._scene)
 			end
 		end,
 		relayout=function(self)
-			local bhspace = 12 --按钮中的文字和边框两侧的间隔
-			local bvspace = 8 --上下的间隔
-			local space = 8
-			local title_height = 42
+			local bhspace = 20 --按钮中的文字和边框两侧的间隔
+			local bvspace = 16 --上下的间隔
+			local space = 16
+			local title_height = 56
 			local H,W = space,space
 			local BW,BH = 0,0
 			--计算需要的空间
@@ -246,9 +279,10 @@ local messageBox = {
 				W = math.max(W,size.width+2*space)
 				H = H+size.height+space
 			end
-			self._box:setContentSize(cc.Size(W,H+title_height))
+			local box_size = cc.size(W,H+title_height)
+			self._box:setContentSize(box_size)
 			--开始布局按钮
-			local ox = (W-BW)/2*space
+			local ox = (W-BW)/2
 			for i,v in pairs(self._buttons) do
 				local x,y = v:getPosition()
 				local size = v:getContentSize()
@@ -265,12 +299,26 @@ local messageBox = {
 			end
 			--放置标题
 			self._caption:setPosition(cc.p(W/2,H+title_height/2))
+			self._caption:setFontName("simhei")
+			--居中放置消息栏
+			local s = uikits.getDR()
+			self._box:setPosition((s.width-box_size.width)/2,(s.height-box_size.height)/2)
 		end
 	}
 }
 
 local function _readonly(t,k,v)
 	kits.log("ERROR read only")
+end
+
+local function readOnly(t)
+	local proxy = {}
+	local mt={
+		__index=t,
+		__newindex=_readonly,
+	}
+	setmetatable(proxy,mt)
+	return proxy
 end
 
 local function addBaseClass(_classes)
@@ -280,12 +328,11 @@ local function addBaseClass(_classes)
 		else
 			setmetatable(cls.class,{__newindex=_readonly})
 		end
-		setmetatable(cls,{__newindex=_readonly})
-		_classes[classid] = cls
+		_classes[classid] = readOnly(cls)
 	end
-	addClass(base.splash_scene,splashScene)
-	addClass(base.loading_scene,loadingScene)
-	addClass(base.message_box,messageBox)
+	addClass(base.SplashScene,splashScene)
+	addClass(base.LoadingScene,loadingScene)
+	addClass(base.MessageBox,messageBox)
 end
 
 base.addBaseClass = addBaseClass

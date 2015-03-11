@@ -145,6 +145,7 @@ local function UpdateClassFiles( classId,func,files,isTemp,progress )
 			return string.sub(v,0,-2)
 		else
 			return v
+		end
 	end
 	local function progressFunc(d,txt)
 		if progress then
@@ -315,7 +316,7 @@ local function UpdateClassRaw( classId,func,progress )
 end
 
 --和UpdateClassRaw基本增加了version检查
-local UpdateClass( classId,updateResult,progress )
+local function UpdateClass( classId,updateResult,progress )
 	local function notify( state )
 		if state == 1 or state == 2 or state == -2 then
 			--需要跟新,-2再次尝试

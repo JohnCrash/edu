@@ -227,12 +227,19 @@ function AppEntry:init()
 				end)
 			end
 		end)	
-	local playsound = uikits.button{caption='show BaiduVoice Configure',x=464*scale,y = 164*scale + 4*item_h,
+	local playsound = uikits.button{caption='Test Class',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				if cc_showBaiduVoiceConfigure then
-					cc_showBaiduVoiceConfigure()
-				end
+				local factory = require "factory"
+				local base = require "base"
+				factory.create(base.MessageBox,function(obj)
+					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
+					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)print(txt)end}
+					print(obj._cls.classid)
+					obj._cls.classid = "1"
+					print(obj._cls.classid)
+					obj._cls.abc = "abc"
+				end)
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
