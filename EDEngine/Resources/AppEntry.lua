@@ -243,16 +243,26 @@ function AppEntry:init()
 				--[[ 测试SplashScene
 				factory.create(base.SplashScene,function(obj)
 					obj:open()
-					uikits.delay_call(nil,function()obj:close()end,3)
+					obj:setText("准备")
+					for i=1,10 do
+						uikits.delay_call(nil,function()
+							obj:setText("进度:"..tostring(i*10).."%")
+							end,3*i/10)
+					end					
+					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]
 				---[[ 测试LoadingScene
 				factory.create(base.LoadingScene,function(obj)
 					obj:open()
+					obj:setText("准备")
 					for i=1,10 do
-						uikits.delay_call(nil,function()obj:setProgress(i/10) end,3*i/10)
+						uikits.delay_call(nil,function()
+							obj:setProgress(i/10) 
+							obj:setText("进度:"..tostring(i*10).."%")
+							end,3*i/10)
 					end
-					uikits.delay_call(nil,function()obj:close()end,3)
+					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]				
 			end}	

@@ -6,8 +6,12 @@ local ui = {
 	LOADING_FILE = "res/splash/laoding_1.json",
 	SPLASH_IMAGE = "Image_5",
 	SPLASH_TEXT = "Label_4",
-	LOADING_PROGRESSBAR = "ProgressBar_1",
+	SPLASH_TEXT_SHADOW="Label_4_0",
+	LOADING_PROGRESSBAR = "Panel_12",
+	LOADING_PROGRESSBAR_BG = "Image_8",
+	LOADING_PROGRESSBAR_SP = "Image_13",
 	LOADING_TEXT = "Label_2",
+	LOADING_TEXT_SHADOW="Label_2_0",
 	MESSAGEBOX_FILE = "res/splash/messagebox.json",
 	BUTTON_OK = "Button_5",
 	CAPTION_TEXT = "Label_8",
@@ -88,6 +92,7 @@ local splashScene = {
 			self._splash = uikits.fromJson{file=self:getR(ui.SPLASH_FILE)}
 			self._scene:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
+			self._text_shadow = uikits.child(self._splash,ui.SPLASH_TEXT_SHADOW)
 			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)
 			local scheduler = self._scene:getScheduler()
 			local schedulerId		
@@ -97,7 +102,7 @@ local splashScene = {
 				local N = 12
 				local function spin()
 					self._spin:setRotation( angle )
-					angle = angle - 360/N
+					angle = angle + 360/N
 				end
 				if event == 'enter' then
 					oldDR=uikits.getDR()
@@ -121,6 +126,7 @@ local splashScene = {
 		end,
 		setText = function(self,txt)
 			self._text:setString(txt)
+			self._text_shadow:setString(txt)
 		end,
 	}
 }
@@ -137,14 +143,47 @@ local loadingScene = {
 			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
 			self._scene:addChild(self._loading)
 			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
+			self._text_shadow = uikits.child(self._loading,ui.LOADING_TEXT_SHADOW)
 			self._progress = uikits.child(self._loading,ui.LOADING_PROGRESSBAR)
+			self._progress_bg = uikits.child(self._loading,ui.LOADING_PROGRESSBAR_BG)
+			self._size = self._progress_bg:getContentSize()
+			self._size.width = self._size.width - 20
+			self._size.height = self._size.height -14			
+			self._sp = uikits.child(self._progress,ui.LOADING_PROGRESSBAR_SP)
+			self._sps = {}
+			table.insert(self._sps,self._sp)
+			local ox,oy = self._sp:getPosition()
+			for i=1,14 do
+				local s = self._sp:clone()
+				s:setPosition(cc.p(ox+i*28,oy))
+				self._progress:addChild( s )
+				table.insert(self._sps,s)
+			end
+			self:setProgress(0)
+			local scheduler = self._scene:getScheduler()
+			local schedulerId				
 			local oldDR
+			local dx = 0
+			local d = 2
 			local function onNodeEvent(event)
+				local function spin()
+					uikits.move(self._sps,-3,0)
+					dx = dx + 3
+					if dx >= 30 then
+						dx = 0
+						uikits.move(self._sps,30,0)
+					end
+				end			
 				if event == 'enter' then
 					oldDR=uikits.getDR()
 					uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
+					schedulerId = scheduler:scheduleScriptFunc(spin,0.02,false)	
 				elseif event == 'exit' then
-					uikits.initDR(oldDR)
+					if schedulerId then
+						uikits.initDR(oldDR)
+						scheduler:unscheduleScriptEntry(schedulerId)
+						schedulerId = nil
+					end
 				end			
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
@@ -156,10 +195,12 @@ local loadingScene = {
 			end
 		end,
 		setProgress = function( self,d )
-			self._progress:setPercent( d )
+			--self._progress:setPercent( d*100 )
+			self._progress:setContentSize(cc.size(self._size.width*d,self._size.height))
 		end,
 		setText = function( self,txt )
 			self._text:setString(txt)
+			self._text_shadow:setString(txt)
 		end,
 	}
 }

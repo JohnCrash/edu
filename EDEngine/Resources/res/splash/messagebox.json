@@ -11,8 +11,10 @@
   "designWidth": 320,
   "textures": [],
   "texturesPng": [
-    "loading2.png",
-    "GUI/loadingbar.png",
+    "009.png",
+    "progressbg.png",
+    "progressbar.png",
+    "grid.png",
     "bg.png",
     "1.png"
   ],
