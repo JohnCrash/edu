@@ -147,8 +147,8 @@ local loadingScene = {
 			self._progress = uikits.child(self._loading,ui.LOADING_PROGRESSBAR)
 			self._progress_bg = uikits.child(self._loading,ui.LOADING_PROGRESSBAR_BG)
 			self._size = self._progress_bg:getContentSize()
-			self._size.width = self._size.width - 20
-			self._size.height = self._size.height -14			
+			self._size.width = self._size.width -8
+			self._size.height = self._size.height -8	
 			self._sp = uikits.child(self._progress,ui.LOADING_PROGRESSBAR_SP)
 			self._sps = {}
 			table.insert(self._sps,self._sp)
