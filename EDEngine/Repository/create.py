@@ -2,6 +2,7 @@ import os
 import sys
 import hashlib
 import json
+import codecs
 from datetime import datetime
 
 base = ["7c3064bb858e619b9f02fef85432f162",
@@ -34,7 +35,12 @@ def create_class(classid,superid,name,desc):
 			#read super desc.json file
 			sdescFile = open('class/'+superid+'/desc.json','rb')
 			if sdescFile:
-				superdesc = json.loads(sdescFile.read())
+				try:
+					superdesc = json.loads(sdescFile.read().decode('utf-8-sig'))
+				except UnicodeDecodeError:
+					print "==UnicodeDecodeError=="
+					descFile.close()
+					
 				if superdesc and superdesc["superid"]:
 					descFile.write('		"'+superdesc["superid"]+'",\n')
 				if superdesc and superdesc["pedigree"]:
