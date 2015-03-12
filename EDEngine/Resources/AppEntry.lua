@@ -271,7 +271,7 @@ function AppEntry:init()
 					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]	
-				---[[ 测试ProgressBox
+				--[[ 测试ProgressBox
 				factory.create(base.ProgressBox,function(obj)
 					obj:open()
 					obj:setText("准备")
@@ -284,6 +284,13 @@ function AppEntry:init()
 					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]	
+				---[[ 测试MessageBox的子类
+				factory.create("46220ce3ba3fe1353f48acef66536fdd",function(obj)
+					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
+					button=3,onClick=function(i,txt)
+					end}
+				end)
+				--]]				
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,

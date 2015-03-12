@@ -4,6 +4,7 @@ local json = require "json-c"
 local ljshell = require "ljshell"
 local resume = require "resume"
 local mt = require "mt"
+local md5 = require "md5"
 
 local _updates = {}
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
@@ -11,7 +12,7 @@ local liexue_server = "http://file.lejiaolexue.com/upgrade/luaapp/v"..resume.get
 local local_server = "http://192.168.2.211:81/lgh/v"..resume.getversion().."/"
 --返回类的存储根目录
 local function getClassRootDirectory()
-	return local_dir..'/class/'
+	return local_dir..'class/'
 end
 
 local function getServerRootDirectory()
@@ -36,12 +37,24 @@ local function writeClassFile( classId,jsonFile,buf )
 		file:write(buf)
 		file:close()
 		return true
+	elseif classId then
+		kits.make_directory(local_dir..'class')
+		kits.make_directory(local_dir..'class/'..tostring(classId))
+		file = io.open(df,'wb')
+		if file then
+			file:write(buf)
+			file:close()
+			return true		
+		end
 	end
+	kits.log("ERROR writeClassFile failed " )
+	kits.log("	"..tostring(classId))
+	kits.log("	"..tostring(jsonFile))
 end
 
 local function loadClassJson( classId,jsonFile )
 	local df = getClassRootDirectory()..classId..'/'..tostring(jsonFile)
-	local file = io.read( df,"rb" )
+	local file = io.open( df,"rb" )
 	if file then
 		local all = file:read("*a")
 		file:close()
@@ -54,7 +67,7 @@ end
 
 local function isExisted( classId,name,md5 )
 	local df = getClassRootDirectory()..classId..'/'..tostring(name)
-	local file = io.read( df,"rb" )
+	local file = io.open( df,"rb" )
 	if file then
 		local all = file:read("*a")
 		file:close()
@@ -96,9 +109,9 @@ local function CheckClassVersion( classId,func )
 		kits.log("ERROR update_factory.CheckClassVersion classId=nil")
 		return
 	end
-	local df = getClassRootDirectory()..classId..'desc.json'
+	local df = getClassRootDirectory()..classId..'/desc.json'
 	local isexist = kits.exist_file(df)
-	local url = getServerRootDirectory()..classId..'version.json'
+	local url = getServerRootDirectory()..classId..'/version.json'
 	request( url,function(b,data)
 		if b then
 			if isexist then
@@ -170,7 +183,11 @@ local function UpdateClassFiles( classId,func,files,isTemp,progress )
 		else
 			local name = getRealName( v )
 			local url = getServerRootDirectory()..classId..'/'..name
-			table.insert(ut,{url=url,readName=name,writeName=v,idx=total})
+			if isTemp then
+				table.insert(ut,{url=url,readName=name,writeName=v..'~',idx=total})
+			else
+				table.insert(ut,{url=url,readName=name,writeName=v,idx=total})
+			end
 		end		
 	end
 	total = #ut
@@ -300,7 +317,7 @@ local function UpdateClassRaw( classId,func,progress )
 			local remote_list = loadClassJson( classId,'filelist.json~' )
 			if remote_list then
 				if local_list then
-					update_files = differnet(local_list,remote_list)					
+					update_files = different(local_list,remote_list)					
 				else
 					update_files = remote_list
 				end

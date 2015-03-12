@@ -94,6 +94,11 @@ if __name__ == "__main__":
 			root = []
 			ldir('.',root)
 			write_json(root)			
+		elif(os.path.isdir('class/'+sys.argv[1])):
+			os.chdir('class/'+sys.argv[1])
+			root=[]
+			ldir('.',root)
+			write_json(root)
 		else:
 			print "Directory src/"+sys.argv[1]," or res/"+sys.argv[1]," is not exist!"
 	else:
