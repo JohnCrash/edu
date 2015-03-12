@@ -30,6 +30,8 @@ Spin (b34d6d7a5652cf3bbe6388d5770dbe95)
 	close() 关闭Spin
 	
 ProgressBox (6e8c7a6612998e78186585e468010f95)
-	open(t) 打开一个具有进度条的对话栏。
+	open(t) 打开一个具有进度条的对话栏。t有如下的项。
+		caption 标题
 	close() 关闭对话栏。
 	setProgress(d) 设置进度，d是一个0-1的数。
+	setText(txt) 加载中间过程的提示文本。

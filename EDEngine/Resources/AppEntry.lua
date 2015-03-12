@@ -232,7 +232,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 				local factory = require "factory"
 				local base = require "base"
-				---[[ 测试MessageBox
+				--[[ 测试MessageBox
 				factory.create(base.MessageBox,function(obj)
 					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
 					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)
@@ -265,6 +265,25 @@ function AppEntry:init()
 					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]				
+				--[[ 测试Spin
+				factory.create(base.Spin,function(obj)
+					obj:open()
+					uikits.delay_call(nil,function()obj:close()end,3.5)
+				end)
+				--]]	
+				---[[ 测试ProgressBox
+				factory.create(base.ProgressBox,function(obj)
+					obj:open()
+					obj:setText("准备")
+					for i=1,10 do
+						uikits.delay_call(nil,function()
+							obj:setProgress(i/10) 
+							obj:setText("进度:"..tostring(i*10).."%")
+							end,3*i/10)
+					end
+					uikits.delay_call(nil,function()obj:close()end,3.5)
+				end)
+				--]]	
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
