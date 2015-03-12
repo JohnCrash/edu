@@ -40,6 +40,23 @@ local function writeClassFile( classId,jsonFile,buf )
 	elseif classId then
 		kits.make_directory(local_dir..'class')
 		kits.make_directory(local_dir..'class/'..tostring(classId))
+		local i = 1
+		local dirs = {}
+		while i do
+			local s = i
+			i = string.find(jsonFile,'/',i)
+			local e = i
+			if i then
+				table.insert(dirs,string.sub(jsonFile,s,e-1))
+				i = i + 1
+			end
+		end
+		local dir = local_dir..'class/'..tostring(classId)..'/'
+		for k,v in pairs(dirs) do
+			dir = dir..v
+			kits.make_directory( dir )
+			dir = dir..'/'
+		end
 		file = io.open(df,'wb')
 		if file then
 			file:write(buf)
@@ -63,13 +80,13 @@ local function loadClassJson( classId,jsonFile )
 	end
 end
 
-local function isExisted( classId,name,md5 )
+local function isExisted( classId,name,md5_ )
 	local df = getClassRootDirectory()..classId..'/'..tostring(name)
 	local file = io.open( df,"rb" )
 	if file then
 		local all = file:read("*a")
 		file:close()
-		if md5.sumhexa(all) == md5 then
+		if md5.sumhexa(all) == md5_ then
 			return true
 		end
 	end

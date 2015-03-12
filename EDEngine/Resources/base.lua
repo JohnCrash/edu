@@ -41,7 +41,7 @@ local root = {
 		getR = function(self,res)
 			local function resFile( classid )
 				if classid then
-					local resfile = "classes/"..classid.."/"..res
+					local resfile = "class/"..classid.."/"..res
 					if kits.local_exists(resfile) then
 						return resfile
 					end
