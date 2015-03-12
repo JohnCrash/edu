@@ -94,17 +94,17 @@ local function addClass( classId,addClassResult )
 					addClassResult(false)
 					return
 				end
-			end		
-			cls.class = loadClassTable(cls.script)
+			end
+			if cls.script then
+				cls.class = loadClassTable(cls.script)
+			end
+			cls.class = cls.class or {}
 			if cls.class then
 				cls.class.this = cls.class
 				cls.class.super = cls.super
 				setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
 				_classes[classId] = readOnly(cls)
 				addClassResult(true)
-			else
-				kits.log("ERROR "..tostring(classId).." is not exist.")
-				addClassResult(false)
 			end
 		end		
 		if cls.superid then --如果存在父类

@@ -60,8 +60,6 @@ local function loadClassJson( classId,jsonFile )
 		file:close()
 		local destable = json.decode( all )
 		return destable
-	else
-		kits.log("ERROR can not read file "..tostring(df))
 	end
 end
 
@@ -114,12 +112,12 @@ local function CheckClassVersion( classId,func )
 	local url = getServerRootDirectory()..classId..'/version.json'
 	request( url,function(b,data)
 		if b then
+			local local_v = json.decode(data)
+			if local_v and local_v.version then
+				writeClassFile( classId,'version.json~',data)
+			end
 			if isexist then
-				local v = loadClassJson( classId,'version.json')
-				local local_v = json.decode(data)
-				if local_v and local_v.version then --确定下载成功
-					writeClassFile( classId,'version.json~',data)
-				end
+				local v = loadClassJson( classId,'version.json')				
 				if v and v.version and local_v and local_v.version then
 					if v.version == local_v then
 						func(0)
@@ -174,11 +172,16 @@ local function UpdateClassFiles( classId,func,files,isTemp,progress )
 	local total = 0
 	for k,v in pairs(files) do
 		if type(v)=='table' then
-			if isTemp then v.name = v.name..'~' end
-			local name = getRealName( v.name )
+			local w_name
+			if isTemp then 
+				w_name = v.name..'~' 
+			else
+				w_name = v.name
+			end
+			local name = getRealName( w_name )
 			local url = getServerRootDirectory()..classId..'/'..name
 			if not isExisted(classId,v.name,v.md5) then
-				table.insert(ut,{url=url,readName=name,writeName=v.name,md5=v.md5,idx=total})
+				table.insert(ut,{url=url,readName=name,writeName=w_name,md5=v.md5,idx=total})
 			end
 		else
 			local name = getRealName( v )
@@ -271,6 +274,10 @@ local function UpdateClassRaw( classId,func,progress )
 				deleteClassFile( classId,v.name )
 				renameClassFile( classId,v.name..'~',v.name )
 			end
+			deleteClassFile(classId,'version.json')
+			renameClassFile(classId,'version.json~','version.json')
+			deleteClassFile(classId,'filelist.json')
+			renameClassFile(classId,'filelist.json~','filelist.json')
 			func(true)
 		else
 			func(false)
