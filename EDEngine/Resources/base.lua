@@ -503,6 +503,7 @@ local function addBaseClass(_classes)
 		end
 		_classes[classid] = readOnly(cls)
 	end
+	addClass(base.root,root)
 	addClass(base.SplashScene,splashScene)
 	addClass(base.LoadingScene,loadingScene)
 	addClass(base.MessageBox,messageBox)

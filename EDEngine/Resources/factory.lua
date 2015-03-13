@@ -72,7 +72,12 @@ local function addClass( classId,addClassResult,progress )
 		addClassResult(true)
 		return
 	end
-	
+	local step = 0
+	local function progressFunc( d,txt )
+		if progress then
+			progress( step/2+d/2,txt or '' )
+		end
+	end
 	local function loadClass( b )
 		if not b then 
 			addClassResult(false)
@@ -108,14 +113,42 @@ local function addClass( classId,addClassResult,progress )
 				addClassResult(true)
 			end
 		end		
-		if cls.superid then --如果存在父类
-			addClass( cls.superid,thisClass )
+		--收集父类和依赖
+		step = 1
+		progressFunc(0)
+		local depends = {}
+		if cls.superid then
+			table.insert(depends,cls.superid)
+		end
+		if cls.depends then
+			for k,v in pairs(cls.depends) do
+				table.insert(depends,v)
+			end
+		end
+		local count = #depends
+		if count>0 then
+			local idx = 0
+			local function stepByStep( b )
+				if b then
+					if idx==count then
+						thisClass(true)
+						return
+					end
+					idx=idx+1
+					progressFunc(idx/count)					
+					addClass( depends[idx],stepByStep )
+				else
+					kits.log("ERROR factory.addClass "..tostring(depends[idx]).." failed")
+					thisClass(false)
+				end
+			end
+			stepByStep(true)
 		else
 			thisClass(true)
 		end
 	end
 	
-	update.UpdateClass( classId,loadClass,progress )
+	update.UpdateClass( classId,loadClass,progressFunc )
 end
 
 --通过classId创建给定对象
@@ -159,7 +192,7 @@ local function import( classIds,notify,progress )
 		end
 		local function nextClass( b )
 			if b then
-				if idx == #classIds then
+				if idx == count then
 					notify(true)
 					return
 				end
