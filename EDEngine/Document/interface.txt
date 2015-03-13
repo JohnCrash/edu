@@ -9,8 +9,8 @@ MessageBox (8736daf38faaa28693f922843cc0c5aa)
 		button 按钮数组,{"OK","Cancel"}或者也可以是一个整数1代表{"确定"}
 			2代表{"确定","取消"},3代表{"确定","取消","重试"}
 		onClick(index,button) 点击事件，当消息栏的按钮被按下时。
-		index :button中的索引
-		button:button中的文字
+			index :button中的索引
+			button:button中的文字
 	
 LoadingScene (8bb51443e440190b892996b8c2864672)
 	open() 打开一个Loading界面，它用来在加载时显示进度用的界面。

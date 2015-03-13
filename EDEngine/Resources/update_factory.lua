@@ -93,7 +93,8 @@ local function isExisted( classId,name,md5_ )
 end
 
 local function request( url,func )
-	local mh,msg = mt.new('GET',url,login.cookie(),
+	local en_url = kits.encode_space(url)
+	local mh,msg = mt.new('GET',en_url,login.cookie(),
 			function(obj)
 				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
 					if obj.state == 'OK' and obj.data then
@@ -250,6 +251,7 @@ local function UpdateClassFiles( classId,func,files,isTemp,progress )
 			if b then
 				writeClassFile(classId,v.writeName,data)
 			end
+			progressFunc(count/total,v.name)
 			if count == total then
 				if isAllDownAndPrepare() then
 					progressFunc(1)

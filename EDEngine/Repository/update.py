@@ -105,6 +105,7 @@ if __name__ == "__main__":
 			if os.path.isdir('z:/v7/class/'+sys.argv[1]) :
 				shutil.rmtree('z:/v7/class/'+sys.argv[1])
 			shutil.copytree('class/'+sys.argv[1],'z:/v7/class/'+sys.argv[1])
+			print "Done."
 		else:
 			print "Directory src/"+sys.argv[1]," or res/"+sys.argv[1]," is not exist!"
 	else:

@@ -6,6 +6,8 @@
 	"pedigree":[
 		"7c3064bb858e619b9f02fef85432f162"
 	],
+	"depends":[
+	],
 	"script":"main.lua",
 	"version":1
 }

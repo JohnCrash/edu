@@ -233,15 +233,14 @@ function AppEntry:init()
 				local factory = require "factory"
 				local base = require "base"
 				--[[ 测试MessageBox
-				factory.create(base.MessageBox,function(obj)
+				factory.createAsyn(base.MessageBox,function(obj)
 					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
 					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)
-						
 					end}
 				end)
 				--]]
 				--[[ 测试SplashScene
-				factory.create(base.SplashScene,function(obj)
+				factory.createAsyn(base.SplashScene,function(obj)
 					obj:open()
 					obj:setText("准备")
 					for i=1,10 do
@@ -253,7 +252,7 @@ function AppEntry:init()
 				end)
 				--]]
 				--[[ 测试LoadingScene
-				factory.create(base.LoadingScene,function(obj)
+				factory.createAsyn(base.LoadingScene,function(obj)
 					obj:open()
 					obj:setText("准备")
 					for i=1,10 do
@@ -266,13 +265,13 @@ function AppEntry:init()
 				end)
 				--]]				
 				--[[ 测试Spin
-				factory.create(base.Spin,function(obj)
+				factory.createAsyn(base.Spin,function(obj)
 					obj:open()
 					uikits.delay_call(nil,function()obj:close()end,3.5)
 				end)
 				--]]	
 				--[[ 测试ProgressBox
-				factory.create(base.ProgressBox,function(obj)
+				factory.createAsyn(base.ProgressBox,function(obj)
 					obj:open()
 					obj:setText("准备")
 					for i=1,10 do
@@ -285,21 +284,52 @@ function AppEntry:init()
 				end)
 				--]]	
 				--[[ 测试MessageBox的子类
-				factory.create("46220ce3ba3fe1353f48acef66536fdd",function(obj)
+				factory.createAsyn("46220ce3ba3fe1353f48acef66536fdd",function(obj)
 					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
 					button=3,onClick=function(i,txt)
 						print(tostring(i)..":"..txt)
 					end}
 				end)
 				--]]				
-				---[[ 测试MessageBox的子类
-				factory.create("cc59f358261f1c6befc2b12029544b02",function(obj)
-					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-					button=3,onClick=function(i,txt)
-						print(tostring(i)..":"..txt)
-					end}
+				--[[ 测试MessageBox的子类
+				factory.createAsyn(base.ProgressBox,function(progressBox)
+					progressBox:open()
+					progressBox:setProgress(0)
+					progressBox:setText('loading cc59f358261f1c6befc2b12029544b02')
+					factory.createAsyn("cc59f358261f1c6befc2b12029544b02",function(obj)
+						progressBox:close()
+						obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
+						button=3,onClick=function(i,txt)
+							print(tostring(i)..":"..txt)
+						end}
+					end,
+					function(d,txt)
+						progressBox:setProgress(d)
+						progressBox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))
+					end)
 				end)
 				--]]								
+				---[[
+				factory.createAsyn(base.ProgressBox,function(progressBox)
+					progressBox:open()
+					progressBox:setProgress(0)				
+					factory.import({'46220ce3ba3fe1353f48acef66536fdd','cc59f358261f1c6befc2b12029544b02'},
+						function(b)
+							progressBox:close()
+							if b then
+								local obj = factory.create("cc59f358261f1c6befc2b12029544b02")
+								obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
+											button=3,onClick=function(i,txt)
+												print(tostring(i)..":"..txt)
+										end}
+							end
+						end,
+						function(d,txt)
+							progressBox:setProgress(d)
+							progressBox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
+						end)
+				end)
+				--]]
 			end}	
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,

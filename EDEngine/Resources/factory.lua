@@ -66,7 +66,7 @@ local function readOnly(t)
 end
 
 --向类表中加入新的类
-local function addClass( classId,addClassResult )
+local function addClass( classId,addClassResult,progress )
 	--在_classes中存在表示已经跟新过
 	if _classes[classId] then 
 		addClassResult(true)
@@ -115,11 +115,11 @@ local function addClass( classId,addClassResult )
 		end
 	end
 	
-	update.UpdateClass( classId,loadClass )
+	update.UpdateClass( classId,loadClass,progress )
 end
 
 --通过classId创建给定对象
-local function create(classId,notify)
+local function createAsyn(classId,notify,progress)
 	local function buildObject( b )
 		if b then --在列表中存在classId的类
 			local obj = {}
@@ -131,7 +131,59 @@ local function create(classId,notify)
 			notify()
 		end
 	end
-	addClass( classId,buildObject )
+	addClass( classId,buildObject,progress )
+end
+
+--本地是不是存在
+local function isExist( classId )
+	if _classes[classId] then
+		return true
+	else
+		return hasLocalClass( classId )
+	end
+end
+
+local function import( classIds,notify,progress )
+	if classIds and type(classIds)=='table' then
+		local idx = 0
+		local count = #classIds
+		
+		if count == 0 then
+			notify( true )
+			return
+		end
+		local function progressFunc( d,text )
+			if progress then
+				progress( (idx-1)/count+d/count,text )
+			end
+		end
+		local function nextClass( b )
+			if b then
+				if idx == #classIds then
+					notify(true)
+					return
+				end
+				idx = idx + 1
+				progressFunc(0,'')
+				addClass( classIds[idx],nextClass,progressFunc )
+			else
+				kits.log("ERROR factory.import addClass "..tostring(classIds[idx]).." failed")
+				notify(false)
+			end
+		end
+		nextClass( true )
+	else
+		kits.log("ERROR factory.import invalid argument #1")
+	end
+end
+
+local function create(classId)
+	local cls = _classes[classId]
+	if not cls then return end
+	local obj = {}
+	obj._cls = cls
+	setmetatable(obj,{__index=obj._cls.class})
+	return obj
 end
 
 --判断B是否继承自A
@@ -255,7 +307,10 @@ return {
 	getClassDescription = getClassDescription,
 	isKindOf = isKindOf,
 	isInstanceOf = isInstanceOf,
+	createAsyn = createAsyn,
 	create = create,
+	import = import,
+	isExist = isExist,
 	launch = launch,
 	updateClass = updateClass,
 }
