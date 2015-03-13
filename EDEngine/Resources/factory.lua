@@ -96,7 +96,8 @@ local function addClass( classId,addClassResult )
 				end
 			end
 			if cls.script then
-				cls.class = loadClassTable(cls.script)
+				local script = 'class/'..tostring(classId)..'/'..tostring(cls.script)
+				cls.class = loadClassTable(script)
 			end
 			cls.class = cls.class or {}
 			if cls.class then

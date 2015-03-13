@@ -5,6 +5,7 @@ import sys
 import hashlib
 import json
 import string
+import shutil
 
 def mmd5(name,bstr):
 	if bstr == True:
@@ -80,7 +81,7 @@ def write_json(root):
 	if(version_file):
 		version_file.write(json.dumps({"version":version}))
 		version_file.close()	
-    
+	
 if __name__ == "__main__":
 	xmlpath = "./filelist.xml"
 	if(len(sys.argv)>1):
@@ -93,13 +94,18 @@ if __name__ == "__main__":
 			os.chdir('res/'+sys.argv[1])
 			root = []
 			ldir('.',root)
-			write_json(root)			
+			write_json(root)
 		elif(os.path.isdir('class/'+sys.argv[1])):
 			os.chdir('class/'+sys.argv[1])
 			root=[]
 			ldir('.',root)
 			write_json(root)
+			os.chdir('../..')
+			print "Copy to z:/v7/class/"+sys.argv[1]
+			if os.path.isdir('z:/v7/class/'+sys.argv[1]) :
+				shutil.rmtree('z:/v7/class/'+sys.argv[1])
+			shutil.copytree('class/'+sys.argv[1],'z:/v7/class/'+sys.argv[1])
 		else:
 			print "Directory src/"+sys.argv[1]," or res/"+sys.argv[1]," is not exist!"
 	else:
-		print "Please input project name,examples:update homework"
+		print "Please input project name,example :update homework"

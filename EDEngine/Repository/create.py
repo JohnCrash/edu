@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import hashlib
 import json
@@ -40,6 +40,7 @@ def create_class(classid,superid,name,desc):
 				except UnicodeDecodeError:
 					print "==UnicodeDecodeError=="
 					descFile.close()
+					return
 					
 				if superdesc and superdesc["superid"]:
 					descFile.write('		"'+superdesc["superid"]+'",\n')
@@ -70,4 +71,7 @@ if __name__=="__main__":
 			name = v[5:]
 		elif v[0:5]== 'desc=':
 			desc = v[5:]
-	create_class(classid,superid,name,desc)
+	if len(superid)==0 :
+		print "create superid=SUPERID name=NAME desc=DESCRIPT\n"
+	else:
+		create_class(classid,superid,name,desc)

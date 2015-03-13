@@ -1,0 +1,11 @@
+{
+	"classid":"cc59f358261f1c6befc2b12029544b02",
+	"superid":"8736daf38faaa28693f922843cc0c5aa",
+	"name":"进度对话栏",
+	"comment":"对话栏中加入一个进度条",
+	"pedigree":[
+		"7c3064bb858e619b9f02fef85432f162"
+	],
+	"script":"main.lua",
+	"version":1
+}
