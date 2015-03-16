@@ -85,8 +85,9 @@ local function addClass( classId,addClassResult,progress )
 		end
 		local cls = loadClassDescription( classId )
 		if not cls then
-			kits.log("ERROR addClass failed,can not load class description file. "..tostring(classId))
-			addClassResult(false)
+			local errmsg = "addClass failed,can not load class description file. "..tostring(classId)
+			kits.log("ERROR "..errmsg )
+			addClassResult(false,errmsg)
 			return
 		end
 		local function thisClass( b )
@@ -95,8 +96,9 @@ local function addClass( classId,addClassResult,progress )
 					cls.super = _classes[cls.superid].class
 				else
 					--存在父类id却没有加载成功
-					kits.log("ERROR addClass class "..tostring(classId).." super class "..tostring(superid).." not exist")
-					addClassResult(false)
+					local errmsg = "addClass class "..tostring(classId).." super class "..tostring(superid).." not exist"
+					kits.log("ERROR "..errmsg)
+					addClassResult(false,errmsg)
 					return
 				end
 			end
@@ -138,8 +140,9 @@ local function addClass( classId,addClassResult,progress )
 					progressFunc(idx/count)					
 					addClass( depends[idx],stepByStep )
 				else
-					kits.log("ERROR factory.addClass "..tostring(depends[idx]).." failed")
-					thisClass(false)
+					local errmsg = "factory.addClass "..tostring(depends[idx]).." failed"
+					kits.log("ERROR "..errmsg )
+					thisClass(false,errmsg)
 				end
 			end
 			stepByStep(true)
@@ -153,15 +156,17 @@ end
 
 --通过classId创建给定对象
 local function createAsyn(classId,notify,progress)
-	local function buildObject( b )
+	local function buildObject( b,errormsg )
 		if b then --在列表中存在classId的类
 			local obj = {}
 			obj._cls = _classes[classId]
 			setmetatable(obj,{__index=obj._cls.class})
 			notify(obj)
 		else
-			kits.log("ERROR factory.create can not create object ."..tostring(classId))
-			notify()
+			local msg = "factory.create can not create object ."..tostring(classId)..
+								"\n\t"..tostring(errormsg)
+			kits.log("ERROR "..msg)
+			notify(nil,msg)
 		end
 	end
 	addClass( classId,buildObject,progress )
@@ -183,14 +188,14 @@ local function import( classIds,notify,progress )
 		
 		if count == 0 then
 			notify( true )
-			return
+			return true
 		end
 		local function progressFunc( d,text )
 			if progress then
 				progress( (idx-1)/count+d/count,text )
 			end
 		end
-		local function nextClass( b )
+		local function nextClass( b,errormsg )
 			if b then
 				if idx == count then
 					notify(true)
@@ -200,11 +205,14 @@ local function import( classIds,notify,progress )
 				progressFunc(0,'')
 				addClass( classIds[idx],nextClass,progressFunc )
 			else
-				kits.log("ERROR factory.import addClass "..tostring(classIds[idx]).." failed")
-				notify(false)
+				local msg = "factory.import addClass "..tostring(classIds[idx])..
+									" failed\n\t"..tostring(errormsg)
+				kits.log("ERROR "..msg)
+				notify(false,msg)
 			end
 		end
 		nextClass( true )
+		return true
 	else
 		kits.log("ERROR factory.import invalid argument #1")
 	end

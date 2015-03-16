@@ -1,3 +1,17 @@
+factory用来创建具体的对象
+	createAsyn(uuid,notify,progress) 异步创建一个对象
+		uuid要创建的对象id
+		notify(obj,errmsg) 通过该函数通知创建是否成功,成功obj为创建的对象，errmsg等于nil.
+			如果失败obj等于fales,errmsg是一个字符串描述错误信息。
+		progress(d,txt) 创建过程的进度函数。d是一个0-1的数。txt是创建过程信息。
+	import(uuids,notify,progress) 跟新表uuids中的全部对象
+		uuids 是一个uuid表。
+		notify(b,errmsg)  通过该函数通知输入是否成功,成功b为true，errmsg等于nil.
+			如果失败b等于fales,errmsg是一个字符串描述错误信息。
+		progress(d,txt) 输入过程的进度函数。d是一个0-1的数。txt是创建过程信息。
+	create(uuid) 同步创建函数，如果创建对象并且返回。失败返回nil。
+	isExist(uuid) 判断uuid的对象本地是否存在。（这是create创建成功的前提条件）
+	
 root (7c3064bb858e619b9f02fef85432f162)
 	getR(res) 取得资源res路径。
 	isInstanceOf(classid) 判断classid是否在对象的继承链中,或者说是不是一个classid对象.

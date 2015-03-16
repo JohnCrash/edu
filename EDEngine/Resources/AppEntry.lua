@@ -310,14 +310,27 @@ function AppEntry:init()
 				end)
 				--]]								
 				---[[
+				local uuidGrayMessageBox = '46220ce3ba3fe1353f48acef66536fdd'
+				local uuidProgressBox = 'cc59f358261f1c6befc2b12029544b02'
+				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
+				local uuidRoot = '7c3064bb858e619b9f02fef85432f162'
+				local uuidTest = 'e0624a7d0d7a6c3d4a3439588ed98fb0'
 				factory.createAsyn(base.ProgressBox,function(progressBox)
 					progressBox:open()
 					progressBox:setProgress(0)				
-					factory.import({'46220ce3ba3fe1353f48acef66536fdd','cc59f358261f1c6befc2b12029544b02'},
+					factory.import({uuidGrayMessageBox,uuidProgressBox},
 						function(b)
 							progressBox:close()
 							if b then
-								local obj = factory.create("cc59f358261f1c6befc2b12029544b02")
+								local obj = factory.create(uuidProgressBox)
+								local is = obj:isInstanceOf(uuidGrayMessageBox)
+								print('uuidProgressBox isKindOf uuidGrayMessageBox '..tostring(is))
+								is = obj:isInstanceOf(uuidProgressBox)
+								print('uuidProgressBox isKindOf uuidProgressBox '..tostring(is))
+								is = obj:isInstanceOf(uuidMessageBox)
+								print('uuidProgressBox isKindOf uuidMessageBox '..tostring(is))
+								is = obj:isInstanceOf(uuidRoot)
+								print('uuidProgressBox isKindOf uuidRoot '..tostring(is))
 								obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
 											button=3,onClick=function(i,txt)
 												print(tostring(i)..":"..txt)
