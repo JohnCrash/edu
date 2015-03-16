@@ -29,6 +29,8 @@ local base = {
 	MessageBox = "8736daf38faaa28693f922843cc0c5aa",
 	Spin = "b34d6d7a5652cf3bbe6388d5770dbe95",
 	ProgressBox = "6e8c7a6612998e78186585e468010f95",
+	Scene = "d55f6d9cbb48b6f402b8122b97ed2dc1",
+	Layer = "685316259b01edf58a85d6705a4541ad",
 }
 
 local root = {
@@ -480,6 +482,67 @@ local ProgressBox={
 	}
 }
 
+local Scene = {
+	classid = base.Scene,
+	superid = base.root,
+	name = "Scene",
+	icon = "res/icon/progressbox.png",
+	comment = "场景",
+	version = 1,
+	class = {
+		__init__ = function(self)
+				self._scene = cc.Scene:create()
+				local function onNodeEvent(event,v)
+					if "enter" == event then
+						self:init()
+					elseif "exit" == event then
+						self:release()
+					end
+				end	
+				self._scene:registerScriptHandler(onNodeEvent)			
+			end,
+		addChild = function(self,child)
+			self._scene:addChild(child._layer)
+		end,
+		push = function(self)
+			uikits.pushScene(self._scene)
+		end,
+		replace = function(self)
+			uikits.replaceScene(self._scene)
+		end,
+		init = function(self)
+		end,
+		release = function(self)
+		end
+	}
+}
+
+local Layer = {
+	classid = base.Layer,
+	superid = base.root,
+	name = "Layer",
+	icon = "res/icon/progressbox.png",
+	comment = "层",
+	version = 1,
+	class = {
+		__init__ = function(self)
+				self._layer = cc.Layer:create()
+				local function onNodeEvent(event,v)		
+					if "enter" == event then
+						self:init()
+					elseif "exit" == event then
+						self:release()
+					end
+				end	
+				self._layer:registerScriptHandler(onNodeEvent)			
+			end,
+		init = function(self)
+		end,
+		release = function(self)
+		end,
+	}
+}
+
 local function _readonly(t,k,v)
 	kits.log("ERROR read only")
 end
@@ -509,6 +572,8 @@ local function addBaseClass(_classes)
 	addClass(base.MessageBox,messageBox)
 	addClass(base.Spin,Spin)
 	addClass(base.ProgressBox,ProgressBox)
+	addClass(base.Scene,Scene)
+	addClass(base.Layer,Layer)
 end
 
 base.addBaseClass = addBaseClass

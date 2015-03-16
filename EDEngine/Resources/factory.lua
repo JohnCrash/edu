@@ -1,6 +1,5 @@
 local md5 = require "md5"
 local json = require "json-c"
-local ljshell = require "ljshell"
 local kits = require "kits"
 local update = require "update_factory"
 local uikits = require "uikits"
@@ -9,8 +8,6 @@ local base = require "base"
 local s_gidcount = os.time()
 --从classId到类表的映射表
 local _classes = {}
-
-local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
 base.addBaseClass( _classes )
 
@@ -154,14 +151,21 @@ local function addClass( classId,addClassResult,progress )
 	update.UpdateClass( classId,loadClass,progressFunc )
 end
 
+local function instance( cls )
+	local obj = {}
+	obj._cls = cls
+	setmetatable(obj,{__index=obj._cls.class})
+	if obj.__init__ then
+		obj:__init__()
+	end
+	return obj
+end
+
 --通过classId创建给定对象
 local function createAsyn(classId,notify,progress)
 	local function buildObject( b,errormsg )
 		if b then --在列表中存在classId的类
-			local obj = {}
-			obj._cls = _classes[classId]
-			setmetatable(obj,{__index=obj._cls.class})
-			notify(obj)
+			notify(instance(_classes[classId]))
 		else
 			local msg = "factory.create can not create object ."..tostring(classId)..
 								"\n\t"..tostring(errormsg)
@@ -221,10 +225,7 @@ end
 local function create(classId)
 	local cls = _classes[classId]
 	if not cls then return end
-	local obj = {}
-	obj._cls = cls
-	setmetatable(obj,{__index=obj._cls.class})
-	return obj
+	return instance(cls)
 end
 
 --判断B是否继承自A

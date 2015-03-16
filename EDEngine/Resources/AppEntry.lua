@@ -309,7 +309,7 @@ function AppEntry:init()
 					end)
 				end)
 				--]]								
-				---[[
+				--[[
 				local uuidGrayMessageBox = '46220ce3ba3fe1353f48acef66536fdd'
 				local uuidProgressBox = 'cc59f358261f1c6befc2b12029544b02'
 				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
@@ -343,7 +343,27 @@ function AppEntry:init()
 						end)
 				end)
 				--]]
-			end}	
+				---[[
+				local uuidProgressBox = '6e8c7a6612998e78186585e468010f95'
+				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
+				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
+				local progressbox = factory.create(uuidProgressBox)
+				progressbox:open()
+				progressbox:setProgress(0)	
+				factory.import({uuidClassSearcher},
+						function(b,err)
+							progressbox:close()
+							local searcher = factory.create(uuidClassSearcher)
+							local scene = factory.create(base.Scene)
+							scene:addChild( searcher )
+							scene:push()
+						end,
+						function(d,txt)
+							progressbox:setProgress(d)
+							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
+						end)
+				--]]
+			end}
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
