@@ -423,6 +423,7 @@ local ProgressBox={
 				kits.log("ERROR Object ProgressBox need a Running Scene!")
 				return
 			end		
+			print("ProgressBox open")
 			self._box = uikits.fromJson{file=self:getR(ui.PROGRESS_BOX)}
 			self._text = uikits.child(self._box,ui.PROGRESS_TEXT)
 			self._progress = uikits.child(self._box,ui.LOADING_PROGRESSBAR)
@@ -494,7 +495,9 @@ local Scene = {
 				self._scene = cc.Scene:create()
 				local function onNodeEvent(event,v)
 					if "enter" == event then
+						print("scene init in")
 						self:init()
+						print("scene init out")
 					elseif "exit" == event then
 						self:release()
 					end
@@ -529,7 +532,9 @@ local Layer = {
 				self._layer = cc.Layer:create()
 				local function onNodeEvent(event,v)		
 					if "enter" == event then
+						print("layer init in")
 						self:init()
+						print("layer init out")
 					elseif "exit" == event then
 						self:release()
 					end
