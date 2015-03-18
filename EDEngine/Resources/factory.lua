@@ -11,6 +11,10 @@ local _classes = {}
 
 base.addBaseClass( _classes )
 
+local function getClass(classid)
+	return _classes[classid]
+end
+
 --产生一个唯一的ID字符串
 local function generateId()
 	local t = tostring(os.time())..tostring(s_gidcount)
@@ -355,4 +359,5 @@ return {
 	isExist = isExist,
 	launch = launch,
 	updateClass = updateClass,
+	getClass = getClass,
 }

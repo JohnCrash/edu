@@ -495,9 +495,7 @@ local Scene = {
 				self._scene = cc.Scene:create()
 				local function onNodeEvent(event,v)
 					if "enter" == event then
-						print("scene init in")
 						self:init()
-						print("scene init out")
 					elseif "exit" == event then
 						self:release()
 					end
@@ -505,7 +503,16 @@ local Scene = {
 				self._scene:registerScriptHandler(onNodeEvent)			
 			end,
 		addChild = function(self,child)
-			self._scene:addChild(child._layer)
+			if child._layer then
+				self._scene:addChild(child._layer)
+			elseif child._widget then
+				self._scene:addChild(child._widget)
+			else
+				self._scene:addChild(child)
+			end
+		end,
+		getScene = function(self)
+			return self._scene
 		end,
 		push = function(self)
 			uikits.pushScene(self._scene)
@@ -532,15 +539,23 @@ local Layer = {
 				self._layer = cc.Layer:create()
 				local function onNodeEvent(event,v)		
 					if "enter" == event then
-						print("layer init in")
 						self:init()
-						print("layer init out")
 					elseif "exit" == event then
 						self:release()
 					end
 				end	
 				self._layer:registerScriptHandler(onNodeEvent)			
 			end,
+		addChild = function(self,child)
+			if child._widget then
+				self._layer:addChild(child._widget)
+			else
+				self._layer:addChild(child)
+			end
+		end,	
+		getLayer = function(self)
+			return self._layer
+		end,
 		init = function(self)
 		end,
 		release = function(self)
