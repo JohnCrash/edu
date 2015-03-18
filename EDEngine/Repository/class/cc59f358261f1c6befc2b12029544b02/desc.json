@@ -3,6 +3,7 @@
 	"superid":"8736daf38faaa28693f922843cc0c5aa",
 	"name":"进度对话栏",
 	"comment":"对话栏中加入一个进度条",
+	"icon":"res/th.jpg",
 	"pedigree":[
 		"7c3064bb858e619b9f02fef85432f162"
 	],

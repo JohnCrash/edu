@@ -12,7 +12,11 @@ local liexue_server = "http://file.lejiaolexue.com/upgrade/luaapp/v"..resume.get
 local local_server = "http://192.168.2.211:81/lgh/v"..resume.getversion().."/"
 --返回类的存储根目录
 local function getClassRootDirectory()
-	return local_dir..'class/'
+	if cc_isdebug() then
+		return cc.FileUtils:getInstance():getWritablePath()..'class/'
+	else
+		return local_dir..'class/'
+	end
 end
 
 local function getServerRootDirectory()

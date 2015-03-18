@@ -3,6 +3,7 @@
 	"superid":"685316259b01edf58a85d6705a4541ad",
 	"name":"对象浏览器",
 	"comment":"浏览本地对象继承结构。",
+	"icon":"res/searcher_icon.jpg",
 	"pedigree":[
 		"7c3064bb858e619b9f02fef85432f162"
 	],
