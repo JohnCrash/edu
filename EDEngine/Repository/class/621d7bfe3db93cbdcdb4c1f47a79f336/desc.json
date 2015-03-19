@@ -1,9 +1,9 @@
 {
 	"classid":"621d7bfe3db93cbdcdb4c1f47a79f336",
-	"superid":"685316259b01edf58a85d6705a4541ad",
+	"superid":"d55f6d9cbb48b6f402b8122b97ed2dc1",
 	"name":"对象浏览器",
 	"comment":"浏览本地对象继承结构。",
-	"icon":"res/searcher_icon.jpg",
+	"icon":"res/searcher_icon.png",
 	"pedigree":[
 		"7c3064bb858e619b9f02fef85432f162"
 	],

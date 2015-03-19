@@ -55,7 +55,7 @@ return {
 				table.insert(classids,file)
 			end
 		end
-		local scheduler = self:ccLayer():getScheduler()
+		local scheduler = self:ccScene():getScheduler()
 		local schedulerId
 		local idx = 0
 		local count = #classids

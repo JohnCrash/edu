@@ -242,10 +242,8 @@ function AppEntry:init()
 				factory.import({uuidClassSearcher},
 						function(b,err)
 							progressbox:close()
-							local scene = factory.create(base.Scene)
 							local searcher = factory.create(uuidClassSearcher)
-							scene:addChild( searcher )
-							scene:push()
+							searcher:push()
 						end,
 						function(d,txt)
 							progressbox:setProgress(d)

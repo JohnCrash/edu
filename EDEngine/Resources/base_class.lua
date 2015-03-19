@@ -25,7 +25,7 @@ local ui = {
 local root = {
 	classid = base.root,
 	name = "Root",
-	icon = "res/splash/root_icon.jpg",
+	icon = "res/splash/root_icon.png",
 	comment = "所有对象都是它的子类",
 	version = 1,
 	class = {
@@ -643,7 +643,7 @@ local Layout={
 		base.root
 	},
 	name = "Layout",
-	icon = "res/splash/widget_icon.png",
+	icon = "res/splash/layout_icon.png",
 	comment = "界面的基本元件的基类",
 	version = 1,
 	class={
@@ -657,7 +657,7 @@ local Button={
 		base.root
 	},
 	name = "Button",
-	icon = "res/splash/widget_icon.png",
+	icon = "res/splash/button_icon.png",
 	comment = "界面的基本元件的基类",
 	version = 1,
 	class={
@@ -685,7 +685,7 @@ local Text={
 		base.root
 	},
 	name = "Text",
-	icon = "res/splash/widget_icon.png",
+	icon = "res/splash/text_icon.png",
 	comment = "界面的基本元件的基类",
 	version = 1,
 	class={
