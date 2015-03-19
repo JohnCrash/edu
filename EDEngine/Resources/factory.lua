@@ -1,15 +1,15 @@
 local md5 = require "md5"
 local json = require "json-c"
 local kits = require "kits"
-local update = require "update_factory"
 local uikits = require "uikits"
-local base = require "base"
+local update = require "update_factory"
+local base_class = require "base_class"
 
 local s_gidcount = os.time()
 --从classId到类表的映射表
 local _classes = {}
 
-base.addBaseClass( _classes )
+base_class.addBaseClass( _classes )
 
 local function getClass(classid)
 	return _classes[classid]

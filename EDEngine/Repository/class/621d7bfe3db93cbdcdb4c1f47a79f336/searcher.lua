@@ -22,17 +22,21 @@ local list = {}
 
 return {
 	init = function(self)
-		self._item = uikits.fromJson{file=self:getR(ui.FILE)}
-		local size = uikits.getDR()
-		self._scroll = uikits.scrollview{x=0,y=0,anchorX=0,anchorY=0,
-		width=size.width,height=size.height,
-		bgcolor=cc.c3b(64,64,64)
-		}
-		self:addChild(self._scroll)
-		self._scroll:addChild(self._item)
-		self._item:setVisible(false)
-		if #classes == 0 then
+		if not self._scroll then
+			self._item = uikits.fromJson{file=self:getR(ui.FILE)}
+			local size = uikits.getDR()
+			self._scroll = uikits.scrollview{x=0,y=0,anchorX=0,anchorY=0,
+			width=size.width,height=size.height,
+			bgcolor=cc.c3b(64,64,64)
+			}
+			self:addChild(self._scroll)
+			self._scroll:addChild(self._item)
+			self._item:setVisible(false)
+		end
+		if #list == 0 then
 			self:initClasses()
+		else
+			self:layout()
 		end
 	end,
 	initClasses = function(self)
@@ -41,7 +45,7 @@ return {
 			if type(v)=='string' then
 				table.insert(classids,v)
 			end
-		end		
+		end
 		if string.sub(path,-1) == '/' then
 			path = string.sub(path,1,-2)
 		end
@@ -71,6 +75,8 @@ return {
 				if cls then
 					classes[classids[idx]] = {id=classids[idx],child={},cls=cls}
 				end
+			elseif idx==count then
+				progressBox:setProgress(idx/count)
 			else
 				--组织为树状结构
 				for i,v in pairs(classes) do
@@ -158,9 +164,18 @@ return {
 				else
 					print("not icon "..s)
 				end
+				uikits.event(item,function(sender)
+					print("test "..s)
+					local obj = factory.createAsyn(s,function(obj)
+						obj:test()
+					end)
+				end,"click")
 			end
 		end
 		local ss = self._scroll:getContentSize()
 		self._scroll:setInnerContainerSize(cc.size(ss.width,h))
 	end,
+	test = function(self)
+		print("you can not test searcher!")
+	end
 }
