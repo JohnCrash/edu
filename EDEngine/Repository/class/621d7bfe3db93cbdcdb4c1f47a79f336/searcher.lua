@@ -55,7 +55,7 @@ return {
 				table.insert(classids,file)
 			end
 		end
-		local scheduler = self:getLayer():getScheduler()
+		local scheduler = self:ccLayer():getScheduler()
 		local schedulerId
 		local idx = 0
 		local count = #classids
@@ -80,7 +80,7 @@ return {
 			else
 				--组织为树状结构
 				for i,v in pairs(classes) do
-					if v.cls.superid then
+					if v.cls.superid and classes[v.cls.superid] then
 						table.insert(classes[v.cls.superid].child,i)
 					else
 						table.insert(root,i)

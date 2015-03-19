@@ -232,118 +232,6 @@ function AppEntry:init()
 		eventClick=function(sender)
 				local factory = require "factory"
 				local base = require "base"
-				--[[ 测试MessageBox
-				factory.createAsyn(base.MessageBox,function(obj)
-					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-					button={"选择1","选择2","选择3","选择4"},onClick=function(i,txt)
-					end}
-				end)
-				--]]
-				--[[ 测试SplashScene
-				factory.createAsyn(base.SplashScene,function(obj)
-					obj:open()
-					obj:setText("准备")
-					for i=1,10 do
-						uikits.delay_call(nil,function()
-							obj:setText("进度:"..tostring(i*10).."%")
-							end,3*i/10)
-					end					
-					uikits.delay_call(nil,function()obj:close()end,3.5)
-				end)
-				--]]
-				--[[ 测试LoadingScene
-				factory.createAsyn(base.LoadingScene,function(obj)
-					obj:open()
-					obj:setText("准备")
-					for i=1,10 do
-						uikits.delay_call(nil,function()
-							obj:setProgress(i/10) 
-							obj:setText("进度:"..tostring(i*10).."%")
-							end,3*i/10)
-					end
-					uikits.delay_call(nil,function()obj:close()end,3.5)
-				end)
-				--]]				
-				--[[ 测试Spin
-				factory.createAsyn(base.Spin,function(obj)
-					obj:open()
-					uikits.delay_call(nil,function()obj:close()end,3.5)
-				end)
-				--]]	
-				--[[ 测试ProgressBox
-				factory.createAsyn(base.ProgressBox,function(obj)
-					obj:open()
-					obj:setText("准备")
-					for i=1,10 do
-						uikits.delay_call(nil,function()
-							obj:setProgress(i/10) 
-							obj:setText("进度:"..tostring(i*10).."%")
-							end,3*i/10)
-					end
-					uikits.delay_call(nil,function()obj:close()end,3.5)
-				end)
-				--]]	
-				--[[ 测试MessageBox的子类
-				factory.createAsyn("46220ce3ba3fe1353f48acef66536fdd",function(obj)
-					obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-					button=3,onClick=function(i,txt)
-						print(tostring(i)..":"..txt)
-					end}
-				end)
-				--]]				
-				--[[ 测试MessageBox的子类
-				factory.createAsyn(base.ProgressBox,function(progressBox)
-					progressBox:open()
-					progressBox:setProgress(0)
-					progressBox:setText('loading cc59f358261f1c6befc2b12029544b02')
-					factory.createAsyn("cc59f358261f1c6befc2b12029544b02",function(obj)
-						progressBox:close()
-						obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-						button=3,onClick=function(i,txt)
-							print(tostring(i)..":"..txt)
-						end}
-					end,
-					function(d,txt)
-						progressBox:setProgress(d)
-						progressBox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))
-					end)
-				end)
-				--]]								
-				--[[
-				local uuidGrayMessageBox = '46220ce3ba3fe1353f48acef66536fdd'
-				local uuidProgressBox = 'cc59f358261f1c6befc2b12029544b02'
-				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
-				local uuidRoot = '7c3064bb858e619b9f02fef85432f162'
-				local uuidTest = 'e0624a7d0d7a6c3d4a3439588ed98fb0'
-				factory.createAsyn(base.ProgressBox,function(progressBox)
-					progressBox:open()
-					progressBox:setProgress(0)				
-					factory.import({uuidGrayMessageBox,uuidProgressBox},
-						function(b)
-							progressBox:close()
-							if b then
-								local obj = factory.create(uuidProgressBox)
-								local is = obj:isInstanceOf(uuidGrayMessageBox)
-								print('uuidProgressBox isKindOf uuidGrayMessageBox '..tostring(is))
-								is = obj:isInstanceOf(uuidProgressBox)
-								print('uuidProgressBox isKindOf uuidProgressBox '..tostring(is))
-								is = obj:isInstanceOf(uuidMessageBox)
-								print('uuidProgressBox isKindOf uuidMessageBox '..tostring(is))
-								is = obj:isInstanceOf(uuidRoot)
-								print('uuidProgressBox isKindOf uuidRoot '..tostring(is))
-								obj:open{caption="提示",text={"1.第一行提示","2.第二行提示...","3.随着云时代的到来，大数据也吸引了越来越多多关注。"},
-											button=3,onClick=function(i,txt)
-												print(tostring(i)..":"..txt)
-										end}
-							end
-						end,
-						function(d,txt)
-							progressBox:setProgress(d)
-							progressBox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
-						end)
-				end)
-				--]]
-				---[[
 				local uuidProgressBox = '6e8c7a6612998e78186585e468010f95'
 				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
 				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
@@ -363,7 +251,6 @@ function AppEntry:init()
 							progressbox:setProgress(d)
 							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
 						end)
-				--]]
 			end}
 	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,

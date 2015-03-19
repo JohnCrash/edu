@@ -26,7 +26,7 @@ local root = {
 	classid = base.root,
 	name = "Root",
 	icon = "res/splash/root_icon.jpg",
-	comment = "ËùÓĞ¶ÔÏó¶¼ÊÇËüµÄ×ÓÀà",
+	comment = "æ‰€æœ‰å¯¹è±¡éƒ½æ˜¯å®ƒçš„å­ç±»",
 	version = 1,
 	class = {
 		getR = function(self,res)
@@ -78,49 +78,140 @@ local root = {
 	},
 }
 
-local splashScene = {
-	classid = base.SplashScene,
+local Scene = {
+	classid = base.Scene,
 	superid = base.root,
-	name = "SplashScene",
-	icon = "res/splash/splash_icon.png",
-	comment = "´´½¨Ò»¸öµÈ´ıÆÁÖ±µ½ÈÎÎñ½áÊø",
+	name = "Scene",
+	icon = "res/splash/scene_icon.png",
+	comment = "åœºæ™¯",
 	version = 1,
 	class = {
-		open = function(self)
-			self._scene = cc.Scene:create()
+		__init__ = function(self)
+				self._scene = cc.Scene:create()
+				local function onNodeEvent(event,v)
+					if "enter" == event then
+						self:init()
+					elseif "exit" == event then
+						self:release()
+					end
+				end	
+				self._scene:registerScriptHandler(onNodeEvent)			
+			end,
+		addChild = function(self,child)
+			if child._layer then
+				self._scene:addChild(child._layer)
+			elseif child._widget then
+				self._scene:addChild(child._widget)
+			else
+				self._scene:addChild(child)
+			end
+		end,
+		ccScene = function(self)
+			return self._scene
+		end,
+		push = function(self)
+			uikits.pushScene(self._scene)
+		end,
+		pop = function(self)
+			if self._scene then	
+				uikits.popScene()
+			end
+		end,		
+		replace = function(self)
+				uikits.replaceScene(self._scene)
+		end,
+		init = function(self)
+		end,
+		release = function(self)
+		end,
+		test = function(self)
+			self:push()		
+		end,
+	}
+}
+
+local Layer = {
+	classid = base.Layer,
+	superid = base.root,
+	name = "Layer",
+	icon = "res/splash/layer_icon.png",
+	comment = "ä¸€ä¸ªåœºæ™¯å¯ä»¥æœ‰å¤šä¸ªå±‚",
+	version = 1,
+	class = {
+		__init__ = function(self)
+				self._layer = cc.Layer:create()
+				local function onNodeEvent(event,v)		
+					if "enter" == event then
+						self:init()
+					elseif "exit" == event then
+						self:release()
+					end
+				end	
+				self._layer:registerScriptHandler(onNodeEvent)			
+			end,
+		addChild = function(self,child)
+			if child._widget then
+				self._layer:addChild(child._widget)
+			else
+				self._layer:addChild(child)
+			end
+		end,	
+		ccLayer = function(self)
+			return self._layer
+		end,
+		init = function(self)
+		end,
+		release = function(self)
+		end,
+		test=function(self)
+			local factory = require "factory"
+			local scene = factory.create(base.Scene)
+			scene:addChild(self)
+			scene:push()
+		end,
+	}
+}
+
+local splashScene = {
+	classid = base.SplashScene,
+	superid = base.Scene,
+	pedigree={
+		base.root
+	},
+	name = "SplashScene",
+	icon = "res/splash/splash_icon.png",
+	comment = "åˆ›å»ºä¸€ä¸ªç­‰å¾…å±ç›´åˆ°ä»»åŠ¡ç»“æŸ",
+	version = 1,
+	class = {
+		__init__ = function(self)
+			self.super.__init__(self)
 			self._splash = uikits.fromJson{file=self:getR(ui.SPLASH_FILE)}
 			self._scene:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
 			self._text_shadow = uikits.child(self._splash,ui.SPLASH_TEXT_SHADOW)
-			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)
-			local scheduler = self._scene:getScheduler()
-			local schedulerId
-			local oldDR
-			local function onNodeEvent(event)
-				local angle = 0
-				local N = 12
-				local function spin()
-					self._spin:setRotation( angle )
-					angle = angle + 360/N
-				end
-				if event == 'enter' then
-					oldDR=uikits.getDR()
-					uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
-					schedulerId = scheduler:scheduleScriptFunc(spin,0.8/N,false)	
-				elseif event == 'exit' then
-					if schedulerId then
-						uikits.initDR(oldDR)
-						scheduler:unscheduleScriptEntry(schedulerId)
-						schedulerId = nil
-					end
-				end
-			end
-			self._scene:registerScriptHandler(onNodeEvent)
-			uikits.pushScene(self._scene)
+			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)		
+			self._scheduler = self._scene:getScheduler()		
+			self:setText("")			
 		end,
-		close = function(self)
-			if self._scene then	
-				uikits.popScene()
+		push = function(self)
+			self._oldDR=uikits.getDR()
+			self.super.push(self)
+		end,
+		init = function(self)
+			uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
+			local angle = 0
+			local N = 12
+			local function spin()
+				self._spin:setRotation( angle )
+				angle = angle + 360/N
+			end
+			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.8/N,false)	
+		end,
+		release = function(self)
+			if self._schedulerId then
+				uikits.initDR(self._oldDR)
+				self._scheduler:unscheduleScriptEntry(self._schedulerId)
+				self._schedulerId = nil
 			end
 		end,
 		setText = function(self,txt)
@@ -128,27 +219,30 @@ local splashScene = {
 			self._text_shadow:setString(txt)
 		end,
 		test = function(self)
-			self:open()
-			self:setText("²âÊÔ")
+			self:push()
+			self:setText("æµ‹è¯•")
 			for i=1,10 do
 				uikits.delay_call(nil,function()
-					self:setText("½ø¶È:"..tostring(i*10).."%")
+					self:setText("è¿›åº¦:"..tostring(i*10).."%")
 					end,3*i/10)
 			end					
-			uikits.delay_call(nil,function()self:close()end,3.5)			
+			uikits.delay_call(nil,function()self:pop()end,3.5)			
 		end,
 	}
 }
 local loadingScene = {
 	classid = base.LoadingScene,
-	superid = base.root,
+	superid = base.Scene,
+	pedigree={
+		base.root
+	},
 	name = "LoadingScene",
 	icon = "res/splash/loadingscene_icon.png",
-	comment = "´´½¨Ò»¸ö¾ßÓĞ½ø¶ÈÌõµÄ¼ÓÔØÆÁ",
+	comment = "åˆ›å»ºä¸€ä¸ªå…·æœ‰è¿›åº¦æ¡çš„åŠ è½½å±",
 	version = 1,
 	class = {
-		open = function(self)
-			self._scene = cc.Scene:create()
+		__init__ = function(self)
+			self.super.__init__(self)
 			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
 			self._scene:addChild(self._loading)
 			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
@@ -159,7 +253,7 @@ local loadingScene = {
 			self._size.width = self._size.width -5
 			self._size.height = self._size.height -6	
 			self._sp = uikits.child(self._progress,ui.LOADING_PROGRESSBAR_SP)
-			self._sps = {}
+			self._sps = {}		
 			table.insert(self._sps,self._sp)
 			local ox,oy = self._sp:getPosition()
 			for i=1,14 do
@@ -168,42 +262,36 @@ local loadingScene = {
 				self._progress:addChild( s )
 				table.insert(self._sps,s)
 			end
-			self:setProgress(0)
-			local scheduler = self._scene:getScheduler()
-			local schedulerId				
-			local oldDR
-			local dx = 0
-			local d = 2
-			local function onNodeEvent(event)
-				local function spin()
-					uikits.move(self._sps,-3,0)
-					dx = dx + 3
-					if dx >= 30 then
-						dx = 0
-						uikits.move(self._sps,30,0)
-					end
-				end			
-				if event == 'enter' then
-					oldDR=uikits.getDR()
-					uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
-					schedulerId = scheduler:scheduleScriptFunc(spin,0.02,false)	
-				elseif event == 'exit' then
-					if schedulerId then
-						uikits.initDR(oldDR)
-						scheduler:unscheduleScriptEntry(schedulerId)
-						schedulerId = nil
-						self._text = nil
-						self._progress = nil
-					end
-				end			
-			end
-			self._scene:registerScriptHandler(onNodeEvent)
-			uikits.pushScene(self._scene)
+			self:setProgress(0)		
+			self:setText("")
+			self._scheduler = self._scene:getScheduler()				
 		end,
-		close = function(self)
-			if self._scene then
-				uikits.popScene(self._scene)
-			end
+		push = function(self)
+			self._oldDR = uikits.getDR()
+			self.super.push(self)
+		end,
+		init = function(self)
+			uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
+			local dx = 0
+			local d = 2	
+			local function spin()
+				uikits.move(self._sps,-3,0)
+				dx = dx + 3
+				if dx >= 30 then
+					dx = 0
+					uikits.move(self._sps,30,0)
+				end
+			end				
+			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.02,false)	
+		end,
+		release = function(self)
+			if self._schedulerId then
+				uikits.initDR(self._oldDR)
+				self._scheduler:unscheduleScriptEntry(self._schedulerId)
+				self._schedulerId = nil
+				self._text = nil
+				self._progress = nil
+			end		
 		end,
 		setProgress = function( self,d )
 			if self._progress then
@@ -217,24 +305,75 @@ local loadingScene = {
 			end
 		end,
 		test = function(self)
-			self:open()
-			self:setText("×¼±¸")
-			for i=1,10 do
-				uikits.delay_call(nil,function()
-					self:setProgress(i/10) 
-					self:setText("½ø¶È:"..tostring(i*10).."%")
-					end,3*i/10)
+			self:push()
+			local count = 4*20
+			local i = 0
+			local function progress()
+				i=i+1
+				self:setProgress(i/count)
+				self:setText("è¿›åº¦:"..tostring(math.floor(i/count*100)).."%")
+				if i > count then
+					self._scheduler:unscheduleScriptEntry(self._testId)
+					self:pop()
+				end
 			end
-			uikits.delay_call(nil,function()self:close()end,3.5)			
+			self._testId = self._scheduler:scheduleScriptFunc(progress,1/20,false)
 		end,
 	}
 }
+
+local Dialog = {
+	classid = base.Dialog,
+	superid = base.root,
+	name = "Dialog",
+	icon = "res/splash/dialog_icon.png",
+	comment = "å¯¹è¯æ åŸºç±»",
+	version = 1,
+	class = {
+		open = function(self,t)
+		end,
+		close = function(self)
+			if self._root then
+				self._root:removeFromParent()	
+				self._root = nil
+				if self._needpop	then
+					uikits.popScene()
+				end
+			end
+		end,
+		modal = function(self,box)
+			local director = cc.Director:getInstance()
+			local scene = director:getRunningScene()
+			local size = uikits.getDR()
+			box:setPosition(cc.p(size.width/2,size.height/2))
+			box:setAnchorPoint(cc.p(0.5,0.5))			
+			if scene then
+				self._scene = scene
+				self._root = ccui.Layout:create()
+				self._root:addChild(box)
+				scene:addChild(self._root)
+				self._root:setTouchEnabled(true)
+				self._root:setContentSize(uikits.getDR())
+			else
+				self._scene = cc.Scene:create()
+				self._scene:addChild(box)
+				self._root = box
+				self._needpop = true
+				uikits.pushScene(self._scene)
+			end		
+		end,
+	}
+}
+
 local messageBox = {
 	classid = base.MessageBox,
-	superid = base.root,
+	superid = base.Dialog,
+	pedigree = {
+		base.root
+	},
 	name = "MessageBox",
 	icon = "res/splash/messagebox_icon.png",
-	comment = "´´½¨Ò»¸öµÈ´ıÆÁÖ±µ½ÈÎÎñ½áÊø",
+	comment = "åˆ›å»ºä¸€ä¸ªç­‰å¾…å±ç›´åˆ°ä»»åŠ¡ç»“æŸ",
 	version = 1,
 	class = {
 		open = function(self,t)
@@ -264,21 +403,15 @@ local messageBox = {
 			local function click(i,v)
 				if self._root then
 					uikits.delay_call(parent,function()	
-												if self._root then
-													self._root:removeFromParent()	
-													self._root = nil
-													if self._needpop	then
-														uikits.popScene()
-													end
-												end
+												self:close()
 												if t.onClick then
 													t.onClick(i,v)
-												end												
+												end													
 											end,0)	
 				end
 			end
 			if t.button and type(t.button)=='number' then
-				local bt={"È·¶¨","È¡Ïû","ÖØÊÔ"}
+				local bt={"ç¡®å®š","å–æ¶ˆ","é‡è¯•"}
 				for i = 1,t.button do
 					local but
 					if i==1 then
@@ -310,31 +443,16 @@ local messageBox = {
 				end
 			end
 			self:relayout()
-			local director = cc.Director:getInstance()
-			local scene = director:getRunningScene()
-			if scene then
-				self._scene = scene
-				self._root = ccui.Layout:create()
-				self._root:addChild(self._box)
-				scene:addChild(self._root)
-				self._root:setTouchEnabled(true)
-				self._root:setContentSize(uikits.getDR())
-			else
-				self._scene = cc.Scene:create()
-				self._scene:addChild(self._box)
-				self._root = self._box
-				self._needpop = true
-				uikits.pushScene(self._scene)
-			end
+			self:modal(self._box)
 		end,
 		relayout=function(self)
-			local bhspace = 20 --°´Å¥ÖĞµÄÎÄ×ÖºÍ±ß¿òÁ½²àµÄ¼ä¸ô
-			local bvspace = 16 --ÉÏÏÂµÄ¼ä¸ô
+			local bhspace = 20 --æŒ‰é’®ä¸­çš„æ–‡å­—å’Œè¾¹æ¡†ä¸¤ä¾§çš„é—´éš”
+			local bvspace = 16 --ä¸Šä¸‹çš„é—´éš”
 			local space = 16
 			local title_height = 56
 			local H,W = space,space
 			local BW,BH = 0,0
-			--¼ÆËãĞèÒªµÄ¿Õ¼ä
+			--è®¡ç®—éœ€è¦çš„ç©ºé—´
 			for i,v in pairs(self._buttons) do
 				local txt = v:getTitleText()
 				self._text:setString(txt)
@@ -356,7 +474,7 @@ local messageBox = {
 			end
 			local box_size = cc.size(W,H+title_height)
 			self._box:setContentSize(box_size)
-			--¿ªÊ¼²¼¾Ö°´Å¥
+			--å¼€å§‹å¸ƒå±€æŒ‰é’®
 			local ox = (W-BW)/2
 			for i,v in pairs(self._buttons) do
 				local x,y = v:getPosition()
@@ -364,7 +482,7 @@ local messageBox = {
 				v:setPosition(cc.p(ox,y))
 				ox = ox+size.width+space
 			end
-			--²¼¾ÖÎÄ±¾
+			--å¸ƒå±€æ–‡æœ¬
 			local oy = BH
 			for i,v in pairs(self._texts) do
 				local x,y = v:getPosition()
@@ -372,16 +490,16 @@ local messageBox = {
 				v:setPosition(cc.p(x,oy))
 				oy = oy+size.height+space
 			end
-			--·ÅÖÃ±êÌâ
+			--æ”¾ç½®æ ‡é¢˜
 			self._caption:setPosition(cc.p(W/2,H+title_height/2))
 			self._caption:setFontName("simhei")
-			--¾ÓÖĞ·ÅÖÃÏûÏ¢À¸
+			--å±…ä¸­æ”¾ç½®æ¶ˆæ¯æ 
 			local s = uikits.getDR()
 			self._box:setPosition((s.width-box_size.width)/2,(s.height-box_size.height)/2)
 		end,
 		test = function(self)
-			self:open{caption="ÌáÊ¾",text={"1.µÚÒ»ĞĞÌáÊ¾","2.µÚ¶şĞĞÌáÊ¾...","3.Ëæ×ÅÔÆÊ±´úµÄµ½À´£¬´óÊı¾İÒ²ÎüÒıÁËÔ½À´Ô½¶à¶à¹Ø×¢¡£"},
-					button={"Ñ¡Ôñ1","Ñ¡Ôñ2","Ñ¡Ôñ3","Ñ¡Ôñ4"},onClick=function(i,txt)
+			self:open{caption="æç¤º",text={"1.ç¬¬ä¸€è¡Œæç¤º","2.ç¬¬äºŒè¡Œæç¤º...","3.éšç€äº‘æ—¶ä»£çš„åˆ°æ¥ï¼Œå¤§æ•°æ®ä¹Ÿå¸å¼•äº†è¶Šæ¥è¶Šå¤šå¤šå…³æ³¨ã€‚"},
+					button={"é€‰æ‹©1","é€‰æ‹©2","é€‰æ‹©3","é€‰æ‹©4"},onClick=function(i,txt)
 					print(tostring(i)..":"..txt)
 			end}
 		end,
@@ -390,39 +508,32 @@ local messageBox = {
 
 local Spin ={
 	classid = base.Spin,
-	superid = base.root,
+	superid = base.Dialog,
+	pedigree={
+		base.root
+	},
 	name = "Spin",
 	icon = "res/splash/splash_icon.png",
-	comment = "ÔÚÆÁÄ»ÖĞ¼ä¼ÓÈëÒ»¸öĞı×ªÈ¦ÓÃÀ´µÈ´ıÒ»¸öÈÎÎñ",
+	comment = "åœ¨å±å¹•ä¸­é—´åŠ å…¥ä¸€ä¸ªæ—‹è½¬åœˆç”¨æ¥ç­‰å¾…ä¸€ä¸ªä»»åŠ¡",
 	version = 1,
 	class = {
 		open=function(self)
-			local director = cc.Director:getInstance()
-			local scene = director:getRunningScene()
-			if not scene then
-				kits.log("ERROR Object Spin need a Running Scene!")
-				return
-			end
-			local size = uikits.getDR()
-			self._image = uikits.image{image=ui.SPIN_IMAGE,
-				x=size.width/2,y=size.height/2,
-				anchorX=0.5,anchorY=0.5}
-			scene:addChild(self._image)
+			self._image = uikits.image{image=ui.SPIN_IMAGE}
+			self:modal(self._image)
 			local angle = 0
 			local N = 12
 			local function spin()
 				self._image:setRotation( angle )
 				angle = angle + 360/N
 			end
-			self._scheduler = scene:getScheduler()			
+			self._scheduler = self._root:getScheduler()			
 			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.8/N,false)	
 		end,
 		close=function(self)
-			if self._schedulerId and self._scheduler then
-				self._image:removeFromParent()
+			self.super.close(self)
+			if self._schedulerId then
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
-				self._schedulerId = nil
-			end		
+			end
 		end,
 		test=function(self)
 			self:open()
@@ -433,20 +544,16 @@ local Spin ={
 
 local ProgressBox={
 	classid = base.ProgressBox,
-	superid = base.root,
+	superid = base.Dialog,
+	pedigree = {
+		base.root
+	},	
 	name = "ProgressBox",
 	icon = "res/splash/progressbox_icon.jpg",
-	comment = "Ò»¸öÓĞ½ø¶ÈÌõµÄ¶Ô»°À¸",
+	comment = "ä¸€ä¸ªæœ‰è¿›åº¦æ¡çš„å¯¹è¯æ ",
 	version = 1,
 	class = {
 		open=function(self,t)
-			local director = cc.Director:getInstance()
-			local scene = director:getRunningScene()
-			if not scene then
-				kits.log("ERROR Object ProgressBox need a Running Scene!")
-				return
-			end		
-			print("ProgressBox open")
 			self._box = uikits.fromJson{file=self:getR(ui.PROGRESS_BOX)}
 			self._text = uikits.child(self._box,ui.PROGRESS_TEXT)
 			self._progress = uikits.child(self._box,ui.LOADING_PROGRESSBAR)
@@ -455,12 +562,9 @@ local ProgressBox={
 			self._size.width = self._size.width -6
 			self._size.height = self._size.height -7	
 			self._sp = uikits.child(self._progress,ui.LOADING_PROGRESSBAR_SP)
-			local size = uikits.getDR()
-			self._box:setPosition(cc.p(size.width/2,size.height/2))
-			self._box:setAnchorPoint(cc.p(0.5,0.5))
 			self._box:setScaleX(2)
 			self._box:setScaleY(2)
-			scene:addChild(self._box)
+			self:modal(self._box)
 			self._sps = {}
 			table.insert(self._sps,self._sp)
 			local ox,oy = self._sp:getPosition()
@@ -471,7 +575,7 @@ local ProgressBox={
 				table.insert(self._sps,s)
 			end
 			self:setProgress(0)
-			self._scheduler = scene:getScheduler()
+			self._scheduler = self._root:getScheduler()
 			local dx = 0
 			local d = 2
 			local function spin()
@@ -485,8 +589,8 @@ local ProgressBox={
 			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.02,false)				
 		end,
 		close=function(self)
-			if self._schedulerId and self._scheduler then
-				self._box:removeFromParent()
+			self.super.close(self)
+			if self._schedulerId then
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
 				self._schedulerId = nil
 				self._progress = nil
@@ -505,104 +609,100 @@ local ProgressBox={
 		end,		
 		test = function(self)
 			self:open()
-			self:setText("×¼±¸")
-			for i=1,10 do
-				uikits.delay_call(nil,function()
-					self:setProgress(i/10) 
-					self:setText("½ø¶È:"..tostring(i*10).."%")
-					end,3*i/10)
+			local count = 4*20
+			local i = 0
+			local function progress()
+				i=i+1
+				self:setProgress(i/count)
+				self:setText("è¿›åº¦:"..tostring(math.floor(i/count*100)).."%")
+				if i > count then
+					self._scheduler:unscheduleScriptEntry(self._testId)
+					self:close()
+				end
 			end
-			uikits.delay_call(nil,function()self:close()end,3.5)		
+			self._testId = self._scheduler:scheduleScriptFunc(progress,1/20,false)
 		end,
 	}
 }
 
-local Scene = {
-	classid = base.Scene,
+local Widget={
+	classid = base.Widget,
 	superid = base.root,
-	name = "Scene",
-	icon = "res/splash/scene_icon.png",
-	comment = "³¡¾°",
+	name = "Widget",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
 	version = 1,
-	class = {
-		__init__ = function(self)
-				self._scene = cc.Scene:create()
-				local function onNodeEvent(event,v)
-					if "enter" == event then
-						self:init()
-					elseif "exit" == event then
-						self:release()
-					end
-				end	
-				self._scene:registerScriptHandler(onNodeEvent)			
-			end,
-		addChild = function(self,child)
-			if child._layer then
-				self._scene:addChild(child._layer)
-			elseif child._widget then
-				self._scene:addChild(child._widget)
-			else
-				self._scene:addChild(child)
-			end
-		end,
-		getScene = function(self)
-			return self._scene
-		end,
-		push = function(self)
-			uikits.pushScene(self._scene)
-		end,
-		replace = function(self)
-			uikits.replaceScene(self._scene)
-		end,
-		init = function(self)
-		end,
-		release = function(self)
-		end,
-		test = function(self)
-			self:push()		
-		end,
+	class={
 	}
 }
 
-local Layer = {
-	classid = base.Layer,
-	superid = base.root,
-	name = "Layer",
-	icon = "res/splash/layer_icon.png",
-	comment = "²ã",
+local Layout={
+	classid = base.Layout,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "Layout",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
 	version = 1,
-	class = {
-		__init__ = function(self)
-				self._layer = cc.Layer:create()
-				local function onNodeEvent(event,v)		
-					if "enter" == event then
-						self:init()
-					elseif "exit" == event then
-						self:release()
-					end
-				end	
-				self._layer:registerScriptHandler(onNodeEvent)			
-			end,
-		addChild = function(self,child)
-			if child._widget then
-				self._layer:addChild(child._widget)
-			else
-				self._layer:addChild(child)
-			end
-		end,	
-		getLayer = function(self)
-			return self._layer
-		end,
-		init = function(self)
-		end,
-		release = function(self)
-		end,
-		test=function(self)
-			local factory = require "factory"
-			local scene = factory.create(base.Scene)
-			scene:addChild(self)
-			scene:push()
-		end,
+	class={
+	}
+}
+
+local Button={
+	classid = base.Button,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "Button",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
+	version = 1,
+	class={
+	}
+}
+
+local ScrollView={
+	classid = base.ScrollView,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "ScrollView",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
+	version = 1,
+	class={
+	}
+}
+
+local Text={
+	classid = base.Text,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "Text",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
+	version = 1,
+	class={
+	}
+}
+
+local ProgressBar={
+	classid = base.ProgressBar,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "ProgressBar",
+	icon = "res/splash/widget_icon.png",
+	comment = "ç•Œé¢çš„åŸºæœ¬å…ƒä»¶çš„åŸºç±»",
+	version = 1,
+	class={
 	}
 }
 
@@ -623,20 +723,33 @@ end
 local function addBaseClass(_classes)
 	local function addClass( classid,cls )
 		if cls.superid then
-			setmetatable(cls.class,{__index=root.class,__newindex=_readonly})
+			local supercls = _classes[cls.superid]
+			if supercls then
+				cls.class.super = supercls.class
+				setmetatable(cls.class,{__index=supercls.class,__newindex=_readonly})
+			else
+				kits.log("ERROR addBaseClass super class = nil "..tostring(cls.superid))
+			end
 		else
 			setmetatable(cls.class,{__newindex=_readonly})
 		end
 		_classes[classid] = readOnly(cls)
 	end
 	addClass(base.root,root)
+	addClass(base.Scene,Scene)
+	addClass(base.Layer,Layer)	
 	addClass(base.SplashScene,splashScene)
 	addClass(base.LoadingScene,loadingScene)
+	addClass(base.Dialog,Dialog)
 	addClass(base.MessageBox,messageBox)
 	addClass(base.Spin,Spin)
 	addClass(base.ProgressBox,ProgressBox)
-	addClass(base.Scene,Scene)
-	addClass(base.Layer,Layer)
+	addClass(base.Widget,Widget)
+	addClass(base.Layout,Layout)
+	addClass(base.Button,Button)
+	addClass(base.ScrollView,ScrollView)
+	addClass(base.Text,Text)
+	addClass(base.ProgressBar,ProgressBar)
 end
 
 return {

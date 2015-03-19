@@ -11,11 +11,35 @@ factory用来创建具体的对象
 		progress(d,txt) 输入过程的进度函数。d是一个0-1的数。txt是创建过程信息。
 	create(uuid) 同步创建函数，如果创建对象并且返回。失败返回nil。
 	isExist(uuid) 判断uuid的对象本地是否存在。（这是create创建成功的前提条件）
-	
+
+如果一个对象被创建出来，并且对象有方法__init__，那么方法__init__将被调用。
+
 root (7c3064bb858e619b9f02fef85432f162)
 	getR(res) 取得资源res路径。
 	isInstanceOf(classid) 判断classid是否在对象的继承链中,或者说是不是一个classid对象.
-
+	test() 对象的测试代码。
+	
+	
+Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)
+	addChild(child) 加入一个子节点，可以是Layer对象，也可以是cocos2d-x的节点。
+	ccScene() 返回cocos2d-x的场景对象。
+	push() 将场景压入场景堆栈。展示该场景。
+	pop() 将场景弹出。
+	replace() 替换场景堆栈的栈顶。展示该场景。
+	init() 事件函数，当场景展示时被调用。
+	release() 事件函数，当场景退出时调用。
+	
+Layer (685316259b01edf58a85d6705a4541ad)
+	addChild(child) 加入一个子节点，可以是Widget对象，也可以是cocos2d-x的节点。
+	ccLayer() 返回cocos2d-x的层对象。
+	init() 事件函数，当场景展示时被调用。
+	release() 事件函数，当场景退出时调用。
+	
+Dialog (f9e6338b892d9da54fc0668d5f1bd19c)
+	open(t) 打开对话栏界面。
+	close() 关闭对话栏。
+	modal(widget) 模式对话栏。
+	
 MessageBox (8736daf38faaa28693f922843cc0c5aa)
 	open(t) 打开一个对话框。t有如下的项。
 		caption 标题必须是一个字符串

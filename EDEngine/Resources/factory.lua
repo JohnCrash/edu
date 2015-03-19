@@ -109,7 +109,6 @@ local function addClass( classId,addClassResult,progress )
 			end
 			cls.class = cls.class or {}
 			if cls.class then
-				cls.class.this = cls.class
 				cls.class.super = cls.super
 				setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
 				_classes[classId] = readOnly(cls)
@@ -159,6 +158,7 @@ local function instance( cls )
 	local obj = {}
 	obj._cls = cls
 	setmetatable(obj,{__index=obj._cls.class})
+	obj.super = obj._cls.super
 	if obj.__init__ then
 		obj:__init__()
 	end
