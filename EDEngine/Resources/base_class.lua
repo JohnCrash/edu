@@ -230,6 +230,7 @@ local splashScene = {
 		end,
 	}
 }
+
 local loadingScene = {
 	classid = base.LoadingScene,
 	superid = base.Scene,
@@ -361,6 +362,9 @@ local Dialog = {
 				self._needpop = true
 				uikits.pushScene(self._scene)
 			end		
+		end,
+		test = function(self)
+			self:open()
 		end,
 	}
 }
@@ -625,6 +629,44 @@ local ProgressBox={
 	}
 }
 
+local BaiduVoice={
+	classid = base.BaiduVoice,
+	superid = base.Dialog,
+	pedigree = {
+		base.root
+	},	
+	name = "BaiduVoice",
+	icon = "res/splash/baidu_icon.png",
+	comment = "百度语音识别",
+	version = 1,
+	class={
+		open=function(self,t)
+			local platform = CCApplication:getInstance():getTargetPlatform()
+			if platform == kTargetWindows then
+				local factory = require "factory"
+				local msgbox = factory.create(base.MessageBox)
+				if msgbox then
+					msgbox:open{caption="错误",text="百度语音不支持windows平台",button=1}
+				end
+			else
+				cc_showBaiduVoice( function(text)
+					if t and type(t)=='function' then
+						t(text)
+					end
+				end)
+			end
+		end,
+		close=function(self)
+			local platform = CCApplication:getInstance():getTargetPlatform()
+			if platform == kTargetWindows then		
+				kits.log("BaiduVoice not support windows platform")
+			else
+				cc_closeBaiduVoice()
+			end
+		end,
+	}
+}
+
 local Widget={
 	classid = base.Widget,
 	superid = base.root,
@@ -742,6 +784,7 @@ local function addBaseClass(_classes)
 	addClass(base.LoadingScene,loadingScene)
 	addClass(base.Dialog,Dialog)
 	addClass(base.MessageBox,messageBox)
+	addClass(base.BaiduVoice,BaiduVoice)
 	addClass(base.Spin,Spin)
 	addClass(base.ProgressBox,ProgressBox)
 	addClass(base.Widget,Widget)

@@ -15,4 +15,5 @@ return {
 	ScrollView = "a8e99a03bc830f5d2d904be27302d0c2",
 	Text = "ba6864653e414016e9f1848ee5986654",
 	ProgressBar = "9b954ac14796cf7c24c4a5863c3f5b93",
+	BaiduVoice = "5b16c70370e6791975778195b421524b",
 }

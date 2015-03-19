@@ -20,7 +20,7 @@ root (7c3064bb858e619b9f02fef85432f162)
 	test() 对象的测试代码。
 	
 	
-Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)
+Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Dialog
 	addChild(child) 加入一个子节点，可以是Layer对象，也可以是cocos2d-x的节点。
 	ccScene() 返回cocos2d-x的场景对象。
 	push() 将场景压入场景堆栈。展示该场景。
@@ -29,18 +29,18 @@ Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
 	
-Layer (685316259b01edf58a85d6705a4541ad)
+Layer (685316259b01edf58a85d6705a4541ad)父类:Dialog
 	addChild(child) 加入一个子节点，可以是Widget对象，也可以是cocos2d-x的节点。
 	ccLayer() 返回cocos2d-x的层对象。
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
 	
-Dialog (f9e6338b892d9da54fc0668d5f1bd19c)
+Dialog (f9e6338b892d9da54fc0668d5f1bd19c)父类:root
 	open(t) 打开对话栏界面。
 	close() 关闭对话栏。
 	modal(widget) 模式对话栏。
 	
-MessageBox (8736daf38faaa28693f922843cc0c5aa)
+MessageBox (8736daf38faaa28693f922843cc0c5aa)父类:Dialog
 	open(t) 打开一个对话框。t有如下的项。
 		caption 标题必须是一个字符串
 		text 正文可以是一个字符串，也可以是一个字符数组{"line1","line2"}
@@ -50,24 +50,19 @@ MessageBox (8736daf38faaa28693f922843cc0c5aa)
 			index :button中的索引
 			button:button中的文字
 	
-LoadingScene (8bb51443e440190b892996b8c2864672)
-	open() 打开一个Loading界面，它用来在加载时显示进度用的界面。
-		比如有一个旋转的圈表示程序还在运行。
-	close() 关闭Loading界面。
+LoadingScene (8bb51443e440190b892996b8c2864672)父类:Scene
 	setProgress(d) 设置进度，d是一个0-1的数。
 	setText(txt) 加载中间过程的提示文本。
 	
-SplashScene (b50a67aa2ed2183bee9b804ce7dbdefd)
-	open() 打开一个Splash界面，它用来在加载时显示的一个提示屏。
-		比如有一个旋转的圈表示程序还在运行。
+SplashScene (b50a67aa2ed2183bee9b804ce7dbdefd)父类:Scene
 	close() 关闭Splash界面。
 	setText(txt) 加载中间过程的提示文本。
 
-Spin (b34d6d7a5652cf3bbe6388d5770dbe95)
+Spin (b34d6d7a5652cf3bbe6388d5770dbe95)父类:Dialog
 	open() 在屏幕的中间显示一个旋转的圈。
 	close() 关闭Spin
 	
-ProgressBox (6e8c7a6612998e78186585e468010f95)
+ProgressBox (6e8c7a6612998e78186585e468010f95)父类:Dialog
 	open(t) 打开一个具有进度条的对话栏。t有如下的项。
 		caption 标题
 	close() 关闭对话栏。
