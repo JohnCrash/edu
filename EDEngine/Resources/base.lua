@@ -16,4 +16,6 @@ return {
 	Text = "ba6864653e414016e9f1848ee5986654",
 	ProgressBar = "9b954ac14796cf7c24c4a5863c3f5b93",
 	BaiduVoice = "5b16c70370e6791975778195b421524b",
+	Game = "9bb2c0c57a6b6a3763875bbf71b8a0c2",
+	Sprite = "5e0c81c61dcebe5b27b6c6c54b5b4414",
 }

@@ -39,8 +39,15 @@ return {
 			self:layout()
 		end
 	end,
+	getClassRootDirectory = function(self)
+		if cc_isdebug() then
+			return cc.FileUtils:getInstance():getWritablePath()..'class/'
+		else
+			return ljshell.getDirectory(ljshell.AppDir)..'class/'
+		end	
+	end,
 	initClasses = function(self)
-		local path = update.getClassRootDirectory()
+		local path = self:getClassRootDirectory()
 		for i,v in pairs(base) do
 			if type(v)=='string' then
 				table.insert(classids,v)

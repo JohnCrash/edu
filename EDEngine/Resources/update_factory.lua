@@ -11,12 +11,9 @@ local local_dir = ljshell.getDirectory(ljshell.AppDir)
 local liexue_server = "http://file.lejiaolexue.com/upgrade/luaapp/v"..resume.getversion().."/"
 local local_server = "http://192.168.2.211:81/lgh/v"..resume.getversion().."/"
 --返回类的存储根目录
+
 local function getClassRootDirectory()
-	if cc_isdebug() then
-		return cc.FileUtils:getInstance():getWritablePath()..'class/'
-	else
-		return local_dir..'class/'
-	end
+	return local_dir..'class/'
 end
 
 local function getServerRootDirectory()

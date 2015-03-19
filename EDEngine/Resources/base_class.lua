@@ -748,6 +748,28 @@ local ProgressBar={
 	}
 }
 
+local Game={
+	classid = base.Game,
+	superid = base.root,
+	name = "Game",
+	icon = "res/splash/game_icon.png",
+	comment = "游戏基类",
+	version = 1,
+	class={
+	}
+}
+
+local Sprite={
+	classid = base.Sprite,
+	superid = base.root,
+	name = "Sprite",
+	icon = "res/splash/sprite_icon.png",
+	comment = "可以放入到场景中的角色",
+	version = 1,
+	class={
+	}
+}
+
 local function _readonly(t,k,v)
 	kits.log("ERROR read only")
 end
@@ -793,6 +815,8 @@ local function addBaseClass(_classes)
 	addClass(base.ScrollView,ScrollView)
 	addClass(base.Text,Text)
 	addClass(base.ProgressBar,ProgressBar)
+	addClass(base.Game,Game)
+	addClass(base.Sprite,Sprite)
 end
 
 return {

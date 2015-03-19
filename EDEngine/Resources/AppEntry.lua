@@ -232,11 +232,9 @@ function AppEntry:init()
 		eventClick=function(sender)
 				local factory = require "factory"
 				local base = require "base"
-				local uuidProgressBox = '6e8c7a6612998e78186585e468010f95'
-				local uuidMessageBox = '8736daf38faaa28693f922843cc0c5aa'
 				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
 				
-				local progressbox = factory.create(uuidProgressBox)
+				local progressbox = factory.create(base.ProgressBox)
 				progressbox:open()
 				progressbox:setProgress(0)	
 				factory.import({uuidClassSearcher},
