@@ -675,6 +675,29 @@ local Widget={
 	comment = "界面的基本元件的基类",
 	version = 1,
 	class={
+		ccWidget = function(self)
+			return self._widget
+		end,
+		setPosition = function(self,p)
+			self._widget:setPosition(p)
+		end,
+		getPosition = function(self)
+			local x,y = self._widget:getPosition()
+			return cc.p(x,y)
+		end,
+		setAnchor = function(self,p)
+			self._widget:setAnchorPoint(p)
+		end,
+		getAnchor = function(self)
+			local x,y = self._widget:getAnchorPoint()
+			return cc.p(x,y)
+		end,
+		setSize = function(self,s)
+			self._widget:setContentSize(s)
+		end,
+		getSize = function(self)
+			return self._widget:getContentSize()
+		end,
 	}
 }
 
@@ -686,7 +709,7 @@ local Layout={
 	},
 	name = "Layout",
 	icon = "res/splash/layout_icon.png",
-	comment = "界面的基本元件的基类",
+	comment = "界面元件容器",
 	version = 1,
 	class={
 	}
@@ -700,7 +723,7 @@ local Button={
 	},
 	name = "Button",
 	icon = "res/splash/button_icon.png",
-	comment = "界面的基本元件的基类",
+	comment = "界面元件按钮",
 	version = 1,
 	class={
 	}
@@ -714,7 +737,7 @@ local ScrollView={
 	},
 	name = "ScrollView",
 	icon = "res/splash/widget_icon.png",
-	comment = "界面的基本元件的基类",
+	comment = "界面元件滚动区",
 	version = 1,
 	class={
 	}
@@ -728,7 +751,7 @@ local Text={
 	},
 	name = "Text",
 	icon = "res/splash/text_icon.png",
-	comment = "界面的基本元件的基类",
+	comment = "界面元件文字",
 	version = 1,
 	class={
 	}
@@ -742,9 +765,49 @@ local ProgressBar={
 	},
 	name = "ProgressBar",
 	icon = "res/splash/widget_icon.png",
-	comment = "界面的基本元件的基类",
+	comment = "界面元件进度条",
 	version = 1,
 	class={
+	}
+}
+
+local ScrollViewBar={
+	classid = base.ScrollViewBar,
+	superid = base.Widget,
+	pedigree = {
+		base.root
+	},
+	name = "ScrollViewBar",
+	icon = "res/splash/widget_icon.png",
+	comment = "界面元件滚动条",
+	version = 1,
+	class={
+		__init__=function(self)
+			self._widget = uikits.layout{bgcolor=cc.c3b(128,128,128)}
+			self._slider = uikits.layout{bgcolor=cc.c3b(0,0,0)}
+			self._widget:addChild(self._slider)
+			self._width = 16
+			self._rang = 1
+			self._slider:setAnchorPoint(cc.p(0,0))
+			self:setScrollPos(0)
+		end,
+		trackScrollView = function(self,scrollview)
+			local sv = scrollview._widget or scrollview
+			
+		end,
+		setScrollRang = function(self,rang)
+			local size = self._widget:getContentSize()
+			self._rang = rang or self._rang
+			self._block = size.height*self._rang
+			self._slider:setContentSize(cc.size(self._width,self._block))
+		end,
+		setScrollPos = function(self,p)
+			if p<0 then p = 0 end
+			if p>1 then p = 1 end
+			local ss = self._slider:getContentSize()
+			local s = self._widget:getContentSize()
+			self._slider:setPosition(cc.p(0,p*(s.height-ss.height)))
+		end,
 	}
 }
 
@@ -764,7 +827,18 @@ local Sprite={
 	superid = base.root,
 	name = "Sprite",
 	icon = "res/splash/sprite_icon.png",
-	comment = "可以放入到场景中的角色",
+	comment = "场景中的角色",
+	version = 1,
+	class={
+	}
+}
+
+local Item={
+	classid = base.Item,
+	superid = base.root,
+	name = "Item",
+	icon = "res/splash/item_icon.png",
+	comment = "场景中的道具",
 	version = 1,
 	class={
 	}
@@ -801,7 +875,7 @@ local function addBaseClass(_classes)
 	end
 	addClass(base.root,root)
 	addClass(base.Scene,Scene)
-	addClass(base.Layer,Layer)	
+	addClass(base.Layer,Layer)
 	addClass(base.SplashScene,splashScene)
 	addClass(base.LoadingScene,loadingScene)
 	addClass(base.Dialog,Dialog)
@@ -815,8 +889,10 @@ local function addBaseClass(_classes)
 	addClass(base.ScrollView,ScrollView)
 	addClass(base.Text,Text)
 	addClass(base.ProgressBar,ProgressBar)
+	addClass(base.ScrollViewBar,ScrollViewBar)
 	addClass(base.Game,Game)
 	addClass(base.Sprite,Sprite)
+	addClass(base.Item,Item)
 end
 
 return {
