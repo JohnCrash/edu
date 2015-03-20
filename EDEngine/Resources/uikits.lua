@@ -678,7 +678,7 @@ local function event( obj,func,eventType )
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then
 						playClickSound()
-						func( sender,x,y )
+						func( sender)
 					end
 				end)				
 			elseif eventType == 'began' then
@@ -697,7 +697,7 @@ local function event( obj,func,eventType )
 					function(sender,eventType) 
 						if eventType == ccui.TouchEventType.began then
 							playClickSound()
-							func( sender,x,y )
+							func( sender )
 						end
 					end)			
 				end

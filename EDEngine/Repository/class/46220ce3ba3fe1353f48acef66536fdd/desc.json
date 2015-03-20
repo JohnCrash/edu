@@ -1,7 +1,8 @@
 {
 	"classid":"46220ce3ba3fe1353f48acef66536fdd",
 	"superid":"8736daf38faaa28693f922843cc0c5aa",
-	"name":"灰色风格对话栏",
+	"name":"test scene",
+	"comment":"test scene",
 	"icon":"res/th.jpg",
 	"pedigree":[
 		"7c3064bb858e619b9f02fef85432f162"

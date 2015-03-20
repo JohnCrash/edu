@@ -38,7 +38,9 @@ Layer (685316259b01edf58a85d6705a4541ad)父类:Dialog
 Dialog (f9e6338b892d9da54fc0668d5f1bd19c)父类:root
 	open(t) 打开对话栏界面。
 	close() 关闭对话栏。
-	modal(widget) 模式对话栏。
+	modal(widget,cancel) 模式对话栏。
+		widget 要展示的界面元件
+		cancel 如果为true当点击到widget外面将自动关闭widget
 	
 MessageBox (8736daf38faaa28693f922843cc0c5aa)父类:Dialog
 	open(t) 打开一个对话框。t有如下的项。

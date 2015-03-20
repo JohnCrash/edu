@@ -1,5 +1,6 @@
 local kits = require "kits"
 local uikits = require "uikits"
+local json = require "json-c"
 local lfs = require "lfs"
 local ljshell = require "ljshell"
 local base = require "base"
@@ -26,7 +27,7 @@ return {
 			self._item = uikits.fromJson{file=self:getR(ui.FILE)}
 			local size = uikits.getDR()
 			self._scroll = uikits.scrollview{x=0,y=0,anchorX=0,anchorY=0,
-			width=size.width,height=size.height,
+			width=size.width-16,height=size.height,
 			bgcolor=cc.c3b(64,64,64)
 			}
 			self:addChild(self._scroll)
@@ -45,6 +46,16 @@ return {
 		else
 			return ljshell.getDirectory(ljshell.AppDir)..'class/'
 		end	
+	end,
+	loadClassJson = function( self,classId,jsonFile )
+		local df = self:getClassRootDirectory()..classId..'/'..tostring(jsonFile)
+		local file = io.open( df,"rb" )
+		if file then
+			local all = file:read("*a")
+			file:close()
+			local destable = json.decode( all )
+			return destable
+		end
 	end,
 	initClasses = function(self)
 		local path = self:getClassRootDirectory()
@@ -74,13 +85,20 @@ return {
 				progressBox:setProgress(idx/count)
 				local cls = factory.getClass(classids[idx])
 				if not cls then
-					cls = update.loadClassJson(classids[idx],'desc.json')
+					cls = self:loadClassJson(classids[idx],'desc.json')
 					if not cls then
 						kits.log("ERROR can not load "..tostring(classids[idx])..'/desc.json')
 					end
 				end
+				local isbase = false
+				for i,v in pairs(base) do
+					if classids[idx]==v then
+						isbase = true
+						break
+					end
+				end
 				if cls then
-					classes[classids[idx]] = {id=classids[idx],child={},cls=cls}
+					classes[classids[idx]] = {id=classids[idx],child={},cls=cls,isbase=isbase}
 				end
 			elseif idx==count then
 				progressBox:setProgress(idx/count)
@@ -124,6 +142,13 @@ return {
 				scheduler:unscheduleScriptEntry(schedulerId)				
 				self:print()
 				self:layout()
+				local ss = self._scroll:getContentSize()
+				self._scrollbar = factory.create(base.ScrollBar)
+				self._scrollbar:setSize(cc.size(16,ss.height))
+				self._scrollbar:setPosition(cc.p(ss.width,0))
+				self:addChild(self._scrollbar)
+				self._scrollbar:trackScrollView(self._scroll)
+				--uikits.enableMouseWheelIFWindows(self._scroll,200)				
 			end
 		end
 		schedulerId = scheduler:scheduleScriptFunc(spin,0.01,false)	
@@ -155,6 +180,12 @@ return {
 				local name = uikits.child(item,ui.NAME)
 				name:setString(classes[s].cls.name or '')
 				name:setFontName("simhei")
+				item:setBackGroundColorType(LAYOUT_COLOR_SOLID)
+				if classes[s].isbase then
+					item:setBackGroundColor(cc.c3b(128,32,0))			
+				else
+					item:setBackGroundColor(cc.c3b(16,96,0))							
+				end
 				local comment = uikits.child(item,ui.COMMENT)
 				comment:setString(classes[s].cls.comment or '')
 				comment:setFontName("simhei")
@@ -172,11 +203,39 @@ return {
 					print("not icon "..s)
 				end
 				uikits.event(item,function(sender)
-					print("test "..s)
+					local menu = factory.create(base.PopupMenu)
+					menu:addItem("测试",function(sender)
+						local obj = factory.createAsyn(s,function(obj)
+							obj:test()
+						end)						
+					end)
+					menu:addItem("创建子类",function(sender)
+					end)
+					menu:addItem("修改",function(sender)
+					end)
+					menu:addItem("删除",function(sender)
+						local msgbox = factory.create(base.MessageBox)
+						msgbox:open{caption="提示",text={"你确定要删除"..tostring(classes[s].cls.name)..'?','ID:'..s},
+							button=2,
+							onClick=function(i,text)
+								if i==1 then
+									print("删除")
+								else
+									print("取消")
+								end
+							end
+						}					
+					end)
+					local p = sender:getTouchBeganPosition()
+					menu:open(p)
+				end,"click")
+				--[[
+				uikits.event(item,function(sender)
 					local obj = factory.createAsyn(s,function(obj)
 						obj:test()
 					end)
 				end,"click")
+				--]]
 			end
 		end
 		local ss = self._scroll:getContentSize()

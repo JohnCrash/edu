@@ -342,7 +342,7 @@ local Dialog = {
 				end
 			end
 		end,
-		modal = function(self,box)
+		modal = function(self,box,cancel)
 			local director = cc.Director:getInstance()
 			local scene = director:getRunningScene()
 			local size = uikits.getDR()
@@ -361,7 +361,14 @@ local Dialog = {
 				self._root = box
 				self._needpop = true
 				uikits.pushScene(self._scene)
-			end		
+			end
+			if cancel and self._root then
+				uikits.event(self._root,function(sender)
+					uikits.delay_call(nil,function()
+						self:close()
+					end)
+				end,"click")
+			end
 		end,
 		test = function(self)
 			self:open()
@@ -771,29 +778,49 @@ local ProgressBar={
 	}
 }
 
-local ScrollViewBar={
-	classid = base.ScrollViewBar,
+local ScrollBar={
+	classid = base.ScrollBar,
 	superid = base.Widget,
 	pedigree = {
 		base.root
 	},
-	name = "ScrollViewBar",
+	name = "ScrollBar",
 	icon = "res/splash/widget_icon.png",
 	comment = "界面元件滚动条",
 	version = 1,
 	class={
 		__init__=function(self)
-			self._widget = uikits.layout{bgcolor=cc.c3b(128,128,128)}
+			self._widget = uikits.layout{bgcolor=cc.c3b(128,128,128),
+			anchorX=0,anchorY=0}
 			self._slider = uikits.layout{bgcolor=cc.c3b(0,0,0)}
 			self._widget:addChild(self._slider)
 			self._width = 16
 			self._rang = 1
 			self._slider:setAnchorPoint(cc.p(0,0))
+			self:setScrollRang(1)
 			self:setScrollPos(0)
+		end,
+		getWidth = function(self)
+			return self._width
+		end,
+		setSize = function(self,s)
+			s.width = 16
+			self.super.setSize(self,s)
 		end,
 		trackScrollView = function(self,scrollview)
 			local sv = scrollview._widget or scrollview
-			
+			local function scrollEvent(sender,state)
+				if state == ccui.ScrollviewEventType.scrolling then
+					local size = sv:getContentSize()
+					local isize = sv:getInnerContainerSize()
+					local inner = sv:getInnerContainer()
+					local x,y = inner:getPosition()
+					self:setScrollRang(size.height/isize.height)
+					self:setScrollPos(-y/isize.height)
+				end
+			end
+			uikits.event(sv,scrollEvent)
+			scrollEvent(sv,ccui.ScrollviewEventType.scrolling)
 		end,
 		setScrollRang = function(self,rang)
 			local size = self._widget:getContentSize()
@@ -804,9 +831,65 @@ local ScrollViewBar={
 		setScrollPos = function(self,p)
 			if p<0 then p = 0 end
 			if p>1 then p = 1 end
-			local ss = self._slider:getContentSize()
+			--local ss = self._slider:getContentSize()
 			local s = self._widget:getContentSize()
-			self._slider:setPosition(cc.p(0,p*(s.height-ss.height)))
+			self._slider:setPosition(cc.p(0,p*(s.height)))
+		end,
+	}
+}
+
+local PopupMenu={
+	classid = base.PopupMenu,
+	superid = base.Dialog,
+	pedigree = {
+		base.root
+	},
+	name = "PopupMenu",
+	icon = "res/splash/widget_icon.png",
+	comment = "界面元件菜单",
+	version = 1,
+	class={
+		__init__=function(self)
+			self._menu = uikits.layout{}
+			self._items = {}
+			self._texts = {}
+			self._maxsize = {width=0,height=0}
+		end,
+		addItem = function(self,text,onclick)
+			local bg = uikits.layout{anchorX=0,anchorY=0,bgcolor=cc.c3b(255,66,0)}
+			local text = uikits.text{caption=text,anchorX=0.5,anchorY=0.5}
+			bg:addChild(text)
+			self._menu:addChild(bg)
+			table.insert(self._items,bg)
+			table.insert(self._texts,text)
+			local size = text:getContentSize()
+			self._maxsize.width = math.max(self._maxsize.width,size.width)
+			self._maxsize.height = math.max(self._maxsize.height,size.height)
+			uikits.event(bg,function(sender)
+				uikits.delay_call(nil,function()self:close()end)
+				if onclick then
+					onclick()
+				end
+			end
+			,"click")
+		end,
+		open = function(self,p)
+			self:relayout()
+			self:modal(self._menu,true)
+			if p and p.x and p.y then
+				self._menu:setAnchorPoint(cc.p(0,1))
+				self._menu:setPosition(p)
+			end
+		end,
+		relayout = function(self)
+			for i,v in pairs(self._items) do
+				v:setContentSize(self._maxsize)
+				v:setPosition(cc.p(0,(i-1)*self._maxsize.height))
+			end
+			for i,v in pairs(self._texts) do
+				v:setPosition(cc.p(self._maxsize.width/2,self._maxsize.height/2))
+			end
+			self._menu:setContentSize(cc.size(self._maxsize.width,self._maxsize.height*#self._items))
 		end,
 	}
 }
@@ -888,8 +971,9 @@ local function addBaseClass(_classes)
 	addClass(base.Button,Button)
 	addClass(base.ScrollView,ScrollView)
 	addClass(base.Text,Text)
+	addClass(base.PopupMenu,PopupMenu)
 	addClass(base.ProgressBar,ProgressBar)
-	addClass(base.ScrollViewBar,ScrollViewBar)
+	addClass(base.ScrollBar,ScrollBar)
 	addClass(base.Game,Game)
 	addClass(base.Sprite,Sprite)
 	addClass(base.Item,Item)
