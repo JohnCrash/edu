@@ -1,6 +1,6 @@
 --基类的名称映射表
 return {
-	root = "7c3064bb858e619b9f02fef85432f162",
+	Root = "7c3064bb858e619b9f02fef85432f162",
 	SplashScene = "b50a67aa2ed2183bee9b804ce7dbdefd",
 	LoadingScene = "8bb51443e440190b892996b8c2864672",
 	Dialog = "f9e6338b892d9da54fc0668d5f1bd19c",

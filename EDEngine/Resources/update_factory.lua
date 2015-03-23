@@ -5,6 +5,7 @@ local ljshell = require "ljshell"
 local resume = require "resume"
 local mt = require "mt"
 local md5 = require "md5"
+local base = require "base"
 
 local _updates = {}
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
@@ -77,6 +78,21 @@ local function loadClassJson( classId,jsonFile )
 		local all = file:read("*a")
 		file:close()
 		local destable = json.decode( all )
+		if destable.superid and type(destable.superid)=='string' and
+			string.len(destable.superid)~=32 then
+			if base[destable.superid] then
+				destable.superid = base[destable.superid]
+			end
+		end
+		if destable.pedigree and type(destable.pedigree)=='table' then
+			for i,v in pairs(destable.pedigree) do
+				if string.len(v)~=32 then
+					if base[v] then
+						destable.pedigree[i] = base[v] 
+					end
+				end
+			end
+		end
 		return destable
 	end
 end

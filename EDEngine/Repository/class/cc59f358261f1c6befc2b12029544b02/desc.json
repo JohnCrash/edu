@@ -1,11 +1,11 @@
 {
 	"classid":"cc59f358261f1c6befc2b12029544b02",
-	"superid":"8736daf38faaa28693f922843cc0c5aa",
+	"superid":"MessageBox",
 	"name":"进度对话栏",
 	"comment":"对话栏中加入一个进度条",
 	"icon":"res/th.jpg",
 	"pedigree":[
-		"7c3064bb858e619b9f02fef85432f162"
+		"root"
 	],
 	"depends":[
 		"e0624a7d0d7a6c3d4a3439588ed98fb0"

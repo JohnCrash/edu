@@ -54,6 +54,21 @@ return {
 			local all = file:read("*a")
 			file:close()
 			local destable = json.decode( all )
+			if destable.superid and type(destable.superid)=='string' and
+				string.len(destable.superid)~=32 then
+				if base[destable.superid] then
+					destable.superid = base[destable.superid]
+				end
+			end
+			if destable.pedigree and type(destable.pedigree)=='table' then
+				for i,v in pairs(destable.pedigree) do
+					if string.len(v)~=32 then
+						if base[v] then
+							destable.pedigree[i] = base[v] 
+						end
+					end
+				end
+			end			
 			return destable
 		end
 	end,
@@ -81,7 +96,7 @@ return {
 		progressBox:open()			
 		local function spin()
 			idx = idx+1
-			if idx<count then
+			if idx<=count then
 				progressBox:setProgress(idx/count)
 				local cls = factory.getClass(classids[idx])
 				if not cls then
@@ -100,8 +115,8 @@ return {
 				if cls then
 					classes[classids[idx]] = {id=classids[idx],child={},cls=cls,isbase=isbase}
 				end
-			elseif idx==count then
-				progressBox:setProgress(idx/count)
+			elseif idx==count+1 then
+				progressBox:setProgress(1)
 			else
 				--组织为树状结构
 				for i,v in pairs(classes) do

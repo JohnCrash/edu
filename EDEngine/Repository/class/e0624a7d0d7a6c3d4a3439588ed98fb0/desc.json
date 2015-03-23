@@ -1,10 +1,8 @@
 {
 	"classid":"e0624a7d0d7a6c3d4a3439588ed98fb0",
-	"superid":"7c3064bb858e619b9f02fef85432f162",
+	"superid":"Root",
 	"name":"test",
 	"comment":"测试依赖项",
-	"pedigree":[
-	],
 	"version":1,
 	"script":"main"
 }

@@ -1,10 +1,10 @@
 {
 	"classid":"ae21c0fc8dd08f18e39afe2446f234e0",
-	"superid":"d55f6d9cbb48b6f402b8122b97ed2dc1",
+	"superid":"Scene",
 	"name":"XXScene",
 	"comment":"sdfsdf",
 	"pedigree":[
-		"7c3064bb858e619b9f02fef85432f162"
+		"Root"
 	],
 	"version":1,
 	"script":"main",

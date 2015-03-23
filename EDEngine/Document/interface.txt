@@ -70,3 +70,12 @@ ProgressBox (6e8c7a6612998e78186585e468010f95)父类:Dialog
 	close() 关闭对话栏。
 	setProgress(d) 设置进度，d是一个0-1的数。
 	setText(txt) 加载中间过程的提示文本。
+	
+Widget (67f40d28c8cb0b5141b7d8dca355ad58) 父类:root
+	ccWidget() 返回cocos2d-x的节点。
+	setPosition(ccp)
+	getPosition() 返回Widget的位置点。
+	setAnchor(anp)
+	getAnchor()
+	setSize(ccs)
+	getSize()

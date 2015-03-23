@@ -22,8 +22,8 @@ local ui = {
 	PROGRESS_TEXT = "Label_9",
 }
 
-local root = {
-	classid = base.root,
+local Root = {
+	classid = base.Root,
 	name = "Root",
 	icon = "res/splash/root_icon.png",
 	comment = "所有对象都是它的子类",
@@ -80,7 +80,7 @@ local root = {
 
 local Scene = {
 	classid = base.Scene,
-	superid = base.root,
+	superid = base.Root,
 	name = "Scene",
 	icon = "res/splash/scene_icon.png",
 	comment = "场景",
@@ -132,7 +132,7 @@ local Scene = {
 
 local Layer = {
 	classid = base.Layer,
-	superid = base.root,
+	superid = base.Root,
 	name = "Layer",
 	icon = "res/splash/layer_icon.png",
 	comment = "一个场景可以有多个层",
@@ -176,7 +176,7 @@ local splashScene = {
 	classid = base.SplashScene,
 	superid = base.Scene,
 	pedigree={
-		base.root
+		base.Root
 	},
 	name = "SplashScene",
 	icon = "res/splash/splash_icon.png",
@@ -235,7 +235,7 @@ local loadingScene = {
 	classid = base.LoadingScene,
 	superid = base.Scene,
 	pedigree={
-		base.root
+		base.Root
 	},
 	name = "LoadingScene",
 	icon = "res/splash/loadingscene_icon.png",
@@ -325,7 +325,7 @@ local loadingScene = {
 
 local Dialog = {
 	classid = base.Dialog,
-	superid = base.root,
+	superid = base.Root,
 	name = "Dialog",
 	icon = "res/splash/dialog_icon.png",
 	comment = "对话栏基类",
@@ -380,7 +380,7 @@ local messageBox = {
 	classid = base.MessageBox,
 	superid = base.Dialog,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "MessageBox",
 	icon = "res/splash/messagebox_icon.png",
@@ -521,7 +521,7 @@ local Spin ={
 	classid = base.Spin,
 	superid = base.Dialog,
 	pedigree={
-		base.root
+		base.Root
 	},
 	name = "Spin",
 	icon = "res/splash/splash_icon.png",
@@ -557,7 +557,7 @@ local ProgressBox={
 	classid = base.ProgressBox,
 	superid = base.Dialog,
 	pedigree = {
-		base.root
+		base.Root
 	},	
 	name = "ProgressBox",
 	icon = "res/splash/progressbox_icon.jpg",
@@ -640,7 +640,7 @@ local BaiduVoice={
 	classid = base.BaiduVoice,
 	superid = base.Dialog,
 	pedigree = {
-		base.root
+		base.Root
 	},	
 	name = "BaiduVoice",
 	icon = "res/splash/baidu_icon.png",
@@ -676,7 +676,7 @@ local BaiduVoice={
 
 local Widget={
 	classid = base.Widget,
-	superid = base.root,
+	superid = base.Root,
 	name = "Widget",
 	icon = "res/splash/widget_icon.png",
 	comment = "界面的基本元件的基类",
@@ -712,7 +712,7 @@ local Layout={
 	classid = base.Layout,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "Layout",
 	icon = "res/splash/layout_icon.png",
@@ -726,7 +726,7 @@ local Button={
 	classid = base.Button,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "Button",
 	icon = "res/splash/button_icon.png",
@@ -740,7 +740,7 @@ local ScrollView={
 	classid = base.ScrollView,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "ScrollView",
 	icon = "res/splash/widget_icon.png",
@@ -754,7 +754,7 @@ local Text={
 	classid = base.Text,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "Text",
 	icon = "res/splash/text_icon.png",
@@ -768,7 +768,7 @@ local ProgressBar={
 	classid = base.ProgressBar,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "ProgressBar",
 	icon = "res/splash/widget_icon.png",
@@ -782,7 +782,7 @@ local ScrollBar={
 	classid = base.ScrollBar,
 	superid = base.Widget,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "ScrollBar",
 	icon = "res/splash/widget_icon.png",
@@ -842,7 +842,7 @@ local PopupMenu={
 	classid = base.PopupMenu,
 	superid = base.Dialog,
 	pedigree = {
-		base.root
+		base.Root
 	},
 	name = "PopupMenu",
 	icon = "res/splash/widget_icon.png",
@@ -896,7 +896,7 @@ local PopupMenu={
 
 local Game={
 	classid = base.Game,
-	superid = base.root,
+	superid = base.Root,
 	name = "Game",
 	icon = "res/splash/game_icon.png",
 	comment = "游戏基类",
@@ -907,7 +907,7 @@ local Game={
 
 local Sprite={
 	classid = base.Sprite,
-	superid = base.root,
+	superid = base.Root,
 	name = "Sprite",
 	icon = "res/splash/sprite_icon.png",
 	comment = "场景中的角色",
@@ -918,7 +918,7 @@ local Sprite={
 
 local Item={
 	classid = base.Item,
-	superid = base.root,
+	superid = base.Root,
 	name = "Item",
 	icon = "res/splash/item_icon.png",
 	comment = "场景中的道具",
@@ -956,7 +956,7 @@ local function addBaseClass(_classes)
 		end
 		_classes[classid] = readOnly(cls)
 	end
-	addClass(base.root,root)
+	addClass(base.Root,Root)
 	addClass(base.Scene,Scene)
 	addClass(base.Layer,Layer)
 	addClass(base.SplashScene,splashScene)
