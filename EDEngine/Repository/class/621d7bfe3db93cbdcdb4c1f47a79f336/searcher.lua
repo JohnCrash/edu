@@ -127,7 +127,7 @@ return {
 					end
 				end
 				--组织为一个列表结构
-				local line = {level=1,child={}}
+				local line
 				local n_level
 				local function enum(id,level)
 					local this = classes[id]
@@ -149,6 +149,7 @@ return {
 				end
 				for i,v in pairs(root) do
 					n_level = 0
+					line = {level=1,child={}}
 					enum(v,1)
 				end
 				table.insert(list,line)
