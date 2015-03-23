@@ -1,9 +1,12 @@
 {
 	"classid":"0e553fc4b6bca473e08a4186fd01d82a",
 	"superid":"Item",
-	"name":"",
-	"comment":"",
+	"icon":"res/eq.png",
+	"name":"NumberSequence",
+	"comment":"产生数字不停的下落",
 	"pedigree":[
+		"Root"
 	],
-	"version":1
+	"version":1,
+	"script":"main"
 }

@@ -3,58 +3,8 @@
         <Folder name="0e553fc4b6bca473e08a4186fd01d82a">
             <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\0e553fc4b6bca473e08a4186fd01d82a\desc.json" />
         </Folder>
-        <Folder name="46220ce3ba3fe1353f48acef66536fdd">
-            <Folder name="res">
-                <Folder name="splash">
-                    <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\res\splash\1.png" />
-                    <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\res\splash\messagebox.json" />
-                    <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\res\splash\newb.png" />
-                </Folder>
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\res\th.jpg" />
-            </Folder>
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\desc.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\filelist.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\46220ce3ba3fe1353f48acef66536fdd\version.json" />
-        </Folder>
-        <Folder name="621d7bfe3db93cbdcdb4c1f47a79f336">
-            <Folder name="res">
-                <Folder name="GUI">
-                    <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\GUI\image.png" />
-                </Folder>
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\searcher_icon.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\splash_6.json" />
-            </Folder>
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\desc.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\filelist.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\searcher.lua" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\621d7bfe3db93cbdcdb4c1f47a79f336\version.json" />
-        </Folder>
-        <Folder name="ae21c0fc8dd08f18e39afe2446f234e0">
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\ae21c0fc8dd08f18e39afe2446f234e0\desc.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\ae21c0fc8dd08f18e39afe2446f234e0\main.lua" />
-        </Folder>
-        <Folder name="cc59f358261f1c6befc2b12029544b02">
-            <Folder name="res">
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\44cocor.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\ditu.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\grid.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\progressbar.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\progressbg.png" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\th.jpg" />
-                <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\res\xin.png" />
-            </Folder>
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\desc.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\filelist.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\main.lua" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\test.lua" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\test_in_hello.lua" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\cc59f358261f1c6befc2b12029544b02\version.json" />
-        </Folder>
-        <Folder name="e0624a7d0d7a6c3d4a3439588ed98fb0">
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\e0624a7d0d7a6c3d4a3439588ed98fb0\desc.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\e0624a7d0d7a6c3d4a3439588ed98fb0\filelist.json" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\e0624a7d0d7a6c3d4a3439588ed98fb0\main.lua" />
-            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\e0624a7d0d7a6c3d4a3439588ed98fb0\version.json" />
+        <Folder name="2c718eeb0fb6c1cdfcf03fd20c1df0ba">
+            <File name="F:\source\Edu\EDEngine\proj.win32\Debug.win32\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\desc.json" />
         </Folder>
     </Project>
 </NotepadPlus>

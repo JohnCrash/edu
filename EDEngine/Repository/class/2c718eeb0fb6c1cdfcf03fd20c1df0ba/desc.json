@@ -1,0 +1,12 @@
+{
+	"classid":"2c718eeb0fb6c1cdfcf03fd20c1df0ba",
+	"superid":"Item",
+	"icon":"res/add.png",
+	"name":"NumberBox",
+	"comment":"数字方块容器",
+	"pedigree":[
+		"Root"
+	],
+	"version":1,
+	"script":"main"
+}

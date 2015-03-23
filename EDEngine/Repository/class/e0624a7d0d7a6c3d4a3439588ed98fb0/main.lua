@@ -1,2 +1,20 @@
-print("e0624a7d0d7a6c3d4a3439588ed98fb0")
-print("test 继承~")
+local NumberBlock={}
+
+function NumberBlock:__init__()
+	self._ccnode = cc.Sprite:create()
+	self._ccnode:loadTexture(self:getR("res/"))
+end
+
+function NumberBlock:setNumber()
+end
+
+function NumberBlock:init()
+end
+
+function NumberBlock:release()
+end
+
+function NumberBlock:test()
+end
+
+return NumberBlock

@@ -3,6 +3,7 @@
 	"superid":"Scene",
 	"name":"XXScene",
 	"comment":"sdfsdf",
+	"icon":"res/aide.png",
 	"pedigree":[
 		"Root"
 	],

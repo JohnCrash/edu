@@ -1,8 +1,12 @@
 {
 	"classid":"e0624a7d0d7a6c3d4a3439588ed98fb0",
-	"superid":"Root",
-	"name":"test",
-	"comment":"测试依赖项",
+	"superid":"Item",
+	"icon":"res/3.png",
+	"name":"NumberBlock",
+	"comment":"数字和符号方块",
 	"version":1,
+	"pedigree":[
+		"Root",
+	],
 	"script":"main"
 }

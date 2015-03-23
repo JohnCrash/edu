@@ -924,6 +924,46 @@ local Item={
 	comment = "场景中的道具",
 	version = 1,
 	class={
+		__init__=function(self)
+			
+		end,
+		ccNode =function(self)
+			return self._ccnode
+		end,
+	}
+}
+
+local Item={
+	classid = base.Item,
+	superid = base.Root,
+	name = "Item",
+	icon = "res/splash/item_icon.png",
+	comment = "场景中的道具",
+	version = 1,
+	class={
+		__init__=function(self)
+			
+		end,
+		ccNode =function(self)
+			return self._ccnode
+		end,
+	}
+}
+
+local Icons={
+	classid = base.Icons,
+	superid = base.Item,
+	name = "Icons",
+	icon = "res/splash/item_icon.png",
+	comment = "一组图标",
+	version = 1,
+	class={
+		__init__=function(self)
+			self._ccnode=cc.
+		end,
+		ccNode =function(self)
+			return self._ccnode
+		end,
 	}
 }
 
