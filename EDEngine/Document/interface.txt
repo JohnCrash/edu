@@ -14,14 +14,20 @@ factory用来创建具体的对象
 
 如果一个对象被创建出来，并且对象有方法__init__，那么方法__init__将被调用。
 
-root (7c3064bb858e619b9f02fef85432f162)
+Root (7c3064bb858e619b9f02fef85432f162)
 	getR(res) 取得资源res路径。
 	isInstanceOf(classid) 判断classid是否在对象的继承链中,或者说是不是一个classid对象.
 	test() 对象的测试代码。
 	
-	
-Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Dialog
+Node () 父类:Root
+	attachNode( ccnode ) 给对象附上一个cocos2d-x的节点
+	ccCreate() 
+		Node的子类必须实现此方法，并且必须调用attachNode为对象附上一个cocos2d-x节点
 	addChild(child) 加入一个子节点，可以是Layer对象，也可以是cocos2d-x的节点。
+	ccNode() 返回附属cocos2d-x对象。
+	
+Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Root
+	Scene的子类通过ccCreate来构造
 	ccScene() 返回cocos2d-x的场景对象。
 	push() 将场景压入场景堆栈。展示该场景。
 	pop() 将场景弹出。
@@ -29,13 +35,13 @@ Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Dialog
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
 	
-Layer (685316259b01edf58a85d6705a4541ad)父类:Dialog
+Layer (685316259b01edf58a85d6705a4541ad)父类:Node
 	addChild(child) 加入一个子节点，可以是Widget对象，也可以是cocos2d-x的节点。
 	ccLayer() 返回cocos2d-x的层对象。
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
 	
-Dialog (f9e6338b892d9da54fc0668d5f1bd19c)父类:root
+Dialog (f9e6338b892d9da54fc0668d5f1bd19c)父类:Root
 	open(t) 打开对话栏界面。
 	close() 关闭对话栏。
 	modal(widget,cancel) 模式对话栏。

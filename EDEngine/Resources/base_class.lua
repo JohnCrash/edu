@@ -78,6 +78,72 @@ local Root = {
 	},
 }
 
+local Node = {
+	classid = base.Node,
+	superid = base.Root,
+	name = "Node",
+	icon = "res/splash/node_icon.png",
+	comment = "所有可以放入到屏幕中的对象都是Node的子类",
+	version = 1,
+	class = {
+		__init__ = function(self)
+			self:ccCreate()
+			local function onNodeEvent(event,v)
+				if "enter" == event then
+					self:init()
+				elseif "exit" == event then
+					self:release()
+				end
+			end
+			self._ccnode:registerScriptHandler(onNodeEvent)
+		end,
+		addChild = function(self,child)
+			if child._ccnode then
+				self._ccnode:addChild(child._ccnode)
+			elseif cc_isobj(child) then
+				self._ccnode:addChild(child)
+			else
+				kits.log("ERROR Node addChild unknow type child")
+			end
+		end,
+		attach = function(self,ccnode)
+			self._ccnode = ccnode
+		end,
+		ccNode = function(self)
+			return self._ccnode
+		end,
+		init = function(self)
+		end,
+		release = function(self)
+		end,
+		ccCreate = function(self)
+			self:attach( cc.Node:create() )
+		end,
+		setPosition = function(self,p)
+			self._ccnode:setPosition(p)
+		end,
+		getPosition = function(self)
+			local x,y = self._ccnode:getPosition()
+			return cc.p(x,y)
+		end,
+		setAnchor = function(self,p)
+			self._ccnode:setAnchorPoint(p)
+		end,
+		getAnchor = function(self)
+			local x,y = self._ccnode:getAnchorPoint()
+			return cc.p(x,y)
+		end,
+		setSize = function(self,s)
+			self._ccnode:setContentSize(s)
+		end,
+		getSize = function(self)
+			return self._ccnode:getContentSize()
+		end,	
+		test = function(self)
+		end,
+	}
+}
+
 local Scene = {
 	classid = base.Scene,
 	superid = base.Root,
@@ -86,43 +152,42 @@ local Scene = {
 	comment = "场景",
 	version = 1,
 	class = {
-		__init__ = function(self)
-				self._scene = cc.Scene:create()
-				local function onNodeEvent(event,v)
-					if "enter" == event then
-						self:init()
-					elseif "exit" == event then
-						self:release()
-					end
-				end	
-				self._scene:registerScriptHandler(onNodeEvent)			
-			end,
-		addChild = function(self,child)
-			if child._layer then
-				self._scene:addChild(child._layer)
-			elseif child._widget then
-				self._scene:addChild(child._widget)
-			else
-				self._scene:addChild(child)
+		__init__=function(self)
+			self._scene = cc.Scene:create()
+			self:ccCreate()
+			local function onNodeEvent(event,v)
+				if "enter" == event then
+					self._oldDR=uikits.getDR()
+					self:init()
+				elseif "exit" == event then
+					self:release()
+					uikits.initDR(self._oldDR)
+				end
 			end
+			self._scene:registerScriptHandler(onNodeEvent)		
 		end,
-		ccScene = function(self)
+		ccCreate=function(self)
+		end,
+		ccScene=function(self)
 			return self._scene
+		end,
+		addChild=function(self,child)
+			if child._ccnode then
+				self._scene:addChild(child._ccnode)
+			elseif cc_isobj(child) then
+				self._scene:addChild(child)
+			else
+				kits.log("ERROR Scene addChild unknow type child")
+			end
 		end,
 		push = function(self)
 			uikits.pushScene(self._scene)
 		end,
 		pop = function(self)
-			if self._scene then	
-				uikits.popScene()
-			end
+			uikits.popScene()
 		end,		
 		replace = function(self)
 				uikits.replaceScene(self._scene)
-		end,
-		init = function(self)
-		end,
-		release = function(self)
 		end,
 		test = function(self)
 			self:push()		
@@ -132,36 +197,17 @@ local Scene = {
 
 local Layer = {
 	classid = base.Layer,
-	superid = base.Root,
+	superid = base.Node,
 	name = "Layer",
 	icon = "res/splash/layer_icon.png",
 	comment = "一个场景可以有多个层",
 	version = 1,
+	pedigree = {
+		base.Root
+	},
 	class = {
-		__init__ = function(self)
-				self._layer = cc.Layer:create()
-				local function onNodeEvent(event,v)		
-					if "enter" == event then
-						self:init()
-					elseif "exit" == event then
-						self:release()
-					end
-				end	
-				self._layer:registerScriptHandler(onNodeEvent)			
-			end,
-		addChild = function(self,child)
-			if child._widget then
-				self._layer:addChild(child._widget)
-			else
-				self._layer:addChild(child)
-			end
-		end,	
-		ccLayer = function(self)
-			return self._layer
-		end,
-		init = function(self)
-		end,
-		release = function(self)
+		ccCreate = function(self)
+			attach(cc.Layer:create())
 		end,
 		test=function(self)
 			local factory = require "factory"
@@ -183,19 +229,14 @@ local splashScene = {
 	comment = "创建一个等待屏直到任务结束",
 	version = 1,
 	class = {
-		__init__ = function(self)
-			self.super.__init__(self)
+		ccCreate = function(self)
 			self._splash = uikits.fromJson{file=self:getR(ui.SPLASH_FILE)}
-			self._scene:addChild(self._splash)
+			self:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
 			self._text_shadow = uikits.child(self._splash,ui.SPLASH_TEXT_SHADOW)
 			self._spin = uikits.child(self._splash,ui.SPLASH_IMAGE)		
-			self._scheduler = self._scene:getScheduler()		
+			self._scheduler = self:ccScene():getScheduler()		
 			self:setText("")			
-		end,
-		push = function(self)
-			self._oldDR=uikits.getDR()
-			self.super.push(self)
 		end,
 		init = function(self)
 			uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
@@ -209,7 +250,6 @@ local splashScene = {
 		end,
 		release = function(self)
 			if self._schedulerId then
-				uikits.initDR(self._oldDR)
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
 				self._schedulerId = nil
 			end
@@ -242,10 +282,9 @@ local loadingScene = {
 	comment = "创建一个具有进度条的加载屏",
 	version = 1,
 	class = {
-		__init__ = function(self)
-			self.super.__init__(self)
+		ccCreate = function(self)
 			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
-			self._scene:addChild(self._loading)
+			self:addChild(self._loading)
 			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
 			self._text_shadow = uikits.child(self._loading,ui.LOADING_TEXT_SHADOW)
 			self._progress = uikits.child(self._loading,ui.LOADING_PROGRESSBAR)
@@ -265,11 +304,7 @@ local loadingScene = {
 			end
 			self:setProgress(0)		
 			self:setText("")
-			self._scheduler = self._scene:getScheduler()				
-		end,
-		push = function(self)
-			self._oldDR = uikits.getDR()
-			self.super.push(self)
+			self._scheduler = self:ccScene():getScheduler()				
 		end,
 		init = function(self)
 			uikits.initDR{width=960,height=540,mode=cc.ResolutionPolicy.SHOW_ALL}
@@ -287,7 +322,6 @@ local loadingScene = {
 		end,
 		release = function(self)
 			if self._schedulerId then
-				uikits.initDR(self._oldDR)
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
 				self._schedulerId = nil
 				self._text = nil
@@ -380,6 +414,7 @@ local messageBox = {
 	classid = base.MessageBox,
 	superid = base.Dialog,
 	pedigree = {
+		base.Node,
 		base.Root
 	},
 	name = "MessageBox",
@@ -674,43 +709,9 @@ local BaiduVoice={
 	}
 }
 
-local Widget={
-	classid = base.Widget,
-	superid = base.Root,
-	name = "Widget",
-	icon = "res/splash/widget_icon.png",
-	comment = "界面的基本元件的基类",
-	version = 1,
-	class={
-		ccWidget = function(self)
-			return self._widget
-		end,
-		setPosition = function(self,p)
-			self._widget:setPosition(p)
-		end,
-		getPosition = function(self)
-			local x,y = self._widget:getPosition()
-			return cc.p(x,y)
-		end,
-		setAnchor = function(self,p)
-			self._widget:setAnchorPoint(p)
-		end,
-		getAnchor = function(self)
-			local x,y = self._widget:getAnchorPoint()
-			return cc.p(x,y)
-		end,
-		setSize = function(self,s)
-			self._widget:setContentSize(s)
-		end,
-		getSize = function(self)
-			return self._widget:getContentSize()
-		end,
-	}
-}
-
 local Layout={
 	classid = base.Layout,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -724,7 +725,7 @@ local Layout={
 
 local Button={
 	classid = base.Button,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -738,7 +739,7 @@ local Button={
 
 local ScrollView={
 	classid = base.ScrollView,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -752,7 +753,7 @@ local ScrollView={
 
 local Text={
 	classid = base.Text,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -766,7 +767,7 @@ local Text={
 
 local ProgressBar={
 	classid = base.ProgressBar,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -780,7 +781,7 @@ local ProgressBar={
 
 local ScrollBar={
 	classid = base.ScrollBar,
-	superid = base.Widget,
+	superid = base.Node,
 	pedigree = {
 		base.Root
 	},
@@ -789,11 +790,11 @@ local ScrollBar={
 	comment = "界面元件滚动条",
 	version = 1,
 	class={
-		__init__=function(self)
-			self._widget = uikits.layout{bgcolor=cc.c3b(128,128,128),
-			anchorX=0,anchorY=0}
+		ccCreate=function(self)
+			attach(uikits.layout{bgcolor=cc.c3b(128,128,128),
+			anchorX=0,anchorY=0})
 			self._slider = uikits.layout{bgcolor=cc.c3b(0,0,0)}
-			self._widget:addChild(self._slider)
+			self:addChild(self._slider)
 			self._width = 16
 			self._rang = 1
 			self._slider:setAnchorPoint(cc.p(0,0))
@@ -823,7 +824,7 @@ local ScrollBar={
 			scrollEvent(sv,ccui.ScrollviewEventType.scrolling)
 		end,
 		setScrollRang = function(self,rang)
-			local size = self._widget:getContentSize()
+			local size = self:ccNode():getContentSize()
 			self._rang = rang or self._rang
 			self._block = size.height*self._rang
 			self._slider:setContentSize(cc.size(self._width,self._block))
@@ -832,7 +833,7 @@ local ScrollBar={
 			if p<0 then p = 0 end
 			if p>1 then p = 1 end
 			--local ss = self._slider:getContentSize()
-			local s = self._widget:getContentSize()
+			local s = self:ccNode():getContentSize()
 			self._slider:setPosition(cc.p(0,p*(s.height)))
 		end,
 	}
@@ -907,63 +908,29 @@ local Game={
 
 local Sprite={
 	classid = base.Sprite,
-	superid = base.Root,
+	superid = base.Node,
 	name = "Sprite",
 	icon = "res/splash/sprite_icon.png",
 	comment = "场景中的角色",
 	version = 1,
+	pedigree={
+		base.Root
+	},
 	class={
 	}
 }
 
 local Item={
 	classid = base.Item,
-	superid = base.Root,
+	superid = base.Node,
 	name = "Item",
 	icon = "res/splash/item_icon.png",
 	comment = "场景中的道具",
 	version = 1,
+	pedigree={
+		base.Root
+	},
 	class={
-		__init__=function(self)
-			
-		end,
-		ccNode =function(self)
-			return self._ccnode
-		end,
-	}
-}
-
-local Item={
-	classid = base.Item,
-	superid = base.Root,
-	name = "Item",
-	icon = "res/splash/item_icon.png",
-	comment = "场景中的道具",
-	version = 1,
-	class={
-		__init__=function(self)
-			
-		end,
-		ccNode =function(self)
-			return self._ccnode
-		end,
-	}
-}
-
-local Icons={
-	classid = base.Icons,
-	superid = base.Item,
-	name = "Icons",
-	icon = "res/splash/item_icon.png",
-	comment = "一组图标",
-	version = 1,
-	class={
-		__init__=function(self)
-			self._ccnode=cc.
-		end,
-		ccNode =function(self)
-			return self._ccnode
-		end,
 	}
 }
 
@@ -997,6 +964,7 @@ local function addBaseClass(_classes)
 		_classes[classid] = readOnly(cls)
 	end
 	addClass(base.Root,Root)
+	addClass(base.Node,Node)
 	addClass(base.Scene,Scene)
 	addClass(base.Layer,Layer)
 	addClass(base.SplashScene,splashScene)
@@ -1006,7 +974,6 @@ local function addBaseClass(_classes)
 	addClass(base.BaiduVoice,BaiduVoice)
 	addClass(base.Spin,Spin)
 	addClass(base.ProgressBox,ProgressBox)
-	addClass(base.Widget,Widget)
 	addClass(base.Layout,Layout)
 	addClass(base.Button,Button)
 	addClass(base.ScrollView,ScrollView)
