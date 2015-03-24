@@ -166,6 +166,10 @@ local Scene = {
 			end
 			self._scene:registerScriptHandler(onNodeEvent)		
 		end,
+		init=function(self)
+		end,
+		release=function(self)
+		end,
 		ccCreate=function(self)
 		end,
 		ccScene=function(self)
@@ -791,8 +795,8 @@ local ScrollBar={
 	version = 1,
 	class={
 		ccCreate=function(self)
-			attach(uikits.layout{bgcolor=cc.c3b(128,128,128),
-			anchorX=0,anchorY=0})
+			self:attach(uikits.layout{bgcolor=cc.c3b(128,128,128),
+				anchorX=0,anchorY=0})
 			self._slider = uikits.layout{bgcolor=cc.c3b(0,0,0)}
 			self:addChild(self._slider)
 			self._width = 16
@@ -824,7 +828,7 @@ local ScrollBar={
 			scrollEvent(sv,ccui.ScrollviewEventType.scrolling)
 		end,
 		setScrollRang = function(self,rang)
-			local size = self:ccNode():getContentSize()
+			local size = self:getSize()
 			self._rang = rang or self._rang
 			self._block = size.height*self._rang
 			self._slider:setContentSize(cc.size(self._width,self._block))
@@ -833,7 +837,7 @@ local ScrollBar={
 			if p<0 then p = 0 end
 			if p>1 then p = 1 end
 			--local ss = self._slider:getContentSize()
-			local s = self:ccNode():getContentSize()
+			local s = self:getSize()
 			self._slider:setPosition(cc.p(0,p*(s.height)))
 		end,
 	}
