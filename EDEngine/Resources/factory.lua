@@ -23,7 +23,11 @@ local function generateId()
 end
 
 local function loadClassDescription( classId )
-	return update.loadClassJson( classId,'desc.json' )
+	if cc_isdebug() then
+		return update.loadClassJsonDebug( classId,'desc.json' )
+	else
+		return update.loadClassJson( classId,'desc.json' )
+	end
 end
 
 --检查存在本地类吗

@@ -97,6 +97,39 @@ local function loadClassJson( classId,jsonFile )
 	end
 end
 
+local function loadClassJsonDebug( classId,jsonFile )
+	local function getRootDirectory()
+		if cc_isdebug() then
+			return cc.FileUtils:getInstance():getWritablePath()..'class/'
+		else
+			return ljshell.getDirectory(ljshell.AppDir)..'class/'
+		end		
+	end
+	local df = getRootDirectory()..classId..'/'..tostring(jsonFile)
+	local file = io.open( df,"rb" )
+	if file then
+		local all = file:read("*a")
+		file:close()
+		local destable = json.decode( all )
+		if destable.superid and type(destable.superid)=='string' and
+			string.len(destable.superid)~=32 then
+			if base[destable.superid] then
+				destable.superid = base[destable.superid]
+			end
+		end
+		if destable.pedigree and type(destable.pedigree)=='table' then
+			for i,v in pairs(destable.pedigree) do
+				if string.len(v)~=32 then
+					if base[v] then
+						destable.pedigree[i] = base[v] 
+					end
+				end
+			end
+		end
+		return destable
+	end	
+end
+
 local function isExisted( classId,name,md5_ )
 	local df = getClassRootDirectory()..classId..'/'..tostring(name)
 	local file = io.open( df,"rb" )
@@ -471,6 +504,7 @@ return {
 	CheckClassVersion = CheckClassVersion,
 	UpdateClass = UpdateClass,
 	loadClassJson = loadClassJson,
+	loadClassJsonDebug = loadClassJsonDebug,
 	UpdateClassByTable = UpdateClassByTable,
 	UpdateClassFiles = UpdateClassFiles,
 	getClassRootDirectory = getClassRootDirectory,

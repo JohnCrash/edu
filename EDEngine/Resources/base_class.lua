@@ -33,8 +33,15 @@ local Root = {
 			local function resFile( classid )
 				if classid then
 					local resfile = "class/"..classid.."/"..res
-					if kits.local_exists(resfile) then
-						return resfile
+					if cc_isdebug() then
+						local f = cc.FileUtils:getInstance():getWritablePath()..resfile
+						if kits.exist_file(f) then
+							return resfile
+						end
+					else
+						if kits.local_exists(resfile) then
+							return resfile
+						end
 					end
 				end				
 			end
@@ -140,6 +147,11 @@ local Node = {
 			return self._ccnode:getContentSize()
 		end,	
 		test = function(self)
+			local factory = require "factory"
+			local scene = factory.create(base.Scene)
+			scene:addCloseButton()
+			scene:addChild(self)
+			scene:push()
 		end,
 	}
 }
@@ -191,9 +203,20 @@ local Scene = {
 			uikits.popScene()
 		end,		
 		replace = function(self)
-				uikits.replaceScene(self._scene)
+			uikits.replaceScene(self._scene)
+		end,
+		addCloseButton=function(self)
+			local but = uikits.button{width=96,height=96}
+			local ss = uikits.getDR()
+			but:loadTextures("res/hd/Images/close.png","res/hd/Images/close.png")
+			but:setPosition(cc.p(ss.width-100,ss.height-100))
+			uikits.event(but,function(sender)
+				self:pop()
+			end)
+			self:addChild(but)
 		end,
 		test = function(self)
+			self:addCloseButton()
 			self:push()		
 		end,
 	}
@@ -211,12 +234,13 @@ local Layer = {
 	},
 	class = {
 		ccCreate = function(self)
-			attach(cc.Layer:create())
+			self:attach(cc.Layer:create())
 		end,
 		test=function(self)
 			local factory = require "factory"
 			local scene = factory.create(base.Scene)
 			scene:addChild(self)
+			scene:addCloseButton()
 			scene:push()
 		end,
 	}
@@ -935,6 +959,12 @@ local Item={
 		base.Root
 	},
 	class={
+		ccCreate=function(self)
+			self:attach(cc.Sprite:create())
+		end,
+		use=function(self,texture)
+			self:ccNode():setTexture(self:getR(texture))
+		end,
 	}
 }
 

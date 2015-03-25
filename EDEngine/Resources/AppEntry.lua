@@ -51,7 +51,7 @@ function AppEntry:LavaFlow( N )
 			emitter[i]:setPosition(cc.p(ss.width*(i+7)/ (N+2), ss.height / 1.25))
 			emitter[i]:setStartColor(cc.c4f(0,0,0,1))
 		end
-		
+
 		local batch = cc.ParticleBatchNode:createWithTexture(emitter[1]:getTexture())
 
 		for i = 1,N do
@@ -59,7 +59,7 @@ function AppEntry:LavaFlow( N )
 		end
 
 		self:addChild(batch, 10)
-		self:Snow(true)
+		--self:Snow(true)
 		self._cn_label = cc.LabelTTF:create("周末愉快", "Marker Felt", 128)
 		self._cn_label:setPosition(cc.p(ss.width/2,ss.height*4/5))
 		self:addChild(self._cn_label)
@@ -233,7 +233,6 @@ function AppEntry:init()
 				local factory = require "factory"
 				local base = require "base"
 				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
-				
 				local progressbox = factory.create(base.ProgressBox)
 				progressbox:open()
 				progressbox:setProgress(0)	

@@ -36,7 +36,7 @@ return {
 		end
 		if #list == 0 then
 			self:initClasses()
-		else
+		elseif #root == 0 then
 			self:layout()
 		end
 	end,
@@ -219,6 +219,7 @@ return {
 					print("not icon "..s)
 				end
 				uikits.event(item,function(sender)
+					--[[
 					local menu = factory.create(base.PopupMenu)
 					menu:addItem("测试",function(sender)
 						local obj = factory.createAsyn(s,function(obj)
@@ -244,6 +245,19 @@ return {
 					end)
 					local p = sender:getTouchBeganPosition()
 					menu:open(p)
+					--]]
+					local progressbox = factory.create(base.ProgressBox)
+					local obj = factory.createAsyn(s,function(obj)
+						progressbox:close()
+						if obj then
+							obj:test()
+						else
+							kits.log("ERROR factory.createAsyn("..s..") return nil")
+						end
+					end,function(d,txt)
+						progressbox:setProgress(d)
+						progressbox:setText(txt)
+					end)
 				end,"click")
 				--[[
 				uikits.event(item,function(sender)
