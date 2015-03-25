@@ -3,7 +3,6 @@ local uikits = require "uikits"
 return{
 	test=function(self)
 		self.super.test(self)
-		print("hello world")
 		local ss = uikits.getDR()
 		self:use("res/3.png")
 		self:setPosition(cc.p(ss.width/2,ss.height/2))

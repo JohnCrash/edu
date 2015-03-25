@@ -1,5 +1,6 @@
 local kits = require "kits"
 local uikits = require "uikits"
+local json = require "json-c"
 local base = require "base"
 
 local ui = {
@@ -94,6 +95,7 @@ local Node = {
 	version = 1,
 	class = {
 		__init__ = function(self)
+			self._child_nodes = {}
 			self:ccCreate()
 			local function onNodeEvent(event,v)
 				if "enter" == event then
@@ -106,6 +108,8 @@ local Node = {
 		end,
 		addChild = function(self,child)
 			if child._ccnode then
+				child._parent_node = self
+				self._child_nodes[child] = child
 				self._ccnode:addChild(child._ccnode)
 			elseif cc_isobj(child) then
 				self._ccnode:addChild(child)
@@ -125,6 +129,42 @@ local Node = {
 		end,
 		ccCreate = function(self)
 			self:attach( cc.Node:create() )
+		end,
+		getParent = function(self)
+			return self._parent_node
+		end,
+		getScene = function(self)
+			if self._parent_scene then
+				return self._parent_scene
+			end
+			if self._parent_node then
+				return self._parent_node:getScene()
+			end
+		end,
+		childs = function(self)
+			local child = {}
+			for i,v in pairs(self._child_nodes) do
+				table.insert(child,v)
+			end
+			return child
+		end,
+		removeChild = function(self,child)
+			self._child_nodes[child] = nil
+		end,
+		removeFromParent = function(self,isdelay)
+			if self._parent_node then
+				self._parent_node:removeChild(self)
+			end
+			if self._parent_scene then
+				self._parent_scene:removeChild(self)
+			end
+			if self._ccnode then
+				if isdelay then
+					uikits.delay_call(nil,function()self._ccnode:removeFromParent()end)
+				else
+					self._ccnode:removeFromParent()
+				end
+			end
 		end,
 		setPosition = function(self,p)
 			self._ccnode:setPosition(p)
@@ -166,18 +206,18 @@ local Scene = {
 	version = 1,
 	class = {
 		__init__=function(self)
+			self._child_nodes = {}
 			self._scene = cc.Scene:create()
 			self:ccCreate()
 			local function onNodeEvent(event,v)
 				if "enter" == event then
-					--self._oldDR=uikits.getDR()
 					self:init()
 				elseif "exit" == event then
 					self:release()
-					--uikits.initDR(self._oldDR)
+					self._child_nodes = nil
 				end
 			end
-			self._scene:registerScriptHandler(onNodeEvent)		
+			self._scene:registerScriptHandler(onNodeEvent)
 		end,
 		init=function(self)
 		end,
@@ -193,12 +233,24 @@ local Scene = {
 		end,
 		addChild=function(self,child)
 			if child._ccnode then
+				child._parent_scene = self
+				self._child_nodes[child] = child
 				self._scene:addChild(child._ccnode)
 			elseif cc_isobj(child) then
 				self._scene:addChild(child)
 			else
 				kits.log("ERROR Scene addChild unknow type child")
 			end
+		end,
+		removeChild = function(self,child)
+			self._child_nodes[child] = nil
+		end,		
+		childs=function(self)
+			local child = {}
+			for i,v in pairs(self._child_nodes) do
+				table.insert(child,v)
+			end
+			return child
 		end,
 		push = function(self)
 			uikits.pushScene(self._scene)
@@ -956,17 +1008,85 @@ local Item={
 	superid = base.Node,
 	name = "Item",
 	icon = "res/splash/item_icon.png",
-	comment = "场景中的道具",
+	comment = "场景中的道具，物品，角色",
 	version = 1,
 	pedigree={
 		base.Root
 	},
 	class={
 		ccCreate=function(self)
+			self._actions = {}
+			self._default = ""
+			self._current = ""
+			self._animation = ccs.Armature:create()
+			self:loadFromJson(self:getR("actions.json"))
+			self:reset()
 			self:attach(cc.Sprite:create())
 		end,
-		use=function(self,texture)
-			self:ccNode():setTexture(self:getR(texture))
+		loadFromJson=function(self,file)
+			local s = kits.read_file(file)
+			if s then
+				local a = json.decode(s)
+				if a then
+					self._default = a.default or ""
+					if a.animations then
+						for i,v in pairs(a.animations) do
+							self:addAnimationFile(v)
+						end
+					end
+					if a.actions then
+						for i,v in pairs(a.actions) do
+							self:addAction(v)
+						end
+					end
+				else
+					kits.log("ERROR Item loadFromJson decode failed")	
+					kits.log("	"..tostring(file))	
+				end
+			else
+				kits.log("ERROR Item loadFromJson can't open file:")
+				kits.log("	"..tostring(file))
+			end
+		end,
+		init=function(self)
+		end,
+		release=function(self)
+		end,
+		addAnimationFile=function(self,file)
+			local arm = ccs.ArmatureDataManager:getInstance()
+			arm:removeArmatureFileInfo(file)
+			arm:addArmatureFileInfo(file)
+		end,
+		addAction=function(self,action)
+			if action and action.name and (action.animation or action.image) then
+				table.insert(self._actions,action)
+			end
+		end,
+		reset=function(self)
+			self:doAction(self._default)
+		end,
+		actions=function(self)
+			return self._actions
+		end,
+		currentAction=function(self)
+			return self._current
+		end,
+		doAction=function(self,name)
+			if self._actions[name] then
+				local action = self._actions[name]
+				if action.animation then
+					
+					if not self._animation:init(action.animation) then
+						kits.log("WARNING item.doAction unknow animation "..tostring(action.animation))
+					end
+					
+				elseif action.image then
+				else
+				end
+				self._current = name
+			else
+				kits.log("WARNING item.doAction unknow action "..tostring(name))
+			end
 		end,
 	}
 }

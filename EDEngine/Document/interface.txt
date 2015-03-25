@@ -77,11 +77,24 @@ ProgressBox (6e8c7a6612998e78186585e468010f95)父类:Dialog
 	setProgress(d) 设置进度，d是一个0-1的数。
 	setText(txt) 加载中间过程的提示文本。
 	
-Widget (67f40d28c8cb0b5141b7d8dca355ad58) 父类:root
-	ccWidget() 返回cocos2d-x的节点。
-	setPosition(ccp)
-	getPosition() 返回Widget的位置点。
-	setAnchor(anp)
-	getAnchor()
-	setSize(ccs)
-	getSize()
+Item () super:Node
+	actions() 返回对象能做的全部动作
+	currentAction() 返回当前动作名称
+	doAction(name) 做动作 
+	reset() 做默认动作
+	addAction(action) 加入一个动作action是一个表
+		{
+			default, 默认动作
+			animations={ 动画文件
+			},
+			actions={
+				name,动作名称
+				animation,动画名称
+				image,图片名称(和动画二选一)
+				audio,动作音效
+				audioDelay,音效延迟时间(默认0)
+				offset,动作开始时空间偏移位置(默认0,0)
+				scale,动作开始时缩放(默认1)
+				rotate,动作开始时角度偏移(默认0)
+			}
+		}
