@@ -184,6 +184,29 @@ local function createAsyn(classId,notify,progress)
 	addClass( classId,buildObject,progress )
 end
 
+local function resetClass(classId)
+	local function reset(id)
+		local base = require "base"
+		for i,v in pairs(base) do
+			if v==id then
+				return
+			end
+		end
+		_classes[id]=nil
+		for i,v in pairs(package.loaded) do
+			if string.find(i,id) then
+				package.loaded[i]=nil
+			end
+		end	
+	end
+	if _classes[id] and _classes[id].depends then
+		for i,v in pairs(_classes[id].depends) do
+			reset(v)
+		end
+	end
+	reset(classId)
+end
+
 --本地是不是存在
 local function isExist( classId )
 	if _classes[classId] then
@@ -363,5 +386,6 @@ return {
 	isExist = isExist,
 	launch = launch,
 	updateClass = updateClass,
+	resetClass = resetClass,
 	getClass = getClass,
 }

@@ -23,6 +23,7 @@ local list = {}
 
 return {
 	init = function(self)
+		self:initDesignView(1024*2,576*2)
 		if not self._scroll then
 			self._item = uikits.fromJson{file=self:getR(ui.FILE)}
 			local size = uikits.getDR()
@@ -36,9 +37,15 @@ return {
 		end
 		if #list == 0 then
 			self:initClasses()
-		elseif #root == 0 then
-			self:layout()
+		else
+			local inner = self._scroll:getInnerContainer()	
+			inner:setPosition(cc.p(self._scrollx,self._scrolly))
 		end
+	end,
+	release=function(self)
+		--保存滚动位置
+		local inner = self._scroll:getInnerContainer()
+		self._scrollx,self._scrolly = inner:getPosition()
 	end,
 	getClassRootDirectory = function(self)
 		if cc_isdebug() then
@@ -247,6 +254,7 @@ return {
 					menu:open(p)
 					--]]
 					local progressbox = factory.create(base.ProgressBox)
+					factory.resetClass(s)
 					local obj = factory.createAsyn(s,function(obj)
 						progressbox:close()
 						if obj then

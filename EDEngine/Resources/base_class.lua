@@ -149,6 +149,7 @@ local Node = {
 		test = function(self)
 			local factory = require "factory"
 			local scene = factory.create(base.Scene)
+			scene:initDesignView(1024*2,576*2)
 			scene:addCloseButton()
 			scene:addChild(self)
 			scene:push()
@@ -169,11 +170,11 @@ local Scene = {
 			self:ccCreate()
 			local function onNodeEvent(event,v)
 				if "enter" == event then
-					self._oldDR=uikits.getDR()
+					--self._oldDR=uikits.getDR()
 					self:init()
 				elseif "exit" == event then
 					self:release()
-					uikits.initDR(self._oldDR)
+					--uikits.initDR(self._oldDR)
 				end
 			end
 			self._scene:registerScriptHandler(onNodeEvent)		
@@ -181,6 +182,9 @@ local Scene = {
 		init=function(self)
 		end,
 		release=function(self)
+		end,
+		initDesignView = function(self,w,h,s)
+			uikits.initDR{width=w,height=h,mode=s}
 		end,
 		ccCreate=function(self)
 		end,
@@ -860,7 +864,6 @@ local ScrollBar={
 		setScrollPos = function(self,p)
 			if p<0 then p = 0 end
 			if p>1 then p = 1 end
-			--local ss = self._slider:getContentSize()
 			local s = self:getSize()
 			self._slider:setPosition(cc.p(0,p*(s.height)))
 		end,
