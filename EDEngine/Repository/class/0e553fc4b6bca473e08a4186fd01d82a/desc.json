@@ -5,8 +5,10 @@
 	"name":"NumberSequence",
 	"comment":"产生数字不停的下落",
 	"pedigree":[
-		"Node",
 		"Root"
+	],
+	"depends":[
+		"e0624a7d0d7a6c3d4a3439588ed98fb0"
 	],
 	"version":1,
 	"script":"main"

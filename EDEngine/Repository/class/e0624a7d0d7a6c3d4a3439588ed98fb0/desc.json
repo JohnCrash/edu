@@ -6,7 +6,6 @@
 	"comment":"数字和符号方块",
 	"version":1,
 	"pedigree":[
-		"Node",
 		"Root"
 	],
 	"script":"main"

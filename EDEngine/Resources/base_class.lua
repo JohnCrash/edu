@@ -202,6 +202,10 @@ local Node = {
 		getSize = function(self)
 			return self._ccnode:getContentSize()
 		end,	
+		setScale=function(self,scale)
+			self._ccnode:setScaleX(scale)
+			self._ccnode:setScaleY(scale)
+		end,
 		test = function(self)
 			local factory = require "factory"
 			local scene = factory.create(base.Scene)
@@ -727,6 +731,7 @@ local ProgressBox={
 				table.insert(self._sps,s)
 			end
 			self:setProgress(0)
+			self:setText("")
 			self._scheduler = self._root:getScheduler()
 			local dx = 0
 			local d = 2
