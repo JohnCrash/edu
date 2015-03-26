@@ -70,6 +70,22 @@ local function readOnly(t)
 	return proxy
 end
 
+local function setupClassEnv(cls)
+	local defaultEnv = _G
+	local newenv
+	if cls.super then
+		newenv = {super=cls.super.class}
+	else
+		newenv = {}
+	end
+	setmetatable(newenv,{__index=defaultEnv})
+	for i,v in pairs(cls.class) do
+		if type(v)=='function' then
+			setfenv(v,newenv)
+		end
+	end
+end
+
 --向类表中加入新的类
 local function addClass( classId,addClassResult,progress )
 	--在_classes中存在表示已经跟新过
@@ -98,7 +114,7 @@ local function addClass( classId,addClassResult,progress )
 		local function thisClass( b )
 			if cls.superid then
 				if _classes[cls.superid] and _classes[cls.superid].class then
-					cls.super = _classes[cls.superid].class
+					cls.super = _classes[cls.superid]
 				else
 					--存在父类id却没有加载成功
 					local errmsg = "addClass class "..tostring(classId).." super class "..tostring(superid).." not exist"
@@ -113,8 +129,8 @@ local function addClass( classId,addClassResult,progress )
 			end
 			cls.class = cls.class or {}
 			if cls.class then
-				cls.class.super = cls.super
-				setmetatable(cls.class,{__index=cls.super,__newindex=_readonly})
+				setupClassEnv(cls)
+				setmetatable(cls.class,{__index=cls.super.class,__newindex=_readonly})
 				_classes[classId] = readOnly(cls)
 				addClassResult(true)
 			end
@@ -162,7 +178,6 @@ local function instance( cls )
 	local obj = {}
 	obj._cls = cls
 	setmetatable(obj,{__index=obj._cls.class})
-	obj.super = obj._cls.super
 	if obj.__init__ then
 		obj:__init__()
 	end

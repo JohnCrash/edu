@@ -37,3 +37,7 @@ lua将在luacore中查询test.lua文件。而不是在main.lua平行路径中查
 local test = require "class/classid/test"
 假想的方法是这样local test = require "test"，但是查找顺序是先同级路径，然后在luacore。
 但是没有办法为对象类定制私有的require方法。
+
+对象类的super实现(在类中加入特定变量，甚至改变类的语义)
+================
+

@@ -222,7 +222,6 @@ local Scene = {
 					self:init()
 				elseif "exit" == event then
 					self:release()
-					self._child_nodes = nil
 				end
 			end
 			self._scene:registerScriptHandler(onNodeEvent)
@@ -514,7 +513,6 @@ local messageBox = {
 	classid = base.MessageBox,
 	superid = base.Dialog,
 	pedigree = {
-		base.Node,
 		base.Root
 	},
 	name = "MessageBox",
@@ -676,7 +674,7 @@ local Spin ={
 			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.8/N,false)	
 		end,
 		close=function(self)
-			self.super.close(self)
+			super.close(self)
 			if self._schedulerId then
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
 			end
@@ -735,7 +733,7 @@ local ProgressBox={
 			self._schedulerId = self._scheduler:scheduleScriptFunc(spin,0.02,false)				
 		end,
 		close=function(self)
-			self.super.close(self)
+			super.close(self)
 			if self._schedulerId then
 				self._scheduler:unscheduleScriptEntry(self._schedulerId)
 				self._schedulerId = nil
@@ -906,7 +904,7 @@ local ScrollBar={
 		end,
 		setSize = function(self,s)
 			s.width = 16
-			self.super.setSize(self,s)
+			super.setSize(self,s)
 		end,
 		trackScrollView = function(self,scrollview)
 			local sv = scrollview._widget or scrollview
@@ -1130,6 +1128,22 @@ local Item={
 				kits.log("WARNING item.doAction unknow action "..tostring(name))
 			end
 		end,
+		test=function(self)
+			super.test(self)
+			local scene = self:getScene()
+			local function actionButton()
+				local action = self:actions()
+				local x = 0
+				local y = 0
+				local space = 4
+				for i,v in pairs(action) do
+					local but = uikits.button{caption=tostring(i),x=x,y=y}
+					y = y + but:getContentSize().height+space
+					scene:addChild(but)
+				end
+			end
+			uikits.delay_call(nil,actionButton)
+		end,
 	}
 }
 
@@ -1147,42 +1161,59 @@ local function readOnly(t)
 	return proxy
 end
 
+local function setupClassEnv(cls)
+	local defaultEnv = _G
+	local newenv
+	if cls.super then
+		newenv = {super=cls.super.class}
+	else
+		newenv = {}
+	end
+	setmetatable(newenv,{__index=defaultEnv})
+	for i,v in pairs(cls.class) do
+		if type(v)=='function' then
+			setfenv(v,newenv)
+		end
+	end
+end
+
 local function addBaseClass(_classes)
-	local function addClass( classid,cls )
+	local function addClass( cls )
 		if cls.superid then
-			local supercls = _classes[cls.superid]
-			if supercls then
-				cls.class.super = supercls.class
-				setmetatable(cls.class,{__index=supercls.class,__newindex=_readonly})
+			cls.super = _classes[cls.superid]
+			if cls.super then
+				setupClassEnv(cls)
+				setmetatable(cls.class,{__index=cls.super.class,__newindex=_readonly})
 			else
 				kits.log("ERROR addBaseClass super class = nil "..tostring(cls.superid))
 			end
 		else
+			setupClassEnv(cls)
 			setmetatable(cls.class,{__newindex=_readonly})
 		end
-		_classes[classid] = readOnly(cls)
+		_classes[cls.classid] = readOnly(cls)
 	end
-	addClass(base.Root,Root)
-	addClass(base.Node,Node)
-	addClass(base.Scene,Scene)
-	addClass(base.Layer,Layer)
-	addClass(base.SplashScene,splashScene)
-	addClass(base.LoadingScene,loadingScene)
-	addClass(base.Dialog,Dialog)
-	addClass(base.MessageBox,messageBox)
-	addClass(base.BaiduVoice,BaiduVoice)
-	addClass(base.Spin,Spin)
-	addClass(base.ProgressBox,ProgressBox)
-	addClass(base.Layout,Layout)
-	addClass(base.Button,Button)
-	addClass(base.ScrollView,ScrollView)
-	addClass(base.Text,Text)
-	addClass(base.PopupMenu,PopupMenu)
-	addClass(base.ProgressBar,ProgressBar)
-	addClass(base.ScrollBar,ScrollBar)
-	addClass(base.Game,Game)
-	addClass(base.Sprite,Sprite)
-	addClass(base.Item,Item)
+	addClass(Root)
+	addClass(Node)
+	addClass(Scene)
+	addClass(Layer)
+	addClass(splashScene)
+	addClass(loadingScene)
+	addClass(Dialog)
+	addClass(messageBox)
+	addClass(BaiduVoice)
+	addClass(Spin)
+	addClass(ProgressBox)
+	addClass(Layout)
+	addClass(Button)
+	addClass(ScrollView)
+	addClass(Text)
+	addClass(PopupMenu)
+	addClass(ProgressBar)
+	addClass(ScrollBar)
+	addClass(Game)
+	addClass(Sprite)
+	addClass(Item)
 end
 
 return {

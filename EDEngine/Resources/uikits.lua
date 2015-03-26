@@ -767,7 +767,8 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 		 local schedulerID
 		 local function delay_call_func()
 			if not schedulerID then return end
-			if not func(param1,param2,param3) then
+			local err,ret = pcall(func,param1,param2,param3)
+			if not err or not ret then
 				scheduler:unscheduleScriptEntry(schedulerID)
 				schedulerID = nil					
 			end

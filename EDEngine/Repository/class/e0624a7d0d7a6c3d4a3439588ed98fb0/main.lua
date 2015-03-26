@@ -2,7 +2,7 @@ local uikits = require "uikits"
 
 return{
 	test=function(self)
-		self.super.test(self)
+		super.test(self)
 		local ss = uikits.getDR()
 		for i=0,9 do
 			self:addAction{name=tostring(i),image="res/"..tostring(i)..".png"}
