@@ -106,13 +106,21 @@ local Node = {
 			end
 			self._ccnode:registerScriptHandler(onNodeEvent)
 		end,
-		addChild = function(self,child)
+		addChild = function(self,child,z)
 			if child._ccnode then
 				child._parent_node = self
 				self._child_nodes[child] = child
-				self._ccnode:addChild(child._ccnode)
+				if z then
+					self._ccnode:addChild(child._ccnode,z)
+				else
+					self._ccnode:addChild(child._ccnode)
+				end
 			elseif cc_isobj(child) then
-				self._ccnode:addChild(child)
+				if z then
+					self._ccnode:addChild(child,z)
+				else
+					self._ccnode:addChild(child)
+				end
 			else
 				kits.log("ERROR Node addChild unknow type child")
 			end
@@ -231,13 +239,21 @@ local Scene = {
 		ccScene=function(self)
 			return self._scene
 		end,
-		addChild=function(self,child)
+		addChild=function(self,child,z)
 			if child._ccnode then
 				child._parent_scene = self
 				self._child_nodes[child] = child
-				self._scene:addChild(child._ccnode)
+				if z then
+					self._scene:addChild(child._ccnode,z)
+				else
+					self._scene:addChild(child._ccnode)
+				end
 			elseif cc_isobj(child) then
-				self._scene:addChild(child)
+				if z then
+					self._scene:addChild(child,z)
+				else
+					self._scene:addChild(child)
+				end
 			else
 				kits.log("ERROR Scene addChild unknow type child")
 			end
@@ -1018,10 +1034,14 @@ local Item={
 			self._actions = {}
 			self._default = ""
 			self._current = ""
+			local root = cc.Node:create()
+			self:attach(root)
 			self._animation = ccs.Armature:create()
+			self._sprite = cc.Sprite:create()
+			root:addChild(self._animation)
+			root:addChild(self._sprite)
 			self:loadFromJson(self:getR("actions.json"))
 			self:reset()
-			self:attach(cc.Sprite:create())
 		end,
 		loadFromJson=function(self,file)
 			local s = kits.read_file(file)
@@ -1043,9 +1063,6 @@ local Item={
 					kits.log("ERROR Item loadFromJson decode failed")	
 					kits.log("	"..tostring(file))	
 				end
-			else
-				kits.log("ERROR Item loadFromJson can't open file:")
-				kits.log("	"..tostring(file))
 			end
 		end,
 		init=function(self)
@@ -1054,12 +1071,16 @@ local Item={
 		end,
 		addAnimationFile=function(self,file)
 			local arm = ccs.ArmatureDataManager:getInstance()
-			arm:removeArmatureFileInfo(file)
-			arm:addArmatureFileInfo(file)
+			local localres = self:getR(file)
+			arm:removeArmatureFileInfo(localres)
+			arm:addArmatureFileInfo(localres)
 		end,
 		addAction=function(self,action)
 			if action and action.name and (action.animation or action.image) then
-				table.insert(self._actions,action)
+				action.offset = action.offset or cc.p(0,0)
+				action.scale = action.scale or 1
+				action.angle = action.angle or 0
+				self._actions[action.name]=action
 			end
 		end,
 		reset=function(self)
@@ -1075,13 +1096,34 @@ local Item={
 			if self._actions[name] then
 				local action = self._actions[name]
 				if action.animation then
-					
 					if not self._animation:init(action.animation) then
+						self._animation:setPosition(action.offset)
+						self._animation:setScaleX(action.scale)
+						self._animation:setScaleY(action.scale)
+						self._animation:setRotation(action.angle)
+						if action.animationName then
+							self._animation:play(action.animationName)
+						elseif action.animationIndex then
+							self._animation:playWithIndex(action.animationIndex)
+						else
+							kits.log("WARNING item.doAction animationName or animationIndex not exst "..tostring(action.animation))
+						end
+						self._sprite:setVisible(false)
+						self._animation:setVisible(true)
+					else
 						kits.log("WARNING item.doAction unknow animation "..tostring(action.animation))
 					end
-					
 				elseif action.image then
+					self._sprite:setTexture(self:getR(action.image))
+					self._sprite:setPosition(action.offset)
+					self._sprite:setScaleX(action.scale)
+					self._sprite:setScaleY(action.scale)
+					self._sprite:setRotation(action.angle)					
+					self._sprite:setVisible(true)
+					self._animation:setVisible(false)				
 				else
+					self._animation:setVisible(false)
+					self._sprite:setVisible(false)
 				end
 				self._current = name
 			else

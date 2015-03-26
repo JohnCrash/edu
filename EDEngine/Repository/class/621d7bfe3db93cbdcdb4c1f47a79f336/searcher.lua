@@ -11,6 +11,7 @@ local FileUtils = cc.FileUtils:getInstance()
 local ui={
 	FILE = 'res/splash_6.json',
 	ICON = 'Image_1',
+	REFRESH = 'res/splash/refresh.png',
 	NAME = 'Label_2',
 	COMMENT = 'Label_3',
 	UUID = 'Label_4',
@@ -20,6 +21,7 @@ local classids = {}
 local classes = {}
 local root = {}
 local list = {}
+local items = {}
 
 return {
 	init = function(self)
@@ -34,6 +36,7 @@ return {
 			self:addChild(self._scroll)
 			self._scroll:addChild(self._item)
 			self._item:setVisible(false)
+			self:initRefresh()
 		end
 		if #list == 0 then
 			self:initClasses()
@@ -46,6 +49,28 @@ return {
 		--保存滚动位置
 		local inner = self._scroll:getInnerContainer()
 		self._scrollx,self._scrolly = inner:getPosition()
+	end,
+	initRefresh=function(self)
+		local size = uikits.getDR()
+		self._sprite = uikits.button{x=size.width-128,y=size.height-128,width=128,height=128,
+		anchorX=0.5,anchorY=0.5}
+		self._sprite:loadTextures(self:getR(ui.REFRESH),self:getR(ui.REFRESH))
+		self:addChild(self._sprite,2)
+		uikits.event(self._sprite,function(sender)
+			local actionTo2 = cc.RotateTo:create( 0.2, 360)
+			local actionTo = cc.RotateTo:create( 0.2, 180)	
+			self._sprite:runAction(cc.Sequence:create(
+			actionTo,actionTo2))
+			classids = {}
+			classes = {}
+			root = {}
+			list = {}
+			for i,v in pairs(items) do
+				v:removeFromParent()
+			end
+			items = {}
+			self:initClasses()
+		end,"click")
 	end,
 	getClassRootDirectory = function(self)
 		if cc_isdebug() then
@@ -197,6 +222,7 @@ return {
 			for k,s in pairs(v.child) do
 				local item = self._item:clone()
 				self._scroll:addChild(item)
+				table.insert(items,item)
 				item:setVisible(true)
 				item:setPosition(cc.p(x,y))
 				x = x+size.width
