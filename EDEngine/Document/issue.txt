@@ -40,4 +40,22 @@ local test = require "class/classid/test"
 
 对象类的super实现(在类中加入特定变量，甚至改变类的语义)
 ================
-
+一个类被定义为一个函数表，问题是如何在这组函数中加入变量super指向父表。
+方法是使用setfenv,为每个函数设置一个私有的环境表，其中包含super变量。
+local function setupClassEnv(cls)
+	local defaultEnv = _G
+	local newenv
+	if cls.super then
+		newenv = {super=cls.super.class}
+	else
+		newenv = {}
+	end
+	setmetatable(newenv,{__index=defaultEnv})
+	for i,v in pairs(cls.class) do
+		if type(v)=='function' then
+			setfenv(v,newenv)
+		end
+	end
+end
+用此方法可以任意扩展类的本地变量。
+并且可以设置类的访问权限。

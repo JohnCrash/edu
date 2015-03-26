@@ -1,0 +1,12 @@
+{
+	"classid":"984469d5988c0f0c390049625faf7b61",
+	"superid":"Item",
+	"name":"Zerg",
+	"icon":"res/",
+	"comment":"虫子，用于测试Item",
+	"pedigree":[
+		"Node",
+		"Root"
+	],
+	"version":1
+}

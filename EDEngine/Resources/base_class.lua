@@ -80,6 +80,14 @@ local Root = {
 				end
 			end
 		end,
+		read = function(self,res)
+			if cc_isdebug() then
+				local file = cc.FileUtils:getInstance():getWritablePath()..res
+				return kits.read_file(file)
+			else
+				return kits.read_local_file(res)
+			end
+		end,
 		test = function(self)
 			kits.log("root test function")
 		end,		
@@ -1042,7 +1050,7 @@ local Item={
 			self:reset()
 		end,
 		loadFromJson=function(self,file)
-			local s = kits.read_file(file)
+			local s = self:read(file)
 			if s then
 				local a = json.decode(s)
 				if a then
@@ -1094,7 +1102,7 @@ local Item={
 			if self._actions[name] then
 				local action = self._actions[name]
 				if action.animation then
-					if not self._animation:init(action.animation) then
+					if self._animation:init(action.animation) then
 						self._animation:setPosition(action.offset)
 						self._animation:setScaleX(action.scale)
 						self._animation:setScaleY(action.scale)
@@ -1102,7 +1110,12 @@ local Item={
 						if action.animationName then
 							self._animation:play(action.animationName)
 						elseif action.animationIndex then
-							self._animation:playWithIndex(action.animationIndex)
+							local anim = self._animation:getAnimation()
+							if(action.animationIndex < anim:getMovementCount()) and action.animationIndex>=0 then
+								anim:playWithIndex(action.animationIndex)
+							else
+								kits.log("WARNING item.doAction animation index overflow :"..tostring(action.animation))
+							end
 						else
 							kits.log("WARNING item.doAction animationName or animationIndex not exst "..tostring(action.animation))
 						end
@@ -1131,15 +1144,20 @@ local Item={
 		test=function(self)
 			super.test(self)
 			local scene = self:getScene()
+			local ss = uikits.getDR()
+			self:setPosition(cc.p(ss.width/2,ss.height/2))
 			local function actionButton()
 				local action = self:actions()
-				local x = 0
-				local y = 0
+				local x = ss.width-256
+				local y = 10
 				local space = 4
 				for i,v in pairs(action) do
-					local but = uikits.button{caption=tostring(i),x=x,y=y}
+					local but = uikits.button{caption=tostring(i),x=x,y=y,width=250,height=40}
 					y = y + but:getContentSize().height+space
 					scene:addChild(but)
+					uikits.event(but,function(sender)
+						self:doAction(tostring(i))
+					end)
 				end
 			end
 			uikits.delay_call(nil,actionButton)
