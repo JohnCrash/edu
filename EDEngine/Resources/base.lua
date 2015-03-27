@@ -9,6 +9,7 @@ return {
 	Spin = "b34d6d7a5652cf3bbe6388d5770dbe95",
 	ProgressBox = "6e8c7a6612998e78186585e468010f95",
 	Scene = "d55f6d9cbb48b6f402b8122b97ed2dc1",
+	PhysicsScene = "fe3b5a71265217def35a0633f8e85c6f",
 	Layer = "685316259b01edf58a85d6705a4541ad",
 	Widget = "67f40d28c8cb0b5141b7d8dca355ad58",
 	Layout = "d00696dff16c2e217c24cc1fed8ba49e",

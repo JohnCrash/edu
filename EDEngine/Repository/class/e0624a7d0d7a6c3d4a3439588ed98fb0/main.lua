@@ -8,7 +8,7 @@ return{
 		end
 		self:addAction{name='+',image="res/add.png"}
 		self:addAction{name='-',image="res/sub.png"}
-		self:addAction{name='x',image="res/mul.png"}
+		self:addAction{name='*',image="res/mul.png"}
 		self:addAction{name='/',image="res/div.png"}
 		self:addAction{name='=',image="res/eq.png"}
 	end,

@@ -236,9 +236,13 @@ local Node = {
 			self._ccnode:setScaleX(scale)
 			self._ccnode:setScaleY(scale)
 		end,
+		testScene = function(self)
+			local factory = require "factory"
+			return factory.create(base.Scene)		
+		end,
 		test = function(self)
 			local factory = require "factory"
-			local scene = factory.create(base.Scene)
+			local scene = self:testScene()
 			uikits.muteSound(false)
 			uikits.muteClickSound(true)
 			scene:initDesignView(1024*2,576*2)
@@ -333,6 +337,39 @@ local Scene = {
 		test = function(self)
 			self:addCloseButton()
 			self:push()		
+		end,
+	}
+}
+
+local PhysicsScene = {
+	classid = base.PhysicsScene,
+	superid = base.Scene,
+	name = "PhysicsScene",
+	icon = "res/splash/scene_icon.png",
+	comment = "物理场景场景",
+	version = 1,
+	pedigree={
+		base.Root
+	},
+	class = {
+		__init__=function(self)
+			self._child_nodes = {}
+			self._scene = cc.Scene:createWithPhysics()
+			self:ccCreate()
+			local function onNodeEvent(event,v)
+				if "enter" == event then
+					self:init()
+				elseif "exit" == event then
+					self:release()
+				end
+			end
+			self._scene:registerScriptHandler(onNodeEvent)
+		end,
+		setGravity=function(self,x,y)
+			self._scene:getPhysicsWorld():setGravity(cc.p(x, y));
+		end,
+		setUpdateRate=function(self,f)
+			self._scene:getPhysicsWorld():setUpdateRate(f);
 		end,
 	}
 }
@@ -1119,7 +1156,7 @@ local Item={
 			arm:addArmatureFileInfo(localres)
 		end,
 		addAction=function(self,action)
-			if action and action.name and (action.animation or action.image) then
+			if action and action.name and (action.animation or action.image or action.script) then
 				action.offset = action.offset or cc.p(0,0)
 				action.scale = action.scale or 1
 				action.angle = action.angle or 0
@@ -1128,6 +1165,9 @@ local Item={
 		end,
 		reset=function(self)
 			self:doAction(self._default)
+		end,
+		setDefaultAction=function(self,name)
+			self._default = name
 		end,
 		actions=function(self)
 			return self._actions
@@ -1185,9 +1225,10 @@ local Item={
 						self._sprite:setVisible(false)
 					end
 				else
-					kits.log("WARNING item.doAction unknow action "..tostring(name))
+					kits.log("WARNING item.doAction unknow action ["..tostring(name).."]")
 				end
 			end
+			print("action name ["..tostring(name).."]")
 			if self._current_loop_id then
 				self:removeScheduler(self._current_loop_id)
 				self._current_loop_id = nil
@@ -1203,6 +1244,22 @@ local Item={
 				actionimp(...)
 			end
 			self._current = name
+		end,
+		getSize=function(self)
+			if self._animation:isVisible() then
+				return self._animation:getContentSize()
+			else
+				return self._sprite:getContentSize()
+			end
+		end,
+		setSize=function(self,s)
+			if self._animation:isVisible() then
+				self._animation:setContentSize(s)
+			else
+				local ss = self._sprite:getContentSize()
+				self._sprite:setScaleX(s.width/ss.width)
+				self._sprite:setScaleY(s.height/ss.height)
+			end		
 		end,
 		test=function(self)
 			super.test(self)
@@ -1277,6 +1334,7 @@ local function addBaseClass(_classes)
 	addClass(Root)
 	addClass(Node)
 	addClass(Scene)
+	addClass(PhysicsScene)
 	addClass(Layer)
 	addClass(splashScene)
 	addClass(loadingScene)
