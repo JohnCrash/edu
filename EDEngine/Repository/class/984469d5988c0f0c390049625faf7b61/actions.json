@@ -24,27 +24,33 @@
 				"y":0,
 			},
 			"scale":3,
-			"angle":45
+			"angle":45,
+			"audio":"res/qiaoda.mp3",
+			"loop":1
 		},
 		{
 			"name":"惊呆",
 			"animation":"NewAnimation",
-			"animationIndex":2
+			"animationIndex":2,
+			"audio":"res/shibai.MP3"
 		},
 		{
 			"name":"打晕",
 			"animation":"NewAnimation",
-			"animationIndex":3
+			"animationIndex":3,
+			"audio":"res/beida.MP3"
 		},
 		{
 			"name":"悠闲",
 			"animation":"NewAnimation",
-			"animationIndex":4
+			"animationIndex":4,
+			"loop":5
 		},
 		{
 			"name":"悠闲2",
 			"animation":"NewAnimation",
-			"animationIndex":5
+			"animationIndex":5,
+			"loop":2
 		},
 		{
 			"name":"悠闲4",

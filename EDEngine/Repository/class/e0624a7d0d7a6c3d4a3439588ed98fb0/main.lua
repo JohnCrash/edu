@@ -14,9 +14,9 @@ return{
 	end,
 	test=function(self)
 		super.test(self)
-		uikits.delay_call(nil,function()self:doAction("3")end)
-		uikits.delay_call(nil,function()self:doAction("2")end,0.5)
-		uikits.delay_call(nil,function()self:doAction("1")end,1)
+		self:scheduler(function()self:doAction("3")end)
+		self:scheduler(function()self:doAction("2")end,0.5)
+		self:scheduler(function()self:doAction("1")end,1)
 		self:setScale(0.5)	
 	end,
 }

@@ -14,7 +14,7 @@ local FileUtils = cc.FileUtils:getInstance()
 local defaultFont="Marker Felt"
 local defaultFontSize = 32
 local ismute
-
+local clickismute
 local listener_mouse
 local foucs_scrollview
 local scrolly_value = 100
@@ -164,6 +164,10 @@ local function muteSound( b )
 	end
 end
 
+local function muteClickSound( b )
+	clickismute = b
+end
+
 local click_sounds = {
 	'audio/click.mp3',
 	'audio/scroll.mp3',
@@ -177,7 +181,7 @@ local function setDefaultClickSound( idx,file )
 end
 
 local function playClickSound( idx )
-	if not ismute then
+	if not ismute and not clickismute then
 		if idx and type(idx)=='number' and idx<=#click_sounds and idx>0 then
 			playSound( click_sounds[idx] )
 		else
@@ -2010,6 +2014,7 @@ return {
 	fitsize = fitsize,
 	scrollview_step_add = scrollview_step_add,
 	muteSound = muteSound,
+	muteClickSound=muteClickSound,
 	playClickSound = playClickSound,
 	setClickSound = setClickSound,
 	setDefaultClickSound = setDefaultClickSound,

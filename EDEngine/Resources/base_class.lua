@@ -110,9 +110,39 @@ local Node = {
 					self:init()
 				elseif "exit" == event then
 					self:release()
+					if self._scheduler_ids then
+						for i,v in pairs(self._scheduler_ids) do
+							self._scheduler:unscheduleScriptEntry(v)
+						end
+						self._scheduler_ids = nil
+						self._scheduler = nil
+					end
 				end
 			end
 			self._ccnode:registerScriptHandler(onNodeEvent)
+		end,
+		scheduler=function(self,func,d)
+			self._scheduler = self._scheduler or self._ccnode:getScheduler()
+			local schedulerID
+			local function delay_call_func()
+				local err,ret = pcall(func)
+				if not err or not ret then
+					self:removeScheduler(schedulerID)
+				end
+			end			
+			schedulerID = self._scheduler:scheduleScriptFunc(delay_call_func,d or 0.01,false)
+			self._scheduler_ids = self._scheduler_ids or {}
+			table.insert(self._scheduler_ids,schedulerID)
+			return schedulerID
+		end,
+		removeScheduler=function(self,id)
+			for i,v in pairs(self._scheduler_ids) do
+				if v==id then
+					self._scheduler:unscheduleScriptEntry(id)
+					table.remove(self._scheduler_ids,i)
+					return
+				end
+			end
 		end,
 		addChild = function(self,child,z)
 			if child._ccnode then
@@ -209,6 +239,8 @@ local Node = {
 		test = function(self)
 			local factory = require "factory"
 			local scene = factory.create(base.Scene)
+			uikits.muteSound(false)
+			uikits.muteClickSound(true)
 			scene:initDesignView(1024*2,576*2)
 			scene:addCloseButton()
 			scene:addChild(self)
@@ -1103,48 +1135,74 @@ local Item={
 		currentAction=function(self)
 			return self._current
 		end,
-		doAction=function(self,name)
-			if self._actions[name] then
-				local action = self._actions[name]
-				if action.animation then
-					if self._animation:init(action.animation) then
-						self._animation:setPosition(action.offset)
-						self._animation:setScaleX(action.scale)
-						self._animation:setScaleY(action.scale)
-						self._animation:setRotation(action.angle)
-						if action.animationName then
-							self._animation:play(action.animationName)
-						elseif action.animationIndex then
-							local anim = self._animation:getAnimation()
-							if(action.animationIndex < anim:getMovementCount()) and action.animationIndex>=0 then
-								anim:playWithIndex(action.animationIndex)
-							else
-								kits.log("WARNING item.doAction animation index overflow :"..tostring(action.animation))
-							end
-						else
-							kits.log("WARNING item.doAction animationName or animationIndex not exst "..tostring(action.animation))
-						end
-						self._sprite:setVisible(false)
-						self._animation:setVisible(true)
-					else
-						kits.log("WARNING item.doAction unknow animation "..tostring(action.animation))
+		doAction=function(self,name,...)
+			local function actionimp(...)
+				if self._actions[name] then
+					local action = self._actions[name]
+					if action.audio then
+						self:scheduler(function()
+							uikits.playSound(self:getR(action.audio))
+						end,action.audioDelay)
 					end
-				elseif action.image then
-					self._sprite:setTexture(self:getR(action.image))
-					self._sprite:setPosition(action.offset)
-					self._sprite:setScaleX(action.scale)
-					self._sprite:setScaleY(action.scale)
-					self._sprite:setRotation(action.angle)					
-					self._sprite:setVisible(true)
-					self._animation:setVisible(false)				
+					if action.script then
+						if type(action.script)=='function' then
+							action.script(...)
+						end
+					end
+					if action.animation then
+						if self._animation:init(action.animation) then
+							self._animation:setPosition(action.offset)
+							self._animation:setScaleX(action.scale)
+							self._animation:setScaleY(action.scale)
+							self._animation:setRotation(action.angle)
+							if action.animationName then
+								self._animation:play(action.animationName)
+							elseif action.animationIndex then
+								local anim = self._animation:getAnimation()
+								if(action.animationIndex < anim:getMovementCount()) and action.animationIndex>=0 then
+									anim:playWithIndex(action.animationIndex)
+								else
+									kits.log("WARNING item.doAction animation index overflow :"..tostring(action.animation))
+								end
+							else
+								kits.log("WARNING item.doAction animationName or animationIndex not exst "..tostring(action.animation))
+							end
+							self._sprite:setVisible(false)
+							self._animation:setVisible(true)
+						else
+							kits.log("WARNING item.doAction unknow animation "..tostring(action.animation))
+						end
+					elseif action.image then
+						self._sprite:setTexture(self:getR(action.image))
+						self._sprite:setPosition(action.offset)
+						self._sprite:setScaleX(action.scale)
+						self._sprite:setScaleY(action.scale)
+						self._sprite:setRotation(action.angle)					
+						self._sprite:setVisible(true)
+						self._animation:setVisible(false)				
+					else
+						self._animation:setVisible(false)
+						self._sprite:setVisible(false)
+					end
 				else
-					self._animation:setVisible(false)
-					self._sprite:setVisible(false)
+					kits.log("WARNING item.doAction unknow action "..tostring(name))
 				end
-				self._current = name
-			else
-				kits.log("WARNING item.doAction unknow action "..tostring(name))
 			end
+			if self._current_loop_id then
+				self:removeScheduler(self._current_loop_id)
+				self._current_loop_id = nil
+			end
+			if self._actions[name] and self._actions[name].loop then
+				local a,b,c,d = ...
+				actionimp(...)
+				self._current_loop_id = self:scheduler(function()
+					actionimp(a,b,c,d)
+					return true
+				end,self._actions[name].loop)
+			else
+				actionimp(...)
+			end
+			self._current = name
 		end,
 		test=function(self)
 			super.test(self)

@@ -38,6 +38,10 @@ Node () 父类:Root
 	getAnchor()
 	setSize(size)
 	getSize()
+	setScale(scale)
+	getScale()
+	scheduler(func,delta) 创建一个周期调度,delta周期时间.成功返回一个scheduler id
+	removeScheduler(id) 删除周期调用,如果对象退场将自动清除全部调度
 	
 Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Root
 	Scene的子类通过ccCreate来构造
@@ -111,5 +115,7 @@ Item () super:Node
 				offset,动作开始时空间偏移位置(默认0,0)
 				scale,动作开始时缩放(默认1)
 				angle,动作开始时角度偏移(默认0)
+				script,动作脚本可以是一个函数
+				loop,循环动作(这是一个周期的时间)
 			}
 		}
