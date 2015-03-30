@@ -774,7 +774,10 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 			local err,ret = pcall(func,param1,param2,param3)
 			if not err or not ret then
 				scheduler:unscheduleScriptEntry(schedulerID)
-				schedulerID = nil					
+				schedulerID = nil		
+				if not err then
+					kits.log( "ERROR : "..tostring(ret))
+				end				
 			end
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)	

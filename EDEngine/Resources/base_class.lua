@@ -124,10 +124,13 @@ local Node = {
 		scheduler=function(self,func,d)
 			self._scheduler = self._scheduler or self._ccnode:getScheduler()
 			local schedulerID
-			local function delay_call_func()
-				local err,ret = pcall(func)
+			local function delay_call_func(dt)
+				local err,ret = pcall(func,dt)
 				if not err or not ret then
 					self:removeScheduler(schedulerID)
+					if not err then
+						kits.log( "ERROR : "..tostring(ret))
+					end
 				end
 			end			
 			schedulerID = self._scheduler:scheduleScriptFunc(delay_call_func,d or 0.01,false)
@@ -195,7 +198,15 @@ local Node = {
 			return child
 		end,
 		removeChild = function(self,child)
-			self._child_nodes[child] = nil
+			if child._ccnode and self._child_nodes[child] then
+				child._parent_node = nil
+				--self._ccnode:removeChild(child._ccnode,true)
+				self._child_nodes[child] = nil
+			elseif cc_isobj(child) then
+				self._ccnode:removeChild(child)
+			else
+				kits.log("WARNING : Node.removeChild failed")
+			end
 		end,
 		removeFromParent = function(self,isdelay)
 			if self._parent_node then
@@ -212,7 +223,7 @@ local Node = {
 				end
 			end
 		end,
-		setPosition = function(self,p)
+		setPosition = function(self,p,anchor)
 			self._ccnode:setPosition(p)
 		end,
 		getPosition = function(self)
@@ -1121,7 +1132,6 @@ local Item={
 			root:addChild(self._animation)
 			root:addChild(self._sprite)
 			self:loadFromJson(self:getR("actions.json"))
-			self:reset()
 		end,
 		loadFromJson=function(self,file)
 			local s = self:read(file)
@@ -1164,7 +1174,9 @@ local Item={
 			end
 		end,
 		reset=function(self)
-			self:doAction(self._default)
+			if self._actions[self._default] then
+				self:doAction(self._default)
+			end
 		end,
 		setDefaultAction=function(self,name)
 			self._default = name
@@ -1176,6 +1188,8 @@ local Item={
 			return self._current
 		end,
 		doAction=function(self,name,...)
+			if not name then return end
+			local result
 			local function actionimp(...)
 				if self._actions[name] then
 					local action = self._actions[name]
@@ -1186,7 +1200,7 @@ local Item={
 					end
 					if action.script then
 						if type(action.script)=='function' then
-							action.script(...)
+							result = action.script(...)
 						end
 					end
 					if action.animation then
@@ -1228,7 +1242,6 @@ local Item={
 					kits.log("WARNING item.doAction unknow action ["..tostring(name).."]")
 				end
 			end
-			print("action name ["..tostring(name).."]")
 			if self._current_loop_id then
 				self:removeScheduler(self._current_loop_id)
 				self._current_loop_id = nil
@@ -1244,6 +1257,7 @@ local Item={
 				actionimp(...)
 			end
 			self._current = name
+			return result
 		end,
 		getSize=function(self)
 			if self._animation:isVisible() then
