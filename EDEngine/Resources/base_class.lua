@@ -1275,6 +1275,22 @@ local Item={
 				self._sprite:setScaleY(s.height/ss.height)
 			end		
 		end,
+		setAnchor=function(self,p)
+			if self._animation:isVisible() then
+				self._animation:setAnchorPoint(p)
+			else
+				self._sprite:setAnchorPoint(p)
+			end
+		end,
+		getAnchor=function(self,p)
+			if self._animation:isVisible() then
+				local x,y = self._animation:getAnchorPoint()
+				return cc.p(x,y)
+			else
+				local x,y = self._sprite:getAnchorPoint()
+				return cc.p(x,y)			
+			end		
+		end,
 		test=function(self)
 			super.test(self)
 			local scene = self:getScene()

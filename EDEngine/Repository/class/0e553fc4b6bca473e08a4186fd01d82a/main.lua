@@ -54,6 +54,7 @@ return {
 			self:addChild( obj )
 			table.insert(self._blocks,obj)
 			obj:doAction(c)
+			obj:setAnchor(cc.p(0,0))
 			obj:setPosition(cc.p(x,y))
 			obj:setSize(cc.size(self._blockWidth,self._blockWidth))
 			if self._orientation=='right' then
@@ -80,6 +81,7 @@ return {
 			p.x=p.x+self._blockWidth
 		end
 		obj:setSize(cc.size(self._blockWidth,self._blockWidth))
+		obj:setAnchor(cc.p(0,0))
 		obj:setPosition(p)	
 		self:addChild(obj)
 		for i,v in pairs(self._blocks) do
@@ -98,6 +100,7 @@ return {
 		blockObj:removeFromParent()
 		blockObj = factory.create(blockUUID)
 		blockObj:doAction(current)
+		blockObj:setAnchor(cc.p(0,0))
 		blockObj:setSize(cc.size(self._blockWidth,self._blockWidth))
 		return blockObj
 	end,

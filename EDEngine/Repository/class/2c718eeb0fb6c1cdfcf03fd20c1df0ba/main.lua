@@ -113,7 +113,7 @@ return {
 			
 			local p = self:getPosition()
 			local ss = uikits.getDR()
-			local height = self._size.height+blockWidth
+			local height = raw*blockWidth+blockWidth--self._size.height+blockWidth
 			p.y = (ss.height-height)/2
 			self:setPosition(p)
 			p.y = p.y+self._size.height
