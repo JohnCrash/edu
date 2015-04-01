@@ -118,13 +118,13 @@ return {
 			local e = math.random(1,4)
 			local z
 			if e == 1 then
-				x = math.random(0,99)
-				y = math.random(0,99)
+				x = math.random(0,9)
+				y = math.random(0,9)
 				z = x+y
 				e = '+'
 			elseif e == 2 then
-				x = math.random(0,99)
-				y = math.random(0,99)		
+				x = math.random(0,9)
+				y = math.random(0,9)		
 				if x>y then
 					z = x-y
 				else
@@ -132,8 +132,8 @@ return {
 				end
 				e = '-'
 			elseif e == 3 then
-				x = math.random(0,99)
-				y = math.random(0,99)	
+				x = math.random(0,9)
+				y = math.random(0,9)	
 				z = x*y
 				e = '*'
 			elseif e == 4 then
