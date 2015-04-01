@@ -33,10 +33,10 @@ return {
 			self:fall(3)
 		end
 		local function normal()
-			self._fallSpeed = 50
+			self._fallSpeed = 10
 		end
 		local function fast()
-			self._fallSpeed = self._fallSpeed+50
+			self._fallSpeed = self._fallSpeed+10
 		end
 		local function auto()
 			if self._auto then
@@ -55,6 +55,38 @@ return {
 		self:addAction{name="恢复",script=resume}
 		self:addAction{name="重新开始",script=init}	
 		self:reset{}
+		
+		local mp
+		local opFallBlock
+		local function onTouchBegan(touches,event)
+			if #touches==1 then
+				opFallBlock = self._fallBlock
+			end
+		end
+		local function onTouchMoved(touches,event)
+			if #touches==1 and self._fallBlock==opFallBlock then
+				local p = self:ccNode():convertToNodeSpace(touches[1]:getLocation())
+				local m = math.floor(p.x/self._blockWidth)+1-self._fallColum
+				mp = mp or p
+				if math.abs(p.x-mp.x) >= math.abs(p.y-mp.y) then
+					if math.abs(m) > 0 then
+						self:move(m)
+						mp = p
+					end
+				else
+					local cp = self._fallBlock:getPosition()
+					self:fall(math.floor((cp.y-p.y)/self._blockWidth)+1)
+				end
+			end		
+		end
+		local function onTouchEnded(touches,event)
+		end
+		local listener = cc.EventListenerTouchAllAtOnce:create()
+		listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
+		listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCHES_MOVED )	
+		listener:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )	
+		local eventDispatcher=self:ccNode():getEventDispatcher()
+		eventDispatcher:addEventListenerWithSceneGraphPriority(listener,self:ccNode())
 	end,
 	setSize=function(self,s)
 		self._size = s
@@ -227,6 +259,15 @@ return {
 				isdo = true
 			end
 		end
+		for i=1,self._colum do
+			local result = self:clac(self:colum(i))
+			self:printResult(result)
+			for k,v in pairs(result) do
+				self._grid[v.col][v.raw] = nil
+				v.object:removeFromParent()
+				isdo = true
+			end
+		end		
 		if isdo then
 			self:relayoutBlock()
 		end
