@@ -75,7 +75,7 @@ return {
 		local p = self._blocks[#self._blocks]:getPosition()
 		local orientation = self._orientation
 		table.insert(self._blocks,obj)
-		if orientation=='right' then
+		if orientation=='right' then --加入右边
 			p.x=p.x-self._blockWidth
 		else
 			p.x=p.x+self._blockWidth
@@ -84,6 +84,7 @@ return {
 		obj:setAnchor(cc.p(0,0))
 		obj:setPosition(p)	
 		self:addChild(obj)
+		
 		for i,v in pairs(self._blocks) do
 			local p = v:getPosition()
 			if orientation=='right' then
@@ -91,8 +92,10 @@ return {
 			else
 				p.x = p.x - self._blockWidth
 			end
-			v:setPosition(p)
+			--v:setPosition(p)
+			v:ccNode():runAction(cc.MoveTo:create(0.1,p))
 		end
+		
 		local blockObj
 		blockObj = self._blocks[1]
 		table.remove(self._blocks,1)
@@ -133,7 +136,7 @@ return {
 				e = '-'
 			elseif e == 3 then
 				x = math.random(0,9)
-				y = math.random(0,9)	
+				y = math.random(0,9)
 				z = x*y
 				e = '*'
 			elseif e == 4 then

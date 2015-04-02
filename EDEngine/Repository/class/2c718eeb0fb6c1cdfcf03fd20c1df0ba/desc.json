@@ -5,8 +5,9 @@
 	"name":"NumberBox",
 	"comment":"数字方块容器",
 	"pedigree":[
+		"Node",
 		"Root"
 	],
 	"version":1,
-	"script":"main"
+	"script":"tetris"
 }

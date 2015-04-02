@@ -216,6 +216,7 @@ return {
 	layout = function(self)
 		local size = self._item:getContentSize()
 		local h = #list * size.height
+		local maxw = 0
 		for i,v in pairs(list) do
 			local y = h-size.height*i
 			local x = (v.level-1)*size.width
@@ -224,6 +225,7 @@ return {
 				self._scroll:addChild(item)
 				table.insert(items,item)
 				item:setVisible(true)
+				maxw = math.max(maxw,x+size.width)
 				item:setPosition(cc.p(x,y))
 				x = x+size.width
 				local name = uikits.child(item,ui.NAME)
@@ -302,8 +304,8 @@ return {
 				--]]
 			end
 		end
-		local ss = self._scroll:getContentSize()
-		self._scroll:setInnerContainerSize(cc.size(ss.width,h))
+		self._scroll:setDirection(cc.SCROLLVIEW_DIRECTION_BOTH)
+		self._scroll:setInnerContainerSize(cc.size(maxw,h))
 	end,
 	test = function(self)
 		print("you can not test searcher!")
