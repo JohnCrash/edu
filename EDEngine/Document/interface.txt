@@ -40,6 +40,7 @@ Node () 父类:Root
 	getSize()
 	setScale(scale)
 	getScale()
+	setVisible(b)
 	scheduler(func,delta) 创建一个周期调度,delta周期时间.成功返回一个scheduler id
 	removeScheduler(id) 删除周期调用,如果对象退场将自动清除全部调度
 	

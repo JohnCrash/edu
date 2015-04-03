@@ -1,11 +1,9 @@
 {
 	"classid":"458c46b4a43eacb6c0b8ce278b0c1982",
-	"superid":"0e553fc4b6bca473e08a4186fd01d82a",
-	"name":"BlockSelecter",
-	"comment":"从多个方块中选择一个",
+	"superid":"Node",
+	"name":"ObjectSelecter",
+	"comment":"从多对象中选择一个",
 	"pedigree":[
-		"Item",
-		"Node",
 		"Root"	],
 	"script":"blockselecter",
 	"version":1

@@ -10,17 +10,19 @@ return {
 	ccCreate=function(self)
 		super.ccCreate(self)
 		local function fall()
-			local blockObj = self:fall()
-			local p = blockObj:getPosition()
-			p.y = p.y - 1000
-			local function removeMe(node)
-				blockObj:removeFromParent()
+			local blockObj = self:get()
+			if blockObj then
+				local p = blockObj:getPosition()
+				p.y = p.y - 1000
+				local function removeMe(node)
+					blockObj:removeFromParent()
+				end
+				blockObj:ccNode():runAction(
+					cc.Sequence:create(
+						cc.MoveTo:create(1,p),
+						cc.CallFunc:create(removeMe))
+					)			
 			end
-			blockObj:ccNode():runAction(
-				cc.Sequence:create(
-					cc.MoveTo:create(1,p),
-					cc.CallFunc:create(removeMe))
-				)			
 		end
 		local function init( colum,orientation )
 			self:reset{colum=colum,orientation=orientation}
@@ -34,6 +36,7 @@ return {
 		self:initSequence()
 		t = t or {}
 		self._colum=t.colum or 6
+		self._cycle =t.cycle or 0.2
 		self._orientation = t.orientation or "left"
 		local x = 0
 		local y = 0
@@ -65,26 +68,27 @@ return {
 		end
 		self._index = self._index+self._colum		
 	end,
-	fall=function(self)
+	get=function(self)
+		if self._last_fall_time and cc_clock()-self._last_fall_time<self._cycle then
+			return
+		end
 		local obj = factory.create(blockUUID)
 		obj:doAction(string.sub(self._sequence,self._index,self._index))
 		self._index=self._index+1
 		if self._index > #self._sequence then
 			self._index = 1
 		end
-		local p = self._blocks[#self._blocks]:getPosition()
+		local p = cc.p(0,0)
 		local orientation = self._orientation
-		table.insert(self._blocks,obj)
 		if orientation=='right' then --加入右边
-			p.x=p.x-self._blockWidth
+			p.x=0
 		else
-			p.x=p.x+self._blockWidth
+			p.x=(self._colum-1)*self._blockWidth
 		end
 		obj:setSize(cc.size(self._blockWidth,self._blockWidth))
 		obj:setAnchor(cc.p(0,0))
-		obj:setPosition(p)	
+		obj:setPosition(p)
 		self:addChild(obj)
-		
 		for i,v in pairs(self._blocks) do
 			local p = v:getPosition()
 			if orientation=='right' then
@@ -92,19 +96,22 @@ return {
 			else
 				p.x = p.x - self._blockWidth
 			end
-			--v:setPosition(p)
-			v:ccNode():runAction(cc.MoveTo:create(0.1,p))
+			v:ccNode():runAction(cc.MoveTo:create(self._cycle,p))
 		end
+		table.insert(self._blocks,obj)
+		obj:setVisible(false)
+		obj:scheduler(function()
+			obj:setVisible(true)	
+		end,self._cycle)
+		self._last_fall_time = cc_clock()
 		
 		local blockObj
 		blockObj = self._blocks[1]
 		table.remove(self._blocks,1)
 		local current = blockObj:currentAction()
+		blockObj:ccNode():retain()
+		blockObj:ccNode():autorelease()
 		blockObj:removeFromParent()
-		blockObj = factory.create(blockUUID)
-		blockObj:doAction(current)
-		blockObj:setAnchor(cc.p(0,0))
-		blockObj:setSize(cc.size(self._blockWidth,self._blockWidth))
 		return blockObj
 	end,
 	setSize=function(self,s)

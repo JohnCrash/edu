@@ -1,0 +1,11 @@
+{
+	"classid":"d2cec3976ce41e69c1bde08fb032af7b",
+	"superid":"Item",
+	"name":"Object Selecter",
+	"comment":"对象选择",
+	"pedigree":[
+		"Node",
+		"Root"
+	],
+	"version":1
+}

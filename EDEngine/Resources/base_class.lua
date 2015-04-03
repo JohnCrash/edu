@@ -200,10 +200,7 @@ local Node = {
 		removeChild = function(self,child)
 			if child._ccnode and self._child_nodes[child] then
 				child._parent_node = nil
-				--self._ccnode:removeChild(child._ccnode,true)
 				self._child_nodes[child] = nil
-			elseif cc_isobj(child) then
-				self._ccnode:removeChild(child)
 			else
 				kits.log("WARNING : Node.removeChild failed")
 			end
@@ -246,6 +243,9 @@ local Node = {
 		setScale=function(self,scale)
 			self._ccnode:setScaleX(scale)
 			self._ccnode:setScaleY(scale)
+		end,
+		setVisible=function(self,b)
+			self._ccnode:setVisible(b)
 		end,
 		testScene = function(self)
 			local factory = require "factory"
@@ -343,7 +343,7 @@ local Scene = {
 			uikits.event(but,function(sender)
 				self:pop()
 			end)
-			self:addChild(but)
+			self:addChild(but,99)
 		end,
 		test = function(self)
 			self:addCloseButton()

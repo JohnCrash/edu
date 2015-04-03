@@ -73,7 +73,7 @@ return {
 						self:move(m)
 						mp = p
 					end
-				else
+				elseif self._fallBlock then
 					local cp = self._fallBlock:getPosition()
 					self:fall(math.floor((cp.y-p.y)/self._blockWidth)+1)
 				end
@@ -217,7 +217,10 @@ return {
 			end
 		end
 	end,
-	place=function(self,block)
+	isFalling=function(self)
+		if self._fallBlock then return true end
+	end,
+	add=function(self,block)
 		if not self._fallBlock then
 			self._fallBlock = block
 			
@@ -455,9 +458,9 @@ return {
 				colum=colum,raw=raw,blockWidth=blockWidth,
 			onEvent=function(msg)
 				if msg=="ready" then
-					local obj = seqer:fall()
+					local obj = seqer:get()
 					if obj then
-						self:place( obj )
+						self:add( obj )
 					else
 					end
 				else

@@ -57,7 +57,7 @@ def create_class(classid,superid,name,desc):
 				pass
 			elif superid in level2:
 				descFile.write('		"Root"\n')	
-			else
+			else:
 				descFile.write('		You need to manually fill\n')	
 		else:
 			#read super desc.json file
