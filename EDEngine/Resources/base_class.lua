@@ -1209,6 +1209,13 @@ local Item={
 							self._animation:setScaleX(action.scale)
 							self._animation:setScaleY(action.scale)
 							self._animation:setRotation(action.angle)
+							if self._ItemSize then
+								self._animation:setContentSize(self._ItemSize)
+							end
+							if self._ItemAnchorPt then
+								self._animation:setAnchorPoint(self._ItemAnchorPt)
+							end
+						
 							if action.animationName then
 								self._animation:play(action.animationName)
 							elseif action.animationIndex then
@@ -1232,6 +1239,12 @@ local Item={
 						self._sprite:setScaleX(action.scale)
 						self._sprite:setScaleY(action.scale)
 						self._sprite:setRotation(action.angle)					
+						if self._ItemSize then
+							self._sprite:setContentSize(self._ItemSize)
+						end
+						if self._ItemAnchorPt then
+							self._sprite:setAnchorPoint(self._ItemAnchorPt)
+						end
 						self._sprite:setVisible(true)
 						self._animation:setVisible(false)				
 					else
@@ -1267,6 +1280,7 @@ local Item={
 			end
 		end,
 		setSize=function(self,s)
+			self._ItemSize = s
 			if self._animation:isVisible() then
 				self._animation:setContentSize(s)
 			else
@@ -1276,6 +1290,7 @@ local Item={
 			end		
 		end,
 		setAnchor=function(self,p)
+			self._ItemAnchorPt = p
 			if self._animation:isVisible() then
 				self._animation:setAnchorPoint(p)
 			else

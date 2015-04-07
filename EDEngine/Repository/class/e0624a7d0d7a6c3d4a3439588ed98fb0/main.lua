@@ -17,6 +17,6 @@ return{
 		self:scheduler(function()self:doAction("3")end)
 		self:scheduler(function()self:doAction("2")end,0.5)
 		self:scheduler(function()self:doAction("1")end,1)
-		self:setScale(0.5)	
+		self:setScale(5)	
 	end,
 }

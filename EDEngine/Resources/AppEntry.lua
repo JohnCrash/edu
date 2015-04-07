@@ -239,8 +239,12 @@ function AppEntry:init()
 				factory.import({uuidClassSearcher},
 						function(b,err)
 							progressbox:close()
-							local searcher = factory.create(uuidClassSearcher)
-							searcher:push()
+							if b then
+								local searcher = factory.create(uuidClassSearcher)
+								searcher:push()
+							else
+									kits.log("")
+							end
 						end,
 						function(d,txt)
 							progressbox:setProgress(d)

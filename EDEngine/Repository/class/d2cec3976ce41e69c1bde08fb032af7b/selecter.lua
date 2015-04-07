@@ -9,6 +9,40 @@ local calcBox = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
 return {
 	ccCreate=function(self)
 		super.ccCreate(self)
+		self._enable = true
+		local function onTouchBegan(touches,event)
+			if self._enable and #touches==1 then
+				local col,raw
+				local p = self:ccNode():convertToNodeSpace(touches[1]:getLocation())
+				if p.y>=0 and p.x>=0 and p.x<=self._size.width and p.y<=self._size.height then
+					local raw = math.floor(p.y/self._blockWidth)+1
+					local col = math.floor(p.x/self._blockWidth)+1
+					local obj = self._blocks[col][raw]				
+					if self._onSelect and obj then
+						obj:ccNode():retain()
+						obj:ccNode():autorelease()
+						obj:removeFromParent()
+						self._onSelect( obj )
+					end
+				end
+			end
+		end
+		local function onTouchMoved(touches,event)
+		end
+		local function onTouchEnded(touches,event)
+		end
+		local listener = cc.EventListenerTouchAllAtOnce:create()
+		listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
+		listener:registerScriptHandler(onTouchMoved,cc.Handler.EVENT_TOUCHES_MOVED )	
+		listener:registerScriptHandler(onTouchEnded,cc.Handler.EVENT_TOUCHES_ENDED )	
+		local eventDispatcher=self:ccNode():getEventDispatcher()
+		eventDispatcher:addEventListenerWithSceneGraphPriority(listener,self:ccNode())
+	end,
+	enable=function(self,en)
+		self._enable = en
+	end,
+	onSelect=function(self,func)
+		self._onSelect = func
 	end,
 	reset=function(self,t)
 		self._idx = 0
@@ -20,7 +54,7 @@ return {
 		self._blocks = {}
 		for i=1,self._colum do
 			self._blocks[i] = {}
-		end
+		end		
 	end,
 	clear=function(self)
 		if not self._blocks then return end
@@ -42,7 +76,8 @@ return {
 				self._blocks[col][raw] = o
 				o:setSize(cc.size(self._blockWidth,self._blockWidth))
 				self:addChild(o)
-				o:setPosition(cc.p(col*self._blockWidth,raw*self._blockWidth))
+				o:setAnchor(cc.p(0,0))
+				o:setPosition(cc.p((col-1)*self._blockWidth,(raw-1)*self._blockWidth))
 			end
 		end
 	end,
@@ -89,7 +124,7 @@ return {
 				self:insert(14,1,o)				
 				o = factory.create(blockUUID)
 				o:doAction('=')
-				self:insert(15,1,o)					
+				self:insert(15,1,o)			
 				--创建一个计算盒
 				local box = factory.create(calcBox)
 				box:reset{colum=12,raw=7,
@@ -108,6 +143,9 @@ return {
 				box:setPosition(cc.p(ox,oy))
 				self:setPosition(cc.p(ox,oy+bs.height))
 				self:getScene():addChild(box)
+				self:onSelect(function(obj)
+					box:add(obj)
+				end)
 			end
 		end)
 	end,

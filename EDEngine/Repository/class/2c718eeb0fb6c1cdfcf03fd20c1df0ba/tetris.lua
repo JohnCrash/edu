@@ -142,9 +142,8 @@ return {
 		self._colum = t.colum or self._colum or 6
 		self._raw = t.raw or self._raw or 8
 		self._blockWidth = t.blockWidth or self._blockWidth or 128
-		self._OSpeed = t._OSpeed or self._OSpeed or 2000
+		self._OSpeed = t._OSpeed or self._OSpeed or 200
 		self._fallSpeed = self._OSpeed
-		self._eventFunc = t.onEvent or self._eventFunc
 		self._fallColum = self._fallColum or 1
 		if self._grid then
 			for i,v in pairs(self._grid) do
@@ -164,25 +163,21 @@ return {
 			self:removeScheduler(self._scID)
 		end
 		local function mainLoop(dt)
-			local function event(msg)
-				if self._eventFunc then
-					self._eventFunc(msg)
-				else
-				--	print("func = nil")
-				end
-			end
 			if self._pause then return true end
 			if not self._fallBlock then --下落已经结束
-			--	print("ready")
-				event('ready')
+				if self._onReady then
+					self._onReady()
+				end
 			else --下落过程中
 				local p = self._fallBlock:getPosition()
 				local topRaw = self:getColumTop(self._fallColum)
 				local fallHeight=topRaw*self._blockWidth				
 				local maxFall = p.y - fallHeight
 				if maxFall<0 then
-					event("game over")
 					print("game over")
+					if self._onGameOver then
+						self._onGameOver()
+					end
 					self:reset()
 					return false
 				end
@@ -200,6 +195,10 @@ return {
 					self._grid[self._fallColum][topRaw+1] = self._fallBlock
 					self._fallBlock = nil
 					self._fallSpeed = self._OSpeed
+					self:clacAndClearRaw()
+					if self._onFalldown then
+						self._onFalldown()
+					end
 				else
 					p.y = p.y - self._fallSpeed*dt
 					p.x = (self._fallColum-1)*self._blockWidth
@@ -209,6 +208,15 @@ return {
 			return true
 		end
 		self._scID = self:scheduler(mainLoop)
+	end,
+	onGameOver=function(self,func)
+		self._onGameOver = func
+	end,
+	onFalldown=function(self,func)
+		self._onFalldown = func
+	end,
+	onReady=function(self,func)
+		self._onReady = func
 	end,
 	getColumTop = function(self,n)
 		for i=self._raw,1,-1 do
@@ -278,8 +286,6 @@ return {
 			
 			self:addChild(self._fallBlock)
 			self._fallBlock:setPosition(cc.p((self._fallColum-1)*self._blockWidth,(self._raw-1)*self._blockWidth))
-			
-			self:clacAndClearRaw()
 		end
 	end,
 	printResult=function(self,result,value)
@@ -498,19 +504,18 @@ return {
 			local raw = 11
 			local blockWidth=96
 			seqer:reset{colum=colum,blockWidth=blockWidth}
-			self:reset{
-				colum=colum,raw=raw,blockWidth=blockWidth,
-			onEvent=function(msg)
-				if msg=="ready" then
+			self:reset{colum=colum,raw=raw,blockWidth=blockWidth}	
+			self:onGameOver(function()
+				print("Game Over")
+			end)
+			self:onFalldown(function()
+			end)
+			self:onReady(function()
 					local obj = seqer:get()
 					if obj then
 						self:add( obj )
-					else
-					end
-				else
-					print("msg="..tostring(msg))
-				end
-			end}	
+					end						
+			end)
 			--居中放置
 			local p = self:getPosition()
 			local ss = uikits.getDR()
