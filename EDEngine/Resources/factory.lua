@@ -101,8 +101,9 @@ local function addClass( classId,addClassResult,progress )
 	end
 	local function loadClass( b )
 		if not b then 
-			addClassResult(false)
-			return
+			--addClassResult(false)
+			kits.log("WARNING UpdateClass return false,try local version...")
+			--return
 		end
 		local cls = loadClassDescription( classId )
 		if not cls then

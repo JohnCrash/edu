@@ -33,10 +33,12 @@ return {
 			self:fall(3)
 		end
 		local function normal()
-			self._fallSpeed = 10
+			self._OSpeed = 10
+			self._fallSpeed = self._OSpeed
 		end
 		local function fast()
-			self._fallSpeed = self._fallSpeed+10
+			self._OSpeed = self._OSpeed+10
+			self._fallSpeed =self._OSpeed
 		end
 		local function auto()
 			if self._auto then
@@ -57,29 +59,57 @@ return {
 		self:reset{}
 		
 		local mp
+		local ah
 		local opFallBlock
+		local rate = 1
+		local stime = 
 		local function onTouchBegan(touches,event)
 			if #touches==1 then
 				opFallBlock = self._fallBlock
+				ah = 0
+				self._fallStartPt = nil
+				mp = touches[1]:getLocation()
 			end
 		end
 		local function onTouchMoved(touches,event)
 			if #touches==1 and self._fallBlock==opFallBlock then
-				local p = self:ccNode():convertToNodeSpace(touches[1]:getLocation())
-				local m = math.floor(p.x/self._blockWidth)+1-self._fallColum
-				mp = mp or p
+				local p = touches[1]:getLocation()
+				local sp = touches[1]:getStartLocation()
 				if math.abs(p.x-mp.x) >= math.abs(p.y-mp.y) then
-					if math.abs(m) > 0 then
+					ah = ah+p.x-mp.x
+					if math.abs(ah)>self._blockWidth*rate then
+						local m = math.floor(ah/(self._blockWidth*rate))
+						if m < 0 then
+							m = m+1
+						end
 						self:move(m)
-						mp = p
+						self._fallSpeed = self._OSpeed
+						ah = ah - m*(self._blockWidth*rate)
 					end
+					self._fallStartPt = nil
 				elseif self._fallBlock then
 					local cp = self._fallBlock:getPosition()
-					self:fall(math.floor((cp.y-p.y)/self._blockWidth)+1)
+					if not self._fallStartPt then
+						self._fallStartPt = cp
+					else
+						self._fallStopY = sp.y-p.y
+						if self._fallStartPt.y-cp.y<self._fallStopY then
+							self._fallSpeed = 1000
+						else
+							self._fallSpeed = self._OSpeed
+						end
+					end
+					ah = 0
 				end
+				mp = p
 			end		
 		end
 		local function onTouchEnded(touches,event)
+			self._fallSpeed = self._OSpeed
+			self._fallStartPt = nil
+			--直接落下
+			if self._fallBlock then
+			end
 		end
 		local listener = cc.EventListenerTouchAllAtOnce:create()
 		listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
@@ -105,7 +135,8 @@ return {
 		self._colum = t.colum or self._colum or 6
 		self._raw = t.raw or self._raw or 8
 		self._blockWidth = t.blockWidth or self._blockWidth or 128
-		self._fallSpeed = t.fallSpeed or self._fallSpeed or 2000
+		self._OSpeed = t._OSpeed or self._OSpeed or 2000
+		self._fallSpeed = self._OSpeed
 		self._eventFunc = t.onEvent or self._eventFunc
 		self._fallColum = self._fallColum or 1
 		if self._grid then
@@ -149,6 +180,11 @@ return {
 					return false
 				end
 				local fall
+				if self._fallStartPt and self._fallStopY then
+					if not (self._fallStartPt.y-p.y<self._fallStopY) then
+						self._fallSpeed = self._OSpeed
+					end
+				end
 				if self._fallSpeed*dt > maxFall then
 					p.y = p.y - maxFall
 					p.x = (self._fallColum-1)*self._blockWidth
@@ -156,6 +192,7 @@ return {
 					--放置好
 					self._grid[self._fallColum][topRaw+1] = self._fallBlock
 					self._fallBlock = nil
+					self._fallSpeed = self._OSpeed
 				else
 					p.y = p.y - self._fallSpeed*dt
 					p.x = (self._fallColum-1)*self._blockWidth
