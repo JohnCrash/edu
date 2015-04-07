@@ -88,6 +88,7 @@ return {
 						ah = ah - m*(self._blockWidth*rate)
 					end
 					self._fallStartPt = nil
+					self._fallSpeed = self._OSpeed
 				elseif self._fallBlock then
 					local cp = self._fallBlock:getPosition()
 					if not self._fallStartPt then
