@@ -62,7 +62,8 @@ return {
 		local ah
 		local opFallBlock
 		local rate = 1
-		local stime = 
+		local stime
+		local spt
 		local function onTouchBegan(touches,event)
 			if #touches==1 then
 				opFallBlock = self._fallBlock
@@ -91,6 +92,8 @@ return {
 					local cp = self._fallBlock:getPosition()
 					if not self._fallStartPt then
 						self._fallStartPt = cp
+						spt = p
+						stime = cc_clock()
 					else
 						self._fallStopY = sp.y-p.y
 						if self._fallStartPt.y-cp.y<self._fallStopY then
@@ -108,7 +111,10 @@ return {
 			self._fallSpeed = self._OSpeed
 			self._fallStartPt = nil
 			--直接落下
-			if self._fallBlock then
+			local p = touches[1]:getLocation()
+			local sp = touches[1]:getStartLocation()			
+			if self._fallBlock and stime and spt.y-p.y>64 and cc_clock()-stime<0.5 then
+				self:fall()
 			end
 		end
 		local listener = cc.EventListenerTouchAllAtOnce:create()
