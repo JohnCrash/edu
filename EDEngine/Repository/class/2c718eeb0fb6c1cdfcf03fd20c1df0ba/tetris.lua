@@ -88,6 +88,7 @@ return {
 						ah = ah - m*(self._blockWidth*rate)
 					end
 					self._fallStartPt = nil
+					spt = nil
 					self._fallSpeed = self._OSpeed
 				elseif self._fallBlock then
 					local cp = self._fallBlock:getPosition()
@@ -113,10 +114,11 @@ return {
 			self._fallStartPt = nil
 			--直接落下
 			local p = touches[1]:getLocation()
-			local sp = touches[1]:getStartLocation()			
-			if self._fallBlock and stime and spt.y-p.y>64 and cc_clock()-stime<0.5 then
+			local sp = touches[1]:getStartLocation()
+			if self._fallBlock and stime and spt and spt.y-p.y>64 and cc_clock()-stime<0.5 then
 				self:fall()
 			end
+			spt = nil
 		end
 		local listener = cc.EventListenerTouchAllAtOnce:create()
 		listener:registerScriptHandler(onTouchBegan,cc.Handler.EVENT_TOUCHES_BEGAN )
