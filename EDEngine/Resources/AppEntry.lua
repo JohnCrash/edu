@@ -141,6 +141,7 @@ function AppEntry:init()
 	eventClick=function(sender)
 		update.create{name='amouse',updates={'amouse','luacore'},
 			run=function()
+			login.set_selector(5)
 			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
 			local amouse = require "amouse/amouse_om"
 			return AMouseMain()

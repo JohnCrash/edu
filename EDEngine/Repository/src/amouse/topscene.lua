@@ -70,7 +70,7 @@ function TopScene:init()
 		end
 		if t and type(t)=='table' and t.area_prop then
 			self._prop = t.area_prop
-			if self._prop and self._prop.county_id == 0 then --110108 then
+			if self._prop and self._prop.county_id == 130402 then --邯山区
 				self:CountyTop()
 				return
 			end
@@ -92,6 +92,9 @@ function TopScene:rankByUrl( url )
 			circle:removeFromParent()
 		end
 		self:clearAll()
+		for i,v in pairs(tops) do
+			print( tostring(i).."->>"..tostring(v))
+		end
 		if tops and tops.users and type(tops.users)=='table' then
 			for k,v in pairs(tops.users) do
 				--kits.log( "table:"..k )
@@ -134,8 +137,36 @@ function TopScene:CountyTop()
 	self._week:setVisible(false)
 	self._history:setVisible(false)
 	self._caption:setVisible(true)
-	self._caption:setString(" ->"..self._prop.grade_year)
-	local url
+	local i = self._prop.grade
+	if i and i>=1 and i<=12 then
+		local class={
+			[1] = "一",
+			[2] = "二",
+			[3] = "三",
+			[4] = "四",
+			[5] = "五",
+			
+			[6] = "六",
+			[7] = "一",
+			[8] = "二",
+			[9] = "三",
+			[10] = "一",
+			[11] = "二",
+			[12] = "三",			
+		}
+		if i>=1 and i<=6 then
+			self._caption:setString(class[i]..'年级组')
+		elseif i>=7 and i<=9 then
+			self._caption:setString('初'..class[i]..'年级组')
+		else
+			self._caption:setString('高'..class[i]..'年级组')
+		end
+	else
+		self._caption:setString('未知年级组'..tostring(i))
+	end
+	self._title:loadTexture('amouse/jie_mian_5/hsqcyds.png')
+	local url = 'http://app.lejiaolexue.com/ourgame/api/rank/area_top.ashx?province_id=0&city_id=0&school_id=0&app_id=1004&county_id='
+	url = url..tostring(self._prop.county_id)..'&grade='..tostring(i)
 	self:rankByUrl(url)
 end
 

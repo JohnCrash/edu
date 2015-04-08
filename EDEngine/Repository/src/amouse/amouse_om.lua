@@ -589,6 +589,11 @@ function AMouseScene:game_start_Dialog()
 	kits.log("game start dialog")
 	self:close_Dialog()
 	if self._uiLayer then return end
+
+	if self._schedulerEntry then
+		self._scheduler:unscheduleScriptEntry(self._schedulerEntry)
+		self._schedulerEntry = nil
+	end
 	
 	self._hummer:setVisible(false)
 	self._uiLayer = cc.Layer:create()
