@@ -40,6 +40,22 @@ function TopScene.create(zoneid)
 	return scene
 end
 
+function TopScene:disableUI()
+	self._week:setVisible(false)
+	self._history:setVisible(false)
+	self._caption:setVisible(false)
+	self._scrollview:setVisible(false)
+	self._title:setVisible(false)
+end
+
+function TopScene:enableUI()
+	self._week:setVisible(true)
+	self._history:setVisible(true)
+	--self._caption:setVisible(true)
+	self._scrollview:setVisible(true)
+	self._title:setVisible(true)
+end
+
 function TopScene:init()
 	uikits.initDR{width=2048,height=1536,mode=cc.ResolutionPolicy.NO_BORDER}
 	self._root = uikits.fromJson{file=ui.FILE}
@@ -56,6 +72,7 @@ function TopScene:init()
 	self._caption = uikits.child(self._root,ui.CAPTION)
 	self._title = uikits.child(self._root,ui.TITLE)
 	self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
+	self:disableUI()
 	uikits.event(self._week,function(sender)
 		self:WeekTop()
 	end)
@@ -68,6 +85,7 @@ function TopScene:init()
 		if circle and cc_isobj(circle) then
 			circle:removeFromParent()
 		end
+		self:enableUI()
 		if t and type(t)=='table' and t.area_prop then
 			self._prop = t.area_prop
 			if self._prop and self._prop.county_id == 130402 then --邯山区
