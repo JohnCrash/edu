@@ -1,0 +1,11 @@
+{
+	"classid":"cdbcb413e5740736d2a5993a2660f84f",
+	"superid":"Game",
+	"name":"NumberTetris",
+	"comment":"数字方块",
+	"pedigree":[
+		"Root"
+	],
+	"version":1,
+	"script":"game"
+}

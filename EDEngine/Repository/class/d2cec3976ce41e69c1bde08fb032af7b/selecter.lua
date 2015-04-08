@@ -17,12 +17,13 @@ return {
 				if p.y>=0 and p.x>=0 and p.x<=self._size.width and p.y<=self._size.height then
 					local raw = math.floor(p.y/self._blockWidth)+1
 					local col = math.floor(p.x/self._blockWidth)+1
-					local obj = self._blocks[col][raw]				
+					local obj = self._blocks[col][raw]		
+					self._blocks[col][raw] = nil					
 					if self._onSelect and obj then
 						obj:ccNode():retain()
 						obj:ccNode():autorelease()
 						obj:removeFromParent()
-						self._onSelect( obj )
+						self._onSelect( obj,col,raw )
 					end
 				end
 			end
@@ -97,54 +98,67 @@ return {
 	getSize=function(self)
 		return self._size
 	end,	
-	fall=function(self)
+	get=function(self)
 	end,
 	test=function(self)
 		super.test(self)
 		factory.import({blockUUID,calcBox},function(b)
 			if b then
 				--初始化一个数字盘
-				self:reset{colum=15,raw=1}
-				for i = 1,10 do
+				self:reset{colum=5,raw=2}
+				math.randomseed(os.time())
+				for i = 1,5 do
 					local o = factory.create(blockUUID)
-					o:doAction(tostring(i-1))
+					o:doAction(tostring(math.random(0,9)))
 					self:insert(i,1,o)
 				end
 				local o = factory.create(blockUUID)
 				o:doAction('+')
-				self:insert(11,1,o)
+				self:insert(1,2,o)
 				o = factory.create(blockUUID)
 				o:doAction('-')
-				self:insert(12,1,o)
+				self:insert(2,2,o)
 				o = factory.create(blockUUID)
 				o:doAction('*')
-				self:insert(13,1,o)
+				self:insert(3,2,o)
 				o = factory.create(blockUUID)
 				o:doAction('/')
-				self:insert(14,1,o)				
+				self:insert(4,2,o)
 				o = factory.create(blockUUID)
 				o:doAction('=')
-				self:insert(15,1,o)			
+				self:insert(5,2,o)		
+				--在做一个选择盘
 				--创建一个计算盒
 				local box = factory.create(calcBox)
-				box:reset{colum=12,raw=7,
-					onEvent=function(msg)
-						if msg=='ready' then
-						else
-							print("msg="..tostring(msg))
-						end
-					end
-				}
+				box:reset{colum=15,raw=7}
 				local ss = uikits.getDR()
 				local bs = box:getSize()
 				local s = self:getSize()
-				local ox = (ss.width-math.max(bs.width,s.width))/2
+				local ox = (ss.width-bs.width)/2
 				local oy = (ss.height-bs.height-s.height)/2
 				box:setPosition(cc.p(ox,oy))
+				ox = (ss.width-s.width)/2
 				self:setPosition(cc.p(ox,oy+bs.height))
 				self:getScene():addChild(box)
-				self:onSelect(function(obj)
+				box:setFallSpeed(50)
+				self:onSelect(function(obj,col,raw)
 					box:add(obj)
+					self:enable(false)
+					if raw == 1 then
+						local o = factory.create(blockUUID)
+						o:doAction(tostring(math.random(0,9)))
+						self:insert(col,1,o)					
+					elseif raw==2 then
+						local o = factory.create(blockUUID)
+						local op = {
+							[1] = '+',[2]='-',[3]='*',[4]='/',[5]='='
+						}
+						o:doAction(op[col])
+						self:insert(col,2,o)										
+					end
+				end)
+				box:onFalldown(function()
+					self:enable(true)
 				end)
 			end
 		end)

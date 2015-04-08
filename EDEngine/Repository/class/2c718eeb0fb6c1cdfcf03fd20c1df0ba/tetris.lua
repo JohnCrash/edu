@@ -134,6 +134,13 @@ return {
 	pause = function(self)
 		self._pause=true
 	end,
+	setFallSpeed=function(self,speed)
+		self._OSpeed = speed
+		self._fallSpeed = speed
+	end,
+	getFallSpeed=function(self)
+		return self._fallSpeed
+	end,	
 	resume=function(self)
 		self._pause=false
 	end,
