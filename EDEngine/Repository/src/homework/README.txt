@@ -1256,3 +1256,6 @@ total_pages 总页数
         ]
     }
 }
+
+取得区域ID的接口
+http://api.lejiaolexue.com/rest/userinfo/query_user_area_prop.ashx?uid=149527

@@ -1302,6 +1302,10 @@ local function scroll(root,scrollID,itemID,horiz,space,itemID2,item_min_height)
 			local height = self._tops_space or space
 			if not self._item2 then
 				height = cs.height-self._item_oy-self._item_height --self._item_height*(#self._list)
+				print("HEIGHT="..height)
+				print("cs.height="..cs.height)
+				print("cs._item_oy="..self._item_oy)
+				print("cs._item_height="..self._item_height)
 			end
 			for i=1,#self._list do
 				if not self._list[i]._isHidden then

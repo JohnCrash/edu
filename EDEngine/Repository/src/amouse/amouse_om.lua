@@ -1,12 +1,13 @@
 require "AudioEngine" 
-lxp = require "lom"
-kits = require "kits"
-json = require "json-c"
-curl = require 'curl'
-uikits = require "uikits"
-login = require "login"
-cache = require "cache"
-loadingbox = require "loadingbox"
+local lxp = require "lom"
+local kits = require "kits"
+local json = require "json-c"
+local curl = require 'curl'
+local uikits = require "uikits"
+local login = require "login"
+local cache = require "cache"
+local loadingbox = require "loadingbox"
+local topscene = require "amouse/topscene"
 
 local AMouseScene = class("AMouseScene")
 AMouseScene.__index = AMouseScene
@@ -319,8 +320,8 @@ function AMouseScene:game_setting_Dialog( where )
 		
 	local function return_up( sender,eventType )
 		if eventType == ccui.TouchEventType.ended then
-			self:close_Dialog()
 			self:save_player_data()
+			self:close_Dialog()
 			where( self )
 			self:play_sound( SND_UI_CLICK )
 		end
@@ -451,6 +452,11 @@ function AMouseScene:clean_top_list()
 end
 
 function AMouseScene:game_top10_Dialog( where )
+	if topscene then
+		uikits.pushScene(topscene.create(self._zoneid))
+		return
+	end
+	--下面是老的排行榜代码暂时保留
 	--if self._uiLayer then return end
 	kits.log("game top10 dialog")
 	self:close_Dialog()
@@ -1425,6 +1431,11 @@ end
 
 function AMouseScene:init()
 	--游戏基本变量初始化
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+	else
+		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+	end		
 	if not self._ss then
 		if not self._zoneid then
 			self:get_zone_id()
@@ -1442,11 +1453,6 @@ function AMouseScene:init()
 			self._screen = 1
 			kits.log("4/3" )
 		end
-		if uikits.get_factor() == uikits.FACTOR_9_16 then
-			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-		else
-			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-		end	
 		--self._scheduler = cc.Director:getInstance():getScheduler()
 		self._scheduler = self:getScheduler()
 		--初始化玩家数据
