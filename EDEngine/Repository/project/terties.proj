@@ -61,8 +61,10 @@
         </Folder>
         <Folder name="&#x8865;&#x5168;&#x7B49;&#x5F0F;">
             <File name="G:\source\Edu\EDEngine\Repository\class\0e7a453cd52d5e154e8dbd5687c1e0b0\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e7a453cd52d5e154e8dbd5687c1e0b0\claccompletion.lua" />
         </Folder>
-        <Folder name="&#x8BA1;&#x7B97;">
+        <Folder name="&#x8BA1;&#x7B97;&#x7B49;&#x5F0F;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\24bc31ce59a306651f5fb434dae904bc\claceq.lua" />
             <File name="G:\source\Edu\EDEngine\Repository\class\24bc31ce59a306651f5fb434dae904bc\desc.json" />
         </Folder>
     </Project>
