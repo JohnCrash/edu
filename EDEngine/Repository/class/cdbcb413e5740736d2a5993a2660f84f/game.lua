@@ -9,4 +9,6 @@ local calcBox = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
 return {
 	main=function(self)
 	end,
+	test=function(self)
+	end,
 }
