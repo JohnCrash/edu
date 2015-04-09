@@ -1,0 +1,10 @@
+{
+	"classid":"24bc31ce59a306651f5fb434dae904bc",
+	"superid":"Scene",
+	"name":"计算",
+	"comment":"给出算式要求计算结果",
+	"pedigree":[
+		"Root"
+	],
+	"version":1
+}

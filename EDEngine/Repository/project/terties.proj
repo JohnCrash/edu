@@ -32,15 +32,6 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\tetris.lua" />
             <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\version.json" />
         </Folder>
-        <Folder name="NumberSequence">
-            <Folder name="res">
-                <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\res\eq.png" />
-            </Folder>
-            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\desc.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\filelist.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\sequencer.lua" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\version.json" />
-        </Folder>
         <Folder name="NumberBox">
             <Folder name="res">
                 <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\res\add.png" />
@@ -50,10 +41,35 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\tetris.lua" />
             <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\version.json" />
         </Folder>
+        <Folder name="NumberSequence">
+            <Folder name="res">
+                <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\res\eq.png" />
+            </Folder>
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\filelist.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\sequencer.lua" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\version.json" />
+        </Folder>
     </Project>
     <Project name="&#x573A;&#x666F;">
-        <Folder name="21&#x70B9;" />
-        <Folder name="&#x8865;&#x5168;&#x7B49;&#x5F0F;" />
+        <Folder name="24&#x70B9;">
+            <Folder name="res">
+                <File name="G:\source\Edu\EDEngine\Repository\class\ae21c0fc8dd08f18e39afe2446f234e0\res\aide.png" />
+            </Folder>
+            <File name="G:\source\Edu\EDEngine\Repository\class\ae21c0fc8dd08f18e39afe2446f234e0\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\ae21c0fc8dd08f18e39afe2446f234e0\main.lua" />
+        </Folder>
+        <Folder name="&#x8865;&#x5168;&#x7B49;&#x5F0F;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\0e7a453cd52d5e154e8dbd5687c1e0b0\desc.json" />
+        </Folder>
+        <Folder name="&#x8BA1;&#x7B97;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\24bc31ce59a306651f5fb434dae904bc\desc.json" />
+        </Folder>
     </Project>
-    <Project name="&#x6E38;&#x620F;" />
+    <Project name="&#x6E38;&#x620F;">
+        <Folder name="&#x6570;&#x5B57;&#x6E38;&#x620F;1">
+            <File name="G:\source\Edu\EDEngine\Repository\class\cdbcb413e5740736d2a5993a2660f84f\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\cdbcb413e5740736d2a5993a2660f84f\game.lua" />
+        </Folder>
+    </Project>
 </NotepadPlus>

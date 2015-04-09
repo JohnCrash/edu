@@ -1,8 +1,8 @@
 {
 	"classid":"ae21c0fc8dd08f18e39afe2446f234e0",
 	"superid":"Scene",
-	"name":"XXScene",
-	"comment":"sdfsdf",
+	"name":"24点",
+	"comment":"24点，通过加减乘除最后得数等于24",
 	"icon":"res/aide.png",
 	"pedigree":[
 		"Root"
