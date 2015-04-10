@@ -1,9 +1,10 @@
 {
 	"classid":"24bc31ce59a306651f5fb434dae904bc",
-	"superid":"Scene",
+	"superid":"7733168941a18d7d19f60e1d601385d0",
 	"name":"计算",
 	"comment":"给出算式要求计算结果",
 	"pedigree":[
+		"Scene",
 		"Root"
 	],
 	"version":1,

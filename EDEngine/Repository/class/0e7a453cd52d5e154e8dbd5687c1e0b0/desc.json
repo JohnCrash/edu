@@ -1,9 +1,10 @@
 {
 	"classid":"0e7a453cd52d5e154e8dbd5687c1e0b0",
-	"superid":"Scene",
+	"superid":"7733168941a18d7d19f60e1d601385d0",
 	"name":"等式补全",
 	"comment":"给出一个不全的等式，要求不全等式",
 	"pedigree":[
+		"Scene",
 		"Root"
 	],
 	"version":1,

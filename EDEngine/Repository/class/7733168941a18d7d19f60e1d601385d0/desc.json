@@ -1,0 +1,11 @@
+{
+	"classid":"7733168941a18d7d19f60e1d601385d0",
+	"superid":"Scene",
+	"name":"LevelScene",
+	"comment":"关卡场景，场景包括自定义数据",
+	"pedigree":[
+		"Root"
+	],
+	"version":1,
+	"script":"levelscene",
+}

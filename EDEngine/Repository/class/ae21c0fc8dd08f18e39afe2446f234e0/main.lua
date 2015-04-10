@@ -13,14 +13,15 @@ local calcUUID = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
 return {
 	init=function(self)
 		factory.importByProgressBox({calcUUID,selecterUUID,blockUUID},
-		function(b)
+		function(b,msg)
 			if b then
 				self._calcbox = factory.create(blockUUID)
 				self._selecter = factory.create(selecterUUID)
 				self:initGame()
 			else
 				local box = factory.create(base.MessageBox)
-				box:open{caption='程序加载失败',text="确定退出",button=1,
+				box:open{caption='加载失败',text={
+				"确定退出",tostring(msg)},button=1,
 				onClick=function(idx)
 					self:pop()
 				end}
