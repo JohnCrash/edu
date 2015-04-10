@@ -1,0 +1,12 @@
+{
+	"classid":"92fb6e0c6a45a760646d2fb3970271cc",
+	"superid":"Item",
+	"name":"CalcBox",
+	"comment":"按顺序输入计算式，给出计算结果",
+	"pedigree":[
+		"Node",
+		"Root"
+	],
+	"version":1,
+	"script","calcbox"
+}

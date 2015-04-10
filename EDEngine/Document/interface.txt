@@ -22,7 +22,7 @@ Root (7c3064bb858e619b9f02fef85432f162)
 Node () 父类:Root
 	attach( ccnode ) 给对象附上一个cocos2d-x的节点
 	ccCreate() 
-		Node的子类必须实现此方法，并且必须调用attachNode为对象附上一个cocos2d-x节点
+		Node的子类必须实现此方法，并且必须调用attach为对象附上一个cocos2d-x节点
 	init() 派生类可以定义自己的登场函数
 	release()	 派生类定义自己的退场函数
 	addChild(child) 加入一个子节点，可以是Layer对象，也可以是cocos2d-x的节点。
@@ -32,26 +32,41 @@ Node () 父类:Root
 	childs() 返回所有的子节点
 	removeChild(child) 删除子节点数据(内部函数)
 	removeFromParent(isdelay) 删除节点，isdelay=true延时删除
-	setPosition(p)
-	getPosition()
-	setAnchor(p)
-	getAnchor()
-	setSize(size)
-	getSize()
-	setScale(scale)
-	getScale()
-	setVisible(b)
+	setPosition(p) 设置位置点
+	getPosition() 取得位置
+	setAnchor(p) 设置锚点
+	getAnchor() 取得锚点
+	setSize(size) 设置节点尺寸
+	getSize() 取节点尺寸
+	setScale(scale) 设置缩放比例
+	getScale() 取缩放比例
+	setVisible(b) 设置可见度
+	getVisible() 取可见度
+	enable(b) 打开关闭触摸或鼠标输入
+	isEnable() 判断当前是否被关闭输入
 	scheduler(func,delta) 创建一个周期调度,delta周期时间.成功返回一个scheduler id
 	removeScheduler(id) 删除周期调用,如果对象退场将自动清除全部调度
+		例子1:obj:scheduler(function(t) return true end,0.2) --函数返回true表示继续重复调用
+		例子2:obj:scheduler(function(t) return end)  --这相当与延时函数
 	
 Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Root
 	Scene的子类通过ccCreate来构造
+	attach(ccobj) 附属一个cocos2d-x场景对象
+	ccCreate() 创建cocos2d-x场景对象，在其中调用attach将cocos2d-x和本对象绑定
 	ccScene() 返回cocos2d-x的场景对象。
 	push() 将场景压入场景堆栈。展示该场景。
 	pop() 将场景弹出。
 	replace() 替换场景堆栈的栈顶。展示该场景。
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
+	childs() 返回场景中的全部子节点
+	addChild(child,z) 加入一个子节点
+	initDesignView(w,h,s) 设置设计视图的宽高和模式
+	scheduler(func,delta) 创建一个周期调度,delta周期时间.成功返回一个scheduler id
+	removeScheduler(id) 删除周期调用,如果对象退场将自动清除全部调度
+		例子1:obj:scheduler(function(t) return true end,0.2) --函数返回true表示继续重复调用
+		例子2:obj:scheduler(function(t) return end)  --这相当与延时函数
+		
 	
 Layer (685316259b01edf58a85d6705a4541ad)父类:Node
 	addChild(child) 加入一个子节点，可以是Widget对象，也可以是cocos2d-x的节点。

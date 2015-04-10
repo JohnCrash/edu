@@ -57,8 +57,11 @@ return {
 		self:addChild(self._selecter)
 	end,
 	release=function(self)
-		print("release")
 	end,
+	loadLevel=function(self,json)
+	end,
+	buildLevel=function(self,notify)
+	end,	
 	test=function(self)
 		print("24点")
 		super.test(self)

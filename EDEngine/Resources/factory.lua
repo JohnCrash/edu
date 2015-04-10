@@ -420,6 +420,16 @@ local function importByLoadingScene( classIds,notify)
 	end)
 end
 
+local function checkType( obj,id )
+	if obj and obj:isInstenceOf(id) then
+		return true
+	elseif obj then
+		local box = factory.create(base.MessageBox)
+		box:open{caption="类型检查错误",
+		text={"要求一个"..tostring(id).."类型的对象","得到一个"..tostring(obj._cls.classid).."类型的对象"}}
+	end
+end
+
 return {
 	generateId = generateId,
 	getClassDescription = getClassDescription,
@@ -430,6 +440,7 @@ return {
 	import = import,
 	importByProgressBox = importByProgressBox,
 	importByLoadingScene = importByLoadingScene,
+	checkType = checkType,
 	isExist = isExist,
 	launch = launch,
 	updateClass = updateClass,

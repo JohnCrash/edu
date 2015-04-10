@@ -45,6 +45,10 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\sequencer.lua" />
             <File name="G:\source\Edu\EDEngine\Repository\class\0e553fc4b6bca473e08a4186fd01d82a\version.json" />
         </Folder>
+        <Folder name="CalcBox">
+            <File name="G:\source\Edu\EDEngine\Repository\class\92fb6e0c6a45a760646d2fb3970271cc\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\92fb6e0c6a45a760646d2fb3970271cc\calcbox.lua" />
+        </Folder>
     </Project>
     <Project name="&#x573A;&#x666F;">
         <Folder name="24&#x70B9;">
@@ -327,5 +331,18 @@
         <File name="G:\source\Edu\EDEngine\Document\&#x63A5;&#x53E3;(2).doc" />
         <File name="G:\source\Edu\EDEngine\Document\&#x63A5;&#x53E3;&#x534F;&#x8BAE; 1.docx" />
         <File name="G:\source\Edu\EDEngine\Document\&#x6559;&#x5B66;&#x6E38;&#x620F;&#x4E0E;&#x670D;&#x52A1;&#x7AEF;&#x901A;&#x4FE1;&#x534F;&#x8BAE; 2.docx" />
+    </Project>
+    <Project name="&#x5BF9;&#x8C61;&#x6D4F;&#x89C8;&#x5668;">
+        <Folder name="res">
+            <Folder name="GUI">
+                <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\GUI\image.png" />
+            </Folder>
+            <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\searcher_icon.png" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\res\splash_6.json" />
+        </Folder>
+        <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\desc.json" />
+        <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\filelist.json" />
+        <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\searcher.lua" />
+        <File name="G:\source\Edu\EDEngine\Repository\class\621d7bfe3db93cbdcdb4c1f47a79f336\version.json" />
     </Project>
 </NotepadPlus>

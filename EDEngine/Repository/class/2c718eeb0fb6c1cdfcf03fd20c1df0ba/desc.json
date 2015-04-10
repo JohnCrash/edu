@@ -3,7 +3,7 @@
 	"superid":"Item",
 	"icon":"res/add.png",
 	"name":"NumberBox",
-	"comment":"数字方块容器",
+	"comment":"数字方块容器,当横向组成等式将消除",
 	"pedigree":[
 		"Node",
 		"Root"

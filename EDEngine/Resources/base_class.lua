@@ -421,6 +421,7 @@ local splashScene = {
 	version = 1,
 	class = {
 		ccCreate = function(self)
+			super.ccCreate(self)
 			self._splash = uikits.fromJson{file=self:getR(ui.SPLASH_FILE)}
 			self:addChild(self._splash)
 			self._text = uikits.child(self._splash,ui.SPLASH_TEXT)
@@ -474,6 +475,7 @@ local loadingScene = {
 	version = 1,
 	class = {
 		ccCreate = function(self)
+			super.ccCreate(self)
 			self._loading = uikits.fromJson{file=self:getR(ui.LOADING_FILE)}
 			self:addChild(self._loading)
 			self._text = uikits.child(self._loading,ui.LOADING_TEXT)
