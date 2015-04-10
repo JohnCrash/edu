@@ -6,5 +6,6 @@ return {
 	end,
 	test=function(self)
 		print("补全")
+		super.test(self)
 	end,
 }

@@ -3,6 +3,7 @@ local json = require "json-c"
 local kits = require "kits"
 local uikits = require "uikits"
 local update = require "update_factory"
+local base = require "base"
 local base_class = require "base_class"
 
 local s_gidcount = os.time()
@@ -391,6 +392,34 @@ local function launch(classId)
 	update.CheckClassVersion( classId,checkResult )
 end
 
+local function importByProgressBox( classIds,notify )
+	local box = create( base.ProgressBox )
+	box:open{}
+	import( classIds,
+	function(b)
+		box:close()
+		notify(b)
+	end,
+	function(d,txt)
+		box:setProgress(d)
+		box:setText(txt)
+	end)
+end
+
+local function importByLoadingScene( classIds,notify)
+	local loading = create( base.LoadingScene )
+	loading:push{}
+	import( classIds,
+	function(b)
+		loading:pop()
+		notify(b)
+	end,
+	function(d,txt)
+		loading:setProgress(d)
+		loading:setText(txt)
+	end)
+end
+
 return {
 	generateId = generateId,
 	getClassDescription = getClassDescription,
@@ -399,6 +428,8 @@ return {
 	createAsyn = createAsyn,
 	create = create,
 	import = import,
+	importByProgressBox = importByProgressBox,
+	importByLoadingScene = importByLoadingScene,
 	isExist = isExist,
 	launch = launch,
 	updateClass = updateClass,

@@ -7,5 +7,5 @@
 		"Root"
 	],
 	"version":1,
-	"script":"claccomplate",
+	"script":"claccompletion",
 }

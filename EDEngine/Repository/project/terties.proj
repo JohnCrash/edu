@@ -24,13 +24,8 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\e0624a7d0d7a6c3d4a3439588ed98fb0\desc.json" />
         </Folder>
         <Folder name="NumberSelecter">
-            <Folder name="res">
-                <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\res\add.png" />
-            </Folder>
-            <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\desc.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\filelist.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\tetris.lua" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\2c718eeb0fb6c1cdfcf03fd20c1df0ba\version.json" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\class\d2cec3976ce41e69c1bde08fb032af7b\desc.json" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\class\d2cec3976ce41e69c1bde08fb032af7b\selecter.lua" />
         </Folder>
         <Folder name="NumberBox">
             <Folder name="res">
@@ -73,5 +68,260 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\cdbcb413e5740736d2a5993a2660f84f\desc.json" />
             <File name="G:\source\Edu\EDEngine\Repository\class\cdbcb413e5740736d2a5993a2660f84f\game.lua" />
         </Folder>
+    </Project>
+    <Project name="luacore">
+        <Folder name="res">
+            <Folder name="audio">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\audio\click.mp3" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\audio\error.mp3" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\audio\right.mp3" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\audio\scroll.mp3" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\audio\select.mp3" />
+            </Folder>
+            <Folder name="cocosui">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\button.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\buttonHighlighted.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_active.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_active_disable.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_active_press.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_normal.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_normal_disable.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\check_box_normal_press.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\loadingbar.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\slidbar.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderballnormal.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderballpressed.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderProgress.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderProgress2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderThumb.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderTrack.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\cocosui\sliderTrack2.png" />
+            </Folder>
+            <Folder name="fonts">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\fonts\font-issue1343.fnt" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\fonts\font-issue1343.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\fonts\Marker Felt.ttf" />
+            </Folder>
+            <Folder name="hd">
+                <Folder name="Images">
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\hd\Images\close.png" />
+                </Folder>
+            </Folder>
+            <Folder name="icon">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\icon\loading_scene.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\icon\message_box.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\icon\root.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\icon\splash_scene.png" />
+            </Folder>
+            <Folder name="Images">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\arrow.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\close.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\snow.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\stars-grayscale.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\stars.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\stars2-grayscale.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\stars2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Images\streak.png" />
+            </Folder>
+            <Folder name="load">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\again1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\again2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\ladingbox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\load.ExportJson" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\load0.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\load0.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\loading0.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\network.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\networkbox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\off1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\off2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\out1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\out2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\red_in.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\repair.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\load\repairbox.json" />
+            </Folder>
+            <Folder name="loading">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loading\sliderProgress.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loading\sliderThumb.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loading\sliderTrack.png" />
+            </Folder>
+            <Folder name="loadscreen">
+                <Folder name="GUI">
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\GUI\button.png" />
+                </Folder>
+                <Folder name="jiazhan43">
+                    <Folder name="GUI">
+                        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\GUI\button.png" />
+                    </Folder>
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\bo1.png" />
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\bo2.png" />
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\cong.png" />
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\jiazhan43.json" />
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\tea.png" />
+                    <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan43\tui.png" />
+                </Folder>
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\bo1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\bo2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\cong.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\jiazhan.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\tea.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\loadscreen\tui.png" />
+            </Folder>
+            <Folder name="luyinui">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\a1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\kuang.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\lu.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\luyinui_1.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\su.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\w1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\w2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\luyinui\w3.png" />
+            </Folder>
+            <Folder name="messagebox">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\again1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\again2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\loading0.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\loading08.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\network.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\networkbox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\off1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\off2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\out1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\out2.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\qr4.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\red_in.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\repair.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\repairbox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\messagebox\tanchu.json" />
+            </Folder>
+            <Folder name="Particles">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\BoilingFoam.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\BurstPipe.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Comet.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\debian.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\ExplodingRing.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\ExplodingRing.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Flower.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Galaxy.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\LavaFlow.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\lightDot.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\lightDot.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\lines.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Phoenix.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\SmallSun.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\SpinningPeas.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Spiral.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\SpookyPeas.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\TestPremultipliedAlpha.plist" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\Particles\Upsidedown.plist" />
+            </Folder>
+            <Folder name="splash">
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\009.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\1.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\44cocor.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\baidu_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\bg.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\button_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\dialog_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\ditu.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\game_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\grid.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\item_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\laoding_1.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\layer_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\layout_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\loadingscene_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\messagebox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\messagebox_0.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\messagebox_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\newb.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\node_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\progressbar.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\progressbg.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\progressbox.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\progressbox_icon.jpg" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\refresh.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\root_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\scene_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\splash_1.json" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\splash_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\sprite_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\text_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\widget_icon.png" />
+                <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\res\splash\xin.png" />
+            </Folder>
+        </Folder>
+        <Folder name="socket">
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\ftp.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\headers.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\http.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\mbox.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\smtp.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\tp.lua" />
+            <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket\url.lua" />
+        </Folder>
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\amouse_stage.json" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\AppEntry.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\AudioEngine.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\base.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\base_class.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\bitExtend.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\bootstrap.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\cache.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\CCBReaderLoad.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\Cocos2d.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\Cocos2dConstants.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\CocoStudio.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\config.json" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\console.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\crash.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\debuger.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\Deprecated.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\DeprecatedClass.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\DeprecatedEnum.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\DeprecatedOpenglEnum.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\DrawPrimitives.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\experimentalConstants.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\extern.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\factory.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\GuiConstants.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\json.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\kits.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\launcher.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\ljshellDeprecated.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\loadingbox.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\login.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\lom.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\ltn12.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\luaj.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\luaoc.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\md5.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\messagebox.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\mime.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\mobdebug.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\Opengl.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\OpenglConstants.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\recordvoice.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\resume.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\socket.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\StudioConstants.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\test.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\uikits.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\update.lua" />
+        <File name="G:\source\Edu\EDEngine\proj.win32\Debug.win32\luacore\update_factory.lua" />
+    </Project>
+    <Project name="Document">
+        <File name="G:\source\Edu\EDEngine\Document\gamekit.docx" />
+        <File name="G:\source\Edu\EDEngine\Document\interface.txt" />
+        <File name="G:\source\Edu\EDEngine\Document\issue.txt" />
+        <File name="G:\source\Edu\EDEngine\Document\~$amekit.docx" />
+        <File name="G:\source\Edu\EDEngine\Document\~WRL2603.tmp" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x4F5C;&#x4E1A;&#x6D4B;&#x8BD5;.docx" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x5176;&#x4ED6;&#x5E94;&#x7528;&#x4E0E;&#x5927;&#x5385;&#x95F4;&#x5BF9;&#x63A5;&#x8BF4;&#x660E;.doc" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x5362;&#x6CD0;&#x5CA9;lua&#x9879;&#x76EE;&#x4EA4;&#x63A5;.xls" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x63A5;&#x53E3;(2).doc" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x63A5;&#x53E3;&#x534F;&#x8BAE; 1.docx" />
+        <File name="G:\source\Edu\EDEngine\Document\&#x6559;&#x5B66;&#x6E38;&#x620F;&#x4E0E;&#x670D;&#x52A1;&#x7AEF;&#x901A;&#x4FE1;&#x534F;&#x8BAE; 2.docx" />
     </Project>
 </NotepadPlus>

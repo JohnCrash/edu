@@ -6,5 +6,6 @@ return {
 	end,
 	test=function(self)
 		print("计算等式")
+		super.test(self)
 	end,	
 }
