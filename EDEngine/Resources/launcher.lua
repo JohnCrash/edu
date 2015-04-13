@@ -201,8 +201,31 @@ elseif app and string.len(app)>0 then
 				if apps and apps[app] and apps[app].name and apps[app].updates and apps[app].launch then
 					update.create{name=apps[app].name,updates=apps[app].updates,res_level=apps.res_level,
 						run=function()
-							local a = require(apps[app].launch)
-							return a.create()
+							local debug_mode = apps[app].debug
+							function doScript()
+								local a = require(apps[app].launch)
+								return a.create()
+							end							
+							if debug_mode and debug_mode == 'console' then
+							--debug = 1 如何出错打开控制台模式
+								local b,result = pcall(doScript)
+								if b then
+									return result
+								else --打开控制台
+									local console = require "console"
+									local scene = console.create()
+									if scene then
+										cc.Director:getInstance():pushScene( scene )
+									end
+								end
+							elseif debug_mode and type(debug_mode)=='string' then
+							--打开调试
+								require("mobdebug").start(debug_mode)
+								return doScript()
+							else
+							--正常启动
+								return doScript()
+							end
 						end}			
 				else
 					kits.log("ERROR : can not found applet : "..tostring(app))
