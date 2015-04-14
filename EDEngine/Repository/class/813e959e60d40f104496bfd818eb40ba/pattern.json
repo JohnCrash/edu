@@ -1,0 +1,24 @@
+{
+	"patterns":[
+		{
+			"image":"bg2.png",
+			"offset":{
+				"x":0,
+				"y":0
+			},
+			"scale":{
+				"x":1,
+				"y":2,
+			},
+			"strip":3072,
+		},		
+		{
+			"image":"bg.png",
+			"offset":{
+				"x":1024,
+				"y":120
+			},
+			"strip":3072,
+		},
+	]
+}

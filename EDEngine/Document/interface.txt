@@ -122,6 +122,7 @@ Item () super:Node
 			animations={ 动画文件
 			},
 			actions={
+				{
 				name,动作名称
 				animation,动画名称
 				animationName,动画名称
@@ -134,5 +135,26 @@ Item () super:Node
 				angle,动作开始时角度偏移(默认0)
 				script,动作脚本可以是一个函数
 				loop,循环动作(这是一个周期的时间)
+				}
 			}
 		}
+		没有对代码也可以提供一个actions.json来描述对象
+	
+ParallaxNode super:Node
+	一种根据某种模式反复出现的无限场景
+	对象没有大小（无限大小）
+	{
+		patterns=[
+			{
+			offset,偏移默认(0,0)
+			scale,缩放默认(1,1)
+			angle,角度默认(0)
+			anchor,锚点默认值为(0,0)
+			strip, 一个循环的宽度,必须有该值。
+			image, 图像资源
+			}
+		]
+	}
+ParallaxLayer super:Node
+	用来管理多个视察节点
+	

@@ -82,10 +82,23 @@ local Root = {
 		end,
 		read = function(self,res)
 			if cc_isdebug() then
-				local file = cc.FileUtils:getInstance():getWritablePath()..res
+				local file = cc.FileUtils:getInstance():getWritablePath()..self:getR(res)
 				return kits.read_file(file)
 			else
-				return kits.read_local_file(res)
+				return kits.read_local_file(self:getR(res))
+			end
+		end,
+		readJson = function(self,res)
+			local s = self:read(res)
+			if s then
+				local result = json.decode(s)
+				if result then
+					return result
+				else
+					kits.log("ERROR Root readJson decode failed")
+					kits.log("	type:"..tostring(self._cls.classid))
+					kits.log("	file:"..tostring(res))
+				end
 			end
 		end,
 		test = function(self)
@@ -288,6 +301,9 @@ local Scene = {
 		init=function(self)
 		end,
 		release=function(self)
+		end,
+		getSize=function(self)
+			return uikits.getDR()
 		end,
 		initDesignView = function(self,w,h,s)
 			uikits.initDR{width=w,height=h,mode=s}
@@ -1133,7 +1149,7 @@ local Item={
 			self._sprite = cc.Sprite:create()
 			root:addChild(self._animation)
 			root:addChild(self._sprite)
-			self:loadFromJson(self:getR("actions.json"))
+			self:loadFromJson("actions.json")
 		end,
 		loadFromJson=function(self,file)
 			local s = self:read(file)
