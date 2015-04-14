@@ -49,9 +49,37 @@
             <File name="G:\source\Edu\EDEngine\Repository\class\92fb6e0c6a45a760646d2fb3970271cc\desc.json" />
             <File name="G:\source\Edu\EDEngine\Repository\class\92fb6e0c6a45a760646d2fb3970271cc\calcbox.lua" />
         </Folder>
+        <Folder name="&#x571F;&#x5730;" />
+        <Folder name="&#x8DEF;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\a01ee8a3db56d31570a9307e56d91c3f\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\a01ee8a3db56d31570a9307e56d91c3f\actions.json" />
+        </Folder>
+        <Folder name="&#x6C34;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\1f113e04275489b8ee542deb43873498\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\1f113e04275489b8ee542deb43873498\actions.json" />
+        </Folder>
+        <Folder name="&#x4E91;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\4abdf31c00f3d1dc7c5870188fef0481\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\4abdf31c00f3d1dc7c5870188fef0481\actions.json" />
+        </Folder>
+        <Folder name="&#x5C71;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\033b3be83c70075bbe5f98cc9f634a27\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\033b3be83c70075bbe5f98cc9f634a27\actions.json" />
+        </Folder>
+        <Folder name="&#x704C;&#x6728;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\dcbeb36aa886a490d9437569e4972793\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\dcbeb36aa886a490d9437569e4972793\actions.json" />
+        </Folder>
+        <Folder name="&#x6570;" />
+        <Folder name="&#x767D;&#x5929;">
+            <File name="G:\source\Edu\EDEngine\Repository\class\813e959e60d40f104496bfd818eb40ba\desc.json" />
+            <File name="G:\source\Edu\EDEngine\Repository\class\813e959e60d40f104496bfd818eb40ba\bluesky.lua" />
+        </Folder>
+        <Folder name="&#x591C;&#x665A;" />
+        <Folder name="&#x5377;&#x8F74;&#x573A;&#x666F;" />
     </Project>
     <Project name="&#x573A;&#x666F;">
-        <Folder name="24&#x70B9;">
+        <Folder name="&#x7B97;&#x5F0F;&#x8FC7;&#x6CB3;">
             <Folder name="res">
                 <File name="G:\source\Edu\EDEngine\Repository\class\ae21c0fc8dd08f18e39afe2446f234e0\res\aide.png" />
             </Folder>

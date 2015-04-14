@@ -1,0 +1,12 @@
+{
+	"classid":"4abdf31c00f3d1dc7c5870188fef0481",
+	"superid":"Item",
+	"name":"Cloud",
+	"icon":"icon.png",
+	"comment":"云,用于横向卷轴背景",
+	"pedigree":[
+		"Node",
+		"Root",
+	],
+	"version":1
+}

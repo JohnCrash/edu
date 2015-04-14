@@ -56,6 +56,7 @@ Scene (d55f6d9cbb48b6f402b8122b97ed2dc1)父类:Root
 	ccScene() 返回cocos2d-x的场景对象。
 	push() 将场景压入场景堆栈。展示该场景。
 	pop() 将场景弹出。
+	getSize() 取得设计视图的尺寸
 	replace() 替换场景堆栈的栈顶。展示该场景。
 	init() 事件函数，当场景展示时被调用。
 	release() 事件函数，当场景退出时调用。
@@ -98,7 +99,7 @@ LoadingScene (8bb51443e440190b892996b8c2864672)父类:Scene
 SplashScene (b50a67aa2ed2183bee9b804ce7dbdefd)父类:Scene
 	close() 关闭Splash界面。
 	setText(txt) 加载中间过程的提示文本。
-
+	
 Spin (b34d6d7a5652cf3bbe6388d5770dbe95)父类:Dialog
 	open() 在屏幕的中间显示一个旋转的圈。
 	close() 关闭Spin

@@ -1,11 +1,12 @@
 {
 	"classid":"ae21c0fc8dd08f18e39afe2446f234e0",
 	"superid":"7733168941a18d7d19f60e1d601385d0",
-	"name":"24点",
-	"comment":"24点，通过加减乘除最后得数等于24",
+	"name":"算数过关游戏",
+	"comment":"通过摆放真确的算数过河",
 	"icon":"res/aide.png",
 	"pedigree":[
 		"Scene",
+		"Node",
 		"Root"
 	],
 	"version":1,

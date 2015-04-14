@@ -7,8 +7,16 @@ local blockUUID = "e0624a7d0d7a6c3d4a3439588ed98fb0"
 local selecterUUID = "d2cec3976ce41e69c1bde08fb032af7b"
 local calcUUID = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
 --[[
-	24点游戏场景
-	通过可选项，组合成24点
+	通过摆放正确的方块，过河
+	数据类型
+	{
+		"level":[
+			{
+			},
+			{
+			}
+		]
+	}
 --]]
 return {
 	init=function(self)
@@ -28,7 +36,16 @@ return {
 			end
 		end)
 	end,
-	initGame = function(self)
+	loadLevel=function(self,levelJson)
+		if not levelJson then return end
+	end,
+	initBaseScene = function(self,data)
+		
+	end,
+	initScene = function(self,data)
+		self:initBaseScene()
+		
+		--[[
 		self._selecter:reset{colum=5,raw=2}
 		math.randomseed(os.time())
 		for i = 1,5 do
@@ -55,6 +72,7 @@ return {
 		local ss = uikits.getDR()
 		local selecter_size = self._selecter:getSize()
 		self:addChild(self._selecter)
+		--]]
 	end,
 	release=function(self)
 	end,
