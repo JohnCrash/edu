@@ -1,11 +1,12 @@
 {
 	"classid":"1f113e04275489b8ee542deb43873498",
-	"superid":"Item",
-	"name":"水",
-	"comment":"水,用于横向卷轴背景",
+	"superid":"Parallax",
+	"name":"田野背景",
+	"comment":"有田野和白云蓝天组成的视差场景",
 	"pedigree":[
 		"Node",
 		"Root",
 	],
-	"version":1
+	"version":1,
+	"script":"test"
 }

@@ -269,7 +269,7 @@ local Node = {
 			local scene = self:testScene()
 			uikits.muteSound(false)
 			uikits.muteClickSound(true)
-			scene:initDesignView(1024*2,576*2)
+			scene:initDesignView(1024,576)
 			scene:addCloseButton()
 			scene:addChild(self)
 			scene:push()
@@ -439,21 +439,22 @@ local ParallaxLayer = {
 		ccCreate=function(self)
 			self:attach(gl.glNodeCreate())
 			local ss
-			local prev_x
 			local function visit()
-				local pt = self:getPosition()
-				if prev_x==pt.x or not self._patterns  then
+				--local pt = self:getPosition()
+				--pt = self:ccNode():convertToWorldSpace(pt)
+				if not self._patterns  then
 					return
 				end
-				prev_x=pt.x
+				local pt = self:ccNode():convertToNodeSpace(cc.p(0,0))				
 				ss = ss or self:getScene():getSize() --简单优化
 				for i,v in pairs(self._patterns) do
-					local x = -pt.x + math.fmod(pt.x,v.strip) + v.offset.x
+					local x = pt.x - math.fmod(pt.x-v.offset.x,v.strip)
 					local y = v.offset.y
 					if not v.obj then
 						v.obj = {}
 						for k=1,math.floor(ss.width/v.strip) + 2 do
-							local obj = uikits.image{image=self:getR(v.image)}
+							local obj = cc.Sprite:create()
+							obj:setTexture(self:getR(v.image))
 							self:addChild(obj)
 							obj:setAnchorPoint(v.anchor)
 							obj:setScaleX(v.scale.x)
@@ -465,9 +466,9 @@ local ParallaxLayer = {
 					for k,o in pairs(v.obj) do
 						o:setPosition(cc.p(x,y))
 						if pt.x > 0 then
-							x = x - v.strip
-						else
 							x = x + v.strip
+						else
+							x = x - v.strip
 						end
 					end
 				end

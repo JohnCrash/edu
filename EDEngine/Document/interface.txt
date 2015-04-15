@@ -140,7 +140,7 @@ Item () super:Node
 		}
 		没有对代码也可以提供一个actions.json来描述对象
 	
-ParallaxNode super:Node
+ParallaxLayer super:Node
 	一种根据某种模式反复出现的无限场景
 	对象没有大小（无限大小）
 	{
@@ -156,6 +156,13 @@ ParallaxNode super:Node
 			}
 		]
 	}
-ParallaxLayer super:Node
+Parallax super:Node
 	用来管理多个视察节点
+	{
+		parallaxs=[
+			{
+				
+			}
+		]
+	}
 	

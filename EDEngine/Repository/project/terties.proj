@@ -56,11 +56,9 @@
         </Folder>
         <Folder name="&#x84DD;&#x5929;&#xFF0C;&#x767D;&#x4E91;&#xFF0C;&#x7530;&#x91CE;(Parallax)">
             <File name="G:\source\Edu\EDEngine\Repository\class\1f113e04275489b8ee542deb43873498\desc.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\1f113e04275489b8ee542deb43873498\actions.json" />
         </Folder>
         <Folder name="&#x4E91;(ParallaxLayer)">
             <File name="G:\source\Edu\EDEngine\Repository\class\4abdf31c00f3d1dc7c5870188fef0481\desc.json" />
-            <File name="G:\source\Edu\EDEngine\Repository\class\4abdf31c00f3d1dc7c5870188fef0481\actions.json" />
         </Folder>
         <Folder name="&#x6D77;&#x6D0B;(ParallaxLayer)">
             <File name="G:\source\Edu\EDEngine\Repository\class\033b3be83c70075bbe5f98cc9f634a27\desc.json" />
@@ -68,7 +66,7 @@
         <Folder name="&#x7530;&#x91CE;(ParallaxLayer)">
             <File name="G:\source\Edu\EDEngine\Repository\class\dcbeb36aa886a490d9437569e4972793\desc.json" />
         </Folder>
-        <Folder name="&#x84DD;&#x5929;&#x767D;&#x4E91;(ParallaxLayer)">
+        <Folder name="&#x767D;&#x4E91;(ParallaxLayer)">
             <File name="G:\source\Edu\EDEngine\Repository\class\813e959e60d40f104496bfd818eb40ba\desc.json" />
             <File name="G:\source\Edu\EDEngine\Repository\class\813e959e60d40f104496bfd818eb40ba\pattern.json" />
         </Folder>

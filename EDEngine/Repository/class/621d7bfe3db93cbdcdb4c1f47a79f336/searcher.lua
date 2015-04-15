@@ -86,13 +86,13 @@ return {
 			local all = file:read("*a")
 			file:close()
 			local destable = json.decode( all )
-			if destable.superid and type(destable.superid)=='string' and
+			if destable and destable.superid and type(destable.superid)=='string' and
 				string.len(destable.superid)~=32 then
 				if base[destable.superid] then
 					destable.superid = base[destable.superid]
 				end
 			end
-			if destable.pedigree and type(destable.pedigree)=='table' then
+			if destable and destable.pedigree and type(destable.pedigree)=='table' then
 				for i,v in pairs(destable.pedigree) do
 					if string.len(v)~=32 then
 						if base[v] then
@@ -159,7 +159,16 @@ return {
 					end
 				end
 				--按名称排序
-				
+				for i,v in pairs(classes) do
+					if v.child then
+						print( i )
+						table.sort(v.child,function(b,a)
+							if b and a and b.cls and a.cls then
+								return b.cls.name > a.cls.name
+							end
+						end)
+					end
+				end
 				--组织为一个列表结构
 				local line
 				local n_level

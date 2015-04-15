@@ -1,0 +1,28 @@
+{
+	"patterns":[		
+		{
+			"image":"shan-1.png",
+			"strip":2272,
+			"offset":{
+				"x":1136,
+				"y":0	
+			},
+			"scale":{
+				"x":1,
+				"y":1	
+			},			
+		},		
+		{
+			"image":"shan-2.png",
+			"offset":{
+				"x":0,
+				"y":0
+			},
+			"scale":{
+				"x":1,
+				"y":1	
+			},				
+			"strip":2272,
+		},		
+	]
+}

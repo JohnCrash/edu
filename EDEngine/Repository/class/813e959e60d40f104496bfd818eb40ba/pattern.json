@@ -1,24 +1,20 @@
 {
-	"patterns":[
+	"patterns":[		
 		{
-			"image":"bg2.png",
+			"image":"yun-1.png",
+			"strip":1992,
 			"offset":{
 				"x":0,
-				"y":0
-			},
-			"scale":{
-				"x":1,
-				"y":2,
-			},
-			"strip":3072,
+				"y":0	
+			},			
 		},		
 		{
-			"image":"bg.png",
+			"image":"yun-2.png",
 			"offset":{
-				"x":1024,
-				"y":120
-			},
-			"strip":3072,
-		},
+				"x":996,
+				"y":0
+			},			
+			"strip":1992,
+		},			
 	]
 }
