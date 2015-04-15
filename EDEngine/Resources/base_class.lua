@@ -425,6 +425,90 @@ local Layer = {
 	}
 }
 
+local ParallaxLayer = {
+	classid = base.ParallaxLayer,
+	superid = base.Node,
+	name = "ParallaxLayer",
+	icon = "res/splash/layer_icon.png",
+	comment = "视差层，由无限循环的图组成的背景",
+	version = 1,
+	pedigree = {
+		base.Root
+	},
+	class={
+		ccCreate=function(self)
+			self:attach(gl.glNodeCreate())
+			local ss
+			local prev_x
+			local function visit()
+				local pt = self:getPosition()
+				if prev_x==pt.x or not self._patterns  then
+					return
+				end
+				prev_x=pt.x
+				ss = ss or self:getScene():getSize() --简单优化
+				for i,v in pairs(self._patterns) do
+					local x = -pt.x + math.fmod(pt.x,v.strip) + v.offset.x
+					local y = v.offset.y
+					if not v.obj then
+						v.obj = {}
+						for k=1,math.floor(ss.width/v.strip) + 2 do
+							local obj = uikits.image{image=self:getR(v.image)}
+							self:addChild(obj)
+							obj:setAnchorPoint(v.anchor)
+							obj:setScaleX(v.scale.x)
+							obj:setScaleY(v.scale.y)
+							obj:setRotation(v.angle)
+							table.insert(v.obj,obj)
+						end
+					end
+					for k,o in pairs(v.obj) do
+						o:setPosition(cc.p(x,y))
+						if pt.x > 0 then
+							x = x - v.strip
+						else
+							x = x + v.strip
+						end
+					end
+				end
+			end
+			self:ccNode():registerScriptDrawHandler(visit)
+			self:loadFromJson("pattern.json")
+		end,
+		loadFromJson=function(self,file)
+			local t = self:readJson(file)
+			if t and t.patterns then
+				self._patterns = t.patterns
+				for i,v in pairs(self._patterns) do
+					v.scale = v.scale or cc.p(1,1)
+					v.angle = v.angle or 0
+					v.anchor = v.anchor or cc.p(0,0)
+					v.offset = v.offset or cc.p(0,0)
+				end
+			end
+		end,	
+		test=function(self)
+			super.test(self)
+			local move = cc.MoveTo:create(1000,cc.p(-1024*400,0))
+			self:ccNode():runAction(move)
+		end,		
+	}
+}
+
+local Parallax = {
+	classid = base.Parallax,
+	superid = base.Node,
+	name = "Parallax",
+	icon = "res/splash/layer_icon.png",
+	comment = "由多个视差层组成一个有层次的视差背景",
+	version = 1,
+	pedigree = {
+		base.Root
+	},
+	class={
+	}
+}
+
 local splashScene = {
 	classid = base.SplashScene,
 	superid = base.Scene,
@@ -1416,6 +1500,8 @@ local function addBaseClass(_classes)
 	addClass(Game)
 	addClass(Sprite)
 	addClass(Item)
+	addClass(ParallaxLayer)
+	addClass(Parallax)
 end
 
 return {

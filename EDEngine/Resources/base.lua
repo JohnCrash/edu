@@ -23,4 +23,6 @@ return {
 	Game = "9bb2c0c57a6b6a3763875bbf71b8a0c2",
 	Sprite = "5e0c81c61dcebe5b27b6c6c54b5b4414",
 	Item = "f84f4bfc387cdc692c07ab1cc16da18d",
+	Parallax = "16f9330ea144773758612597e14f5ec5",
+	ParallaxLayer = "cc42bd8743526710a76c97a3e77201b9",
 }

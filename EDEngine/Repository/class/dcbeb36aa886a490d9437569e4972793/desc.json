@@ -1,7 +1,7 @@
 {
 	"classid":"dcbeb36aa886a490d9437569e4972793",
-	"superid":"Item",
-	"name":"Bush",
+	"superid":"ParallaxLayer",
+	"name":"田野",
 	"comment":"灌木,用于横向卷轴背景",
 	"pedigree":[
 		"Node",

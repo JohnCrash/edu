@@ -149,8 +149,9 @@ ParallaxNode super:Node
 			offset,偏移默认(0,0)
 			scale,缩放默认(1,1)
 			angle,角度默认(0)
+			mirror,镜像
 			anchor,锚点默认值为(0,0)
-			strip, 一个循环的宽度,必须有该值。
+			strip, 一个循环的宽度,必须有该值。(每隔strip宽度放置一个对象)
 			image, 图像资源
 			}
 		]

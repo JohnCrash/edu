@@ -1,9 +1,9 @@
 {
 	"classid":"033b3be83c70075bbe5f98cc9f634a27",
-	"superid":"Item",
+	"superid":"ParallaxLayer",
 	"icon":"icon.png",
-	"name":"Mountain",
-	"comment":"山峰,用于横向卷轴背景",
+	"name":"海洋",
+	"comment":"海洋,用于横向卷轴背景",
 	"pedigree":[
 		"Node",
 		"Root",

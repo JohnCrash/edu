@@ -1,17 +1,11 @@
 {
 	"classid":"813e959e60d40f104496bfd818eb40ba",
-	"superid":"Layer",
+	"superid":"ParallaxLayer",
 	"name":"BlueSky",
 	"comment":"蓝天白云，远山背景，用于卷轴场景的背景",
 	"pedigree":[
 		"Node",
 		"Root"
 	],
-	"depends":[
-		"033b3be83c70075bbe5f98cc9f634a27",
-		"4abdf31c00f3d1dc7c5870188fef0481",
-		"a01ee8a3db56d31570a9307e56d91c3f",
-	],
-	"version":1,
-	"script":"bluesky"
+	"version":1
 }
