@@ -1,0 +1,19 @@
+{
+	"parallax":[
+		{
+			"image":"beijing.png",
+			"ratio":{"x":0,"y":0},
+			"offset":{"x":0,"y":100},		
+		},
+		{
+			"objectid":"813e959e60d40f104496bfd818eb40ba",
+			"ratio":{"x":0.1,"y":0.1},
+			"offset":{"x":0,"y":120},
+		},
+		{
+			"objectid":"dcbeb36aa886a490d9437569e4972793",
+			"ratio":{"x":1,"y":1},
+			"offset":{"x":0,"y":0},		
+		}
+	]
+}

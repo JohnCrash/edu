@@ -1,20 +1,20 @@
 {
 	"patterns":[		
 		{
-			"image":"yun-1.png",
-			"strip":1992,
+			"image":"yun-3.png",
+			"strip":1983,
 			"offset":{
 				"x":0,
 				"y":0	
 			},			
 		},		
 		{
-			"image":"yun-2.png",
+			"image":"yun-4.png",
 			"offset":{
-				"x":996,
+				"x":1013,
 				"y":0
 			},			
-			"strip":1992,
+			"strip":1983,
 		},			
 	]
 }

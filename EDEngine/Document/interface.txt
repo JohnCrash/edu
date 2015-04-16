@@ -112,6 +112,7 @@ ProgressBox (6e8c7a6612998e78186585e468010f95)父类:Dialog
 	setText(txt) 加载中间过程的提示文本。
 	
 Item () super:Node
+	该对象会读取init.json用于初始化
 	actions() 返回对象能做的全部动作
 	currentAction() 返回当前动作名称
 	doAction(name) 做动作 
@@ -143,6 +144,7 @@ Item () super:Node
 ParallaxLayer super:Node
 	一种根据某种模式反复出现的无限场景
 	对象没有大小（无限大小）
+	该对象会读取pattern.json,会读取
 	{
 		patterns=[
 			{
@@ -157,11 +159,16 @@ ParallaxLayer super:Node
 		]
 	}
 Parallax super:Node
+	addChild(child,z,ratio,offset),增加了参数。
 	用来管理多个视察节点
+	该对象会读取parallax.json,会读取
 	{
 		parallaxs=[
 			{
-				
+				objectid,层对象id,注意加入到depends中,主要用于ParallaxLayer对象.
+				scale,缩放默认(1,1)
+				offset,偏移默认(0,0)
+				ratio,视差率,默认(1,1)。1代表和屏幕一起动，0代表不动。其他状态为差值
 			}
 		]
 	}

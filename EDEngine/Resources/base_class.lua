@@ -440,8 +440,6 @@ local ParallaxLayer = {
 			self:attach(gl.glNodeCreate())
 			local ss
 			local function visit()
-				--local pt = self:getPosition()
-				--pt = self:ccNode():convertToWorldSpace(pt)
 				if not self._patterns  then
 					return
 				end
@@ -507,6 +505,55 @@ local Parallax = {
 		base.Root
 	},
 	class={
+		ccCreate=function(self)
+			self:attach(cc.ParallaxNode:create())
+			self:loadFromJson("parallax.json")
+		end,
+		addChild=function(self,child,z,ratio,offset)
+			if child._ccnode then
+				child._parent_node = self
+				self._child_nodes[child] = child
+				self._ccnode:addChild(child:ccNode(),z or -1,ratio or cc.p(1,1),offset or cc.p(0,0))
+			elseif cc_isobj(child) then
+				self._ccnode:addChild(child,z or -1,ratio or cc.p(1,1),offset or cc.p(0,0))
+			else
+				kits.log("ERROR Node addChild unknow type child")
+			end
+		end,
+		loadFromJson=function(self,res)
+			local t = self:readJson(res)
+			if t and t.parallax then
+				local factory = require "factory"
+				for i,v in pairs(t.parallax) do
+					local scale = v.scale or cc.p(1,1)
+					local obj
+					if v.objectid then
+						obj = factory.create(v.objectid) 
+						obj:ccNode():setScaleX(scale.x)
+						obj:ccNode():setScaleY(scale.y)						
+					elseif v.image then
+						obj = cc.Sprite:create()
+						obj:setTexture(self:getR(v.image))
+						local ss = cc.size(1024,576)
+						obj:setAnchorPoint(cc.p(0,0))
+						local s = obj:getContentSize()
+						obj:setScaleX(ss.width/s.width)
+						obj:setScaleY(ss.height/s.height)												
+					end
+					if obj then
+						self:addChild(obj,1,v.ratio or cc.p(1,1),v.offset or cc.p(0,0))
+					else
+						kits.log("ERROR Parallax.loadFromJson parallax object is nil")
+						kits.log("	"..tostring(v.objectid))
+					end					
+				end
+			end
+		end,
+		test=function(self)
+			super.test(self)
+			local move = cc.MoveTo:create(1000,cc.p(-1024*400,0))
+			self:ccNode():runAction(move)
+		end,				
 	}
 }
 
