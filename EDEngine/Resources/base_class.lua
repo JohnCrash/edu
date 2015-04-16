@@ -80,6 +80,9 @@ local Root = {
 				end
 			end
 		end,
+		getClassid = function(self)
+			return self._cls.classid
+		end,
 		read = function(self,res)
 			if cc_isdebug() then
 				local file = cc.FileUtils:getInstance():getWritablePath()..self:getR(res)
@@ -260,6 +263,9 @@ local Node = {
 		setVisible=function(self,b)
 			self._ccnode:setVisible(b)
 		end,
+		runAction=function(self,action)
+			self._ccnode:runAction(action)
+		end,
 		testScene = function(self)
 			local factory = require "factory"
 			return factory.create(base.Scene)		
@@ -287,7 +293,6 @@ local Scene = {
 	class = {
 		__init__=function(self)
 			self._child_nodes = {}
-			self._scene = cc.Scene:create()
 			self:ccCreate()
 			local function onNodeEvent(event,v)
 				if "enter" == event then
@@ -308,7 +313,11 @@ local Scene = {
 		initDesignView = function(self,w,h,s)
 			uikits.initDR{width=w,height=h,mode=s}
 		end,
+		attach=function(self,scene)
+			self._scene = scene
+		end,
 		ccCreate=function(self)
+			self:attach(cc.Scene:create())
 		end,
 		ccScene=function(self)
 			return self._scene
@@ -379,24 +388,15 @@ local PhysicsScene = {
 		base.Root
 	},
 	class = {
-		__init__=function(self)
-			self._child_nodes = {}
-			self._scene = cc.Scene:createWithPhysics()
-			self:ccCreate()
-			local function onNodeEvent(event,v)
-				if "enter" == event then
-					self:init()
-				elseif "exit" == event then
-					self:release()
-				end
-			end
-			self._scene:registerScriptHandler(onNodeEvent)
+		ccCreate=function(self)
+			attach(cc.Scene:createWithPhysics())
+			self._physics = self._scene:getPhysicsWorld()
 		end,
 		setGravity=function(self,x,y)
-			self._scene:getPhysicsWorld():setGravity(cc.p(x, y));
+			self._physics:setGravity(cc.p(x, y));
 		end,
 		setUpdateRate=function(self,f)
-			self._scene:getPhysicsWorld():setUpdateRate(f);
+			self._physics:setUpdateRate(f);
 		end,
 	}
 }

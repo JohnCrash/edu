@@ -2,10 +2,14 @@ local kits = require "kits"
 local uikits = require "uikits"
 local base = require "base"
 local factory = require "factory"
+local json = require "json-c"
 
-local blockUUID = "e0624a7d0d7a6c3d4a3439588ed98fb0"
-local selecterUUID = "d2cec3976ce41e69c1bde08fb032af7b"
-local calcUUID = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
+local uuid = {
+	block = "e0624a7d0d7a6c3d4a3439588ed98fb0",
+	selecter = "d2cec3976ce41e69c1bde08fb032af7b",
+	calcbox = "2c718eeb0fb6c1cdfcf03fd20c1df0ba",
+	parallaxFeild = "1f113e04275489b8ee542deb43873498",
+}
 --[[
 	通过摆放正确的方块，过河
 	数据类型
@@ -20,11 +24,9 @@ local calcUUID = "2c718eeb0fb6c1cdfcf03fd20c1df0ba"
 --]]
 return {
 	init=function(self)
-		factory.importByProgressBox({calcUUID,selecterUUID,blockUUID},
+		factory.importByProgressBox(self:depends(),
 		function(b,msg)
 			if b then
-				self._calcbox = factory.create(blockUUID)
-				self._selecter = factory.create(selecterUUID)
 				self:initGame()
 			else
 				local box = factory.create(base.MessageBox)
@@ -36,43 +38,35 @@ return {
 			end
 		end)
 	end,
-	loadLevel=function(self,levelJson)
-		if not levelJson then return end
+	depends=function(self)
+		local t = {}
+		for i,v in pairs(uuid) do
+			table.insert(t,v)
+		end
+		return t
+	end,
+	loadLevelByJson=function(self,t)
+		if t then
+			self._level = t
+		else
+			kits.log("ERROR "..self:getClassid().." loadLevelByJson")
+			kits.log("	loadLevelByJson t = nil")
+		end
+	end,
+	loadLevelByFile=function(self,levelJson)
+		local file = kits.read_file(levelJson)
+		if file then
+			local t = json.decode(file)
+			self:loadLevelByJson(t)
+		else
+			kits.log("ERROR "..self:getClassid().." loadLevelByFile")
+			kits.log("	Can not read file "..tostring(levelJson))
+		end
 	end,
 	initBaseScene = function(self,data)
-		
 	end,
 	initScene = function(self,data)
 		self:initBaseScene()
-		
-		--[[
-		self._selecter:reset{colum=5,raw=2}
-		math.randomseed(os.time())
-		for i = 1,5 do
-			local o = factory.create(blockUUID)
-			o:doAction(tostring(math.random(0,9)))
-			self._selecter:insert(i,1,o)
-		end
-		local o = factory.create(blockUUID)
-		o:doAction('+')
-		self._selecter:insert(1,2,o)
-		o = factory.create(blockUUID)
-		o:doAction('-')
-		self._selecter:insert(2,2,o)
-		o = factory.create(blockUUID)
-		o:doAction('*')
-		self._selecter:insert(3,2,o)
-		o = factory.create(blockUUID)
-		o:doAction('/')
-		self._selecter:insert(4,2,o)
-		o = factory.create(blockUUID)
-		o:doAction('=')
-		self._selecter:insert(5,2,o)	
-
-		local ss = uikits.getDR()
-		local selecter_size = self._selecter:getSize()
-		self:addChild(self._selecter)
-		--]]
 	end,
 	release=function(self)
 	end,

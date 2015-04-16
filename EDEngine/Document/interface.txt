@@ -18,6 +18,9 @@ Root (7c3064bb858e619b9f02fef85432f162)
 	getR(res) 取得资源res路径。
 	isInstanceOf(classid) 判断classid是否在对象的继承链中,或者说是不是一个classid对象.
 	test() 对象的测试代码。
+	getClassid() 返回对象的类型id
+	read(res) 读对象的文件
+	readJson(res) 读对象的json文件
 	
 Node () 父类:Root
 	attach( ccnode ) 给对象附上一个cocos2d-x的节点
@@ -42,6 +45,7 @@ Node () 父类:Root
 	getScale() 取缩放比例
 	setVisible(b) 设置可见度
 	getVisible() 取可见度
+	runAction(a) 执行一个动作
 	enable(b) 打开关闭触摸或鼠标输入
 	isEnable() 判断当前是否被关闭输入
 	scheduler(func,delta) 创建一个周期调度,delta周期时间.成功返回一个scheduler id
