@@ -1,7 +1,9 @@
 {
+	"width":1024,
+	"height":576,
 	"parallax":[
 		{
-			"image":"beijing.png",
+			"background":"beijing.png",
 			"ratio":{"x":0,"y":0},
 			"offset":{"x":0,"y":100},		
 		},
@@ -9,6 +11,7 @@
 			"objectid":"813e959e60d40f104496bfd818eb40ba",
 			"ratio":{"x":0.1,"y":0.1},
 			"offset":{"x":0,"y":120},
+			"speed":{"x":-12,"y":0},
 		},
 		{
 			"objectid":"dcbeb36aa886a490d9437569e4972793",

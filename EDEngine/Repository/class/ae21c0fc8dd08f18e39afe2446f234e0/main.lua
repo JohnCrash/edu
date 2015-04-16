@@ -27,7 +27,7 @@ return {
 		factory.importByProgressBox(self:depends(),
 		function(b,msg)
 			if b then
-				self:initGame()
+				self:initScene()
 			else
 				local box = factory.create(base.MessageBox)
 				box:open{caption='加载失败',text={
@@ -46,7 +46,7 @@ return {
 		return t
 	end,
 	loadLevelByJson=function(self,t)
-		if t then
+		if t and t.section then
 			self._level = t
 		else
 			kits.log("ERROR "..self:getClassid().." loadLevelByJson")
@@ -63,10 +63,21 @@ return {
 			kits.log("	Can not read file "..tostring(levelJson))
 		end
 	end,
-	initBaseScene = function(self,data)
+	initParallax = function(self)
+		self._level = self._level or {}
+		self._skin = self._level.skin or 1
+		if self._skin==1 then
+			self._parallax = factory.create(uuid.parallaxFeild)
+		end
+		if self._parallax then
+			self:addChild(self._parallax)
+		else
+			kits.log("ERROR initParallax fail,self._parallax = nil")
+			kits.log("	skin = "..tostring(self._skin))
+		end
 	end,
-	initScene = function(self,data)
-		self:initBaseScene()
+	initScene = function(self)
+		self:initParallax()
 	end,
 	release=function(self)
 	end,

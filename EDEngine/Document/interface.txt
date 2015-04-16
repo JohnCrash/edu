@@ -150,6 +150,8 @@ ParallaxLayer super:Node
 	对象没有大小（无限大小）
 	该对象会读取pattern.json,会读取
 	{
+		width,设计时的宽体,确保在不同的设计视图中可以真确显示
+		height,设计时的高度	
 		patterns=[
 			{
 			offset,偏移默认(0,0)
@@ -167,12 +169,16 @@ Parallax super:Node
 	用来管理多个视察节点
 	该对象会读取parallax.json,会读取
 	{
+		width,设计时的宽体,确保在不同的设计视图中可以真确显示
+		height,设计时的高度
 		parallaxs=[
 			{
 				objectid,层对象id,注意加入到depends中,主要用于ParallaxLayer对象.
+				background,指定一个背景图片
 				scale,缩放默认(1,1)
 				offset,偏移默认(0,0)
 				ratio,视差率,默认(1,1)。1代表和屏幕一起动，0代表不动。其他状态为差值
+				speed,固定偏移速度(0,0)
 			}
 		]
 	}
