@@ -17,6 +17,11 @@
 			"objectid":"dcbeb36aa886a490d9437569e4972793",
 			"ratio":{"x":1,"y":1},
 			"offset":{"x":0,"y":0},		
-		}
+		},
+		{
+			"objectid":"a01ee8a3db56d31570a9307e56d91c3f",
+			"ratio":{"x":1,"y":1},
+			"offset":{"x":0,"y":0},		
+		}		
 	]
 }

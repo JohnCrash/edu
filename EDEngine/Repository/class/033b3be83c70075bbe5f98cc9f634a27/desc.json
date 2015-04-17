@@ -1,12 +1,12 @@
 {
 	"classid":"033b3be83c70075bbe5f98cc9f634a27",
-	"superid":"ParallaxLayer",
+	"superid":"Node",
 	"icon":"icon.png",
-	"name":"海洋",
-	"comment":"海洋,用于横向卷轴背景",
+	"name":"测试特殊关卡",
+	"comment":"测试特殊关卡",
 	"pedigree":[
-		"Node",
 		"Root",
 	],
-	"version":1
+	"version":1,
+	"script":"levelscene"
 }

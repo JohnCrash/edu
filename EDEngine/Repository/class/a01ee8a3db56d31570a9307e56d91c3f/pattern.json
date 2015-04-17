@@ -1,0 +1,10 @@
+{
+	"width":1024,
+	"height":576,
+	"patterns":[
+		{
+			"image":"1.png",
+			"strip":1024,
+		}
+	]
+}

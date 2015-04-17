@@ -76,6 +76,21 @@ return {
 			kits.log("	skin = "..tostring(self._skin))
 		end
 	end,
+	initLevel = function(self)
+		local level = self._level
+		if level and level.section then
+			for i,v in pairs(level.section) do
+				if v.type==1 then
+				elseif v.type==2 then
+				elseif v.type==3 then
+				elseif v.type==4 then
+				else
+					kits.log("WARNING "..tostring(self:getClassid()))
+					kits.log("	initLevel not support type="..tostring(v.type))
+				end
+			end
+		end
+	end,
 	initScene = function(self)
 		self:initParallax()
 	end,
@@ -86,7 +101,6 @@ return {
 	buildLevel=function(self,notify)
 	end,	
 	test=function(self)
-		print("24点")
 		super.test(self)
 	end,
 }

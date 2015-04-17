@@ -1,6 +1,6 @@
 {
 	"classid":"a01ee8a3db56d31570a9307e56d91c3f",
-	"superid":"Item",
+	"superid":"ParallaxLayer",
 	"icon":"icon.png",
 	"name":"路面",
 	"comment":"路面，用于横向卷轴背景",

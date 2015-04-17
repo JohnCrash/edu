@@ -164,6 +164,7 @@ ParallaxLayer super:Node
 			}
 		]
 	}
+	
 Parallax super:Node
 	addChild(child,z,ratio,offset),增加了参数。
 	用来管理多个视察节点
@@ -183,3 +184,23 @@ Parallax super:Node
 		]
 	}
 	
+SegmentLayer super:Node
+	场景以一种模式延伸(横向)
+	addSegment(index,repeat,pt)
+		加入一个段index为段编号,repeat表示重复次数,pt为指定的偏移点
+		返回一个段的矩形{x,y,width,height}
+	{
+		width,设计时的宽体
+		height,设计时的高度
+		grain,最新粒度,比如64,代表片段长度是64的倍数
+		defualt,默认的段索引
+		segments=[
+			{
+				scale,缩放默认(1,1)
+				offset,偏移默认(0,0)
+				mipmap:[
+					图片数组
+				],
+			}
+		]
+	}
