@@ -188,12 +188,11 @@ SegmentLayer super:Node
 	场景以一种模式延伸(横向)
 	addSegment(index,repeat,pt)
 		加入一个段index为段编号,repeat表示重复次数,pt为指定的偏移点
-		返回一个段的矩形{x,y,width,height}
+		返回一个段的矩形{x,y,width}
 	{
 		width,设计时的宽体
 		height,设计时的高度
 		grain,最新粒度,比如64,代表片段长度是64的倍数
-		defualt,默认的段索引
 		segments=[
 			{
 				scale,缩放默认(1,1)
