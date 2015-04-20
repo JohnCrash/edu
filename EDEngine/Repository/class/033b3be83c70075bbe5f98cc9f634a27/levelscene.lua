@@ -42,6 +42,7 @@ return {
 	release=function(self)
 	end,
 	addSegment=function(self,index,re,pt)
+		--[[
 		local oldpt = cc.p(self._segpt.x,self._segpt.y)
 		if pt then
 			self._segpt = pt
@@ -49,6 +50,21 @@ return {
 			self._segpt.x = self._segpt.x + re*self._grain
 		end
 		table.insert(self._segs,{index=index,repes = re,offset=self._segpt,endx=self._segpt.x+re*self._grain}
+		--]]
+		local seg = self._segments[index]
+		local s = {}
+		local function findLevel( r )
+			if r >= seg.maxlevel then
+				return seg.maxlevel
+			end
+			for i = re,1,-1 do
+				local l = seg.levels[i]
+				if l then
+					return i
+				end
+			end
+		end
+		
 		return {x=oldpt.x,y=oldpt.y,width=re*self._grain}
 	end,
 	getSize=function(self)
