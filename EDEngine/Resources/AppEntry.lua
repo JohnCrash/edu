@@ -298,6 +298,7 @@ function AppEntry:init()
 		end}
 	local debugip = uikits.editbox{
 		caption = '192.168.2.*',
+		fontSize = 64,
 		x=320*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale
 	}
@@ -311,7 +312,14 @@ function AppEntry:init()
 				isopen = true
 			end
 		end}	
-
+	local testInput = uikits.editbox{
+		caption = 'TEST INPUT',
+		fontSize = 64,
+		x=(320+320)*scale,y = 64*scale + 2*item_h,
+		width=128*scale,height=48*scale
+	}
+	testInput:setText("TEST INPUT")
+	bg:addChild(testInput)
 	--[[-----------------------------------
 	local ti = os.clock()
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"

@@ -71,7 +71,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;COCOS2D_DEBUG=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;USE_WIN32_CONSOLE;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -85,9 +85,9 @@
       <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;jsonD.lib;armnb.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;jsonD.lib;armnb.lib;Wininet.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);$(EngineRoot)external\giflib\Debug;$(EngineRoot)external\json-c\Debug;$(EngineRoot)external\amrnb\armnb\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);$(EngineRoot)external\giflib\Debug;$(EngineRoot)external\json-c\Debug;$(EngineRoot)external\amrnb\armnb\Debug;$(EngineRoot)external\ffmpeg\prebuilt\win32\share;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -108,7 +108,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -120,9 +120,9 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;json.lib;armnb.lib;websockets.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;json.lib;armnb.lib;websockets.lib;Wininet.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EngineRoot)build\Release.win32;$(OutDir);$(EngineRoot)external\giflib\Release;$(EngineRoot)external\json-c\Release;$(EngineRoot)external\amrnb\armnb\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EngineRoot)build\Release.win32;$(OutDir);$(EngineRoot)external\giflib\Release;$(EngineRoot)external\json-c\Release;$(EngineRoot)external\amrnb\armnb\Release;$(EngineRoot)external\ffmpeg\prebuilt\win32\share;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -142,19 +142,34 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\AssetsManager.cpp" />
     <ClCompile Include="..\Classes\Console.cpp" />
+    <ClCompile Include="..\Classes\ff.cpp" />
+    <ClCompile Include="..\Classes\FFVideo.cpp" />
     <ClCompile Include="..\Classes\Files.cpp" />
-    <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\luaDebug.cpp" />
     <ClCompile Include="..\Classes\lua_ext.cpp" />
+    <ClCompile Include="..\Classes\lua_ffmpeg.cpp" />
     <ClCompile Include="..\Classes\lua_json.cpp" />
     <ClCompile Include="..\Classes\lua_ljshell.cpp" />
     <ClCompile Include="..\Classes\lua_thread_curl.cpp" />
     <ClCompile Include="..\Classes\MD5.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
     <ClCompile Include="..\Classes\Platform.cpp" />
+    <ClCompile Include="..\Classes\PlatformAndroid.cpp" />
+    <ClCompile Include="..\Classes\PlatformApple.cpp" />
     <ClCompile Include="..\Classes\PlatformWnd32.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
+    <ClCompile Include="..\Classes\SDL.cpp" />
+    <ClCompile Include="..\Classes\SDLAudio.cpp" />
+    <ClCompile Include="..\Classes\SDLAudioCVT.cpp" />
+    <ClCompile Include="..\Classes\SDLAudioTypeCVT.cpp" />
+    <ClCompile Include="..\Classes\SDLAudio_mm.cpp" />
+    <ClCompile Include="..\Classes\SDLEvent.cpp" />
+    <ClCompile Include="..\Classes\SDLOverlay.cpp" />
+    <ClCompile Include="..\Classes\SDLSurface.cpp" />
+    <ClCompile Include="..\Classes\SDLThread.cpp" />
+    <ClCompile Include="..\Classes\SDLVideo.cpp" />
+    <ClCompile Include="..\Classes\SDLWindow.cpp" />
     <ClCompile Include="..\Classes\thread_curl.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FileOp.cpp" />
@@ -163,8 +178,9 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\AssetsManager.h" />
     <ClInclude Include="..\Classes\Console.h" />
+    <ClInclude Include="..\Classes\ff.h" />
+    <ClInclude Include="..\Classes\ffdepends.h" />
     <ClInclude Include="..\Classes\Files.h" />
-    <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="..\Classes\IDF.h" />
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
@@ -173,7 +189,9 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\MD5.h" />
     <ClInclude Include="..\Classes\misc.h" />
     <ClInclude Include="..\Classes\Platform.h" />
+    <ClInclude Include="..\Classes\PlatformApple.h" />
     <ClInclude Include="..\Classes\RenderTextureEx.h" />
+    <ClInclude Include="..\Classes\SDLImp.h" />
     <ClInclude Include="..\Classes\thread_curl.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="FileOp.h" />
