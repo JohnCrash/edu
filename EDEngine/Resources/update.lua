@@ -15,7 +15,8 @@ local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local versionNUM = resume.getversion()
-local liexue_server = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
 --local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
@@ -27,9 +28,9 @@ if config_server and string.len(config_server)>10 then
 	update_server = config_server
 else
 	kits.log("===============================")
-	kits.log("use default server:"..liexue_server)
+	kits.log("use default server:"..liexue_server_sr)
 	kits.log("===============================")
-	update_server = liexue_server
+	update_server = liexue_server_sr
 end
 kits.config("current_server",update_server )
 
@@ -42,6 +43,20 @@ local ui = {
 	TRY_BUTTON = 'try',
 	CAPTION = 'text',
 }
+
+local function splite(s)
+	local i = 0
+	local e = 0
+	while i do
+		i = i+1
+		i = string.find(s,'/',i)
+		if not i and e ~= 0 then
+			return string.sub(s,1,e),string.sub(s,e+1)
+		end
+		e = i
+	end
+	return "",s
+end
 
 local function runScene( scene )
 	if scene then
@@ -62,12 +77,20 @@ local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
 --2网络问题，1本地问题，0没有问题，3算法结构问题
 local function download_file(t,m5)
-	local url = kits.encode_space(update_server..t)
-	local local_file = local_dir..t..'_' --临时文件后面加个下划线
+	local url
+	local local_file
+	if m5 then
+		url = kits.encode_space(liexue_server_dl..t..'_'..m5)
+		local_file = local_dir..t..'_'..m5
+	else
+		url = kits.encode_space(liexue_server_sr..t)
+		local_file = local_dir..t..'_'
+	end
+
 	if kits.exist_file(local_file) then
 		local result = kits.read_file(local_file)
 		if result and md5.sumhexa(result)==m5 then
-			return true,0 --已经下载好了
+			return true,0
 		end
 	end
 	
@@ -136,7 +159,7 @@ local function update_one_by_one(t)
 	if t then
 		if t.download then --做文件删除和改名
 			local oldfile =  local_dir..t.download
-			local newfile =  local_dir..t.download..'_'
+			local newfile =  local_dir..t.download..'_'..(t.md5 or "")
 			local e,msg = kits.del_file(oldfile)
 			if kits.rename_file( newfile,oldfile ) then
 				return true,0
@@ -262,7 +285,7 @@ end
 
 --根据filelist.json来跟新文件
 function UpdateProgram:update_directory(dir)
-	local n_dir = update_server..dir..'/filelist.json'
+	local n_dir = liexue_server_sr..dir..'/filelist.json'
 	local l_dir = local_dir..dir
 	local nbuf = kits.http_get(n_dir)
 	if not nbuf then
@@ -424,7 +447,7 @@ function UpdateProgram:check_update(t)
 	end
 	if outer then
 		--尝试外网的服务器
-		update_server = liexue_server
+		update_server = liexue_server_sr
 		kits.log("INFO check "..tostring(update_server))
 		t.need_updates={}
 		for i,v in pairs(t.updates) do
