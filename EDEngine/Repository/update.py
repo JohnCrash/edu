@@ -7,6 +7,8 @@ import json
 import string
 import shutil
 
+current_path = ""
+
 def mmd5(name,bstr):
 	if bstr == True:
 		md5ret = hashlib.md5(name.encode('utf-8')).hexdigest()
@@ -22,7 +24,19 @@ def mmd5(name,bstr):
 			md5ret = 'error'
 	return md5ret
 
-
+def copyfile(src,des,md5):
+	try:
+		os.makedirs(os.path.split(des)[0])
+	except OSError  as err:
+		pass
+	try:
+		shutil.copy(src,des+"_"+md5)
+	except OSError as err:
+		print "ERROR copy failed! "
+		print "ERROR src : "+src
+		print "ERROR des : "+des
+		print "ERROR md5 : "+md5
+	
 def ldir(proot,item):
 	bdir = os.path.isdir(proot)
 	if(len(proot)>1 and proot[0]=='.' and proot[1]=='/'):
@@ -42,6 +56,7 @@ def ldir(proot,item):
 			else:
 				if(d!='filelist.json' and d!='version.json'):
 					md5val = mmd5(childdir,False)
+					copyfile(childdir,"../../output/"+current_path+"/"+childdir,md5val)
 					low = string.lower(d)
 					if(len(dir)>0): #has dir
 						if low != 'thumbs.db' and low != 'resume.lua' and low[0]!='.':
@@ -82,19 +97,38 @@ def write_json(root):
 		version_file.write(json.dumps({"version":version}))
 		version_file.close()	
 	
+def copyjson(dir):
+	try:
+		shutil.copy(dir+"/version.json","output/"+dir+"/version.json")
+		shutil.copy(dir+"/filelist.json","output/"+dir+"/filelist.json")
+	except OSError as err:
+		print "ERROR copy version.json failed"
+		
 if __name__ == "__main__":
-	xmlpath = "./filelist.xml"
 	if(len(sys.argv)>1):
 		if(os.path.isdir('src/'+sys.argv[1]) and os.path.isdir('res/'+sys.argv[1])):
+			try:
+				shutil.rmtree("output/src")
+			except OSError  as err:
+				print "ERROR rmtree output/src"
+			try:
+				shutil.rmtree("output/res")		
+			except OSError  as err:
+				print "ERROR rmtree output/src"
 			os.chdir('src/'+sys.argv[1])
+			current_path = "src/"+sys.argv[1]
 			root = []
 			ldir('.',root)
 			write_json(root)
 			os.chdir('../..')
 			os.chdir('res/'+sys.argv[1])
+			current_path = "res/"+sys.argv[1]
 			root = []
 			ldir('.',root)
 			write_json(root)
+			os.chdir('../..')
+			copyjson("src/"+sys.argv[1])
+			copyjson("res/"+sys.argv[1])
 		elif(os.path.isdir('class/'+sys.argv[1])):
 			os.chdir('class/'+sys.argv[1])
 			root=[]

@@ -44,14 +44,14 @@ local ui = {
 	CAPTION = 'text',
 }
 
-local function splite(s)
+local function splite(s,ext)
 	local i = 0
 	local e = 0
 	while i do
 		i = i+1
-		i = string.find(s,'/',i)
+		i = string.find(s,ext,i)
 		if not i and e ~= 0 then
-			return string.sub(s,1,e),string.sub(s,e+1)
+			return string.sub(s,1,e-1),string.sub(s,e)
 		end
 		e = i
 	end
@@ -80,8 +80,9 @@ local function download_file(t,m5)
 	local url
 	local local_file
 	if m5 then
-		url = kits.encode_space(liexue_server_dl..t..'_'..m5)
-		local_file = local_dir..t..'_'..m5
+		local prefix,surfix = splite(t,'%.')
+		url = kits.encode_space(liexue_server_dl..prefix..'_'..m5..surfix)
+		local_file = local_dir..prefix..'_'..m5..surfix
 	else
 		url = kits.encode_space(liexue_server_sr..t)
 		local_file = local_dir..t..'_'
@@ -159,7 +160,13 @@ local function update_one_by_one(t)
 	if t then
 		if t.download then --做文件删除和改名
 			local oldfile =  local_dir..t.download
-			local newfile =  local_dir..t.download..'_'..(t.md5 or "")
+			local prefix,surfix = splite(t.download,'%.')
+			local newfile
+			if t.md5 then
+				newfile = local_dir..prefix..'_'..t.md5..surfix
+			else
+				newfile = local_dir..t.download..'_'
+			end
 			local e,msg = kits.del_file(oldfile)
 			if kits.rename_file( newfile,oldfile ) then
 				return true,0
