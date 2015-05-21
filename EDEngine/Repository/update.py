@@ -30,7 +30,8 @@ def copyfile(src,des,md5):
 	except OSError  as err:
 		pass
 	try:
-		shutil.copy(src,des+"_"+md5)
+		a = os.path.splitext(des)
+		shutil.copy(src,a[0]+"_"+md5+a[1])
 	except OSError as err:
 		print "ERROR copy failed! "
 		print "ERROR src : "+src
@@ -103,18 +104,27 @@ def copyjson(dir):
 		shutil.copy(dir+"/filelist.json","output/"+dir+"/filelist.json")
 	except OSError as err:
 		print "ERROR copy version.json failed"
-		
+
+def deleteoutput():
+	try:
+		shutil.rmtree("output/src")
+	except OSError  as err:
+		print "ERROR rmtree output/src"
+	try:
+		shutil.rmtree("output/res")		
+	except OSError  as err:
+		print "ERROR rmtree output/src"
+
+def help():
+	print "update project_name"
+	print "update -clear"
+	print "update project_name -clear"
+
 if __name__ == "__main__":
 	if(len(sys.argv)>1):
 		if(os.path.isdir('src/'+sys.argv[1]) and os.path.isdir('res/'+sys.argv[1])):
-			try:
-				shutil.rmtree("output/src")
-			except OSError  as err:
-				print "ERROR rmtree output/src"
-			try:
-				shutil.rmtree("output/res")		
-			except OSError  as err:
-				print "ERROR rmtree output/src"
+			if len(sys.argv)>2 and sys.argv[2] == '-clear':
+				deleteoutput()
 			os.chdir('src/'+sys.argv[1])
 			current_path = "src/"+sys.argv[1]
 			root = []
@@ -140,7 +150,12 @@ if __name__ == "__main__":
 				shutil.rmtree('z:/v7/class/'+sys.argv[1])
 			shutil.copytree('class/'+sys.argv[1],'z:/v7/class/'+sys.argv[1])
 			print "Done."
+		elif sys.argv[1] == '-clear' :
+			deleteoutput()
+		elif sys.argv[1] == '-help' :
+			help()
 		else:
-			print "Directory src/"+sys.argv[1]," or res/"+sys.argv[1]," is not exist!"
+			help()
 	else:
 		print "Please input project name,example :update homework"
+		print "update -help"
