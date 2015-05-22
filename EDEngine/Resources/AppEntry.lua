@@ -320,6 +320,51 @@ function AppEntry:init()
 	}
 	testInput:setText("TEST INPUT")
 	bg:addChild(testInput)
+	local ff = uikits.button{caption='FFMPEG',x=664*scale,y = 164*scale + 4*item_h,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			local ff = require "ff"
+			local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8")
+			--local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8")
+			--local mv = ff.new("g:\\1.m3u8")
+
+			if mv then
+				print( "mv isOpen "..tostring(mv.isOpen))
+				print( "mv isError "..tostring(mv.isError))
+				if mv.isError then
+					print( "mv errorMsg  "..tostring(mv.errorMsg))
+				end
+				print( "mv isPlaying "..tostring(mv.isPlaying))
+			else
+				print( "mv open failed")
+			end
+			local tx
+			uikits.delay_call(nil,
+			function()
+				local data = mv:refresh()
+				print( "isOpen:"..tostring(mv.isOpen).." isEnd:"..tostring(mv.isEnd).." isPlaying:"..tostring(mv.isPlaying).." isPause:"..tostring(mv.isPause))
+				print( ""..tostring(mv.current).."/"..tostring(mv.length))
+				if tx then
+					tx:updateWithData(data,0,0,mv.width,mv.height)
+				elseif data and mv.isOpen and mv.hasVideo then
+					tx = cc.Texture2D:new()
+					print( "move width = "..mv.width.." height = "..mv.height)
+					tx:initWithData(data,mv.width,mv.height)
+					sp = cc.Sprite:createWithTexture(tx)
+					sp:setAnchorPoint(cc.p(0,0))
+					sp:setPosition(cc.p(0,0))
+					bg:addChild(sp)
+					sp = cc.Sprite:createWithTexture(tx)
+					sp:setScaleX(2)
+					sp:setScaleY(2)
+					sp:setAnchorPoint(cc.p(0,0))
+					sp:setPosition(cc.p(mv.width,0))					
+					bg:addChild(sp)
+				end
+				return true
+			end,1/30)
+		end}		
+	bg:addChild(ff)
 	--[[-----------------------------------
 	local ti = os.clock()
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
