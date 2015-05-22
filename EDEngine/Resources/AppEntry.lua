@@ -324,10 +324,17 @@ function AppEntry:init()
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			local ff = require "ff"
-			local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8")
+			--local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8")
 			--local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8")
 			--local mv = ff.new("g:\\1.m3u8")
-
+			local moveies = { 
+			"http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
+			"http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8",
+			"http://dl-lejiaolexue.qiniudn.com/729c4a6a87c541ff8e9eff183ce98658.m3u8",
+			"http://dl-lejiaolexue.qiniudn.com/835764b62d6e47e9b0c7cab42ed90fa3.m3u8",
+			}
+			local idx = 1
+			local mv = ff.new(moveies[idx])
 			if mv then
 				print( "mv isOpen "..tostring(mv.isOpen))
 				print( "mv isError "..tostring(mv.isError))
@@ -344,6 +351,16 @@ function AppEntry:init()
 				local data = mv:refresh()
 				print( "isOpen:"..tostring(mv.isOpen).." isEnd:"..tostring(mv.isEnd).." isPlaying:"..tostring(mv.isPlaying).." isPause:"..tostring(mv.isPause))
 				print( ""..tostring(mv.current).."/"..tostring(mv.length))
+				if mv.isError or mv.isEnd then
+				print("close")
+					mv:close()
+					idx = idx + 1
+					if idx > #moveies then
+						idx = 1
+					end
+					print( "open "..moveies[idx] )
+					mv = ff.new(moveies[idx])
+				end
 				if tx then
 					tx:updateWithData(data,0,0,mv.width,mv.height)
 				elseif data and mv.isOpen and mv.hasVideo then

@@ -168,7 +168,7 @@ extern "C" {
 			else
 			{
 				if (strcmp(key, "current") == 0)
-					lua_pushvalue(L, pfv->cur());
+					lua_pushnumber(L, pfv->cur());
 				else if (strcmp(key, "preload")==0)
 					lua_pushinteger(L, pfv->preload_packet_nb());
 				else if (strcmp(key, "width") == 0)
@@ -186,7 +186,7 @@ extern "C" {
 				else if (strcmp(key, "seek") == 0)
 					lua_pushcfunction(L, lua_seek);
 				else if (strcmp(key, "length") == 0)
-					lua_pushvalue(L, pfv->length());
+					lua_pushnumber(L, pfv->length());
 				else if (strcmp(key, "play") == 0)
 					lua_pushcfunction(L, lua_play);
 				else if (strcmp(key, "pause") == 0)
