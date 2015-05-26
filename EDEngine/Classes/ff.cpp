@@ -65,7 +65,7 @@ void static My_log(void* p,int inval,const char* fmt,...)
 	va_start(args, fmt);
 	vsnprintf(buf, 1024 - 3, fmt, args);
 	va_end(args);
-	CCLog("%s",buf);
+	CCLog(buf);
 }
 
 static inline

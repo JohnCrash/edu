@@ -320,68 +320,76 @@ function AppEntry:init()
 	}
 	testInput:setText("TEST INPUT")
 	bg:addChild(testInput)
+	local height_ = 0
+	local idx = 1
 	local ff = uikits.button{caption='FFMPEG',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			local ff = require "ff"
-			--local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8")
-			--local mv = ff.new("http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8")
-			--local mv = ff.new("g:\\1.m3u8")
 			local moveies = { 
 			"http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/729c4a6a87c541ff8e9eff183ce98658.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/835764b62d6e47e9b0c7cab42ed90fa3.m3u8",
 			}
-			local idx = 1
-			local mv = ff.new(moveies[idx])
-			if mv then
-				print( "mv isOpen "..tostring(mv.isOpen))
-				print( "mv isError "..tostring(mv.isError))
-				if mv.isError then
-					print( "mv errorMsg  "..tostring(mv.errorMsg))
-				end
-				print( "mv isPlaying "..tostring(mv.isPlaying))
-			else
-				print( "mv open failed")
-			end
-			local tx
-			uikits.delay_call(nil,
-			function()
-				local data = mv:refresh()
-				print( "isOpen:"..tostring(mv.isOpen).." isEnd:"..tostring(mv.isEnd).." isPlaying:"..tostring(mv.isPlaying).." isPause:"..tostring(mv.isPause))
-				print( ""..tostring(mv.current).."/"..tostring(mv.length))
-				if mv.isError or mv.isEnd then
-				print("close")
-					mv:close()
-					idx = idx + 1
-					if idx > #moveies then
-						idx = 1
+			local ffplayer = require "ffplayer"
+			ffplayer.playStream(moveies[idx],function(state,stream,tx)
+					if state ~=5 then
+						print( "state:"..state)
 					end
-					print( "open "..moveies[idx] )
-					mv = ff.new(moveies[idx])
-				end
-				if tx then
-					tx:updateWithData(data,0,0,mv.width,mv.height)
-				elseif data and mv.isOpen and mv.hasVideo then
-					tx = cc.Texture2D:new()
-					print( "move width = "..mv.width.." height = "..mv.height)
-					tx:initWithData(data,mv.width,mv.height)
-					sp = cc.Sprite:createWithTexture(tx)
-					sp:setAnchorPoint(cc.p(0,0))
-					sp:setPosition(cc.p(0,0))
-					bg:addChild(sp)
-					sp = cc.Sprite:createWithTexture(tx)
-					sp:setScaleX(2)
-					sp:setScaleY(2)
-					sp:setAnchorPoint(cc.p(0,0))
-					sp:setPosition(cc.p(mv.width,0))					
-					bg:addChild(sp)
-				end
-				return true
-			end,1/30)
+					if state==ffplayer.STATE_OPEN then
+						stream:play()
+					elseif state==ffplayer.STATE_OPEN_VIDEO and tx then
+						sp = cc.Sprite:createWithTexture(tx)
+						sp:setAnchorPoint(cc.p(0,0))
+						sp:setPosition(cc.p(0,0))
+						bg:addChild(sp)
+						sp = cc.Sprite:createWithTexture(tx)
+						sp:setScaleX(2)
+						sp:setScaleY(2)
+						sp:setAnchorPoint(cc.p(0,0))
+						sp:setPosition(cc.p(stream.width,0))					
+						bg:addChild(sp)
+						--stream:pause()
+					elseif state==ffplayer.STATE_PROGRESS then
+						print( "progress "..math.floor(10000*stream.current/stream.length)/100)
+					end
+				end)
 		end}		
 	bg:addChild(ff)
+	local as
+	local ffplay = uikits.button{caption='FFAUDIO',x=664*scale,y = 164*scale + 4*item_h+100,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			local ffplayer = require "ffplayer"
+			as = ffplayer.playStream("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
+				function(state,as)
+					if state == ffplayer.STATE_PROGRESS then
+						print( "progress "..math.floor(10000*as.current/as.length)/100)
+					else
+						print( "CURRENT STATE : "..state )
+					end
+				end)
+		end}
+	local play = uikits.button{caption='play',x=664*scale+300,y = 164*scale + 4*item_h+100,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			as:seek(0)
+			as:play()
+		end}
+	local pause = uikits.button{caption='pause',x=664*scale-300,y = 164*scale + 4*item_h+100,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			as:pause()
+		end}		
+	local close = uikits.button{caption='close',x=664*scale-600,y = 164*scale + 4*item_h+100,
+		width=128*scale,height=48*scale,
+		eventClick=function(sender)
+			as:close()
+		end}		
+	bg:addChild(close)	
+	bg:addChild(pause)	
+	bg:addChild(play)	
+	bg:addChild(ffplay)
 	--[[-----------------------------------
 	local ti = os.clock()
 	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
