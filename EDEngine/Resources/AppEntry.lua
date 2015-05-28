@@ -321,22 +321,29 @@ function AppEntry:init()
 	testInput:setText("TEST INPUT")
 	bg:addChild(testInput)
 	local height_ = 0
-	local idx = 1
+	local idx = 4
+	local ffmpeg_as
+	local sp
 	local ff = uikits.button{caption='FFMPEG',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			local moveies = { 
+			"g:/Shake It Off.mp3",
+			"g:/music_logo.mp3",
 			"http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/729c4a6a87c541ff8e9eff183ce98658.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/835764b62d6e47e9b0c7cab42ed90fa3.m3u8",
 			}
 			local ffplayer = require "ffplayer"
-			ffplayer.playStream(moveies[idx],function(state,stream,tx)
+			if ffmpeg_as then ffmpeg_as:close() end
+			if sp then sp:removeFromParent() end
+			ffmpeg_as = ffplayer.playStream(moveies[idx],function(state,stream,tx)
 					if state ~=5 then
 						print( "state:"..state)
 					end
 					if state==ffplayer.STATE_OPEN then
+						stream:seek(stream.length*0.8)
 						stream:play()
 					elseif state==ffplayer.STATE_OPEN_VIDEO and tx then
 						sp = cc.Sprite:createWithTexture(tx)
@@ -361,8 +368,10 @@ function AppEntry:init()
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			local ffplayer = require "ffplayer"
-			as = ffplayer.playStream("http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
+			if as then as:close() end
+			as = ffplayer.playStream("g:/Maps.mp3",
 				function(state,as)
+					print("STATE:"..state)
 					if state == ffplayer.STATE_PROGRESS then
 						print( "progress "..math.floor(10000*as.current/as.length)/100)
 					else
@@ -373,7 +382,7 @@ function AppEntry:init()
 	local play = uikits.button{caption='play',x=664*scale+300,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			as:seek(0)
+			as:seek(as.length*0.9)
 			as:play()
 		end}
 	local pause = uikits.button{caption='pause',x=664*scale-300,y = 164*scale + 4*item_h+100,
