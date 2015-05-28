@@ -323,7 +323,7 @@ function AppEntry:init()
 	local height_ = 0
 	local idx = 4
 	local ffmpeg_as
-	local sp
+	local sp,sp2
 	local ff = uikits.button{caption='FFMPEG',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -337,7 +337,17 @@ function AppEntry:init()
 			}
 			local ffplayer = require "ffplayer"
 			if ffmpeg_as then ffmpeg_as:close() end
-			if sp then sp:removeFromParent() end
+			if sp then 
+				sp:removeFromParent()
+				sp=nil
+			end
+			if sp2 then
+				sp2:removeFromParent()
+				sp2=nil			
+			end
+			if idx > #moveies then
+				idx = 3
+			end
 			ffmpeg_as = ffplayer.playStream(moveies[idx],function(state,stream,tx)
 					if state ~=5 then
 						print( "state:"..state)
@@ -350,17 +360,18 @@ function AppEntry:init()
 						sp:setAnchorPoint(cc.p(0,0))
 						sp:setPosition(cc.p(0,0))
 						bg:addChild(sp)
-						sp = cc.Sprite:createWithTexture(tx)
-						sp:setScaleX(2)
-						sp:setScaleY(2)
-						sp:setAnchorPoint(cc.p(0,0))
-						sp:setPosition(cc.p(stream.width,0))					
-						bg:addChild(sp)
+						sp2 = cc.Sprite:createWithTexture(tx)
+						sp2:setScaleX(2)
+						sp2:setScaleY(2)
+						sp2:setAnchorPoint(cc.p(0,0))
+						sp2:setPosition(cc.p(stream.width,0))					
+						bg:addChild(sp2)
 						--stream:pause()
 					elseif state==ffplayer.STATE_PROGRESS then
 						print( "progress "..math.floor(10000*stream.current/stream.length)/100)
 					end
 				end)
+				idx = idx + 1
 		end}		
 	bg:addChild(ff)
 	local as

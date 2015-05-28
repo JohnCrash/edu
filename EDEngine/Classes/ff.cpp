@@ -2147,7 +2147,7 @@ static int audio_thread(void *arg){
 			}
 			goto the_end;
 		}
-
+		is->sampq.eof = 0;
 		if (got_frame) {
 			//tb = (AVRational){ 1, frame->sample_rate };
 			tb.num = 1;

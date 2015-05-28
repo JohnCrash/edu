@@ -1,6 +1,10 @@
 local ff = require "ff"
 local uikits = require "uikits"
 
+local function isSupport()
+	return ff
+end
+
 local function playStream( filename,event_func )
 	local as = ff.new(filename)
 	local state = 0
@@ -71,4 +75,5 @@ return {
 	STATE_PROGRESS = 5,
 	STATE_OPEN_VIDEO = 6,
 	playStream = playStream,
+	isSupport = isSupport,
 }
