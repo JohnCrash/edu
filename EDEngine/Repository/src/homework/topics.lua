@@ -622,6 +622,7 @@ local function attachment_ui_player( t )
 			if v and type(v)=='string' and string.len(v)>4 then
 				local ex = string.lower( string.sub(v,-3) )
 				if ex=='mp3' or ex=='wav' then
+					local ffplayer = require "ffplayer"
 					local pbox = uikits.fromJson{file=ui.PLAYBOX}
 					if pbox then
 						pbox:setAnchorPoint(cc.p(0.5,0))
@@ -629,24 +630,35 @@ local function attachment_ui_player( t )
 						local play_but = uikits.child(pbox,ui.PLAY)
 						local pause_but = uikits.child(pbox,ui.PAUSE)
 						local file = cache.get_name(v)
-						local snd_idx
+						local as
 						play_but:setVisible(true)
 						pause_but:setVisible(false)
+						local as = ffplayer.playSound("TOPICS",file,
+						function(state,as)
+							if state==ffplayer.STATE_END then
+								if play_but and pause_but and cc_isobj(play_but) and cc_isobj(pause_but) then
+									play_but:setVisible(true)
+									pause_but:setVisible(false)		
+								end
+							end
+						end)	
 						uikits.event(play_but,
 							function(sender)
-								snd_idx = uikits.playSound(file)
-						--		play_but:setVisible(false)
-						--		pause_but:setVisible(true)
+								if as and as.isOpen and not as.isPlaying then
+									as:seek(0)
+									as:play()
+									play_but:setVisible(false)
+									pause_but:setVisible(true)
+								end
 							end,'began' )
-							--[[ 目前声音不支持监听状态
 						uikits.event(pause_but,
 							function(sender)
-								if snd_idx then
+								if as and as.isOpen and as.isPlaying then
+									as:pause()
 									play_but:setVisible(true)
-									pause_but:setVisible(false)
-									uikits.pauseSound(snd_idx)							
+									pause_but:setVisible(false)					
 								end
-							end,'began') --]]
+							end,'began')
 					end
 					return pbox
 				end

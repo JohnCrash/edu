@@ -1,4 +1,5 @@
 local ff = require "ff"
+local kits = require "kits"
 local uikits = require "uikits"
 
 local function isSupport()
@@ -29,8 +30,8 @@ local function playStream( filename,event_func )
 				eventFunc(state)
 			elseif state == 1 and not as.isOpen then
 				eventFunc(0)
-				cc.TextureCache:getInstance():removeUnusedTextures()
 				if _texture then _texture:release() end
+				cc.TextureCache:getInstance():removeUnusedTextures()
 				return false
 			end
 			if state == 1 then
@@ -65,6 +66,52 @@ local function playStream( filename,event_func )
 	return as
 end
 
+local _soundGroup = {}
+local function playSound( group,file,eventCallback )
+	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
+		local filename = file
+		if kits.exist_cache(file) then
+			filename = kits.get_cache_path()..file
+		end
+		local as = playStream( filename,eventCallback )
+		if as then
+			_soundGroup[group] = _soundGroup[group] or {}
+			table.insert(_soundGroup[group],as)
+			return as
+		else
+			kits.log('ERROR ffplayer.playSound can not open '..tostring(file))
+		end
+	else
+		kits.log('ERROR ffplayer.playSound file not exist '..tostring(file))
+	end
+end
+
+local function stopSoundGroup( group )
+	if _soundGroup[group] then
+		for k,v in pairs(_soundGroup[group]) do
+			if v and v.isOpen then
+				v:close()
+			end
+		end
+		_soundGroup[group] = {}
+	end
+end
+
+local function stopAllGroup()
+	for k,v in pairs(_soundGroup) do
+		for i,as in pairs(v) do
+			if as and as.isOpen then
+				as:close()
+			end
+		end
+	end
+	_soundGroup = {}
+end
+
+local function getSoundGroup()
+	return _soundGroup
+end
+
 return {
 	STATE_CLOSE = 0,
 	STATE_OPEN = 1,
@@ -75,5 +122,9 @@ return {
 	STATE_PROGRESS = 5,
 	STATE_OPEN_VIDEO = 6,
 	playStream = playStream,
+	playSound = playSound,
+	stopSoundGroup = stopSoundGroup,
+	stopAllGroup = stopAllGroup,
+	getSoundGroup = getSoundGroup,
 	isSupport = isSupport,
 }

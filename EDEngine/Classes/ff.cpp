@@ -1201,7 +1201,6 @@ static int getAudioChanelCount()
 	}
 	return count;
 }
-static const int MAX_VOLUME = 128 * 128;
 const int max_audioval = ((1 << (16 - 1)) - 1);
 const int min_audioval = -(1 << (16 - 1));
 int clamp(int d,int mi,int ma)
@@ -1244,7 +1243,7 @@ static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 
 static bool gInitAudio = false;
 static AudioSpec gSpec;
-static bool initAudio(AudioSpec *desired, AudioSpec *obtained)
+static int initAudio(AudioSpec *desired, AudioSpec *obtained)
 {
 	int ret = 0;
 	if (!OpenAudioChanel((VideoState *)desired->userdata, desired->callback))
@@ -1253,6 +1252,12 @@ static bool initAudio(AudioSpec *desired, AudioSpec *obtained)
 	{
 		desired->callback = sdl_mx_audio_callback;
 		ret = OpenAudio(desired, &gSpec);
+		if (gSpec.format != AUDIO_S16SYS)
+		{
+			My_log(NULL, AV_LOG_ERROR, "Close audio device!\n");
+			CloseAudio();
+			return -1;
+		}
 		if ( ret >= 0 )
 			PauseAudio(0);
 		gInitAudio = true;
@@ -1316,6 +1321,7 @@ static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb
 			if (!wanted_spec.freq) {
 				My_log(NULL, AV_LOG_ERROR,
 					"No more combinations to try, audio open failed\n");
+				CloseAudio();
 				return -1;
 			}
 		}
@@ -1324,6 +1330,7 @@ static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb
 	if (spec.format != AUDIO_S16SYS) {
 		My_log(NULL, AV_LOG_ERROR,
 			"SDL advised audio format %d is not supported!\n", spec.format);
+		CloseAudio();
 		return -1;
 	}
 	if (spec.channels != wanted_spec.channels) {
@@ -1331,6 +1338,7 @@ static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb
 		if (!wanted_channel_layout) {
 			My_log(NULL, AV_LOG_ERROR,
 				"SDL advised channel count %d is not supported!\n", spec.channels);
+			CloseAudio();
 			return -1;
 		}
 	}
@@ -1343,6 +1351,7 @@ static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb
 	audio_hw_params->bytes_per_sec = av_samples_get_buffer_size(NULL, audio_hw_params->channels, audio_hw_params->freq, audio_hw_params->fmt, 1);
 	if (audio_hw_params->bytes_per_sec <= 0 || audio_hw_params->frame_size <= 0) {
 		My_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size failed\n");
+		CloseAudio();
 		return -1;
 	}
 	return spec.size;
