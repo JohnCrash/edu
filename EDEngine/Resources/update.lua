@@ -15,8 +15,10 @@ local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local versionNUM = resume.getversion()
-local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/debug/'
+local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
 --local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server

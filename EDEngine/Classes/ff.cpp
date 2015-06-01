@@ -1225,6 +1225,9 @@ static void MixAudioFormat(Sint16 *des, Sint16 *src, AudioFormat format,int len,
 
 static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 {
+	My_log(nullptr,AV_LOG_WARNING,"sdl_mx_audio_callback %d",len);
+	//memcpy(stream,0,len);
+	/*
 	AudioFormat format = AUDIO_S16SYS;
 	memset(stream, 0, len);
 	Uint8 * mixData = new Uint8[len];
@@ -1239,6 +1242,7 @@ static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 		}
 	}
 	delete [] mixData;
+	*/
 }
 
 static bool gInitAudio = false;

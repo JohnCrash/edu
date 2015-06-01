@@ -100,6 +100,10 @@ def write_json(root):
 	
 def copyjson(dir):
 	try:
+		os.makedirs("output/"+dir)
+	except OSError  as err:
+		pass
+	try:
 		shutil.copy(dir+"/version.json","output/"+dir+"/version.json")
 		shutil.copy(dir+"/filelist.json","output/"+dir+"/filelist.json")
 	except OSError as err:

@@ -23,7 +23,23 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/RenderTextureEx.cpp \
 				   ../../Classes/misc.cpp \
 				   ../../Classes/IDF.cpp \
-				   JniLaunch.cpp
+				   ../../Classes/ff.cpp \
+				   ../../Classes/FFVideo.cpp \
+				   ../../Classes/lua_ffmpeg.cpp \
+				   ../../Classes/SDL.cpp \
+				   ../../Classes/SDLAudio.cpp \
+				   ../../Classes/SDL_androidaudio.cpp \
+				   ../../Classes/SDLAUdioCVT.cpp \
+				   ../../Classes/SDLAudioTypeCVT.cpp \
+				   ../../Classes/SDLEvent.cpp \
+				   ../../Classes/SDLMixer.cpp \
+				   ../../Classes/SDLOverlay.cpp \
+				   ../../Classes/SDLSurface.cpp \
+				   ../../Classes/SDLThread.cpp \
+				   ../../Classes/SDLVideo.cpp \
+				   ../../Classes/SDLWindow.cpp \
+				   JniLaunch.cpp \
+				   SDLAudioJNI.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
@@ -35,7 +51,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES := cocos_lua_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocosdenshion_static
 LOCAL_WHOLE_STATIC_LIBRARIES += box2d_static
-
+LOCAL_WHOLE_STATIC_LIBRARIES += ffmpeg_static
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -43,3 +59,4 @@ include $(BUILD_SHARED_LIBRARY)
 $(call import-module,audio/android)
 $(call import-module,Box2D)
 $(call import-module,scripting/lua-bindings)
+$(call import-module,ffmpeg/prebuilt/android)

@@ -2,6 +2,9 @@ local ff = require "ff"
 local kits = require "kits"
 local uikits = require "uikits"
 
+local _soundGroup = {}
+local _allStreams = {}
+
 local function isSupport()
 	return ff
 end
@@ -11,6 +14,7 @@ local function playStream( filename,event_func )
 	local state = 0
 	local play_state = 3
 	local _texture
+	local layer
 	
 	local function eventFunc(state,param)
 		if event_func then
@@ -22,6 +26,7 @@ local function playStream( filename,event_func )
 			if as.isError then
 				eventFunc(-1,as)
 				as:close()
+				_allStreams[as] = nil
 				return false
 			end		
 			if state == 0 and as.isOpen then
@@ -32,6 +37,7 @@ local function playStream( filename,event_func )
 				eventFunc(0)
 				if _texture then _texture:release() end
 				cc.TextureCache:getInstance():removeUnusedTextures()
+				_allStreams[as] = nil
 				return false
 			end
 			if state == 1 then
@@ -62,11 +68,11 @@ local function playStream( filename,event_func )
 			end			
 			return true
 		end,1/30)
+		_allStreams[as] = as
 	end
 	return as
 end
 
-local _soundGroup = {}
 local function playSound( group,file,eventCallback )
 	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local filename = file
@@ -111,6 +117,29 @@ end
 local function getSoundGroup()
 	return _soundGroup
 end
+
+local _pauseStreams={}
+local directorEventDispatcher = cc.Director:getInstance():getEventDispatcher()
+local onPause = cc.EventListenerCustom:create("event_come_to_background",
+	function(event)
+		kits.log("OnPause")
+		for as,v in pairs(_allStreams) do
+			if as and v and (as.isOpen and as.isPlaying and not as.isEnd) then
+				as:pause()
+				table.insert(_pauseStreams,as)
+			end
+		end
+	end)
+local onResume = cc.EventListenerCustom:create("event_come_to_foreground",
+	function(event)
+		kits.log("OnResume")
+		for i,as in pairs(_pauseStreams) do
+			as:play()
+		end
+		_pauseStreams = {}
+	end)
+directorEventDispatcher:addEventListenerWithFixedPriority(onPause,1)
+directorEventDispatcher:addEventListenerWithFixedPriority(onResume,1)
 
 return {
 	STATE_CLOSE = 0,

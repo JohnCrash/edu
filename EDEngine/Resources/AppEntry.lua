@@ -375,12 +375,13 @@ function AppEntry:init()
 		end}		
 	bg:addChild(ff)
 	local as
-	local ffplay = uikits.button{caption='FFAUDIO',x=664*scale,y = 164*scale + 4*item_h+100,
+	local ffplay = uikits.button{caption='FFAUDIO',x=464*scale,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			local ffplayer = require "ffplayer"
 			if as then as:close() end
-			as = ffplayer.playStream("g:/Maps.mp3",
+			local filename = "G:/Maps.mp3"
+			as = ffplayer.playStream(filename,
 				function(state,as)
 					print("STATE:"..state)
 					if state == ffplayer.STATE_PROGRESS then
@@ -390,18 +391,18 @@ function AppEntry:init()
 					end
 				end)
 		end}
-	local play = uikits.button{caption='play',x=664*scale+300,y = 164*scale + 4*item_h+100,
+	local play = uikits.button{caption='play',x=464*scale+300,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			as:seek(as.length*0.9)
+			as:seek(as.length*0)
 			as:play()
 		end}
-	local pause = uikits.button{caption='pause',x=664*scale-300,y = 164*scale + 4*item_h+100,
+	local pause = uikits.button{caption='pause',x=464*scale-300,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			as:pause()
 		end}		
-	local close = uikits.button{caption='close',x=664*scale-600,y = 164*scale + 4*item_h+100,
+	local close = uikits.button{caption='close',x=464*scale-600,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			as:close()
