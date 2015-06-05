@@ -769,9 +769,9 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 	if obj and func then
 		 local scheduler = obj:getScheduler()
 		 local schedulerID
-		 local function delay_call_func()
+		 local function delay_call_func(dt)
 			if not schedulerID then return end
-			local err,ret = pcall(func,param1,param2,param3)
+			local err,ret = pcall(func,dt,param1,param2,param3)
 			if not err or not ret then
 				scheduler:unscheduleScriptEntry(schedulerID)
 				schedulerID = nil		
@@ -780,7 +780,8 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 				end				
 			end
 		end
-		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)	
+		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)
+		return schedulerID
 	end
 end
 
