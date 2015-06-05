@@ -1,3 +1,4 @@
+require "AudioEngine" 
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
@@ -12,6 +13,11 @@ local ui = {
 	PROGRESS = 'ding/jindu',
 	SCORE = 'ding/defen',
 	ANIMATION_RGN = "ding/donghua",
+	
+	ZI1 = "zi1/wen",
+	ZI2 = "zi2/wen",
+	ZI3 = "zi3/wen",
+	ZI4 = "zi4/wen",
 	
 	TIMEOVER_WINDOW = 'js1',
 	SUCCESS_WINDOW = 'js2',
@@ -40,6 +46,72 @@ function battle.create(arg)
 	end	
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
+end
+
+--修改游戏声效
+function battle:play_sound( idx )
+	local name
+	
+	if self._player_data and self._player_data.sound then
+		if idx == SND_UI_CLICK then
+			name = 'hitmouse/snd/qiaoda.mp3'
+		elseif idx == SND_CLICK then
+			name = 'hitmouse/snd/qiaoda.mp3'
+		elseif idx == SND_MISS then
+			name = 'hitmouse/snd/shibai.MP3'
+		elseif idx == SND_HIT then
+			name = 'hitmouse/snd/beida.MP3'
+		elseif idx == SND_RIGHT then
+			name = 'hitmouse/snd/zhengque.MP3'
+		elseif idx == SND_FAIL then
+			name = 'hitmouse/snd/shibai.mp3'
+		elseif idx == SND_NEXT_PROM then
+			name = 'hitmouse/snd/guoguan.MP3'
+		elseif idx == SND_PASS then
+			name = 'hitmouse/snd/complete.mp3'
+		elseif idx == SND_GOLD then
+			name = 'hitmouse/snd/gold.mp3'
+		else
+			return
+		end
+		kits.log( "Play sound: "..name )
+		AudioEngine.playEffect(name)
+	end
+end
+
+function battle:stop_music()
+	if AudioEngine.isMusicPlaying () then
+		AudioEngine.stopMusic()
+	end
+end
+
+function battle:play_music()
+	local name
+	
+	if AudioEngine.isMusicPlaying () then
+		return
+	end
+	local idx = math.random(1,3)
+	if self._music_idx then
+		for i=1,10 do
+			if idx ~= self._music_idx then
+				self._music_idx = idx
+				break
+			end
+			idx = math.random(1,3)
+		end
+	else
+		self._music_idx = idx
+	end
+	if self._player_data and self._player_data.music then
+		if idx <=3 and idx >= 1 then
+			name = 'hitmouse/snd/beijing'..idx..'.mp3'
+		else
+			return
+		end
+		
+		AudioEngine.playMusic( name,true )
+	end
 end
 
 function battle:initGame( arg )
@@ -103,7 +175,7 @@ function battle:init_role()
 			bone:changeDisplayWithIndex(0,true)
 		end
 		self:addChild(self._amouse[i],111)
-		self._choose_text[i]:setFontSize(50)
+		self._choose_text[i]:setFontSize(100)
 		self._choose_text[i]:setColor(cc.c3b(0,0,0))
 	end	
 	--锤子
@@ -187,6 +259,83 @@ function battle:judge(i)
 	end
 end
 
+--延迟调用
+function battle:delay_call(func,param,delay)
+	local schedulerID
+	if func == nil then
+		kits.log( "func = nil?")
+		return
+	end
+	if not schedulerID then
+		local function delay_call_func()
+			self._scheduler:unscheduleScriptEntry(schedulerID)
+			schedulerID = nil		
+			func(self,param)
+		end
+		schedulerID = self._scheduler:scheduleScriptFunc(delay_call_func,delay,false)
+	end	
+end
+
+--显示正确答案n=1 or n=2
+function battle:show_right_word( n,b )
+	local text = self._cn_label:getString()
+	if text and n <= self._yes_num then
+		if self._yes_num > 1 then
+			text = string.gsub(text,'　',self._yes[n],1)
+		else
+			text = string.gsub(text,'　',self._yes[n])
+		end
+		self._cn_label:setString(text)
+	end
+	--答对设置积分增加
+	if b then
+		self._fen_adding = self._fen_adding + 100 + 10*self._fen_mul
+		self._fen_mul = self._fen_mul + 1
+		--提示已经过关
+		if self._pass or self:getIntegration() > 60 then
+			self:play_sound(SND_PASS)
+			self._xing:setVisible(true)
+			self._xing_time = self._game_time
+			self._xing:getAnimation():playWithIndex(0)
+			self._pass = true
+		end
+	end
+end
+
+--开始下一个词
+function battle:reload_scene(b)
+	for i=1,4 do
+		self._amouse[i]:getAnimation():playWithIndex(0)
+	end
+	self:next_select()
+end
+
+--正确
+function battle:show_right(i)
+	--重置
+	self._fen_mul = 1
+	
+	self._error_num = self._error_num + 1
+	if self._errors[#self._errors] ~= self._word_index-1 then
+		self._errors[#self._errors+1] = self._word_index-1
+	end
+	self:hummer_home()
+	for i,v in ipairs(self._rand_idx) do
+		if v == 1 then
+			self._amouse[i]:getAnimation():playWithIndex(6)
+			self:delay_call(self.reload_scene,true,3)
+		elseif v == 2 and self._yes_num==2 then
+			self._amouse[i]:getAnimation():playWithIndex(6)
+		end
+	end
+	if self._answer_num == 1 then
+		self:show_right_word(1,false)
+		self:show_right_word(2,false)
+	elseif self._answer_num == 2 then
+		self:show_right_word(2,false)
+	end
+end
+
 function battle:init_event()
 	local function onTouchBegan(touches,event)
 		local p = touches[1]:getLocation()
@@ -258,7 +407,6 @@ end
 function battle:init_data( i )
 	i = i or 1
 	local filename = 'res/amouse/data/'..tostring(i)..'.xml'
-	--filename = cc.FileUtils:getInstance():fullPathForFilename(filename)
 	local promble_xml = kits.read_local_file(filename)
 	self._words = {} --全部词语
 	self._time_limit = 60 --时限
@@ -333,8 +481,6 @@ function battle:init_timer()
 
 				if self._game_time > self._time_limit then
 					--time over
-					self._scheduler:unscheduleScriptEntry(self._schedulerEntry)
-					self._schedulerEntry = nil
 					self._pause = true -- 暂停游戏
 					self:game_over()
 				end
@@ -343,6 +489,10 @@ function battle:init_timer()
 		end
 	end
 	uikits.delay_call(self,timer_update,1.0)
+end
+
+--游戏结束
+function battle:game_over()
 end
 
 --设置剩余的题数
@@ -354,11 +504,12 @@ end
 
 --选择第index个词语
 function battle:select_word(index)
-	if not self._cn_label then
-		kits.log("ERROR battle:select_word self._cn_label = nil")
-		return
-	end
-	self._cn_label:setString(self._words[index].name)
+	print(self._words[index].name)
+	--if not self._cn_label then
+	--	kits.log("ERROR battle:select_word self._cn_label = nil")
+	--	return
+	--end
+	--self._cn_label:setString(self._words[index].name)
 	local prob = self._words[index].answer
 	local length = cc.utf8.length(prob)
 	local text_idx = 1
@@ -397,6 +548,53 @@ function battle:select_word(index)
 			self._word_index = self._word_index + 1
 			self:next_select()
 		end
+	end
+end
+
+--多次偏移
+function battle:rand_idx_loop(n)
+	for i=1,n do
+		self:random_idx()
+	end
+end
+
+function battle:random_idx()
+	local n1 = math.random(1,4)
+	local n2
+	repeat
+		n2 = math.random(1,4)
+	until n1 ~= n2
+	--xchang
+	local temp = self._rand_idx[n1]
+	self._rand_idx[n1] = self._rand_idx[n2]
+	self._rand_idx[n2] = temp
+end
+
+function battle:merge_word(yp,np)
+	local p = {}
+	for i,v in ipairs(yp) do
+		p[#p+1] = v
+	end
+	for i,v in ipairs(np) do
+		p[#p+1] = v
+	end
+	return p			
+end
+
+--设置词语yp,np.正确答案，错误答案
+function battle:set_word( yp,np )
+	--合并到一个4个表中
+	local p = self:merge_word(yp,np)
+	--随机移动
+	self:rand_idx_loop(5)
+	self._yes_num = #yp
+	self._yes = yp
+	if self._yes_num > 0 and #p == 4 then
+		for i,v in ipairs(self._rand_idx) do
+			self._choose_text[i]:setString(p[v])
+		end
+	else
+		kits.log("Error word")
 	end
 end
 
@@ -467,6 +665,7 @@ function battle:init()
 	if not self._root then
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		self:addChild(self._root)
+		self._scheduler = self:getScheduler()
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,function(sender)
 			uikits.popScene()
@@ -475,6 +674,10 @@ function battle:init()
 		self._time_bar = uikits.child(self._root,ui.PROGRESS)
 		self._pnum_label = uikits.child(self._root,ui.NUMBER)
 		self._fen_label = uikits.child(self._root,ui.SCORE)
+		self._cn_1 = uikits.child(self._root,ui.ZI1)
+		self._cn_2 = uikits.child(self._root,ui.ZI2)
+		self._cn_3 = uikits.child(self._root,ui.ZI3)
+		self._cn_4 = uikits.child(self._root,ui.ZI4)
 		self:init_role()
 		self:init_event()
 		self:startStage()
@@ -482,7 +685,10 @@ function battle:init()
 end
 
 function battle:release()
-	
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_1)
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_2)
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_3)
+	self:stop_music()
 end
 
 return battle
