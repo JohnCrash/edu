@@ -166,7 +166,7 @@ function AppEntry:init()
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				login.set_selector(2)
-				local hitmouse = require "amouse/amouse_om"
+				local hitmouse = require "hitmouse/matchview"
 				return hitmouse.create()
 				end}
 		end}
