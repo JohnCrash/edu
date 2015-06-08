@@ -21,12 +21,15 @@ local ui = {
 local gradeview = class("gradeview")
 gradeview.__index = gradeview
 
-function gradeview.create(block_id,enable,match_id)
+function gradeview.create(block_id,enable,match_id,match_rank,match_name)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),gradeview)
 	layer.block_id = block_id
 	layer.enable = enable
 	layer.match_id = match_id
+	layer.match_rank = match_rank
+	layer.match_name = match_name
+	
 	scene:addChild(layer)
 	local function onNodeEvent(event)
 		if "enter" == event then
@@ -106,7 +109,7 @@ function gradeview:show_history_list()
 		scroll_size.height = all_height
 		view_cur_match:setPositionY(scroll_size.height-size_cur_match.height)
 	end
-	view_mine:setInnerContainerSize(scroll_size)	
+	size_all:setInnerContainerSize(scroll_size)	
 		
 	local pos_y_start = scroll_size.height - size_cur_match.height - size_his_match_src.height
 	view_his_match_src:setVisible(false)	
@@ -114,12 +117,12 @@ function gradeview:show_history_list()
 		local cur_pro = view_his_match_src:clone()
 		cur_pro:setVisible(true)
 		cur_pro:setPositionY(pos_y_start-(i-1)*(size_his_match_src.height))
-		view_mine:addChild(cur_pro,1,10000+i)
+		size_all:addChild(cur_pro,1,10000+i)
 		
 	end
 	
-	local but_mine_repw = uikits.child(self._gradeview,ui.BUTTON_MINE_REPW)
-	uikits.event(but_mine_repw,	
+	local but_detail = uikits.child(size_his_match_src,ui.BUTTON_DETAIL)
+	uikits.event(but_detail,	
 		function(sender,eventType)
 			--uikits.pushScene( resetpwview.create() )
 	end)

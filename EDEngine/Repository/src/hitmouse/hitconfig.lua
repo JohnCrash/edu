@@ -4,6 +4,7 @@ local login = require "login"
 local cache = require "cache"
 local uikits = require "uikits"
 local ljshell = require "ljshell"
+local md5 =  require 'md5'
 
 local function put_lading_circle( parent )
 	local size
@@ -79,7 +80,7 @@ local flag_dictionary = {
 {title = '错误',content='未知错误',button_type = 3,},	 		--自定义弹出框
 }
 
-local function messagebox(parent,flag,func,txt_title,txt_content)
+local function messagebox(parent,flag,func,txt_content)
 	local s = uikits.fromJson{file=ui.MSGBOX}
 	local content = uikits.child(s,ui.CONTENT)
 	local title = uikits.child(s,ui.TITLE)
@@ -315,7 +316,7 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 											if e == OK then
 											
 											end
-										end,'提示',tb_result.c..' : '..tb_result.msg)	
+										end,tb_result.c..' : '..tb_result.msg)	
 									end
 									end)
 					--	end
@@ -325,13 +326,13 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 						if e == OK then
 							cc.Director:getInstance():endToLua()
 						end
-					end,'提示','您的账号正在其它设备登录')	
+					end,'您的账号正在其它设备登录')	
 				else
 					messagebox(parent,DIY_MSG,function(e)
 						if e == OK then
 							cc.Director:getInstance():endToLua()
 						end
-					end,'提示',tb_result.c..' : '..tb_result.msg)		
+					end,tb_result.c..' : '..tb_result.msg)		
 				end
 			elseif  tb_result.c > 599 then
 				func(tb_result.c,tb_result.msg)
@@ -488,6 +489,43 @@ end
 local function get_id_flag()
 	return id_flag
 end
+
+local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
+
+local function get_user_id(parent)
+	cache.request_json( get_uesr_info_url,function(t)
+		if t and type(t)=='table' then
+			if 	t.result ~= 0 then				
+				messagebox(parent,DIY_MSG,function(e)
+					if e == OK then
+						
+					end
+				end,t.result..' : '..t.msg)		
+			else
+				local user_id
+				if t.uig[1].user_role == 1 then	--xuesheng
+					user_id = ID_FLAG_STU
+				elseif t.uig[1].user_role == 2 then	--parent
+					user_id = ID_FLAG_TEA
+				elseif t.uig[1].user_role == 3 then	--teacher
+					user_id = ID_FLAG_TEA
+				elseif t.uig[1].user_role >10 and t.uig[1].user_role <15 then	--manager
+					user_id = ID_FLAG_SCH
+				else
+					user_id = ID_FLAG_TEA
+				end
+				set_id_flag(user_id)
+			end	
+		else
+			messagebox(parent,NETWORK_ERROR,function(e)
+				if e == RETRY then
+					get_user_id(parent)
+				end
+			end)
+		end
+	end,'N')	
+end
+
 return {
 	post_data = post_data_by_new_form,
 	messagebox = messagebox,
@@ -519,4 +557,5 @@ return {
 	ID_FLAG_SCH = ID_FLAG_SCH,
 	circle = put_lading_circle,
 	set_base_rid = set_base_rid,
+	get_user_id = get_user_id,
 }
