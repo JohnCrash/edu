@@ -4,6 +4,7 @@ local login = require "login"
 local cache = require "cache"
 local uikits = require "uikits"
 local ljshell = require "ljshell"
+local md5 =  require 'md5'
 
 local function put_lading_circle( parent )
 	local size
