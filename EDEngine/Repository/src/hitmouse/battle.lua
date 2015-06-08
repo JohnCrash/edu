@@ -3,15 +3,18 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local lxp = require "lom"
+local json = require "json-c"
+local level = require "hitmouse/level"
 
 local ui = {
 	FILE = 'hitmouse/zuoti.json',
-	FILE_3_4 = 'hitmouse/zuoti.json',
+	FILE_3_4 = 'hitmouse/zuoti43.json',
 	TOPBAR = 'ding',
 	BACK = 'ding/hui',
 	NUMBER = 'ding/tu/tishu',
 	PROGRESS = 'ding/jindu',
 	SCORE = 'ding/defen',
+	SCORE_RECT = 'ding/donghua',
 	ANIMATION_RGN = "ding/donghua",
 	
 	ZI1 = "zi1/wen",
@@ -26,6 +29,18 @@ local ui = {
 	ANIMATION_1 = "hitmouse/NewAnimation/NewAnimation.ExportJson",
 	ANIMATION_2 = "hitmouse/chong_zi/chong_zi.ExportJson",
 	ANIMATION_3 = "hitmouse/defen/defen.ExportJson",
+	
+	USE_TIME = 'js1/sj',
+	RIGHT_COUNT = 'js1/tisu',
+	SCORE_COUNT = 'js1/defen',
+	TIME_OVER_BUT = 'js1/quer',
+	
+	USE_TIME2 = 'js2/sj',
+	RIGHT_COUNT2 = 'js2/tisu',
+	SCORE_COUNT2 = 'js2/defen',
+	SUCCESS_OVER_BUT = 'js2/quer',	
+	
+	FAILED_OVER_BUT = 'js3/quer',
 }
 
 local battle = class("battle")
@@ -174,7 +189,7 @@ function battle:init_role()
 			bone:addDisplay(self._choose_text[i],0)
 			bone:changeDisplayWithIndex(0,true)
 		end
-		self:addChild(self._amouse[i],111)
+		self:addChild(self._amouse[i])
 		self._choose_text[i]:setFontSize(100)
 		self._choose_text[i]:setColor(cc.c3b(0,0,0))
 	end	
@@ -182,7 +197,17 @@ function battle:init_role()
 	self._hummer = ccs.Armature:create("NewAnimation")
 	self:hummer_home()
 	self._hummer:getAnimation():playWithIndex(1)
-	self:addChild(self._hummer,2000)	
+	self:addChild(self._hummer,2000)
+	
+	self._defenAnimation = ccs.Armature:create("defen")
+	self._defenAnimation:getAnimation():playWithIndex(0)
+	self._fen_animation_is_show = false
+	self._topbar:addChild(self._defenAnimation)
+	self._defenAnimation:setVisible(false)
+	self._defenAnimation:setAnchorPoint(cc.p(0,0))
+	self._score_rect = uikits.child(self._root,ui.SCORE_RECT)
+	local x,y = self._score_rect:getPosition()
+	self._defenAnimation:setPosition(cc.p(x,y))
 end
 
 function battle:hummer_home()
@@ -276,16 +301,58 @@ function battle:delay_call(func,param,delay)
 	end	
 end
 
+function battle:utf8_string_to_table( w )
+	local length = cc.utf8.length(w)
+	local t = {}
+	if length and length > 1 then
+		local idx = 0
+		repeat
+			local idx2 = cc.utf8.next(w,idx)
+			if idx2 then
+				table.insert(t,string.sub(w,idx+1,idx+idx2))
+				idx = idx2 + idx
+			end
+		until #t >= length
+	end
+	return t
+end
+
+function battle:set_topics_word( w )
+	self._topics_world = w
+	local t = self:utf8_string_to_table(w)
+	local idx = 1
+	for i=1,#t do
+		local c = t[i]
+		if c~='(' and c~=')' then
+			self._cn_label[idx]:setString(c)
+			idx = idx + 1
+		end
+		if idx > 4 then
+			break
+		end
+	end
+end
+
+function battle:get_topics_word()
+	return self._topics_world or ""
+end
+
+function battle:flash_xing()
+	--self._xing:setVisible(true)
+	--self._xing_time = self._game_time
+	--self._xing:getAnimation():playWithIndex(0)
+end
+
 --显示正确答案n=1 or n=2
 function battle:show_right_word( n,b )
-	local text = self._cn_label:getString()
+	local text = self:get_topics_word() --self._cn_label:getString()
 	if text and n <= self._yes_num then
 		if self._yes_num > 1 then
 			text = string.gsub(text,'　',self._yes[n],1)
 		else
 			text = string.gsub(text,'　',self._yes[n])
 		end
-		self._cn_label:setString(text)
+		self:set_topics_word( text ) --self._cn_label:setString(text)
 	end
 	--答对设置积分增加
 	if b then
@@ -294,11 +361,27 @@ function battle:show_right_word( n,b )
 		--提示已经过关
 		if self._pass or self:getIntegration() > 60 then
 			self:play_sound(SND_PASS)
-			self._xing:setVisible(true)
-			self._xing_time = self._game_time
-			self._xing:getAnimation():playWithIndex(0)
+			self:flash_xing()
 			self._pass = true
 		end
+	end
+end
+
+--取得积分1-100
+function battle:getIntegration()
+	--对错占80% , 时间占20%
+	local r_rate = 1
+	local t_rate = 0
+	
+	if self._words and #self._words >= 1 and 
+		self._word_index >= self._error_num then
+		local ra = (100*r_rate)/#self._words --每题多少分数
+		local td = (self._time_limit-self._game_time+1)/self._time_limit
+		if td > t_rate then td = t_rate end
+		if td < 0 then td = 0 end
+		return ra*self._right_num + td*100
+	else
+		return 0
 	end
 end
 
@@ -406,32 +489,18 @@ end
 --初始化游戏数据,i代表关卡,1-10
 function battle:init_data( i )
 	i = i or 1
-	local filename = 'res/amouse/data/'..tostring(i)..'.xml'
-	local promble_xml = kits.read_local_file(filename)
-	self._words = {} --全部词语
+	level.init()
+	self._words = {}
+	self._time_limit = 30 --时限
+	self._word_num = 20 --词数	
+	local data = level.get{diff1=1,diff2=2568,rand=3,signle=10,dual=10}
+	for k,v in pairs(data) do
+		print(v.name.."		"..v.answer)
+		table.insert(self._words,v)
+	end
 	self._time_limit = 60 --时限
 	self._word_num = 40 --词数
 	math.randomseed(os.time())
-	if promble_xml then
-		local items = lxp.parse(promble_xml)
-	  if items then
-			if items.attr then
-				if items.attr.time_limit then
-					self._time_limit = tonumber(items.attr.time_limit)
-				end
-				if  items.attr.word_num then
-					self._word_num = tonumber(items.attr.word_num)
-				end
-			end
-			for i,v in ipairs(items) do
-				if v.attr and v.attr.name and v.attr.answer then
-					self._words[#self._words+1] = {name=v.attr.name,answer=v.attr.answer}
-				end
-			end
-	  end
-	else
-		kits.log("Can\'t open resource file : "..tostring(filename))
-	end
 	--一次加载全部的词，然后随机挑出_word_num个词
 	if self._word_num <= #self._words then
 		local ws = {}
@@ -482,7 +551,8 @@ function battle:init_timer()
 				if self._game_time > self._time_limit then
 					--time over
 					self._pause = true -- 暂停游戏
-					self:game_over()
+					self:game_over(2)
+					return false
 				end
 			end
 			return true
@@ -492,7 +562,47 @@ function battle:init_timer()
 end
 
 --游戏结束
-function battle:game_over()
+function battle:game_over(mode)
+	if self._game_over_flag then return end
+	self._game_over_flag = true
+	print("Game Over~")
+	local fen100 = self:getIntegration()
+	local b = fen100 > 60
+	kits.log("分数:"..self:getIntegration())
+	
+	self._worm:setVisible(false)
+	local fen_text = tostring(math.floor(self._fen))
+	self._fen_label:setString(fen_text)
+	for i=1,4 do
+		self._amouse[i]:setVisible(false)
+		self._cn_label[i]:getParent():setVisible(false)
+	end
+	if b then
+		--播放成功过关的声音
+		self:play_sound(SND_NEXT_PROM)	
+		if mode == 2 then
+			self._timeover_ui:setVisible(true)
+			uikits.child(self._root,ui.USE_TIME):setString(tostring(self._xing_time))
+			uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
+			uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)			
+		else
+			self._pnum_label:setString("0")
+			self._success_ui:setVisible(true)
+			uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._xing_time))
+			uikits.child(self._root,ui.RIGHT_COUNT2):setString(tostring(self._right_num))
+			uikits.child(self._root,ui.SCORE_COUNT2):setString(fen_text)
+		end
+	else
+		self._failed_ui:setVisible(true)
+	end
+	
+	if b then
+		--提交到网络
+		--self:upload_rank( self._player_data.stage,self._fen )
+	end	
+end
+
+function battle:upload_rank( stage,score )
 end
 
 --设置剩余的题数
@@ -504,12 +614,8 @@ end
 
 --选择第index个词语
 function battle:select_word(index)
-	print(self._words[index].name)
-	--if not self._cn_label then
-	--	kits.log("ERROR battle:select_word self._cn_label = nil")
-	--	return
-	--end
-	--self._cn_label:setString(self._words[index].name)
+	self:set_topics_word(self._words[index].name)
+	
 	local prob = self._words[index].answer
 	local length = cc.utf8.length(prob)
 	local text_idx = 1
@@ -607,7 +713,7 @@ function battle:next_select()
 	self._ideal_pause = false
 	
 	if self._word_index > #self._words then
-		self:game_over()
+		self:game_over(1)
 		return
 	end
 	--设置剩余的题数
@@ -629,6 +735,11 @@ function battle:init_adding_timer()
 		t = t + dt or 0
 		if self._fen_label and cc_isobj(self._fen_label) then
 			if self._fen_adding > 0 then
+				if not self._fen_animation_is_show then
+					self._defenAnimation:setVisible(true)
+					
+					self._fen_animation_is_show = true
+				end
 				if t > old_time+1 then
 					old_time = t
 					self:play_sound( SND_GOLD )
@@ -639,6 +750,9 @@ function battle:init_adding_timer()
 					self._fen =  self._fen + self._fen_adding
 					self._fen_adding = 0
 				end
+			elseif self._fen_animation_is_show then
+				self._defenAnimation:setVisible(false)
+				self._fen_animation_is_show = false
 			end
 			self._fen_label:setString(tostring(math.floor(self._fen)))
 			return true
@@ -659,6 +773,29 @@ function battle:startStage()
 	self:next_select()
 end
 
+function battle:load_player_data()
+	local s = kits.read_local_file('hitmouse.json')
+	if s then
+		self._player_data = json.decode( s )
+	end
+end
+
+function battle:save_player_data()
+	if self._player_data then
+		local s = json.encode( self._player_data )
+		if s then
+			kits.write_local_file('hitmouse.json',s)
+		else
+			kits.log("save_player_data error!")
+		end
+	end
+end
+
+function battle:init_player_data()
+	self:load_player_data()
+	self._player_data = self._player_data or { sound = true,music = true,stage = 1,scroce=0 }
+end
+
 function battle:init()
 	self._ss = cc.size(1920,1080);
 	uikits.initDR{width=self._ss.width,height=self._ss.height}
@@ -674,11 +811,16 @@ function battle:init()
 		self._time_bar = uikits.child(self._root,ui.PROGRESS)
 		self._pnum_label = uikits.child(self._root,ui.NUMBER)
 		self._fen_label = uikits.child(self._root,ui.SCORE)
-		self._cn_1 = uikits.child(self._root,ui.ZI1)
-		self._cn_2 = uikits.child(self._root,ui.ZI2)
-		self._cn_3 = uikits.child(self._root,ui.ZI3)
-		self._cn_4 = uikits.child(self._root,ui.ZI4)
+		self._cn_label = {}
+		table.insert(self._cn_label,uikits.child(self._root,ui.ZI1))
+		table.insert(self._cn_label,uikits.child(self._root,ui.ZI2))
+		table.insert(self._cn_label,uikits.child(self._root,ui.ZI3))
+		table.insert(self._cn_label,uikits.child(self._root,ui.ZI4))
+		self._timeover_ui = uikits.child(self._root,ui.TIMEOVER_WINDOW)
+		self._success_ui = uikits.child(self._root,ui.SUCCESS_WINDOW)
+		self._failed_ui = uikits.child(self._root,ui.FAILED_WINDOW)
 		self:init_role()
+		self:init_player_data()
 		self:init_event()
 		self:startStage()
 	end
