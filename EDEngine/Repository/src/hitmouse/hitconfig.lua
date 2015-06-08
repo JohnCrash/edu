@@ -6,6 +6,7 @@ local uikits = require "uikits"
 local ljshell = require "ljshell"
 local md5 =  require 'md5'
 
+
 local function put_lading_circle( parent )
 	local size
 	if not parent then return end
@@ -478,7 +479,7 @@ local ID_FLAG_STU = 1
 local ID_FLAG_TEA = 2
 local ID_FLAG_SCH = 3
 
-local id_flag = ID_FLAG_STU
+local id_flag = ID_FLAG_SCH
 
 local function set_id_flag(id)
 	if id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_STU then
