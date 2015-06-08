@@ -94,41 +94,6 @@ function battle:play_sound( idx )
 	end
 end
 
-function battle:stop_music()
-	if AudioEngine.isMusicPlaying () then
-		AudioEngine.stopMusic()
-	end
-end
-
-function battle:play_music()
-	local name
-	
-	if AudioEngine.isMusicPlaying () then
-		return
-	end
-	local idx = math.random(1,3)
-	if self._music_idx then
-		for i=1,10 do
-			if idx ~= self._music_idx then
-				self._music_idx = idx
-				break
-			end
-			idx = math.random(1,3)
-		end
-	else
-		self._music_idx = idx
-	end
-	if self._player_data and self._player_data.music then
-		if idx <=3 and idx >= 1 then
-			name = 'hitmouse/snd/beijing'..idx..'.mp3'
-		else
-			return
-		end
-		
-		AudioEngine.playMusic( name,true )
-	end
-end
-
 function battle:initGame( arg )
 	self._game_time = 0
 	if arg and type(arg)=='table' then
@@ -823,6 +788,12 @@ function battle:init()
 		self:init_player_data()
 		self:init_event()
 		self:startStage()
+		self._mut = kits.config("hitmouse_mute","get")
+		if not self._mut then
+			math.randomseed(os.time())
+			music.stop()
+			music.play()
+		end		
 	end
 end
 
@@ -830,7 +801,6 @@ function battle:release()
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_1)
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_2)
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_3)
-	self:stop_music()
 end
 
 return battle

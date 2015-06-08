@@ -2,6 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local level = require "hitmouse/level"
+local music = require "hitmouse/music"
 
 local ui = {
 	FILE = 'hitmouse/load.json',

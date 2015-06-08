@@ -1033,9 +1033,14 @@ local function popScene()
 		--cc.TextureCache:getInstance():removeAllTextures();
 		_pushNum = _pushNum - 1
 	else
+		stopAllSound()
 		kits.log("ERROR popScene")
 		Director:endToLua()
 	end
+end
+
+local function getSceneCount()
+	return _pushNum
 end
 
 local function set_item(c,v)
@@ -2034,4 +2039,5 @@ return {
 	enableMouseWheelIFWindows = enableMouseWheelIFWindows,
 	pushKeyboardListener = pushKeyboardListener,
 	popKeyboardListener = popKeyboardListener,
+	getSceneCount = getSceneCount,
 }
