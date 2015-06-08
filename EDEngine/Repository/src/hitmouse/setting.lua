@@ -1,6 +1,7 @@
 local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
+local music = require "hitmouse/music"
 
 local ui = {
 	FILE = 'hitmouse/shezhi.json',
@@ -38,11 +39,23 @@ function setting:init()
 		uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 			uikits.popScene()
 		end)
+		local check = uikits.child(self._root,ui.MUSIC)
+		self._mut = kits.config("hitmouse_mute","get")
+		check:setSelectedState(not self._mut)
+		uikits.event(check,function(sender)
+			if sender:getSelectedState() then
+				--当前打开声音状态
+				self._mut = false
+				music.play()
+			else
+				self._mut = true
+				music.stop()
+			end
+		end)		
 	end
 end
-
 function setting:release()
-	
+	kits.config("hitmouse_mute",self._mut)
 end
 
 return setting
