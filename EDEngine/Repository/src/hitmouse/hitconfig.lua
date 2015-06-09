@@ -30,6 +30,37 @@ local function put_lading_circle( parent )
 	end
 end
 
+local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
+local function load_logo_pic(handle,uid)
+
+	local function showLogoPic(logo_handle,logo_pic_path)
+		if cc_type(logo_handle) == 'ccui.Button' then
+			logo_handle:loadTextures(logo_pic_path,'')
+		elseif cc_type(logo_handle) == 'ccui.ImageView' then
+			logo_handle:loadTexture(logo_pic_path)
+		end
+	end
+	
+	local local_dir = ljshell.getDirectory(ljshell.AppDir)
+	local file_path = local_dir.."cache/"..uid..'.jpg'
+	if kits.exist_file(file_path) then
+		showLogoPic(handle,file_path)
+		--handle:loadTexture(file_path)
+	else
+		local loadbox = put_lading_circle(handle)
+		local send_url = download_log_url..uid..'/99'
+		cache.request_nc(send_url,
+		function(b,t)
+				if b then
+					showLogoPic(handle,file_path)
+					--handle:loadTexture(file_path)
+				else
+					kits.log("ERROR :  download_pic_url failed")
+				end
+				loadbox:removeFromParent()
+			end,uid..'.jpg')			
+	end
+end
 
 
 local ui = {
@@ -559,4 +590,5 @@ return {
 	circle = put_lading_circle,
 	set_base_rid = set_base_rid,
 	get_user_id = get_user_id,
+	load_logo_pic = load_logo_pic,
 }
