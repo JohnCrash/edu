@@ -2,6 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local hitconfig = require 'hitmouse/hitconfig'
+local rankview = require 'hitmouse/rankview'
 
 
 local ui = {
@@ -163,7 +164,7 @@ function gradeview:show_history_list()
 				send_data.v4 = 100
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
-									uikits.pushScene( resetpwview.create(v) )
+									uikits.pushScene( rankview.create(v) )
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 										if e == hitconfig.OK then
