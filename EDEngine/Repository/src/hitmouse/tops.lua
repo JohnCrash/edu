@@ -2,6 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local level = require "hitmouse/level"
+local http = require "hitmouse/hitconfig"
 
 local ui = {
 	FILE = 'hitmouse/paihang.json',
@@ -41,10 +42,19 @@ function tops:init()
 			uikits.popScene()
 		end)
 		self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
-		for i=1,15 do
-			self._scrollview:additem()
-		end
-		self._scrollview:relayout()
+		local send_data = {V1=1,V2=1,V3=1,V4=24}
+		http.post_data(self._root,'road_block_rank',send_data,function(t,v)
+			if t and t==200 then
+				pt(v)
+				for i=1,15 do
+					self._scrollview:additem()
+				end
+				self._scrollview:relayout()
+			else
+				http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+				end)				
+			end
+		end)
 	end
 end
 

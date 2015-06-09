@@ -43,6 +43,8 @@ function main:init()
 			music.stop()
 			uikits.popScene()
 		end)
+		local match_news = uikits.child(self._root,ui.MATCH_NEW)
+		match_news:setVisible(false)
 		uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)
 			local tops = require "hitmouse/tops"
 			uikits.pushScene(tops.create())

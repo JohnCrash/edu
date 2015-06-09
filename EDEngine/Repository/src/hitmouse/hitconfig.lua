@@ -524,14 +524,12 @@ end
 
 local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 
-local function get_user_id(parent)
+local function get_user_id(parent,func)
 	cache.request_json( get_uesr_info_url,function(t)
 		if t and type(t)=='table' then
 			if 	t.result ~= 0 then				
 				messagebox(parent,DIY_MSG,function(e)
-					if e == OK then
-						
-					end
+					func(false,false)
 				end,t.result..' : '..t.msg)		
 			else
 				local user_id
@@ -547,11 +545,15 @@ local function get_user_id(parent)
 					user_id = ID_FLAG_TEA
 				end
 				set_id_flag(user_id)
+				func(true)
 			end	
 		else
 			messagebox(parent,NETWORK_ERROR,function(e)
 				if e == RETRY then
 					get_user_id(parent)
+					func(false,true)
+				else
+					func(false,false)
 				end
 			end)
 		end

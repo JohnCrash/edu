@@ -96,6 +96,7 @@ end
 
 function battle:initGame( arg )
 	self._game_time = 0
+	self._arg = arg
 	if arg and type(arg)=='table' then
 		self._time_limit = arg.time_limit
 	else
@@ -455,19 +456,32 @@ function battle:init_event()
 end
 
 --初始化游戏数据,i代表关卡,1-10
-function battle:init_data( i )
-	i = i or 1
+function battle:init_data()
 	level.init()
 	self._words = {}
-	self._time_limit = 30 --时限
-	self._word_num = 20 --词数	
-	local data = level.get{diff1=1,diff2=2568,rand=3,signle=10,dual=10}
+	self._time_limit = self._arg.time_limit --时限
+	self._word_num = self._arg.signle+self._arg.dual --词数	
+	local data = level.get{
+		diff1=self._arg.diff1,
+		diff2=self._arg.diff2,
+		rand=self._arg.rand,
+		signle=self._arg.signle,
+		dual=self._arg.dual}
+	kits.log("battle:")
+	kits.log("========================")
+	kits.log("time limit:"..self._arg.time_limit)
+	kits.log("condition:"..self._arg.condition.."%")
+	kits.log("num :"..self._word_num)
+	kits.log("diff1 = "..self._arg.diff1)
+	kits.log("diff2 = "..self._arg.diff2)
+	kits.log("rand = "..self._arg.rand)
+	kits.log("signle="..self._arg.signle)
+	kits.log("dual = "..self._arg.dual)
+	kits.log("========================")
 	for k,v in pairs(data) do
-		print(v.name.."		"..v.answer)
+		kits.log(v.name.."		"..v.answer)
 		table.insert(self._words,v)
 	end
-	self._time_limit = 60 --时限
-	self._word_num = 40 --词数
 	math.randomseed(os.time())
 	--一次加载全部的词，然后随机挑出_word_num个词
 	if self._word_num <= #self._words then
@@ -734,7 +748,7 @@ function battle:startStage()
 	self._pause = false
 	self._hummer:setVisible(true)
 	--初始化游戏数据
-	self:init_data(self._stage)
+	self:init_data()
 	self:init_timer()
 	self:init_adding_timer()
 	--载入第一词

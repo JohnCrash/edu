@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local battle = require "hitmouse/battle"
 local level = require "hitmouse/level"
+local http = require "hitmouse/hitconfig"
 
 local ui = {
 	FILE = 'hitmouse/chuangguan.json',
@@ -55,7 +56,25 @@ function levelScene:add(m,n,b)
 	end
 	if m==1 or m==2 then
 		uikits.event(item,function(sender)
-			uikits.pushScene(battle.create())
+			local send_data = {V1=n,V2=1}
+			kits.log("do levelScene launch battle...")
+			http.post_data(self._root,'get_match',send_data,function(t,v)
+				if t and t==200 then
+					pt(v)
+					uikits.pushScene(battle.create{
+							time_limit = v.times or 10,
+							rand = v.road_radom or 0,
+							diff1 = v.diffcult_low or 0,
+							diff2 = v.diffcult_up or 0,
+							signle = v.question_amount or 10,
+							dual = 0,
+							condition = v.pass_condition or 60,
+						})
+				else
+					http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+					end)		
+				end
+			end)
 		end)
 	end
 	item:setVisible(true)
@@ -159,7 +178,7 @@ function levelScene:initOpenNext()
 		self._items[self._current]:removeFromParent()
 		self._items[self._current+1]:removeFromParent()
 		self._items[self._current] = self:add(1,self._current,true)
-		self._items[self._current+1] = self:add(2,nil,true)
+		self._items[self._current+1] = self:add(2,self._current+1,true)
 		self._items[self._current]:setPosition(cc.p(cx,cy))
 		self._items[self._current+1]:setPosition(cc.p(dx,dy))
 		self._current = self._current + 1
@@ -172,7 +191,7 @@ function levelScene:initLevelList()
 		self:add(1,i)
 	end
 	if self._current <= self._count then
-		self:add(2)
+		self:add(2,self._current)
 		for i = self._current+1,self._count do
 			self:add(3)
 		end

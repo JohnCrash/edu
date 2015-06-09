@@ -155,7 +155,7 @@ function AppEntry:init()
 				run=function()
 				login.set_uid_type(login.STUDENT)
 				login.set_selector(4)--学生
-				local hitmouse = require "hitmouse/main"
+				local hitmouse = require "hitmouse/loading"
 				return hitmouse.create()
 			end}			
 		end}
