@@ -2,7 +2,6 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local hitconfig = require 'hitmouse/hitconfig'
-local gradeview = require 'hitmouse/gradeview'
 
 local ui = {
 	TEA_FILE = 'hitmouse/xiangqing.json',
@@ -44,7 +43,7 @@ function rankview:show_rank()
 	view_rank:setVisible(false)
 	if self.rank_data and type(self.rank_data) == 'table' then
 		local view_rank = hitconfig.createRankView(viewParent,viewPosition,viewSize,view_person_src,function(item,data)
-			
+				
 			end,function(waitingNode,afterReflash)
 			local data = self.rank_data 
 			afterReflash(data)
