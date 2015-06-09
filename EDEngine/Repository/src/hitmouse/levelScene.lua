@@ -2,6 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 local cache = require "cache"
 local battle = require "hitmouse/battle"
+local level = require "hitmouse/level"
 
 local ui = {
 	FILE = 'hitmouse/chuangguan.json',
@@ -42,7 +43,7 @@ function levelScene:clear()
 	end
 end
 
-function levelScene:add(m,n)
+function levelScene:add(m,n,b)
 	self._items = self._items or {}
 	local item
 	if m==1 then
@@ -65,7 +66,10 @@ function levelScene:add(m,n)
 		end
 	end
 	self._list:addChild(item)
-	table.insert(self._items,item)	
+	if not b then
+		table.insert(self._items,item)	
+	end
+	return item
 end
 
 function levelScene:relayout()
@@ -136,9 +140,30 @@ function levelScene:init()
 		self._item_number:setVisible(false)
 		self._item_current:setVisible(false)
 		self._item_lock:setVisible(false)
-		self._current = 30
-		self._count = 201
+	end
+	if self._current and self._current==level.getCurrent() then
+	elseif self._current and self._current==level.getCurrent()-1 then
+		self:initOpenNext()
+	else
+		self:clear()
+		self._current = level.getCurrent()
+		self._count = level.getLevelCount()
 		self:initLevelList()
+	end
+end
+
+function levelScene:initOpenNext()
+	if self._current and self._items and self._current < self._count then
+		local cx,cy = self._items[self._current]:getPosition()
+		local dx,dy = self._items[self._current+1]:getPosition()
+		self._items[self._current]:removeFromParent()
+		self._items[self._current+1]:removeFromParent()
+		self._items[self._current] = self:add(1,self._current,true)
+		self._items[self._current+1] = self:add(2,nil,true)
+		self._items[self._current]:setPosition(cc.p(cx,cy))
+		self._items[self._current+1]:setPosition(cc.p(dx,dy))
+		self._current = self._current + 1
+		self:visibleCurrent()
 	end
 end
 

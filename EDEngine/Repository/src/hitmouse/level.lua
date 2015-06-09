@@ -163,7 +163,30 @@ local function getLevel(t)
 	return result
 end
 
+local _count = 60
+local _current = 1
+
+local function setLevelCount(c)
+	_count = c
+end
+
+local function getLevelCount()
+	return _count
+end
+
+local function setCurrent(c)
+	_current = c
+end
+
+local function getCurrent()
+	return _current
+end
+
 return {
 	init = init_level,
 	get = getLevel,
+	setLevelCount = setLevelCount,
+	getLevelCount = getLevelCount,
+	setCurrent = setCurrent,
+	getCurrent = getCurrent
 }
