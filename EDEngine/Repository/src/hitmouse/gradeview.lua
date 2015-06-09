@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local hitconfig = require 'hitmouse/hitconfig'
 
+
 local ui = {
 	TEA_FILE = 'hitmouse/xzjinru.json',
 	TEA_FILE_3_4 = 'hitmouse/xzjinru43.json',
@@ -14,7 +15,17 @@ local ui = {
 	VIEW_CUR_MATCH = 'gun/xinde',
 	VIEW_HIS_MATCH_SRC = 'gun/bisai1',
 	
+	TXT_MATCH_NAME = 'wen',
+	TXT_MATCH_RANK = 'ph',
+	
+	TXT_TIP_HAS_MATCH = 'w2',
+	TXT_TIP_NO_MATCH = 'w3',
+	BUTTON_OPEN_MATCH = 'kaiguan',
+	
 	BUTTON_DETAIL  = 'xiangq',
+	TXT_PEOPLE_NUM = 'sj',
+	TXT_OPEN_TIME = 'mz',
+	
 	BUTTON_QUIT  = 'ding/fan',
 }
 
@@ -42,43 +53,6 @@ function gradeview.create(block_id,enable,match_id,match_rank,match_name)
 	return scene
 end
 
-function gradeview:show_match_list()
-	self.is_has_match = false
-	for i=1,6 do
-		local but_grade = uikits.child(self._gradeview,ui.VIEW_GRADE_SRC..i)
-		local txt_grade_open = uikits.child(but_grade,ui.TXT_GRADE_OPEN)
-		local txt_grade_close = uikits.child(but_grade,ui.TXT_GRADE_CLOSE)
-		but_grade.block_id = self.match_list_data[i].road_block_id
-		if self.match_list_data[i].enable == 1 then
-			txt_grade_open:setVisible(true)
-			txt_grade_close:setVisible(false)
-			self.is_has_match = true
-		--	but_grade:setEnabled(true)
-			but_grade:setBright(true)
-		--	but_grade:setTouchEnabled(true)
-		else
-		--	but_grade:setEnabled(false)
-			but_grade:setBright(false)
-		--	but_grade:setTouchEnabled(false)	
-			txt_grade_open:setVisible(false)
-			txt_grade_close:setVisible(true)			
-		end
-		uikits.event(but_grade,	
-			function(sender,eventType)	
-			
-			end,"click")
-	end
-	local txt_has_match = uikits.child(self._gradeview,ui.TXT_HAS_MATCH)
-	local txt_no_match = uikits.child(self._gradeview,ui.TXT_NO_MATCH)
-	if self.is_has_match == true then
-		txt_has_match:setVisible(true)
-		txt_no_match:setVisible(false)			
-	else
-		txt_has_match:setVisible(false)
-		txt_no_match:setVisible(true)			
-	end
-end
-
 function gradeview:show_history_list()
 	local is_show_cur_match = true
 	local view_all_history = uikits.child(self._gradeview,ui.VIEW_ALL_HISTORY)
@@ -87,45 +61,122 @@ function gradeview:show_history_list()
 	if self.id_flag == hitconfig.ID_FLAG_STU then
 		if self.enable == 1 then
 			view_cur_match:setVisible(true)
+			local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
+			local txt_match_rank = uikits.child(view_cur_match,ui.TXT_MATCH_RANK)
+			txt_match_name:setString(self.match_name)
+			txt_match_rank:setString(self.match_rank)
 		else
 			view_cur_match:setVisible(false)
 			is_show_cur_match = false
 		end
-	else
-	
+	else	
+		view_cur_match:setVisible(true)
+		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
+		txt_match_name:setString(self.match_name)
+		local txt_has_match = uikits.child(view_cur_match,ui.TXT_TIP_HAS_MATCH)
+		local txt_no_match = uikits.child(view_cur_match,ui.TXT_TIP_NO_MATCH)
+		local but_open_match = uikits.child(view_cur_match,ui.BUTTON_OPEN_MATCH)
+		if self.enable == 1 then
+			txt_has_match:setVisible(true)
+			txt_no_match:setVisible(false)
+			but_open_match:setSelectedState(false)
+		else
+			txt_has_match:setVisible(false)
+			txt_no_match:setVisible(true)	
+			but_open_match:setSelectedState(true)	
+		end
+		uikits.event(but_open_match,	
+			function(sender,eventType)
+				local send_data = {}
+				send_data.v1 = self.match_id
+				if self.enable == 1 then
+					send_data.v2 = 0
+				else
+					send_data.v2 = 1
+				end
+				hitconfig.post_data(self._gradeview,'open_road_block',send_data,function(t,v)
+								if t and t == 200 then
+									if v == true then
+										if self.enable == 1 then
+											self.enable = 0
+										else
+											self.enable = 1
+										end
+									else
+										if self.enable == 1 then
+											but_open_match:setSelectedState(false)
+										else
+											but_open_match:setSelectedState(true)
+										end										
+									end
+								else
+									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
+										if e == hitconfig.OK then
+										
+										else
+											
+										end
+									end)							
+								end
+							end)
+		end)
 	end
-
+	local view_space = 10
 	local size_all = view_all_history:getContentSize()
 	local size_cur_match = view_cur_match:getContentSize()
 	local size_his_match_src = view_his_match_src:getContentSize()
 	local scroll_size = view_all_history:getInnerContainerSize()
 	local all_height
 	if is_show_cur_match == true then
-		all_height = size_cur_match.height + (size_his_match_src.height)*(#self.history_list)
+		all_height = size_cur_match.height + (size_his_match_src.height+view_space)*(#self.history_list)
 	else
-		all_height = (size_his_match_src.height)*(#self.history_list)
+		all_height = (size_his_match_src.height+view_space)*(#self.history_list)
 	end
 	if all_height > size_all.height then
 		scroll_size.height = all_height
 		view_cur_match:setPositionY(scroll_size.height-size_cur_match.height)
 	end
-	size_all:setInnerContainerSize(scroll_size)	
+	view_all_history:setInnerContainerSize(scroll_size)	
 		
 	local pos_y_start = scroll_size.height - size_cur_match.height - size_his_match_src.height
 	view_his_match_src:setVisible(false)	
+
 	for i=1 , #self.history_list do
 		local cur_pro = view_his_match_src:clone()
 		cur_pro:setVisible(true)
-		cur_pro:setPositionY(pos_y_start-(i-1)*(size_his_match_src.height))
-		size_all:addChild(cur_pro,1,10000+i)
+		cur_pro:setPositionY(pos_y_start-(i-1)*(size_his_match_src.height+view_space))
+		view_all_history:addChild(cur_pro,1,10000+i)
+
+		local txt_people_num = uikits.child(cur_pro,ui.TXT_PEOPLE_NUM)
+		local txt_open_time = uikits.child(cur_pro,ui.TXT_OPEN_TIME)
+		txt_people_num:setString(self.history_list[i].Users..'人')
+		txt_open_time:setString(self.history_list[i].match_time)
 		
+		local but_detail = uikits.child(cur_pro,ui.BUTTON_DETAIL)
+		but_detail.road_block_id = self.history_list[i].road_block_id
+		uikits.event(but_detail,	
+			function(sender,eventType)
+				local send_data = {}
+				send_data.v1 = sender.road_block_id
+				send_data.v2 = 2
+				send_data.v3 = 1
+				send_data.v4 = 100
+				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
+								if t and t == 200 then
+									uikits.pushScene( resetpwview.create(v) )
+								else
+									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
+										if e == hitconfig.OK then
+										
+										else
+											
+										end
+									end)							
+								end
+							end)
+				--uikits.pushScene( resetpwview.create() )
+		end)
 	end
-	
-	local but_detail = uikits.child(size_his_match_src,ui.BUTTON_DETAIL)
-	uikits.event(but_detail,	
-		function(sender,eventType)
-			--uikits.pushScene( resetpwview.create() )
-	end)
 end
 
 function gradeview:get_his_list()
@@ -133,6 +184,7 @@ function gradeview:get_his_list()
 	send_data.v1 = self.match_id
 	hitconfig.post_data(self._gradeview,'get_match_history',send_data,function(t,v)
 					if t and t == 200 then
+						self.history_list = v
 						self:show_history_list()
 					else
 						hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
@@ -159,6 +211,7 @@ function gradeview:init()
 		self._gradeview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
 	end
 	self:addChild(self._gradeview)
+	self:get_his_list()
 	local but_quit = uikits.child(self._gradeview,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
 		function(sender,eventType)	

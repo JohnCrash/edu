@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local hitconfig = require 'hitmouse/hitconfig'
 local gradeview = require 'hitmouse/gradeview'
+
 local ui = {
 	TEA_FILE = 'hitmouse/xiaozhang.json',
 	TEA_FILE_3_4 = 'hitmouse/xiaozhang43.json',
@@ -48,6 +49,8 @@ function matchview:show_match_list()
 		but_grade.block_id = self.match_list_data[i].road_block_id
 		but_grade.enable = self.match_list_data[i].enable
 		but_grade.match_id = self.match_list_data[i].match_id
+		but_grade.match_name = self.match_list_data[i].match_name
+		but_grade.user_rank = self.match_list_data[i].rank
 		if self.match_list_data[i].enable == 1 then
 			txt_grade_open:setVisible(true)
 			txt_grade_close:setVisible(false)
@@ -64,7 +67,7 @@ function matchview:show_match_list()
 		end
 		uikits.event(but_grade,	
 			function(sender,eventType)	
-				local scene_next = gradeview.create(sender.block_id,sender.enable,sender.match_id)
+				local scene_next = gradeview.create(sender.block_id,sender.enable,sender.match_id,sender.user_rank,sender.match_name)
 				uikits.pushScene(scene_next)	
 			end,"click")
 	end
