@@ -7,6 +7,8 @@ local ui = {
 	FILE = 'hitmouse/paihang.json',
 	FILE_3_4 = 'hitmouse/paihang43.json',
 	BACK = 'ding/fan',
+	LIST = 'p',
+	ITEM = 'ren',
 }
 
 local tops = class("tops")
@@ -38,6 +40,11 @@ function tops:init()
 		uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 			uikits.popScene()
 		end)
+		self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
+		for i=1,15 do
+			self._scrollview:additem()
+		end
+		self._scrollview:relayout()
 	end
 end
 

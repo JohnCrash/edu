@@ -4,6 +4,7 @@ local json = require "json-c"
 local _cy
 local _gr
 local function init_level()
+	if _cy and _cy then return end
 	local filename = "res/hitmouse/data/cy.json"
 	local s = kits.read_local_file(filename)
 	if s then

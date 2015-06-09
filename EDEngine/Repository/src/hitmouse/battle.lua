@@ -259,10 +259,13 @@ function battle:delay_call(func,param,delay)
 	if not schedulerID then
 		local function delay_call_func()
 			self._scheduler:unscheduleScriptEntry(schedulerID)
+			self._schedulerIDS[schedulerID] = nil
 			schedulerID = nil		
 			func(self,param)
 		end
 		schedulerID = self._scheduler:scheduleScriptFunc(delay_call_func,delay,false)
+		self._schedulerIDS = self._schedulerIDS or {}
+		self._schedulerIDS[schedulerID] = schedulerID
 	end	
 end
 
@@ -801,6 +804,14 @@ function battle:release()
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_1)
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_2)
 	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo(ui.ANIMATION_3)
+	if self._schedulerIDS then
+		for i,v in pairs(self._schedulerIDS) do
+			if v then
+				self._scheduler:unscheduleScriptEntry(v)
+			end
+		end
+	end
+	self._schedulerIDS = nil
 end
 
 return battle
