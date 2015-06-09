@@ -5,6 +5,7 @@ local cache = require "cache"
 local lxp = require "lom"
 local json = require "json-c"
 local level = require "hitmouse/level"
+local http = require "hitmouse/hitconfig"
 
 local ui = {
 	FILE = 'hitmouse/zuoti.json',
@@ -328,7 +329,7 @@ function battle:show_right_word( n,b )
 		self._fen_adding = self._fen_adding + 100 + 10*self._fen_mul
 		self._fen_mul = self._fen_mul + 1
 		--提示已经过关
-		if self._pass or self:getIntegration() > 60 then
+		if self._pass or self:getIntegration() > self._arg.condition then
 			self:play_sound(SND_PASS)
 			self:flash_xing()
 			self._pass = true
@@ -549,7 +550,7 @@ function battle:game_over(mode)
 	self._game_over_flag = true
 	print("Game Over~")
 	local fen100 = self:getIntegration()
-	local b = fen100 > 60
+	local b = fen100 > self._arg.condition
 	kits.log("分数:"..self:getIntegration())
 	
 	self._worm:setVisible(false)
@@ -579,12 +580,31 @@ function battle:game_over(mode)
 	end
 	
 	if b then
-		--提交到网络
-		--self:upload_rank( self._player_data.stage,self._fen )
+		--提交游戏数据
+		self:upload_rank(self._arg.level,math.floor(self._fen))
 	end	
 end
 
-function battle:upload_rank( stage,score )
+function battle:upload_rank( level_id,score )
+	local send_data = {}
+	http.post_data(self._root,'upload_match',send_data,function(t,v)
+		if t and t==200 then
+			local current = level.getCurrent()
+			local count = level.getLevelCount()
+			if current<count then
+				level.setCurrent(current+1)
+			end
+			uikits.popScene()
+		else
+			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+				if e==RETRY then
+					self:upload_rank( level_id,score )
+				else
+					uikits.popScene()
+				end
+			end)
+		end
+	end)
 end
 
 --设置剩余的题数

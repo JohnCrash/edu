@@ -62,6 +62,7 @@ function levelScene:add(m,n,b)
 				if t and t==200 then
 					pt(v)
 					uikits.pushScene(battle.create{
+							level = n or 1,
 							time_limit = v.times or 10,
 							rand = v.road_radom or 0,
 							diff1 = v.diffcult_low or 0,
