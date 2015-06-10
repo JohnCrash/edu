@@ -59,8 +59,8 @@ function levelScene:add(m,n,b)
 			local send_data = {V1=n,V2=1}
 			kits.log("do levelScene launch battle...")
 			http.post_data(self._root,'get_match',send_data,function(t,v)
-				if t and t==200 then
-					pt(v)
+				if t and t==200 and v then
+					http.logTable(v,1)
 					uikits.pushScene(battle.create{
 							level = n or 1,
 							time_limit = v.times or 10,
@@ -133,6 +133,7 @@ function levelScene:init()
 	--self._ss = cc.size(1440,1080)
 	uikits.initDR{width=self._ss.width,height=self._ss.height}
 	if not self._root then
+		level.init()
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		--self._root = uikits.fromJson{file_9_16=ui.FILE_3_4,file_3_4=ui.FILE}
 		self:addChild(self._root)
