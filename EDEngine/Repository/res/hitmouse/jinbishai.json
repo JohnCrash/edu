@@ -58,7 +58,8 @@
     "back1.png",
     "xingq.png",
     "hei2.png",
-    "jinbs.png"
+    "jinbs.png",
+    "jinbshui.png"
   ],
   "version": "1.6.0.0",
   "widgetTree": {
@@ -952,8 +953,8 @@
                   "capInsetsY": 0,
                   "disabled": null,
                   "disabledData": {
-                    "path": null,
-                    "plistFile": null,
+                    "path": "jinbshui.png",
+                    "plistFile": "",
                     "resourceType": 0
                   },
                   "fontName": "微软雅黑",
@@ -978,6 +979,56 @@
                   "textColorB": 255,
                   "textColorG": 255,
                   "textColorR": 255
+                }
+              },
+              {
+                "classname": "Label",
+                "name": null,
+                "children": [],
+                "options": {
+                  "__type": "LabelSurrogate:#EditorCommon.JsonModel.Component.GUI",
+                  "classname": "Label",
+                  "name": "tip",
+                  "ZOrder": 0,
+                  "actiontag": 52410062,
+                  "anchorPointX": 0.5,
+                  "anchorPointY": 0.5,
+                  "classType": "CocoStudio.EngineAdapterWrap.CSLabel",
+                  "colorB": 4,
+                  "colorG": 0,
+                  "colorR": 255,
+                  "customProperty": "",
+                  "flipX": false,
+                  "flipY": false,
+                  "height": 46,
+                  "ignoreSize": true,
+                  "layoutParameter": null,
+                  "opacity": 255,
+                  "positionPercentX": 0.6595052,
+                  "positionPercentY": 0.161138922,
+                  "positionType": 0,
+                  "rotation": 0,
+                  "scaleX": 1,
+                  "scaleY": 1,
+                  "sizePercentX": 0.0494791679,
+                  "sizePercentY": 0.045,
+                  "sizeType": 0,
+                  "tag": 3743,
+                  "touchAble": false,
+                  "useMergedTexture": false,
+                  "visible": true,
+                  "width": 252,
+                  "x": 1266,
+                  "y": 96,
+                  "areaHeight": 0,
+                  "areaWidth": 0,
+                  "fontFile": null,
+                  "fontName": "微软雅黑",
+                  "fontSize": 36,
+                  "hAlignment": 0,
+                  "text": "比赛次数已用完",
+                  "touchScaleEnable": false,
+                  "vAlignment": 0
                 }
               }
             ],

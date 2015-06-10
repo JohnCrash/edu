@@ -11,17 +11,27 @@ local ui = {
 	STU_FILE_3_4 = 'hitmouse/xiangqing43.json',
 	VIEW_RANK = 'gun',
 	VIEW_PER_USER = 'gun/ren1',
+	TXT_RANK = 'mc',
+	PIC_USER = 'toux',
+	TXT_USER_NAME = 'mz',
+	TXT_USER_CLASS = 'bj',
+	TXT_TIME = 'sj',
+	TXT_USER_FEN = 'defen',
 	
+	TXT_TOP_DATE = 'ding/sj',
+	TXT_TOP_GRADE = 'ding/nj',
 	BUTTON_QUIT  = 'ding/fan',
 }
 
 local rankview = class("rankview")
 rankview.__index = rankview
 
-function rankview.create(rank_data)
+function rankview.create(rank_data,str_date,str_grade)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),rankview)
 	layer.rank_data = rank_data
+	layer.str_date = str_date
+	layer.str_grade = str_grade
 	scene:addChild(layer)
 	local function onNodeEvent(event)
 		if "enter" == event then
@@ -35,6 +45,10 @@ function rankview.create(rank_data)
 end
 
 function rankview:show_rank()
+	local txt_top_date = uikits.child(self._rankview,ui.TXT_TOP_DATE)
+	local txt_top_grade = uikits.child(self._rankview,ui.TXT_TOP_GRADE)
+	txt_top_date:setString(self.str_date)
+	txt_top_grade:setString(self.str_grade)
 	local view_rank = uikits.child(self._rankview,ui.VIEW_RANK)
 	local view_person_src = uikits.child(self._rankview,ui.VIEW_PER_USER)
 	local viewSize=view_rank:getContentSize()
@@ -43,7 +57,18 @@ function rankview:show_rank()
 	view_rank:setVisible(false)
 	if self.rank_data and type(self.rank_data) == 'table' then
 		local view_rank = hitconfig.createRankView(viewParent,viewPosition,viewSize,view_person_src,function(item,data)
-				
+				local txt_rank = uikits.child(item,ui.TXT_RANK)
+				local pic_user = uikits.child(item,ui.PIC_USER)
+				local txt_user_name = uikits.child(item,ui.TXT_USER_NAME)
+				local txt_user_class = uikits.child(item,ui.TXT_USER_CLASS)
+				local txt_time = uikits.child(item,ui.TXT_TIME)
+				local txt_user_fen = uikits.child(item,ui.TXT_USER_FEN)
+				txt_rank:setString(data.rank)
+				txt_user_name:setString(data.uname)
+				txt_user_class:setString(data.str_gradeclass)
+				txt_time:setString(data.str_times)
+				txt_user_fen:setString(data.integral)
+				hitconfig.load_logo_pic(pic_user,data.user_id)
 			end,function(waitingNode,afterReflash)
 			local data = self.rank_data 
 			afterReflash(data)

@@ -510,7 +510,7 @@ local ID_FLAG_STU = 1
 local ID_FLAG_TEA = 2
 local ID_FLAG_SCH = 3
 
-local id_flag = ID_FLAG_SCH
+local id_flag = ID_FLAG_STU
 
 local function set_id_flag(id)
 	if id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_STU then
