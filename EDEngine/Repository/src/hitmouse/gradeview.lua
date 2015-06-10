@@ -71,7 +71,7 @@ function gradeview:show_history_list()
 			local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
 			txt_match_name:setString(self.match_name)
 			txt_match_rank:setString(self.match_rank)
-			if self.match_enable == 1 then
+			if self.match_enable ~= 1 then
 				but_match_join:setEnabled(true)
 				but_match_join:setBright(true)
 				but_match_join:setTouchEnabled(true)
@@ -88,8 +88,8 @@ function gradeview:show_history_list()
 		end
 		uikits.event(but_match_join,	
 			function(sender,eventType)
-			local send_data = {V1=self.match_id}
-			http.post_data(self._gradeview,'get_match',send_data,function(t,v)
+			local send_data = {v1=self.match_id,v2=2}
+			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
 					uikits.replaceScene(battle.create{
 							level = n or 1,
@@ -102,7 +102,7 @@ function gradeview:show_history_list()
 							condition = v.pass_condition or 60,
 						})
 				else
-					http.messagebox(self._gradeview,http.NETWORK_ERROR,function(e)
+					hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 					end)		
 				end
 			end)
