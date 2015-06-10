@@ -49,10 +49,11 @@ function tops:init()
 		self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
 		uikits.event(self._scrollview._scrollview,function(sender,state)
 			if state == ccui.ScrollviewEventType.scrollToBottom then
-				if self._tatolPags and self._curPage < self._tatolPags then
+				if not self._done_loading and self._tatolPags and self._curPage < self._tatolPags then
 					self._curPage = self._curPage + 1
 					kits.log("continue loading...")
-					initTops(self._curPage)	
+					self:initTops(self._curPage)
+					self._done_loading = true
 				end
 			end
 		end)
@@ -63,7 +64,7 @@ function tops:init()
 end
 
 function tops:initTops(cur)
-	local send_data = {V1=1,V2=1,V3=cur,V4=8}
+	local send_data = {V1=1,V2=1,V3=cur,V4=18}
 	http.post_data(self._root,'road_block_rank',send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v)
@@ -90,13 +91,14 @@ function tops:initTops(cur)
 				caption=caption.."   ("..tostring(v.v3)..")"
 				title:setString(caption)
 				self._caption_flag = true
-			else
+			elseif not v.v3 then
 				kits.log("ERROR tops:initTops road_block_rank v.v3 = nil")
 			end			
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 			end)				
 		end
+		self._done_loading = nil
 	end)
 end
 
