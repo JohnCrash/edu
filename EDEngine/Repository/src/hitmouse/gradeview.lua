@@ -92,7 +92,7 @@ function gradeview:show_history_list()
 			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
 					uikits.replaceScene(battle.create{
-							level = n or 1,
+							level = self.block_id or 1,
 							time_limit = v.times or 10,
 							rand = v.road_radom or 0,
 							diff1 = v.diffcult_low or 0,
@@ -100,6 +100,7 @@ function gradeview:show_history_list()
 							signle = v.question_amount or 10,
 							dual = 0,
 							condition = v.pass_condition or 60,
+							type= 2,
 						})
 				else
 					hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
