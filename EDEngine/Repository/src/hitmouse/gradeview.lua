@@ -3,7 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local hitconfig = require 'hitmouse/hitconfig'
 local rankview = require 'hitmouse/rankview'
-
+local battle = require "hitmouse/battle"
 
 local ui = {
 	TEA_FILE = 'hitmouse/xzjinru.json',
@@ -18,6 +18,8 @@ local ui = {
 	
 	TXT_MATCH_NAME = 'wen',
 	TXT_MATCH_RANK = 'ph',
+	BUTTON_MATCH_JOIN = 'jinru',
+	TXT_MATCH_TIP = 'tip',
 	
 	TXT_TIP_HAS_MATCH = 'w2',
 	TXT_TIP_NO_MATCH = 'w3',
@@ -33,7 +35,7 @@ local ui = {
 local gradeview = class("gradeview")
 gradeview.__index = gradeview
 
-function gradeview.create(block_id,enable,match_id,match_rank,match_name)
+function gradeview.create(block_id,enable,match_id,match_rank,match_name,match_enable)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),gradeview)
 	layer.block_id = block_id
@@ -41,6 +43,7 @@ function gradeview.create(block_id,enable,match_id,match_rank,match_name)
 	layer.match_id = match_id
 	layer.match_rank = match_rank
 	layer.match_name = match_name
+	layer.match_enable = match_enable
 	
 	scene:addChild(layer)
 	local function onNodeEvent(event)
@@ -60,16 +63,50 @@ function gradeview:show_history_list()
 	local view_cur_match = uikits.child(self._gradeview,ui.VIEW_CUR_MATCH)
 	local view_his_match_src = uikits.child(self._gradeview,ui.VIEW_HIS_MATCH_SRC)
 	if self.id_flag == hitconfig.ID_FLAG_STU then
+		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		if self.enable == 1 then
 			view_cur_match:setVisible(true)
 			local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
 			local txt_match_rank = uikits.child(view_cur_match,ui.TXT_MATCH_RANK)
+			local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
 			txt_match_name:setString(self.match_name)
 			txt_match_rank:setString(self.match_rank)
+			if self.match_enable == 1 then
+				but_match_join:setEnabled(true)
+				but_match_join:setBright(true)
+				but_match_join:setTouchEnabled(true)
+				txt_match_tip:setVisible(false)
+			else
+				but_match_join:setEnabled(false)
+				but_match_join:setBright(false)
+				but_match_join:setTouchEnabled(false)	
+				txt_match_tip:setVisible(true)			
+			end
 		else
 			view_cur_match:setVisible(false)
 			is_show_cur_match = false
 		end
+		uikits.event(but_match_join,	
+			function(sender,eventType)
+			local send_data = {V1=self.match_id}
+			http.post_data(self._gradeview,'get_match',send_data,function(t,v)
+				if t and t==200 then
+					uikits.replaceScene(battle.create{
+							level = n or 1,
+							time_limit = v.times or 10,
+							rand = v.road_radom or 0,
+							diff1 = v.diffcult_low or 0,
+							diff2 = v.diffcult_up or 0,
+							signle = v.question_amount or 10,
+							dual = 0,
+							condition = v.pass_condition or 60,
+						})
+				else
+					http.messagebox(self._gradeview,http.NETWORK_ERROR,function(e)
+					end)		
+				end
+			end)
+		end)
 	else	
 		view_cur_match:setVisible(true)
 		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
@@ -100,8 +137,12 @@ function gradeview:show_history_list()
 									if v == true then
 										if self.enable == 1 then
 											self.enable = 0
+											txt_has_match:setVisible(false)
+											txt_no_match:setVisible(true)	
 										else
 											self.enable = 1
+											txt_has_match:setVisible(true)
+											txt_no_match:setVisible(false)
 										end
 									else
 										if self.enable == 1 then
@@ -138,8 +179,12 @@ function gradeview:show_history_list()
 		view_cur_match:setPositionY(scroll_size.height-size_cur_match.height)
 	end
 	view_all_history:setInnerContainerSize(scroll_size)	
-		
-	local pos_y_start = scroll_size.height - size_cur_match.height - size_his_match_src.height
+	local pos_y_start
+	if is_show_cur_match == true then
+		pos_y_start = scroll_size.height - size_cur_match.height - size_his_match_src.height
+	else
+		pos_y_start = scroll_size.height - size_his_match_src.height
+	end	
 	view_his_match_src:setVisible(false)	
 
 	for i=1 , #self.history_list do

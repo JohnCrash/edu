@@ -165,7 +165,7 @@ function AppEntry:init()
 			update.create{name='hitmouse',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
-				login.set_selector(2)
+				login.set_selector(4)
 				local hitmouse = require "hitmouse/matchview"
 				return hitmouse.create()
 				end}
