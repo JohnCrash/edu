@@ -8,6 +8,7 @@ local ui = {
 	FILE = 'hitmouse/paihang.json',
 	FILE_3_4 = 'hitmouse/paihang43.json',
 	BACK = 'ding/fan',
+	CAPTION = 'ding/wen',
 	LIST = 'p',
 	ITEM = 'ren',
 	LOGO = 'touxiang',
@@ -78,7 +79,20 @@ function tops:initTops(cur)
 				kits.log("ERROR tops:initTops road_block_rank v.v1 = nil")
 			end
 			self._scrollview:relayout()
-			self._tatolPags = self._tatolPags or v.v2 or 1
+			if v.v2 then
+				self._tatolPags = self._tatolPags or v.v2
+			else
+				kits.log("ERROR tops:initTops road_block_rank v.v2 = nil")
+			end
+			if v.v3 and not self._caption_flag then
+				local title = uikits.child(self._root,ui.CAPTION)
+				local caption = title:getString()
+				caption=caption.."   ("..tostring(v.v3)..")"
+				title:setString(caption)
+				self._caption_flag = true
+			else
+				kits.log("ERROR tops:initTops road_block_rank v.v3 = nil")
+			end			
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 			end)				
