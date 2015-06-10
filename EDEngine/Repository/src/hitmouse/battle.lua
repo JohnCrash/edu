@@ -17,6 +17,7 @@ local ui = {
 	SCORE = 'ding/defen',
 	SCORE_RECT = 'ding/donghua',
 	ANIMATION_RGN = "ding/donghua",
+	OK_BUT = 'quer',
 	
 	ZI1 = "zi1/wen",
 	ZI2 = "zi2/wen",
@@ -560,6 +561,7 @@ function battle:game_over(mode)
 		self._amouse[i]:setVisible(false)
 		self._cn_label[i]:getParent():setVisible(false)
 	end
+	local ok
 	if b then
 		--播放成功过关的声音
 		self:play_sound(SND_NEXT_PROM)	
@@ -567,18 +569,25 @@ function battle:game_over(mode)
 			self._timeover_ui:setVisible(true)
 			uikits.child(self._root,ui.USE_TIME):setString(tostring(self._xing_time))
 			uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
-			uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)			
+			uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
+			ok=uikits.child(self._timeover_ui,ui.OK_BUT)
 		else
 			self._pnum_label:setString("0")
 			self._success_ui:setVisible(true)
 			uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._xing_time))
 			uikits.child(self._root,ui.RIGHT_COUNT2):setString(tostring(self._right_num))
 			uikits.child(self._root,ui.SCORE_COUNT2):setString(fen_text)
+			ok=uikits.child(self._success_ui,ui.OK_BUT)
 		end
 	else
+		ok=uikits.child(self._failed_ui,ui.OK_BUT)
 		self._failed_ui:setVisible(true)
 	end
-	
+	if ok then
+		uikits.event(ok,function(sender)
+			uikits.popScene()
+		end)
+	end
 	if b then
 		--提交游戏数据
 		self:upload_scroe(self._arg.level,math.floor(self._fen),self._xing_time,self._right_num)
@@ -586,9 +595,9 @@ function battle:game_over(mode)
 end
 
 function battle:upload_scroe( level_id,score,use_time,right_num )
-	local send_data = {}
+	local send_data = {v1=level_id,v2=self._arg.type,v3=score,v4=right_num,v5=use_time}
 	kits.log("do battle:upload_scroe")
-	http.post_data(self._root,'upload_match',send_data,function(t,v)
+	http.post_data(self._root,'submit_integral',send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v,1)
 			local current = level.getCurrent()

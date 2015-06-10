@@ -10,6 +10,10 @@ local ui = {
 	BACK = 'ding/fan',
 	LIST = 'p',
 	ITEM = 'ren',
+	LOGO = 'touxiang',
+	NAME = 'ming',
+	USETIME = 'sj',
+	SCROE = 'df',
 }
 
 local tops = class("tops")
@@ -42,11 +46,11 @@ function tops:init()
 			uikits.popScene()
 		end)
 		self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
-		uikits.event(self._scrollview,function(sender,state)
+		uikits.event(self._scrollview._scrollview,function(sender,state)
 			if state == ccui.ScrollviewEventType.scrollToBottom then
-				kits.log("continue loading...")
-				if self._tatalPags and self._curPage < self._tatalPags then
+				if self._tatolPags and self._curPage < self._tatolPags then
 					self._curPage = self._curPage + 1
+					kits.log("continue loading...")
 					initTops(self._curPage)	
 				end
 			end
@@ -58,14 +62,23 @@ function tops:init()
 end
 
 function tops:initTops(cur)
-	local send_data = {V1=1,V2=1,V3=cur,V4=24}
+	local send_data = {V1=1,V2=1,V3=cur,V4=8}
 	http.post_data(self._root,'road_block_rank',send_data,function(t,v)
-		if t and t==200 and v and v.V1 then
-			http.logTable(v,1)
-			for i,u in pairs(v.V1) do
-				self._scrollview:additem()
+		if t and t==200 and v then
+			http.logTable(v)
+			if v.v1 then
+				for i,u in pairs(v.v1) do
+					local item = self._scrollview:additem()
+					http.load_logo_pic(uikits.child(item,ui.LOGO),u.user_id or 0)
+					uikits.child(item,ui.NAME):setString(u.uname or "?")
+					uikits.child(item,ui.USETIME):setString(u.str_times or "?")
+					uikits.child(item,ui.SCROE):setString(u.integral or "?")
+				end
+			else
+				kits.log("ERROR tops:initTops road_block_rank v.v1 = nil")
 			end
 			self._scrollview:relayout()
+			self._tatolPags = self._tatolPags or v.v2 or 1
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 			end)				

@@ -61,15 +61,23 @@ function levelScene:add(m,n,b)
 			http.post_data(self._root,'get_match',send_data,function(t,v)
 				if t and t==200 and v then
 					http.logTable(v,1)
+					local signle,dual = 1,1
+					if v.question_amount and v.question_signle then
+						signle = v.question_signle
+						dual = v.question_amount-signle
+					else
+						kits.log("ERROR get_match invaild result,v.question_signle = nil")
+					end					
 					uikits.pushScene(battle.create{
-							level = n or 1,
+							level = v.road_block_id or 1,
 							time_limit = v.times or 10,
 							rand = v.road_radom or 0,
 							diff1 = v.diffcult_low or 0,
 							diff2 = v.diffcult_up or 0,
-							signle = v.question_amount or 10,
-							dual = 0,
+							signle = signle,
+							dual = dual,
 							condition = v.pass_condition or 60,
+							type = 1,
 						})
 				else
 					http.messagebox(self._root,http.NETWORK_ERROR,function(e)
@@ -133,7 +141,6 @@ function levelScene:init()
 	--self._ss = cc.size(1440,1080)
 	uikits.initDR{width=self._ss.width,height=self._ss.height}
 	if not self._root then
-		level.init()
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		--self._root = uikits.fromJson{file_9_16=ui.FILE_3_4,file_3_4=ui.FILE}
 		self:addChild(self._root)
@@ -141,6 +148,7 @@ function levelScene:init()
 			uikits.popScene()
 		end)
 		self._list = uikits.child(self._root,ui.LIST)
+		uikits.enableMouseWheelIFWindows(self._list)
 		self._item_number = uikits.child(self._list,ui.ITEM_NUMBER)
 		self._item_current = uikits.child(self._list,ui.ITEM_CURRENT)
 		self._item_lock = uikits.child(self._list,ui.ITEM_LOCK)
@@ -203,7 +211,7 @@ function levelScene:initLevelList()
 end
 
 function levelScene:release()
-	
+	uikits.enableMouseWheelIFWindows(nil)
 end
 
 return levelScene
