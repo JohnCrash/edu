@@ -48,7 +48,8 @@ function loading:login()
 	local send_data = {}
 	kits.log("do loading:login...")
 	http.post_data(self._root,'login',send_data,function(t,v)
-					if t and t == 200 then
+					if t and t == 200 and v then
+						http.logTable(v,1)
 						self._progress:setPercent(30)
 						self:initUserId()
 					else
@@ -71,25 +72,13 @@ function loading:launch()
 	uikits.replaceScene(main.create())
 end
 
---打印表
-function pt(t)
-	if not t then print("pt table = nil") return end
-	for i,v in pairs(t) do
-		if type(v) == 'type' then
-			pt(v)
-		else
-			print( tostring(i)..":"..tostring(v) )
-		end
-	end
-end
-
 function loading:initLevelData()
 	local send_data = {}
 	kits.log("do loading:initLevelData...")
 	http.post_data(self._root,'user_road_info',send_data,function(t,v)
-		if t and t==200 then
+		if t and t==200 and v then
 			kits.log("loading initLevelData success!")
-			pt(v)
+			http.logTable(v,1)
 			if v.v1 and type(v.v1)=='number' then
 				level.setCurrent(v.v1)
 			else

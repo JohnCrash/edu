@@ -548,7 +548,7 @@ end
 function battle:game_over(mode)
 	if self._game_over_flag then return end
 	self._game_over_flag = true
-	print("Game Over~")
+	kits.log("Game Over~")
 	local fen100 = self:getIntegration()
 	local b = fen100 > self._arg.condition
 	kits.log("分数:"..self:getIntegration())
@@ -581,14 +581,16 @@ function battle:game_over(mode)
 	
 	if b then
 		--提交游戏数据
-		self:upload_rank(self._arg.level,math.floor(self._fen))
+		self:upload_scroe(self._arg.level,math.floor(self._fen),self._xing_time,self._right_num)
 	end	
 end
 
-function battle:upload_rank( level_id,score )
+function battle:upload_scroe( level_id,score,use_time,right_num )
 	local send_data = {}
+	kits.log("do battle:upload_scroe")
 	http.post_data(self._root,'upload_match',send_data,function(t,v)
-		if t and t==200 then
+		if t and t==200 and v then
+			http.logTable(v,1)
 			local current = level.getCurrent()
 			local count = level.getLevelCount()
 			if current<count then
@@ -598,7 +600,7 @@ function battle:upload_rank( level_id,score )
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 				if e==RETRY then
-					self:upload_rank( level_id,score )
+					self:upload_scroe( level_id,score,use_time,right_num )
 				else
 					uikits.popScene()
 				end

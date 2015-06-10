@@ -42,24 +42,39 @@ function tops:init()
 			uikits.popScene()
 		end)
 		self._scrollview = uikits.scroll(self._root,ui.LIST,ui.ITEM)
-		local send_data = {V1=1,V2=1,V3=1,V4=24}
-		http.post_data(self._root,'road_block_rank',send_data,function(t,v)
-			if t and t==200 then
-				pt(v)
-				for i=1,15 do
-					self._scrollview:additem()
+		uikits.event(self._scrollview,function(sender,state)
+			if state == ccui.ScrollviewEventType.scrollToBottom then
+				kits.log("continue loading...")
+				if self._tatalPags and self._curPage < self._tatalPags then
+					self._curPage = self._curPage + 1
+					initTops(self._curPage)	
 				end
-				self._scrollview:relayout()
-			else
-				http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-				end)				
 			end
 		end)
+		uikits.enableMouseWheelIFWindows(self._scrollview)
+		self._curPage = 1
+		self:initTops(self._curPage)
 	end
 end
 
+function tops:initTops(cur)
+	local send_data = {V1=1,V2=1,V3=cur,V4=24}
+	http.post_data(self._root,'road_block_rank',send_data,function(t,v)
+		if t and t==200 and v and v.V1 then
+			http.logTable(v,1)
+			for i,u in pairs(v.V1) do
+				self._scrollview:additem()
+			end
+			self._scrollview:relayout()
+		else
+			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+			end)				
+		end
+	end)
+end
+
 function tops:release()
-	
+	uikits.enableMouseWheelIFWindows(nil)
 end
 
 return tops
