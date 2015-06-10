@@ -88,11 +88,11 @@ function gradeview:show_history_list()
 		end
 		uikits.event(but_match_join,	
 			function(sender,eventType)
-			local send_data = {V1=self.match_id}
-			http.post_data(self._gradeview,'get_match',send_data,function(t,v)
+			local send_data = {v1=self.match_id,v2=2}
+			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
 					uikits.replaceScene(battle.create{
-							level = n or 1,
+							level = self.block_id or 1,
 							time_limit = v.times or 10,
 							rand = v.road_radom or 0,
 							diff1 = v.diffcult_low or 0,
@@ -100,9 +100,10 @@ function gradeview:show_history_list()
 							signle = v.question_amount or 10,
 							dual = 0,
 							condition = v.pass_condition or 60,
+							type= 2,
 						})
 				else
-					http.messagebox(self._gradeview,http.NETWORK_ERROR,function(e)
+					hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 					end)		
 				end
 			end)
@@ -210,7 +211,7 @@ function gradeview:show_history_list()
 				send_data.v4 = 100
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
-									uikits.pushScene( rankview.create(v,sender.open_time,self.match_name) )
+									uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 										if e == hitconfig.OK then
