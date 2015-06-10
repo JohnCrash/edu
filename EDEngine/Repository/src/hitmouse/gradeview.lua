@@ -71,7 +71,7 @@ function gradeview:show_history_list()
 			local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
 			txt_match_name:setString(self.match_name)
 			txt_match_rank:setString(self.match_rank)
-			if self.match_enable ~= 1 then
+			if self.match_enable == 1 then
 				but_match_join:setEnabled(true)
 				but_match_join:setBright(true)
 				but_match_join:setTouchEnabled(true)
@@ -210,7 +210,7 @@ function gradeview:show_history_list()
 				send_data.v4 = 100
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
-									uikits.pushScene( rankview.create(v,sender.open_time,self.match_name) )
+									uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 										if e == hitconfig.OK then
