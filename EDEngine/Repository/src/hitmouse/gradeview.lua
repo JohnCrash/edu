@@ -155,6 +155,7 @@ function gradeview:show_history_list()
 		
 		local but_detail = uikits.child(cur_pro,ui.BUTTON_DETAIL)
 		but_detail.road_block_id = self.history_list[i].road_block_id
+		but_detail.open_time = self.history_list[i].match_time
 		uikits.event(but_detail,	
 			function(sender,eventType)
 				local send_data = {}
@@ -164,7 +165,7 @@ function gradeview:show_history_list()
 				send_data.v4 = 100
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
-									uikits.pushScene( rankview.create(v) )
+									uikits.pushScene( rankview.create(v,sender.open_time,self.match_name) )
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 										if e == hitconfig.OK then
