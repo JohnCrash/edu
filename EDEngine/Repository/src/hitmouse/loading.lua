@@ -75,19 +75,19 @@ end
 function loading:initLevelData()
 	local send_data = {}
 	kits.log("do loading:initLevelData...")
-	http.post_data(self._root,'user_road_info',send_data,function(t,v)
+	http.post_data(self._root,'get_roadblock_list',send_data,function(t,v)
 		if t and t==200 and v then
 			kits.log("loading initLevelData success!")
 			http.logTable(v,1)
-			if v.v2 and type(v.v2)=='number' then
-				level.setCurrent(v.v2)
+			if v.v1 and type(v.v1)=='number' then
+				level.setCurrent(v.v1)
 			else
 				kits.log("ERROR loading:initLevelData v1 invalid")
 			end
-			if v.v1 and type(v.v1)=='number' then
-				level.setLevelCount(v.v1)
+			if v.v2 and type(v.v2)=='number' then
+				level.setLevelCount(v.v2)
 			else
-				kits.log("ERROR loading:initLevelData v1 invalid")
+				kits.log("ERROR loading:initLevelData v2 invalid")
 			end			
 			self:launch()
 		else

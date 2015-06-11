@@ -67,7 +67,19 @@ function levelScene:add(m,n,b)
 						dual = v.question_amount-signle
 					else
 						kits.log("ERROR get_match invaild result,v.question_signle = nil")
-					end					
+					end		
+					uikits.pushScene(battle.create{
+							level = v.road_block_id or 1,
+							time_limit = 120,
+							rand = 1,
+							diff1 = 1,
+							diff2 = 5,
+							signle = 1,
+							dual = 0,
+							condition = 70,
+							type = 1,
+						})	
+--[[						
 					uikits.pushScene(battle.create{
 							level = v.road_block_id or 1,
 							time_limit = v.times or 10,
@@ -79,6 +91,7 @@ function levelScene:add(m,n,b)
 							condition = v.pass_condition or 60,
 							type = 1,
 						})
+						--]]
 				else
 					http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 					end)		
@@ -199,6 +212,9 @@ end
 function levelScene:initLevelList()
 	for i = 1,self._current-1 do
 		self:add(1,i)
+	end
+	if self._current <= 0 then
+		self._current = 1
 	end
 	if self._current <= self._count then
 		self:add(2,self._current)

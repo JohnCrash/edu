@@ -7,6 +7,8 @@ local json = require "json-c"
 local level = require "hitmouse/level"
 local http = require "hitmouse/hitconfig"
 
+local _platform = cc.Application:getInstance():getTargetPlatform()
+
 local ui = {
 	FILE = 'hitmouse/zuoti.json',
 	FILE_3_4 = 'hitmouse/zuoti43.json',
@@ -179,7 +181,9 @@ function battle:init_role()
 end
 
 function battle:hummer_home()
-	self._hummer:setPosition( cc.p(self._ss.width/5,self._ss.height*4.6/7) )
+	if _platform~=cc.PLATFORM_OS_WINDOWS then
+		self._hummer:setPosition( cc.p(self._ss.width/10,self._ss.height*4.6/7) )
+	end
 end
 
 --敲击判断，i敲击了第几个地鼠
@@ -509,7 +513,7 @@ function battle:init_data()
 	self._fen_adding = 0 --真正增加的积分
 	self._fen_mul = 1 --连续答对多少次
 	self._pass = false --游戏已经通关
-	self._xing_time = 1000 --通关时间
+	self._xing_time = 0 --通关时间
 end
 
 function battle:init_timer()
@@ -517,6 +521,9 @@ function battle:init_timer()
 	self:update_time_bar()
 	local function timer_update(time)
 		if self._time_bar and cc_isobj(self._time_bar) then
+			if self._game_over_flag then
+				return
+			end
 			--不要显示大于时限的
 			if self._game_time <= self._time_limit then
 				--self._time_label:setText(self._game_time.."/"..self._time_limit)
@@ -590,7 +597,7 @@ function battle:game_over(mode)
 	end
 	if b then
 		--提交游戏数据
-		self:upload_scroe(self._arg.level,math.floor(self._fen),self._xing_time,self._right_num)
+		self:upload_scroe(self._arg.level,math.floor(self._fen),self._game_time,self._right_num)
 	end	
 end
 
@@ -605,10 +612,9 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 			if current<count then
 				level.setCurrent(current+1)
 			end
-			uikits.popScene()
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-				if e==RETRY then
+			   if e==RETRY then
 					self:upload_scroe( level_id,score,use_time,right_num )
 				else
 					uikits.popScene()
