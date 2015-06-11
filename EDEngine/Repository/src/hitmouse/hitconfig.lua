@@ -279,10 +279,10 @@ elseif cc.Application:getInstance():getTargetPlatform() == cc.PLATFORM_OS_ANDROI
 	str_platform = 'ANDROID'
 end
 
---local base_url = 'http://app.lejiaolexue.com/poems/client.ashx'
-local base_url = 'http://app.idiom.lejiaolexue.com/idiomclient.ashx'
---local base_url = 'http://schooladmin.lejiaolexue.com/client.ashx'
---local base_url = 'http://api.in.lejiaolexue.com/poems_s/client.ashx'
+
+--local base_url = 'http://app.idiom.lejiaolexue.com/idiomclient.ashx'
+local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
+
 local base_rid = ''
 
 local function set_base_rid()
