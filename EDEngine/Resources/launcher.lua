@@ -147,11 +147,11 @@ elseif  app == 'studenthw2' then
 		return selstudent.create()
 	end}
 elseif app == 'amouse' then
-	update.create{name=app,updates={'amouse','luacore'},
+	update.create{name=app,updates={'hitmouse','luacore'},
 		run=function()
 		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-		local amouse = require "hitmouse/hitmouse"
-		return AMouseMain()
+		local hitmouse = require "hitmouse/loading"
+		return hitmouse.create()
 	end}		
 elseif app == 'teacherhw' then
 	update.create{name=app,updates={'homework','errortitile','luacore'},

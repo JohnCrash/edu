@@ -151,7 +151,7 @@ function AppEntry:init()
 	local tbutton = uikits.button{caption='新打地鼠(学生)',x=64*scale,y = 64*scale +4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='hitmouse',updates={'luacore'},
+			update.create{name='hitmouse',updates={'hitmouse','luacore'},
 				run=function()
 				login.set_uid_type(login.STUDENT)
 				login.set_selector(4)--学生
@@ -162,7 +162,7 @@ function AppEntry:init()
 	local sbutton = uikits.button{caption='新打地鼠(管理)',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='hitmouse',updates={'luacore'},
+			update.create{name='hitmouse',updates={'hitmouse','luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				login.set_selector(4)

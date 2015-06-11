@@ -8,6 +8,17 @@ local level = require "hitmouse/level"
 local http = require "hitmouse/hitconfig"
 
 local _platform = cc.Application:getInstance():getTargetPlatform()
+--本地支援缓冲区
+local local_dir = kits.get_local_directory()..'res/'
+local SND_UI_CLICK = 0
+local SND_CLICK = 1
+local SND_MISS = 2
+local SND_HIT = 3
+local SND_RIGHT = 4
+local SND_FAIL = 5
+local SND_NEXT_PROM = 6
+local SND_PASS = 7
+local SND_GOLD = 8
 
 local ui = {
 	FILE = 'hitmouse/zuoti.json',
@@ -70,32 +81,30 @@ end
 --修改游戏声效
 function battle:play_sound( idx )
 	local name
-	
-	if self._player_data and self._player_data.sound then
-		if idx == SND_UI_CLICK then
-			name = 'hitmouse/snd/qiaoda.mp3'
-		elseif idx == SND_CLICK then
-			name = 'hitmouse/snd/qiaoda.mp3'
-		elseif idx == SND_MISS then
-			name = 'hitmouse/snd/shibai.MP3'
-		elseif idx == SND_HIT then
-			name = 'hitmouse/snd/beida.MP3'
-		elseif idx == SND_RIGHT then
-			name = 'hitmouse/snd/zhengque.MP3'
-		elseif idx == SND_FAIL then
-			name = 'hitmouse/snd/shibai.mp3'
-		elseif idx == SND_NEXT_PROM then
-			name = 'hitmouse/snd/guoguan.MP3'
-		elseif idx == SND_PASS then
-			name = 'hitmouse/snd/complete.mp3'
-		elseif idx == SND_GOLD then
-			name = 'hitmouse/snd/gold.mp3'
-		else
-			return
-		end
-		kits.log( "Play sound: "..name )
-		AudioEngine.playEffect(name)
+	if idx == SND_UI_CLICK then
+		name = 'hitmouse/snd/qiaoda.mp3'
+	elseif idx == SND_CLICK then
+		name = 'hitmouse/snd/qiaoda.mp3'
+	elseif idx == SND_MISS then
+		name = 'hitmouse/snd/shibai.MP3'
+	elseif idx == SND_HIT then
+		name = 'hitmouse/snd/beida.MP3'
+	elseif idx == SND_RIGHT then
+		name = 'hitmouse/snd/zhengque.MP3'
+	elseif idx == SND_FAIL then
+		name = 'hitmouse/snd/shibai.mp3'
+	elseif idx == SND_NEXT_PROM then
+		name = 'hitmouse/snd/guoguan.MP3'
+	elseif idx == SND_PASS then
+		name = 'hitmouse/snd/complete.mp3'
+	elseif idx == SND_GOLD then
+		name = 'hitmouse/snd/gold.mp3'
+	else
+		return
 	end
+	kits.log( "Play sound: "..name )
+	--print("kits.get_local_directory() = "..kits.get_local_directory())
+	AudioEngine.playEffect(local_dir..name)
 end
 
 function battle:initGame( arg )
@@ -830,6 +839,7 @@ function battle:init()
 		self._time_bar = uikits.child(self._root,ui.PROGRESS)
 		self._pnum_label = uikits.child(self._root,ui.NUMBER)
 		self._fen_label = uikits.child(self._root,ui.SCORE)
+		self._fen_label:setString('0')
 		self._cn_label = {}
 		table.insert(self._cn_label,uikits.child(self._root,ui.ZI1))
 		table.insert(self._cn_label,uikits.child(self._root,ui.ZI2))

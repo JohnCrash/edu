@@ -78,8 +78,10 @@ local function makeWord(s,n)
 		end
 		return {name=text,answer=answer}
 	elseif n==2 then
-		local i = math.random(1,4)
-		local i2 = diffRandom(i)
+		local _1 = math.random(1,4)
+		local _2 = diffRandom(i)
+		local i = math.min(_1,_2)
+		local i2 = math.max(_1,_2)
 		local d = s[i]
 		local d2 = s[i2]
 		local text = ""
