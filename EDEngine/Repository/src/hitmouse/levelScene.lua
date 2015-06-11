@@ -67,7 +67,8 @@ function levelScene:add(m,n,b)
 						dual = v.question_amount-signle
 					else
 						kits.log("ERROR get_match invaild result,v.question_signle = nil")
-					end		
+					end	
+--[[					
 					uikits.pushScene(battle.create{
 							level = v.road_block_id or 1,
 							time_limit = 120,
@@ -79,7 +80,8 @@ function levelScene:add(m,n,b)
 							condition = 70,
 							type = 1,
 						})	
---[[						
+						--]]
+---[[						
 					uikits.pushScene(battle.create{
 							level = v.road_block_id or 1,
 							time_limit = v.times or 10,

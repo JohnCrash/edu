@@ -150,7 +150,7 @@ elseif app == 'amouse' then
 	update.create{name=app,updates={'amouse','luacore'},
 		run=function()
 		uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-		local amouse = require "amouse/amouse_om"
+		local amouse = require "hitmouse/hitmouse"
 		return AMouseMain()
 	end}		
 elseif app == 'teacherhw' then
