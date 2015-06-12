@@ -208,6 +208,7 @@ elseif app and string.len(app)>0 then
 							end							
 							if debug_mode and debug_mode == 'console' then
 							--debug = 1 如何出错打开控制台模式
+								enableDebug(true)
 								local b,result = pcall(doScript)
 								if b then
 									return result
