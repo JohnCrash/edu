@@ -158,7 +158,8 @@ function battle:init_role()
 		local b = (self._ss.width-4*box.width)/5
 		self._amouse[i]:setAnchorPoint(cc.p(0,0))
 		if self._screen == 1 then
-			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),box.height/2))
+			b = -64
+			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),1.0*box.height))
 		else
 			self._amouse[i]:setPosition(cc.p(b+(i-1)*(box.width+b),1.0*box.height))
 		end
@@ -191,7 +192,11 @@ end
 
 function battle:hummer_home()
 	if _platform~=cc.PLATFORM_OS_WINDOWS then
-		self._hummer:setPosition( cc.p(self._ss.width/10,self._ss.height*4.6/7) )
+		if self._screen == 1 then
+			self._hummer:setPosition( cc.p(self._ss.width/10,64) )
+		else
+			self._hummer:setPosition( cc.p(self._ss.width/10,self._ss.height*4.6/7) )
+		end
 	end
 end
 
@@ -825,7 +830,14 @@ function battle:init_player_data()
 end
 
 function battle:init()
-	self._ss = cc.size(1920,1080);
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		self._ss = cc.size(1920,1080)
+		self._screen = 2
+	else
+		self._ss = cc.size(1440,1080)
+		self._screen = 1
+	end
+
 	uikits.initDR{width=self._ss.width,height=self._ss.height}
 	if not self._root then
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
