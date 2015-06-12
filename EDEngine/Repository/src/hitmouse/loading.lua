@@ -32,7 +32,11 @@ function loading.create()
 end
 
 function loading:init()
-	self._ss = cc.size(1920,1080);
+	if uikits.get_factor() == uikits.FACTOR_9_16 then
+		self._ss = cc.size(1920,1080)
+	else
+		self._ss = cc.size(1440,1080)
+	end
 	uikits.initDR{width=self._ss.width,height=self._ss.height}
 	if not self._root then
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
