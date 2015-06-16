@@ -1969,6 +1969,31 @@ local function animationFormJson( filename,name )
 	end
 end
 
+local function SceneClass( name )
+	local clas = class( name )
+	clas.__index = clas
+	clas.init=function(self)
+	end
+	clas.release=function(self)
+	end
+	clas.create=function(arg)
+		local scene = cc.Scene:create()
+		local layer = extend(cc.Layer:create(),clas)
+		scene:addChild(layer)
+		layer._arg = arg
+		local function onNodeEvent(event)
+			if "enter" == event then
+				layer:init()
+			elseif "exit" == event then
+				layer:release()
+			end
+		end	
+		layer:registerScriptHandler(onNodeEvent)
+		return scene		
+	end
+	return clas
+end
+
 return {
 	text = text,
 	textbmfont = textbmfont,
@@ -2040,4 +2065,5 @@ return {
 	pushKeyboardListener = pushKeyboardListener,
 	popKeyboardListener = popKeyboardListener,
 	getSceneCount = getSceneCount,
+	SceneClass = SceneClass,
 }
