@@ -12,6 +12,7 @@ local ui = {
 	MATCH_NEW = 'bs/tixing',
 	SETTING_BUT = 'ding/sez',
 	NOTICE_BUT = 'ding/xiaoxi',
+	NOTICE_BOBO = 'ding/xiaoxi/hong',
 }
 
 local main = uikits.SceneClass("main")
@@ -50,23 +51,25 @@ function main:init()
 			music.stop()
 			uikits.popScene()
 		end)
+		self._bobo = uikits.child(self._root,ui.NOTICE_BOBO)
+		self._bobo:setVisible(false)
 		local match_news = uikits.child(self._root,ui.MATCH_NEW)
 		match_news:setVisible(false)
 		uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)
-			local tops = require "hitmouse/tops"
-			uikits.pushScene(tops.create())
+			local scene = require "hitmouse/tops"
+			uikits.pushScene(scene.create())
 		end)
 		uikits.event(uikits.child(self._root,ui.MATCH_BUT),function(sender)
-			local tops = require "hitmouse/matchview"
-			uikits.pushScene(tops.create())		
+			local scene = require "hitmouse/matchview"
+			uikits.pushScene(scene.create())		
 		end)
 		uikits.event(uikits.child(self._root,ui.SETTING_BUT),function(sender)
-			local tops = require "hitmouse/setting"
-			uikits.pushScene(tops.create())		
+			local scene = require "hitmouse/setting"
+			uikits.pushScene(scene.create())		
 		end)		
 		uikits.event(uikits.child(self._root,ui.LEVEL_BUT),function(sender)
-			local tops = require "hitmouse/levelScene"
-			uikits.pushScene(tops.create())		
+			local scene = require "hitmouse/levelScene"
+			uikits.pushScene(scene.create())		
 		end)	
 		uikits.event(uikits.child(self._root,ui.NOTICE_BUT),function(sender)
 			local scene = require "hitmouse/notice"

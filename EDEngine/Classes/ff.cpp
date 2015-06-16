@@ -1275,9 +1275,21 @@ static void CloseAudioChanelByVideoState(VideoState *pvs)
 		{
 			mxAudioChanel[i] = nullptr;
 			delete pac;
-			return;
+			break;
 		}
 	}
+	/*
+		在全部的声音混合通道关闭后，关闭声音设备
+		这也许导致频繁的打开关闭声音设备导致电噪音
+	*/
+	for (int i = 0; i < MAXCHANEL; i++)
+	{
+		if (mxAudioChanel[i])
+			return;
+	}
+	//all audio chanel is close.
+	CloseAudio();
+	gInitAudio = false;
 }
 
 static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
