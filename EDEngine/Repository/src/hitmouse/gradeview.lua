@@ -19,7 +19,7 @@ local ui = {
 	TXT_MATCH_NAME = 'wen',
 	TXT_MATCH_RANK = 'ph',
 	BUTTON_MATCH_JOIN = 'jinru',
-	TXT_MATCH_TIP = 'tip',
+	TXT_MATCH_TIP = 'w3',
 	
 	TXT_TIP_HAS_MATCH = 'w2',
 	TXT_TIP_NO_MATCH = 'w3',
@@ -64,13 +64,14 @@ function gradeview:show_history_list()
 	local view_his_match_src = uikits.child(self._gradeview,ui.VIEW_HIS_MATCH_SRC)
 	if self.id_flag == hitconfig.ID_FLAG_STU then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
+		view_cur_match:setVisible(true)
+		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
+		local txt_match_rank = uikits.child(view_cur_match,ui.TXT_MATCH_RANK)
+		local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
+		txt_match_name:setString(self.match_name)
+		txt_match_rank:setString(self.match_rank)
 		if self.enable == 1 then
-			view_cur_match:setVisible(true)
-			local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
-			local txt_match_rank = uikits.child(view_cur_match,ui.TXT_MATCH_RANK)
-			local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
-			txt_match_name:setString(self.match_name)
-			txt_match_rank:setString(self.match_rank)
+
 			if self.match_enable == 1 then
 				but_match_join:setEnabled(true)
 				but_match_join:setBright(true)
@@ -83,8 +84,12 @@ function gradeview:show_history_list()
 				txt_match_tip:setVisible(true)			
 			end
 		else
-			view_cur_match:setVisible(false)
-			is_show_cur_match = false
+			but_match_join:setEnabled(false)
+			but_match_join:setBright(false)
+			but_match_join:setTouchEnabled(false)	
+			txt_match_tip:setVisible(true)	
+			--view_cur_match:setVisible(false)
+			--is_show_cur_match = false
 		end
 		uikits.event(but_match_join,	
 			function(sender,eventType)
@@ -135,15 +140,17 @@ function gradeview:show_history_list()
 				end
 				hitconfig.post_data(self._gradeview,'open_road_block',send_data,function(t,v)
 								if t and t == 200 then
-									if v == true then
+									if v.v1 == true then
 										if self.enable == 1 then
 											self.enable = 0
 											txt_has_match:setVisible(false)
 											txt_no_match:setVisible(true)	
+											--but_open_match:setSelectedState(false)
 										else
 											self.enable = 1
 											txt_has_match:setVisible(true)
 											txt_no_match:setVisible(false)
+											--but_open_match:setSelectedState(true)
 										end
 									else
 										if self.enable == 1 then
