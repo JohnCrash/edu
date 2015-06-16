@@ -66,7 +66,8 @@
     "back1.png",
     "xingq.png",
     "hei2.png",
-    "jinbs.png"
+    "jinbs.png",
+    "jinbshui.png"
   ],
   "version": "1.6.0.0",
   "widgetTree": {
@@ -960,8 +961,8 @@
                   "capInsetsY": 0,
                   "disabled": null,
                   "disabledData": {
-                    "path": null,
-                    "plistFile": null,
+                    "path": "jinbshui.png",
+                    "plistFile": "",
                     "resourceType": 0
                   },
                   "fontName": "微软雅黑",
@@ -1153,10 +1154,10 @@
           "capInsetsWidth": 1,
           "capInsetsX": 0,
           "capInsetsY": 0,
-          "clipAble": false,
+          "clipAble": true,
           "colorType": 1,
           "direction": 1,
-          "editorClipAble": false,
+          "editorClipAble": true,
           "innerHeight": 980,
           "innerWidth": 1920,
           "layoutType": 0,

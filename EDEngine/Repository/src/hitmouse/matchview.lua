@@ -42,7 +42,7 @@ end
 
 function matchview:show_match_list()
 	self.is_has_match = false
-	for i=1,9 do
+	for i=1,6 do
 		local match_enable = 0
 		if self.match_list_data[i].enable == 1 and self.match_list_data[i].enter_number >0 then
 			match_enable = 1
