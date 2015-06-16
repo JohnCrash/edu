@@ -590,6 +590,7 @@ return {
 	ID_FLAG_STU = ID_FLAG_STU,
 	ID_FLAG_TEA = ID_FLAG_TEA,
 	ID_FLAG_SCH = ID_FLAG_SCH,
+	ID_FLAG_PAR = ID_FLAG_PAR,
 	circle = put_lading_circle,
 	set_base_rid = set_base_rid,
 	get_user_id = get_user_id,
