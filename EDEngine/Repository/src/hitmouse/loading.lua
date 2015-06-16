@@ -11,25 +11,7 @@ local ui = {
 	PROGRESS = "jindu",
 }
 
-local loading = class("loading")
-loading.__index = loading
-
-function loading.create()
-	local scene = cc.Scene:create()
-	local layer = uikits.extend(cc.Layer:create(),loading)
-	
-	scene:addChild(layer)
-	
-	local function onNodeEvent(event)
-		if "enter" == event then
-			layer:init()
-		elseif "exit" == event then
-			layer:release()
-		end
-	end	
-	layer:registerScriptHandler(onNodeEvent)
-	return scene
-end
+local loading = uikits.SceneClass("loading")
 
 function loading:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then

@@ -15,6 +15,8 @@ local ui = {
 	ITEM_LOCK = 'g3',
 }
 
+local levelScene = uikits.SceneClass("levelScene")
+--[[
 local levelScene = class("levelScene")
 levelScene.__index = levelScene
 
@@ -34,7 +36,7 @@ function levelScene.create()
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
-
+--]]
 function levelScene:clear()
 	if self._items then
 		for i,v in pairs(self._items) do

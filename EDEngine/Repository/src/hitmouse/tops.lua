@@ -17,6 +17,8 @@ local ui = {
 	SCROE = 'df',
 }
 
+local tops = uikits.SceneClass("tops")
+--[[
 local tops = class("tops")
 tops.__index = tops
 
@@ -36,7 +38,7 @@ function tops.create()
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
-
+--]]
 function tops:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		self._ss = cc.size(1920,1080)

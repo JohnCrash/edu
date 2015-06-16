@@ -11,8 +11,11 @@ local ui = {
 	MATCH_BUT = 'bs',
 	MATCH_NEW = 'bs/tixing',
 	SETTING_BUT = 'ding/sez',
+	NOTICE_BUT = 'ding/xiaoxi',
 }
 
+local main = uikits.SceneClass("main")
+--[[
 local main = class("main")
 main.__index = main
 
@@ -32,7 +35,7 @@ function main.create()
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
-
+--]]
 function main:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		self._ss = cc.size(1920,1080)
@@ -65,6 +68,10 @@ function main:init()
 			local tops = require "hitmouse/levelScene"
 			uikits.pushScene(tops.create())		
 		end)	
+		uikits.event(uikits.child(self._root,ui.NOTICE_BUT),function(sender)
+			local scene = require "hitmouse/notice"
+			uikits.pushScene(scene.create())
+		end)
 		self._mut = kits.config("hitmouse_mute","get")
 		if not self._mut then
 			math.randomseed(os.time())
