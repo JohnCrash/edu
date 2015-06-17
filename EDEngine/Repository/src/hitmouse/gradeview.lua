@@ -209,8 +209,21 @@ function gradeview:show_history_list()
 		local but_detail = uikits.child(cur_pro,ui.BUTTON_DETAIL)
 		but_detail.road_block_id = self.history_list[i].road_block_id
 		but_detail.open_time = self.history_list[i].match_time
+		but_detail.user_num = self.history_list[i].Users
 		uikits.event(but_detail,	
 			function(sender,eventType)
+				if sender.user_num == 0 then
+--[[					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+						if e == hitconfig.OK then
+						
+						else
+							
+						end
+					end)	--]]
+					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+					end,'没有参与比赛的人')		
+					return
+				end
 				local send_data = {}
 				send_data.v1 = sender.road_block_id
 				send_data.v2 = 2

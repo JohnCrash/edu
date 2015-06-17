@@ -509,11 +509,12 @@ end
 local ID_FLAG_STU = 1
 local ID_FLAG_TEA = 2
 local ID_FLAG_SCH = 3
+local ID_FLAG_PAR = 4
 
-local id_flag = ID_FLAG_STU
+local id_flag = ID_FLAG_SCH
 
 local function set_id_flag(id)
-	if id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_STU then
+	if id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_PAR then
 		id_flag = id
 	end
 end
@@ -536,7 +537,7 @@ local function get_user_id(parent,func)
 				if t.uig[1].user_role == 1 then	--xuesheng
 					user_id = ID_FLAG_STU
 				elseif t.uig[1].user_role == 2 then	--parent
-					user_id = ID_FLAG_TEA
+					user_id = ID_FLAG_PAR
 				elseif t.uig[1].user_role == 3 then	--teacher
 					user_id = ID_FLAG_TEA
 				elseif t.uig[1].user_role >10 and t.uig[1].user_role <15 then	--manager
@@ -589,6 +590,7 @@ return {
 	ID_FLAG_STU = ID_FLAG_STU,
 	ID_FLAG_TEA = ID_FLAG_TEA,
 	ID_FLAG_SCH = ID_FLAG_SCH,
+	ID_FLAG_PAR = ID_FLAG_PAR,
 	circle = put_lading_circle,
 	set_base_rid = set_base_rid,
 	get_user_id = get_user_id,
