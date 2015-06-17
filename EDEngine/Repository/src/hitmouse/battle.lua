@@ -61,6 +61,12 @@ local ui = {
 	SHARE_SCORE1 = 'js1/gongxian',
 	SHARE_SCORE_LABEL2 = 'js2/w3',
 	SHARE_SCORE2 = 'js2/gongxian',
+	
+	MATCH_OVER = 'js4',
+	USE_TIME3 = 'js4/sj',
+	RIGHT_COUNT3 = 'js4/tisu',
+	SCORE_COUNT3 = 'js4/defen',
+	MATCH_OVER_BUT = 'js4/quer',	
 }
 
 local battle = class("battle")
@@ -636,11 +642,19 @@ function battle:game_over(mode)
 			--提交游戏数据
 			self:upload_scroe(self._arg.level,math.floor(self._fen),self._game_time,self._right_num)
 		end
-	else self._arg.type==2 then
+	elseif self._arg.type==2 then
 		--比赛结束
+		local moui = uikits.child(self._root,ui.MATCH_OVER)
+		moui:setVisible(true)
+		uikits.child(self._root,ui.USE_TIME3):setString(tostring(self._game_time))
+		uikits.child(self._root,ui.RIGHT_COUNT3):setString(tostring(self._right_num))	
+		local ok = uikits.child(self._root,ui.MATCH_OVER_BUT)
+		if ok then
+			uikits.event(ok,function(sender)
+				uikits.popScene()
+			end)
+		end		
 		self:upload_scroe(self._arg.level,math.floor(self._fen),self._game_time,self._right_num)
-		
-		
 	else
 		kits.log("ERROR invalid match type "..tostring(self._arg.type))
 	end

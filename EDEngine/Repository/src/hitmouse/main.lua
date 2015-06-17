@@ -84,6 +84,10 @@ function main:init()
 			math.randomseed(os.time())
 			music.play()
 		end
+	else
+		if self._bobo then
+			self._bobo:setVisible(false)
+		end
 	end
 end
 
