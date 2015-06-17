@@ -93,7 +93,7 @@ function gradeview:show_history_list()
 		end
 		uikits.event(but_match_join,	
 			function(sender,eventType)
-			local send_data = {v1=self.match_id,v2=2}
+			local send_data = {v1=self.block_id,v2=2}
 			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
 					uikits.replaceScene(battle.create{
