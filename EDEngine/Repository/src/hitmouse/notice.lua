@@ -44,25 +44,37 @@ function notice:init()
 				end
 			end
 		end)		
+		self:initNotices(self._curPage)
 	end
 end
 
 function notice:initNotices(cur)
-	local send_data = {}
+	local send_data = {v1=cur,v2=12}
 	http.post_data(self._root,'get_msg',send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v)
-			
 			self._scrollview:relayout()
 			if v.v2 then
 				self._tatolPags = self._tatolPags or v.v2
 			else
-				kits.log("ERROR tops:initTops road_block_rank v.v2 = nil")
+				kits.log("ERROR tops:initNotices get_msg v.v2 = nil")
 			end
+			if v.v1 then
+				for k,u in pairs(v.v1) do
+					local item = self._scrollview:additem()
+					uikits.child(item,ui.ITEM_TITLE):setString(u.msg_title or "?")
+					uikits.child(item,ui.ITEM_TIME):setString(u.add_time or "?")
+					uikits.child(item,ui.ITEM_TEXT):setString(u.msg_info or "?")
+				end
+			else
+				kits.log("ERROR tops:initNotices get_msg v.v1 = nil")
+			end
+			self._scrollview:relayout()
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 			end)				
 		end
+		self._done_loading = nil
 	end)
 end
 

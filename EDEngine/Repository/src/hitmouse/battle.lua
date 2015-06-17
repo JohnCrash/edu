@@ -587,53 +587,63 @@ function battle:game_over(mode)
 		self._amouse[i]:setVisible(false)
 		self._cn_label[i]:getParent():setVisible(false)
 	end
-	local ok
-	if b then
-		--播放成功过关的声音
-		self:play_sound(SND_NEXT_PROM)	
-		if mode == 2 then
-			self._timeover_ui:setVisible(true)
-			uikits.child(self._root,ui.USE_TIME):setString(tostring(self._game_time))
-			uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
-			uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
-			ok=uikits.child(self._timeover_ui,ui.OK_BUT)
-			local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
-			local share_score = uikits.child(self._root,ui.SHARE_SCORE1)			
-			if http.get_id_flag()==ID_FLAG_PAR then
-				share_score:setString(tostring(math.floor(self._fen*0.1)))
+	
+	if self._arg.type==1 then
+		local ok
+		if b then
+			--播放成功过关的声音
+			self:play_sound(SND_NEXT_PROM)	
+			if mode == 2 then
+				self._timeover_ui:setVisible(true)
+				uikits.child(self._root,ui.USE_TIME):setString(tostring(self._game_time))
+				uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
+				uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
+				ok=uikits.child(self._timeover_ui,ui.OK_BUT)
+				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
+				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)			
+				if http.get_id_flag()==ID_FLAG_PAR then
+					share_score:setString(tostring(math.floor(self._fen*0.1)))
+				else
+					label:setVisible(false)
+					label:setVisible(false)
+				end
 			else
-				label:setVisible(false)
-				label:setVisible(false)
+				self._pnum_label:setString("0")
+				self._success_ui:setVisible(true)
+				uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._game_time))
+				uikits.child(self._root,ui.RIGHT_COUNT2):setString(tostring(self._right_num))
+				uikits.child(self._root,ui.SCORE_COUNT2):setString(fen_text)
+				ok=uikits.child(self._success_ui,ui.OK_BUT)
+				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL2)
+				local share_score = uikits.child(self._root,ui.SHARE_SCORE2)		
+				if http.get_id_flag()==ID_FLAG_PAR then
+					share_score:setString(tostring(math.floor(self._fen*0.1)))
+				else
+					label:setVisible(false)
+					label:setVisible(false)
+				end
 			end
 		else
-			self._pnum_label:setString("0")
-			self._success_ui:setVisible(true)
-			uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._game_time))
-			uikits.child(self._root,ui.RIGHT_COUNT2):setString(tostring(self._right_num))
-			uikits.child(self._root,ui.SCORE_COUNT2):setString(fen_text)
-			ok=uikits.child(self._success_ui,ui.OK_BUT)
-			local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL2)
-			local share_score = uikits.child(self._root,ui.SHARE_SCORE2)		
-			if http.get_id_flag()==ID_FLAG_PAR then
-				share_score:setString(tostring(math.floor(self._fen*0.1)))
-			else
-				label:setVisible(false)
-				label:setVisible(false)
-			end
+			ok=uikits.child(self._failed_ui,ui.OK_BUT)
+			self._failed_ui:setVisible(true)
 		end
-	else
-		ok=uikits.child(self._failed_ui,ui.OK_BUT)
-		self._failed_ui:setVisible(true)
-	end
-	if ok then
-		uikits.event(ok,function(sender)
-			uikits.popScene()
-		end)
-	end
-	if b then
-		--提交游戏数据
+		if ok then
+			uikits.event(ok,function(sender)
+				uikits.popScene()
+			end)
+		end
+		if b then
+			--提交游戏数据
+			self:upload_scroe(self._arg.level,math.floor(self._fen),self._game_time,self._right_num)
+		end
+	else self._arg.type==2 then
+		--比赛结束
 		self:upload_scroe(self._arg.level,math.floor(self._fen),self._game_time,self._right_num)
-	end	
+		
+		
+	else
+		kits.log("ERROR invalid match type "..tostring(self._arg.type))
+	end
 end
 
 function battle:upload_scroe( level_id,score,use_time,right_num )
