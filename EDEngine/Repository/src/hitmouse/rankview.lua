@@ -16,7 +16,10 @@ local ui = {
 	TXT_USER_NAME = 'mz',
 	TXT_USER_CLASS = 'bj',
 	TXT_TIME = 'sj',
-	TXT_USER_FEN = 'defen',
+	TXT_USER_FEN = 'df',
+	TXT_PAR_FEN = 'df2',
+	TXT_ALL_FEN = 'defen',
+	TXT_JOIN_TIMES = 'cs',
 	
 	TXT_TOP_DATE = 'ding/sj',
 	TXT_TOP_GRADE = 'ding/nj',
@@ -63,11 +66,18 @@ function rankview:show_rank()
 				local txt_user_class = uikits.child(item,ui.TXT_USER_CLASS)
 				local txt_time = uikits.child(item,ui.TXT_TIME)
 				local txt_user_fen = uikits.child(item,ui.TXT_USER_FEN)
+				local txt_par_fen = uikits.child(item,ui.TXT_PAR_FEN)
+				local txt_all_fen = uikits.child(item,ui.TXT_ALL_FEN)
+				local txt_join_times = uikits.child(item,ui.TXT_JOIN_TIMES)
+
 				txt_rank:setString(data.rank)
 				txt_user_name:setString(data.uname)
 				txt_user_class:setString(data.str_gradeclass)
 				txt_time:setString(data.str_times)
 				txt_user_fen:setString(data.integral)
+				txt_par_fen:setString(data.parent_integral)
+				txt_all_fen:setString(data.results)
+				txt_join_times:setString(data.enter_number)
 				hitconfig.load_logo_pic(pic_user,data.user_id)
 			end,function(waitingNode,afterReflash)
 			local data = self.rank_data 
