@@ -49,7 +49,7 @@ end
 
 function notice:initNotices(cur)
 	local send_data = {}
-	http.post_data(self._root,'?',send_data,function(t,v)
+	http.post_data(self._root,'get_msg',send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v)
 			

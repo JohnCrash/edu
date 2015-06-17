@@ -14,7 +14,9 @@ local ui = {
 	LOGO = 'touxiang',
 	NAME = 'ming',
 	USETIME = 'sj',
-	SCROE = 'df',
+	SCORE = 'df',
+	SCORE_PARENT = 'df2',
+	SCORE_TOTAL = 'zdf',
 }
 
 local tops = uikits.SceneClass("tops")
@@ -80,7 +82,13 @@ function tops:initTops(cur)
 					http.load_logo_pic(uikits.child(item,ui.LOGO),u.user_id or 0)
 					uikits.child(item,ui.NAME):setString(u.uname or "?")
 					uikits.child(item,ui.USETIME):setString(u.str_times or "?")
-					uikits.child(item,ui.SCROE):setString(u.integral or "?")
+					uikits.child(item,ui.SCORE):setString(u.integral or "?")
+					uikits.child(item,ui.SCORE_PARENT):setString(u.parent_integral or "?")
+					if u.integral and u.parent_integral then
+						uikits.child(item,ui.SCORE_TOTAL):setString(u.integral+u.parent_integral)
+					else
+						uikits.child(item,ui.SCORE_TOTAL):setString("?")
+					end
 				end
 			else
 				kits.log("ERROR tops:initTops road_block_rank v.v1 = nil")

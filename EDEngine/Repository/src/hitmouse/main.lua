@@ -52,7 +52,11 @@ function main:init()
 			uikits.popScene()
 		end)
 		self._bobo = uikits.child(self._root,ui.NOTICE_BOBO)
-		self._bobo:setVisible(false)
+		if self._arg and self._arg.hasMsg then
+			self._bobo:setVisible(true)		
+		else
+			self._bobo:setVisible(false)		
+		end
 		local match_news = uikits.child(self._root,ui.MATCH_NEW)
 		match_news:setVisible(false)
 		uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)

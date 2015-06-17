@@ -55,7 +55,29 @@ function loading:launch()
 	level.init()
 	kits.log("login success!")
 	local main = require "hitmouse/main"
-	uikits.replaceScene(main.create())
+	uikits.replaceScene(main.create(self._arg))
+end
+
+function loading:initSummary()
+	local send_data = {}
+	kits.log("do loading:initSummary...")
+	http.post_data(self._root,'get_user_msg_state',send_data,function(t,v)
+		if t and t==200 and v then
+			kits.log("loading initLevelData success!")
+			http.logTable(v,1)
+			self._arg = {}
+			self._arg.hasMsg = v.v1
+			self:launch()
+		else
+			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+				if e == http.OK then
+					self:initSummary()
+				else
+					uikits.popScene()
+				end
+			end)	
+		end
+	end)
 end
 
 function loading:initLevelData()
@@ -75,7 +97,7 @@ function loading:initLevelData()
 			else
 				kits.log("ERROR loading:initLevelData v2 invalid")
 			end			
-			self:launch()
+			self:initSummary()
 		else
 			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
 				if e == http.OK then
