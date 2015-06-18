@@ -614,7 +614,6 @@ function battle:game_over(mode)
 					label:setVisible(false)
 				end
 			else
-				self._pnum_label:setString("0")
 				self._success_ui:setVisible(true)
 				uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._game_time))
 				uikits.child(self._root,ui.RIGHT_COUNT2):setString(tostring(self._right_num))
@@ -672,8 +671,8 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 				level.setCurrent(current+1)
 			end
 		else
-			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-			   if e==RETRY then
+			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+			   if e==http.RETRY then
 					self:upload_scroe( level_id,score,use_time,right_num )
 				else
 					uikits.popScene()
@@ -791,6 +790,7 @@ function battle:next_select()
 	self._ideal_pause = false
 	
 	if self._word_index > #self._words then
+		self:set_last_proms(0)
 		self:game_over(1)
 		return
 	end

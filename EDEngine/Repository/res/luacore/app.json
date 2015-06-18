@@ -12,5 +12,34 @@
 		"updates":[
 			"test"
 		]
-	}
+	},
+	"poetrymatch":{
+		"name":"poetrymatch",
+		"launch":"poetrymatch/Loading",
+		"updates":[
+			"poetrymatch"
+		]
+	},
+	"qwxt":{
+		"name":"qwxt",
+		"launch":"qwxt/main",
+		"updates":[
+			"qwxt",
+			"topics"
+		]
+	},
+	"lemall":{
+		"name":"lemall",
+		"launch":"lemall/Loading",
+		"updates":[
+			"lemall"
+		]
+	},
+	"hitmouse":{
+		"name":"hitmouse",
+		"launch":"hitmouse/loading",
+		"updates":[
+			"hitmouse"
+		]
+	}	
 }
