@@ -10,6 +10,8 @@ local ui = {
 	MUSIC = 'kuang/kg',
 }
 
+local setting = uikits.SceneClass("setting")
+--[[
 local setting = class("setting")
 setting.__index = setting
 
@@ -29,7 +31,7 @@ function setting.create()
 	layer:registerScriptHandler(onNodeEvent)
 	return scene
 end
-
+--]]
 function setting:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		self._ss = cc.size(1920,1080)

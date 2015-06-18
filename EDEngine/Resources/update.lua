@@ -74,6 +74,7 @@ local function runScene( scene )
 end
 
 local thread_count = 0
+local done_count = 0
 local download_error_table = {}
 local UpdateProgram = class("UpdateProgram")
 UpdateProgram.__index = UpdateProgram
@@ -127,17 +128,20 @@ local function download_file(t,m5)
 							table.insert(download_error_table,{file=t,md5=m5,err=1})
 						end
 					end
+					done_count = done_count + 1
 					thread_count = thread_count - 1 --正常结束
 				else
 					--非正常结束校验错误
 					kits.log('error download_file verify md5 failed '..tostring(url))
 					table.insert(download_error_table,{file=t,md5=m5,err=2})
+					done_count = done_count + 1
 					thread_count = thread_count - 1
 				end
 			else
 				--非正常结束FAILED or CANCEL
 				kits.log('error download_file failed '..tostring(url))
 				table.insert(download_error_table,{download=t,md5=m5,err=3})
+				done_count = done_count + 1
 				thread_count = thread_count - 1
 			end
 		end
@@ -514,13 +518,15 @@ function UpdateProgram:update()
 		self._progress:setVisible(true)
 		self._progress_bg:setVisible(true)
 		self._step = 2
+		done_count = 0
 		kits.log("Ceck version done")
 		kits.log("Download file")
 	elseif self._step == 2 then --现在文件，将下载的文件存为临时文件
 		if thread_count >=10 then return end --队列满
 		
 		if self._count <= self._maxcount then
-			self._progress:setPercent(self._count*100/self._maxcount)
+			--self._progress:setPercent(self._count*100/self._maxcount)
+			self._progress:setPercent(done_count*100/self._maxcount)
 			self._count = self._count+1
 		end
 		if self._count > self._maxcount then
@@ -541,6 +547,7 @@ function UpdateProgram:update()
 					end
 					self._oplist = download_error_table
 					thread_count = 0
+					done_count = 0
 					download_error_table = {}
 					self._maxcount = #self._oplist
 					try_count = try_count + 1
