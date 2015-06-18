@@ -110,23 +110,6 @@ function matchview:get_match_list()
 	end)
 end
 
-function matchview:login()
-	local send_data = {}
-	hitconfig.post_data(self._matchview,'login',send_data,function(t,v)
-					if t and t == 200 then
-						self:get_match_list()
-					else
-						hitconfig.messagebox(self._matchview,hitconfig.NETWORK_ERROR,function(e)
-							if e == hitconfig.OK then
-								self:show_match_list()
-							else
-								
-							end
-						end)							
-					end
-				end)
-end
-
 function matchview:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		uikits.initDR{width=1920,height=1080}
@@ -140,9 +123,9 @@ function matchview:init()
 		self._matchview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
 	end
 	self:addChild(self._matchview)
-	--self:get_match_list()
-	hitconfig.set_base_rid()
-	self:login()
+	self:get_match_list()
+--[[	hitconfig.set_base_rid()
+	self:login()--]]
 	local but_quit = uikits.child(self._matchview,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
 		function(sender,eventType)	

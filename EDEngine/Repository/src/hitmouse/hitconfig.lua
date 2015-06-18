@@ -73,11 +73,13 @@ local ui = {
 	OK = 'tu/hao',
 	RETRY = 'tu/chongs',
 	GOOD = 'tu/tbl',
+	CANCEL = 'tu/qux',
 }
 
 local RETRY = 1
 local OK = 2
 local FAIL = 3
+local CANCEL = 4
 
 local NETWORK_ERROR = 1
 local DOWNLOAD_ERROR = 2
@@ -122,6 +124,8 @@ local function messagebox(parent,flag,func,txt_content)
 	local but_ok = uikits.child(s,ui.OK)
 	local but_retry = uikits.child(s,ui.RETRY)
 	local but_good = uikits.child(s,ui.GOOD)
+	local but_cancel = uikits.child(s,ui.CANCEL)
+	
 
 	uikits.event( but_confirm,function(sender)
 				uikits.delay_call(parent,function()
@@ -185,6 +189,16 @@ local function messagebox(parent,flag,func,txt_content)
 				end,0)
 				func(OK)
 			end,'click')	
+	uikits.event( but_cancel,function(sender)
+				uikits.delay_call(parent,function()
+					if sender.parent then
+						sender.parent:setEnabled(true)
+						sender.parent:setTouchEnabled(true)					
+					end
+					s:removeFromParent()
+				end,0)
+				func(CANCEL)
+			end,'click')	
 
 	but_confirm:setVisible(false)
 	but_giveup:setVisible(false)
@@ -192,6 +206,7 @@ local function messagebox(parent,flag,func,txt_content)
 	but_ok:setVisible(false)
 	but_retry:setVisible(false)
 	but_good:setVisible(false)
+	but_cancel:setVisible(false)
 
 	if flag > #flag_dictionary then
 --[[		if txt_title and type(txt_title) == 'string' then
@@ -224,6 +239,7 @@ local function messagebox(parent,flag,func,txt_content)
 		but_ok.parent = parent
 		but_retry.parent = parent
 		but_good.parent = parent
+		but_cancel.parent = parent
 		s:setEnabled(true)
 		s:setTouchEnabled(true)		
 		return
@@ -234,6 +250,7 @@ local function messagebox(parent,flag,func,txt_content)
 	
 	if flag_dictionary[flag].button_type == 1 then
 		but_retry:setVisible(true)
+		but_cancel:setVisible(true)
 	elseif flag_dictionary[flag].button_type == 2 then
 		but_ok:setVisible(true)
 	elseif flag_dictionary[flag].button_type == 3 then
@@ -262,6 +279,7 @@ local function messagebox(parent,flag,func,txt_content)
 	but_ok.parent = parent
 	but_retry.parent = parent
 	but_good.parent = parent
+	but_cancel.parent = parent
 	s:setEnabled(true)
 	s:setTouchEnabled(true)
 end
@@ -570,6 +588,7 @@ return {
 	RETRY = RETRY,
 	OK = OK,
 	FAIL = FAIL,
+	CANCEL = CANCEL,
 	NETWORK_ERROR = NETWORK_ERROR,
 	DOWNLOAD_ERROR = DOWNLOAD_ERROR,
 	SER_ERROR = SER_ERROR,
