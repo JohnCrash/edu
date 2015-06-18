@@ -67,6 +67,8 @@ local ui = {
 	RIGHT_COUNT3 = 'js4/tisu',
 	SCORE_COUNT3 = 'js4/defen',
 	MATCH_OVER_BUT = 'js4/quer',	
+	SHARE_SCORE_LABEL3 = 'js4/w3',
+	SHARE_SCORE3 = 'js4/gongxian',	
 }
 
 local battle = class("battle")
@@ -606,12 +608,13 @@ function battle:game_over(mode)
 				uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
 				ok=uikits.child(self._timeover_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
-				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)			
-				if http.get_id_flag()==ID_FLAG_PAR then
+				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)
+				--if http.get_id_flag()==ID_FLAG_PAR then
+				if false then
 					share_score:setString(tostring(math.floor(self._fen*0.1)))
 				else
 					label:setVisible(false)
-					label:setVisible(false)
+					share_score:setVisible(false)
 				end
 			else
 				self._success_ui:setVisible(true)
@@ -621,11 +624,14 @@ function battle:game_over(mode)
 				ok=uikits.child(self._success_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL2)
 				local share_score = uikits.child(self._root,ui.SHARE_SCORE2)		
-				if http.get_id_flag()==ID_FLAG_PAR then
+				--if http.get_id_flag()==ID_FLAG_PAR then
+				if false then
+					label:setVisible(true)
+					share_score:setVisible(true)						
 					share_score:setString(tostring(math.floor(self._fen*0.1)))
 				else
 					label:setVisible(false)
-					label:setVisible(false)
+					share_score:setVisible(false)
 				end
 			end
 		else
@@ -647,6 +653,18 @@ function battle:game_over(mode)
 		moui:setVisible(true)
 		uikits.child(self._root,ui.USE_TIME3):setString(tostring(self._game_time))
 		uikits.child(self._root,ui.RIGHT_COUNT3):setString(tostring(self._right_num))	
+		uikits.child(self._root,ui.SCORE_COUNT3):setString(tostring(math.floor(self._fen)))
+		local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL3)
+		local share_score = uikits.child(self._root,ui.SHARE_SCORE3)		
+		--if http.get_id_flag()==ID_FLAG_PAR then
+		if false then
+			label:setVisible(true)
+			share_score:setVisible(true)		
+			share_score:setString(tostring(math.floor(self._fen*0.1)))
+		else
+			label:setVisible(false)
+			share_score:setVisible(false)
+		end		
 		local ok = uikits.child(self._root,ui.MATCH_OVER_BUT)
 		if ok then
 			uikits.event(ok,function(sender)

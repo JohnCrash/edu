@@ -154,7 +154,7 @@ function AppEntry:init()
 			update.create{name='hitmouse',updates={'hitmouse','luacore'},
 				run=function()
 				login.set_uid_type(login.STUDENT)
-				login.set_selector(4)--学生
+				login.set_selector(7)--学生
 				local hitmouse = require "hitmouse/loading"
 				return hitmouse.create()
 			end}			
