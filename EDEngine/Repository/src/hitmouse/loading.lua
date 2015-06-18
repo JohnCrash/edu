@@ -39,8 +39,8 @@ function loading:login()
 						self._progress:setPercent(30)
 						self:initUserId()
 					else
-						http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-							if e == http.OK then
+						http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+							if e==http.RETRY then
 								self:login()
 							else
 								uikits.popScene()
@@ -69,8 +69,8 @@ function loading:initSummary()
 			self._arg.hasMsg = v.v1
 			self:launch()
 		else
-			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-				if e == http.OK then
+			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+				if e == http.RETRY then
 					self:initSummary()
 				else
 					uikits.popScene()
@@ -99,8 +99,8 @@ function loading:initLevelData()
 			end			
 			self:initSummary()
 		else
-			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
-				if e == http.OK then
+			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+				if e == http.RETRY then
 					self:initLevelData()
 				else
 					uikits.popScene()

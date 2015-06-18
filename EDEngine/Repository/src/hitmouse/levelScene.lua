@@ -97,7 +97,12 @@ function levelScene:add(m,n,b)
 						})
 						--]]
 				else
-					http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+					http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+						if e==http.RETRY then
+							self:add(m,n,b)
+						else
+							uikits.popScene()
+						end
 					end)		
 				end
 			end)

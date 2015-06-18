@@ -71,7 +71,12 @@ function notice:initNotices(cur)
 			end
 			self._scrollview:relayout()
 		else
-			http.messagebox(self._root,http.NETWORK_ERROR,function(e)
+			http.messagebox(self._root,http.DOWLOAD_ERROR,function(e)
+				if e==http.RETRY then
+					self:initNotices(cur)
+				else
+					uikits.popScene()
+				end
 			end)				
 		end
 		self._done_loading = nil
