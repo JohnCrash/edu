@@ -25,6 +25,8 @@ local ui = {
 	TXT_TIP_NO_MATCH = 'w3',
 	BUTTON_OPEN_MATCH = 'kaiguan',
 	
+	BUTTON_MATCH_DETAIL = 'info',
+	
 	BUTTON_DETAIL  = 'xiangq',
 	TXT_PEOPLE_NUM = 'sj',
 	TXT_OPEN_TIME = 'mz',
@@ -62,7 +64,47 @@ function gradeview:show_history_list()
 	local view_all_history = uikits.child(self._gradeview,ui.VIEW_ALL_HISTORY)
 	local view_cur_match = uikits.child(self._gradeview,ui.VIEW_CUR_MATCH)
 	local view_his_match_src = uikits.child(self._gradeview,ui.VIEW_HIS_MATCH_SRC)
-	if self.id_flag == hitconfig.ID_FLAG_STU then
+	local but_match_detail = uikits.child(view_cur_match,ui.BUTTON_MATCH_DETAIL)
+	uikits.event(but_match_detail,	
+		function(sender,eventType)
+			local send_data = {}
+			send_data.v1 = self.block_id
+			send_data.v2 = 2
+			send_data.v3 = 1
+			send_data.v4 = 100
+			hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
+							if t and t == 200 then
+								uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
+							else
+								hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
+									if e == hitconfig.OK then
+									
+									else
+										
+									end
+								end)							
+							end
+						end)
+	end)	
+	if self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
+		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
+		local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
+		view_cur_match:setVisible(true)		
+		but_match_join:setEnabled(false)
+		but_match_join:setBright(false)
+		but_match_join:setTouchEnabled(false)	
+		txt_match_tip:setVisible(false)	
+		if self.enable == 1 then
+			but_match_detail:setEnabled(true)
+			but_match_detail:setBright(true)
+			but_match_detail:setTouchEnabled(true)
+		else
+			but_match_detail:setEnabled(false)
+			but_match_detail:setBright(false)
+			but_match_detail:setTouchEnabled(false)	
+		end	
+			
+	elseif self.id_flag == hitconfig.ID_FLAG_STU then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		view_cur_match:setVisible(true)
 		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
@@ -71,23 +113,31 @@ function gradeview:show_history_list()
 		txt_match_name:setString(self.match_name)
 		txt_match_rank:setString(self.match_rank)
 		if self.enable == 1 then
-
 			if self.match_enable == 1 then
 				but_match_join:setEnabled(true)
 				but_match_join:setBright(true)
 				but_match_join:setTouchEnabled(true)
 				txt_match_tip:setVisible(false)
+				but_match_detail:setEnabled(true)
+				but_match_detail:setBright(true)
+				but_match_detail:setTouchEnabled(true)
 			else
 				but_match_join:setEnabled(false)
 				but_match_join:setBright(false)
 				but_match_join:setTouchEnabled(false)	
-				txt_match_tip:setVisible(true)			
+				txt_match_tip:setVisible(true)	
+				but_match_detail:setEnabled(true)
+				but_match_detail:setBright(true)
+				but_match_detail:setTouchEnabled(true)	
 			end
 		else
 			but_match_join:setEnabled(false)
 			but_match_join:setBright(false)
 			but_match_join:setTouchEnabled(false)	
 			txt_match_tip:setVisible(true)	
+			but_match_detail:setEnabled(false)
+			but_match_detail:setBright(false)
+			but_match_detail:setTouchEnabled(false)	
 			--view_cur_match:setVisible(false)
 			--is_show_cur_match = false
 		end
@@ -124,10 +174,16 @@ function gradeview:show_history_list()
 			txt_has_match:setVisible(true)
 			txt_no_match:setVisible(false)
 			but_open_match:setSelectedState(false)
+			but_match_detail:setEnabled(true)
+			but_match_detail:setBright(true)
+			but_match_detail:setTouchEnabled(true)	
 		else
 			txt_has_match:setVisible(false)
 			txt_no_match:setVisible(true)	
-			but_open_match:setSelectedState(true)	
+			but_open_match:setSelectedState(true)
+			but_match_detail:setEnabled(false)
+			but_match_detail:setBright(false)
+			but_match_detail:setTouchEnabled(false)	
 		end
 		uikits.event(but_open_match,	
 			function(sender,eventType)
