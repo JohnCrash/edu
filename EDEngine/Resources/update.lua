@@ -15,10 +15,10 @@ local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local versionNUM = resume.getversion()
---local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
---local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
-local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/debug/'
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
+local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/debug/'
+--local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
 --local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
@@ -530,7 +530,9 @@ function UpdateProgram:update()
 			self._count = self._count+1
 		end
 		if self._count > self._maxcount then
+			self._progress:setPercent(done_count*100/self._maxcount)
 			if thread_count <= 0 then
+				self._progress:setPercent(100)
 				--操作完成
 				--检查错误列表，看看是否有没有下载的数据
 				if #download_error_table > 0 then
