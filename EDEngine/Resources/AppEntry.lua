@@ -159,15 +159,16 @@ function AppEntry:init()
 				return hitmouse.create()
 			end}			
 		end}
-	local sbutton = uikits.button{caption='新打地鼠(管理)',x=64*scale,y = 64*scale + 3*item_h,
+	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='hitmouse',updates={'hitmouse','luacore'},
+			cc_setUIOrientation(2)
+			update.create{name='ss',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				login.set_selector(5)
-				local hitmouse = require "hitmouse/matchview"
-				return hitmouse.create()
+				local ss = require "ss/ss"
+				return ss.create()
 				end}
 		end}
 	local ebutton = uikits.button{caption='错题本',x=64*scale,y = 64*scale + 2*item_h,

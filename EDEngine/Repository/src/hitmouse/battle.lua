@@ -6,6 +6,7 @@ local lxp = require "lom"
 local json = require "json-c"
 local level = require "hitmouse/level"
 local http = require "hitmouse/hitconfig"
+local music = require "hitmouse/music"
 
 local _platform = cc.Application:getInstance():getTargetPlatform()
 --本地支援缓冲区

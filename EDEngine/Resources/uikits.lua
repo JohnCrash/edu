@@ -250,6 +250,9 @@ local function get_factor()
 	local glview = Director:getOpenGLView()
 	local ss = glview:getFrameSize()
 	local factor = ss.height/ss.width
+	if factor > 1 then
+		factor = 1/factor
+	end
 	if factor > (3/4+9/16)/2 then --更接近3/4
 		return FACTOR_3_4,factor
 	else --更接近9/16
