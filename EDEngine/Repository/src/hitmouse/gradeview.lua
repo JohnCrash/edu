@@ -72,6 +72,7 @@ function gradeview:show_history_list()
 			send_data.v2 = 2
 			send_data.v3 = 1
 			send_data.v4 = 100
+			send_data.v5 = ''
 			hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 							if t and t == 200 then
 								uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
@@ -285,6 +286,7 @@ function gradeview:show_history_list()
 				send_data.v2 = 2
 				send_data.v3 = 1
 				send_data.v4 = 100
+				send_data.v5 = ''
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
 									uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
