@@ -1972,7 +1972,7 @@ local function animationFormJson( filename,name )
 	end
 end
 
-local function SceneClass( name )
+local function SceneClass( name,ui )
 	local clas = class( name )
 	clas.__index = clas
 	clas.init=function(self)
@@ -1986,6 +1986,29 @@ local function SceneClass( name )
 		layer._arg = arg
 		local function onNodeEvent(event)
 			if "enter" == event then
+				if ui then
+					if ui.designWidth and ui.designHeight then
+						if ui.designWidth > ui.designHeight then
+							if get_factor() == FACTOR_9_16 then
+								layer._ss = cc.size(ui.designWidth,ui.designHeight)
+							else
+								layer._ss = cc.size(ui.designHeight*4/3,ui.designHeight)
+							end
+						else
+							cc_setUIOrientation(2)
+							if get_factor() == FACTOR_9_16 then
+								layer._ss = cc.size(ui.designWidth,ui.designHeight)
+							else
+								layer._ss = cc.size(ui.designWidth,ui.designWidth*4/3)
+							end						
+						end
+						InitDesignResolutionMode{width=layer._ss.width,height=layer._ss.height,mode=ui.designMode}
+					end
+					if not layer._root and ui.FILE and ui.FILE_3_4 then
+						layer._root = fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
+						layer:addChild(layer._root)
+					end
+				end
 				layer:init()
 			elseif "exit" == event then
 				layer:release()

@@ -162,12 +162,11 @@ function AppEntry:init()
 	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			cc_setUIOrientation(2)
-			update.create{name='ss',updates={'luacore'},
+			update.create{name='calc',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				login.set_selector(5)
-				local ss = require "ss/ss"
+				local ss = require "calc/mainui"
 				return ss.create()
 				end}
 		end}

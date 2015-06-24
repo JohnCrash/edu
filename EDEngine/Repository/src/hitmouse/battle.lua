@@ -610,7 +610,7 @@ function battle:game_over(mode)
 				ok=uikits.child(self._timeover_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
 				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)
-				--if http.get_id_flag()==ID_FLAG_PAR then
+				--if http.get_id_flag()==http.ID_FLAG_PAR then
 				if false then
 					share_score:setString(tostring(math.floor(self._fen*0.1)))
 				else
@@ -625,7 +625,7 @@ function battle:game_over(mode)
 				ok=uikits.child(self._success_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL2)
 				local share_score = uikits.child(self._root,ui.SHARE_SCORE2)		
-				--if http.get_id_flag()==ID_FLAG_PAR then
+				--if http.get_id_flag()==http.ID_FLAG_PAR then
 				if false then
 					label:setVisible(true)
 					share_score:setVisible(true)						
