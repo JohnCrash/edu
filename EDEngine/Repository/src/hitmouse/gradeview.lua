@@ -331,7 +331,7 @@ function gradeview:init()
 		uikits.initDR{width=1440,height=1080}
 	end
 	self.id_flag = hitconfig.get_id_flag()
-	if self.id_flag == hitconfig.ID_FLAG_STU then
+	if self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
 		self._gradeview = uikits.fromJson{file_9_16=ui.STU_FILE,file_3_4=ui.STU_FILE_3_4}	
 	else
 		self._gradeview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
