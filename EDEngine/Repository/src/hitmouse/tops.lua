@@ -17,7 +17,9 @@ local ui = {
 	SCORE = 'df',
 	SCORE_PARENT = 'df2',
 	SCORE_TOTAL = 'zdf',
-	NEXT_CLASS_BUTTON = 'tu/Button_10',
+	CLASS_CAPTION = 'ding/Label_10',
+	NEXT_CLASS_BUTTON = 'ding/Button_11',
+	PREV_CLASS_BUTTON = 'ding/Button_12',
 }
 
 local tops = uikits.SceneClass("tops")
@@ -70,14 +72,29 @@ function tops:init()
 		self._curPage = 1
 		self:initTops(self._curPage)
 		self._next_but = uikits.child(self._root,ui.NEXT_CLASS_BUTTON)
+		self._prev_but = uikits.child(self._root,ui.PREV_CLASS_BUTTON)
+		self._calss_title = uikits.child(self._root,ui.CLASS_CAPTION)
 		self._next_but:setVisible(false)
-		if http.get_id_flag()==http.ID_FLAG_TEA or http.get_id_flag()==http.ID_FLAG_SCH then
+		self._prev_but:setVisible(false)
+		self._calss_title:setVisible(false)
+		self._calss_title:setString("")
+		if http.get_id_flag()==http.ID_FLAG_TEA or 
+			http.get_id_flag()==http.ID_FLAG_SCH or 
+			http.get_id_flag()==http.ID_FLAG_PRA then
 			local send_data={}
-			http.post_data(self._root,'get_teacherclass',send_data,function(t,v)
+			local type_id
+			if http.get_id_flag()==http.ID_FLAG_PRA then
+				type_id = 'get_childrens'
+			else
+				type_id = 'get_teacherclass'
+			end
+			http.post_data(self._root,type_id,send_data,function(t,v)
 				if t and t==200 and v then
 					http.logTable(v)
 					if v.v1 and v.v2 and #v.v2>1 then
 						self._next_but:setVisible(true)
+						self._prev_but:setVisible(true)
+						self._calss_title:setVisible(true)
 						local idx = 1
 						uikits.event(self._next_but,function(sender)
 							idx=idx+1
@@ -88,6 +105,15 @@ function tops:init()
 							self._curPage = 1
 							self:initTops(self._curPage ,v.v2[idx])
 						end)
+						uikits.event(self._prev_but,function(sender)
+							idx=idx-1
+							if not v.v2[idx] then
+								idx=#v.v2
+							end
+							self._scrollview:clear()
+							self._curPage = 1
+							self:initTops(self._curPage ,v.v2[idx])
+						end)						
 					end
 				else
 					kits.log("ERROR get_teacherclass failed~")
@@ -126,12 +152,7 @@ function tops:initTops(cur,className)
 				kits.log("ERROR tops:initTops road_block_rank v.v2 = nil")
 			end
 			if v.v3 and not self._caption_flag then
-				local title = uikits.child(self._root,ui.CAPTION)
-				if not self._caption then
-					self._caption = title:getString()
-				end
-				local caption=self._caption.."   ("..tostring(v.v3)..")"
-				title:setString(caption)
+				self._calss_title:setString(tostring(v.v3))
 			elseif not v.v3 then
 				kits.log("ERROR tops:initTops road_block_rank v.v3 = nil")
 			end			
