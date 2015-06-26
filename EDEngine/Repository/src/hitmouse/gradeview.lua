@@ -87,7 +87,7 @@ function gradeview:show_history_list()
 							end
 						end)
 	end)	
-	if self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
+	if self.id_flag == hitconfig.ID_FLAG_TEA then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
 		view_cur_match:setVisible(true)		
@@ -105,7 +105,7 @@ function gradeview:show_history_list()
 			but_match_detail:setTouchEnabled(false)	
 		end	
 			
-	elseif self.id_flag == hitconfig.ID_FLAG_STU then
+	elseif self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_PAR then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		view_cur_match:setVisible(true)
 		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
