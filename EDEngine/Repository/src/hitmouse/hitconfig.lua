@@ -30,6 +30,29 @@ local function put_lading_circle( parent )
 	end
 end
 
+local function put_circle( parent )
+	local size
+	if not parent then return end
+	
+	if parent.getContentSize then
+		size = parent:getContentSize()
+	else
+		size = uikits.getDR()
+	end
+	--旋转体
+	ccs.ArmatureDataManager:getInstance():removeArmatureFileInfo('hitmouse/loadingSCS/loadingSC.ExportJson')
+	ccs.ArmatureDataManager:getInstance():addArmatureFileInfo('hitmouse/loadingSCS/loadingSC.ExportJson')	
+	local circle = ccs.Armature:create('loadingSC')
+
+	if circle then
+		circle:getAnimation():playWithIndex(0)
+		circle:setAnchorPoint(cc.p(0.5,0.5))
+		circle:setPosition( cc.p(size.width/2,size.height/2) )
+		parent:addChild( circle,9999 )
+		return circle
+	end
+end
+
 local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
 local function load_logo_pic(handle,uid)
 
@@ -47,7 +70,7 @@ local function load_logo_pic(handle,uid)
 		showLogoPic(handle,file_path)
 		--handle:loadTexture(file_path)
 	else
-		local loadbox = put_lading_circle(handle)
+		local loadbox = put_circle(handle)
 		local send_url = download_log_url..uid..'/99'
 		cache.request_nc(send_url,
 		function(b,t)
@@ -298,8 +321,8 @@ elseif cc.Application:getInstance():getTargetPlatform() == cc.PLATFORM_OS_ANDROI
 end
 
 
-local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
---local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
+--local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
+local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
 
 local base_rid = ''
 
