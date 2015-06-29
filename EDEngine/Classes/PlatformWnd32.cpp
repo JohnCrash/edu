@@ -90,7 +90,8 @@ void setUIOrientation(int m)
 			else
 			{
 				h = abs(rect.bottom - rect.top) - borderHeight;
-				w = (h * 3 )/ 4;
+				//w = (h * 3 )/ 4;
+				w = (h * 9) / 16;
 			}
 			auto resSize = glview->getDesignResolutionSize();
 			ResolutionPolicy resPolicy = glview->getResolutionPolicy();
