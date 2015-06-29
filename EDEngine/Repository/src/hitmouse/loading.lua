@@ -63,8 +63,7 @@ function loading:initClassOrChild()
 	local id = http.get_id_flag()
 	local send_data={}
 	if id == http.ID_FLAG_TEA or 
-		id==http.ID_FLAG_SCH or 
-		id==http.ID_FLAG_PRA then
+		id==http.ID_FLAG_SCH then
 		http.post_data(self._root,'get_teacherclass',send_data,function(t,v)
 				if t and t==200 and v then
 					global.setTeacherClass(v)
@@ -73,9 +72,10 @@ function loading:initClassOrChild()
 					kits.log("ERROR get_teacherclass failed~")
 				end
 		end)
-	elseif id==http.ID_FLAG_PRA then
+	elseif id==http.ID_FLAG_PAR then
 		http.post_data(self._root,'get_childinfo',send_data,function(t,v)
 				if t and t==200 and v then
+					http.logTable(v)
 					global.setChildInfo(v)
 					self:launch()
 				else

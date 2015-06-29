@@ -5,6 +5,7 @@ local hitconfig = require 'hitmouse/hitconfig'
 local rankview = require 'hitmouse/rankview'
 local battle = require "hitmouse/battle"
 
+
 local ui = {
 	TEA_FILE = 'hitmouse/xzjinru.json',
 	TEA_FILE_3_4 = 'hitmouse/xzjinru43.json',
@@ -72,18 +73,30 @@ function gradeview:show_history_list()
 			send_data.v2 = 2
 			send_data.v3 = 1
 			send_data.v4 = 100
-			send_data.v5 = ''
+			if self.id_flag == hitconfig.ID_FLAG_PAR then
+				local cur_school_info = hitconfig.get_school_info()
+				send_data.v5 = tostring(cur_school_info.user_id)
+			else
+				send_data.v5 = '0'
+			end		
 			hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 							if t and t == 200 then
 								uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 							else
-								hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
+--[[								hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
 									if e == hitconfig.OK then
 									
 									else
 										
 									end
-								end)							
+								end)	--]]
+								hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+									if e == person_info.RETRY then
+										self.show_history_list()
+									else
+										uikits.popScene()
+									end
+								end,v)								
 							end
 						end)
 	end)	
@@ -145,6 +158,12 @@ function gradeview:show_history_list()
 		uikits.event(but_match_join,	
 			function(sender,eventType)
 			local send_data = {v1=self.block_id,v2=2}
+			if self.id_flag == hitconfig.ID_FLAG_PAR then
+				local cur_school_info = hitconfig.get_school_info()
+				send_data.v3 = cur_school_info.school_id
+			else
+				send_data.v3 = 0
+			end
 			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
 					uikits.replaceScene(battle.create{
@@ -159,8 +178,13 @@ function gradeview:show_history_list()
 							type= 2,
 						})
 				else
-					hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
-					end)		
+					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+						if e == person_info.RETRY then
+							self.show_history_list()
+						else
+							uikits.popScene()
+						end
+					end,v)	
 				end
 			end)
 		end)
@@ -217,13 +241,13 @@ function gradeview:show_history_list()
 										end										
 									end
 								else
-									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
-										if e == hitconfig.OK then
-										
+									hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+										if e == person_info.RETRY then
+											self.show_history_list()
 										else
-											
+											uikits.popScene()
 										end
-									end)							
+									end,v)							
 								end
 							end)
 		end)
@@ -286,18 +310,24 @@ function gradeview:show_history_list()
 				send_data.v2 = 2
 				send_data.v3 = 1
 				send_data.v4 = 100
-				send_data.v5 = ''
+--				send_data.v5 = ''
+				if self.id_flag == hitconfig.ID_FLAG_PAR then
+					local cur_school_info = hitconfig.get_school_info()
+					send_data.v5 = tostring(cur_school_info.user_id)
+				else
+					send_data.v5 = '0'
+				end				
 				hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
 								if t and t == 200 then
 									uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 								else
-									hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
-										if e == hitconfig.OK then
-										
+									hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+										if e == person_info.RETRY then
+											self.show_history_list()
 										else
-											
+											uikits.popScene()
 										end
-									end)							
+									end,v)							
 								end
 							end)
 				--uikits.pushScene( resetpwview.create() )
@@ -308,18 +338,24 @@ end
 function gradeview:get_his_list()
 	local send_data = {}
 	send_data.v1 = self.match_id
+	if self.id_flag == hitconfig.ID_FLAG_PAR then
+		local cur_school_info = hitconfig.get_school_info()
+		send_data.v2 = cur_school_info.school_id
+	else
+		send_data.v2 = 0
+	end
 	hitconfig.post_data(self._gradeview,'get_match_history',send_data,function(t,v)
 					if t and t == 200 then
 						self.history_list = v
 						self:show_history_list()
 					else
-						hitconfig.messagebox(self._gradeview,hitconfig.NETWORK_ERROR,function(e)
-							if e == hitconfig.OK then
-							
+						hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+							if e == person_info.RETRY then
+								self.get_his_list()
 							else
-								
+								uikits.popScene()
 							end
-						end)							
+						end,v)							
 					end
 				end)
 end
@@ -337,6 +373,7 @@ function gradeview:init()
 		self._gradeview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
 	end
 	self:addChild(self._gradeview)
+
 	self:get_his_list()
 	local but_quit = uikits.child(self._gradeview,ui.BUTTON_QUIT)
 	uikits.event(but_quit,	
