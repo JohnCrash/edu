@@ -3,6 +3,7 @@ local uikits = require "uikits"
 local cache = require "cache"
 local level = require "hitmouse/level"
 local http = require "hitmouse/hitconfig"
+local global = require "hitmouse/global"
 
 local ui = {
 	FILE = 'hitmouse/paihang.json',
@@ -81,44 +82,41 @@ function tops:init()
 		if http.get_id_flag()==http.ID_FLAG_TEA or 
 			http.get_id_flag()==http.ID_FLAG_SCH or 
 			http.get_id_flag()==http.ID_FLAG_PRA then
-			local send_data={}
-			local type_id
+			local v
 			if http.get_id_flag()==http.ID_FLAG_PRA then
-				type_id = 'get_childrens'
+				v = global.getChildInfo()
 			else
-				type_id = 'get_teacherclass'
+				v = global.getTeacherClass()
 			end
-			http.post_data(self._root,type_id,send_data,function(t,v)
-				if t and t==200 and v then
-					http.logTable(v)
-					if v.v1 and v.v2 and #v.v2>1 then
-						self._next_but:setVisible(true)
-						self._prev_but:setVisible(true)
-						self._calss_title:setVisible(true)
-						local idx = 1
-						uikits.event(self._next_but,function(sender)
-							idx=idx+1
-							if not v.v2[idx] then
-								idx=1
-							end
-							self._scrollview:clear()
-							self._curPage = 1
-							self:initTops(self._curPage ,v.v2[idx])
-						end)
-						uikits.event(self._prev_but,function(sender)
-							idx=idx-1
-							if not v.v2[idx] then
-								idx=#v.v2
-							end
-							self._scrollview:clear()
-							self._curPage = 1
-							self:initTops(self._curPage ,v.v2[idx])
-						end)						
-					end
-				else
-					kits.log("ERROR get_teacherclass failed~")
+			if v then
+				http.logTable(v)
+				if v.v1 and v.v2 and #v.v2>1 then
+					self._next_but:setVisible(true)
+					self._prev_but:setVisible(true)
+					self._calss_title:setVisible(true)
+					local idx = 1
+					uikits.event(self._next_but,function(sender)
+						idx=idx+1
+						if not v.v2[idx] then
+							idx=1
+						end
+						self._scrollview:clear()
+						self._curPage = 1
+						self:initTops(self._curPage,v.v2[idx].uid or v.v2[idx])
+					end)
+					uikits.event(self._prev_but,function(sender)
+						idx=idx-1
+						if not v.v2[idx] then
+							idx=#v.v2
+						end
+						self._scrollview:clear()
+						self._curPage = 1
+						self:initTops(self._curPage,v.v2[idx].uid or v.v2[idx])
+					end)						
 				end
-			end)
+			else
+				kits.log("ERROR get_teacherclass failed~")
+			end
 		end
 	end
 end

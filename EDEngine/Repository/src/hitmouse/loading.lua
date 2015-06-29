@@ -4,6 +4,7 @@ local cache = require "cache"
 local level = require "hitmouse/level"
 local music = require "hitmouse/music"
 local http = require "hitmouse/hitconfig"
+local global = require "hitmouse/global"
 
 local ui = {
 	FILE = 'hitmouse/load.json',
@@ -58,16 +59,45 @@ function loading:launch()
 	uikits.replaceScene(main.create(self._arg))
 end
 
+function loading:initClassOrChild()
+	local id = http.get_id_flag()
+	local send_data={}
+	if id == http.ID_FLAG_TEA or 
+		id==http.ID_FLAG_SCH or 
+		id==http.ID_FLAG_PRA then
+		http.post_data(self._root,'get_teacherclass',send_data,function(t,v)
+				if t and t==200 and v then
+					global.setTeacherClass(v)
+					self:launch()
+				else
+					kits.log("ERROR get_teacherclass failed~")
+				end
+		end)
+	elseif id==http.ID_FLAG_PRA then
+		http.post_data(self._root,'get_childinfo',send_data,function(t,v)
+				if t and t==200 and v then
+					global.setChildInfo(v)
+					self:launch()
+				else
+					kits.log("ERROR get_childinfo failed~")
+				end
+		end)	
+	else
+		self:launch()
+	end
+end
+
 function loading:initSummary()
 	local send_data = {}
 	kits.log("do loading:initSummary...")
 	http.post_data(self._root,'get_user_msg_state',send_data,function(t,v)
 		if t and t==200 and v then
+			self._progress:setPercent(80)
 			kits.log("loading initLevelData success!")
 			http.logTable(v,1)
 			self._arg = {}
 			self._arg.hasMsg = v.v1
-			self:launch()
+			self:initClassOrChild()
 		else
 			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
 				if e == http.RETRY then
