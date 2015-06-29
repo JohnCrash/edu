@@ -111,7 +111,7 @@ local flag_dictionary = {
 {title = '我的天啊',content='你真的确定要把卡牌已经学到的技能洗掉，重新学习新的技能吗？花费10000银币',button_type = 4,},	 		--洗掉卡牌技能
 {title = '甘拜下风',content='你真的要甘拜下风，然后认输吗？',button_type = 4,},	 		--战斗中，退出
 {title = '长安钱庄',content='少侠，你太明智了，我们可是这里最大的钱庄了。你确定要用10乐币兑换1000银币吗？',button_type = 4,},	 		--乐币兑换银币
-{title = '错误',content='未知错误',button_type = 3,},	 		--自定义弹出框
+{title = '错误',content='未知错误',button_type = 1,},	 		--自定义弹出框
 }
 
 local function messagebox(parent,flag,func,txt_content)
@@ -298,8 +298,8 @@ elseif cc.Application:getInstance():getTargetPlatform() == cc.PLATFORM_OS_ANDROI
 end
 
 
---local base_url = 'http://app.idiom.lejiaolexue.com/idiomclient.ashx'
-local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
+local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
+--local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
 
 local base_rid = ''
 
@@ -541,6 +541,20 @@ local function get_id_flag()
 	return id_flag
 end
 
+local school_info = {}
+local function set_school_info(cur_school)
+	school_info = cur_school
+end
+
+local function get_school_info()
+	local cur_school
+	if school_info then
+		cur_school = school_info
+	end
+	return cur_school
+end
+
+
 local get_uesr_info_url = 'http://api.lejiaolexue.com/rest/userinfo/simple/current'
 
 local function get_user_id(parent,func)
@@ -614,4 +628,6 @@ return {
 	set_base_rid = set_base_rid,
 	get_user_id = get_user_id,
 	load_logo_pic = load_logo_pic,
+	set_school_info = set_school_info,
+	get_school_info = get_school_info,
 }

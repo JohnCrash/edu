@@ -81,9 +81,9 @@ function tops:init()
 		self._calss_title:setString("")
 		if http.get_id_flag()==http.ID_FLAG_TEA or 
 			http.get_id_flag()==http.ID_FLAG_SCH or 
-			http.get_id_flag()==http.ID_FLAG_PRA then
+			http.get_id_flag()==http.ID_FLAG_PAR then
 			local v
-			if http.get_id_flag()==http.ID_FLAG_PRA then
+			if http.get_id_flag()==http.ID_FLAG_PAR then
 				v = global.getChildInfo()
 			else
 				v = global.getTeacherClass()
