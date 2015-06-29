@@ -690,13 +690,13 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 				level.setCurrent(current+1)
 			end
 		else
-			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+			http.messagebox(self._root,http.DIY_MSG,function(e)
 			   if e==http.RETRY then
 					self:upload_scroe( level_id,score,use_time,right_num )
 				else
 					uikits.popScene()
 				end
-			end)
+			end,v)
 		end
 	end)
 end

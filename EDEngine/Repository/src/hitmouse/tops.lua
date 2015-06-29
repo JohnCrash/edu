@@ -155,13 +155,13 @@ function tops:initTops(cur,className)
 				kits.log("ERROR tops:initTops road_block_rank v.v3 = nil")
 			end			
 		else
-			http.messagebox(self._root,http.DOWNLOAD_ERROR,function(e)
+			http.messagebox(self._root,http.DIY_MSG,function(e)
 				if e==http.RETRY then
 					self:initTops(cur,className)
 				else
 					uikits.popScene()
 				end
-			end)				
+			end,v)				
 		end
 		self._done_loading = nil
 	end)
