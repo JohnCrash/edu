@@ -20,7 +20,7 @@ local test_login =
 	[5] = {name='曹珀笙',uid=280889,cookie='sc1=1F23B4F9E58326D0704F6CCE435CCA0706B4AF50aUV%2fOgnmBdWNi24CJlJs%2fwUsfxf3IF%2fj8AyGl9%2fM%2b0shBhbdgD8gdj%2biq1qO%2fkT6'},
 	[6] = {name='李洪',uid=144975,cookie='sc1=7BC33223C36F1B2EB26E310E5AE65F6FCE084DDFakl7OwbqBZfKj2YIIVRn6VkiYQvwMxjjsUyJ18LP6FZzF1aLxGVyaDWgoA%3d%3d'},
 	[8] = {name='李洪家长',uid=145823,cookie='sc1=A77088A25A39273F195F916CCD787CD457AFFDE4akl6OgPsBcqQ0TFVdFNi4UV%2fbAusYRjisEzUhMLI6lZwQkjbnm94Yw%3d%3d'},	
-	[7] = {name='张瑜',uid=145850,cookie='sc1=F97887AE9CFCF549064E09457C3BAF072F050420akl6OgTvBdyR2DBcahFl4ls%2fPxuwZ17%2ftFmU196P5xE0QkvRlGVyaDY%3d'},	
+	[7] = {name='张瑜',uid=591892,cookie='sc1=50979108ED86EB3240235BF4366282FD9394E9AFbkR%2bOgjtBZfBj28JIlVu71UqYQvwMBi4tkzQgsLP6VYpFFbTkHsmZSP69k6Nq1qvHfaxwJxYk2zJinAHrnJQ'},	
 }
 local selector = 2
 local g_cookie
