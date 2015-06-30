@@ -118,8 +118,8 @@ function matchview:get_match_list()
 				end
 			end)	--]]
 			hitconfig.messagebox(self._matchview,hitconfig.DIY_MSG,function(e)
-				if e == person_info.RETRY then
-					self.get_match_list()
+				if e == hitconfig.RETRY then
+					self:get_match_list()
 				else
 					uikits.popScene()
 				end
@@ -158,7 +158,7 @@ function matchview:init()
 		else
 			kits.log("ERROR get_childinfo failed~")
 		end
-		txt_school_name:setString(self.cur_school_info.school_name)
+		txt_school_name:setString(self.cur_school_info.user_name)
 		hitconfig.set_school_info(self.cur_school_info)	
 	end	
 	
@@ -172,7 +172,7 @@ function matchview:init()
 		end
 		self.cur_school_info = self.child_info.v2[self.child_index]
 		local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
-		txt_school_name:setString(self.cur_school_info.sch_name)
+		txt_school_name:setString(self.cur_school_info.user_name)
 		hitconfig.set_school_info(self.cur_school_info)	
 		self:get_match_list()
 	end,"click")
@@ -187,7 +187,7 @@ function matchview:init()
 		end
 		self.cur_school_info = self.child_info.v2[self.child_index]
 		local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
-		txt_school_name:setString(self.cur_school_info.sch_name)
+		txt_school_name:setString(self.cur_school_info.user_name)
 		hitconfig.set_school_info(self.cur_school_info)		
 		self:get_match_list()
 	end,"click")	

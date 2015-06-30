@@ -91,7 +91,7 @@ function gradeview:show_history_list()
 									end
 								end)	--]]
 								hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
-									if e == person_info.RETRY then
+									if e == hitconfig.RETRY then
 										self.show_history_list()
 									else
 										uikits.popScene()
@@ -179,7 +179,7 @@ function gradeview:show_history_list()
 						})
 				else
 					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
-						if e == person_info.RETRY then
+						if e == hitconfig.RETRY then
 							self.show_history_list()
 						else
 							uikits.popScene()
@@ -242,7 +242,7 @@ function gradeview:show_history_list()
 									end
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
-										if e == person_info.RETRY then
+										if e == hitconfig.RETRY then
 											self.show_history_list()
 										else
 											uikits.popScene()
@@ -322,7 +322,7 @@ function gradeview:show_history_list()
 									uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 								else
 									hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
-										if e == person_info.RETRY then
+										if e == hitconfig.RETRY then
 											self.show_history_list()
 										else
 											uikits.popScene()
@@ -350,7 +350,7 @@ function gradeview:get_his_list()
 						self:show_history_list()
 					else
 						hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
-							if e == person_info.RETRY then
+							if e == hitconfig.RETRY then
 								self.get_his_list()
 							else
 								uikits.popScene()

@@ -243,7 +243,8 @@ local function messagebox(parent,flag,func,txt_content)
 		else
 			content:setString(flag_dictionary[#flag_dictionary].content)
 		end
-		but_ok:setVisible(true)
+		but_retry:setVisible(true)
+		but_cancel:setVisible(true)
 		s:setAnchorPoint{x=0.5,y=0.5}
 		local size
 		if parent.getContentSize then
@@ -269,21 +270,22 @@ local function messagebox(parent,flag,func,txt_content)
 	else
 		content:setString(flag_dictionary[flag].content)
 		--title:setString(flag_dictionary[flag].title)
+		if flag_dictionary[flag].button_type == 1 then
+			but_retry:setVisible(true)
+			but_cancel:setVisible(true)
+		elseif flag_dictionary[flag].button_type == 2 then
+			but_ok:setVisible(true)
+		elseif flag_dictionary[flag].button_type == 3 then
+			but_know:setVisible(true)
+		elseif flag_dictionary[flag].button_type == 4 then
+			but_confirm:setVisible(true)
+			but_giveup:setVisible(true)	
+		elseif flag_dictionary[flag].button_type == 5 then
+			but_good:setVisible(true)
+		end
 	end
 	
-	if flag_dictionary[flag].button_type == 1 then
-		but_retry:setVisible(true)
-		but_cancel:setVisible(true)
-	elseif flag_dictionary[flag].button_type == 2 then
-		but_ok:setVisible(true)
-	elseif flag_dictionary[flag].button_type == 3 then
-		but_know:setVisible(true)
-	elseif flag_dictionary[flag].button_type == 4 then
-		but_confirm:setVisible(true)
-		but_giveup:setVisible(true)	
-	elseif flag_dictionary[flag].button_type == 5 then
-		but_good:setVisible(true)
-	end
+
 	s:setAnchorPoint{x=0.5,y=0.5}
 	local size
 	if parent.getContentSize then
@@ -321,8 +323,8 @@ elseif cc.Application:getInstance():getTargetPlatform() == cc.PLATFORM_OS_ANDROI
 end
 
 
---local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
-local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
+local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
+--local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
 
 local base_rid = ''
 
