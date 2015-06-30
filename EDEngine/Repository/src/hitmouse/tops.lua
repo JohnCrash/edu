@@ -64,7 +64,7 @@ function tops:init()
 				if not self._done_loading and self._tatolPags and self._curPage < self._tatolPags then
 					self._curPage = self._curPage + 1
 					kits.log("continue loading...")
-					self:initTops(self._curPage)
+					self:initTops(self._curPage,self._currentParam)
 					self._done_loading = true
 				end
 			end
@@ -102,7 +102,8 @@ function tops:init()
 						end
 						self._scrollview:clear()
 						self._curPage = 1
-						self:initTops(self._curPage,v.v2[idx].user_id or v.v2[idx])
+						self._currentParam = v.v2[idx].user_id or v.v2[idx]
+						self:initTops(self._curPage,self._currentParam)
 					end)
 					uikits.event(self._prev_but,function(sender)
 						idx=idx-1
@@ -111,7 +112,8 @@ function tops:init()
 						end
 						self._scrollview:clear()
 						self._curPage = 1
-						self:initTops(self._curPage,v.v2[idx].user_id or v.v2[idx])
+						self._currentParam = v.v2[idx].user_id or v.v2[idx]
+						self:initTops(self._curPage,self._currentParam)
 					end)						
 				end
 			else
