@@ -1995,7 +1995,9 @@ local function SceneClass( name,ui )
 								layer._ss = cc.size(ui.designHeight*4/3,ui.designHeight)
 							end
 						else
-							cc_setUIOrientation(2)
+							if cc_getUIOrientation() ~= 2 then
+								cc_setUIOrientation(2)
+							end
 							if get_factor() == FACTOR_9_16 then
 								layer._ss = cc.size(ui.designWidth,ui.designHeight)
 							else
