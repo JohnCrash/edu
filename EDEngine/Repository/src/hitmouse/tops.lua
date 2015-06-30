@@ -102,7 +102,7 @@ function tops:init()
 						end
 						self._scrollview:clear()
 						self._curPage = 1
-						self:initTops(self._curPage,v.v2[idx].uid or v.v2[idx])
+						self:initTops(self._curPage,v.v2[idx].user_id or v.v2[idx])
 					end)
 					uikits.event(self._prev_but,function(sender)
 						idx=idx-1
@@ -111,7 +111,7 @@ function tops:init()
 						end
 						self._scrollview:clear()
 						self._curPage = 1
-						self:initTops(self._curPage,v.v2[idx].uid or v.v2[idx])
+						self:initTops(self._curPage,v.v2[idx].user_id or v.v2[idx])
 					end)						
 				end
 			else
