@@ -124,6 +124,9 @@ function tops:init()
 end
 
 function tops:initTops(cur,className)
+	if cur==1 then
+		self._scrollview._scrollview:jumpToTop()
+	end
 	local send_data = {V1=1,V2=1,V3=cur,V4=18,V5=className or ""}
 	http.post_data(self._root,'road_block_rank',send_data,function(t,v)
 		if t and t==200 and v then
