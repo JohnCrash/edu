@@ -97,8 +97,10 @@ function matchview:get_match_list()
 	local send_data = {}
 	if self.id_flag == hitconfig.ID_FLAG_PAR then
 		send_data.v1 = self.cur_school_info.school_id
+		send_data.v2 = self.cur_school_info.user_id
 	else
 		send_data.v1 = 0
+		send_data.v2 = 0
 	end
 	hitconfig.post_data(self._matchview,'get_match_list',send_data,function(t,v)
 		if t and t == 200 then
@@ -150,8 +152,18 @@ function matchview:init()
 		if self.child_info and self.child_info.v2 and #self.child_info.v2 > 1 then
 			hitconfig.logTable(child_info)
 			view_change_class:setVisible(true)
-			self.child_index = 1
-			self.cur_school_info = self.child_info.v2[self.child_index]
+			self.cur_school_info = hitconfig.get_school_info()
+			if self.cur_school_info then
+				for i=1,#self.child_info.v2 do
+					if self.cur_school_info == self.child_info.v2[i] then
+						self.child_index = i
+						break
+					end
+				end
+			else
+				self.child_index = 1
+				self.cur_school_info = self.child_info.v2[self.child_index]			
+			end
 		elseif self.child_info and self.child_info.v2 and #self.child_info.v2 == 1 then
 			self.child_index = 0
 			self.cur_school_info = self.child_info.v2[1]

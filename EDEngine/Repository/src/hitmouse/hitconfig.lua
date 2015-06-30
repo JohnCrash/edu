@@ -566,7 +566,7 @@ local function get_id_flag()
 	return id_flag
 end
 
-local school_info = {}
+local school_info
 local function set_school_info(cur_school)
 	school_info = cur_school
 end
