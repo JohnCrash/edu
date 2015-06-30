@@ -323,8 +323,8 @@ elseif cc.Application:getInstance():getTargetPlatform() == cc.PLATFORM_OS_ANDROI
 end
 
 
-local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
---local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
+--local base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
+local base_url = 'http://app.lejiaolexue.com/idiom/idiomclient.ashx'
 
 local base_rid = ''
 
