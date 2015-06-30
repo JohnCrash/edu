@@ -398,13 +398,17 @@ local function post_data_by_new_form(parent,module_id,post_data,func,is_not_load
 					--end,'提升',tb_result.c..' : '..tb_result.msg)	
 				elseif tb_result.c == 506 then
 					messagebox(parent,DIY_MSG,function(e)
-						if e == OK then
+						if e == RETRY then
+							post_data_by_new_form(parent,module_id,post_data,func)
+						else
 							cc.Director:getInstance():endToLua()
 						end
 					end,'您的账号正在其它设备登录')	
 				else
 					messagebox(parent,DIY_MSG,function(e)
-						if e == OK then
+						if e == RETRY then
+							post_data_by_new_form(parent,module_id,post_data,func)
+						else
 							cc.Director:getInstance():endToLua()
 						end
 					end,tb_result.c..' : '..tb_result.msg)		
