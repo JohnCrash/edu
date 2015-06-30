@@ -21,6 +21,7 @@ local test_login =
 	[6] = {name='李洪',uid=144975,cookie='sc1=7BC33223C36F1B2EB26E310E5AE65F6FCE084DDFakl7OwbqBZfKj2YIIVRn6VkiYQvwMxjjsUyJ18LP6FZzF1aLxGVyaDWgoA%3d%3d'},
 	[8] = {name='李洪家长',uid=145823,cookie='sc1=A77088A25A39273F195F916CCD787CD457AFFDE4akl6OgPsBcqQ0TFVdFNi4UV%2fbAusYRjisEzUhMLI6lZwQkjbnm94Yw%3d%3d'},	
 	[7] = {name='张瑜',uid=591892,cookie='sc1=50979108ED86EB3240235BF4366282FD9394E9AFbkR%2bOgjtBZfBj28JIlVu71UqYQvwMBi4tkzQgsLP6VYpFFbTkHsmZSP69k6Nq1qvHfaxwJxYk2zJinAHrnJQ'},	
+--	[7] = {name='张瑜',uid=866447,cookie='sc1=3213887FA8639EE88F4ADABCF0C29A156310C671Y0t5NgXoBZfKiGoNJVdn61AiYQvwMBi4tkzQgsLP6VYpFFbTkHZmNj6%2bqFuQ907vTOb2w4EfmW%2fRinMHr3lSaOc%3d'},	
 }
 local selector = 2
 local g_cookie
