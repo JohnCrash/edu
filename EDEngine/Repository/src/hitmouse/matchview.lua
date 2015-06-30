@@ -139,70 +139,71 @@ function matchview:init()
 	self.id_flag = hitconfig.get_id_flag()
 	if self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
 		self._matchview = uikits.fromJson{file_9_16=ui.STU_FILE,file_3_4=ui.STU_FILE_3_4}	
+
+		local view_change_class = uikits.child(self._matchview,ui.VIEW_CHANGE_CLASS)
+		local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
+		view_change_class:setVisible(false)
+		if self.id_flag == hitconfig.ID_FLAG_PAR then
+			self.child_info = global.getChildInfo()
+			if self.child_info and self.child_info.v2 and #self.child_info.v2 > 1 then
+				hitconfig.logTable(child_info)
+				view_change_class:setVisible(true)
+				self.cur_school_info = hitconfig.get_school_info()
+				if self.cur_school_info then
+					for i=1,#self.child_info.v2 do
+						if self.cur_school_info == self.child_info.v2[i] then
+							self.child_index = i
+							break
+						end
+					end
+				else
+					self.child_index = 1
+					self.cur_school_info = self.child_info.v2[self.child_index]			
+				end
+			elseif self.child_info and self.child_info.v2 and #self.child_info.v2 == 1 then
+				self.child_index = 0
+				self.cur_school_info = self.child_info.v2[1]
+			else
+				kits.log("ERROR get_childinfo failed~")
+			end
+			txt_school_name:setString(self.cur_school_info.user_name)
+			hitconfig.set_school_info(self.cur_school_info)	
+		end	
+		
+		local but_left = uikits.child(self._matchview,ui.BUTTON_LEFT)
+		uikits.event(but_left,	
+		function(sender,eventType)	
+			if self.child_index == 1 then
+				self.child_index = #self.child_info.v2
+			else
+				self.child_index = self.child_index - 1
+			end
+			self.cur_school_info = self.child_info.v2[self.child_index]
+			local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
+			txt_school_name:setString(self.cur_school_info.user_name)
+			hitconfig.set_school_info(self.cur_school_info)	
+			self:get_match_list()
+		end,"click")
+
+		local but_right = uikits.child(self._matchview,ui.BUTTON_RIGHT)
+		uikits.event(but_right,	
+		function(sender,eventType)	
+			if self.child_index == #self.child_info.v2 then
+				self.child_index = 1
+			else
+				self.child_index = self.child_index + 1
+			end
+			self.cur_school_info = self.child_info.v2[self.child_index]
+			local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
+			txt_school_name:setString(self.cur_school_info.user_name)
+			hitconfig.set_school_info(self.cur_school_info)		
+			self:get_match_list()
+		end,"click")	
+		
 	else
 		self._matchview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
 	end
 	self:addChild(self._matchview)
-	
-	local view_change_class = uikits.child(self._matchview,ui.VIEW_CHANGE_CLASS)
-	local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
-	view_change_class:setVisible(false)
-	if self.id_flag == hitconfig.ID_FLAG_PAR then
-		self.child_info = global.getChildInfo()
-		if self.child_info and self.child_info.v2 and #self.child_info.v2 > 1 then
-			hitconfig.logTable(child_info)
-			view_change_class:setVisible(true)
-			self.cur_school_info = hitconfig.get_school_info()
-			if self.cur_school_info then
-				for i=1,#self.child_info.v2 do
-					if self.cur_school_info == self.child_info.v2[i] then
-						self.child_index = i
-						break
-					end
-				end
-			else
-				self.child_index = 1
-				self.cur_school_info = self.child_info.v2[self.child_index]			
-			end
-		elseif self.child_info and self.child_info.v2 and #self.child_info.v2 == 1 then
-			self.child_index = 0
-			self.cur_school_info = self.child_info.v2[1]
-		else
-			kits.log("ERROR get_childinfo failed~")
-		end
-		txt_school_name:setString(self.cur_school_info.user_name)
-		hitconfig.set_school_info(self.cur_school_info)	
-	end	
-	
-	local but_left = uikits.child(self._matchview,ui.BUTTON_LEFT)
-	uikits.event(but_left,	
-	function(sender,eventType)	
-		if self.child_index == 1 then
-			self.child_index = #self.child_info.v2
-		else
-			self.child_index = self.child_index - 1
-		end
-		self.cur_school_info = self.child_info.v2[self.child_index]
-		local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
-		txt_school_name:setString(self.cur_school_info.user_name)
-		hitconfig.set_school_info(self.cur_school_info)	
-		self:get_match_list()
-	end,"click")
-
-	local but_right = uikits.child(self._matchview,ui.BUTTON_RIGHT)
-	uikits.event(but_right,	
-	function(sender,eventType)	
-		if self.child_index == #self.child_info.v2 then
-			self.child_index = 1
-		else
-			self.child_index = self.child_index + 1
-		end
-		self.cur_school_info = self.child_info.v2[self.child_index]
-		local txt_school_name = uikits.child(self._matchview,ui.TXT_SCHOOL_NAME)
-		txt_school_name:setString(self.cur_school_info.user_name)
-		hitconfig.set_school_info(self.cur_school_info)		
-		self:get_match_list()
-	end,"click")	
 	
 	self:get_match_list()
 	
