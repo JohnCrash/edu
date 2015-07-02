@@ -166,7 +166,7 @@ function AppEntry:init()
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				login.set_selector(5)
-				local ss = require "calc/mainui"
+				local ss = require "calc/loading"
 				return ss.create()
 				end}
 		end}

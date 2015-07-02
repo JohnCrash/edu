@@ -70,6 +70,8 @@ function loading:initClassOrChild()
 					self:launch()
 				else
 					kits.log("ERROR get_teacherclass failed~")
+					global.setTeacherClass({})
+					self:launch()
 				end
 		end)
 	elseif id==http.ID_FLAG_PAR then
@@ -80,6 +82,8 @@ function loading:initClassOrChild()
 					self:launch()
 				else
 					kits.log("ERROR get_childinfo failed~")
+					global.setChildInfo({})
+					self:launch()
 				end
 		end)	
 	else

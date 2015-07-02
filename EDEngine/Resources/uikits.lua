@@ -1986,6 +1986,7 @@ local function SceneClass( name,ui )
 		layer._arg = arg
 		local function onNodeEvent(event)
 			if "enter" == event then
+				local isfirst
 				if ui then
 					if ui.designWidth and ui.designHeight then
 						if ui.designWidth > ui.designHeight then
@@ -2009,9 +2010,10 @@ local function SceneClass( name,ui )
 					if not layer._root and ui.FILE and ui.FILE_3_4 then
 						layer._root = fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 						layer:addChild(layer._root)
+						isfirst = true
 					end
 				end
-				layer:init()
+				layer:init(isfirst)
 			elseif "exit" == event then
 				layer:release()
 			end
