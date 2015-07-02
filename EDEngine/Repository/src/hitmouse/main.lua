@@ -57,8 +57,8 @@ function main:init()
 		else
 			self._bobo:setVisible(false)		
 		end
-		local match_news = uikits.child(self._root,ui.MATCH_NEW)
-		match_news:setVisible(false)
+	--	local match_news = uikits.child(self._root,ui.MATCH_NEW)
+	--	match_news:setVisible(false)
 		uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)
 			local scene = require "hitmouse/tops"
 			uikits.pushScene(scene.create())

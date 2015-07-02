@@ -31,6 +31,7 @@ local ui = {
 	BUTTON_DETAIL  = 'xiangq',
 	TXT_PEOPLE_NUM = 'sj',
 	TXT_OPEN_TIME = 'mz',
+	TXT_GRADE_NAME = 'cs',
 	
 	BUTTON_QUIT  = 'ding/fan',
 }
@@ -100,7 +101,7 @@ function gradeview:show_history_list()
 							end
 						end)
 	end)	
-	if self.id_flag == hitconfig.ID_FLAG_TEA then
+--[[	if self.id_flag == hitconfig.ID_FLAG_TEA then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		local txt_match_tip = uikits.child(view_cur_match,ui.TXT_MATCH_TIP)
 		view_cur_match:setVisible(true)		
@@ -118,7 +119,7 @@ function gradeview:show_history_list()
 			but_match_detail:setTouchEnabled(false)	
 		end	
 			
-	elseif self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_PAR then
+	else--]]if self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_PAR or self.id_flag == hitconfig.ID_FLAG_TEA then
 		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		view_cur_match:setVisible(true)
 		local txt_match_name = uikits.child(view_cur_match,ui.TXT_MATCH_NAME)
@@ -160,7 +161,11 @@ function gradeview:show_history_list()
 			local send_data = {v1=self.block_id,v2=2}
 			if self.id_flag == hitconfig.ID_FLAG_PAR then
 				local cur_school_info = hitconfig.get_school_info()
-				send_data.v3 = cur_school_info.school_id
+				if cur_school_info and cur_school_info.school_id then
+					send_data.v3 = cur_school_info.school_id
+				else
+					send_data.v3 = 0
+				end	
 			else
 				send_data.v3 = 0
 			end
@@ -195,6 +200,7 @@ function gradeview:show_history_list()
 		local txt_has_match = uikits.child(view_cur_match,ui.TXT_TIP_HAS_MATCH)
 		local txt_no_match = uikits.child(view_cur_match,ui.TXT_TIP_NO_MATCH)
 		local but_open_match = uikits.child(view_cur_match,ui.BUTTON_OPEN_MATCH)
+		local but_match_join = uikits.child(view_cur_match,ui.BUTTON_MATCH_JOIN)
 		if self.enable == 1 then
 			txt_has_match:setVisible(true)
 			txt_no_match:setVisible(false)
@@ -202,6 +208,9 @@ function gradeview:show_history_list()
 			but_match_detail:setEnabled(true)
 			but_match_detail:setBright(true)
 			but_match_detail:setTouchEnabled(true)	
+			but_match_join:setEnabled(true)
+			but_match_join:setBright(true)
+			but_match_join:setTouchEnabled(true)	
 		else
 			txt_has_match:setVisible(false)
 			txt_no_match:setVisible(true)	
@@ -209,6 +218,9 @@ function gradeview:show_history_list()
 			but_match_detail:setEnabled(false)
 			but_match_detail:setBright(false)
 			but_match_detail:setTouchEnabled(false)	
+			but_match_join:setEnabled(false)
+			but_match_join:setBright(false)
+			but_match_join:setTouchEnabled(false)	
 		end
 		uikits.event(but_open_match,	
 			function(sender,eventType)
@@ -226,11 +238,23 @@ function gradeview:show_history_list()
 											self.enable = 0
 											txt_has_match:setVisible(false)
 											txt_no_match:setVisible(true)	
+											but_match_detail:setEnabled(false)
+											but_match_detail:setBright(false)
+											but_match_detail:setTouchEnabled(false)	
+											but_match_join:setEnabled(false)
+											but_match_join:setBright(false)
+											but_match_join:setTouchEnabled(false)	
 											--but_open_match:setSelectedState(false)
 										else
 											self.enable = 1
 											txt_has_match:setVisible(true)
 											txt_no_match:setVisible(false)
+											but_match_detail:setEnabled(true)
+											but_match_detail:setBright(true)
+											but_match_detail:setTouchEnabled(true)	
+											but_match_join:setEnabled(true)
+											but_match_join:setBright(true)
+											but_match_join:setTouchEnabled(true)
 											--but_open_match:setSelectedState(true)
 										end
 									else
@@ -250,6 +274,34 @@ function gradeview:show_history_list()
 									end,v)							
 								end
 							end)
+		end)
+		uikits.event(but_match_join,	
+			function(sender,eventType)
+			local send_data = {v1=self.block_id,v2=2}
+			send_data.v3 = 0
+			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
+				if t and t==200 then
+					uikits.replaceScene(battle.create{
+							level = self.block_id or 1,
+							time_limit = v.times or 10,
+							rand = v.road_radom or 0,
+							diff1 = v.diffcult_low or 0,
+							diff2 = v.diffcult_up or 0,
+							signle = v.question_amount or 10,
+							dual = 0,
+							condition = v.pass_condition or 60,
+							type= 2,
+						})
+				else
+					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
+						if e == hitconfig.RETRY then
+							self.show_history_list()
+						else
+							uikits.popScene()
+						end
+					end,v)	
+				end
+			end)
 		end)
 	end
 	local view_space = 10
@@ -284,8 +336,11 @@ function gradeview:show_history_list()
 
 		local txt_people_num = uikits.child(cur_pro,ui.TXT_PEOPLE_NUM)
 		local txt_open_time = uikits.child(cur_pro,ui.TXT_OPEN_TIME)
+		local txt_grade_name = uikits.child(cur_pro,ui.TXT_GRADE_NAME)
+		
 		txt_people_num:setString(self.history_list[i].Users..'人')
 		txt_open_time:setString(self.history_list[i].match_time)
+		txt_grade_name:setString(self.match_name)
 		
 		local but_detail = uikits.child(cur_pro,ui.BUTTON_DETAIL)
 		but_detail.road_block_id = self.history_list[i].road_block_id

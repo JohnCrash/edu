@@ -19,10 +19,10 @@ local ui = {
 	TXT_HAS_MATCH = 'xiao/w2',
 	TXT_NO_MATCH = 'xiao/wen',
 
-	VIEW_CHANGE_CLASS = 'ding/change_class',
-	BUTTON_LEFT = 'ding/change_class/zuo',
-	BUTTON_RIGHT = 'ding/change_class/you',
-	TXT_SCHOOL_NAME = 'ding/change_class/school_name',
+	VIEW_CHANGE_CLASS = 'ding/duo',
+	BUTTON_LEFT = 'ding/duo/zuo',
+	BUTTON_RIGHT = 'ding/duo/you',
+	TXT_SCHOOL_NAME = 'ding/duo/xuexiao',
 
 	BUTTON_QUIT  = 'ding/fan',
 }
@@ -48,7 +48,7 @@ end
 
 function matchview:show_match_list()
 	self.is_has_match = false
-	for i=1,9 do
+	for i=1,10 do
 		local match_enable = 0
 		if self.match_list_data[i].enable == 1 and self.match_list_data[i].enter_number >0 then
 			match_enable = 1
@@ -82,7 +82,7 @@ function matchview:show_match_list()
 				uikits.pushScene(scene_next)	
 			end,"click")
 	end
-	local txt_has_match = uikits.child(self._matchview,ui.TXT_HAS_MATCH)
+--[[	local txt_has_match = uikits.child(self._matchview,ui.TXT_HAS_MATCH)
 	local txt_no_match = uikits.child(self._matchview,ui.TXT_NO_MATCH)
 	if self.is_has_match == true then
 		txt_has_match:setVisible(true)
@@ -90,7 +90,7 @@ function matchview:show_match_list()
 	else
 		txt_has_match:setVisible(false)
 		txt_no_match:setVisible(true)			
-	end
+	end--]]
 end
 
 function matchview:get_match_list()

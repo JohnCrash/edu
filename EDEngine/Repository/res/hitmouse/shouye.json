@@ -12,6 +12,9 @@
   "textures": [],
   "texturesPng": [
     "bei.jpg",
+    "duy1.png",
+    "duy2.png",
+    "bei.jpg",
     "d1.jpg",
     "back1.png",
     "sz.png",
@@ -19,8 +22,7 @@
     "hong.png",
     "ph.png",
     "cg.png",
-    "bs.png",
-    "tixing.png"
+    "bs.png"
   ],
   "version": "1.6.0.0",
   "widgetTree": {
@@ -569,62 +571,7 @@
       {
         "classname": "Button",
         "name": null,
-        "children": [
-          {
-            "classname": "ImageView",
-            "name": null,
-            "children": [],
-            "options": {
-              "__type": "ImageViewSurrogate:#EditorCommon.JsonModel.Component.GUI",
-              "classname": "ImageView",
-              "name": "tixing",
-              "ZOrder": 0,
-              "actiontag": 48854323,
-              "anchorPointX": 0.5,
-              "anchorPointY": 0.5,
-              "classType": "CocoStudio.EngineAdapterWrap.CSImageView",
-              "colorB": 255,
-              "colorG": 255,
-              "colorR": 255,
-              "customProperty": "",
-              "flipX": false,
-              "flipY": false,
-              "height": 50,
-              "ignoreSize": true,
-              "layoutParameter": null,
-              "opacity": 255,
-              "positionPercentX": 0.4632353,
-              "positionPercentY": 0.353448272,
-              "positionType": 0,
-              "rotation": 0,
-              "scaleX": 1,
-              "scaleY": 1,
-              "sizePercentX": 0.183823526,
-              "sizePercentY": 0.431034476,
-              "sizeType": 0,
-              "tag": 2678,
-              "touchAble": false,
-              "useMergedTexture": false,
-              "visible": true,
-              "width": 50,
-              "x": 126,
-              "y": 41,
-              "capInsetsHeight": 1,
-              "capInsetsWidth": 1,
-              "capInsetsX": 0,
-              "capInsetsY": 0,
-              "fileName": null,
-              "fileNameData": {
-                "path": "tixing.png",
-                "plistFile": "",
-                "resourceType": 0
-              },
-              "scale9Enable": false,
-              "scale9Height": 50,
-              "scale9Width": 50
-            }
-          }
-        ],
+        "children": [],
         "options": {
           "__type": "ButtonSurrogate:#EditorCommon.JsonModel.Component.GUI",
           "classname": "Button",
