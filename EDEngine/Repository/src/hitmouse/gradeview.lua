@@ -140,7 +140,7 @@ function gradeview:show_history_list()
 				but_match_join:setEnabled(false)
 				but_match_join:setBright(false)
 				but_match_join:setTouchEnabled(false)	
-				txt_match_tip:setVisible(true)	
+				txt_match_tip:setVisible(false)	
 				but_match_detail:setEnabled(true)
 				but_match_detail:setBright(true)
 				but_match_detail:setTouchEnabled(true)	
@@ -422,6 +422,7 @@ function gradeview:init()
 		uikits.initDR{width=1440,height=1080}
 	end
 	self.id_flag = hitconfig.get_id_flag()
+	print('self.id_flag:::::::'..self.id_flag)
 	if self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
 		self._gradeview = uikits.fromJson{file_9_16=ui.STU_FILE,file_3_4=ui.STU_FILE_3_4}	
 	else

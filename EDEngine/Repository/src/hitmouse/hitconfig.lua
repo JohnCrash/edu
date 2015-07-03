@@ -558,10 +558,10 @@ local ID_FLAG_TEA = 2
 local ID_FLAG_SCH = 3
 local ID_FLAG_PAR = 4
 
-local id_flag = ID_FLAG_SCH
+local id_flag
 
 local function set_id_flag(id)
-	if id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_STU or id == ID_FLAG_PAR then
+	if id == ID_FLAG_STU or id == ID_FLAG_TEA or id == ID_FLAG_SCH or id == ID_FLAG_PAR then
 		id_flag = id
 	end
 end
@@ -606,6 +606,7 @@ local function get_user_id(parent,func)
 				else
 					user_id = ID_FLAG_TEA
 				end
+				print('user_id:::::'..user_id)
 				set_id_flag(user_id)
 				func(true)
 			end	
