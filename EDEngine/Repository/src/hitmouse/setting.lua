@@ -60,6 +60,7 @@ function setting:init()
 		end)		
 	end
 end
+
 function setting:release()
 	kits.config("hitmouse_mute",self._mut)
 end

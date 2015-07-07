@@ -676,7 +676,7 @@ local isTouchEvent = {
 	['ccui.Text'] = true
 }
 
-local function event( obj,func,eventType )
+local function event( obj,func,eventType,mut )
 	if obj and func then
 		obj:setTouchEnabled(true)
 		if eventType then
@@ -684,7 +684,9 @@ local function event( obj,func,eventType )
 				obj:addTouchEventListener( 
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then
-						playClickSound()
+						if not mut then
+							playClickSound()
+						end
 						func( sender)
 					end
 				end)				
@@ -693,7 +695,9 @@ local function event( obj,func,eventType )
 					obj:addEventListener(
 						function(sender,eventType)
 							if eventType == ccui.CheckBoxEventType.selected then
-								playClickSound()
+								if not mut then
+									playClickSound()
+								end
 								func(sender,true)
 							elseif eventType == ccui.CheckBoxEventType.unselected then
 								func(sender,false)
@@ -703,7 +707,9 @@ local function event( obj,func,eventType )
 					obj:addTouchEventListener( 
 					function(sender,eventType) 
 						if eventType == ccui.TouchEventType.began then
-							playClickSound()
+							if not mut then
+								playClickSound()
+							end
 							func( sender )
 						end
 					end)			
@@ -713,7 +719,9 @@ local function event( obj,func,eventType )
 			obj:addTouchEventListener( 
 				function(sender,eventType) 
 					if eventType == ccui.TouchEventType.ended then
-						playClickSound()
+						if not mut then
+							playClickSound()
+						end
 						func( sender )
 					end
 				end)
@@ -721,7 +729,9 @@ local function event( obj,func,eventType )
 			obj:addEventListener(
 				function(sender,eventType)
 					if eventType == ccui.CheckBoxEventType.selected then
-						playClickSound()
+						if not mut then
+							playClickSound()
+						end
 						func(sender,true)
 					elseif eventType == ccui.CheckBoxEventType.unselected then
 						func(sender,false)
@@ -784,7 +794,7 @@ local function delay_call( target,func,delay,param1,param2,param3 )
 			end
 		end
 		schedulerID = scheduler:scheduleScriptFunc(delay_call_func,delay or 0.01,false)
-		return schedulerID
+		return schedulerID,scheduler
 	end
 end
 
