@@ -10,6 +10,7 @@ hw_cur_child_id = 0
 local ui = {
 }
 
+kits.write_file("g:\\hello\\abc\\1.txt","hello world")
 ----------------------------------
 
 

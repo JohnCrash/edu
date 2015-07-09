@@ -217,6 +217,21 @@ local function exist_file( file )
   return f ~= nil  
 end
 
+local function directory_exists( dir )
+	local s,err = lfs.attributes( dir )
+	if s and s.mode == 'directory' then
+		return true
+	end
+	return false
+end
+
+local function make_directory( name )
+	local dir = name
+	if not directory_exists(dir) then
+		lfs.mkdir(dir)
+	end
+end
+
 local function local_exists( file )
 	return exist_file( local_dir..file )
 end
@@ -242,17 +257,86 @@ local function read_network_file( name )
   return download_http_by_curl(url)
 end
 
+local function make_file_directory( filename )
+	local i = 1
+	local dirs = {}
+	if not filename then
+		return
+	end
+	while i do
+		local s = i
+		i = string.find(filename,'[/\\]',i)
+		local e = i
+		if i then
+			table.insert(dirs,string.sub(filename,s,e-1))
+			i = i + 1
+		end
+	end
+	local dir = ""
+	for k,v in pairs(dirs) do
+		dir = dir..v
+		make_directory( dir )
+		dir = dir..'/'
+	end
+end
+
+local function log_file_directory( filename )
+	local i = 1
+	local dirs = {}
+	if not filename then
+		return
+	end
+	while i do
+		local s = i
+		i = string.find(filename,'[/\\]',i)
+		local e = i
+		if i then
+			table.insert(dirs,string.sub(filename,s,e-1))
+			i = i + 1
+		end
+	end
+	
+	local dir = ""
+	for k,v in pairs(dirs) do
+		dir = dir..v
+		if not directory_exists( dir ) then
+			my_log("error directory "..tostring(dir).." not exist~")
+		end
+		dir = dir..'/'
+	end
+end
+
 local function write_file( name,buf )
   local filename = name
-  local file = io.open(filename,'wb')
+  local file,msg = io.open(filename,'wb')
   if file then
     file:write(buf)
     file:close()
 	return true
   else
-     --local file error?
-     --my_log('Can not write file '..filename)
-	 return false
+	--open failed ,make directory 
+	make_file_directory(filename)
+	if directory_exists(filename) then
+		lfs.rmdir(filename)
+	end
+	 local file,msg = io.open(filename,'wb')
+	 if file then
+		file:write(buf)
+		file:close()
+		return true	 
+	 else
+		 my_log('Can not write file '..tostring(filename)..' '..tostring(msg))
+		 log_file_directory(filename)
+		 my_log("filename is directory:"..tostring(directory_exists(filename)))
+		 local file,msg = io.open(filename,'r')
+		 if file then
+			my_log("filename can open by mode r")
+			file:close()
+		 else
+			my_log("filename can not open by mode r error:"..tostring(msg))	 
+		 end
+		 return false
+	 end
   end
 end
 
@@ -267,21 +351,6 @@ end
 local function write_local_file( name,buf )
   local filename = local_dir..name
   return write_file( filename,buf )
-end
-
-local function directory_exists( dir )
-	local s,err = lfs.attributes( dir )
-	if s and s.mode == 'directory' then
-		return true
-	end
-	return false
-end
-
-local function make_directory( name )
-	local dir = name
-	if not directory_exists(dir) then
-		lfs.mkdir(dir)
-	end
 end
 
 local function make_local_directory( name )
@@ -306,7 +375,32 @@ local function del_file( name )
 end
 
 local function rename_file( old,new )
-	return os.rename(old,new)
+	local b,msg = os.rename(old,new)
+	if not b then
+		local new_isexist = exist_file(new)
+		local old_isexist = exist_file(old)
+		my_log("rename_file failed:")
+		my_log("old="..tostring(old).." isexist:"..tostring(old_isexist))
+		my_log("new="..tostring(new).." isexist:"..tostring(new_isexist))
+		my_log(" error_msg:"..tostring(msg))
+		my_log(" try rename new file")
+		local e,m = os.rename(new,new.."_")
+		if not e then
+			my_log(" rename failed "..tostring(m))
+		else
+			my_log(" rename success")
+		end
+		my_log("try rename old file")
+		e,m = os.rename(old,new)
+		if not e then
+			my_log(" rename failed "..tostring(m))
+		else
+			my_log(" rename success ")
+			b = e
+		end
+		require "crash".report("*RENAME FAILED INFO*"..tostring(math.floor(os.time())))
+	end
+	return b,msg
 end
 
 local function del_local_file( name )

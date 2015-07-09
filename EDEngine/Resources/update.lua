@@ -407,7 +407,7 @@ function UpdateProgram:check_directory(dir,n)
 					if not l_src_v then return true end
 					local j_res_v = json.decode(l_res_v)
 					local j_src_v = json.decode(l_src_v)
-					if j_res_v.version and j_src_v.version and
+					if j_res_v and j_src_v and j_res_v.version and j_src_v.version and
 					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
 						return false --完全相同不需要跟新
 					else
