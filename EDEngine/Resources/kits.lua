@@ -398,6 +398,34 @@ local function rename_file( old,new )
 			my_log(" rename success ")
 			b = e
 		end
+		--HOTFIX
+		if not e then
+			if (string.find(old,"/res/") or string.find(old,"/src/")) and
+				(string.find(new,"/res/") or string.find(new,"/src/")) then
+				local b1 = string.find(new,"/res/")
+				local b2 = string.find(new,"/src/")
+				local filename
+				if b1 then
+					filename = string.sub(new,b1)
+				else
+					filename = string.sub(new,b2)
+				end
+				my_log("download from original server:")
+				local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v7'
+				local url = liexue_server_sr..filename
+				my_log(" try :"..tostring(url))
+				for i=1,3 do
+					local data_s = http_get(url,'',300)
+					if data_s then
+						e = write_file(new,data_s)
+						my_log("	done ")
+						break
+					else
+						my_log("	failed "..tostring(i))
+					end
+				end
+			end
+		end
 		require "crash".report("*RENAME FAILED INFO*"..tostring(math.floor(os.time())))
 	end
 	return b,msg

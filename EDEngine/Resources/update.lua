@@ -125,7 +125,7 @@ local function download_file(t,m5)
 						if not kits.write_file(local_file,obj.data) then
 							--非正常结束,不能正常写入
 							kits.log('error download_file write file failed '..tostring(url))
-							table.insert(download_error_table,{file=t,md5=m5,err=1})
+							table.insert(download_error_table,{download=t,md5=m5,err=1})
 						end
 					end
 					done_count = done_count + 1
@@ -133,7 +133,7 @@ local function download_file(t,m5)
 				else
 					--非正常结束校验错误
 					kits.log('error download_file verify md5 failed '..tostring(url))
-					table.insert(download_error_table,{file=t,md5=m5,err=2})
+					table.insert(download_error_table,{download=t,md5=m5,err=2})
 					done_count = done_count + 1
 					thread_count = thread_count - 1
 				end

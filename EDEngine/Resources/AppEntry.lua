@@ -10,7 +10,7 @@ hw_cur_child_id = 0
 local ui = {
 }
 
-kits.write_file("g:\\hello\\abc\\1.txt","hello world")
+--kits.rename_file("g:\\hello\\abc/res/hitmouse/snd/beijing3.mp3","g:\\hello\\abc/res/hitmouse/snd/beijing3.mp3")
 ----------------------------------
 
 
