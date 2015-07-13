@@ -747,6 +747,16 @@ local function event( obj,func,eventType,mut )
 			obj:addEventListener(func)
 		elseif cc_type(obj)=='cc.MenuItemFont' then
 			obj:registerScriptTapHandler(func)
+		elseif cc_type(obj)=='ccui.Layout' then
+			obj:addTouchEventListener(				
+			function(sender,eventType) 
+					if eventType == ccui.TouchEventType.ended then
+						if not mut then
+							playClickSound()
+						end
+						func( sender )
+					end
+				end)
 		else
 			error('uikits.event not support type:'..cc_type(obj))
 		end

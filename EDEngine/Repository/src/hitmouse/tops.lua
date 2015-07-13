@@ -18,9 +18,9 @@ local ui = {
 	SCORE = 'df',
 	SCORE_PARENT = 'df2',
 	SCORE_TOTAL = 'zdf',
-	CLASS_CAPTION = 'ding/duo/bm',
-	NEXT_CLASS_BUTTON = 'ding/duo/you',
-	PREV_CLASS_BUTTON = 'ding/duo/zuo',
+	CLASS_CAPTION = 'ding/Label_10',
+	NEXT_CLASS_BUTTON = 'ding/Button_11',
+	PREV_CLASS_BUTTON = 'ding/Button_12',
 }
 
 local tops = uikits.SceneClass("tops")

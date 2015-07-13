@@ -330,7 +330,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			local moveies = { 
 			"g:/Shake It Off.mp3",
-			"g:/music_logo.mp3",
+			"g:/1.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8",
 			"http://dl-lejiaolexue.qiniudn.com/729c4a6a87c541ff8e9eff183ce98658.m3u8",
@@ -347,7 +347,7 @@ function AppEntry:init()
 				sp2=nil			
 			end
 			if idx > #moveies then
-				idx = 3
+				idx = 1
 			end
 			ffmpeg_as = ffplayer.playStream(moveies[idx],function(state,stream,tx)
 					if state ~=5 then

@@ -2695,7 +2695,9 @@ static int read_thread(void *arg)
 	}
 	err = avformat_open_input(&ic, is->filename, is->iformat, &format_opts);
 	if (err < 0) {
-		//print_error(is->filename, err);
+		char errmsg[1024];
+		av_strerror(err, errmsg, 1024);
+		My_log(NULL, AV_LOG_ERROR, "ffmpeg error msg:%s", errmsg);
 		is->errmsg = "Could not open input file.";
 		is->errcode = -1;
 		ret = -1;
@@ -3246,7 +3248,6 @@ void initFF()
 #endif
 	av_register_all();
 	avformat_network_init();
-
 	//下面的代码也许和单个视频的播放相关
 	if (av_lockmgr_register(lockmgr)) {
 		My_log(NULL, AV_LOG_FATAL, "Could not initialize lock manager!\n");

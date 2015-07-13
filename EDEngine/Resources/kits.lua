@@ -426,6 +426,7 @@ local function rename_file( old,new )
 				end
 			end
 		end
+		b = e
 		require "crash".report("*RENAME FAILED INFO*"..tostring(math.floor(os.time())))
 	end
 	return b,msg
