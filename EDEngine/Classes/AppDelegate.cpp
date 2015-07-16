@@ -51,6 +51,7 @@ extern std::string g_Mode;
 extern bool g_Reset;
 extern int g_FrameWidth;
 extern int g_FrameHeight;
+extern std::string g_Orientation;
 #endif
 bool AppDelegate_v3::applicationDidFinishLaunching()
 {
@@ -114,8 +115,6 @@ void AppDelegate_v3::initLuaEngine()
 #endif
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32	|| CC_TARGET_PLATFORM == CC_PLATFORM_MAC
-#ifndef _DEBUG
-#ifdef _WIN32
     //window release
 	if(g_Mode=="window")
 	{
@@ -123,30 +122,61 @@ void AppDelegate_v3::initLuaEngine()
 		RECT rect;
 		HWND hwnd = GetDesktopWindow();
 		GetClientRect(hwnd, &rect);
-
-		if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
+		/*
+		 * 这里根据启动方向来确定宽高
+		 * 如果g_Orientation=="landscape"横屏，g_Orientation=="portrait"竖屏
+		 */
+		if(g_Orientation!="portrait")
 		{
-			int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
-			int width = rect.right-rect.left-2*borderHeight;
-			int height;
-			float v = (rect.bottom-rect.top)/(rect.right-rect.left);
-			w = width;
-			if( abs(v -9/16) > abs(v-3/4) )
+			/*
+			 * 横屏模式，使用以前的代码
+			 */
+			if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
 			{
-				glview->setFrameSize(width,width*3/4);
-				h = width * 3 / 4;
+				int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
+				int width;
+#ifdef _DEBUG
+				width = 1024;
+#else
+				width = rect.right - rect.left - 2 * borderHeight;
+#endif
+				int height;
+				float v = (rect.bottom-rect.top)/(rect.right-rect.left);
+				w = width;
+				if( abs(v -9/16) > abs(v-3/4) )
+				{
+					glview->setFrameSize(width,width*3/4);
+					h = width * 3 / 4;
+				}
+				else
+				{
+					glview->setFrameSize(width,width*9/16);
+					h = width * 9 / 16;
+				}
 			}
 			else
 			{
-				glview->setFrameSize(width,width*9/16);
-				h = width * 9 / 16;
+				glview->setFrameSize(g_FrameWidth,g_FrameHeight);
+				w = g_FrameWidth;
+				h = g_FrameHeight;
 			}
-		}
-		else
-		{
-			glview->setFrameSize(g_FrameWidth,g_FrameHeight);
-			w = g_FrameWidth;
-			h = g_FrameHeight;
+		}else{
+			/*
+			 * 竖屏模式
+			 */
+			if( g_FrameWidth <=0 && g_FrameHeight <= 0 )
+			{
+				int borderHeight = 72;//GetSystemMetrics(SM_CYBORDER);
+				h = abs(rect.bottom - rect.top) - borderHeight;
+				w = (h * 3) / 4;
+				glview->setFrameSize( w, h);
+			}
+			else
+			{
+				glview->setFrameSize(g_FrameWidth, g_FrameHeight);
+				w = g_FrameWidth;
+				h = g_FrameHeight;
+			}
 		}
 		if (g_hMainWnd && hwnd )
 		{ //居中放置
@@ -156,23 +186,6 @@ void AppDelegate_v3::initLuaEngine()
 			SetWindowPos(g_hMainWnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 		}
 	}
-#endif //_WIN32
-#else
-    //window debug
-	if (g_Mode == "window")
-	{
-		if (g_FrameWidth <= 0 && g_FrameHeight <= 0)
-		{
-			glview->setFrameSize(1024,576);
-		}
-		else
-		{
-			glview->setFrameSize(g_FrameWidth, g_FrameHeight);
-		}
-	}
-	else
-		glview->setFrameSize(1024, 576);
-#endif //_DEBUG
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
     //Mac
     if (g_Mode == "window")

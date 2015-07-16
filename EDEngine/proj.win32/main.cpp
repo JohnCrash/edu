@@ -15,6 +15,7 @@ std::string g_Cookie;
 std::string g_Launch;
 std::string g_Userid;
 std::string g_Mode;
+std::string g_Orientation;
 int g_FrameWidth = -1;
 int g_FrameHeight = -1;
 bool g_Reset = true;
@@ -46,6 +47,7 @@ void ParseCommand(LPTSTR lpCmdLine)
 	g_Launch = toUTF8(getParam(cmd,TEXT("launch=")));
 	g_Userid = toUTF8(getParam(cmd,TEXT("userid=")));
 	g_Mode = toUTF8(getParam(cmd,TEXT("mode=")));
+	g_Orientation = toUTF8(getParam(cmd, TEXT("orientation=")));
 	if (g_Mode.length() == 0)
 	{
 		g_Mode = "window";
@@ -53,6 +55,7 @@ void ParseCommand(LPTSTR lpCmdLine)
 	CCLOG("cookie=%s",g_Cookie.c_str());
 	CCLOG("userid=%s", g_Userid.c_str());
 	CCLOG("launch=%s", g_Launch.c_str());
+	CCLOG("orientation=%s", g_Orientation.c_str());
 }
 MySpaceEnd
 

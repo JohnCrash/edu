@@ -130,7 +130,8 @@ static int cc_launchparam(lua_State* L)
 	lua_pushstring(L,g_Launch.c_str());
 	lua_pushstring(L,g_Cookie.c_str());
 	lua_pushstring(L,g_Userid.c_str());
-	return 3;
+	lua_pushstring(L, g_Orientation.c_str());
+	return 4;
 }
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32

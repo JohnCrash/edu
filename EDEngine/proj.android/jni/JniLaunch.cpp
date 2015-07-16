@@ -13,6 +13,7 @@ MySpaceBegin
 std::string g_Launch;
 std::string g_Cookie;
 std::string g_Userid;
+std::string g_Orientation;
 std::string g_ExternalStorageDirectory;
 std::string g_RecordFile;
 
@@ -82,6 +83,7 @@ void setUIOrientation( int m )
 		if( count++ > 2000 )
 			break;
 	}
+	CCLOG("setUIOrientation END		 2");
 #endif	
 }
 
@@ -303,11 +305,12 @@ bool VoiceIsPlaying(const char *pszPathName)
 MySpaceEnd
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid) 
+    JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid,jstring orientation) 
 	{
 		g_Launch = cocos2d::JniHelper::jstring2string(launch);
 		g_Cookie = cocos2d::JniHelper::jstring2string(cookie);
 		g_Userid = cocos2d::JniHelper::jstring2string(uid);
+		g_Orientation = cocos2d::JniHelper::jstring2string(orientation);
     }
 
     JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_setExternalStorageDirectory(JNIEnv* env,jobject thiz,jstring dir) 
@@ -352,8 +355,13 @@ extern "C" {
 	}
 	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation(JNIEnv *env,jobject thiz,int state,int w,int h)
 	{
+		CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 1");
 		if( state == 1 )
+		{
 			cocos2dChangeOrientationBySize(w,h);
+			CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 2");
+		}
+		CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 3");
 		sWaitChangeEnd = true;
 	}	
 	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_setBaiduResult(JNIEnv *env,jobject thiz,jstring text)

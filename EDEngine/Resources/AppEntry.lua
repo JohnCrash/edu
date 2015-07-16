@@ -10,9 +10,74 @@ hw_cur_child_id = 0
 local ui = {
 }
 
---kits.rename_file("g:\\hello\\abc/res/hitmouse/snd/beijing3.mp3","g:\\hello\\abc/res/hitmouse/snd/beijing3.mp3")
 ----------------------------------
+local ffi = require("ffi")
+ffi.cdef[[
+typedef int (__cdecl *compare_func )(const void *, const void *);
+void qsort(
+   void *base,
+   size_t num,
+   size_t width,
+   compare_func
+);
+typedef struct{
+	int a;
+	float b;
+	char* c;
+	uint8_t d;
+} test;
+typedef struct {int x,y;} point_t;
+]]
 
+
+local point_ptr = ffi.typeof("point_t[?]")
+local pt = point_ptr(100)
+for i=0,99 do
+	pt[i].x = math.random(1,99)
+	pt[i].y = math.random(1,99)
+end
+for i=0,99 do
+	print(pt[i].x..","..pt[i].y)
+end
+print("os = "..ffi.os)
+print("abi 32bit = "..tostring(ffi.abi("32bit")))
+print("abi 64bit = "..tostring(ffi.abi("64bit")))
+print("abi le = "..tostring(ffi.abi("le")))
+print("abi be = "..tostring(ffi.abi("be")))
+print("abi fpu = "..tostring(ffi.abi("fpu")))
+print("abi eabi = "..tostring(ffi.abi("eabi")))
+print("abi win = "..tostring(ffi.abi("win")))
+print("abi arch = "..tostring(ffi.arch))
+print("test.a offset :"..ffi.offsetof("test","a"))
+print("test.b offset :"..ffi.offsetof("test","b"))
+print("test.c offset :"..ffi.offsetof("test","c"))
+print("test.d offset :"..ffi.offsetof("test","d"))
+
+local c = ffi.new("int[?]",26)
+for i=0,26-1 do
+	c[i] = math.random(1,100)
+	print("["..i.."]="..c[i])
+end
+print("qsort")
+local cb = ffi.new("compare_func",function(a,b)
+		if ffi.cast("int*",a)[0]>ffi.cast("int*",b)[0] then
+			return 1
+		else
+			return -1
+		end
+	end)
+ffi.gc(cb,function(p)
+	print("gc cb")
+end)
+ffi.C.qsort(c,26,ffi.sizeof("int"),cb)
+print("free cb")
+cb:free()
+
+for i=0,26-1 do
+	print("["..i.."]="..c[i])
+end
+
+print("--------------end--------------")
 
 -----------------------------------
 
@@ -135,7 +200,7 @@ function AppEntry:init()
 		x=320*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale
 	}
-	debugip:setText("192.168.2.182")
+	debugip:setText("192.168.2.157")
 	
 	local amouse = uikits.button{caption='打地鼠',x=64*scale,y = 64*scale +5*item_h,
 	width=128*scale,height=48*scale,
@@ -171,14 +236,14 @@ function AppEntry:init()
 				return ss.create()
 				end}
 		end}
-	local ebutton = uikits.button{caption='错题本',x=64*scale,y = 64*scale + 2*item_h,
+	local ebutton = uikits.button{caption='新打地鼠2',x=64*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='errortitle',updates={'homework','errortitile','luacore'},
+			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.STUDENT)
-				login.set_selector(1) --学生
-				local Loading = require "errortitile/Loading"
+				login.set_selector(7) --学生
+				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}
 		end}
@@ -195,22 +260,25 @@ function AppEntry:init()
 			end}
 		end}
 		--]]
-	local epbutton = uikits.button{caption='错题',x=64*scale,y = 64*scale + 6*item_h,
+	local epbutton = uikits.button{caption='TEST',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='errortitlenew',updates={'errortitlenew','luacore'},
+			update.create{name='test',updates={'test','luacore'},
 				run=function()
 				login.set_selector(3) 
-				local selstudent = require "errortitlenew/Loading"
+				local selstudent = require "test/test"
 				return selstudent.create()
 			end}
 		end}
-	local pbutton = uikits.button{caption='卡牌',x=64*scale,y = 64*scale + 7*item_h,
+	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				login.set_selector(3) 
-				local selstudent1 = require "poetrymatch/Loading"
-				uikits.pushScene( selstudent1.create() )
+			update.create{name='test',updates={'lemall','luacore'},
+				run=function()
+				login.set_selector(9) 
+				local selstudent = require "lemall/Loading"
+				return selstudent.create()
+			end}
 		end}
 	local g_last
 	local record =  uikits.button{caption='show BaiduVoice',x=264*scale,y = 64*scale + 4*item_h,
@@ -303,7 +371,7 @@ function AppEntry:init()
 		x=320*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale
 	}
-	debugip:setText("192.168.2.75")
+	debugip:setText("192.168.2.157")
 	local isopen = false
 	local debugbutton = uikits.button{caption='调试...',x=320*scale,y = 64*scale + item_h,
 		width=128*scale,height=48*scale,

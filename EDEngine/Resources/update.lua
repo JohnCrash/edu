@@ -6,6 +6,7 @@ local md5 = require "md5"
 local json = require "json-c"
 local resume = require "resume"
 local mt = require "mt"
+local app,cookie,uid,orientation = cc_launchparam()
 
 if not kits.exist_file then
 	kits.exist_file = kits.exists_file
@@ -15,10 +16,10 @@ local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local versionNUM = resume.getversion()
-local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
---local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/debug/'
---local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
+--local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
+local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
 --local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
@@ -37,13 +38,15 @@ end
 kits.config("current_server",update_server )
 
 local ui = {
-	FILE = 'loadscreen/jiazhan.json',
-	FILE_43 = 'loadscreen/jiazhan43/jiazhan43.json',
+	FILE = 'loadscreen/newloading/kuan169.json',
+	FILE_43 = 'loadscreen/newloading/kuan43.json',
+	VFILE = 'loadscreen/newloading/zhai169.json',
+	VFILE_43 = 'loadscreen/newloading/zhai43.json',	
 	PROGRESS = 'bo2',
-	PROGRESS_BG = 'bo',
+	PROGRESS_BG = 'tu',
 	EXIT_BUTTON = 'exit',
 	TRY_BUTTON = 'try',
-	CAPTION = 'text',
+	CAPTION = 'wen',
 }
 
 local function splite(s,ext)
@@ -248,8 +251,32 @@ local TRY = 1
 
 function UpdateProgram:ErrorAndExit(msg,t)
 	self._mode = TRY
-	self._count = self._count-1
-	self._text:setText(msg)
+	if self._count then
+		self._count = self._count-1
+	end
+	uikits.delay_call(
+		self._root,
+		function(dt)
+			local factory = require "factory"
+			local base = require "base"
+			local messageBox = factory.create(base.MessageBox)
+			if t==1 then
+				messageBox:open{caption="出错了",text=msg,button={"退出","重试"},
+					onClick=function(i,text)
+						if i==1 then
+							kits.quit()
+						else
+							self._mode = nil
+						end
+					end}
+			else
+				messageBox:open{caption="出错了",text=msg,button={"退出"},
+					onClick=function(i,text)
+						kits.quit()
+					end}	
+			end
+	end)
+	--[[
 	self._exit:setVisible(true)
 	self._try:setVisible(true)
 	if t==1 then --正常启动
@@ -264,6 +291,7 @@ function UpdateProgram:ErrorAndExit(msg,t)
 		self._try:setEnabled(false)
 		self._try:setHighlighted(false)
 	end
+	--]]
 end
 
 local function build_fast_table(s)
@@ -500,6 +528,7 @@ function UpdateProgram:update()
 			local b,scene = pcall(self._args.run)
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
+				self:flagUpdate(false)
 			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed")
 				kits.log("error message:")
@@ -601,6 +630,7 @@ function UpdateProgram:update()
 			local b,scene = pcall(self._args.run)
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
+				self:flagUpdate(false)
 			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed!")
 				kits.log("error message:")
@@ -637,26 +667,145 @@ function UpdateProgram:update()
 	end
 end
 
+function UpdateProgram:getUpdateFileName()
+	return self._args.name.."_config.json"
+end
+
+function UpdateProgram:saveUpdateByTable(t)
+	local s = json.encode(t)
+	if s then
+		return kits.write_local_file(self:getUpdateFileName(),s)
+	end
+end
+
+function UpdateProgram:loadUpdateTable()
+	local ufile = kits.read_local_file(self:getUpdateFileName())
+	if not ufile then
+		return nil
+	end
+	return json.decode(ufile)
+end
+
+function UpdateProgram:flagUpdate(b)
+	local updates = {}
+	for i,v in pairs(self._args.updates) do
+		updates[v] = b
+	end
+	self:saveUpdateByTable(updates)
+end
+
+function UpdateProgram:check_directory_mt(dir,func,isres)
+	local url,filename
+	if isres then
+		url = update_server..self:get_resource_suffix()..dir..'/version.json'
+		filename = "res/"..dir.."/version.json"
+	else
+		url = update_server..'src/'..dir..'/version.json'
+		filename = "src/"..dir.."/version.json"
+	end
+	local f = kits.read_local_file(filename)
+	if f then
+		local res_json = json.decode(f)
+		if res_json and res_json.version then
+			cache.request_json(url,function(t)
+				if t then
+					if t.version and t.version==res_json.version then
+						func(false,dir,isres)
+					else
+						func(true,dir,isres)
+					end
+				else--状态未定
+					func(false,dir,isres)
+				end
+			end,'N')
+		else
+			func(true,dir,isres)
+		end
+	else
+		func(true,dir,isres)
+	end
+end
+
+function UpdateProgram:checkUpdateAndFlag()
+	local updates = {}
+	local count = 2*(#self._args.updates)
+	local n = 0
+	kits.log("UpdateProgram:checkUpdateAndFlag()")
+	local function check(b,name,isres)
+		updates[name] = updates[name] or b
+		n = n+1
+		if count==n then
+			kits.log("-----------------update--------------------")
+			kits.log("UpdateProgram:checkUpdateAndFlag done~")
+			self:saveUpdateByTable(updates)		
+			kits.log("------------------end---------------------")
+		end
+	end
+	for i,v in pairs(self._args.updates) do
+		self:check_directory_mt(v,check)
+		self:check_directory_mt(v,check,true)
+	end
+end
+
+function UpdateProgram:ifExistAndDo()
+	local need_updates = self:loadUpdateTable()
+	if not need_updates then
+		return false
+	end
+	for i,v in pairs(self._args.updates) do
+		if need_updates[v] then
+			return false
+		end
+	end
+	local passcount=0
+	for i,v in pairs(self._args.updates) do
+		if kits.local_exists("src/"..tostring(v).."/filelist.json") and
+			kits.local_exists("res/"..tostring(v).."/filelist.json") then
+			passcount=passcount+1
+		end
+	end
+	if passcount==#self._args.updates then
+		kits.log('Launch '..tostring(self._args.name))
+		resume.clearflag("update") --update isok
+		local b,scene = pcall(self._args.run)
+		if b and scene then
+			cc.Director:getInstance():pushScene(scene)
+			self:checkUpdateAndFlag()
+			return true
+		elseif scene then
+			kits.log("ERROR UpdateProgram:ifExistAndDo pcall failed!")
+			kits.log("error message:")
+			kits.log(tostring(scene))
+		end
+	end
+end
+
 function UpdateProgram:init()
 	if not self._root then
-		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_43}
+		if self:ifExistAndDo() then
+			return
+		end
+		if orientation=="portrait" then
+			if uikits.get_factor() == uikits.FACTOR_9_16 then
+				self._ss = cc.size(1080,1920)
+			else
+				self._ss = cc.size(1080,1440)
+			end				
+			uikits.initDR{width=self._ss.width,height=self._ss.height}
+			self._root = uikits.fromJson{file_9_16=ui.VFILE,file_3_4=ui.VFILE_43}			
+		else
+			if uikits.get_factor() == uikits.FACTOR_9_16 then
+				self._ss = cc.size(1920,1080)
+			else
+				self._ss = cc.size(1440,1080)
+			end		
+			uikits.initDR{width=self._ss.width,height=self._ss.height}
+			self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_43}
+		end
 		self._progress = uikits.child(self._root,ui.PROGRESS)
-		self._exit = uikits.child(self._root,ui.EXIT_BUTTON)
-		self._try = uikits.child(self._root,ui.TRY_BUTTON)
 		self._text = uikits.child(self._root,ui.CAPTION)
 		self._progress_bg = uikits.child(self._root,ui.PROGRESS_BG)
-		self._exit:setVisible(false)
-		self._try:setVisible(false)
 		self:addChild(self._root)
-		uikits.event(self._exit,function(sender)
-				kits.quit()
-			end)
-		uikits.event(self._try,function(sender)
-				self._exit:setVisible(false)
-				self._try:setVisible(false)
-				self._mode = nil
-				self._text:setText("")
-			end)	
 	end
 	self._step = 1
 	kits.log("Ceck version")
