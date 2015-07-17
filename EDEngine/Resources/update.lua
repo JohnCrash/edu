@@ -11,15 +11,15 @@ local app,cookie,uid,orientation = cc_launchparam()
 if not kits.exist_file then
 	kits.exist_file = kits.exists_file
 end
-
+--require("mobdebug").start("192.168.2.157")
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
  
 local versionNUM = resume.getversion()
---local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
---local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
-local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
-local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
+local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
+--local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
 --local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
 local update_server
@@ -526,9 +526,11 @@ function UpdateProgram:update()
 			if local_not_exist then return end --如果本地不存在
 			
 			local b,scene = pcall(self._args.run)
+			if b then
+				self:flagUpdate(false)
+			end			
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-				self:flagUpdate(false)
 			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed")
 				kits.log("error message:")
@@ -628,9 +630,11 @@ function UpdateProgram:update()
 			kits.log('Update complate!')
 			resume.clearflag("update") --update isok
 			local b,scene = pcall(self._args.run)
+			if b then
+				self:flagUpdate(false)
+			end
 			if b and scene then
 				cc.Director:getInstance():replaceScene(scene)
-				self:flagUpdate(false)
 			elseif scene then
 				kits.log("ERROR UpdateProgram:update pcall failed!")
 				kits.log("error message:")
@@ -671,10 +675,12 @@ function UpdateProgram:getUpdateFileName()
 	return self._args.name.."_config.json"
 end
 
-function UpdateProgram:saveUpdateByTable(t)
+local function saveUpdateByTable(name,t)
 	local s = json.encode(t)
 	if s then
-		return kits.write_local_file(self:getUpdateFileName(),s)
+		kits.log("saveUpdateByTable : "..tostring(name))
+		kits.log("	"..tostring(s))
+		return kits.write_local_file(tostring(name).."_config.json",s)
 	end
 end
 
@@ -691,7 +697,7 @@ function UpdateProgram:flagUpdate(b)
 	for i,v in pairs(self._args.updates) do
 		updates[v] = b
 	end
-	self:saveUpdateByTable(updates)
+	saveUpdateByTable(self._args.name,updates)
 end
 
 function UpdateProgram:check_directory_mt(dir,func,isres)
@@ -730,6 +736,7 @@ function UpdateProgram:checkUpdateAndFlag()
 	local updates = {}
 	local count = 2*(#self._args.updates)
 	local n = 0
+	local app_name = self._args.name
 	kits.log("UpdateProgram:checkUpdateAndFlag()")
 	local function check(b,name,isres)
 		updates[name] = updates[name] or b
@@ -737,7 +744,7 @@ function UpdateProgram:checkUpdateAndFlag()
 		if count==n then
 			kits.log("-----------------update--------------------")
 			kits.log("UpdateProgram:checkUpdateAndFlag done~")
-			self:saveUpdateByTable(updates)		
+			saveUpdateByTable(app_name,updates)
 			kits.log("------------------end---------------------")
 		end
 	end
@@ -770,6 +777,9 @@ function UpdateProgram:ifExistAndDo()
 		local b,scene = pcall(self._args.run)
 		if b and scene then
 			cc.Director:getInstance():pushScene(scene)
+			self:checkUpdateAndFlag()
+			return true
+		elseif b then
 			self:checkUpdateAndFlag()
 			return true
 		elseif scene then
