@@ -15,6 +15,15 @@ local crash_url ="http://api.lejiaolexue.com/ssp/debug/pset.ashx"
 local crash_url_get ="http://api.lejiaolexue.com/ssp/debug/pget.ashx"
 
 local platform = CCApplication:getInstance():getTargetPlatform()
+local app,cookie,uid = cc_launchparam()
+if cookie and type(cookie)=='string' and string.len(cookie)>1 then
+	login.set_cookie( cookie )
+end
+if uid and type(uid)=='string' and string.len(uid)>1 then
+	login.set_userid( uid )
+else
+	login.set_selector(7)	
+end
 
 local function open_report_handle(appname,version)
 	luaapp_name = appname
@@ -87,7 +96,7 @@ local function report_export( errmsg,stack_level )
 					table.insert(ca,logs[inx])
 				end
 			end
-			bugs.log = table.concat(ca,'\n')
+			bugs.log = table.concat(ca,'<br>')
 			kits.log( bugs.log)
 		end
 		local curt = math.floor(os.time()/(24*3600))
@@ -101,6 +110,35 @@ local function report_export( errmsg,stack_level )
 	end	
 end
 
+local function report_s(t)
+	local bugs = {}
+	bugs.call_stack = ""
+	bugs.source = ""
+	bugs.line = 0
+	bugs.errmsg = t.errmsg or ""
+	bugs.type = "native"
+	if platform == kTargetWindows then
+		bugs.platform = 'windows'
+	elseif platform == kTargetIphone then
+		bugs.platform = 'iphone'
+	elseif platform == kTargetIpad then
+		bugs.platform = 'ipad'
+	elseif platform == kTargetAndroid then
+		bugs.platform = 'android'
+	elseif platform == kTargetMacOS then
+		bugs.platform = 'macx'
+	else
+		bugs.platform = 'unkown'
+	end
+	bugs.cocos2dx = '3.2'
+	bugs.luacore_version = kits.get_version()
+	bugs.luaapp_name = luaapp_name
+	bugs.luaapp_version = luaapp_version	
+	bugs.log = string.gsub(t.log or "","\n","<br>")
+	local curt = math.floor(os.time()/(24*3600))
+	report_bug{ appid = 1,key = md5.sumhexa((t.log or "")..tostring(curt)),value=bugs}
+end
+
 function __G__TRACKBACK__(errmsg)
 	kits.log( "ERROR : "..tostring(errmsg) )
 	report_export(errmsg,3)
@@ -109,5 +147,6 @@ end
 return 
 {
 	report = report_export,
+	report_bug = report_s,
 	open = open_report_handle,
 }

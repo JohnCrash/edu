@@ -46,6 +46,7 @@ import android.net.Uri;
 import android.app.Activity;
 import android.app.AlertDialog;
 
+import org.acra.ACRA;
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.lib.Cocos2dxHelper;
@@ -68,8 +69,11 @@ import android.net.NetworkInfo;
 import android.content.BroadcastReceiver;
 import android.os.Vibrator;
 
-//import org.cocos2dx.cpp.CrashHandler;
+import org.acra.*;
+import org.acra.annotation.*;
 
+//import org.cocos2dx.cpp.CrashHandler;
+@ReportsCrashes()
 public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	//======================
 	// JNI
@@ -650,10 +654,14 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		intent.setComponent(componentName);  
 		startActivity(intent);
 	}*/
-	
+
     public Cocos2dxGLSurfaceView onCreateView() {
 		//CrashHandler crashHandler = CrashHandler.getInstance();  
         //crashHandler.init(getApplicationContext());
+    	ACRAConfiguration config = ACRA.getConfig();
+    	ACRA.init(this.getApplication(),config);
+    	ACRASender mySender = new ACRASender(this);
+    	ACRA.getErrorReporter().setReportSender(mySender);
     	myActivity = this;
     	getParameterByIntent(); //取启动参数
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);

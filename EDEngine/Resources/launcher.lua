@@ -81,17 +81,23 @@ end
 enableDebug( kits.config("debug","get") )
 --android 返回键
 local function onKeyRelease(key,event)
+	local function open_console()
+		local console = require "console"
+		if console.isopen() then
+			cc.Director:getInstance():popScene()
+		else
+			local scene = console.create()
+			if scene then
+				cc.Director:getInstance():pushScene( scene )
+			end
+		end	
+	end
+	if key == key == cc.KeyCode.KEY_SPACE then
+		open_console()
+	end
 	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
 		if mode==2 then
-			local console = require "console"
-			if console.isopen() then
-				cc.Director:getInstance():popScene()
-			else
-				local scene = console.create()
-				if scene then
-					cc.Director:getInstance():pushScene( scene )
-				end
-			end
+				open_console()
 		else
 			uikits.popScene()
 		end

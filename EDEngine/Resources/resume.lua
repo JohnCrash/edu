@@ -137,6 +137,17 @@ local function setvision( num )
 	save_resume_table( t )
 end
 
+local crash = read_file("crash.dump")
+if crash then
+	local filename = local_dir.."crash.dump"
+	if not os.remove(filename) then
+		local filename2 = filename.."_"
+		os.remove(filename2)
+		os.rename(filename,filename2)
+	end
+	require "crash".report_bug{errmsg="*ACRA*",log=crash}
+end
+
 if not g_isrun_resume then
 	g_isrun_resume = true
 	if not isok() then --如果系统奔溃
