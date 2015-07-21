@@ -3,6 +3,7 @@
 #include "JniHelper.h"
 #include "cocos2d.h"
 #include "../../Classes/Platform.h"
+#include "acr.h"
 
 using namespace cocos2d;
 UsingMySpace;
@@ -369,5 +370,10 @@ extern "C" {
 		std::string str = cocos2d::JniHelper::jstring2string(text);
 		baiduVoiceResult( str );
 	}		
+	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_writeACRLog(JNIEnv *env,jobject thiz,jstring dir)
+	{
+		std::string str = cocos2d::JniHelper::jstring2string(dir);
+		acr_write_log(str.c_str());
+	}			
 }
 

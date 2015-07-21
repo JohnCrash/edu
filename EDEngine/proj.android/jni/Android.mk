@@ -38,6 +38,7 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/SDLThread.cpp \
 				   ../../Classes/SDLVideo.cpp \
 				   ../../Classes/SDLWindow.cpp \
+				   ../../Classes/acr.cpp \
 				   JniLaunch.cpp \
 				   SDLAudioJNI.cpp
 

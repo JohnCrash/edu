@@ -111,6 +111,9 @@
     <ClCompile Include="..\Classes\SDLMixer.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\acr.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -165,6 +168,9 @@
       <Filter>Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\SDLImp.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\acr.h">
       <Filter>Classes</Filter>
     </ClInclude>
   </ItemGroup>

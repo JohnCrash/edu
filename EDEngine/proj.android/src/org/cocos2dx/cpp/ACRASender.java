@@ -3,6 +3,7 @@ package org.cocos2dx.cpp;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import org.acra.collector.CrashReportData;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
@@ -11,8 +12,9 @@ import org.acra.ACRAConstants;
 import org.acra.ReportField;
 
 import android.content.Context;
+import android.os.Environment;
 
-
+import android.util.Log;
 public class ACRASender implements ReportSender {
 	private final Context mContext;
 	public ACRASender(Context ctx){
@@ -30,6 +32,11 @@ public class ACRASender implements ReportSender {
 			stream.write(dumpString.getBytes());
 			stream.flush();
 			stream.close();
+			/*
+			 * write lua log
+			 */
+			String logfile = mContext.getFilesDir().getPath();
+			AppActivity.writeACRLog(logfile+"/crash.log");
 		}catch(FileNotFoundException e){
 		}catch(IOException e){
 		}

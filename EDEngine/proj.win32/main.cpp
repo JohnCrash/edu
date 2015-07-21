@@ -1,6 +1,7 @@
 #include "main.h"
 #include "cocos2d.h"
 #include "AppDelegate.h"
+#include "acr.h"
 
 USING_NS_CC;
 
@@ -64,6 +65,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LPTSTR    lpCmdLine,
 	int       nCmdShow)
 {
+	initACR();
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	ParseCommand(lpCmdLine);

@@ -4,7 +4,7 @@ local ljshell = require "ljshell"
 
 local local_dir = ljshell.getDirectory(ljshell.AppDir)
 
-local version = 8
+local version = 9
 
 local function exist_file( file )
   local f = io.open(file, "rb")
@@ -139,13 +139,20 @@ end
 
 local crash = read_file("crash.dump")
 if crash then
-	local filename = local_dir.."crash.dump"
-	if not os.remove(filename) then
-		local filename2 = filename.."_"
-		os.remove(filename2)
-		os.rename(filename,filename2)
+	local crash_log = read_file("crash.log")
+	crash = crash.."\n==============LOG============\n"..tostring(crash_log)
+	local cr = require "crash"
+	if cr and cr.report_bug then
+		local result = cr.report_bug{errmsg="*ACRA*",log=crash}
+		if result then
+			local filename = local_dir.."crash.dump"
+			if not os.remove(filename) then
+				local filename2 = filename.."_"
+				os.remove(filename2)
+				os.rename(filename,filename2)
+			end
+		end
 	end
-	require "crash".report_bug{errmsg="*ACRA*",log=crash}
 end
 
 if not g_isrun_resume then

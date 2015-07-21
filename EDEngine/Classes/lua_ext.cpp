@@ -8,6 +8,7 @@
 #include "Platform.h"
 #include "RenderTextureEx.h"
 #include "Files.h"
+#include "acr.h"
 //#include "lua_multithread.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
@@ -746,6 +747,16 @@ int cc_showBaiduVoiceConfigure(lua_State *L)
 	return 0;
 }
 
+int cc_acr_log(lua_State *L)
+{
+	if (lua_isstring(L, 1))
+	{
+		const char * msg = lua_tostring(L, 1);
+		acr_add_log(msg);
+	}
+	return 0;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -779,7 +790,8 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_showBaiduVoice",cc_showBaiduVoice);
 	lua_register(L, "cc_closeBaiduVoice",cc_closeBaiduVoice);
 	lua_register(L, "cc_showBaiduVoiceConfigure",cc_showBaiduVoiceConfigure);
-	
+	lua_register(L, "cc_acr_log", cc_acr_log);
+
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)

@@ -38,6 +38,7 @@ local function report_bug(t)
 			local url_post = crash_url..'?app_id='..tostring(t.appid)..'&sign=unkown&key='..tostring(t.key)
 			local result = kits.http_post(url_post,text,login.cookie())
 			kits.log( "INFO : report_bug result:"..tostring(result) )
+			return result
 		end
 	else
 		kits.log('ERROR report_bug invalid param')
@@ -136,7 +137,7 @@ local function report_s(t)
 	bugs.luaapp_version = luaapp_version	
 	bugs.log = string.gsub(t.log or "","\n","<br>")
 	local curt = math.floor(os.time()/(24*3600))
-	report_bug{ appid = 1,key = md5.sumhexa((t.log or "")..tostring(curt)),value=bugs}
+	return report_bug{ appid = 1,key = md5.sumhexa((t.log or "")..tostring(curt)),value=bugs}
 end
 
 function __G__TRACKBACK__(errmsg)

@@ -34,6 +34,9 @@ local function my_log( a )
 	end
 	table.insert(logs,msg)
 	print( msg )
+	if cc_acr_log then
+		cc_acr_log(msg)
+	end
 end
 
 cclog = function(...)

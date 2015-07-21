@@ -85,6 +85,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	private static native void sendVoiceRecordData(final int nType,final int nID,final int nParam1,final int nParam2,final int len,final byte[] pBytes);
 	private static native void cocos2dChangeOrientation( final int state,final int w,final int h);
 	private static native void setBaiduResult( final String text );
+	public static native void writeACRLog( final String text );
 	//======================
 	// ≈ƒ’’∫Õ»°Õºø‚
 	//======================
