@@ -633,6 +633,12 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		 * 根据启动参数来确定横屏还是竖屏，如果是orientation==landscape将设置横屏
 		 * lua代码同样需要取得方向参数来确定屏幕方向
 		 */
+		Log.w("orientation","=====================================\n");
+		if( orientation!=null )
+			Log.w("orientation","orientation:"+orientation.toString());
+		else
+			Log.w("orientation","orientation:null");
+		Log.w("orientation","=====================================\n");
 		if(orientation=="portrait"){
 			Log.w("orientation","SCREEN_ORIENTATION_LANDSCAPE");
 			myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

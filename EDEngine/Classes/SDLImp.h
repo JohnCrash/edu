@@ -550,8 +550,6 @@ namespace ff{
 #define AUDIO_F32MSB    0x9120  /**< As above, but big-endian byte order */
 #define AUDIO_F32       AUDIO_F32LSB
 
-#define SDL_MIX_MAXVOLUME 128
-
 	int OpenAudio(AudioSpec *desired, AudioSpec *obtained);
 	void CloseAudio(void);
 	void PauseAudio(int pause_on);
@@ -605,15 +603,5 @@ namespace ff{
 	AudioFormat FirstAudioFormat(AudioFormat format);
 	AudioFormat NextAudioFormat(void);
 	void CalculateAudioSpec(AudioSpec * spec);
-
-	/**
-	*  This works like SDL_MixAudio(), but you specify the audio format instead of
-	*  using the format of audio device 1. Thus it can be used when no audio
-	*  device is open at all.
-	*/
-	void  SDL_MixAudioFormat(Uint8 * dst,
-		const Uint8 * src,
-		AudioFormat format,
-		Uint32 len, int volume);
 }
 #endif

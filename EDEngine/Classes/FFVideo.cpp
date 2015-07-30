@@ -20,6 +20,7 @@ namespace ff
 
 	bool FFVideo::open(const char *url)
 	{
+		_first = true;
 		close();
 		 _ctx = stream_open(url, NULL);
 		 return _ctx != nullptr;
@@ -34,8 +35,10 @@ namespace ff
 				t = length();
 			if (t < 0)
 				t = 0;
-			int64_t ts = t * 1000000LL;
-			stream_seek(_vs, ts, 0, 0);
+			double pos = cur();
+			int64_t ts = t * AV_TIME_BASE;
+			int64_t ref = (int64_t)((t-pos) *AV_TIME_BASE);
+			stream_seek(_vs,ts, ref, 0);
 		}
 	}
 
@@ -138,7 +141,7 @@ namespace ff
 		return  (_vs && (_vs->audio_st || _vs->video_st));
 	}
 
-	int FFVideo::width() const
+	int FFVideo::codec_width() const
 	{
 		if (!isOpen())return -1;
 		VideoState* _vs = (VideoState*)_ctx;
@@ -147,7 +150,7 @@ namespace ff
 		return _vs->video_st->codec->width;
 	}
 
-	int FFVideo::height() const
+	int FFVideo::codec_height() const
 	{
 		if (!isOpen())return -1;
 		VideoState* _vs = (VideoState*)_ctx;
@@ -156,15 +159,35 @@ namespace ff
 		return _vs->video_st->codec->height;
 	}
 
-	void *FFVideo::refresh() const
+	int FFVideo::width() const
+	{
+		if (!isOpen())return -1;
+		VideoState* _vs = (VideoState*)_ctx;
+		if (!_vs->pscreen)return -1;
+		return _vs->pscreen->w;
+	}
+
+	int FFVideo::height() const
+	{
+		if (!isOpen())return -1;
+		VideoState* _vs = (VideoState*)_ctx;
+		if (!_vs->pscreen)return -1;
+		return _vs->pscreen->h;
+	}
+
+	void *FFVideo::refresh()
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs && _vs->pscreen)
+		if (_vs && _vs->pscreen2)
 		{
+			double r = 1.0 / 30.0;
 			if (!is_stream_pause((VideoState*)_ctx))
-			{
-				double r = 1 / 30;
 				video_refresh(_vs, &r);
+			if (_vs->pscreen){
+				if (_first){
+					pause();
+					_first = false;
+				}
 				return _vs->pscreen->pixels;
 			}
 		}

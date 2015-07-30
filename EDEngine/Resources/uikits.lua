@@ -1782,14 +1782,72 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 		local tops_offy = height - cs.height
 
 		--tops 要做特殊处理
-		for i,v in pairs(self._tops_lists) do
-			local x,y = v:getPosition()
-			v:setPosition(cc.p(x,y+tops_offy))
+		if self._tops_lists then
+			for i,v in pairs(self._tops_lists) do
+				local x,y = v:getPosition()
+				v:setPosition(cc.p(x,y+tops_offy))
+			end
 		end
 		if self._scrollview.setInnerContainerSize then
 			self._scrollview:setInnerContainerSize(cc.size(cs.width,height))
+			if not horz then
+				--不足顶到顶部
+				if cs.height > height then
+					move(self._tops,0,cs.height-height)
+					move(self._list,0,cs.height-height)
+				end	
+			else
+				--小于宽度居中
+			end
 		elseif self._scrollview.setContentSize then
 			self._scrollview:setContentSize(cc.size(cs.width,height))
+		end
+	end
+	--横向布局
+	t.relayout_horz=function(self,space)
+		local w = space or 16
+		for i,v in pairs(self._list) do
+			local x,y = v:getPosition()
+			v:setPosition(cc.p(w,y))
+			w = w + v:getContentSize().width
+		end
+		w = w + (space or 16)
+		if self._scrollview.setInnerContainerSize then
+			local s = self._scrollview:getContentSize()
+			self._scrollview:setInnerContainerSize(cc.size(w,s.height))
+			if w < s.width then
+				move(self._list,(s.width-w)/2,0)
+			end
+		end
+	end
+	t.relayout_colume=function(self,colume,space_x,space_y,offset_x)
+		local count = #self._list
+		local raw = math.floor(count/colume)
+		if count%colume > 0 then
+			raw = raw + 1
+		end
+		local item_size = self._items[1]:getContentSize()
+		space_y = space_y or 16
+		space_x = space_x or 16
+		offset = offset or space_x
+		local size = cc.size(item_size.width,raw*(item_size.height+space_y)+space_y)
+		local x,y = offset,size.height-space_y-item_size.height
+		self._scrollview:setInnerContainerSize(size)
+		local n = 1
+		for i=1,count do
+			self._list[i]:setPosition(cc.p(x,y))
+			if n < colume then
+				x = x + space_x + item_size.width
+				n = n + 1
+			else
+				x = offset
+				y = y - space_y - item_size.height
+				n = 1
+			end
+		end	
+		local s = self._scrollview:getContentSize()
+		if size.height < s.height then
+			move(self._list,0,(s.height-size.height)/2)
 		end
 	end
 	--添加函数

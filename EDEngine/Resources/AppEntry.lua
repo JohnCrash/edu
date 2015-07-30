@@ -174,7 +174,7 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
-				login.set_uid_type(login.STUDENT)
+				login.set_uid_type(login.TEACHER)
 				login.set_selector(7) --学生
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
