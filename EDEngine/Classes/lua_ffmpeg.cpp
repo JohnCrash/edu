@@ -146,6 +146,10 @@ extern "C" {
 				{
 					lua_pushboolean(L, pfv->isPlaying());
 				}
+				else if(strcmp(key, "isSeeking") == 0 )
+				{
+					lua_pushboolean(L,pfv->isSeeking());
+				}
 				else if (strcmp(key, "isEnd") == 0)
 				{
 					lua_pushboolean(L, pfv->isEnd());

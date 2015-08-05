@@ -31,6 +31,7 @@ enum LJDirectory
 	IDName_FILE = 10,
 	ShareSetting_FILE = 11,
 	UserSetting_FILE = 12,
+	LJShell_DIRECTORY = 13,
 };
 
 std::string getLjShellDirectory(LJDirectory edd);

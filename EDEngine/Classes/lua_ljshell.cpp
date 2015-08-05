@@ -45,6 +45,8 @@ std::string getLjShellDirectory(LJDirectory edd)
 		return g_DirMng.GetShareSettingsPathName();
 	case UserSetting_FILE:
 		return g_DirMng.GetUserSettingsPathName();
+	case LJShell_DIRECTORY:
+		return g_DirMng.GetLJShelldir();
 	}
 	return std::string();
 }

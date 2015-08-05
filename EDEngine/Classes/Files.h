@@ -71,6 +71,8 @@ public:
 	std::string &GetShareSettingsPathName(){return m_strShareSettingsPathName;}	//共享配置文件目录，比如：/ljdata/share/ShareSettings.json
 	std::string &GetUserSettingsPathName(){return m_strUserSettingsPathName;}	//当前用户私有配置文件，比如：/ljdata/share/user/14757/UserSettings.json
 
+	//
+	std::string GetLJShelldir() { return m_strLJShelldir; }
 protected:
 	std::string m_strAppName;
 	int m_nUserID;
@@ -90,6 +92,8 @@ protected:
 	std::string m_strIDNamePathName;
 	std::string m_strShareSettingsPathName;
 	std::string m_strUserSettingsPathName;
+
+	std::string m_strLJShelldir;
 };
 
 //资源名称说明：

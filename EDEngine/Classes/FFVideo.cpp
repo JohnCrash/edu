@@ -22,8 +22,8 @@ namespace ff
 	{
 		_first = true;
 		close();
-		 _ctx = stream_open(url, NULL);
-		 return _ctx != nullptr;
+		_ctx = stream_open(url, NULL);
+		return _ctx != nullptr;
 	}
 
 	void FFVideo::seek(double t)
@@ -35,10 +35,10 @@ namespace ff
 				t = length();
 			if (t < 0)
 				t = 0;
-			double pos = cur();
+			double pos = cur_clock();
 			int64_t ts = t * AV_TIME_BASE;
-			int64_t ref = (int64_t)((t-pos) *AV_TIME_BASE);
-			stream_seek(_vs,ts, ref, 0);
+			int64_t ref = (int64_t)((t - pos) *AV_TIME_BASE);
+			stream_seek(_vs, ts, ref, 0);
 		}
 	}
 
@@ -81,7 +81,7 @@ namespace ff
 		return -1;
 	}
 
-	double FFVideo::cur() const
+	double FFVideo::cur_clock() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
 		if (_vs)
@@ -95,10 +95,20 @@ namespace ff
 		return -1;
 	}
 
+	double FFVideo::cur() const
+	{
+		VideoState* _vs = (VideoState*)_ctx;
+		if (_vs)
+		{
+			return _vs->current;
+		}
+		return -1;
+	}
+
 	double FFVideo::length() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs && _vs->ic )
+		if (_vs && _vs->ic)
 		{
 			return (double)_vs->ic->duration / 1000000LL;
 		}
@@ -128,6 +138,15 @@ namespace ff
 	bool FFVideo::isPause() const
 	{
 		return isOpen() && is_stream_pause((VideoState*)_ctx);
+	}
+
+	bool FFVideo::isSeeking() const
+	{
+		if (!isOpen()) return false;
+
+		VideoState* _vs = (VideoState*)_ctx;
+		if (_vs == NULL) return false;
+		return _vs->seek_req || _vs->step;
 	}
 
 	bool FFVideo::isPlaying() const
@@ -196,7 +215,7 @@ namespace ff
 
 	void FFVideo::pause()
 	{
-		if (isOpen() && !is_stream_pause((VideoState*)_ctx))
+		if (isOpen() && !is_stream_pause((VideoState*)_ctx) && !isSeeking())
 		{
 			toggle_pause((VideoState*)_ctx);
 		}
@@ -204,7 +223,7 @@ namespace ff
 
 	void FFVideo::play()
 	{
-		if (isOpen() && is_stream_pause((VideoState*)_ctx))
+		if (isOpen() && is_stream_pause((VideoState*)_ctx) && !isSeeking())
 		{
 			toggle_pause((VideoState*)_ctx);
 		}

@@ -409,6 +409,10 @@ bool CDirMng::Init(const char *pszAppName)
 	SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, szDocPath);
 	m_strDataDir=szDocPath;
 	m_strDataDir+="/ljdata/";
+
+	SHGetSpecialFolderPathA(NULL,szDocPath,CSIDL_PERSONAL,true);
+	m_strLJShelldir = szDocPath;
+	m_strLJShelldir += "/ljdata/";
 	//调试状态目录
 #ifdef DEBUG
 	m_strDataDir="u:\\ljdata/";
@@ -422,11 +426,13 @@ bool CDirMng::Init(const char *pszAppName)
 	m_strDataDir=GetSDCardDir();
 	CCLog("SDCardDir: %s",m_strDataDir.c_str());
 	m_strDataDir+="ljdata/";
+	m_strLJShelldir = m_strDataDir;
 #else
 	//--------------------------------------------------------------------------------------------------
 	//for IOS，直接使用writable path
 	//--------------------------------------------------------------------------------------------------
 	m_strDataDir=CCFileUtils::sharedFileUtils()->getWritablePath();
+	m_strLJShelldir = m_strDataDir;
 #endif
 
 #endif

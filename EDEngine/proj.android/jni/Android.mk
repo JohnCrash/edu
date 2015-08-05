@@ -32,7 +32,6 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/SDLAUdioCVT.cpp \
 				   ../../Classes/SDLAudioTypeCVT.cpp \
 				   ../../Classes/SDLEvent.cpp \
-				   ../../Classes/SDLMixer.cpp \
 				   ../../Classes/SDLOverlay.cpp \
 				   ../../Classes/SDLSurface.cpp \
 				   ../../Classes/SDLThread.cpp \

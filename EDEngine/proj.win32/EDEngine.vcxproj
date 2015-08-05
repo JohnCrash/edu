@@ -166,7 +166,6 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\SDLAudioTypeCVT.cpp" />
     <ClCompile Include="..\Classes\SDLAudio_mm.cpp" />
     <ClCompile Include="..\Classes\SDLEvent.cpp" />
-    <ClCompile Include="..\Classes\SDLMixer.cpp" />
     <ClCompile Include="..\Classes\SDLOverlay.cpp" />
     <ClCompile Include="..\Classes\SDLSurface.cpp" />
     <ClCompile Include="..\Classes\SDLThread.cpp" />
