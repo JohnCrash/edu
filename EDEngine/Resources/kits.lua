@@ -684,6 +684,73 @@ local function launch(app)
 	end
 end
 
+local _ljshell_config
+local function get_ljconfig()
+	if _ljshell_config then
+		return _ljshell_config
+	end
+	local file = ljshell.getDirectory(ljshell.LJDIR).."/share/ShareSettings.json"
+	local rf = read_file(file)
+	if rf then
+		_ljshell_config = json.decode(rf)
+	end
+end
+
+local function getApiServer()
+	local server = 'api.lejiaolexue.com'
+	local lj_config = get_ljconfig()
+	if lj_config and lj_config.setting then
+		if type(lj_config.setting)=='table' and lj_config.setting.ApiServer then
+			server = lj_config.setting.ApiServer
+		end
+	end
+	return server
+end
+
+local function getAppServer()
+	local server = 'api.lejiaolexue.com'
+	local lj_config = get_ljconfig()
+	if lj_config and lj_config.setting then
+		if type(lj_config.setting)=='table' and lj_config.setting.AppServer then
+			server = lj_config.setting.AppServer
+		end
+	end
+	return server
+end
+
+local function getUpdateServer()
+	local server = 'api.lejiaolexue.com'
+	local lj_config = get_ljconfig()
+	if lj_config and lj_config.setting then
+		if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
+			server = lj_config.setting.FileServer
+		end
+	end
+	return server	
+end
+
+local function getImageUploadServer()
+	local server = 'image.lejiaolexue.com'
+	local lj_config = get_ljconfig()
+	if lj_config and lj_config.setting then
+		if type(lj_config.setting)=='table' and lj_config.setting.ImageServerUpload then
+			server = lj_config.setting.ImageServerUpload
+		end
+	end
+	return server
+end
+
+local function getImageDownloadServer()
+	local api = 'image.lejiaolexue.com'
+	local lj_config = get_ljconfig()
+	if lj_config and lj_config.setting then
+		if type(lj_config.setting)=='table' and lj_config.setting.ImageServer then
+			api = lj_config.setting.ImageServer
+		end
+	end
+	return api
+end
+	
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -730,6 +797,12 @@ local exports = {
 	get_tmp_path = get_tmp_path,
 	get_version = get_version,
 	launch = launch,
+	get_ljconfig = get_ljconfig,
+	getApiServer = getApiServer,
+	getUpdateServer = getUpdateServer,
+	getImageUploadServer = getImageUploadServer,
+	getImageDownloadServer = getImageDownloadServer,
+	getAppServer = getAppServer,
 }
 
 return exports

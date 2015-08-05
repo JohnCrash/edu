@@ -12,6 +12,7 @@ ljshell.AppUserDir = 9
 ljshell.IdNameFile = 10
 ljshell.ShareSettingFile = 11
 ljshell.UserSettingFile = 12
+ljshell.LJDIR = 13
 
 RESULT_OK = -1
 RESULT_CANCEL = 0

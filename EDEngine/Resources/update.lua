@@ -14,10 +14,16 @@ end
 --require("mobdebug").start("192.168.2.157")
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
- 
 local versionNUM = resume.getversion()
-local liexue_server_dl = 'http://dl-lejiaolexue.qiniudn.com/upgrade/luaapp/v'..versionNUM..'/'
 local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_dl = liexue_server_sr
+ 
+local lj_config = kits.get_ljconfig()
+if lj_config and lj_config.setting then
+	if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
+		liexue_server_sr = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
+	end
+end
 --local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 --local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'

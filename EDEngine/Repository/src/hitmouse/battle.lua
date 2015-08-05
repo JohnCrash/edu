@@ -686,7 +686,7 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 			http.logTable(v,1)
 			local current = level.getCurrent()
 			local count = level.getLevelCount()
-			if current<count then
+			if current==level_id then
 				level.setCurrent(current+1)
 			end
 		else
