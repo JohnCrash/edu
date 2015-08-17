@@ -23,9 +23,8 @@ namespace ff
 		bool isError() const; //如果在打开时发生错误返回true
 		const char * errorMsg() const; //取得错误字符串
 		/*
-		播放到结尾了返回true.
-		也可以通过cur,来确定是否到结尾了.
-		*/
+		 *	播放到结尾了返回true.
+		 */
 		bool isEnd() const;
 		void pause(); //暂停视频
 		void play(); //播放视频
@@ -35,21 +34,32 @@ namespace ff
 		int codec_width() const; //解码器视频的宽度
 		int codec_height() const; //解码器视频的高度
 		/*
-		刷新,播放程序需要以一定的帧率调用该函数。比如1/30s
-		函数成功返回一个RGB raw指针，格式为Texture2D::PixelFormat::RGB888
-		因此你可以直接用来作为材质使用
-		*/
+		 *	刷新,播放程序需要以一定的帧率调用该函数。比如1/30s
+		 *	函数成功返回一个RGB raw指针，格式为Texture2D::PixelFormat::RGB888
+		 *	因此你可以直接用来作为材质使用
+		 */
 		void *refresh();
 
 		/*
-		网络预加载进度
-		set_preload_nb,
-		不设置使用默认值50
-		下载包的速度大于播放速度时视频就可以连续播放，并且这时可以下载更多包进行缓冲。
-		preload_packet_nb,返回缓冲的包数，如果该值在0的位置徘徊视频将是不流畅的。
-		*/
+		 *	网络预加载进度
+		 *	set_preload_nb,
+		 *	不设置使用默认值50
+		 *	下载包的速度大于播放速度时视频就可以连续播放，并且这时可以下载更多包进行缓冲。
+		 *	preload_packet_nb,返回缓冲的包数，如果该值在0的位置徘徊视频将是不流畅的。
+		 */
 		void set_preload_nb(int n);
 		int preload_packet_nb() const;
+
+		/*
+		 *	set_preload_time 设置预加载时间单位秒
+		 *	注：仅当视频打开后才能设置
+		 */
+		bool set_preload_time(double t);
+		/*
+		 *	preload_time 取得预加载视频的长度单位(秒)
+		 *	函数失败返回-1
+		 */
+		double preload_time();
 	private:
 		void* _ctx;
 		bool _first;

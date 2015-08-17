@@ -121,6 +121,21 @@ extern "C" {
 		}
 		return 0;
 	}
+	static int lua_setPreloadByTime(lua_State *L)
+	{
+		ff::FFVideo *pfv = get_ff_video(L);
+		if (pfv)
+		{
+			if (lua_isnumber(L, 2))
+			{
+				double b = lua_tonumber(L, 2);
+				pfv->set_preload_time(b);
+				lua_pushboolean(L, true);
+				return 1;
+			}
+		}
+		return 0;
+	}
 	static int lua_ffmpeg_index(lua_State *L)
 	{
 		ff::FFVideo ** pv = (ff::FFVideo**)luaL_checkudata(L, 1, LUA_FFMPEG_HANDLE);
@@ -197,6 +212,10 @@ extern "C" {
 					lua_pushcfunction(L, lua_pause);
 				else if (strcmp(key, "setPreloadNB"))
 					lua_pushcfunction(L, lua_setPreloadNB);
+				else if (strcmp(key, "getPreloadByTime"))
+					lua_pushinteger(L, pfv->preload_time());
+				else if (strcmp(key, "setPreloadByTime"))
+					lua_pushcfunction(L, lua_setPreloadByTime);
 				else
 					lua_pushnil(L);
 			}

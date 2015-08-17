@@ -694,6 +694,7 @@ local function get_ljconfig()
 	if rf then
 		_ljshell_config = json.decode(rf)
 	end
+	return _ljshell_config
 end
 
 local function getApiServer()

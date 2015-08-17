@@ -2,6 +2,7 @@ local ff = require "ff"
 local kits = require "kits"
 local uikits = require "uikits"
 
+local FileUtils = cc.FileUtils:getInstance()
 local _soundGroup = {}
 local _allStreams = {}
 
@@ -29,7 +30,8 @@ local function playStream( filename,event_func )
 				_allStreams[as] = nil
 				return false
 			end		
-			if state == 0 and as.isOpen then
+			local data = as:refresh()
+			if state == 0 and as.isOpen and not as.isSeeking then
 				state = 1
 				as:pause()
 				eventFunc(state)
@@ -40,6 +42,7 @@ local function playStream( filename,event_func )
 				_allStreams[as] = nil
 				return false
 			end
+			
 			if state == 1 then
 				if play_state ~= 2 and (as.isPlaying and not as.isEnd) then
 					play_state = 2
@@ -55,7 +58,7 @@ local function playStream( filename,event_func )
 			if play_state == 2 then
 				eventFunc(5)
 			end
-			local data = as:refresh()
+			
 			if _texture and data then
 				_texture:updateWithData(data,0,0,as.width,as.height)
 			elseif not _texture and data then
@@ -74,11 +77,16 @@ local function playStream( filename,event_func )
 end
 
 local function playSound( group,file,eventCallback )
-	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
-		local filename = file
-		if kits.exist_cache(file) then
-			filename = kits.get_cache_path()..file
-		end
+	local filename=nil
+	if kits.exist_file(file) then
+		filename=file
+	elseif kits.exist_cache(file) then
+		filename = kits.get_cache_path()..file
+	elseif FileUtils:isFileExist(file) then
+		filename = kits.get_local_directory()..file
+	end
+
+	if filename~=nil then
 		local as = playStream( filename,eventCallback )
 		if as then
 			_soundGroup[group] = _soundGroup[group] or {}

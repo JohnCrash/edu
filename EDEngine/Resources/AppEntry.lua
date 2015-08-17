@@ -175,7 +175,8 @@ function AppEntry:init()
 			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
-				login.set_selector(11) --学生
+				--login.set_selector(11) --教育局领导
+				login.set_selector(12) --学生
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}
@@ -387,7 +388,8 @@ function AppEntry:init()
 				function(state,as)
 					print("STATE:"..state)
 					if state == ffplayer.STATE_PROGRESS then
-						print( "progress "..math.floor(10000*as.current/as.length)/100)
+						--print( "progress "..math.floor(10000*as.current/as.length)/100)
+						print( "progress "..as.current)
 					else
 						print( "CURRENT STATE : "..state )
 					end
@@ -396,7 +398,7 @@ function AppEntry:init()
 	local play = uikits.button{caption='play',x=464*scale+300,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			as:seek(as.length*0)
+			--as:seek(as.length*0)
 			as:play()
 		end}
 	local pause = uikits.button{caption='pause',x=464*scale-300,y = 164*scale + 4*item_h+100,

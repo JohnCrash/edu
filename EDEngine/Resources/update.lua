@@ -21,7 +21,7 @@ local liexue_server_dl = liexue_server_sr
 local lj_config = kits.get_ljconfig()
 if lj_config and lj_config.setting then
 	if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
-		liexue_server_sr = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
+		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
 	end
 end
 --local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
@@ -575,6 +575,9 @@ function UpdateProgram:update()
 				if #download_error_table > 0 then
 					--有错误，将其重新加载到_oplist，然后继续下载
 					if try_count > 3 then --总是重试，次数太多
+						--尝试使用原服务器再尝试3次
+						liexue_server_dl = liexue_server_sr
+					elseif try_count > 6 then
 						self:ErrorAndExit('下载失败，重试次数太多。',2)
 						return
 					end

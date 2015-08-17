@@ -92,15 +92,14 @@ local function onKeyRelease(key,event)
 			end
 		end	
 	end
-	if key == key == cc.KeyCode.KEY_SPACE then
-		open_console()
+	--if key == cc.KeyCode.KEY_SPACE then
+	--	open_console()
+	--end
+	if key == cc.KeyCode.KEY_ESCAPE then
+		uikits.popScene()
 	end
-	if key == cc.KeyCode.KEY_ESCAPE or key == cc.KeyCode.KEY_SPACE then
-		if mode==2 then
-				open_console()
-		else
-			uikits.popScene()
-		end
+	if mode==2 and key == cc.KeyCode.KEY_SPACE then
+		open_console()
 	end
 end
 

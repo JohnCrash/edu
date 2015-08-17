@@ -71,12 +71,8 @@ namespace ff
 		VideoState* is = (VideoState*)_ctx;
 		if (is)
 		{
-			if (is->audio_st && is->video_st)
-				return FFMIN(is->audioq.nb_packets, is->videoq.nb_packets);
-			else if (is->audio_st)
-				return is->audioq.nb_packets;
-			else
-				return  is->videoq.nb_packets;
+			
+			return FFMAX(is->videoq.nb_packets,is->audioq.nb_packets);
 		}
 		return -1;
 	}
@@ -100,7 +96,10 @@ namespace ff
 		VideoState* _vs = (VideoState*)_ctx;
 		if (_vs)
 		{
-			return _vs->current;
+			if (_vs->current > 0)
+				return _vs->current;
+			else
+				return cur_clock();
 		}
 		return -1;
 	}
@@ -210,6 +209,9 @@ namespace ff
 				return _vs->pscreen->pixels;
 			}
 		}
+		else if (_vs){
+			_vs->step = 0;
+		}
 		return nullptr;
 	}
 
@@ -256,5 +258,80 @@ namespace ff
 			return _vs->errmsg;
 		}
 		return nullptr;
+	}
+
+	/*
+	 * 计算视频或音频流的平均包率（每秒多少个包）
+	 */
+	static double calc_avg_pocket_rate(AVStream *st)
+	{
+		if (st){
+			if (st->avg_frame_rate.den>0 && st->avg_frame_rate.num>0) 
+				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;//如果已经有平均包率，直接返回
+
+			if (st->time_base.den > 0){
+				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den; //流总的时间
+				if ( tt > 0 )
+					return (double)st->nb_frames / tt;
+			}
+		}
+		return -1;
+	}
+
+	static double calc_stream_preload_time(PacketQueue *pq, AVStream *st)
+	{
+		if (pq && pq->last_pkt && pq->first_pkt && st && st->time_base.den > 0){
+			if (pq->last_pkt->pkt.buf != NULL){
+				return (double)(pq->last_pkt->pkt.pts - pq->first_pkt->pkt.pts) *(double)st->time_base.num / (double)st->time_base.den;
+			}
+			else{
+				/* 
+				 * 如果视频已经结束最后一个包的数据不包括pts，PacketQueue是一个单向队列我尝试从头部开始寻找最后一个正确的包
+				 */
+				MyAVPacketList *last = NULL;
+				for (MyAVPacketList *it = pq->first_pkt; it != NULL; it = it->next){
+					if (it->pkt.buf != NULL)
+						last = it;
+					else
+						break;
+				}
+				if (last){
+					return (double)(last->pkt.pts - pq->first_pkt->pkt.pts) *(double)st->time_base.num / (double)st->time_base.den;
+				}
+			}
+		}
+		else
+			return 0;
+	}
+
+	double FFVideo::preload_time()
+	{
+		VideoState* is = (VideoState*)_ctx;
+		if (is)
+		{
+			return FFMAX(calc_stream_preload_time(&is->videoq,is->video_st),calc_stream_preload_time(&is->audioq,is->audio_st));
+		}
+		return -1;
+	}
+
+	bool FFVideo::set_preload_time(double t)
+	{
+		VideoState* is = (VideoState*)_ctx;
+		if (is && t>=0 )
+		{
+			double apr = calc_avg_pocket_rate(is->video_st);
+			if (apr > 0){
+				set_preload_nb((int)(apr*t));
+				return true;
+			}
+			apr = calc_avg_pocket_rate(is->audio_st);
+			if (apr > 0){
+				set_preload_nb((int)(apr*t));
+				return true;
+			}
+			//如果不能正确计算平均包率就恢复为默认设置
+			set_preload_nb(50);
+		}
+		return false;
 	}
 }
