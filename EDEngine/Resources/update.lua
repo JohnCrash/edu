@@ -19,9 +19,18 @@ local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..version
 local liexue_server_dl = liexue_server_sr
  
 local lj_config = kits.get_ljconfig()
+kits.log("INFO read ljshell setting")
 if lj_config and lj_config.setting then
 	if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
 		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
+		kits.log("read ljshell setting.FileServer = "..tostring(liexue_server_dl))
+	else
+		kits.log("WARNING lj_config.setting.FileServer = nil")
+	end
+else
+	kits.log("WARNING lj_config = "..tostring(lj_config))
+	if lj_config then
+		kits.log("WARNING lj_config.setting = "..tostring(lj_config.setting))
 	end
 end
 --local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'

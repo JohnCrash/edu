@@ -110,7 +110,7 @@ local function makeWord(s,n)
 				text=text.."(　)"
 			end
 		end
-		return {name=text,answer=answer}		
+		return {name=text,answer=answer}
 	end
 end
 

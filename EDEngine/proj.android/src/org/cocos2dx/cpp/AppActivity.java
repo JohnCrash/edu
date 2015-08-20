@@ -639,12 +639,12 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		else
 			Log.w("orientation","orientation:null");
 		Log.w("orientation","=====================================\n");
-		if(orientation=="portrait"){
-			Log.w("orientation","SCREEN_ORIENTATION_LANDSCAPE");
+		if(orientation!=null && orientation.equalsIgnoreCase("portrait")){
+			Log.w("orientation","SCREEN_ORIENTATION_PORTRAIT");
 			myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
 		else{
-			Log.w("orientation","SCREEN_ORIENTATION_PORTRAIT");
+			Log.w("orientation","SCREEN_ORIENTATION_LANDSCAPE");
 			myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
 		//launchParam("errortitile","sc1=D3F1DC81D98457FE8E1085CB4262CAAD5C443773akl%2bNQbvBYOcjHsDK0Fu4kV%2fbgv3ZBi7sFKU19KP5ks0GkvPwGpmMWe%2b8Q6O%2fkT7EuHjkQ%3d%3d");
