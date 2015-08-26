@@ -297,7 +297,8 @@ namespace ff
 				}
 				if (last){
 					return (double)(last->pkt.pts - pq->first_pkt->pkt.pts) *(double)st->time_base.num / (double)st->time_base.den;
-				}
+				}else
+					return 0;
 			}
 		}
 		else

@@ -171,9 +171,15 @@ static int video_open(VideoState *is, int force_set_video_mode, Frame *vp)
 {
 	int w, h;
 
+/*
+	FIXBUG : 后面的转换操作是1:1的转换(DisplayYUVOverlay)，这里个别情况会调整宽高比(vp->sar)
+	修改为简单的设置宽高为帧的宽高。如果需要使用显示宽高，那么最好提供一个函数用来返回显示宽高，
+	在材质的层面上进行缩放效率会比较高。
 	if (vp && vp->width)
 		set_default_window_size(vp->width, vp->height, vp->sar);
-
+*/
+	default_width = vp->width;
+	default_height = vp->height;
 	w = default_width;
 	h = default_height;
 
