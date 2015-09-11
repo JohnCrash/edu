@@ -27,11 +27,17 @@ local test_login =
 	[10] = {name='刘文文',uid=13830000001,cookie='sc1=B8CCE023FD4A5F6BBE407B997F18B573055C2836b094NADuBZfKgW0LI1Rn6lArYQvwMBji7UyIisLP6FYoFVbSknsmZSOipk6N%2bET7Eufok4kKmjLJgSNY%2f3FZbO50mLHgjeyC9gYFKlYOzjSDdPYG4XIV'},
 	[11] = {name='秦胜兵',uid=454652,cookie='sc1=836C111ECBEAA14DDAB56D47991743E92F98BED7b0h7NATtBdeQ1y1TdgowuAl0PRmjPhi%2f4kzQhcLL6FZ0G1bSlnt6MCP%2bpU6N%2blqoHOjimo0Bk2fIiicNrCMEO%2bQvzb27jbvZ8lFRKlMNnGKEc%2fYM6SdISj70'},
 	[12] = {name='五五',uid=955470,cookie='sc1=16ECA3EFA5BC76F12324027CB0AEF13592EF358CYkh6NgbvBdXIimoKIVdj61IrbxWwYAn%2ftwiUi9OPu0c0QRLPnGp4Yj2qq1uOqk76SLewkoAOmDWZhHtd%2fiAFbeFzybHuirzQ9QsLfAM%3d'},
+	[13] = {name='李四',uid=954175,cookie='sc1=04F4896F61A1FC64933FBA1A8D752EE862005833Ykh7MwbqBZfKjW8JIFBm6FMvYQvwMxjjsUyJ18LP61YoQVbTx2VyaDKgoFDQ%2fk%2brTbDgmI0DwzbNiCNe%2fidVbrImzLO%2f3r6GqwsAKg%3d%3d'},
+	[14] = {name='六六',uid=955471,cookie='sc1=E21CF27FB6F841CE0FF2E3EA70B7C63629682360Ykh6NgbuBdXIimoKIVdj61IrbBWwYAj%2f7VyU04OPu0Y0G0bPxDp4Yj2qq1uOqk76SLewkoAOmDWZhHtd%2fiAFbeFzybHuirzQ9QsLfAM%3d'},
+	[15] = {name='六六的哥哥',uid=1269209,cookie='sc1=6C405349AD6B13010489AA101B79BA1679945F62ak95OwPvB52KiG0PIlZk7lEoaxj0Phi%2f4EyJh8LLulZ0FlbSkHsiNyP%2bp06MrlryHfa2lJwDknKZhGdZqWdZa%2fJ3zL%2fo17%2fbowhWflZanTGCfaQHuyBFS2zzmmq7GzTKAs1I0d3kuFHnzA%3d%3d'},
+	[16] = {name='六六母亲',uid=955473,cookie='sc1=87DE0078D583AF636F1245269116137C541E4873Ykh6NgbsBZfKjW8JIFBm6FEsYQvwMBji4EzQ1sLP61YpFlaLwXsmZSP69k6Nq1qvHfaxwJxYk2zJinAHrHkFaed3nefq1brZ8VIGdgdZmzeEcvUO7HYWQD33wDe9SA%3d%3d'},
+	[17] = {name='55的家长',uid=955472,cookie='sc1=9DF20349B1B911407961DA6A0A7D074342E74288Ykh6NgbtBZfKjW8JIFBm6FEvYRugIFjt8FDQl9%2be%2bxYkBhKPgDx1dmOitVKA6h2sEuLok4IKmjLJgSNY/3FZbO50mLHgjeyC9gYFKlYOzjSDdPYG4XIV'},
 }
 
 local selector = 2
 local g_cookie
 local g_uid
+local g_name
 local s_app,s_cookie,s_uid = cc_launchparam()
 local TEACHER = 3
 local STUDENT = 1
@@ -96,7 +102,15 @@ local function get_subuid()
 end
 
 local function get_name()
-	return test_login[selector].name
+	if g_name then
+		return g_name
+	else
+		if test_login[selector] then
+			return test_login[selector].name
+		else
+			return ""
+		end
+	end
 end
 
 local function get_cookie()
@@ -163,6 +177,19 @@ local function get_logo( uid,func,t )
 		end)
 	end
 end
+ 
+local function load_name()
+	if not cache then
+		cache = require "cache"
+		kits = require "kits"
+	end
+	local url = 'http://api.lejiaolexue.com/rest/userinfo/full/current'
+	cache.request_json( url,function(t)
+		if t then
+			g_name = t.uig[1].uname
+		end
+	end)
+end
 
 return {
 	cookie = get_cookie,
@@ -170,6 +197,7 @@ return {
 	get_logo = get_logo,
 	get_logo_url = get_logo_url,
 	get_name = get_name,
+	load_name = load_name,
 	set_selector = set_selector,
 	test_login = test_login,
 	set_cookie = set_cookie,

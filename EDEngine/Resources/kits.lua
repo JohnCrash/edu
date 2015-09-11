@@ -43,6 +43,17 @@ cclog = function(...)
     print(string.format(...))
 end
 
+local function log_caller()
+	local caller = debug.getinfo(3,'nSl')
+	local func = debug.getinfo(2,'n')
+	if caller and func then
+		my_log('	call from '..caller.source..':'..caller.currentline )
+		my_log('		function:'..func.name )
+	else
+		my_log("ERROR: log_caller debug.getinfo return nil.")
+	end
+end
+
 local function download_http_by_socket(host,file,port)
   port = port or 80
   local connect = socket.connect(host,port)
@@ -473,6 +484,9 @@ local function hot_cache( name,sec )
 end
 
 local function exist_cache( name )
+	if not name then
+		return false
+	end
 	local filename = cache_dir..name
 	return exist_file( filename )
 end
@@ -804,6 +818,7 @@ local exports = {
 	getImageUploadServer = getImageUploadServer,
 	getImageDownloadServer = getImageDownloadServer,
 	getAppServer = getAppServer,
+	log_caller = log_caller,
 }
 
 return exports

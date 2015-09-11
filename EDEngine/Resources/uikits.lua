@@ -1784,8 +1784,10 @@ local function scrollex(root,scrollID,itemIDs,topIDs,bottomIDs,horz,m,overlappin
 		--tops 要做特殊处理
 		if self._tops_lists then
 			for i,v in pairs(self._tops_lists) do
-				local x,y = v:getPosition()
-				v:setPosition(cc.p(x,y+tops_offy))
+				if not v.x or not v.y then
+					v.x,v.y = v:getPosition()
+				end
+				v:setPosition(cc.p(v.x,v.y+tops_offy))
 			end
 		end
 		if self._scrollview.setInnerContainerSize then

@@ -78,7 +78,8 @@ function enableDebug( b )
 		mode = 0
 	end
 end
-enableDebug( kits.config("debug","get") )
+--enableDebug( kits.config("debug","get") )
+enableDebug( 1 )
 --android 返回键
 local function onKeyRelease(key,event)
 	local function open_console()
@@ -95,11 +96,12 @@ local function onKeyRelease(key,event)
 	--if key == cc.KeyCode.KEY_SPACE then
 	--	open_console()
 	--end
+	if mode==2 and (key == cc.KeyCode.KEY_SPACE or key == cc.KeyCode.KEY_ESCAPE) then
+		open_console()
+		return
+	end	
 	if key == cc.KeyCode.KEY_ESCAPE then
 		uikits.popScene()
-	end
-	if mode==2 and key == cc.KeyCode.KEY_SPACE then
-		open_console()
 	end
 end
 

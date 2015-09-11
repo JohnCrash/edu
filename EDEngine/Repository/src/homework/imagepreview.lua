@@ -2,7 +2,7 @@ local kits = require "kits"
 local uikits = require "uikits"
 
 local ui = {
-	FILE = "homework/imagepreview.json",
+	FILE = "h/imagepreview.json",
 	FILE_3_4 = "homework/imagepreview43.json",
 	IMAGEVIEW = "scrollview/image",
 	SCROLLVIEW = "scrollview",
