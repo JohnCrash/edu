@@ -765,7 +765,58 @@ local function getImageDownloadServer()
 	end
 	return api
 end
+
+local function isNeedUpade(appname,func)
+	local uikits = require "uikits"
+	if not uikits then return end
 	
+	local function _isNeedUpade(appname)
+		if appname then
+			local s = read_local_file(tostring(appname).."_config.json")
+			if not s then return end
+			local t = decode_json(s)
+			if t and type(t)=='table' then
+				for i,v in pairs(t) do
+					if v then
+						return true
+					end
+				end
+			end
+		end
+	end
+	local count = 0
+	uikits.delay_call(nil,function(dt)
+		count = count+1
+		if count<=10 then
+			if _isNeedUpade(appname) then
+				func( true,appname )
+				return
+			end
+			return true
+		end
+		func( false,appname )
+	end,1)
+end
+
+local function doUpdate(appname)
+	local uikits = require "uikits"
+	if not uikits then return end
+
+	for i=1,uikits.getSceneCount() do
+		uikits.popScene()
+	end
+	package.loaded["launcher"] = nil
+	for i,v in pairs(package.loaded) do
+		if i and type(i)=='string' then
+			local idx = string.find(i,appname)
+			if idx==1 then
+				package.loaded[i] = nil		
+			end
+		end
+	end
+	require "launcher"
+end
+
 local exports = {
 	download_file = download_file,
 	del_local_file = del_local_file,
@@ -819,6 +870,8 @@ local exports = {
 	getImageDownloadServer = getImageDownloadServer,
 	getAppServer = getAppServer,
 	log_caller = log_caller,
+	isNeedUpade = isNeedUpade,
+	doUpdate = doUpdate,
 }
 
 return exports

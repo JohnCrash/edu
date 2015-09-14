@@ -811,6 +811,8 @@ function UpdateProgram:ifExistAndDo()
 			kits.log("ERROR UpdateProgram:ifExistAndDo pcall failed!")
 			kits.log("error message:")
 			kits.log(tostring(scene))
+			local text = tostring(self._args.name).."\n"..tostring(scene)
+			self:ErrorAndExit('没有成功更新('..text..")",2)			
 		end
 	end
 end
