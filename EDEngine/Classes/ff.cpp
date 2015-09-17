@@ -1473,7 +1473,7 @@ static void stream_component_close(VideoState *is, int stream_index)
 
 static double compute_target_delay(double delay, VideoState *is)
 {
-	double sync_threshold, diff;
+	double sync_threshold, diff = 0;
 
 	/* update delay to follow master synchronisation source */
 	if (get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER) {
@@ -2583,7 +2583,7 @@ static int stream_component_open(VideoState *is, int stream_index)
 
 	if (stream_lowres) avctx->flags |= CODEC_FLAG_EMU_EDGE;
 	if (fast)   avctx->flags2 |= CODEC_FLAG2_FAST;
-	if (codec->capabilities & CODEC_CAP_DR1)
+	if (codec->capabilities & AV_CODEC_CAP_DR1)
 		avctx->flags |= CODEC_FLAG_EMU_EDGE;
 
 	opts = filter_codec_opts(codec_opts, avctx->codec_id, ic, ic->streams[stream_index], codec);

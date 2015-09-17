@@ -174,14 +174,15 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
-				login.set_uid_type(login.TEACHER)
+				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				login.set_selector(12) --五五
+				--login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
 				--login.set_selector(14) --六六
 				--login.set_selector(15) --六六的哥哥
 				--login.set_selector(16) --六六母亲 (家长)
+				login.set_selector(18) --额额
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}
