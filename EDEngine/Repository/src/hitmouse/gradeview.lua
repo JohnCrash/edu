@@ -39,15 +39,18 @@ local ui = {
 local gradeview = class("gradeview")
 gradeview.__index = gradeview
 
-function gradeview.create(block_id,enable,match_id,match_rank,match_name,match_enable)
+function gradeview.create(block_id,enable,match_id,match_name,child_id)
 	local scene = cc.Scene:create()
 	local layer = uikits.extend(cc.Layer:create(),gradeview)
 	layer.block_id = block_id
 	layer.enable = enable
 	layer.match_id = match_id
-	layer.match_rank = match_rank
+	layer.match_rank = 0
 	layer.match_name = match_name
-	layer.match_enable = match_enable
+	layer.match_enable = 0
+	if child_id then
+		layer.child_id = child_id
+	end
 	
 	scene:addChild(layer)
 	local function onNodeEvent(event)
@@ -158,19 +161,31 @@ function gradeview:show_history_list()
 		end
 		uikits.event(but_match_join,	
 			function(sender,eventType)
-			local send_data = {v1=self.block_id,v2=2}
+			local send_data = {v1=self.block_id,v2=2,v3=0,v4=false}
 			if self.id_flag == hitconfig.ID_FLAG_PAR then
 				local cur_school_info = hitconfig.get_school_info()
 				if cur_school_info and cur_school_info.school_id then
-					send_data.v3 = cur_school_info.school_id
+					send_data.v5 = cur_school_info.school_id
 				else
-					send_data.v3 = 0
+					send_data.v5 = 0
 				end	
 			else
-				send_data.v3 = 0
+				send_data.v5 = 0
 			end
-			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
-				if t and t==200 then
+			hitconfig.post_data(self._gradeview,'get_new_match',send_data,function(t,v)
+				if t and t==200 and v then
+					hitconfig.logTable(v,1)
+					if v.v1 then
+						v.v5.threshold = v.v6
+						v.v5.condition = v.v6
+						v.v5.type = 2
+						v.v5.level = self.block_id
+						uikits.replaceScene(battle.create(v.v5))			
+					else
+						hitconfig.messagebox(self._root,hitconfig.OK_MSG,function(e)
+						end,tostring(v.v2 or 'get_new_match return v.v2 = nil'))
+					end
+					--[[
 					uikits.replaceScene(battle.create{
 							level = self.block_id or 1,
 							time_limit = v.times or 10,
@@ -182,6 +197,7 @@ function gradeview:show_history_list()
 							condition = v.pass_condition or 60,
 							type= 2,
 						})
+						--]]
 				else
 					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
 						if e == hitconfig.RETRY then
@@ -281,6 +297,11 @@ function gradeview:show_history_list()
 			send_data.v3 = 0
 			hitconfig.post_data(self._gradeview,'get_match',send_data,function(t,v)
 				if t and t==200 then
+					v.v5.threshold = v.v6
+					v.v5.condition = v.v6
+					v.v5.type = 1
+					uikits.replaceScene(battle.create(v.v5))
+--[[					
 					uikits.replaceScene(battle.create{
 							level = self.block_id or 1,
 							time_limit = v.times or 10,
@@ -292,6 +313,7 @@ function gradeview:show_history_list()
 							condition = v.pass_condition or 60,
 							type= 2,
 						})
+--]]						
 				else
 					hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)
 						if e == hitconfig.RETRY then
@@ -396,12 +418,18 @@ function gradeview:get_his_list()
 	if self.id_flag == hitconfig.ID_FLAG_PAR then
 		local cur_school_info = hitconfig.get_school_info()
 		send_data.v2 = cur_school_info.school_id
+		send_data.v3 = self.child_id
 	else
 		send_data.v2 = 0
+		send_data.v3 = 0
 	end
 	hitconfig.post_data(self._gradeview,'get_match_history',send_data,function(t,v)
 					if t and t == 200 then
-						self.history_list = v
+						self.history_list = v.matchhistory
+						self.match_rank = v.rank
+						if self.enable == 1 and v.enter_number >0 then
+							self.match_enable = 1
+						end
 						self:show_history_list()
 					else
 						hitconfig.messagebox(self._gradeview,hitconfig.DIY_MSG,function(e)

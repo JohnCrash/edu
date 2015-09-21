@@ -49,10 +49,10 @@ end
 function matchview:show_match_list()
 	self.is_has_match = false
 	for i=1,10 do
-		local match_enable = 0
+--[[		local match_enable = 0
 		if self.match_list_data[i].enable == 1 and self.match_list_data[i].enter_number >0 then
 			match_enable = 1
-		end
+		end--]]
 		local but_grade = uikits.child(self._matchview,ui.VIEW_GRADE_SRC..i)
 		local txt_grade_open = uikits.child(but_grade,ui.TXT_GRADE_OPEN)
 		local txt_grade_close = uikits.child(but_grade,ui.TXT_GRADE_CLOSE)
@@ -60,8 +60,8 @@ function matchview:show_match_list()
 		but_grade.enable = self.match_list_data[i].enable
 		but_grade.match_id = self.match_list_data[i].match_id
 		but_grade.match_name = self.match_list_data[i].match_name
-		but_grade.user_rank = self.match_list_data[i].rank
-		but_grade.match_enable = match_enable
+		--but_grade.user_rank = self.match_list_data[i].rank
+		--but_grade.match_enable = match_enable
 		if self.match_list_data[i].enable == 1 then
 			txt_grade_open:setVisible(true)
 			txt_grade_close:setVisible(false)
@@ -78,7 +78,11 @@ function matchview:show_match_list()
 		end
 		uikits.event(but_grade,	
 			function(sender,eventType)	
-				local scene_next = gradeview.create(sender.block_id,sender.enable,sender.match_id,sender.user_rank,sender.match_name,sender.match_enable)
+				local child_id = false
+				if self.cur_school_info then
+					child_id = self.cur_school_info.user_id
+				end
+				local scene_next = gradeview.create(sender.block_id,sender.enable,sender.match_id,sender.match_name,child_id)
 				uikits.pushScene(scene_next)	
 			end,"click")
 	end
@@ -137,6 +141,7 @@ function matchview:init()
 		uikits.initDR{width=1440,height=1080}
 	end
 	self.id_flag = hitconfig.get_id_flag()
+	print('self.id_flag::::::::'..self.id_flag)
 	if self.id_flag == hitconfig.ID_FLAG_STU or self.id_flag == hitconfig.ID_FLAG_TEA or self.id_flag == hitconfig.ID_FLAG_PAR then
 		self._matchview = uikits.fromJson{file_9_16=ui.STU_FILE,file_3_4=ui.STU_FILE_3_4}	
 
