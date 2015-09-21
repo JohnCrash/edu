@@ -119,6 +119,9 @@ void acr_write_log(const char *filename)
 }
 
 #ifdef WIN32
+/*
+ * windows 结构化异常处理函数
+ */
 LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPointers)
 {
 	SetErrorMode(SEM_NOGPFAULTERRORBOX);
@@ -130,6 +133,9 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 	HMODULE hModule;
 	char szModuleName[MAX_PATH] = "";
 
+	/*
+	 * 这里创建cpu寄存器的信息
+	 */
 	sprintf(strBuild, "Build: %s %s\n", __DATE__, __TIME__);
 	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCWSTR)pExceptionPointers->ExceptionRecord->ExceptionAddress, &hModule);
 	GetModuleFileNameA(hModule, szModuleName, ARRAYSIZE(szModuleName));
@@ -140,6 +146,9 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 		pExceptionPointers->ContextRecord->Edx, pExceptionPointers->ContextRecord->Ecx, pExceptionPointers->ContextRecord->Eax
 		);
 
+	/*
+	 * Edengine 在启动时会寻找crash.dump文件
+	 */
 	char szDocPath[MAX_PATH];
 	char szPath[MAX_PATH];
 	char szFileName[MAX_PATH];
@@ -155,6 +164,9 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 	}
 	sprintf(szFileName, "%s\\ljdata\\EDEngine\\crash.log",
 		szDocPath);
+	/*
+	 * 奔溃时将lua的日志也写入到crash.log文件
+	 */
 	acr_write_log(szFileName);
 	/*
 	 * 产生一个mini crash dump 文件，但是这需要dbghelp.dll的支持
