@@ -153,13 +153,17 @@ MySpaceBegin
 
 		if( !pct ){ return ; }
 
-		curl = curl_easy_init();
+		if (pct->_curl)
+			curl = pct->_curl;
+		else
+			curl = curl_easy_init();
+
 		if( curl )
 		{
 			//set timeout
 			curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);			
-			curl_easy_setopt(curl,CURLOPT_TIMEOUT,60);
-			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,60);
+			curl_easy_setopt(curl,CURLOPT_TIMEOUT,pct->option_timeout);
+			curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,pct->connect_timeout);
 //			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_LIMIT,1);
 //			curl_easy_setopt(curl,CURLOPT_LOW_SPEED_TIME,10);
 			//set url
@@ -173,6 +177,13 @@ MySpaceBegin
 			//write data
 			curl_easy_setopt(curl,CURLOPT_WRITEDATA,&bufs);
 			curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION, writerCallback);
+
+			//curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+			/* keep-alive idle time to 120 seconds */
+			//curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
+			/* interval time between keep-alive probes: 60 seconds */
+			//curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
+
 			//cookie
 			if( !pct->cookie.empty() )
 				curl_easy_setopt(curl,CURLOPT_COOKIE,pct->cookie.c_str());
@@ -271,7 +282,10 @@ MySpaceBegin
 			pct->bfastEnd = true;
 			clean_vector_t( bufs );
 		}
-		curl_easy_cleanup(curl);
+		if (!pct->iskeep_alive)
+			curl_easy_cleanup(curl);
+		else
+			pct->_curl = nullptr;
 	}
 
 	static bool g_bCurlInit = false;

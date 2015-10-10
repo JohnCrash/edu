@@ -369,6 +369,18 @@ static int lua_curl_index(lua_State *L)
 					{
 						lua_pushcfunction(L,lua_curl_restart);
 					}
+					else if (strcmp(key, "connect_timeout") == 0)
+					{
+						lua_pushinteger(L, ptc->connect_timeout);
+					}
+					else if (strcmp(key, "option_timeout") == 0)
+					{
+						lua_pushinteger(L, ptc->option_timeout);
+					}
+					else if (strcmp(key, "iskeep_alive") == 0)
+					{
+						lua_pushboolean(L, ptc->iskeep_alive);
+					}
 				}
 				return 1;
 			}

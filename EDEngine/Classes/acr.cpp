@@ -120,6 +120,29 @@ void acr_write_log(const char *filename)
 
 #ifdef WIN32
 /*
+ * 读取指针ptr后面count个字节，存储到字符串str中
+ */
+static int mem2str(void *ptr, int count, char *str, int strlen){
+	unsigned char *p = (unsigned char *)ptr;
+	char *s = str;
+	*s = 0;
+	__try{
+		for (int i = 0; i < 128; i++){
+			if (s - str < strlen){
+				sprintf(s, "%02X ", *p++);
+				s += 3;
+			}
+			else
+				return s - str;
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		//发生访问违例
+	}
+	return s - str;
+}
+/*
  * windows 结构化异常处理函数
  */
 LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPointers)
@@ -140,7 +163,7 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCWSTR)pExceptionPointers->ExceptionRecord->ExceptionAddress, &hModule);
 	GetModuleFileNameA(hModule, szModuleName, ARRAYSIZE(szModuleName));
 	sprintf(strError,"%s %08X , %08X ,%08X.\n", szModuleName, pExceptionPointers->ExceptionRecord->ExceptionCode, pExceptionPointers->ExceptionRecord->ExceptionFlags, pExceptionPointers->ExceptionRecord->ExceptionAddress);
-	sprintf(strStack,"Eip=%08X,Esp=%08X,Ebp=%08X\nEdi=%08X,Esi=%08X,Ebx=%08X\nEdx=%08X,Ecx=%08X,Eax=%08X", 
+	sprintf(strStack,"Eip=%08X,Esp=%08X,Ebp=%08X\nEdi=%08X,Esi=%08X,Ebx=%08X\nEdx=%08X,Ecx=%08X,Eax=%08X\n", 
 		pExceptionPointers->ContextRecord->Eip, pExceptionPointers->ContextRecord->Esp, pExceptionPointers->ContextRecord->Ebp,
 		pExceptionPointers->ContextRecord->Edi, pExceptionPointers->ContextRecord->Esi, pExceptionPointers->ContextRecord->Ebx,
 		pExceptionPointers->ContextRecord->Edx, pExceptionPointers->ContextRecord->Ecx, pExceptionPointers->ContextRecord->Eax
@@ -152,6 +175,7 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 	char szDocPath[MAX_PATH];
 	char szPath[MAX_PATH];
 	char szFileName[MAX_PATH];
+	char szFileName2[MAX_PATH];
 	SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, szDocPath);
 	sprintf(szFileName, "%s\\ljdata\\EDEngine\\crash.dump",
 		szDocPath);
@@ -162,12 +186,40 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 		fwrite(strStack, 1, strlen(strStack), fp);
 		fclose(fp);
 	}
-	sprintf(szFileName, "%s\\ljdata\\EDEngine\\crash.log",
+	sprintf(szFileName2, "%s\\ljdata\\EDEngine\\crash.log",
 		szDocPath);
 	/*
 	 * 奔溃时将lua的日志也写入到crash.log文件
 	 */
-	acr_write_log(szFileName);
+	acr_write_log(szFileName2);
+	/*
+	 * 为了便于定位代码位置将Eip的后面128个字节也写入到文件
+	 * 考虑到Eip的位置可能不可以读取
+	 */
+	mem2str((void*)pExceptionPointers->ContextRecord->Eip, 128, strStack, 1024);
+	fp = fopen(szFileName, "ab+");
+	if (fp){
+		char * s = "\nEip:\n";
+		fwrite(s, 1, strlen(s), fp);
+		fwrite(strStack, 1, strlen(strStack), fp);
+		fclose(fp);
+	}
+	mem2str((void*)pExceptionPointers->ContextRecord->Esp, 128, strStack, 1024);
+	fp = fopen(szFileName, "ab+");
+	if (fp){
+		char * s = "\nEsp:\n";
+		fwrite(s, 1, strlen(s), fp);
+		fwrite(strStack, 1, strlen(strStack), fp);
+		fclose(fp);
+	}
+	mem2str((void*)pExceptionPointers->ContextRecord->Ebp, 128, strStack, 1024);
+	fp = fopen(szFileName, "ab+");
+	if (fp){
+		char * s = "\nEbp:\n";
+		fwrite(s, 1, strlen(s), fp);
+		fwrite(strStack, 1, strlen(strStack), fp);
+		fclose(fp);
+	}
 	/*
 	 * 产生一个mini crash dump 文件，但是这需要dbghelp.dll的支持
 	 * 并且mini dump文件一般都140k目前暂时去掉

@@ -142,9 +142,14 @@ namespace ff
 					do {
 						left = NUM_BUFFERS;
 						for (i = 0; i < NUM_BUFFERS; ++i) {
-							if (_this->hidden->wavebuf[i].dwFlags & WHDR_DONE) {
-								--left;
-							}
+							/*
+							 * FIXBUG: 运行时出现_this->hidden->wavebuf[i] = NULL
+							 */
+							if(_this && _this->hidden &&_this->hidden->wavebuf ){
+								if (_this->hidden->wavebuf[i].dwFlags & WHDR_DONE) {
+									--left;
+								}
+							}else break;
 						}
 						if (left > 0) {
 							Delay(100);
