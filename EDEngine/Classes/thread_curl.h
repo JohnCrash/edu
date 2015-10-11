@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 MySpaceBegin
 
@@ -65,7 +67,9 @@ struct curl_t
 	int option_timeout;
 	CURL_STATE lua_state;
 	bool iskeep_alive;
-	void * _curl;
+	std::mutex * _mutex;
+	std::condition_variable * _cond;
+	int _eof;
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
@@ -74,30 +78,17 @@ struct curl_t
 		size(0),data(nullptr),ref(0),user_data(nullptr),
 		refcount(0),bfastEnd(false),this_ref(0),usize(0),
 		retcode(0), connect_timeout(60), option_timeout(60), 
-		lua_state(INIT), iskeep_alive(false),_curl(nullptr)
+		lua_state(INIT), iskeep_alive(false), _eof(0)
 	{
+		_mutex = new std::mutex();
+		_cond = new std::condition_variable();
 	}
 	void retain()
 	{
 		refcount++;
 	}
-	void release()
-	{
-		refcount--;
-		if( refcount == 0 )
-		{
-			if( pthread )
-			{
-				bfastEnd = true;
-				pthread->join();
-				delete pthread;
-			}
-			if(data)delete [] data;
-			data = nullptr;
-			size = 0;
-			pthread = nullptr;
-		}
-	}
+
+	void release();
 };
 
 void do_thread_curl( curl_t *pct );

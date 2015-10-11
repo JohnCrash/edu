@@ -36,18 +36,18 @@ static void lua_mainThread_progressFunc( void *ptr )
 				curl_t *ptc = (curl_t *)ptr;
 				if( ptc && ptc->ref != LUA_REFNIL && 
 					ptc->this_ref != LUA_REFNIL &&
-					L == (lua_State *)ptc->user_data )
+					L == (lua_State *)ptc->user_data &&
+					ptc->_eof == 0 )
 				{
 					ptc->lua_state = ptc->state; //在此之后state可能改变
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->ref);
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->this_ref);
 					pLuaStack->executeFunction(1);
 					//lua_call(L,1,0);
-					if( ptc->lua_state == OK ||  ptc->lua_state == FAILED ||
-						ptc->lua_state == CANCEL )
+					if (ptc->lua_state == OK || ptc->lua_state == FAILED ||
+						ptc->lua_state == CANCEL)
 					{//进度函数将不再被调用,释放引用
-						lua_unref( L,ptc->this_ref );
-						ptc->this_ref = LUA_REFNIL;
+						ptc->_eof = 1;
 					}
 				}
 			}
@@ -193,12 +193,51 @@ static int do_curl(lua_State *L)
 				{
 					pct->content_type = lua_tostring(L, 6);
 				}
+				if (lua_isboolean(L, 7)) /* keep alive*/
+				{
+					pct->iskeep_alive = lua_toboolean(L, 7);
+				}
+				if (lua_isnumber(L, 8)) /* 链接超时设置 */
+				{
+					pct->connect_timeout = lua_tonumber(L, 8);
+				}
+				if (lua_isnumber(L, 9)) /* 操作超时 */
+				{
+					pct->option_timeout = lua_tonumber(L, 9);
+				}
 			}else if( m == HTTPPOST )
 			{
 				httppost_params(L,5,pct);
+				if (lua_isboolean(L, 6)) /* keep alive*/
+				{
+					pct->iskeep_alive = lua_toboolean(L, 6);
+				}
+				if (lua_isnumber(L, 7)) /* 链接超时设置 */
+				{
+					pct->connect_timeout = lua_tonumber(L, 7);
+				}
+				if (lua_isnumber(L, 8)) /* 操作超时 */
+				{
+					pct->option_timeout = lua_tonumber(L, 8);
+				}
+			}
+			else
+			{
+				if (lua_isboolean(L, 5)) /* keep alive*/
+				{
+					pct->iskeep_alive = lua_toboolean(L, 5);
+				}
+				if (lua_isnumber(L, 6)) /* 链接超时设置 */
+				{
+					pct->connect_timeout = lua_tonumber(L, 6);
+				}
+				if (lua_isnumber(L, 7)) /* 操作超时 */
+				{
+					pct->option_timeout = lua_tonumber(L, 7);
+				}
 			}
 			pct->ref = LUA_REFNIL;
-			if( lua_isfunction(L,4) )
+			if (lua_isfunction(L, 4)) /* 回调 */
 			{
 				lua_pushvalue(L, 4);                                  
 				pct->ref = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -290,6 +329,111 @@ static int lua_curl_restart(lua_State *L)
 	return 1;
 }
 
+static int lua_reconnect(lua_State *L)
+{
+	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
+	if (c&&c->ptc&&c->ptc->_mutex)
+	{
+		if (lua_isstring(L, 2) && lua_isstring(L, 3))
+		{
+			const char *method = luaL_checkstring(L, 2);
+			const char *url = luaL_checkstring(L, 3);
+
+			if (method && url)
+			{
+				CURL_METHOD m;
+				if (strcmp("GET", method) == 0)
+					m = GET;
+				else if (strcmp("POST", method) == 0)
+				{
+					m = POST;
+				}
+				else if (strcmp("HTTPPOST", method) == 0)
+				{
+					m = HTTPPOST;
+				}
+				else
+					m = GET;
+				std::string cookie;
+				if (lua_isstring(L, 4))
+					cookie = luaL_checkstring(L, 4);
+
+				curl_t *pct = c->ptc;
+				pct->method = m;
+				pct->url = url;
+				pct->cookie = cookie;
+				if (m == POST)
+				{ //post form
+					if (lua_isstring(L, 6))
+					{
+						pct->post_form = lua_tostring(L, 6);
+					}
+					//content-type
+					if (lua_isstring(L, 7))
+					{
+						pct->content_type = lua_tostring(L, 7);
+					}
+				}
+				else if (m == HTTPPOST)
+				{
+					httppost_params(L, 6, pct);
+				}
+				if (lua_isfunction(L, 5))
+				{
+					if (pct->ref) //释放以前的回调，重新建立一个新的回调引用。
+					{
+						lua_unref(L, pct->ref);
+						pct->ref = LUA_REFNIL;
+					}
+					lua_pushvalue(L, 5);
+					pct->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+				}
+				pct->progressFunc = lua_progressFunc;
+				pct->user_data = (void *)L;
+
+				pct->_cond->notify_one();
+			}
+			else
+			{
+				lua_pushnil(L);
+			}
+
+			lua_pushstring(L, "OK");
+		}
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "invalid context");
+		return 1;
+	}
+	lua_pushboolean(L, false);
+	lua_pushstring(L, "invalid arguments");
+	return 1;
+}
+
+static int lua_curl_close(lua_State *L)
+{
+	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
+	if (c && c->ptc)
+	{
+		if (c->ptc->ref != LUA_REFNIL)
+		{
+			lua_unref(L, c->ptc->ref);
+			c->ptc->ref = LUA_REFNIL;
+		}
+		if (c->ptc->this_ref != LUA_REFNIL)
+		{
+			lua_unref(L, c->ptc->this_ref);
+			c->ptc->this_ref = LUA_REFNIL;
+		}
+		c->ptc->release();
+		lua_pushboolean(L, true);
+	}
+	lua_pushboolean(L, false);
+	return 1;
+}
+
 static int lua_curl_index(lua_State *L)
 {
 	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
@@ -368,6 +512,14 @@ static int lua_curl_index(lua_State *L)
 					else if(strcmp(key,"restart")==0)
 					{
 						lua_pushcfunction(L,lua_curl_restart);
+					}
+					else if (strcmp(key, "reconnect") == 0)
+					{
+						lua_pushcfunction(L, lua_reconnect);
+					}
+					else if (strcmp(key, "close") == 0)
+					{
+						lua_pushcfunction(L, lua_curl_close);
 					}
 					else if (strcmp(key, "connect_timeout") == 0)
 					{

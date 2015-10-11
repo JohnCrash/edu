@@ -3,6 +3,8 @@ local uikits = require "uikits"
 local update = require "update"
 local login = require "login"
 local resume = require "resume"
+local mt = require "mt"
+
 require "ljshellDeprecated"
 local RecordVoice = require "recordvoice"
 
@@ -117,6 +119,25 @@ function AppEntry:Snow( b )
 		self._emitter:removeFromParent()
 		self._emitter = nil
 	end
+end
+
+local function keep_alive( url,func )
+	local mh,msg = mt.new('GET',url,login.cookie(),
+			function(obj)
+				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+					if obj.state == 'OK' and obj.data then
+						func( true,obj.data )
+					else
+						func( false,obj.errmsg )
+					end
+				end
+			end,true,30,20)
+	if not mh then
+		func( false,msg )
+		kits.log('ERROR : request failed! url = '..tostring(url))
+		kits.log('	reason:'..tostring(msg))
+	end
+	return mh,msg
 end
 
 function AppEntry:init()
@@ -336,54 +357,44 @@ function AppEntry:init()
 	local idx = 4
 	local ffmpeg_as
 	local sp,sp2
-	local ff = uikits.button{caption='FFMPEG',x=664*scale,y = 164*scale + 4*item_h,
+	local ff = uikits.button{caption='KEEP-ALIVE',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			local moveies = { 
-			"g:/Shake It Off.mp3",
-			"g:/1.m3u8",
-			"http://dl-lejiaolexue.qiniudn.com/07766ef6c835484fa8eaf606353f0cee.m3u8",
-			"http://dl-lejiaolexue.qiniudn.com/92dc0b8689d64c1682d3d3f2501b3e8d.m3u8",
-			"http://dl-lejiaolexue.qiniudn.com/729c4a6a87c541ff8e9eff183ce98658.m3u8",
-			"http://dl-lejiaolexue.qiniudn.com/835764b62d6e47e9b0c7cab42ed90fa3.m3u8",
-			}
-			local ffplayer = require "ffplayer"
-			if ffmpeg_as then ffmpeg_as:close() end
-			if sp then 
-				sp:removeFromParent()
-				sp=nil
-			end
-			if sp2 then
-				sp2:removeFromParent()
-				sp2=nil			
-			end
-			if idx > #moveies then
-				idx = 1
-			end
-			ffmpeg_as = ffplayer.playStream(moveies[idx],function(state,stream,tx)
-					if state ~=5 then
-						print( "state:"..state)
-					end
-					if state==ffplayer.STATE_OPEN then
-						stream:seek(stream.length*0.8)
-						stream:play()
-					elseif state==ffplayer.STATE_OPEN_VIDEO and tx then
-						sp = cc.Sprite:createWithTexture(tx)
-						sp:setAnchorPoint(cc.p(0,0))
-						sp:setPosition(cc.p(0,0))
-						bg:addChild(sp)
-						sp2 = cc.Sprite:createWithTexture(tx)
-						sp2:setScaleX(2)
-						sp2:setScaleY(2)
-						sp2:setAnchorPoint(cc.p(0,0))
-						sp2:setPosition(cc.p(stream.width,0))					
-						bg:addChild(sp2)
-						--stream:pause()
-					elseif state==ffplayer.STATE_PROGRESS then
-						print( "progress "..math.floor(10000*stream.current/stream.length)/100)
-					end
-				end)
-				idx = idx + 1
+			local mt = require "mt"
+			local url = "http://app.lejiaolexue.com/poems_test/poems.ashx"
+			local handle,msg
+			local count = 0
+			local isok
+			handle,msg = keep_alive(url,function(b,data)
+				if b then
+					count = count + 1
+					kits.log( tostring(count).."-[1]-"..tostring(data) )
+					isok = true
+				else
+					kits.log( "keep_alive failed" )
+				end
+			end)
+			uikits.delay_call(nil,function(dt)
+				if isok then
+					isok = false
+					handle:reconnect('GET',url,login.cookie(),function(obj)
+					if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+						if obj.state == 'OK'  and obj.data then
+							count = count + 1
+							kits.log( tostring(count).."-[1]-"..tostring(obj.data) )
+							if count > 10 then
+								obj:close()
+								return false
+							end
+							isok = true
+						else
+							kits.log( "keep_alive reconnect failed" )
+						end
+						end						
+					end)
+				end
+				return true
+			end,1)
 		end}		
 	bg:addChild(ff)
 	local as

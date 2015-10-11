@@ -153,13 +153,14 @@ MySpaceBegin
 
 		if( !pct ){ return ; }
 
-		if (pct->_curl)
-			curl = pct->_curl;
-		else
-			curl = curl_easy_init();
-
-		if( curl )
+		curl = curl_easy_init();
+		if (!curl){ return; }
+		while (pct->iskeep_alive)
 		{
+			pct->_eof = 0;
+			pct->size = 0;
+			pct->data = nullptr;
+			pct->bfastEnd = false;
 			//set timeout
 			curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);			
 			curl_easy_setopt(curl,CURLOPT_TIMEOUT,pct->option_timeout);
@@ -280,12 +281,17 @@ MySpaceBegin
 				pct->progressFunc( pct );
 			}
 			pct->bfastEnd = true;
-			clean_vector_t( bufs );
+			clean_vector_t(bufs);
+
+			/*
+			* 等待下一次请求
+			*/
+			{
+				std::unique_lock<std::mutex> lk(*pct->_mutex);
+				pct->_cond->wait(lk);
+			}
 		}
-		if (!pct->iskeep_alive)
-			curl_easy_cleanup(curl);
-		else
-			pct->_curl = nullptr;
+		curl_easy_cleanup(curl);
 	}
 
 	static bool g_bCurlInit = false;
@@ -299,5 +305,29 @@ MySpaceBegin
 			g_bCurlInit = true;
 		}
 		pct->pthread = new std::thread(curl_thread_method,pct);
+	}
+
+	void curl_t::release()
+	{
+		refcount--;
+		if (refcount == 0)
+		{
+			if (pthread)
+			{
+				bfastEnd = true;
+				iskeep_alive = false;
+				_cond->notify_one();
+				pthread->join();
+				delete pthread;
+			}
+			delete _mutex;
+			delete _cond;
+			if (data)delete[] data;
+			_mutex = nullptr;
+			_cond = nullptr;
+			data = nullptr;
+			size = 0;
+			pthread = nullptr;
+		}
 	}
 MySpaceEnd
