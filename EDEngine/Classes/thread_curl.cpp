@@ -155,8 +155,9 @@ MySpaceBegin
 
 		curl = curl_easy_init();
 		if (!curl){ return; }
-		while (pct->iskeep_alive)
+		do
 		{
+			pct->_busy = true;
 			pct->_eof = 0;
 			pct->size = 0;
 			pct->data = nullptr;
@@ -287,10 +288,11 @@ MySpaceBegin
 			* 等待下一次请求
 			*/
 			{
+				pct->_busy = false;
 				std::unique_lock<std::mutex> lk(*pct->_mutex);
 				pct->_cond->wait(lk);
 			}
-		}
+		}while (pct->iskeep_alive);
 		curl_easy_cleanup(curl);
 	}
 

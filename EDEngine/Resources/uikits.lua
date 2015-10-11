@@ -1053,7 +1053,7 @@ local function popScene()
 		popScene并不会马上释放场景，因此下面的调用并不会释放被弹出场景的材质内存
 		--]]
 		cc.TextureCache:getInstance():removeUnusedTextures()
-		--cc.TextureCache:getInstance():removeAllTextures();
+		--cc.TextureCache:getInstance():removeAllTextures()
 		_pushNum = _pushNum - 1
 	else
 		stopAllSound()

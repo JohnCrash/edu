@@ -70,6 +70,7 @@ struct curl_t
 	std::mutex * _mutex;
 	std::condition_variable * _cond;
 	int _eof;
+	int _busy;
 
 	curl_t(CURL_METHOD m,std::string u,std::string c):
 		method(m),state(INIT),url(u),cookie(c),
@@ -78,7 +79,7 @@ struct curl_t
 		size(0),data(nullptr),ref(0),user_data(nullptr),
 		refcount(0),bfastEnd(false),this_ref(0),usize(0),
 		retcode(0), connect_timeout(60), option_timeout(60), 
-		lua_state(INIT), iskeep_alive(false), _eof(0)
+		lua_state(INIT), iskeep_alive(false), _eof(0), _busy(false)
 	{
 		_mutex = new std::mutex();
 		_cond = new std::condition_variable();

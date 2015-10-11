@@ -334,6 +334,12 @@ static int lua_reconnect(lua_State *L)
 	lua_curl_t* c = (lua_curl_t *)luaL_checkudata(L, 1, LUA_CURL_HANDLE);
 	if (c&&c->ptc&&c->ptc->_mutex)
 	{
+		if (c->ptc->_busy)
+		{
+			lua_pushboolean(L, false);
+			lua_pushstring(L, "curl busy");
+			return 2;
+		}
 		if (lua_isstring(L, 2) && lua_isstring(L, 3))
 		{
 			const char *method = luaL_checkstring(L, 2);
@@ -481,6 +487,10 @@ static int lua_curl_index(lua_State *L)
 							lua_pushlstring(L,(const char *)ptc->data,ptc->size);
 						else
 							lua_pushnil(L);
+					}
+					else if (strcmp(key, "busy")==0 )
+					{
+						lua_pushboolean(L, ptc->_busy);
 					}
 					else if(strcmp(key,"method")==0 )
 					{

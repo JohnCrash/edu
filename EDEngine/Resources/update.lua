@@ -18,10 +18,11 @@ local versionNUM = resume.getversion()
 --release
 --local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
 --debug
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
+--local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
+local liexue_server_sr = 'http://192.168.2.8/luaapp/keepalive/'
 
 local liexue_server_dl = liexue_server_sr
- 
+--[[
 local lj_config = kits.get_ljconfig()
 kits.log("INFO read ljshell setting")
 if lj_config and lj_config.setting then
@@ -40,6 +41,7 @@ else
 		kits.log("WARNING lj_config.setting = "..tostring(lj_config.setting))
 	end
 end
+--]]
 --local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 --local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
 --local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'

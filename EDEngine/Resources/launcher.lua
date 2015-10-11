@@ -78,8 +78,8 @@ function enableDebug( b )
 		mode = 0
 	end
 end
---enableDebug( kits.config("debug","get") )
-enableDebug( 1 )
+enableDebug( kits.config("debug","get") )
+--enableDebug( 1 )
 --android 返回键
 local function onKeyRelease(key,event)
 	local function open_console()

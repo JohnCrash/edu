@@ -3,16 +3,42 @@ local uikits = require "uikits"
 local update = require "update"
 local login = require "login"
 local resume = require "resume"
-local mt = require "mt"
-
 require "ljshellDeprecated"
 local RecordVoice = require "recordvoice"
+local mt = require "mt"
 
 hw_cur_child_id = 0
 local ui = {
 }
 
-----------------------------------
+-----------------
+local function request_n( url,func,prog )
+	local mh,msg = mt.new('GET',url,login.cookie(),
+			function(obj)
+				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
+					if obj.state == 'OK' and obj.data then
+						func( true,obj.data )
+					else
+						func( false,obj.errmsg )
+					end
+				elseif obj.state == 'LOADING' and prog then
+					prog( obj.progress )
+				end
+			end )
+	if not mh then
+		func( false,msg )
+		kits.log('ERROR : request failed! url = '..tostring(url))
+		kits.log('	reason:'..tostring(msg))
+	end
+end
+
+local function messagebox(caption,text,button,func)
+	local factory = require "factory"
+	local base = require "base"
+	local messageBox = factory.create(base.MessageBox)
+	messageBox:open{caption=caption,text=text,onClick=func,button=button or 1}
+end
+-----------------
 
 -----------------------------------
 
@@ -121,24 +147,188 @@ function AppEntry:Snow( b )
 	end
 end
 
-local function keep_alive( url,func )
-	local mh,msg = mt.new('GET',url,login.cookie(),
-			function(obj)
-				if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-					if obj.state == 'OK' and obj.data then
-						func( true,obj.data )
-					else
-						func( false,obj.errmsg )
-					end
-				end
-			end,true,30,20)
-	if not mh then
-		func( false,msg )
-		kits.log('ERROR : request failed! url = '..tostring(url))
-		kits.log('	reason:'..tostring(msg))
-	end
-	return mh,msg
-end
+local users = {
+        {
+           LoginUserName="s16600000001",
+            NickName="平板01",
+            UserID=1602035,
+            sc1="8481103C1DBA5F0D150556812A6263ED0A7F9ABBakt%2fMAHsC52KiGgNI1Rn6lAqah%2buIFjv8AuIl4WZ%2bxYnBkqOgDwlYzegoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000002",
+            NickName="平板02",
+            UserID=1602037,
+            sc1="613C1EBBE6E3F572383C8643AB028FEC5CEADB65akt%2fMAHsCZ2KiGgNI1Rn6lAqahyuIFjv8AuIl4WZ%2bxYnBkqOgDwlYzSgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000003",
+            NickName="平板03",
+            UserID=1602039,
+            sc1="857BD714837FCD492BB3B7129419961F64F49A8Cakt%2fMAHsB52KiGgNI1Rn6lAqah2uIFjv8AuIl4WZ%2bxYnBkqOgDwlYzWgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000004",
+            NickName="平板04",
+            UserID=1602041,
+            sc1="350CFA81E4631C3FD36AB788BEA711576C3EDE8Cakt%2fMAHrD52KiGgNI1Rn6lAqahquIFjv8AuIl4WZ%2bxYnBkqOgDwlYzKgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000005",
+            NickName="平板05",
+            UserID=1602043,
+            sc1="8FADE7281A03B5F2D0CCE353E470DF71F948FDEBakt%2fMAHrDZ2KiGgNI1Rn6lAqahuuIFjv8AuIl4WZ%2bxYnBkqOgDwlYzOgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000006",
+            NickName="平板06",
+            UserID=1602045,
+            sc1="E4BCEE72EF8521FA8B83A7029E0747245B4D8624akt%2fMAHrC52KiGgNI1Rn6lAqahiuIFjv8AuIl4WZ%2bxYnBkqOgDwlYzCgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000007",
+            NickName="平板07",
+            UserID=1602047,
+            sc1="DFD5DD495A09A01AE34FC00348E12F5D60FAF34Aakt%2fMAHrCZ2KiGgNI1Rn6lAqahmuIFjv8AuIl4WZ%2bxYnBkqOgDwlYzGgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000008",
+            NickName="平板08",
+            UserID=1602049,
+            sc1="A3AF29E2B9471FA0803A85EEC587221F88407BD4akt%2fMAHrB52KiGgNI1Rn6lAqahauIFjv8AuIl4WZ%2bxYnBkqOgDwlYz6goVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000009",
+            NickName="平板09",
+            UserID=1602051,
+            sc1="528F0DDAA64AF45B5B9576FA3018CAA15E377A8Dakt%2fMAHqD52KiGgNI1Rn6lAqaheuIFjv8AuIl4WZ%2bxYnBkqOgDwlYz%2bgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000010",
+            NickName="平板10",
+            UserID=1602053,
+            sc1="60BF7393485EF8045828C7A66202C8B521CB638Dakt%2fMAHqDZ2KiGgNI1Rn6lAqax6uIFjv8AuIl4WZ%2bxYnBkqOgDwlYjagoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000011",
+            NickName="平板11",
+            UserID=1602055,
+            sc1="B78CFF1B2FF97170EA3944894BB185B222D469B2akt%2fMAHqC52KiGgNI1Rn6lAqax%2buIFjv8AuIl4WZ%2bxYnBkqOgDwlYjegoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000012",
+            NickName="平板12",
+            UserID=1602057,
+            sc1="30EC1E99CAC52EC2FE7C8A3968A6BA4000640A8Eakt%2fMAHqCZ2KiGgNI1Rn6lAqaxyuIFjv8AuIl4WZ%2bxYnBkqOgDwlYjSgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000013",
+            NickName="平板13",
+            UserID=1602059,
+            sc1="60D6AF55C114280769A69F6C1D1E48D7ABD06510akt%2fMAHqB52KiGgNI1Rn6lAqax2uIFjv8AuIl4WZ%2bxYnBkqOgDwlYjWgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000014",
+            NickName="平板14",
+            UserID=1602061,
+            sc1="E4C711CD3EF527B1685004BD1F134E5817724D67akt%2fMAHpD52KiGgNI1Rn6lAqaxquIFjv8AuIl4WZ%2bxYnBkqOgDwlYjKgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000015",
+            NickName="平板15",
+            UserID=1602063,
+            sc1="ECD63BA4222AFC8D02BC1B7AF743590F3AF5FFA6akt%2fMAHpDZ2KiGgNI1Rn6lAqaxuuIFjv8AuIl4WZ%2bxYnBkqOgDwlYjOgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000016",
+            NickName="平板16",
+            UserID=1602065,
+            sc1="F33741EC071F1E38134C49C49C04BD3293C36096akt%2fMAHpC52KiGgNI1Rn6lAqaxiuIFjv8AuIl4WZ%2bxYnBkqOgDwlYjCgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000017",
+            NickName="平板17",
+            UserID=1602067,
+            sc1="4DFEC060D2E589057B049072C4010C20F81F7418akt%2fMAHpCZ2KiGgNI1Rn6lAqaxmuIFjv8AuIl4WZ%2bxYnBkqOgDwlYjGgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000018",
+            NickName="平板18",
+            UserID=1602069,
+            sc1="69FB6FADD921D70BD8089CA13E9B7DAFD7E8A79Eakt%2fMAHpB52KiGgNI1Rn6lAqaxauIFjv8AuIl4WZ%2bxYnBkqOgDwlYj6goVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000019",
+            NickName="平板19",
+            UserID=1602071,
+            sc1="C07794C0871583D5A12115C17F472CE4121361D6akt%2fMAHoD52KiGgNI1Rn6lAqaxeuIFjv8AuIl4WZ%2bxYnBkqOgDwlYj%2bgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000020",
+            NickName="平板20",
+            UserID=1602073,
+            sc1="2E42A7D85708517B61ED0E5EF621CE971F45D5A4akt%2fMAHoDZ2KiGgNI1Rn6lAqaB6uIFjv8AuIl4WZ%2bxYnBkqOgDwlYTagoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000021",
+            NickName="平板21",
+            UserID=1602075,
+            sc1="B8E71BECED0AFDF0F56AC3BEC412AACAD1B08BF0akt%2fMAHoC52KiGgNI1Rn6lAqaB%2buIFjv8AuIl4WZ%2bxYnBkqOgDwlYTegoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000022",
+            NickName="平板22",
+            UserID=1602077,
+            sc1="59AC36C52EE584B3AFD8C689A91FE83E34346830akt%2fMAHoCZ2KiGgNI1Rn6lAqaByuIFjv8AuIl4WZ%2bxYnBkqOgDwlYTSgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000023",
+            NickName="平板23",
+            UserID=1602079,
+            sc1="F0F8985C4AE0FF2C4CF82E791005F152D897AC6Cakt%2fMAHoB52KiGgNI1Rn6lAqaB2uIFjv8AuIl4WZ%2bxYnBkqOgDwlYTWgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000024",
+            NickName="平板24",
+            UserID=1602081,
+            sc1="16E6A57490D06AD47018D10BD5EEA591AACDB5ABakt%2fMAHnD52KiGgNI1Rn6lAqaBquIFjv8AuIl4WZ%2bxYnBkqOgDwlYTKgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000025",
+            NickName="平板25",
+            UserID=1602083,
+            sc1="FE474B408BEA573D4EAEC9C4ED5D32633C6623F0akt%2fMAHnDZ2KiGgNI1Rn6lAqaBuuIFjv8AuIl4WZ%2bxYnBkqOgDwlYTOgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000026",
+            NickName="平板26",
+            UserID=1602085,
+            sc1="C62E2290C82DC0656EC990F8F77F246D1DF3DBB2akt%2fMAHnC52KiGgNI1Rn6lAqaBiuIFjv8AuIl4WZ%2bxYnBkqOgDwlYTCgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000027",
+            NickName="平板27",
+            UserID=1602087,
+            sc1="E3416DDFB634B4EB579D7D7A89CBC16CCCBFDBE8akt%2fMAHnCZ2KiGgNI1Rn6lAqaBmuIFjv8AuIl4WZ%2bxYnBkqOgDwlYTGgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000028",
+            NickName="平板28",
+            UserID=1602089,
+            sc1="900BEDB97B3BA20710C101A9EE2D51F18A2360D6akt%2fMAHnB52KiGgNI1Rn6lAqaBauIFjv8AuIl4WZ%2bxYnBkqOgDwlYT6goVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000029",
+            NickName="平板29",
+            UserID=1602091,
+            sc1="FC9E8A6F5A3181962323ACA15397FBA58D0BBC5Dakt%2fMAHmD52KiGgNI1Rn6lAqaBeuIFjv8AuIl4WZ%2bxYnBkqOgDwlYT%2bgoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+        {
+           LoginUserName="s16600000030",
+            NickName="平板30",
+            UserID=1602093,
+            sc1="1CE186C9354272D067D1F1ECA898D9820BF97049akt%2fMAHmDZ2KiGgNI1Rn6lAqaR6uIFjv8AuIl4WZ%2bxYnBkqOgDwlYDagoVCE9E%2fxTOLjwN1Zkm7MiCBdqXsBOrVzzLK83LvX9QEDKV4Dyjc%3d"
+        },
+}
 
 function AppEntry:init()
 	--self:Snow(true)
@@ -149,319 +339,47 @@ function AppEntry:init()
 	local bg = uikits.layout{width=ss.width*scale,height=ss.height*scale}
 	local item_h = 64*scale
 	
-	local debugip = uikits.editbox{
-		caption = '192.168.2.*',
-		x=320*scale,y = 64*scale + 2*item_h,
-		width=128*scale,height=48*scale
-	}
-	debugip:setText("192.168.2.157")
-	
-	local amouse = uikits.button{caption='打地鼠',x=64*scale,y = 64*scale +5*item_h,
-	width=128*scale,height=48*scale,
-	eventClick=function(sender)
-		update.create{name='amouse',updates={'amouse','luacore'},
-			run=function()
-			login.set_selector(5)
-			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-			local amouse = require "amouse/amouse_om"
-			return AMouseMain()
-		end}		
-	end}
-		
-	local tbutton = uikits.button{caption='新打地鼠(学生)',x=64*scale,y = 64*scale +4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='hitmouse',updates={'hitmouse','luacore'},
-				run=function()
-				login.set_uid_type(login.STUDENT)
-				login.set_selector(7)--学生
-				local hitmouse = require "hitmouse/loading"
-				return hitmouse.create()
-			end}			
-		end}
-	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='calc',updates={'luacore'},
-				run=function()
-				login.set_uid_type(login.TEACHER)
-				login.set_selector(5)
-				local ss = require "calc/loading"
-				return ss.create()
-				end}
-		end}
-	local ebutton = uikits.button{caption='新打地鼠2',x=64*scale,y = 64*scale + 2*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='hitmouse2',updates={'luacore'},
-				run=function()
-				--login.set_uid_type(login.TEACHER)
-				--login.set_selector(11) --秦胜兵(教育局领导)
-				--login.set_selector(12) --五五
-				--login.set_selector(17) --五五的家长
-				--login.set_selector(13) --李四 (领导但不能发比赛)
-				--login.set_selector(14) --六六
-				login.set_selector(15) --六六的哥哥
-				--login.set_selector(16) --六六母亲 (家长)
-				--login.set_selector(18) --额额
-				--login.set_selector(18) --杨艳波
-				--login.set_selector(20) --张泳
-				--login.set_selector(21)--李四
-				local Loading = require "hitmouse2/loading"
-				return Loading.create()
+	local col = 6
+	local ox = 24*scale
+	local oy = 32*scale
+	local space = 24*scale
+	local width = 128*scale
+	local height = 48*scale
+	for i,v in pairs(users) do
+		local but = uikits.button{caption=v.NickName,x=((i-1)%col)*(width+space)+ox,y=math.floor((i-1)/col)*(height+space)+oy,
+			width=width,height=height,
+			eventClick=function(sender)
+				login.set_cookie( 'sc1='..v.sc1 )
+				login.set_userid( v.UserID )
+				--local selstudent1 = require "poetrymatch/Loading"
+				--uikits.replaceScene( selstudent1.create() )
+				update.create{name='poetrymatch',updates={'poetrymatch','luacore'},
+					run=function()
+					local selstudent = require "poetrymatch/Loading"
+					return selstudent.create()
+				end}				
 			end}
-		end}
-	--[[	
-	local epbutton = uikits.button{caption='家长错题本',x=64*scale,y = 64*scale + 6*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='parenterrortitle',updates={'homework','errortitile','luacore'},
-				run=function()
-				login.set_uid_type(login.PARENT)
-				login.set_selector(3) --家长
-				local Loading = require "errortitile/Loading"
-				return Loading.create()
+		bg:addChild( but )
+	end
+	local dbg_but = uikits.button{caption="打开调试",x=ox,y=(height+space)*5+space,
+			width=width,height=height,
+			eventClick=function(sender)
+				kits.config("debug",true)
 			end}
-		end}
-		--]]
-	local epbutton = uikits.button{caption='TEST',x=64*scale,y = 64*scale + 6*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='test',updates={'test','luacore'},
-				run=function()
-				login.set_selector(3) 
-				local selstudent = require "test/test"
-				return selstudent.create()
+	bg:addChild(dbg_but)
+	local dbg_but_close = uikits.button{caption="关闭调试",x=ox+width+space,y=(height+space)*5+space,
+			width=width,height=height,
+			eventClick=function(sender)
+				kits.config("debug",false)
 			end}
-		end}
-	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			update.create{name='test',updates={'lemall','luacore'},
-				run=function()
-				login.set_selector(9) 
-				local selstudent = require "lemall/Loading"
-				return selstudent.create()
+	bg:addChild(dbg_but_close)	
+	local setup_but = uikits.button{caption="安装客户端",x=ox+2*(width+space),y=(height+space)*5+space,
+			width=width,height=height,
+			eventClick=function(sender)
+				local url = "http://192.168.2.8/app/EDEngine.apk"
+				cc_openURL(url)
 			end}
-		end}
-	local g_last
-	local record =  uikits.button{caption='show BaiduVoice',x=264*scale,y = 64*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-	}
-	local box = debugip
-	uikits.event( record,
-		function(sender,eventType)
-			if cc_showBaiduVoice then
-				cc_showBaiduVoice( function(text)
-					if cc_isobj(box) then
-						box:setText(text)
-					else
-						print(text)
-					end
-				end)
-			end
-		end)	
-	local playsound = uikits.button{caption='Test Class',x=464*scale,y = 164*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-				local factory = require "factory"
-				local base = require "base"
-				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
-				local progressbox = factory.create(base.ProgressBox)
-				progressbox:open()
-				progressbox:setProgress(0)	
-				factory.import({uuidClassSearcher},
-						function(b,err)
-							progressbox:close()
-							if b then
-								local searcher = factory.create(uuidClassSearcher)
-								searcher:push()
-							else
-									kits.log("")
-							end
-						end,
-						function(d,txt)
-							progressbox:setProgress(d)
-							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
-						end)
-			end}
-	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-				local messagebox = require "messagebox"
-				messagebox.open(bg,function()end,messagebox.REPAIR,"title","text")
-			end}				
-	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			kits.log("cam")
-			cc_takeResource(TAKE_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						--file = res
-					else
-						kits.log("cc_takeResource return fail")
-					end
-				end)
-			end}
-	local photo =   uikits.button{caption='图库',x=664*scale,y = 64*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			kits.log("photo")
-			cc_takeResource(PICK_PICTURE,function(t,result,res)
-					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
-					if result == RESULT_OK then
-						--file = res
-						local b,res = cc_adjustPhoto(res,128)
-						if b then
-							kits.log('adjust success '..res)
-						else
-							kits.log('adjust fail : '..res)
-						end
-					else
-						kits.log("cc_takeResource return fail")
-					end
-				end)
-			end}
-		
-	local exitbutton = uikits.button{caption='退出',x=64*scale,y = 64*scale + item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			kits.quit()
-		end}
-	local debugip = uikits.editbox{
-		caption = '192.168.2.*',
-		fontSize = 64,
-		x=320*scale,y = 64*scale + 2*item_h,
-		width=128*scale,height=48*scale
-	}
-	debugip:setText("192.168.2.157")
-	local isopen = false
-	local debugbutton = uikits.button{caption='调试...',x=320*scale,y = 64*scale + item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			if not isopen then
-				require("mobdebug").start(debugip:getStringValue())
-				isopen = true
-			end
-		end}	
-	local testInput = uikits.editbox{
-		caption = 'TEST INPUT',
-		fontSize = 64,
-		x=(320+320)*scale,y = 64*scale + 2*item_h,
-		width=128*scale,height=48*scale
-	}
-	testInput:setText("TEST INPUT")
-	bg:addChild(testInput)
-	local height_ = 0
-	local idx = 4
-	local ffmpeg_as
-	local sp,sp2
-	local ff = uikits.button{caption='KEEP-ALIVE',x=664*scale,y = 164*scale + 4*item_h,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			local mt = require "mt"
-			local url = "http://app.lejiaolexue.com/poems_test/poems.ashx"
-			local handle,msg
-			local count = 0
-			local isok
-			handle,msg = keep_alive(url,function(b,data)
-				if b then
-					count = count + 1
-					kits.log( tostring(count).."-[1]-"..tostring(data) )
-					isok = true
-				else
-					kits.log( "keep_alive failed" )
-				end
-			end)
-			uikits.delay_call(nil,function(dt)
-				if isok then
-					isok = false
-					handle:reconnect('GET',url,login.cookie(),function(obj)
-					if obj.state == 'OK' or obj.state == 'CANCEL' or obj.state == 'FAILED'  then
-						if obj.state == 'OK'  and obj.data then
-							count = count + 1
-							kits.log( tostring(count).."-[1]-"..tostring(obj.data) )
-							if count > 10 then
-								obj:close()
-								return false
-							end
-							isok = true
-						else
-							kits.log( "keep_alive reconnect failed" )
-						end
-						end						
-					end)
-				end
-				return true
-			end,1)
-		end}		
-	bg:addChild(ff)
-	local as
-	local ffplay = uikits.button{caption='FFAUDIO',x=464*scale,y = 164*scale + 4*item_h+100,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			local ffplayer = require "ffplayer"
-			if as then as:close() end
-			local filename = "G:/Maps.mp3"
-			as = ffplayer.playStream(filename,
-				function(state,as)
-					print("STATE:"..state)
-					if state == ffplayer.STATE_PROGRESS then
-						--print( "progress "..math.floor(10000*as.current/as.length)/100)
-						print( "progress "..as.current)
-					else
-						print( "CURRENT STATE : "..state )
-					end
-				end)
-		end}
-	local play = uikits.button{caption='play',x=464*scale+300,y = 164*scale + 4*item_h+100,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			--as:seek(as.length*0)
-			as:play()
-		end}
-	local pause = uikits.button{caption='pause',x=464*scale-300,y = 164*scale + 4*item_h+100,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			as:pause()
-		end}		
-	local close = uikits.button{caption='close',x=464*scale-600,y = 164*scale + 4*item_h+100,
-		width=128*scale,height=48*scale,
-		eventClick=function(sender)
-			as:close()
-		end}		
-	bg:addChild(close)	
-	bg:addChild(pause)	
-	bg:addChild(play)	
-	bg:addChild(ffplay)
-	--[[-----------------------------------
-	local ti = os.clock()
-	local moLaBattle = require "poetrymatch/BattleScene/LaBattle"
-	local laBattle = moLaBattle.Class:create()
-	bg:addChild(laBattle, 10)
-	print(string.format("time is %f", os.clock() - ti))
-
-
-
-
-	----------------]]
-
-
-	bg:addChild(resetwindow)
-	bg:addChild(playsound)
-	bg:addChild(debugip)
-	bg:addChild(debugbutton)
-	bg:addChild(amouse)
-	bg:addChild(tbutton)
-	bg:addChild(sbutton)
-	bg:addChild(ebutton)
-	bg:addChild(epbutton)
-	bg:addChild(pbutton)
-	bg:addChild(exitbutton)
-	bg:addChild(record)
-	bg:addChild(cam)
-	bg:addChild(photo)
+	bg:addChild(setup_but)		
 	self:addChild(bg)
 	resume.clearflag("update") --update isok
 end
