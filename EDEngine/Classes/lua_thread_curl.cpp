@@ -48,6 +48,11 @@ static void lua_mainThread_progressFunc( void *ptr )
 						ptc->lua_state == CANCEL)
 					{//进度函数将不再被调用,释放引用
 						ptc->_eof = 1;
+						if (!ptc->iskeep_alive)
+						{
+							lua_unref(L, ptc->this_ref);
+							ptc->this_ref = LUA_REFNIL;
+						}
 					}
 				}
 			}

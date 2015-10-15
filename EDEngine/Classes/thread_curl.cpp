@@ -2,6 +2,8 @@
 
 #include <vector>
 #include "cocos2d.h"
+#include "CCLuaStack.h"
+#include "CCLuaEngine.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "curl/include/win32/curl/curl.h"
@@ -287,13 +289,17 @@ MySpaceBegin
 			/*
 			* 等待下一次请求
 			*/
+			if(pct->iskeep_alive)
 			{
 				pct->_busy = false;
 				std::unique_lock<std::mutex> lk(*pct->_mutex);
 				pct->_cond->wait(lk);
 			}
 		}while (pct->iskeep_alive);
+
 		curl_easy_cleanup(curl);
+
+		pct->release();
 	}
 
 	static bool g_bCurlInit = false;
