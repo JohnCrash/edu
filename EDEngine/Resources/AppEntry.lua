@@ -4,6 +4,7 @@ local update = require "update"
 local login = require "login"
 local resume = require "resume"
 local mt = require "mt"
+local pay = require "pay"
 
 require "ljshellDeprecated"
 local RecordVoice = require "recordvoice"
@@ -139,6 +140,63 @@ local function keep_alive( url,func )
 	end
 	return mh,msg
 end
+local socket = require "socket"
+local http = require "socket.http"
+local function test_websocket()
+	--http://local.test.idiom.com/Handler.ashx
+---[[
+	local connect = socket.connect("local.test.idiom.com",80)
+	local buf,err_msg
+	if connect then
+		print("connect :"..tostring(connect))
+		local reqs = "GET /Handler.ashx HTTP/1.0\r\n"
+		reqs = reqs.."Host:local.test.idiom.com\r\n"
+		--reqs = reqs.."Connection:Keep-Alive\r\n"
+		--reqs = reqs.."Content-length:0\r\n"
+		reqs = reqs.."\r\n"
+		local result = connect:send(reqs)
+		print("send "..reqs)
+		print("result "..tostring(result))
+		repeat
+			local t = cc_clock()
+			local chunk,status,partial = connect:receive()
+			print("receive :"..tostring(chunk).."  | status:"..tostring(status).."  | dt= "..(cc_clock()-t))
+			if not buf then
+				buf = chunk
+			elseif buf and chunk then
+				buf = buf..chunk
+			else
+				print("?")
+			end
+		until status == 'closed'
+		connect:close()
+	else
+		print("can not connect")
+	end
+	--]]
+	--[[
+	login.set_selector(24)
+	cache = require "cache"
+	local url = "http://api.lejiaolexue.com/rest/asset/userasset.ashx?currecy=2"
+	cache.request_json(url,function(data)
+		print(tostring(data))
+	end)
+	--]]
+	--[[
+	local b,msg = pay.pay(1040,"201505061543478378",1,"乐信测试产品",1,"1","QW36GFDHGHDFSDFFSDFSREES0987",
+		function(b,data)
+			if b then
+				print("pay success : "..tostring(data))
+			else
+				print("pay failed : "..tostring(data))
+			end
+		end)
+	if b then
+	else
+		print(msg)
+	end
+	--]]
+end
 
 function AppEntry:init()
 	--self:Snow(true)
@@ -197,16 +255,19 @@ function AppEntry:init()
 				run=function()
 				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				--login.set_selector(12) --五五
+				login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
 				--login.set_selector(14) --六六
-				login.set_selector(15) --六六的哥哥
+				--login.set_selector(15) --六六的哥哥
 				--login.set_selector(16) --六六母亲 (家长)
 				--login.set_selector(18) --额额
 				--login.set_selector(18) --杨艳波
 				--login.set_selector(20) --张泳
 				--login.set_selector(21)--李四
+				--login.set_selector(22) --未来之星校长
+				--login.set_selector(23) --大小校长
+				--login.set_selector(24) --田老师
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}
@@ -426,10 +487,10 @@ function AppEntry:init()
 		eventClick=function(sender)
 			as:pause()
 		end}		
-	local close = uikits.button{caption='close',x=464*scale-600,y = 164*scale + 4*item_h+100,
+	local close = uikits.button{caption='HTTP Socket',x=464*scale-600,y = 164*scale + 4*item_h+100,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			as:close()
+			test_websocket()
 		end}		
 	bg:addChild(close)	
 	bg:addChild(pause)	
