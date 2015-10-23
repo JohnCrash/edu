@@ -548,6 +548,14 @@ static int lua_curl_index(lua_State *L)
 					{
 						lua_pushboolean(L, ptc->iskeep_alive);
 					}
+					else
+					{
+						lua_pushnil(L);
+					}
+				}
+				else
+				{
+					lua_pushnil(L);
 				}
 				return 1;
 			}

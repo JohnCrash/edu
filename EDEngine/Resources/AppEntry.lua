@@ -143,8 +143,15 @@ end
 local socket = require "socket"
 local http = require "socket.http"
 local function test_websocket()
+	local thread = require "thread"
+	local t1 = thread.new("test",function()
+	end)
+	uikits.delay_call(nil,function(dt)
+		t1:notify()
+		t1:join()
+	end,5)
 	--http://local.test.idiom.com/Handler.ashx
----[[
+ --[[
 	local connect = socket.connect("local.test.idiom.com",80)
 	local buf,err_msg
 	if connect then
@@ -507,8 +514,10 @@ function AppEntry:init()
 
 
 	----------------]]
-
-
+	local rect = uikits.rect{x2=200,y2=200,x1=100,y1=100,fillColor=cc.c4f(1,1,1,1)}
+	bg:addChild(rect)
+	local image = uikits.image{image="g:\\cache\\4f595dcf81bd1de16866de754a934533.gif",x=100,y=100}
+	bg:addChild(image)
 	bg:addChild(resetwindow)
 	bg:addChild(playsound)
 	bg:addChild(debugip)

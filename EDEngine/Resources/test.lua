@@ -78,6 +78,7 @@ local function isKindOf( instance,class )
 end
 
 --测试
+wait()
 print("test")
 local a = new_A()
 a:init()

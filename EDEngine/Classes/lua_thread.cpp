@@ -7,6 +7,13 @@
 UsingMySpace;
 MySpaceBegin
 
+#define VERSION "1.0"
+#if LUA_VERSION_NUM < 502
+#  define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
+#endif
+
+#define LUA_THREAD_HANDLE "lua_thread_t"
+
 static int executeFunction(lua_State *_state,int numArgs)
 {
 	int functionIndex = -(numArgs + 1);
@@ -70,10 +77,11 @@ static int executeFunction(lua_State *_state,int numArgs)
 
 int thread_proc(thread_t *pt)
 {
-	if (pt)
-		pt->state = TS_RUNING;
+	if (!pt)return -1;
 
-	if (pt && pt->L)
+	pt->state = TS_RUNING;
+
+	if (pt->L)
 	{
 		/*
 		 * 启动指定的文件
@@ -81,12 +89,65 @@ int thread_proc(thread_t *pt)
 		std::string code("require \"");
 		code.append(pt->thread_script);
 		code.append("\"");
-		luaL_loadstring(pt->L, code.c_str());
-		executeFunction(pt->L,0);
+		int ret = luaL_loadstring(pt->L, code.c_str());
+		if (ret == 0)
+		{
+			executeFunction(pt->L, 0);
+		}
+		else
+		{
+			if (lua_isstring(pt->L, 1))
+			{
+				CCLOG(lua_tostring(pt->L,1));
+			}
+		}
 	}
 
-	if (pt)
-		pt->state = TS_EXIT;
+	pt->state = TS_EXIT;
+
+	release_thread_t(pt,true);
+	return 0;
+}
+
+static int lua_print(lua_State * luastate)
+{
+	int nargs = lua_gettop(luastate);
+
+	std::string t;
+	for (int i = 1; i <= nargs; i++)
+	{
+		if (lua_istable(luastate, i))
+			t += "table";
+		else if (lua_isnone(luastate, i))
+			t += "none";
+		else if (lua_isnil(luastate, i))
+			t += "nil";
+		else if (lua_isboolean(luastate, i))
+		{
+			if (lua_toboolean(luastate, i) != 0)
+				t += "true";
+			else
+				t += "false";
+		}
+		else if (lua_isfunction(luastate, i))
+			t += "function";
+		else if (lua_islightuserdata(luastate, i))
+			t += "lightuserdata";
+		else if (lua_isthread(luastate, i))
+			t += "thread";
+		else
+		{
+			const char * str = lua_tostring(luastate, i);
+			if (str)
+				t += lua_tostring(luastate, i);
+			else
+				t += lua_typename(luastate, lua_type(luastate, i));
+		}
+		if (i != nargs)
+			t += "\t";
+	}
+	CCLOG("[LUA-print] %s", t.c_str());
+
 	return 0;
 }
 
@@ -115,44 +176,313 @@ static void add_cc_lua_loader(lua_State *_state, lua_CFunction func)
 	lua_pop(_state, 1);
 }
 
-thread_t * create_thread_t()
+static thread_t * current_thread(lua_State *L)
 {
 	thread_t * pt = NULL;
-	
-	pt = (thread_t *)malloc(sizeof(thread_t));
+	lua_getglobal(L, "_current_thread");
+	if (lua_islightuserdata(L, -1))
+	{
+		pt = (thread_t *)lua_topointer(L, -1);
+	}
+	lua_pop(L, 1);
+	return pt;
+}
+
+/*
+ * 等待直到其他线程调用notify唤醒
+ */
+int lua_thread_wait(lua_State * luastate)
+{
+	thread_t * pt = current_thread(luastate);
+	const char *errmsg = "could not find _current_thread";
+	if (pt)
+	{
+		pt->state = TS_WAIT;
+		if (pt->mutex&&pt->thread)
+		{
+			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->condition->wait(lk);
+			lua_pushboolean(luastate, true);
+			lua_pushnil(luastate);
+			pt->state = TS_RUNING;
+			return 2;
+		}
+		else
+			errmsg = "thread state error";
+		pt->state = TS_RUNING;
+	}
+	lua_pushboolean(luastate, false);
+	lua_pushstring(luastate, errmsg);
+	return 2;
+}
+
+int lua_thread_sleep(lua_State * luastate)
+{
+	if (lua_isnumber(luastate, 1))
+	{
+		int ms = (int)lua_tonumber(luastate, 1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+		lua_pushboolean(luastate, true);
+		return 1;
+	}
+	else
+	{
+		lua_pushboolean(luastate, false);
+		lua_pushstring(luastate, "invalid argument"); 
+		return 2;
+	}
+}
+
+int create_thread_t(thread_t * pt,const char * script)
+{
 	if (pt)
 	{
 		memset(pt, 0, sizeof(thread_t));
 		pt->L = luaL_newstate();
 		if (pt->L)
 		{
+			luaL_openlibs(pt->L);
+			lua_register(pt->L, "print", lua_print);
+			lua_register(pt->L, "wait", lua_thread_wait);
+			lua_register(pt->L, "sleep", lua_thread_sleep);
+			/*
+			* 为新环境注入库
+			*/
+			luaopen_lua_exts(pt->L);
 			/*
 			 * 文件加载器
 			 */
 			add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
-			/*
-			 * 为新环境注入库
-			 */
-			luaopen_lua_exts(pt->L);
+			pt->thread_script = strdup(script);
 			/*
 			 * 启动线程代码
 			 */
 			pt->mutex = new std::mutex();
 			pt->condition = new std::condition_variable();
 			pt->thread = new std::thread(thread_proc, pt);
+			/*
+			 * 线程句柄写入到当前环境中
+			 */
+			lua_pushlightuserdata(pt->L, pt);
+			lua_setglobal(pt->L, "_current_thread");
+			return 0;
 		}
 	}
-	return pt;
+
+	return -1;
 }
 
-int  release_thread_t(thread_t *pt)
+int  release_thread_t(thread_t *pt,bool in)
 {
-
+	if (pt)
+	{
+		if (pt->ref <= 0)
+		{
+			if (!in&&pt->thread &&pt->thread->joinable())
+			{
+				pt->thread->join();
+				delete pt->thread;
+				pt->thread = NULL;
+			}
+			if (pt->condition)
+			{
+				delete pt->condition;
+				pt->condition = NULL;
+			}
+			if (pt->mutex)
+			{
+				delete pt->mutex;
+				pt->mutex = NULL;
+			}
+			if (pt->L)
+			{
+				lua_close(pt->L);
+				pt->L = NULL;
+			}
+			if (pt->thread_script)
+			{
+				free(pt->thread_script);
+				pt->thread_script = NULL;
+			}
+		}
+		else
+		{
+			pt->ref--;
+			return pt->ref;
+		}
+	}
+	return -1;
 }
 
 int retain_thread_t(thread_t * p)
 {
-
+	if (p)
+	{
+		p->ref++;
+		return p->ref;
+	}
+	return -1;
 }
 
+/*
+ * lua中的代码类似于这样
+ * thread.new("revice",function(t)
+ *			
+ * 	end)
+ */
+static int new_thread(lua_State *L)
+{
+	if (lua_isstring(L, 1))
+	{
+		thread_t * pt = (thread_t *)lua_newuserdata(L, sizeof(thread_t));
+		int ret = create_thread_t(pt, lua_tostring(L, 1));
+		if (ret == 0)
+		{
+			luaL_getmetatable(L, LUA_THREAD_HANDLE);
+			lua_setmetatable(L, -2);
+			return 1;
+		}
+		else
+		{
+			lua_pop(L,1);
+			lua_pushnil(L);
+			lua_pushstring(L, "create_thread_t failed");
+			return 2;
+		}
+	}
+
+	lua_pushnil(L);
+	lua_pushstring(L, "invalid arguments");
+	return 2;
+}
+
+/*
+ * local b,... = t.notify(...)
+ * notify和wait交换两个线程的数据
+ * local b,... = wait(...)
+ */
+static int lua_thread_t_notify(lua_State *L)
+{
+	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	const char  *msg = "thread state error";
+	if (c&&c->condition&&c->state==TS_WAIT)
+	{
+		c->condition->notify_one();
+		lua_pushboolean(L, true);
+		return 1;
+	}
+	lua_pushboolean(L, false);
+	lua_pushstring(L, msg);
+	return 2;
+}
+
+static int lua_thread_t_close(lua_State *L)
+{
+	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	if (c)
+	{
+		release_thread_t(c,false);
+	}
+	return 0;
+}
+
+static int lua_thread_t_index(lua_State *L)
+{
+	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	if (c)
+	{
+		if (lua_isstring(L, 2))
+		{
+			const char *key = lua_tostring(L, 2);
+			if (strcmp(key, "notify") == 0)
+			{
+				lua_pushcfunction(L, lua_thread_t_notify);
+			}
+			else if (strcmp(key, "state") == 0)
+			{
+				const char * r = "unknow";
+				switch (c->state)
+				{
+				case TS_INIT:
+					r = "init";
+					break;
+				case TS_RUNING:
+					r = "run";
+					break;
+				case TS_WAIT:
+					r = "wait";
+					break;
+				case TS_EXIT:
+					r = "exit";
+					break;
+				}
+				lua_pushstring(L, r);
+			}
+			else if (strcmp(key, "join") == 0)
+			{
+				lua_pushcfunction(L, lua_thread_t_close);
+			}
+			else
+				lua_pushnil(L);
+
+			return 1;
+		}
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+static int lua_thread_t_gc(lua_State *L)
+{
+	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	if (c)
+	{
+		release_thread_t(c,false);
+	}
+	return 0;
+}
+
+static void createmeta(lua_State *L)
+{
+	luaL_newmetatable(L, LUA_THREAD_HANDLE);
+	lua_pushliteral(L, "__index");
+	lua_pushvalue(L, -2);
+	lua_rawset(L, -3);
+}
+
+static void set_info(lua_State *L)
+{
+	lua_pushliteral(L, "_COPYRIGHT");
+	lua_pushliteral(L, "Copyright (C) 2015");
+	lua_settable(L, -3);
+	lua_pushliteral(L, "_DESCRIPTION");
+	lua_pushliteral(L, "LuaThread is lua Thread library.");
+	lua_settable(L, -3);
+	lua_pushliteral(L, "_VERSION");
+	lua_pushliteral(L, "LuaThread" VERSION);
+	lua_settable(L, -3);
+}
+
+static const struct luaL_Reg lua_thread_methods[] =
+{
+	{ "__index", lua_thread_t_index },
+	{ "__gc", lua_thread_t_gc },
+	{ NULL, NULL }
+};
+
+static const struct luaL_Reg tclib[] =
+{
+	{ "new", new_thread },
+	{ NULL, NULL }
+};
+
+int luaopen_thread(lua_State *L)
+{
+	createmeta(L);
+	luaL_openlib(L, 0, lua_thread_methods, 0);
+	lua_newtable(L);
+	luaL_newlib(L, tclib);
+	set_info(L);
+	return 1;
+}
 MySpaceEnd

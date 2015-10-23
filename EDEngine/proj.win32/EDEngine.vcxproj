@@ -152,6 +152,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\lua_ffmpeg.cpp" />
     <ClCompile Include="..\Classes\lua_json.cpp" />
     <ClCompile Include="..\Classes\lua_ljshell.cpp" />
+    <ClCompile Include="..\Classes\lua_thread.cpp" />
     <ClCompile Include="..\Classes\lua_thread_curl.cpp" />
     <ClCompile Include="..\Classes\MD5.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
@@ -187,6 +188,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
     <ClInclude Include="..\Classes\lua_ljshell.h" />
+    <ClInclude Include="..\Classes\lua_thread.h" />
     <ClInclude Include="..\Classes\lua_thread_curl.h" />
     <ClInclude Include="..\Classes\MD5.h" />
     <ClInclude Include="..\Classes\misc.h" />

@@ -1,6 +1,7 @@
 #include "lua_ext.h"
 #include "lua_thread_curl.h"
 #include "lua_ffmpeg.h"
+#include "lua_thread.h"
 #include "tolua++.h"
 #include "cocos2d.h"
 #include "CCLuaStack.h"
@@ -286,6 +287,7 @@ static luaL_Reg luax_exts[] = {
     {"mt", luaopen_threadcurl},
 	{"json-c",luaopen_json},
 	{"ff",luaopen_ffmpeg},
+	{ "thread", luaopen_thread },
 	//{ "multithread", luaopen_multithread },
     {NULL, NULL}
 };

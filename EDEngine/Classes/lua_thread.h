@@ -41,15 +41,20 @@ struct thread_t
 	int ref;
 };
 
-thread_t * create_thread_t();
+/*
+ * 在另一个线程中执行脚本文件script
+ */
+int create_thread_t(thread_t * pt,const char * script);
 
-int release_thread_t( thread_t * pt );
+int release_thread_t(thread_t * pt, bool in);
 
 int retain_thread_t(thread_t * p);
 
 void wait_thread_t(thread_t *pt);
 
 void notify_thread_t(thread_t *pt);
+
+int luaopen_thread(lua_State *L);
 
 MySpaceEnd
 
