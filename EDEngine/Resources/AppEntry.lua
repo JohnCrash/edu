@@ -147,7 +147,14 @@ local function test_websocket()
 	local t1 = thread.new("test",function()
 	end)
 	uikits.delay_call(nil,function(dt)
-		t1:notify()
+		local b,p1,p2,p3,p4,p5 = t1:notify(1,"hello",true,nil,{2.1,false,nil,"msg"})
+		if b then
+			print("notify 1:"..tostring(p1))
+			print("notify 2:"..tostring(p2))
+			print("notify 3:"..tostring(p3))
+			print("notify 4:"..tostring(p4))
+			print("notify 5:"..tostring(p5))
+		end		
 		t1:join()
 	end,5)
 	--http://local.test.idiom.com/Handler.ashx

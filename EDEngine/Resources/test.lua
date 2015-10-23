@@ -78,7 +78,14 @@ local function isKindOf( instance,class )
 end
 
 --测试
-wait()
+local b,p1,p2,p3,p4,p5 = wait(2,"world",nil,false,true,{})
+if b then
+	print("wait 1:"..tostring(p1))
+	print("wait 2:"..tostring(p2))
+	print("wait 3:"..tostring(p3))
+	print("wait 4:"..tostring(p4))
+	print("wait 5:"..tostring(p5))
+end
 print("test")
 local a = new_A()
 a:init()

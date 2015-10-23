@@ -200,12 +200,12 @@ int lua_thread_wait(lua_State * luastate)
 		pt->state = TS_WAIT;
 		if (pt->mutex&&pt->thread)
 		{
+			pt->notify_argn = 0;
+			lua_pushboolean(luastate, true);
 			std::unique_lock<std::mutex> lk(*pt->mutex);
 			pt->condition->wait(lk);
-			lua_pushboolean(luastate, true);
-			lua_pushnil(luastate);
 			pt->state = TS_RUNING;
-			return 2;
+			return pt->notify_argn+1;
 		}
 		else
 			errmsg = "thread state error";
@@ -367,9 +367,35 @@ static int lua_thread_t_notify(lua_State *L)
 	const char  *msg = "thread state error";
 	if (c&&c->condition&&c->state==TS_WAIT)
 	{
+		/*
+		 * 从一个线程堆栈向另一个线程堆栈搬运参数
+		 */
+		lua_pushboolean(L, true); //准备返回值
+		c->notify_argn = 0;
+		int nargs = lua_gettop(L);
+		int wait_nargs = lua_gettop(c->L);
+		int wait_argn = wait_nargs > 1 ? wait_nargs - 1 : 0; //wait端有多少参数要复制到本线程
+		c->notify_argn = nargs > 2 ? nargs - 2 : 0; //本线程有多少参数要复制到wait线程
+		/*
+		 * 第一步将本线程参数向wait线程复制
+		 */
+		if (c->notify_argn > 0)
+		{
+			for (int i = nargs-1; i > 1; i--) //跳过true直到堆栈位置1(obj)
+				lua_pushvalue(L, i);
+			lua_xmove(L, c->L, c->notify_argn);
+		}
+		/*
+		 * 将wait线程参数线本线程复制
+		 */
+		if (wait_argn > 0)
+		{
+			for (int i = wait_argn - 1; i > 1; i--)
+				lua_pushvalue(c->L, i);
+			lua_xmove(c->L, L, wait_argn); 
+		}
 		c->condition->notify_one();
-		lua_pushboolean(L, true);
-		return 1;
+		return wait_argn+1;
 	}
 	lua_pushboolean(L, false);
 	lua_pushstring(L, msg);

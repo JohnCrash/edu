@@ -38,6 +38,7 @@ struct thread_t
 	std::condition_variable * condition;
 	char * thread_script;
 	thead_state state;
+	int notify_argn;
 	int ref;
 };
 
