@@ -299,7 +299,11 @@ MySpaceBegin
 
 		curl_easy_cleanup(curl);
 
-		pct->release();
+		pct->isthread_exit = true;
+		if (pct->progressFunc)
+		{
+			pct->progressFunc(pct);
+		}
 	}
 
 	static bool g_bCurlInit = false;

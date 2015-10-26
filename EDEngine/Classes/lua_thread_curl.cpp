@@ -34,10 +34,15 @@ static void lua_mainThread_progressFunc( void *ptr )
 			if( L )
 			{
 				curl_t *ptc = (curl_t *)ptr;
-				if( ptc && ptc->ref != LUA_REFNIL && 
+
+				if (ptc&&ptc->isthread_exit)
+				{
+					ptc->release();
+				}
+				else if( ptc && ptc->ref != LUA_REFNIL && 
 					ptc->this_ref != LUA_REFNIL &&
 					L == (lua_State *)ptc->user_data &&
-					ptc->_eof == 0 )
+					ptc->_eof == 0 &&!ptc->isthread_exit)
 				{
 					ptc->lua_state = ptc->state; //在此之后state可能改变
 					lua_rawgeti(L, LUA_REGISTRYINDEX, ptc->ref);
@@ -200,7 +205,7 @@ static int do_curl(lua_State *L)
 				}
 				if (lua_isboolean(L, 7)) /* keep alive*/
 				{
-					pct->iskeep_alive = lua_toboolean(L, 7);
+					pct->iskeep_alive = lua_toboolean(L, 7)?1:0;
 				}
 				if (lua_isnumber(L, 8)) /* 链接超时设置 */
 				{
@@ -215,7 +220,7 @@ static int do_curl(lua_State *L)
 				httppost_params(L,5,pct);
 				if (lua_isboolean(L, 6)) /* keep alive*/
 				{
-					pct->iskeep_alive = lua_toboolean(L, 6);
+					pct->iskeep_alive = lua_toboolean(L, 6)?1:0;
 				}
 				if (lua_isnumber(L, 7)) /* 链接超时设置 */
 				{
@@ -230,7 +235,7 @@ static int do_curl(lua_State *L)
 			{
 				if (lua_isboolean(L, 5)) /* keep alive*/
 				{
-					pct->iskeep_alive = lua_toboolean(L, 5);
+					pct->iskeep_alive = lua_toboolean(L, 5)?1:0;
 				}
 				if (lua_isnumber(L, 6)) /* 链接超时设置 */
 				{

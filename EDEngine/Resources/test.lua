@@ -77,10 +77,27 @@ local function isKindOf( instance,class )
 	return false
 end
 
+local function print_table(t)
+	for i,v in pairs(t) do
+		print( tostring(i)..":"..tostring(v) )
+	end
+end
+
+local b,r1,r2,r3 = post("arg1",2,"hi")
+print("post return b = "..tostring(b))
+print("post return  1:"..tostring(r1))
+print("post return  2:"..tostring(r2))
+print("post return  3:"..tostring(r3))
+print("post return  4:"..tostring(r4))
+print("post return  5:"..tostring(r5))
+
 --测试
-local b,p1,p2,p3,p4,p5 = wait(2,"world",nil,false,true,{})
+local b,p1,p2,p3,p4,p5 = wait(9)
 if b then
 	print("wait 1:"..tostring(p1))
+	if type(p1)=="table" then
+		print_table(p1)
+	end
 	print("wait 2:"..tostring(p2))
 	print("wait 3:"..tostring(p3))
 	print("wait 4:"..tostring(p4))
@@ -107,3 +124,10 @@ print( "isKindOf(a,A) "..tostring(isKindOf(a,A)) )
 print( "isKindOf(b,B) "..tostring(isKindOf(b,B)) )
 print( "isKindOf(b,A) "..tostring(isKindOf(b,A)) )
 print("test end")
+
+local c = 0
+while true do
+	c = c + 1
+	print(c)
+	sleep(1000);
+end

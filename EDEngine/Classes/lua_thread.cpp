@@ -2,10 +2,49 @@
 #include "lua_ext.h"
 #include <cocos2d.h>
 #include "Cocos2dxLuaLoader.h"
+#include "CCLuaStack.h"
+#include "CCLuaEngine.h"
 #include <string>
+#include "tolua_fix.h"
+
+/*
+#include "Lua_web_socket.h"
+*/
+
+extern "C"
+{
+#include "luasocket/luasocket.h"
+#include "luasocket/mime.h"
+#include "luafilesystem/src/lfs.h"
+#include "luaexpat-1.3.0/src/lxplib.h"
+#include "luacurl/luacurl.h"
+#include "luamd5/src/md5.h"
+}
 
 UsingMySpace;
 MySpaceBegin
+static luaL_Reg luax_exts[] = {
+	{ "socket.core", luaopen_socket_core },
+	{ "mime.core", luaopen_mime_core },
+	{ "lfs", luaopen_lfs },
+	{ "lxp", luaopen_lxp },
+	{ "curl", luaopen_luacurl },
+	{ "md5.core", luaopen_md5_core },
+	{ NULL, NULL }
+};
+
+static void luaopen_exts(lua_State *L)
+{
+	luaL_Reg* lib = luax_exts;
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "preload");
+	for (; lib->func; lib++)
+	{
+		lua_pushcfunction(L, lib->func);
+		lua_setfield(L, -2, lib->name);
+	}
+	lua_pop(L, 2);
+}
 
 #define VERSION "1.0"
 #if LUA_VERSION_NUM < 502
@@ -14,8 +53,12 @@ MySpaceBegin
 
 #define LUA_THREAD_HANDLE "lua_thread_t"
 
-static int executeFunction(lua_State *_state,int numArgs)
+static int executeFunction(lua_State *_state,int numArgs,int nResult,char ** errmsg)
 {
+	//初始化错误指针
+	if (errmsg)
+		*errmsg = NULL;
+
 	int functionIndex = -(numArgs + 1);
 	if (!lua_isfunction(_state, functionIndex))
 	{
@@ -38,41 +81,125 @@ static int executeFunction(lua_State *_state,int numArgs)
 
 	int error = 0;
 	//++_callFromLua;
-	error = lua_pcall(_state, numArgs, 1, traceback);                  /* L: ... [G] ret */
+	error = lua_pcall(_state, numArgs, nResult, traceback);                  /* L: ... [G] ret */
 	//--_callFromLua;
 	if (error)
 	{
+		const char * msg = lua_tostring(_state, -1);
+		if (errmsg&&msg)
+			*errmsg = strdup(msg);
 		if (traceback == 0)
 		{
-			CCLOG("[LUA ERROR] %s", lua_tostring(_state, -1));        /* L: ... error */
+			CCLOG("[LUA ERROR] %s", msg?msg:"");        /* L: ... error */
 			lua_pop(_state, 1); // remove error message from stack
 		}
 		else                                                            /* L: ... G error */
 		{
 			lua_pop(_state, 2); // remove __G__TRACKBACK__ and error message from stack
 		}
-		return 0;
+		return -1;
 	}
-
-	// get return value
-	int ret = 0;
-	if (lua_isnumber(_state, -1))
-	{
-		ret = (int)lua_tointeger(_state, -1);
-	}
-	else if (lua_isboolean(_state, -1))
-	{
-		ret = (int)lua_toboolean(_state, -1);
-	}
-	// remove return value from stack
-	lua_pop(_state, 1);                                                /* L: ... [G] */
 
 	if (traceback)
 	{
-		lua_pop(_state, 1); // remove __G__TRACKBACK__ from stack      /* L: ... */
+		//lua_pop(_state, 1); // remove __G__TRACKBACK__ from stack      /* L: ... */
+		lua_remove(_state, -nResult - 1);
 	}
 
-	return ret;
+	return error;
+}
+
+static thread_t * current_thread(lua_State *L)
+{
+	thread_t * pt = NULL;
+	lua_getglobal(L, "_current_thread");
+	if (lua_islightuserdata(L, -1))
+	{
+		pt = (thread_t *)lua_topointer(L, -1);
+	}
+	lua_pop(L, 1);
+	return pt;
+}
+
+static void mainThreadProc(void *ptr)
+{
+	thread_t *pt = (thread_t *)ptr;
+	cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+	if (pEngine)
+	{
+		cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+		if (pLuaStack)
+		{
+			lua_State *L = pLuaStack->getLuaState();
+			if (L&&pt&&pt->mainCallRef != LUA_REFNIL&&pt->L&&pt->condition)
+			{
+				if (pt->state == TS_WAIT)
+				{
+					/*
+					 * 调用主线程中的回调函数，首先从线程调用中复制出参数
+					 */
+					int n = lua_gettop(L);
+					lua_rawgeti(L, LUA_REGISTRYINDEX, pt->mainCallRef);
+					int wait_argn = lua_gettop(pt->L);
+					if (wait_argn > 1)
+					{
+						for (int i = 1; i < wait_argn; i++)
+						{
+							lua_pushvalue(pt->L, i);
+						}
+						lua_xmove(pt->L, L, wait_argn - 1);
+					}
+					char *errmsg = NULL;
+					int ret = executeFunction(L, wait_argn - 1, 5, &errmsg);
+					if (ret)
+					{
+						lua_pushboolean(pt->L, false);
+						lua_pushstring(pt->L, errmsg ? errmsg : "");
+						if (errmsg)
+							free(errmsg);
+						pt->notify_argn = 2;
+					}
+					else
+					{
+						lua_pushboolean(pt->L, true);
+						int n2 = lua_gettop(L);
+						pt->notify_argn = n2 - n;
+						if (pt->notify_argn > 0)
+							lua_xmove(L, pt->L, pt->notify_argn);
+						pt->notify_argn++;
+					}
+					pt->condition->notify_one();
+				}
+			}
+			else if (L&&pt->state == TS_EXIT&&pt->mainCallRef != LUA_REFNIL&&pt->selfRef!=LUA_REFNIL)
+			{
+				/*
+				* 线程已经退出
+				*/
+				lua_unref(L, pt->mainCallRef);
+				lua_unref(L, pt->selfRef);
+				pt->mainCallRef = LUA_REFNIL;
+				pt->selfRef = LUA_REFNIL;
+			}
+		}
+	}
+	release_thread_t(pt,false);
+}
+
+static int postMain(thread_t *pt)
+{
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if (pDirector)
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if (scheduler)
+		{
+			retain_thread_t(pt);
+			scheduler->performFunctionInCocosThread_ext(mainThreadProc, (void *)pt);
+			return 0;
+		}
+	}
+	return -1;
 }
 
 int thread_proc(thread_t *pt)
@@ -92,19 +219,22 @@ int thread_proc(thread_t *pt)
 		int ret = luaL_loadstring(pt->L, code.c_str());
 		if (ret == 0)
 		{
-			executeFunction(pt->L, 0);
+			executeFunction(pt->L, 0,0,NULL);
 		}
 		else
 		{
 			if (lua_isstring(pt->L, 1))
 			{
-				CCLOG(lua_tostring(pt->L,1));
+				CCLOG("%s\n",lua_tostring(pt->L,1));
 			}
 		}
 	}
 
 	pt->state = TS_EXIT;
-
+	/*
+	 * 通知主线程线程已经退出可以做清理工作
+	 */
+	postMain(pt);
 	release_thread_t(pt,true);
 	return 0;
 }
@@ -176,18 +306,6 @@ static void add_cc_lua_loader(lua_State *_state, lua_CFunction func)
 	lua_pop(_state, 1);
 }
 
-static thread_t * current_thread(lua_State *L)
-{
-	thread_t * pt = NULL;
-	lua_getglobal(L, "_current_thread");
-	if (lua_islightuserdata(L, -1))
-	{
-		pt = (thread_t *)lua_topointer(L, -1);
-	}
-	lua_pop(L, 1);
-	return pt;
-}
-
 /*
  * 等待直到其他线程调用notify唤醒
  */
@@ -216,6 +334,46 @@ int lua_thread_wait(lua_State * luastate)
 	return 2;
 }
 
+/*
+ * 向主线程的回调函数发送参数，并接收回调的返回函数
+ */
+static int lua_thread_post(lua_State *L)
+{
+	const char * msg;
+	thread_t * pt = current_thread(L);
+	if (!pt)
+	{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "lua script is not running on thread");
+		return 2;
+	}
+	if (pt->mainCallRef == LUA_REFNIL)
+	{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "main thread have not callback");
+		return 2;
+	}
+	if (postMain(pt) == 0)
+	{
+		pt->state = TS_WAIT;
+		if (pt->mutex&&pt->thread)
+		{
+			pt->notify_argn = 0;
+			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->condition->wait(lk);
+			pt->state = TS_RUNING;
+			return pt->notify_argn;
+		}
+		pt->state = TS_RUNING;
+		msg = "thread exited";
+	}
+	else
+		msg = "main thread is not cocos2d-x thread";
+	lua_pushboolean(L, false);
+	lua_pushstring(L, msg);
+	return 2;
+}
+
 int lua_thread_sleep(lua_State * luastate)
 {
 	if (lua_isnumber(luastate, 1))
@@ -238,17 +396,26 @@ int create_thread_t(thread_t * pt,const char * script)
 	if (pt)
 	{
 		memset(pt, 0, sizeof(thread_t));
+		pt->mainCallRef = LUA_REFNIL;
+		pt->selfRef = LUA_REFNIL;
 		pt->L = luaL_newstate();
 		if (pt->L)
 		{
+			toluafix_open(pt->L);
 			luaL_openlibs(pt->L);
 			lua_register(pt->L, "print", lua_print);
 			lua_register(pt->L, "wait", lua_thread_wait);
 			lua_register(pt->L, "sleep", lua_thread_sleep);
+			lua_register(pt->L, "post", lua_thread_post);
 			/*
 			* 为新环境注入库
 			*/
 			luaopen_lua_exts(pt->L);
+			luaopen_exts(pt->L);
+
+			//tolua_web_socket_open(pt->L);
+			//register_web_socket_manual(pt->L);
+
 			/*
 			 * 文件加载器
 			 */
@@ -338,6 +505,19 @@ static int new_thread(lua_State *L)
 		int ret = create_thread_t(pt, lua_tostring(L, 1));
 		if (ret == 0)
 		{
+			if (lua_isfunction(L, 2))
+			{
+				lua_pushvalue(L, 2);
+				pt->mainCallRef = luaL_ref(L, LUA_REGISTRYINDEX);
+			}
+			/*
+			 * thread_t对象pt在L中如果没有引用将被释放，但是如果新的线程还存在
+			 * 它在调用current_thread就返回一个失效的指针。这里确保只要线程存在
+			 * 对象就不能被释放
+			 */
+			lua_pushvalue(L, -1);
+			pt->selfRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
 			luaL_getmetatable(L, LUA_THREAD_HANDLE);
 			lua_setmetatable(L, -2);
 			return 1;
@@ -381,7 +561,7 @@ static int lua_thread_t_notify(lua_State *L)
 		 */
 		if (c->notify_argn > 0)
 		{
-			for (int i = nargs-1; i > 1; i--) //跳过true直到堆栈位置1(obj)
+			for (int i = 2; i < nargs; i++) //跳过true直到堆栈位置1(obj)
 				lua_pushvalue(L, i);
 			lua_xmove(L, c->L, c->notify_argn);
 		}
@@ -390,7 +570,7 @@ static int lua_thread_t_notify(lua_State *L)
 		 */
 		if (wait_argn > 0)
 		{
-			for (int i = wait_argn - 1; i > 1; i--)
+			for (int i = 1; i <wait_nargs; i++)
 				lua_pushvalue(c->L, i);
 			lua_xmove(c->L, L, wait_argn); 
 		}

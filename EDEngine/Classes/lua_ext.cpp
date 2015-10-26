@@ -572,7 +572,6 @@ int cc_resetWindow(lua_State *L)
 		std::string mode = lua_tostring(L, 1);
 		if (mode == "window")
 		{
-			int w, h;
 			if (lua_isnumber(L, 2) && lua_isnumber(L, 3))
 			{
 				g_FrameWidth = lua_tonumber(L, 2);

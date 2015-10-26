@@ -71,7 +71,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\lua</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;COCOS2D_DEBUG=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;USE_WIN32_CONSOLE;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -108,7 +108,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\lua;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

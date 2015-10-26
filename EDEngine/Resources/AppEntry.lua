@@ -144,10 +144,16 @@ local socket = require "socket"
 local http = require "socket.http"
 local function test_websocket()
 	local thread = require "thread"
-	local t1 = thread.new("test",function()
+	local t1 = thread.new("httpthread",function(a,b,c,e,f)
+		print("receive 1 :"..tostring(a))
+		print("receive 2 :"..tostring(b))
+		print("receive 3 :"..tostring(c))
+		print("receive 4 :"..tostring(e))
+		print("receive 5 :"..tostring(f))
+		return "hi",",","thread"
 	end)
 	uikits.delay_call(nil,function(dt)
-		local b,p1,p2,p3,p4,p5 = t1:notify(1,"hello",true,nil,{2.1,false,nil,"msg"})
+		local b,p1,p2,p3,p4,p5 = t1:notify({1,2,3,4,5,6},"hello","world")
 		if b then
 			print("notify 1:"..tostring(p1))
 			print("notify 2:"..tostring(p2))
@@ -155,7 +161,7 @@ local function test_websocket()
 			print("notify 4:"..tostring(p4))
 			print("notify 5:"..tostring(p5))
 		end		
-		t1:join()
+		--t1:join()
 	end,5)
 	--http://local.test.idiom.com/Handler.ashx
  --[[

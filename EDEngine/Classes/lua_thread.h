@@ -40,6 +40,8 @@ struct thread_t
 	thead_state state;
 	int notify_argn;
 	int ref;
+	int mainCallRef;
+	int selfRef;
 };
 
 /*
