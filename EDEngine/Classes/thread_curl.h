@@ -69,6 +69,7 @@ struct curl_t
 	bool iskeep_alive;
 	std::mutex * _mutex;
 	std::condition_variable * _cond;
+	std::mutex * _mutex2;
 	int _eof;
 	int _busy;
 	bool isthread_exit;
@@ -83,12 +84,10 @@ struct curl_t
 		lua_state(INIT), iskeep_alive(false), _eof(0), _busy(false), isthread_exit(false)
 	{
 		_mutex = new std::mutex();
+		_mutex2 = new std::mutex();
 		_cond = new std::condition_variable();
 	}
-	void retain()
-	{
-		refcount++;
-	}
+	void retain();
 
 	void release();
 };

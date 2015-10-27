@@ -299,6 +299,10 @@ MySpaceBegin
 
 		curl_easy_cleanup(curl);
 
+		while (pct->_eof != 1)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
 		pct->isthread_exit = true;
 		if (pct->progressFunc)
 		{
@@ -319,10 +323,25 @@ MySpaceBegin
 		pct->pthread = new std::thread(curl_thread_method,pct);
 	}
 
+	void curl_t::retain()
+	{
+		if (_mutex2)
+		{
+			std::unique_lock<std::mutex> lk(*_mutex2);
+			refcount++;
+		}
+	}
+
 	void curl_t::release()
 	{
-		refcount--;
-		if (refcount == 0)
+		bool b = false;
+		if (_mutex2){
+			std::unique_lock<std::mutex> lk(*_mutex2);
+			refcount--;
+			if (refcount == 0)
+				b = true;
+		}
+		if (b)
 		{
 			if (pthread)
 			{
@@ -333,10 +352,12 @@ MySpaceBegin
 				delete pthread;
 			}
 			delete _mutex;
-			delete _cond;
-			if (data)delete[] data;
 			_mutex = nullptr;
+			delete _mutex2;
+			_mutex2 = nullptr;
+			delete _cond;
 			_cond = nullptr;
+			if (data)delete[] data;
 			data = nullptr;
 			size = 0;
 			pthread = nullptr;

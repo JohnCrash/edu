@@ -34,7 +34,6 @@ static void lua_mainThread_progressFunc( void *ptr )
 			if( L )
 			{
 				curl_t *ptc = (curl_t *)ptr;
-
 				if (ptc&&ptc->isthread_exit)
 				{
 					ptc->release();
