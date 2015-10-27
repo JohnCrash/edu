@@ -347,6 +347,7 @@ MySpaceBegin
 			{
 				bfastEnd = true;
 				iskeep_alive = false;
+				_eof = 1;
 				_cond->notify_one();
 				pthread->join();
 				delete pthread;

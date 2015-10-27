@@ -425,6 +425,7 @@ int create_thread_t(thread_t * pt,const char * script)
 			 * 启动线程代码
 			 */
 			pt->mutex = new std::mutex();
+			pt->mutex2 = new std::mutex();
 			pt->condition = new std::condition_variable();
 			pt->thread = new std::thread(thread_proc, pt);
 			/*
@@ -443,40 +444,49 @@ int  release_thread_t(thread_t *pt,bool in)
 {
 	if (pt)
 	{
-		if (pt->ref <= 0)
+		std::mutex * mux = NULL;
+		if (pt->mutex2)
 		{
-			if (!in&&pt->thread &&pt->thread->joinable())
+			std::unique_lock<std::mutex> lk(*pt->mutex2);
+			if (pt->ref <= 0)
 			{
-				pt->thread->join();
-				delete pt->thread;
-				pt->thread = NULL;
+				mux = pt->mutex2;
+				pt->mutex2 = NULL;
+				if (!in&&pt->thread &&pt->thread->joinable())
+				{
+					pt->thread->join();
+					delete pt->thread;
+					pt->thread = NULL;
+				}
+				if (pt->condition)
+				{
+					delete pt->condition;
+					pt->condition = NULL;
+				}
+				if (pt->mutex)
+				{
+					delete pt->mutex;
+					pt->mutex = NULL;
+				}
+				if (pt->L)
+				{
+					lua_close(pt->L);
+					pt->L = NULL;
+				}
+				if (pt->thread_script)
+				{
+					free(pt->thread_script);
+					pt->thread_script = NULL;
+				}
 			}
-			if (pt->condition)
+			else
 			{
-				delete pt->condition;
-				pt->condition = NULL;
-			}
-			if (pt->mutex)
-			{
-				delete pt->mutex;
-				pt->mutex = NULL;
-			}
-			if (pt->L)
-			{
-				lua_close(pt->L);
-				pt->L = NULL;
-			}
-			if (pt->thread_script)
-			{
-				free(pt->thread_script);
-				pt->thread_script = NULL;
+				pt->ref--;
+				return pt->ref;
 			}
 		}
-		else
-		{
-			pt->ref--;
-			return pt->ref;
-		}
+		if (mux)
+			delete mux;
 	}
 	return -1;
 }
@@ -485,8 +495,12 @@ int retain_thread_t(thread_t * p)
 {
 	if (p)
 	{
-		p->ref++;
-		return p->ref;
+		if (p->mutex2)
+		{
+			std::unique_lock<std::mutex> lk(*p->mutex2);
+			p->ref++;
+			return p->ref;
+		}
 	}
 	return -1;
 }

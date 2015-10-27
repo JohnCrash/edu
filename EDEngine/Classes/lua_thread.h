@@ -35,6 +35,7 @@ struct thread_t
 	lua_State * L;
 	std::thread * thread;
 	std::mutex * mutex;
+	std::mutex * mutex2;
 	std::condition_variable * condition;
 	char * thread_script;
 	thead_state state;
