@@ -158,14 +158,12 @@ local function test_websocket()
 	local words = {"hello","world","good","bye","end"}
 	local thread = require "thread"
 	local count = 1
-	for i=1,1000 do
-		if count > #words then
-			count = 1
-		end
-		print(i)
-		local t1 = thread.new("test2",function()end,words[count],1000)
-		count = count + 1
-	end
+
+	local t1 = thread.new("test2",function(i,w)
+		print( "i="..tostring(i).."  w="..tostring(w))
+		return i,w
+	end,2,2)
+	
 	--[[
 	local thread = require "thread"
 	local t1 = thread.new("httpthread",function(cmd,p1)

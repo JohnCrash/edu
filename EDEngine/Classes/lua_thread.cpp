@@ -220,7 +220,6 @@ static int thread_proc(thread_t *pt)
 		int ret = luaL_loadstring(pt->L, code.c_str());
 		if (ret == 0)
 		{
-			pt->state = TS_RUNING;
 			executeFunction(pt->L, 0,0,NULL);
 		}
 		else
@@ -561,9 +560,10 @@ static int new_thread(lua_State *L)
 			 */
 			while (pt->state != TS_WAIT)
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				if (pt->state != TS_INIT)
+					break;
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			pt->notify_argn = argn-calln; //本线程有多少参数要复制到wait线程
 			if (pt->notify_argn > 0)
 			{
@@ -572,7 +572,7 @@ static int new_thread(lua_State *L)
 				lua_xmove(L, pt->L, pt->notify_argn);
 			}
 			{
-				std::unique_lock<std::mutex> lk(*pt->mutex);
+				std::lock_guard<std::mutex> lk(*pt->mutex);
 				pt->condition->notify_one();
 			}
 			/*
@@ -612,7 +612,6 @@ static int lua_thread_t_notify(lua_State *L)
 	const char  *msg = "thread state error";
 	if (c&&c->condition&&c->state==TS_WAIT)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		/*
 		 * 从一个线程堆栈向另一个线程堆栈搬运参数
 		 */
@@ -641,7 +640,7 @@ static int lua_thread_t_notify(lua_State *L)
 			lua_xmove(c->L, L, wait_argn); 
 		}
 		{
-			std::unique_lock<std::mutex> lk(*c->mutex);
+			std::lock_guard<std::mutex> lk(*c->mutex);
 			c->condition->notify_one();
 		}
 		return wait_argn+1;
