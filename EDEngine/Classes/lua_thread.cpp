@@ -141,16 +141,16 @@ static void mainThreadProc(void *ptr)
 					int n = lua_gettop(L);
 					lua_rawgeti(L, LUA_REGISTRYINDEX, pt->mainCallRef);
 					int wait_argn = lua_gettop(pt->L);
-					if (wait_argn > 1)
+					if (wait_argn > 0)
 					{
-						for (int i = 1; i < wait_argn; i++)
+						for (int i = 1; i <= wait_argn; i++)
 						{
 							lua_pushvalue(pt->L, i);
 						}
-						lua_xmove(pt->L, L, wait_argn - 1);
+						lua_xmove(pt->L, L, wait_argn);
 					}
 					char *errmsg = NULL;
-					int ret = executeFunction(L, wait_argn - 1, 5, &errmsg);
+					int ret = executeFunction(L, wait_argn, 5, &errmsg);
 					if (ret)
 					{
 						lua_pushboolean(pt->L, false);
@@ -202,23 +202,25 @@ static int postMain(thread_t *pt)
 	return -1;
 }
 
-int thread_proc(thread_t *pt)
+static const char * launch1 = "local script = require \"";
+static const char * launch2 = "\"\nif script and type(script) == \"function\" then\nscript(__wait_args())\nend\n";
+
+static int thread_proc(thread_t *pt)
 {
 	if (!pt)return -1;
-
-	pt->state = TS_RUNING;
 
 	if (pt->L)
 	{
 		/*
 		 * 启动指定的文件
 		 */
-		std::string code("require \"");
+		std::string code(launch1);
 		code.append(pt->thread_script);
-		code.append("\"");
+		code.append(launch2);
 		int ret = luaL_loadstring(pt->L, code.c_str());
 		if (ret == 0)
 		{
+			pt->state = TS_RUNING;
 			executeFunction(pt->L, 0,0,NULL);
 		}
 		else
@@ -315,15 +317,39 @@ int lua_thread_wait(lua_State * luastate)
 	const char *errmsg = "could not find _current_thread";
 	if (pt)
 	{
-		pt->state = TS_WAIT;
-		if (pt->mutex&&pt->thread)
+		if (pt->mutex&&pt->condition)
 		{
+			std::unique_lock<std::mutex> lk(*pt->mutex);
 			pt->notify_argn = 0;
 			lua_pushboolean(luastate, true);
-			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->state = TS_WAIT;
 			pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn+1;
+		}
+		else
+			errmsg = "thread state error";
+		pt->state = TS_RUNING;
+	}
+	lua_pushboolean(luastate, false);
+	lua_pushstring(luastate, errmsg);
+	return 2;
+}
+
+int lua_thread_wait_args(lua_State * luastate)
+{
+	thread_t * pt = current_thread(luastate);
+	const char *errmsg = "could not find _current_thread";
+	if (pt)
+	{
+		if (pt->mutex&&pt->condition)
+		{
+			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->notify_argn = 0;
+			pt->state = TS_WAIT;
+			pt->condition->wait(lk);
+			pt->state = TS_RUNING;
+			return pt->notify_argn;
 		}
 		else
 			errmsg = "thread state error";
@@ -353,22 +379,23 @@ static int lua_thread_post(lua_State *L)
 		lua_pushstring(L, "main thread have not callback");
 		return 2;
 	}
-	if (postMain(pt) == 0)
+	pt->state = TS_WAIT;
+	if (pt->mutex&&pt->condition)
 	{
-		pt->state = TS_WAIT;
-		if (pt->mutex&&pt->thread)
+		pt->notify_argn = 0;
+		std::unique_lock<std::mutex> lk(*pt->mutex);
+		if (postMain(pt) == 0)
 		{
-			pt->notify_argn = 0;
-			std::unique_lock<std::mutex> lk(*pt->mutex);
 			pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn;
 		}
-		pt->state = TS_RUNING;
-		msg = "thread exited";
+		else
+			msg = "main thread is not cocos2d-x thread";
 	}
-	else
-		msg = "main thread is not cocos2d-x thread";
+	else msg = "thread exited";
+
+	pt->state = TS_RUNING;
 	lua_pushboolean(L, false);
 	lua_pushstring(L, msg);
 	return 2;
@@ -405,8 +432,10 @@ int create_thread_t(thread_t * pt,const char * script)
 			luaL_openlibs(pt->L);
 			lua_register(pt->L, "print", lua_print);
 			lua_register(pt->L, "wait", lua_thread_wait);
+			lua_register(pt->L, "__wait_args", lua_thread_wait_args);
 			lua_register(pt->L, "sleep", lua_thread_sleep);
 			lua_register(pt->L, "post", lua_thread_post);
+
 			/*
 			* 为新环境注入库
 			*/
@@ -422,17 +451,17 @@ int create_thread_t(thread_t * pt,const char * script)
 			add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
 			pt->thread_script = strdup(script);
 			/*
+			* 线程句柄写入到当前环境中
+			*/
+			lua_pushlightuserdata(pt->L, pt);
+			lua_setglobal(pt->L, "_current_thread");
+			/*
 			 * 启动线程代码
 			 */
 			pt->mutex = new std::mutex();
 			pt->mutex2 = new std::mutex();
 			pt->condition = new std::condition_variable();
 			pt->thread = new std::thread(thread_proc, pt);
-			/*
-			 * 线程句柄写入到当前环境中
-			 */
-			lua_pushlightuserdata(pt->L, pt);
-			lua_setglobal(pt->L, "_current_thread");
 			return 0;
 		}
 	}
@@ -515,6 +544,8 @@ static int new_thread(lua_State *L)
 {
 	if (lua_isstring(L, 1))
 	{
+		int argn = lua_gettop(L);
+		int calln = 1;
 		thread_t * pt = (thread_t *)lua_newuserdata(L, sizeof(thread_t));
 		int ret = create_thread_t(pt, lua_tostring(L, 1));
 		if (ret == 0)
@@ -523,6 +554,26 @@ static int new_thread(lua_State *L)
 			{
 				lua_pushvalue(L, 2);
 				pt->mainCallRef = luaL_ref(L, LUA_REGISTRYINDEX);
+				calln++;
+			}
+			/*
+			 * 将其他参数传递给等待参数的线程
+			 */
+			while (pt->state != TS_WAIT)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			pt->notify_argn = argn-calln; //本线程有多少参数要复制到wait线程
+			if (pt->notify_argn > 0)
+			{
+				for (int i = calln+1; i <= argn; i++) //跳过true直到堆栈位置1(obj)
+					lua_pushvalue(L, i);
+				lua_xmove(L, pt->L, pt->notify_argn);
+			}
+			{
+				std::unique_lock<std::mutex> lk(*pt->mutex);
+				pt->condition->notify_one();
 			}
 			/*
 			 * thread_t对象pt在L中如果没有引用将被释放，但是如果新的线程还存在
@@ -561,6 +612,7 @@ static int lua_thread_t_notify(lua_State *L)
 	const char  *msg = "thread state error";
 	if (c&&c->condition&&c->state==TS_WAIT)
 	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		/*
 		 * 从一个线程堆栈向另一个线程堆栈搬运参数
 		 */
@@ -588,7 +640,10 @@ static int lua_thread_t_notify(lua_State *L)
 				lua_pushvalue(c->L, i);
 			lua_xmove(c->L, L, wait_argn); 
 		}
-		c->condition->notify_one();
+		{
+			std::unique_lock<std::mutex> lk(*c->mutex);
+			c->condition->notify_one();
+		}
 		return wait_argn+1;
 	}
 	lua_pushboolean(L, false);

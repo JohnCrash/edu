@@ -143,15 +143,40 @@ end
 local socket = require "socket"
 local http = require "socket.http"
 local function test_websocket()
+	--[[
+	local function wait()
+		return true,"hi","hello","world"
+	end
+	local function printd(...)
+		print("1 "..select(1,...))
+		print("2 "..select(2,...))
+		print("3 "..select(3,...))
+	end
+	local b,p1,p2,p3,p4 = wait()
+	printd(p1,p2,p3,p4)
+	--]]
+	local words = {"hello","world","good","bye","end"}
 	local thread = require "thread"
-	local t1 = thread.new("httpthread",function(a,b,c,e,f)
-		print("receive 1 :"..tostring(a))
-		print("receive 2 :"..tostring(b))
-		print("receive 3 :"..tostring(c))
-		print("receive 4 :"..tostring(e))
-		print("receive 5 :"..tostring(f))
+	local count = 1
+	for i=1,1000 do
+		if count > #words then
+			count = 1
+		end
+		print(i)
+		local t1 = thread.new("test2",function()end,words[count],1000)
+		count = count + 1
+	end
+	--[[
+	local thread = require "thread"
+	local t1 = thread.new("httpthread",function(cmd,p1)
+		print("cmd : "..tostring(cmd).." type="..type(cmd).." len="..string.len(cmd))
+		print("p1: "..tostring(p1))
+		if string.find(cmd,'url') then
+			print(" == ")
+			return "local.test.idiom.com","/Handler.ashx",80
+		end
 		return "hi",",","thread"
-	end)
+	end,"local.test.idiom.com","/Handler.ashx",80)
 	uikits.delay_call(nil,function(dt)
 		local b,p1,p2,p3,p4,p5 = t1:notify({1,2,3,4,5,6},"hello","world")
 		if b then
@@ -163,6 +188,7 @@ local function test_websocket()
 		end		
 		--t1:join()
 	end,5)
+	--]]
 	--http://local.test.idiom.com/Handler.ashx
  --[[
 	local connect = socket.connect("local.test.idiom.com",80)

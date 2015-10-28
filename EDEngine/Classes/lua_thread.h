@@ -28,6 +28,7 @@ enum thead_state
 	TS_RUNING,
 	TS_WAIT,
 	TS_EXIT,
+	TS_ARG,
 };
 
 struct thread_t
