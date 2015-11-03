@@ -142,7 +142,63 @@ local function keep_alive( url,func )
 end
 local socket = require "socket"
 local http = require "socket.http"
+local frame = require "websocket.frame"
+local ws_client = require "websocket.client_sync"()
 local function test_websocket()
+ --[[
+  local b,msg = ws_client:connect("ws://localhost/echo")
+  if b then
+		ws_client.sock:settimeout(0)
+	  ws_client:send("hello")
+	  ws_client:send("hello world")
+	  ws_client:send("websocket")
+	  uikits.delay_call(nil,function(dt)
+		 local msg,status = ws_client:receive()
+		 if msg then
+			print('received :'..msg)
+			return true
+		elseif status == "closed" then
+			print("close")
+			ws_client:close()
+		elseif status == "timeout" then
+			return true
+		end
+	  end,0.1)
+  end
+  print( b,msg )
+  --]]
+  
+	--[[
+	local wsSendText = nil
+	local sendTextStatus  = nil
+	local receiveTextTimes = 0
+
+	wsSendText = cc.WebSocket:create("ws://localhost/echo")
+    local function wsSendTextClose(strData)
+        print("_wsiSendText websocket instance closed.")
+        sendTextStatus = nil
+        wsSendText = nil
+    end	
+    local function wsSendTextOpen(strData)
+		print("wsSendTextOpen")
+    end
+
+    local function wsSendTextMessage(strData)
+      local strInfo= "response text msg: "..strData..", "..receiveTextTimes    
+	  print(strInfo)
+    end
+    local function wsSendTextError(strData)
+        print("sendText Error was fired")
+    end	
+    if nil ~= wsSendText then
+        wsSendText:registerScriptHandler(wsSendTextOpen,cc.WEBSOCKET_OPEN)
+        wsSendText:registerScriptHandler(wsSendTextMessage,cc.WEBSOCKET_MESSAGE)
+        wsSendText:registerScriptHandler(wsSendTextClose,cc.WEBSOCKET_CLOSE)
+        wsSendText:registerScriptHandler(wsSendTextError,cc.WEBSOCKET_ERROR)
+    end	
+	--]]
+	
+	
 	--[[
 	local function wait()
 		return true,"hi","hello","world"
@@ -155,6 +211,8 @@ local function test_websocket()
 	local b,p1,p2,p3,p4 = wait()
 	printd(p1,p2,p3,p4)
 	--]]
+	
+	--[[
 	local words = {"hello","world","good","bye","end"}
 	local thread = require "thread"
 	local count = 1
@@ -163,30 +221,21 @@ local function test_websocket()
 		print( "i="..tostring(i).."  w="..tostring(w))
 		return i,w
 	end,2,2)
+	--]]
 	
 	--[[
 	local thread = require "thread"
-	local t1 = thread.new("httpthread",function(cmd,p1)
-		print("cmd : "..tostring(cmd).." type="..type(cmd).." len="..string.len(cmd))
-		print("p1: "..tostring(p1))
-		if string.find(cmd,'url') then
-			print(" == ")
-			return "local.test.idiom.com","/Handler.ashx",80
+	local t1 = thread.new("httpthread",function(data,msg)
+		if data then
+			print( "===========================" )
+			print( tostring(data) )
+			print( "===========================" )
+		else
+			print( tostring(msg) )
 		end
-		return "hi",",","thread"
 	end,"local.test.idiom.com","/Handler.ashx",80)
-	uikits.delay_call(nil,function(dt)
-		local b,p1,p2,p3,p4,p5 = t1:notify({1,2,3,4,5,6},"hello","world")
-		if b then
-			print("notify 1:"..tostring(p1))
-			print("notify 2:"..tostring(p2))
-			print("notify 3:"..tostring(p3))
-			print("notify 4:"..tostring(p4))
-			print("notify 5:"..tostring(p5))
-		end		
-		--t1:join()
-	end,5)
 	--]]
+	
 	--http://local.test.idiom.com/Handler.ashx
  --[[
 	local connect = socket.connect("local.test.idiom.com",80)
@@ -218,6 +267,7 @@ local function test_websocket()
 		print("can not connect")
 	end
 	--]]
+	
 	--[[
 	login.set_selector(24)
 	cache = require "cache"
@@ -226,6 +276,7 @@ local function test_websocket()
 		print(tostring(data))
 	end)
 	--]]
+	
 	--[[
 	local b,msg = pay.pay(1040,"201505061543478378",1,"乐信测试产品",1,"1","QW36GFDHGHDFSDFFSDFSREES0987",
 		function(b,data)
