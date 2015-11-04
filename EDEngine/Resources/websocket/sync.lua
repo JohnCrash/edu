@@ -7,7 +7,8 @@ local tconcat = table.concat
 
 local receive = function(self)
   if self.state ~= 'OPEN' and not self.is_closing then
-    return nil,nil,false,1006,'wrong state'
+    --return nil,nil,false,1006,'wrong state'
+	return nil,'wrong state',1006
   end
   local first_opcode
   local frames
@@ -19,7 +20,8 @@ local receive = function(self)
     if self.on_close then
       self:on_close()
     end
-    return nil,nil,was_clean,code,reason or 'closed'
+    --return nil,nil,was_clean,code,reason or 'closed'
+		return nil,reason or 'closed',code
   end
   while true do
     local chunk,err = self:sock_receive(bytes)

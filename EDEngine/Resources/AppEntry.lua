@@ -140,30 +140,32 @@ local function keep_alive( url,func )
 	end
 	return mh,msg
 end
+
+--[[
 local socket = require "socket"
 local http = require "socket.http"
 local frame = require "websocket.frame"
 local ws_client = require "websocket.client_sync"()
-
+--]]
 local function test_websocket()
+	local ws = require "websock".create("ws://localhost/echo",
+	function(event,msg)
+		if event=="closed" then
+			print("websocket closed")
+		elseif event=="frame" then
+			print("websocket receive : "..tostring(msg))
+		elseif event=="error" then
+			print("websocket error : "..tostring(msg))
+		end
+	end)
+	ws:send("hello world")
+	ws:send("websocket")
+	ws:send("close")
+	uikits.delay_call(nil,function(dt)ws:close()end,1)
+ --[[
 	local thread = require "thread"
 	local filo = {"hello","world"}
-	local t1 = thread.new("wst",function(event,msg)
-		if string.find(event,"closed") then
-			print( "closed" )
-		elseif string.find(event,"frame") then
-			print( "frame : "..tostring(msg) )
-		elseif string.find(event,"error") then
-			print( "error : "..tostring(msg) )
-		elseif event == "idle" then
-		end
-		if filo and #filo > 0 then
-			local data = filo
-			filo = nil
-			return "send",data
-		end
-	end,"ws://localhost/echo")
- --[[
+	
   local b,msg = ws_client:connect("ws://localhost/echo")
   if b then
 		ws_client.sock:settimeout(0)
