@@ -144,7 +144,25 @@ local socket = require "socket"
 local http = require "socket.http"
 local frame = require "websocket.frame"
 local ws_client = require "websocket.client_sync"()
+
 local function test_websocket()
+	local thread = require "thread"
+	local filo = {"hello","world"}
+	local t1 = thread.new("wst",function(event,msg)
+		if string.find(event,"closed") then
+			print( "closed" )
+		elseif string.find(event,"frame") then
+			print( "frame : "..tostring(msg) )
+		elseif string.find(event,"error") then
+			print( "error : "..tostring(msg) )
+		elseif event == "idle" then
+		end
+		if filo and #filo > 0 then
+			local data = filo
+			filo = nil
+			return "send",data
+		end
+	end,"ws://localhost/echo")
  --[[
   local b,msg = ws_client:connect("ws://localhost/echo")
   if b then

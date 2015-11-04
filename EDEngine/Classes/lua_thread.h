@@ -43,6 +43,7 @@ struct thread_t
 	int ref;
 	int mainCallRef;
 	int selfRef;
+	int threadRef;
 };
 
 /*

@@ -23,6 +23,9 @@ local receive = function(self)
   end
   while true do
     local chunk,err = self:sock_receive(bytes)
+	if err=='timeout' then
+		return false,err
+	end
     if err then
       return clean(false,1006,err)
     end

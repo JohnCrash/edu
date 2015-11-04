@@ -282,12 +282,14 @@ extern "C" {
 #endif
 
 extern int luaopen_json( lua_State *L );
+extern int luaopen_bit(lua_State *L);
 
 static luaL_Reg luax_exts[] = {
     {"mt", luaopen_threadcurl},
 	{"json-c",luaopen_json},
 	{"ff",luaopen_ffmpeg},
 	{ "thread", luaopen_thread },
+	{ "bit", luaopen_bit },
 	//{ "multithread", luaopen_multithread },
     {NULL, NULL}
 };

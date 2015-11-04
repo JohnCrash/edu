@@ -1,5 +1,6 @@
 #include "lua_thread.h"
 #include "lua_ext.h"
+#include <pthread.h>
 #include <cocos2d.h>
 #include "Cocos2dxLuaLoader.h"
 #include "CCLuaStack.h"
@@ -109,15 +110,17 @@ static int executeFunction(lua_State *_state,int numArgs,int nResult,char ** err
 	return error;
 }
 
+static pthread_key_t g_key;
+
+static void set_current_thread_handle(thread_t * p)
+{
+	pthread_setspecific(g_key, p);
+}
+
 static thread_t * current_thread(lua_State *L)
 {
 	thread_t * pt = NULL;
-	lua_getglobal(L, "_current_thread");
-	if (lua_islightuserdata(L, -1))
-	{
-		pt = (thread_t *)lua_topointer(L, -1);
-	}
-	lua_pop(L, 1);
+	pt = (thread_t *)pthread_getspecific(g_key);
 	return pt;
 }
 
@@ -170,16 +173,18 @@ static void mainThreadProc(void *ptr)
 					}
 					pt->condition->notify_one();
 				}
-			}
-			else if (L&&pt->state == TS_EXIT&&pt->mainCallRef != LUA_REFNIL&&pt->selfRef!=LUA_REFNIL)
-			{
-				/*
-				* 线程已经退出
-				*/
-				lua_unref(L, pt->mainCallRef);
-				lua_unref(L, pt->selfRef);
-				pt->mainCallRef = LUA_REFNIL;
-				pt->selfRef = LUA_REFNIL;
+				else if (L&&pt->state == TS_EXIT&&pt->mainCallRef != LUA_REFNIL&&pt->selfRef != LUA_REFNIL)
+				{
+					/*
+					* 线程已经退出
+					*/
+					lua_unref(L, pt->mainCallRef);
+					lua_unref(L, pt->selfRef);
+					lua_unref(L, pt->threadRef);
+					pt->mainCallRef = LUA_REFNIL;
+					pt->selfRef = LUA_REFNIL;
+					pt->threadRef = LUA_REFNIL;
+				}
 			}
 		}
 	}
@@ -208,6 +213,11 @@ static const char * launch2 = "\"\nif script and type(script) == \"function\" th
 static int thread_proc(thread_t *pt)
 {
 	if (!pt)return -1;
+
+	/*
+	* 使用线程本地存储来和本线程关联的句柄pt
+	*/
+	set_current_thread_handle(pt);
 
 	if (pt->L)
 	{
@@ -417,29 +427,29 @@ int lua_thread_sleep(lua_State * luastate)
 	}
 }
 
-int create_thread_t(thread_t * pt,const char * script)
+int create_thread_t(thread_t * pt,const char * script,lua_State *L)
 {
 	if (pt)
 	{
 		memset(pt, 0, sizeof(thread_t));
 		pt->mainCallRef = LUA_REFNIL;
 		pt->selfRef = LUA_REFNIL;
-		pt->L = luaL_newstate();
+		pt->threadRef = LUA_REFNIL;
+		//pt->L = luaL_newstate();
+		pt->L = lua_newthread(L);
+		pt->threadRef = luaL_ref(L, LUA_REGISTRYINDEX);
 		if (pt->L)
 		{
-			toluafix_open(pt->L);
-			luaL_openlibs(pt->L);
-			lua_register(pt->L, "print", lua_print);
-			lua_register(pt->L, "wait", lua_thread_wait);
-			lua_register(pt->L, "__wait_args", lua_thread_wait_args);
-			lua_register(pt->L, "sleep", lua_thread_sleep);
-			lua_register(pt->L, "post", lua_thread_post);
-
+			/*
+				toluafix_open(pt->L);
+				luaL_openlibs(pt->L);
+				lua_register(pt->L, "print", lua_print);
+			*/
 			/*
 			* 为新环境注入库
 			*/
-			luaopen_lua_exts(pt->L);
-			luaopen_exts(pt->L);
+	//		luaopen_lua_exts(pt->L);
+	//		luaopen_exts(pt->L);
 
 			//tolua_web_socket_open(pt->L);
 			//register_web_socket_manual(pt->L);
@@ -447,13 +457,13 @@ int create_thread_t(thread_t * pt,const char * script)
 			/*
 			 * 文件加载器
 			 */
-			add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
+	//		add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
 			pt->thread_script = strdup(script);
 			/*
 			* 线程句柄写入到当前环境中
 			*/
-			lua_pushlightuserdata(pt->L, pt);
-			lua_setglobal(pt->L, "_current_thread");
+		//	lua_pushlightuserdata(pt->L, pt);
+		//	lua_setglobal(pt->L, "_current_thread");
 			/*
 			 * 启动线程代码
 			 */
@@ -482,6 +492,8 @@ int  release_thread_t(thread_t *pt,bool in)
 				pt->mutex2 = NULL;
 				if (!in&&pt->thread &&pt->thread->joinable())
 				{
+					if (pt->condition)
+						pt->condition->notify_one();
 					pt->thread->join();
 					delete pt->thread;
 					pt->thread = NULL;
@@ -498,7 +510,7 @@ int  release_thread_t(thread_t *pt,bool in)
 				}
 				if (pt->L)
 				{
-					lua_close(pt->L);
+					//lua_close(pt->L);
 					pt->L = NULL;
 				}
 				if (pt->thread_script)
@@ -546,7 +558,7 @@ static int new_thread(lua_State *L)
 		int argn = lua_gettop(L);
 		int calln = 1;
 		thread_t * pt = (thread_t *)lua_newuserdata(L, sizeof(thread_t));
-		int ret = create_thread_t(pt, lua_tostring(L, 1));
+		int ret = create_thread_t(pt, lua_tostring(L, 1),L);
 		if (ret == 0)
 		{
 			if (lua_isfunction(L, 2))
@@ -582,7 +594,6 @@ static int new_thread(lua_State *L)
 			 */
 			lua_pushvalue(L, -1);
 			pt->selfRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
 			luaL_getmetatable(L, LUA_THREAD_HANDLE);
 			lua_setmetatable(L, -2);
 			return 1;
@@ -752,6 +763,13 @@ static const struct luaL_Reg tclib[] =
 
 int luaopen_thread(lua_State *L)
 {
+	pthread_key_create(&g_key, NULL);
+
+	lua_register(L, "wait", lua_thread_wait);
+	lua_register(L, "__wait_args", lua_thread_wait_args);
+	lua_register(L, "sleep", lua_thread_sleep);
+	lua_register(L, "post", lua_thread_post);
+
 	createmeta(L);
 	luaL_openlib(L, 0, lua_thread_methods, 0);
 	lua_newtable(L);
