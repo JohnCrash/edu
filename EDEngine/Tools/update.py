@@ -86,6 +86,8 @@ def write_json(root):
 	else:
 		has_error = has_error+1
 		print "Can't open file filelist.json"
+	filelist_name = "filelist_"+mmd5('filelist.json',False)+".json"
+	os.rename("filelist.json",filelist_name)
 	version = 1
 	try:
 		version_file = open('version.json','rb')
@@ -104,9 +106,21 @@ def write_json(root):
 		
 	version_file = open('version.json','wb')
 	if(version_file):
-		version_file.write(json.dumps({"version":version}))
+		version_file.write(json.dumps({"version":version,"filelist":filelist_name}))
 		version_file.close()	
-	
+		
+def get_filelist_name(vf):
+	try:
+		version_file = open(vf,'rb')
+		if(version_file):
+			version_json = json.loads(version_file.read())
+			fsname = version_json["filelist"]
+			version_file.close()
+			return fsname
+	except IOError:
+		has_error = has_error+1
+		print "Can't open "+vf
+		
 def copyjson(dir):
 	global has_error
 	try:
@@ -115,7 +129,12 @@ def copyjson(dir):
 		pass
 	try:
 		shutil.copy(dir+"/version.json","output/"+dir+"/version.json")
-		shutil.copy(dir+"/filelist.json","output/"+dir+"/filelist.json")
+		fsname = get_filelist_name(dir+"/version.json")
+		if fsname!=None:
+			shutil.copy(dir+"/"+fsname,"output/"+dir+"/"+fsname)
+			os.remove(dir+"/"+fsname)
+		else:
+			print "ERROR copy filelist"
 	except OSError as err:
 		has_error = has_error+1
 		print "ERROR copy version.json failed"

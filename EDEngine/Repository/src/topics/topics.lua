@@ -244,7 +244,8 @@ end
 
 local function add_topics_image_resourec( e )
 	if e.item_id then
-		local uri = "http://image.lejiaolexue.com/handler/item/item_preview.ashx?item_id="..e.item_id.."&tag=0"
+	--http://imagecdn.lejiaolexue.com/item_preview/acc50ceeeb7e4d7fb3131cb6c2cb293d_0.jpg
+		local uri = "http://imagecdn.lejiaolexue.com/item_preview/"..e.item_id.."_0.jpg"
 		e.topics_image_name = e.item_id..'.jpg'
 		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})
 	end

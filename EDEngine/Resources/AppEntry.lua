@@ -148,7 +148,7 @@ local frame = require "websocket.frame"
 local ws_client = require "websocket.client_sync"()
 --]]
 local function test_websocket()
-	local ws = require "websock".create("ws://localhost/echo",
+	local ws = require "websock".create("ws://localhost/talk",
 	function(event,msg)
 		if event=="closed" then
 			print("websocket closed")
@@ -368,9 +368,10 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
+				login.set_selector(25) --李杰
 				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				login.set_selector(12) --五五
+				--login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
 				--login.set_selector(14) --六六

@@ -197,7 +197,6 @@ def synchronize_dir(sf,lf):
 		recursive_dir(sf,lf)
 		if recursive_error==0:
 			a = lf[len(local_output):]
-			upload_file2(sf+a+'/filelist.json',lf+'/filelist.json')
 			upload_file2(sf+a+'/version.json',lf+'/version.json')
 	else:
 		print "synchronize_dir local directory "+str(lf)+" is not exist"

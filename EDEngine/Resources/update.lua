@@ -8,6 +8,8 @@ local resume = require "resume"
 local mt = require "mt"
 local app,cookie,uid,orientation = cc_launchparam()
 
+local _versions = {}
+
 if not kits.exist_file then
 	kits.exist_file = kits.exists_file
 end
@@ -222,6 +224,10 @@ local function update_one_by_one(t)
 			--delete directory
 			kits.del_directory(local_dir..t.remove_dir)
 			return true,0
+		elseif t.writeto and t.data then
+			kits.log("INFO write to "..t.writeto)
+			kits.write_file(t.writeto,t.data or "")
+			return true,0
 		else
 			kits.log('ERROR update_one_by_one unkown operation')
 			return false,3
@@ -348,8 +354,24 @@ end
 
 --根据filelist.json来跟新文件
 function UpdateProgram:update_directory(dir)
-	local n_dir = liexue_server_sr..dir..'/filelist.json'
+	local n_dir
 	local l_dir = local_dir..dir
+	
+--	kits.log("version:")
+--	for i,v in pairs(_versions) do
+--		kits.log( i )
+--	end
+	if _versions[dir..'/version.json'] and _versions[dir..'/version.json'].json and _versions[dir..'/version.json'].json.filelist then
+		n_dir = liexue_server_dl..dir.."/".._versions[dir..'/version.json'].json.filelist
+		kits.log("INFO : download filelist file : "..n_dir)
+	else
+		kits.log("INFO : json = "..tostring(_versions[dir..'/version.json'].json))
+		kits.log("INFO : json.filelist = "..tostring(_versions[dir..'/version.json'].json.filelist))
+		kits.log("ERROR : update_directory request "..tostring(dir).." failed")
+		self:ErrorAndExit("异常的启动update_directory版本还没有进行检查."..tostring(dir),1)
+		return
+	end
+	--kits.log("WARNING : http_get "..n_dir)
 	local nbuf = kits.http_get(n_dir)
 	if not nbuf then
 		--self._try:setHighlighted(false)
@@ -357,6 +379,7 @@ function UpdateProgram:update_directory(dir)
 		kits.log("ERROR : update_directory request "..tostring(n_dir).." failed")
 		self:ErrorAndExit("跟新服务器暂时不可用请稍后再试."..tostring(dir),1)
 	else
+		--kits.log("INFO : data = "..tostring(nbuf))
 		local n_table = json.decode(nbuf)
 		if n_table and type(n_table)=='table' then
 			if kits.directory_exists(l_dir) then	--创建本地目录
@@ -374,8 +397,8 @@ function UpdateProgram:update_directory(dir)
 				table.insert(self._oplist,v)
 			end
 			--最后将filelist.json和version.json跟新下
-			table.insert(self._oplist,{download=dir..'/filelist.json'})
-			table.insert(self._oplist,{download=dir..'/version.json'})
+			table.insert(self._oplist,{writeto=l_dir..'/filelist.json',data=nbuf})
+			table.insert(self._oplist,{writeto=l_dir..'/version.json',data=_versions[dir..'/version.json'].file})
 		else
 			--self._try:setHighlighted(false)
 			--self._try:setEnabled(false)
@@ -435,21 +458,26 @@ function UpdateProgram:get_resource_suffix( test )
 end
 
 function UpdateProgram:check_directory(dir,n)
-		local res_url = update_server..self:get_resource_suffix()..dir..'/version.json'
-		local src_url = update_server..'src/'..dir..'/version.json'
-		local res_local = local_dir..'res/'..dir..'/version.json'
-		local src_local = local_dir..'src/'..dir..'/version.json'
-		--只有在确定下载成功的情况下才跟新
-		kits.log("check "..tostring(res_url))
-		local res = kits.http_get(res_url,'',2)
+	local res_url = update_server..self:get_resource_suffix()..dir..'/version.json'
+	local src_url = update_server..'src/'..dir..'/version.json'
+	local res_local = local_dir..'res/'..dir..'/version.json'
+	local src_local = local_dir..'src/'..dir..'/version.json'
+	--只有在确定下载成功的情况下才跟新
+	kits.log("check "..tostring(res_url))
+	local try_count = 0
+	local MAX_TRY_COUNT = 10
+	while true do
+		local res = kits.http_get(res_url,'',60)
 		if res then
 			kits.log("check "..tostring(src_url))
-			local src = kits.http_get(src_url,'',2)
+			local src = kits.http_get(src_url,'',60)
 			if src then
 				local res_v = json.decode(res)
 				local src_v = json.decode(src)
 				if res_v and src_v and type(res_v)=='table' and type(src_v)=='table'
 					and res_v.version and src_v.version then
+					_versions[self:get_resource_suffix()..dir..'/version.json'] = {file=res,json=res_v}
+					_versions['src/'..dir..'/version.json'] = {file=src,json=src_v}
 					--比较本地和网络版本
 					local l_res_v = kits.read_file(res_local)
 					local l_src_v = kits.read_file(src_local)
@@ -474,21 +502,30 @@ function UpdateProgram:check_directory(dir,n)
 					return false,1 --下传失败,本次不跟新
 				end
 			else
-				kits.log('ERROR check_directory request '..tostring(src_url)..' failed')
+				if try_count > MAX_TRY_COUNT then
+					kits.log('ERROR check_directory request '..tostring(src_url)..' failed')
+					--网络失败，本机有没有
+					if n==2 then
+						self:NErrorCheckLocal(dir)
+					end
+					return false,1 --下传失败,本次不跟新
+				else
+					try_count = try_count + 1
+				end
+			end
+		else
+			if try_count > MAX_TRY_COUNT then
+				kits.log('ERROR check_directory request '..tostring(res_url)..' failed')
 				--网络失败，本机有没有
-				if n==2 then
+				if n==2 then				
 					self:NErrorCheckLocal(dir)
 				end
 				return false,1 --下传失败,本次不跟新
+			else
+				try_count = try_count + 1
 			end
-		else
-			kits.log('ERROR check_directory request '..tostring(res_url)..' failed')
-			--网络失败，本机有没有
-			if n==2 then				
-				self:NErrorCheckLocal(dir)
-			end
-			return false,1 --下传失败,本次不跟新
 		end
+	end --while
 end
 
 function UpdateProgram:check_update(t)
@@ -500,6 +537,7 @@ function UpdateProgram:check_update(t)
 		if e then --如果网络错误不在等待，直接不跟新
 			--尝试使用外网的
 			outer = true
+			t.need_updates={}
 			break
 		elseif b then
 			if v == 'luacore' then
@@ -516,6 +554,7 @@ function UpdateProgram:check_update(t)
 		for i,v in pairs(t.updates) do
 			local b,e = self:check_directory(v,2)
 			if e then --如果网络错误不在等待，直接不跟新
+				t.need_updates={}
 				return false
 			elseif b then
 				if v == 'luacore' then
