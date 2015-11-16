@@ -141,14 +141,116 @@ local function keep_alive( url,func )
 	return mh,msg
 end
 
+local function toint32( s )
+	return string.byte(s,4)
+end
+
+local function int32tostr( v )
+	local p0 = string.char(v%255)
+	return '\0\0\0'..p0
+end
+
+local function send( socket,msg )
+	local length = string.len(msg)
+	print( length.."-"..msg )
+	socket:send(int32tostr(length)..msg)
+end
+
+local function recv( socket )
+	local msg,err = socket:receive(4)
+	if msg and string.len(msg)==4 then
+		local l = toint32(msg)
+		print( "recv "..tostring(l))
+		if l >= 0 then
+			return socket:receive(l)
+		end
+	else
+		print( "recv "..tostring(err) )
+	end
+	return nil,err
+end
 --[[
 local socket = require "socket"
 local http = require "socket.http"
 local frame = require "websocket.frame"
 local ws_client = require "websocket.client_sync"()
 --]]
+local socket = require "ansync_socket"
+
 local function test_websocket()
-	local ws = require "websock".create("ws://localhost/talk",
+	local count = 0
+	local serial = 0
+	local connect = socket.create("192.168.2.162",8009,function(event,msg)
+		if event=="frame" and msg then
+			print("===============")
+			for i,v in pairs(msg) do
+				count = count - 1
+				print( tostring(event) .."=["..tostring(v).."] "..tostring(count) )
+			end
+		elseif event~="idle" then
+			print( tostring(event) .."=["..tostring(msg).."]" )
+		end
+	end)
+	
+	if connect then
+		uikits.delay_call(nil,function(dt)
+			local b,msg
+			for i=1,1 do
+				count = count + 1
+				serial = serial + 1
+				print("send "..serial)
+				b,msg = connect:send("hello world "..serial)--math.random(1,10000)
+			end
+			if not b then
+				print( "termination send "..msg )
+				return b
+			end
+			return true
+		end,0.1)
+	else
+		print("connect failed")
+	end
+--[[
+	local socket = require "socket"
+	
+	local ct = {}
+	for i=1,1 do
+		local ot = cc_clock()
+		local connect = socket.connect("192.168.2.162",8009)
+		table.insert(ct,{socket = connect,err = msg})
+		if connect then
+			print( "connect "..i..tostring(math.floor((cc_clock()-ot)*1000)).."ms" )
+		else
+			print( "failed "..tostring(msg) )
+		end
+	end
+	local count = 0
+	for i,v in pairs(ct) do
+		if v.con then
+			local ot = cc_clock()
+			connect:send("hello world "..math.random(1,10000).."\n")
+			print( "send delay "..tostring(math.floor((cc_clock()-ot)*1000)).."ms" )
+		end
+	end
+	for i,v in pairs(ct) do
+		if v.con then
+			local msg = recv(v.con)
+			if msg and type(msg)=="string" and string.find(msg,"hello world")==1 then
+				count = count + 1
+			end
+			print( "send 'hello world' recv : "..tostring(msg) )
+		end	
+	end
+	for i,v in pairs(ct) do
+		if v.con then
+			v.con:close()
+			print( "close socket")
+		end	
+	end	
+	print( "success "..tostring(count))
+	--]]
+--[[
+	local ws = require "websock".create("ws://192.168.2.162:8009",
 	function(event,msg)
 		if event=="closed" then
 			print("websocket closed")
@@ -158,10 +260,11 @@ local function test_websocket()
 			print("websocket error : "..tostring(msg))
 		end
 	end)
-	ws:send("hello world")
-	ws:send("websocket")
-	ws:send("close")
-	uikits.delay_call(nil,function(dt)ws:close()end,1)
+	--]]
+	--ws:send("hello world")
+	--ws:send("websocket")
+	--ws:send("close")
+	--uikits.delay_call(nil,function(dt)ws:close()end,1)
  --[[
 	local thread = require "thread"
 	local filo = {"hello","world"}
@@ -368,10 +471,10 @@ function AppEntry:init()
 		eventClick=function(sender)
 			update.create{name='hitmouse2',updates={'luacore'},
 				run=function()
-				login.set_selector(25) --李杰
+				--login.set_selector(25) --李杰
 				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				--login.set_selector(12) --五五
+				login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
 				--login.set_selector(14) --六六

@@ -14,6 +14,7 @@ return function(url)
 			b,msg,t = post("frame",msg)
 		elseif status == "closed" then
 			b,msg,t = post(status)
+			break
 		elseif not status then
 			b,msg,t = post("error",status)
 			break
@@ -35,6 +36,8 @@ return function(url)
 				post("error","send invalid argument")
 				break
 			end
+		elseif msg=="exit" then
+			break
 		end
 	end
 end

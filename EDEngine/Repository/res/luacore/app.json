@@ -36,10 +36,10 @@
 		]
 	},
 	"hitmouse":{
-		"name":"hitmouse",
-		"launch":"hitmouse/loading",
+		"name":"hitmouse2",
+		"launch":"hitmouse2/loading",
 		"updates":[
-			"hitmouse"
+			"hitmouse2"
 		]
 	}	
 }

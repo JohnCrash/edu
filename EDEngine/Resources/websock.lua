@@ -16,6 +16,10 @@ local function create(url,on_message)
 		if on_message then
 			on_message(event,msg)
 		end
+		if msg=="closed" then
+			filo = nil
+			return "exit"
+		end		
 		if filo and #filo > 0 then
 			local data = filo
 			filo = nil
