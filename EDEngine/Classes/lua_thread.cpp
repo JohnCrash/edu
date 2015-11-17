@@ -329,13 +329,14 @@ int lua_thread_wait(lua_State * luastate)
 	const char *errmsg = "could not find _current_thread";
 	if (pt)
 	{
-		pt->state = TS_WAIT;
 		if (pt->mutex&&pt->condition)
 		{
 			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->state = TS_WAIT;
 			pt->notify_argn = 0;
 			lua_pushboolean(luastate, true);
-			pt->condition->wait(lk);
+			if (pt->condition)
+				pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn+1;
 		}
@@ -354,12 +355,13 @@ int lua_thread_wait_args(lua_State * luastate)
 	const char *errmsg = "could not find _current_thread";
 	if (pt)
 	{
-		pt->state = TS_WAIT;
 		if (pt->mutex&&pt->condition)
 		{
 			std::unique_lock<std::mutex> lk(*pt->mutex);
+			pt->state = TS_WAIT;
 			pt->notify_argn = 0;
-			pt->condition->wait(lk);
+			if (pt->condition)
+				pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn;
 		}
@@ -391,14 +393,16 @@ static int lua_thread_post(lua_State *L)
 		lua_pushstring(L, "main thread have not callback");
 		return 2;
 	}
-	pt->state = TS_WAIT;
+	
 	if (pt->mutex&&pt->condition)
 	{
-		pt->notify_argn = 0;
 		std::unique_lock<std::mutex> lk(*pt->mutex);
+		pt->notify_argn = 0;
+		pt->state = TS_WAIT;
 		if (postMain(pt) == 0)
 		{
-			pt->condition->wait(lk);
+			if (pt->condition)
+				pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn;
 		}
@@ -613,6 +617,7 @@ static int new_thread(lua_State *L)
 					lua_pushvalue(L, i);
 				lua_xmove(L, pt->L, pt->notify_argn);
 			}
+
 			if (pt->condition){
 				std::lock_guard<std::mutex> lk(*pt->mutex);
 				pt->condition->notify_one();

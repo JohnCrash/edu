@@ -180,26 +180,32 @@ local socket = require "ansync_socket"
 local function test_websocket()
 	local count = 0
 	local serial = 0
-	local connect = socket.create("192.168.2.162",8009,function(event,msg)
-		if event=="frame" and msg then
-			print("===============")
-			for i,v in pairs(msg) do
-				count = count - 1
-				print( tostring(event) .."=["..tostring(v).."] "..tostring(count) )
-			end
-		elseif event~="idle" then
-			print( tostring(event) .."=["..tostring(msg).."]" )
-		end
-	end)
+	local connects = {}
 	
-	if connect then
+	for i=1,1000 do
+		table.insert(connects,socket.create("192.168.2.162",8009,function(event,msg)
+			if event=="frame" and msg then
+				print("===============")
+				for i,v in pairs(msg) do
+					count = count - 1
+					print( tostring(event) .."=["..tostring(v).."] "..tostring(count) )
+				end
+			elseif event~="idle" then
+				print( tostring(event) .."=["..tostring(msg).."]" )
+			end
+		end))
+	end
+	
+	if connects then
 		uikits.delay_call(nil,function(dt)
 			local b,msg
 			for i=1,1 do
 				count = count + 1
 				serial = serial + 1
 				print("send "..serial)
-				b,msg = connect:send("hello world "..serial)--math.random(1,10000)
+				for k,connect in pairs(connects) do
+					b,msg = connect:send("hello world "..serial)--math.random(1,10000)
+				end
 			end
 			if not b then
 				print( "termination send "..msg )
