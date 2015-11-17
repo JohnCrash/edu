@@ -188,7 +188,7 @@ static void mainThreadProc(void *ptr)
 			}
 		}
 	}
-	release_thread_t(pt,false);
+	release_thread_t(pt,false,false);
 }
 
 static int postMain(thread_t *pt)
@@ -245,8 +245,11 @@ static int thread_proc(thread_t *pt)
 	/*
 	 * 通知主线程线程已经退出可以做清理工作
 	 */
-	postMain(pt);
-	release_thread_t(pt,true);
+	if (pt->L)
+	{
+		postMain(pt);
+		release_thread_t(pt, true,false);
+	}
 	return 0;
 }
 
@@ -326,12 +329,12 @@ int lua_thread_wait(lua_State * luastate)
 	const char *errmsg = "could not find _current_thread";
 	if (pt)
 	{
+		pt->state = TS_WAIT;
 		if (pt->mutex&&pt->condition)
 		{
 			std::unique_lock<std::mutex> lk(*pt->mutex);
 			pt->notify_argn = 0;
 			lua_pushboolean(luastate, true);
-			pt->state = TS_WAIT;
 			pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn+1;
@@ -351,11 +354,11 @@ int lua_thread_wait_args(lua_State * luastate)
 	const char *errmsg = "could not find _current_thread";
 	if (pt)
 	{
+		pt->state = TS_WAIT;
 		if (pt->mutex&&pt->condition)
 		{
 			std::unique_lock<std::mutex> lk(*pt->mutex);
 			pt->notify_argn = 0;
-			pt->state = TS_WAIT;
 			pt->condition->wait(lk);
 			pt->state = TS_RUNING;
 			return pt->notify_argn;
@@ -478,7 +481,7 @@ int create_thread_t(thread_t * pt,const char * script,lua_State *L)
 	return -1;
 }
 
-int  release_thread_t(thread_t *pt,bool in)
+int  release_thread_t(thread_t *pt,bool in,bool must)
 {
 	if (pt)
 	{
@@ -486,17 +489,37 @@ int  release_thread_t(thread_t *pt,bool in)
 		if (pt->mutex2)
 		{
 			std::unique_lock<std::mutex> lk(*pt->mutex2);
-			if (pt->ref <= 0)
+			if (pt->ref <= 0||must)
 			{
 				mux = pt->mutex2;
 				pt->mutex2 = NULL;
+
+				/* 让thread lua环境停止继续工作 */
+				set_current_thread_handle(NULL);
+
 				if (!in&&pt->thread &&pt->thread->joinable())
 				{
-					if (pt->condition)
-						pt->condition->notify_one();
+					/*
+					 * 如果线程没有进入wait,就设置pt->condition=null禁止等待
+					 * 如果已经在等待就通知退出
+					 */
+					auto tmp = pt->condition;
+					if (pt->state == TS_WAIT)
+					{
+						while (pt->state == TS_WAIT)
+						{
+							pt->condition->notify_one();
+							std::this_thread::sleep_for(std::chrono::milliseconds(1));
+						}
+					}
+					else
+					{
+						pt->condition = NULL;
+					}
 					pt->thread->join();
 					delete pt->thread;
 					pt->thread = NULL;
+					pt->condition = tmp;
 				}
 				if (pt->condition)
 				{
@@ -508,25 +531,28 @@ int  release_thread_t(thread_t *pt,bool in)
 					delete pt->mutex;
 					pt->mutex = NULL;
 				}
-				if (pt->L)
-				{
-					//lua_close(pt->L);
-					pt->L = NULL;
-				}
 				if (pt->thread_script)
 				{
 					free(pt->thread_script);
 					pt->thread_script = NULL;
 				}
 			}
-			else
-			{
-				pt->ref--;
-				return pt->ref;
-			}
 		}
 		if (mux)
 			delete mux;
+		/*
+		 * 如果Lua已经不持有本对象，并且引用计数归零就直接释放
+		 */
+		if (pt->ref <= 0&&pt->L==NULL)
+		{
+			delete pt;
+			return -1;
+		}
+		else
+		{
+			pt->ref--;
+			return pt->ref;
+		}
 	}
 	return -1;
 }
@@ -557,7 +583,11 @@ static int new_thread(lua_State *L)
 	{
 		int argn = lua_gettop(L);
 		int calln = 1;
-		thread_t * pt = (thread_t *)lua_newuserdata(L, sizeof(thread_t));
+		//thread_t * pt = (thread_t *)lua_newuserdata(L, sizeof(thread_t));
+		thread_t *pt = new thread_t();
+		thread_t ** ppt = (thread_t**)lua_newuserdata(L, sizeof(thread_t*));
+		*ppt = pt;
+
 		int ret = create_thread_t(pt, lua_tostring(L, 1),L);
 		if (ret == 0)
 		{
@@ -583,7 +613,7 @@ static int new_thread(lua_State *L)
 					lua_pushvalue(L, i);
 				lua_xmove(L, pt->L, pt->notify_argn);
 			}
-			{
+			if (pt->condition){
 				std::lock_guard<std::mutex> lk(*pt->mutex);
 				pt->condition->notify_one();
 			}
@@ -612,6 +642,11 @@ static int new_thread(lua_State *L)
 	return 2;
 }
 
+static thread_t * lua_toThreadObject(lua_State *L, int n)
+{
+	thread_t ** ppt = (thread_t **)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	return *ppt;
+}
 /*
  * local b,... = t.notify(...)
  * notify和wait交换两个线程的数据
@@ -619,7 +654,7 @@ static int new_thread(lua_State *L)
  */
 static int lua_thread_t_notify(lua_State *L)
 {
-	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	thread_t * c = lua_toThreadObject(L, 1);
 	const char  *msg = "thread state error";
 	if (c&&c->condition&&c->state==TS_WAIT)
 	{
@@ -650,7 +685,7 @@ static int lua_thread_t_notify(lua_State *L)
 				lua_pushvalue(c->L, i);
 			lua_xmove(c->L, L, wait_argn); 
 		}
-		{
+		if (c->condition){
 			std::lock_guard<std::mutex> lk(*c->mutex);
 			c->condition->notify_one();
 		}
@@ -663,17 +698,17 @@ static int lua_thread_t_notify(lua_State *L)
 
 static int lua_thread_t_close(lua_State *L)
 {
-	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	thread_t * c = lua_toThreadObject(L, 1);
 	if (c)
 	{
-		release_thread_t(c,false);
+		release_thread_t(c,false,false);
 	}
 	return 0;
 }
 
 static int lua_thread_t_index(lua_State *L)
 {
-	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	thread_t * c = lua_toThreadObject(L, 1);
 	if (c)
 	{
 		if (lua_isstring(L, 2))
@@ -719,10 +754,11 @@ static int lua_thread_t_index(lua_State *L)
 
 static int lua_thread_t_gc(lua_State *L)
 {
-	thread_t * c = (thread_t *)luaL_checkudata(L, 1, LUA_THREAD_HANDLE);
+	thread_t * c = lua_toThreadObject(L, 1);
 	if (c)
 	{
-		release_thread_t(c,false);
+		c->L = NULL;
+		release_thread_t(c,false,true);
 	}
 	return 0;
 }

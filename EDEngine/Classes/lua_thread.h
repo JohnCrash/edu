@@ -51,7 +51,7 @@ struct thread_t
  */
 int create_thread_t(thread_t * pt,const char * script);
 
-int release_thread_t(thread_t * pt, bool in);
+int release_thread_t(thread_t * pt, bool in,bool must);
 
 int retain_thread_t(thread_t * p);
 
