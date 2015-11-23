@@ -38,12 +38,10 @@ local function send( socket,msg )
 		local b,err,try
 		try = 0
 		if type(msg)=="string" then
-			print("send # "..tostring(v))
 			return send_imp(socket,int32tostr(string.len(msg))..msg,3)
 		elseif type(msg)=="table" then
 			local data = {}
 			for i,v in pairs(msg) do
-				print("send @ "..tostring(v))
 				table.insert(data,int32tostr(string.len(v))..v)
 			end
 			return send_imp(socket,table.concat(data),3)

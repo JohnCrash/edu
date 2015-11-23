@@ -181,38 +181,41 @@ local function test_websocket()
 	local count = 0
 	local serial = 0
 	local connects = {}
-	
-	for i=1,1000 do
-		table.insert(connects,socket.create("192.168.2.162",8009,function(event,msg)
+
+	for i=1,1 do
+		table.insert(connects,socket.create("192.168.2.153",8888,function(event,msg)
 			if event=="frame" and msg then
-				print("===============")
 				for i,v in pairs(msg) do
 					count = count - 1
-					print( tostring(event) .."=["..tostring(v).."] "..tostring(count) )
+					--print( tostring(event) .."=["..tostring(v).."] "..tostring(count) )
 				end
 			elseif event~="idle" then
-				print( tostring(event) .."=["..tostring(msg).."]" )
+				--print( tostring(event) .."=["..tostring(msg).."]" )
 			end
 		end))
 	end
 	
 	if connects then
-		uikits.delay_call(nil,function(dt)
-			local b,msg
-			for i=1,1 do
-				count = count + 1
-				serial = serial + 1
-				print("send "..serial)
-				for k,connect in pairs(connects) do
-					b,msg = connect:send("hello world "..serial)--math.random(1,10000)
-				end
-			end
-			if not b then
-				print( "termination send "..msg )
-				return b
-			end
-			return true
-		end,0.1)
+		for i,connect in pairs(connects) do
+			count = count+1
+			print("send enter")
+			b,msg = connect:send(json.encode{m="enter"})--math.random(1,10000)
+			count = count+1
+			print("send say hello world")
+			b,msg = connect:send(json.encode{m="say",c="hello world"})--math.random(1,10000)		
+			count = count+1
+			print("send say hi !")
+			b,msg = connect:send(json.encode{m="say",c="hi !"})--math.random(1,10000)
+			uikits.delay_call(nil,function(dt)
+				serial = serial+1
+				count = count+1
+				b,msg = connect:send(json.encode{m="echo",c="hi "..serial})--math.random(1,10000)
+				serial = serial+1
+				count = count+1				
+				b,msg = connect:send(json.encode{m="say",c="hi "..serial})--math.random(1,10000)
+				return true
+			end)
+		end
 	else
 		print("connect failed")
 	end
@@ -480,10 +483,10 @@ function AppEntry:init()
 				--login.set_selector(25) --李杰
 				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				login.set_selector(12) --五五
+				--login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
-				--login.set_selector(14) --六六
+				login.set_selector(14) --六六
 				--login.set_selector(15) --六六的哥哥
 				--login.set_selector(16) --六六母亲 (家长)
 				--login.set_selector(18) --额额

@@ -44,6 +44,7 @@ struct thread_t
 	int mainCallRef;
 	int selfRef;
 	int threadRef;
+	lua_State * closeit;
 };
 
 /*

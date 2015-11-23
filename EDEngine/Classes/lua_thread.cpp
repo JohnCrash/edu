@@ -54,6 +54,67 @@ static void luaopen_exts(lua_State *L)
 
 #define LUA_THREAD_HANDLE "lua_thread_t"
 
+static void lua_push_table(lua_State *dst, lua_State * src, int index);
+
+/*
+ * 将src堆栈index位置的数据压入dst的栈顶，不能转换的数据压入nil
+ */
+static void lua_push_value(lua_State *dst, lua_State *src, int index)
+{
+	int type = lua_type(src, index);
+	switch (type)
+	{
+		case LUA_TSTRING:
+			if (lua_isnumber(src,index))
+				lua_pushnumber(dst, lua_tonumber(src, index));
+			else
+				lua_pushstring(dst, lua_tostring(src, index));
+			break;
+		case LUA_TBOOLEAN:
+			lua_pushboolean(dst, lua_toboolean(src, index));
+			break;
+		case LUA_TNUMBER:
+			lua_pushnumber(dst, lua_tonumber(src, index));
+			break;
+		case LUA_TTABLE:
+			lua_push_table(dst, src, index);
+			break;
+		default:
+			lua_pushnil(dst);
+			break;
+	}
+}
+
+/*
+ * 当src堆栈index位置是一个table才能调用该函数，函数将src位于index的表复制到
+ * dst的栈顶
+ */
+static void lua_push_table(lua_State *dst, lua_State * src, int index)
+{
+	lua_newtable(dst);
+	lua_pushnil(src);
+	while (lua_next(src, index-1) != 0)
+	{
+		lua_push_value(dst, src, -2);
+		lua_push_value(dst,src, -1);
+		lua_settable(dst, -3);
+		lua_pop(src, 1);
+	}
+}
+
+/*
+ * 将从src向dst搬运数据，仿照lua_xmov操作。
+ */
+static int luax_copy(lua_State * src, lua_State * dst, int n)
+{
+	for (int i = -n; i < 0; i++)
+	{
+		lua_push_value(dst, src, i);
+	}
+	lua_pop(src, n);
+	return 0;
+}
+
 static int executeFunction(lua_State *_state,int numArgs,int nResult,char ** errmsg)
 {
 	//初始化错误指针
@@ -150,7 +211,7 @@ static void mainThreadProc(void *ptr)
 						{
 							lua_pushvalue(pt->L, i);
 						}
-						lua_xmove(pt->L, L, wait_argn);
+						luax_copy(pt->L, L, wait_argn);
 					}
 					char *errmsg = NULL;
 					int ret = executeFunction(L, wait_argn, 5, &errmsg);
@@ -168,7 +229,7 @@ static void mainThreadProc(void *ptr)
 						int n2 = lua_gettop(L);
 						pt->notify_argn = n2 - n;
 						if (pt->notify_argn > 0)
-							lua_xmove(L, pt->L, pt->notify_argn);
+							luax_copy(L, pt->L, pt->notify_argn);
 						pt->notify_argn++;
 					}
 					pt->condition->notify_one();
@@ -200,7 +261,8 @@ static int postMain(thread_t *pt)
 		if (scheduler)
 		{
 			retain_thread_t(pt);
-			scheduler->performFunctionInCocosThread_ext(mainThreadProc, (void *)pt);
+			if (pDirector == cocos2d::Director::getInstance())
+				scheduler->performFunctionInCocosThread_ext(mainThreadProc, (void *)pt);
 			return 0;
 		}
 	}
@@ -247,6 +309,11 @@ static int thread_proc(thread_t *pt)
 	 */
 	if (pt->L)
 	{
+		/*
+		 * 再也不需要pt->L了
+		 */
+		lua_close(pt->L);
+		pt->L = NULL;
 		postMain(pt);
 		release_thread_t(pt, true,false);
 	}
@@ -442,21 +509,27 @@ int create_thread_t(thread_t * pt,const char * script,lua_State *L)
 		pt->mainCallRef = LUA_REFNIL;
 		pt->selfRef = LUA_REFNIL;
 		pt->threadRef = LUA_REFNIL;
-		//pt->L = luaL_newstate();
-		pt->L = lua_newthread(L);
-		pt->threadRef = luaL_ref(L, LUA_REGISTRYINDEX);
+		pt->L = luaL_newstate();
+		/*
+		 * 因为有数据共享，多个线程在lua内部执行中会出现异常
+		 * 问题主要集中在对字符串的访问上，因为字符串在lua内部是共享的
+		 */
+//		pt->L = lua_newthread(L);
+//		pt->threadRef = luaL_ref(L, LUA_REGISTRYINDEX);
 		if (pt->L)
 		{
-			/*
-				toluafix_open(pt->L);
-				luaL_openlibs(pt->L);
-				lua_register(pt->L, "print", lua_print);
-			*/
+			toluafix_open(pt->L);
+			luaL_openlibs(pt->L);
+			lua_register(pt->L, "print", lua_print);
+			lua_register(pt->L, "wait", lua_thread_wait);
+			lua_register(pt->L, "__wait_args", lua_thread_wait_args);
+			lua_register(pt->L, "sleep", lua_thread_sleep);
+			lua_register(pt->L, "post", lua_thread_post);
 			/*
 			* 为新环境注入库
 			*/
-	//		luaopen_lua_exts(pt->L);
-	//		luaopen_exts(pt->L);
+			luaopen_lua_exts(pt->L);
+			luaopen_exts(pt->L);
 
 			//tolua_web_socket_open(pt->L);
 			//register_web_socket_manual(pt->L);
@@ -464,13 +537,13 @@ int create_thread_t(thread_t * pt,const char * script,lua_State *L)
 			/*
 			 * 文件加载器
 			 */
-	//		add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
+			add_cc_lua_loader(pt->L, cocos2dx_lua_loader);
 			pt->thread_script = strdup(script);
 			/*
 			* 线程句柄写入到当前环境中
 			*/
-		//	lua_pushlightuserdata(pt->L, pt);
-		//	lua_setglobal(pt->L, "_current_thread");
+			lua_pushlightuserdata(pt->L, pt);
+			lua_setglobal(pt->L, "_current_thread");
 			/*
 			 * 启动线程代码
 			 */
@@ -544,12 +617,13 @@ int  release_thread_t(thread_t *pt,bool in,bool must)
 		}
 		if (mux)
 			delete mux;
+
 		/*
 		 * 如果Lua已经不持有本对象，并且引用计数归零就直接释放
 		 */
 		if (pt->ref <= 0&&pt->L==NULL)
 		{
-			delete pt;
+		//	delete pt;
 			return -1;
 		}
 		else
@@ -593,6 +667,7 @@ static int new_thread(lua_State *L)
 		*ppt = pt;
 
 		int ret = create_thread_t(pt, lua_tostring(L, 1),L);
+
 		if (ret == 0)
 		{
 			if (lua_isfunction(L, 2))
@@ -610,18 +685,20 @@ static int new_thread(lua_State *L)
 				if (pt->state != TS_INIT)
 					break;
 			}
+
 			pt->notify_argn = argn-calln; //本线程有多少参数要复制到wait线程
 			if (pt->notify_argn > 0)
 			{
 				for (int i = calln+1; i <= argn; i++) //跳过true直到堆栈位置1(obj)
 					lua_pushvalue(L, i);
-				lua_xmove(L, pt->L, pt->notify_argn);
+				luax_copy(L, pt->L, pt->notify_argn);
 			}
 
 			if (pt->condition){
 				std::lock_guard<std::mutex> lk(*pt->mutex);
 				pt->condition->notify_one();
 			}
+
 			/*
 			 * thread_t对象pt在L中如果没有引用将被释放，但是如果新的线程还存在
 			 * 它在调用current_thread就返回一个失效的指针。这里确保只要线程存在
@@ -679,7 +756,7 @@ static int lua_thread_t_notify(lua_State *L)
 		{
 			for (int i = 2; i < nargs; i++) //跳过true直到堆栈位置1(obj)
 				lua_pushvalue(L, i);
-			lua_xmove(L, c->L, c->notify_argn);
+			luax_copy(L, c->L, c->notify_argn);
 		}
 		/*
 		 * 将wait线程参数线本线程复制
@@ -688,7 +765,7 @@ static int lua_thread_t_notify(lua_State *L)
 		{
 			for (int i = 1; i <wait_nargs; i++)
 				lua_pushvalue(c->L, i);
-			lua_xmove(c->L, L, wait_argn); 
+			luax_copy(c->L, L, wait_argn); 
 		}
 		if (c->condition){
 			std::lock_guard<std::mutex> lk(*c->mutex);
@@ -762,6 +839,7 @@ static int lua_thread_t_gc(lua_State *L)
 	thread_t * c = lua_toThreadObject(L, 1);
 	if (c)
 	{
+		c->closeit = c->L;
 		c->L = NULL;
 		release_thread_t(c,false,true);
 	}
