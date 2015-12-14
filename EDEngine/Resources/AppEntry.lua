@@ -141,6 +141,32 @@ local function keep_alive( url,func )
 	return mh,msg
 end
 
+
+local function zmq_test()
+	local zmq = require"lzmq"
+
+	local context = zmq.init(1)
+
+	--  Socket to talk to server
+	print("Connecting to hello world server...")
+	local socket = context:socket(zmq.REQ)
+	socket:connect("tcp://192.168.2.157:5555")
+
+	for n=1,10 do
+		print("Sending Hello " .. n .. " ...")
+		socket:send("Hello")
+
+		local reply = socket:recv()
+		print("Received World " ..  n .. " [" .. reply .. "]")
+	end
+	socket:close()
+	context:term()
+end
+
+--chat
+local function zmq_test2()
+end
+
 local function toint32( s )
 	return string.byte(s,4)
 end
@@ -483,7 +509,7 @@ function AppEntry:init()
 				--login.set_selector(25) --李杰
 				--login.set_uid_type(login.TEACHER)
 				--login.set_selector(11) --秦胜兵(教育局领导)
-				login.set_selector(12) --五五
+				--login.set_selector(12) --五五
 				--login.set_selector(17) --五五的家长
 				--login.set_selector(13) --李四 (领导但不能发比赛)
 				--login.set_selector(14) --六六
@@ -497,6 +523,7 @@ function AppEntry:init()
 				--login.set_selector(23) --大小校长
 				--login.set_selector(24) --田老师
 				--login.set_selector(26) 
+				login.set_selector(25) 
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}
@@ -575,11 +602,10 @@ function AppEntry:init()
 							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
 						end)
 			end}
-	local resetwindow = uikits.button{caption='messagebox',x=264*scale,y = 164*scale + 4*item_h,
+	local resetwindow = uikits.button{caption='zmq test',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				local messagebox = require "messagebox"
-				messagebox.open(bg,function()end,messagebox.REPAIR,"title","text")
+			zmq_test()
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
@@ -631,6 +657,7 @@ function AppEntry:init()
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			if not isopen then
+				kits.log("debug "..tostring(debugip:getStringValue()))
 				require("mobdebug").start(debugip:getStringValue())
 				isopen = true
 			end

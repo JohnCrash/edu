@@ -20,6 +20,10 @@ extern "C"
 #include "luaexpat-1.3.0/src/lxplib.h"
 #include "luacurl/luacurl.h"
 #include "luamd5/src/md5.h"
+#ifdef USE_ZMQ
+	extern int luaopen_lzmq(lua_State *L);
+	extern int luaopen_lzmq_timer(lua_State *L);
+#endif
 }
 
 UsingMySpace;
@@ -31,6 +35,10 @@ static luaL_Reg luax_exts[] = {
 	{ "lxp", luaopen_lxp },
 	{ "curl", luaopen_luacurl },
 	{ "md5.core", luaopen_md5_core },
+#ifdef USE_ZMQ
+	{ "lzmq", luaopen_lzmq },
+	{ "lzmq.timer", luaopen_lzmq_timer },
+#endif
 	{ NULL, NULL }
 };
 

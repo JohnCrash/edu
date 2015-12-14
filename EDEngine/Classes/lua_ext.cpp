@@ -280,7 +280,10 @@ void baiduVoiceResult( std::string text )
 #if __cplusplus
 extern "C" {
 #endif
-
+#ifdef USE_ZMQ
+	extern int luaopen_lzmq(lua_State *L );
+	extern int luaopen_lzmq_timer(lua_State *L);
+#endif
 extern int luaopen_json( lua_State *L );
 extern int luaopen_bit(lua_State *L);
 
@@ -291,6 +294,10 @@ static luaL_Reg luax_exts[] = {
 	{ "thread", luaopen_thread },
 	{ "bit", luaopen_bit },
 	//{ "multithread", luaopen_multithread },
+#ifdef USE_ZMQ
+	{ "lzmq", luaopen_lzmq },
+	{ "lzmq.timer", luaopen_lzmq_timer },
+#endif
     {NULL, NULL}
 };
 

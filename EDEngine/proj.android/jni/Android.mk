@@ -39,10 +39,20 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/SDLWindow.cpp \
 				   ../../Classes/acr.cpp \
 				   ../../Classes/lua_thread.cpp \
+				   ../../Classes/lzmq/lzmq.c \
+				   ../../Classes/lzmq/lzutils.c \
+				   ../../Classes/lzmq/poller.c \
+				   ../../Classes/lzmq/zcontext.c \
+				   ../../Classes/lzmq/zerror.c \
+				   ../../Classes/lzmq/zmsg.c \
+				   ../../Classes/lzmq/zpoller.c \
+				   ../../Classes/lzmq/zsocket.c \
+				   ../../Classes/lzmq/ztimer.c \
 				   JniLaunch.cpp \
 				   SDLAudioJNI.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
+					$(LOCAL_PATH)/../../Classes/lzmq \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
 					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua \
 					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua/lua \
@@ -54,6 +64,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocosdenshion_static
 LOCAL_WHOLE_STATIC_LIBRARIES += box2d_static
 LOCAL_WHOLE_STATIC_LIBRARIES += ffmpeg_static
+LOCAL_WHOLE_STATIC_LIBRARIES += zeromq_static
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -62,3 +73,4 @@ $(call import-module,audio/android)
 $(call import-module,Box2D)
 $(call import-module,scripting/lua-bindings)
 $(call import-module,ffmpeg/prebuilt/android)
+$(call import-module,zeromq/prebuilt/android)
