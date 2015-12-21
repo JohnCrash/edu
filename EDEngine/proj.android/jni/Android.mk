@@ -68,9 +68,14 @@ LOCAL_WHOLE_STATIC_LIBRARIES += zeromq_static
 
 include $(BUILD_SHARED_LIBRARY)
 
+#
+#NDK_MODULE_PATH := $(LOCAL_PATH)/../../../../cocos2d-x \
+#	$(LOCAL_PATH)/../../../../cocos2d-x/external \
+#	$(LOCAL_PATH)/../../../../cocos2d-x/cocos/scripting/lua-bindings
+	
 #$(call import-module,cocos)
-$(call import-module,audio/android)
-$(call import-module,Box2D)
-$(call import-module,scripting/lua-bindings)
-$(call import-module,ffmpeg/prebuilt/android)
-$(call import-module,zeromq/prebuilt/android)
+#$(call import-module,audio/android)
+#$(call import-module,Box2D)
+#$(call import-module,scripting/lua-bindings)
+#$(call import-module,ffmpeg/prebuilt/android)
+#$(call import-module,zeromq/prebuilt/android)

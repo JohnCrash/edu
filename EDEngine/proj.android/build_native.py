@@ -75,7 +75,7 @@ def select_toolchain_version():
         print "Couldn't find the gcc toolchain."
         exit(1)
 
-def do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,android_platform,build_mode):
+def do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,android_platform,build_mode,debug):
 
     ndk_path = os.path.join(ndk_root, "ndk-build")
 
@@ -93,13 +93,15 @@ def do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,and
     print 'ndk_path= %s' % ndk_path
     print 'num_of_cpu= %s' % num_of_cpu
     print 'app_android_root= %s' % app_android_root
-	
-    if ndk_build_param == None:
-#        command = '%s NDK_DEBUG=1 -j%d -C %s %s' % (ndk_path, num_of_cpu, app_android_root, ndk_module_path)
-		command = '%s -j%d -C %s %s' % (ndk_path, num_of_cpu, app_android_root, ndk_module_path)
+    if debug == None:
+        debug_arg=''
     else:
-#        command = '%s NDK_DEBUG=1 -j%d -C %s %s %s' % (ndk_path, num_of_cpu, app_android_root, ''.join(str(e) for e in ndk_build_param), ndk_module_path)
-		command = '%s -j%d -C %s %s %s' % (ndk_path, num_of_cpu, app_android_root, ''.join(str(e) for e in ndk_build_param), ndk_module_path)
+        debug_arg='NDK_DEBUG=1'
+    print 'debug_arg= %s' % debug_arg
+    if ndk_build_param == None:
+		command = '%s %s -j%d -C %s %s' % (ndk_path, debug_arg,num_of_cpu, app_android_root, ndk_module_path)
+    else:
+		command = '%s %s -j%d -C %s %s %s' % (ndk_path, debug_arg,num_of_cpu, app_android_root, ''.join(str(e) for e in ndk_build_param), ndk_module_path)
     print '========================================'     
     print 'command=: %s' % command
     print '========================================' 
@@ -148,7 +150,7 @@ def copy_resources(app_android_root):
     if os.path.isdir(resources_dir):
         copy_files(resources_dir, assets_dir)
 
-def build(ndk_build_param,android_platform,build_mode):
+def build(ndk_build_param,android_platform,build_mode,debug):
 
     ndk_root = check_environment_variables()
     sdk_root = None
@@ -175,7 +177,7 @@ def build(ndk_build_param,android_platform,build_mode):
     elif build_mode != 'release':
         build_mode = 'debug'
     print 'do_building...'
-    do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,android_platform,build_mode)
+    do_build(cocos_root, ndk_root, app_android_root,ndk_build_param,sdk_root,android_platform,build_mode,debug)
 
 # -------------- main --------------
 if __name__ == '__main__':
@@ -186,6 +188,8 @@ if __name__ == '__main__':
     help='parameter for android-update.Without the parameter,the script just build dynamic library for project. Valid android-platform are:[10|11|12|13|14|15|16|17|18|19]')
     parser.add_option("-b", "--build", dest="build_mode", 
     help='the build mode for java project,debug[default] or release.Get more information,please refer to http://developer.android.com/tools/building/building-cmdline.html')
+    parser.add_option("-d","--debug", dest="debug", 
+    help='enable debug mode (NDK_DEBUG=1),default disable')	
     (opts, args) = parser.parse_args()
     print 'build launch...'
-    build(opts.ndk_build_param,opts.android_platform,opts.build_mode)
+    build(opts.ndk_build_param,opts.android_platform,opts.build_mode,opts.debug)

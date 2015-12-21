@@ -448,74 +448,6 @@ local function split_value(nvalue)
 	end
 end
 
---t是一个表，s是一个形如a.b.c的字符串，函数返回t.a.b.c
-local function table_value_by_string(t,s)
-	local tmp = t
-	for s in string.gmatch(s,"[^%.]+") do
-		tmp = tmp[s]
-		if type(tmp)~='table' then
-			break
-		end
-	end
-	return tmp
-end
---先尝试取upvalue,local,然后global
-local function getLuaValue(level,nvalue)
-	if not debug.getinfo(level) then
-		print( 'ERROR getLuaValue levle out of range! level = '..level )
-		return
-	end
-	--nvalue,可能是由一系列的点分割的.如a.b.c.d
-	local m,v = split_value(nvalue)
-	if m then
-		--print('m = '..tostring(m)..' v='..tostring(v) )
-		local i = 1
-		repeat
-			local name,value = debug.getlocal(level,i)
-			--print('local name='..tostring(name)..' value='..tostring(value))
-			if name == m then
-				if v then
-					if type(value)=='table' or type(value)=='userdata' then
-						return table_value_by_string(value,v)
-					else
-						return nil
-					end
-				else
-					return value
-				end
-			end
-			i = i + 1
-		until not name
-		local c = debug.getinfo(level,'f')
-		if c and c.func then
-			i = 1
-			repeat
-				local name,value = debug.getupvalue(c.func,i)
-				--print('upvalue name='..tostring(name)..' value='..tostring(value))
-				if name == m then
-					if v then
-						if type(value)=='table' or type(value)=='userdata' then
-							return table_value_by_string(value,v)
-						else
-							return nil
-						end
-					else
-						return value
-					end
-				end
-				i = i + 1
-			until not name
-			--都没找到,最后尝试在函数的环境中查找
-			local G = debug.getfenv(c.func)
-			if G then
-				return table_value_by_string(G,nvalue)
-			end
-		else
-			print('cant getinfo level='..level)
-		end
-	end
-end
-
 local function space_n(n)
 	--返回有n个space的字符串
 	local t = {}
@@ -538,7 +470,11 @@ local function table_to_debug_info(t)
 		k = k..space_n(m-string.len(k))
 		table.insert(str,tostring(k)..':'..tostring(v)..'\t')
 	end	
-	return table.concat(str)
+	if #str == 0 then
+		return 'table is empty'
+	else
+		return table.concat(str)
+	end
 end
 
 --将值转换为调试信息
@@ -579,6 +515,77 @@ local function value_to_debug_info(value)
 		end
 	else
 		return tostring(value) --nil
+	end
+end
+
+--t是一个表，s是一个形如a.b.c的字符串，函数返回t.a.b.c
+local function table_value_by_string(t,s)
+	local tmp = t
+	for i in string.gmatch(s,"[^%.]+") do
+		tmp = tmp[i]
+		if type(tmp)~='table' then
+			break
+		end
+	end
+	return tmp
+end
+--先尝试取upvalue,local,然后global
+local function getLuaValue(level,nvalue)
+	if not debug.getinfo(level) then
+		print( 'ERROR getLuaValue levle out of range! level = '..level )
+		return
+	end
+	--nvalue,可能是由一系列的点分割的.如a.b.c.d
+	--print( 'getLuaValue ['..level..']'..nvalue)
+	local m,v = split_value(nvalue)
+	if m then
+		--print('m = '..tostring(m)..' v='..tostring(v) )
+		local i = 1
+		repeat
+			local name,value = debug.getlocal(level,i)
+		--print('local name='..tostring(name)..' value='..tostring(value))
+		--print("m = "..tostring(m))
+			if name == m then
+				if v then
+					if type(value)=='table' or type(value)=='userdata' then
+						return table_value_by_string(value,v)
+					else
+						return value
+					end
+				else
+					--print( tostring(name)..":"..tostring(value))
+					return value
+				end
+			end
+			i = i + 1
+		until not name
+		local c = debug.getinfo(level,'f')
+		if c and c.func then
+			i = 1
+			repeat
+				local name,value = debug.getupvalue(c.func,i)
+				--print('upvalue name='..tostring(name)..' value='..tostring(value))
+				if name == m then
+					if v then
+						if type(value)=='table' or type(value)=='userdata' then
+							return table_value_by_string(value,v)
+						else
+							return nil
+						end
+					else
+						return value
+					end
+				end
+				i = i + 1
+			until not name
+			--都没找到,最后尝试在函数的环境中查找
+			local G = debug.getfenv(c.func)
+			if G then
+				return table_value_by_string(G,nvalue)
+			end
+		else
+			print('cant getinfo level='..level)
+		end
 	end
 end
 
