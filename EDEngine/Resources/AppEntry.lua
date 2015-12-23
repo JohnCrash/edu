@@ -151,15 +151,25 @@ local function zmq_test()
 	print("Connecting to hello world server...")
 	local socket = context:socket(zmq.REQ)
 	socket:connect("tcp://192.168.2.157:5555")
-
+	
+	print("zmq.REVTIMO="..tostring(zmq.RCVTIMEO))
+	socket:setopt_int(zmq.RCVTIMEO,500)
 	for n=1,10 do
 		print("Sending Hello " .. n .. " ...")
-		socket:send("Hello")
-
-		local reply = socket:recv()
-		print("Received World " ..  n .. " [" .. reply .. "]")
+		local msg,errorMsg = socket:send("Hello")
+		if not msg then
+			print("send error :"..tostring(errorMsg))
+			break
+		end
+		msg,errorMsg = socket:recv()
+		if msg then
+			print("Received World " ..  n .. " [" ..msg.. "]")
+		else
+			print("recevied error : "..tostring(errorMsg))
+			break
+		end
 	end
-	socket:close()
+	socket:close(1)
 	context:term()
 end
 

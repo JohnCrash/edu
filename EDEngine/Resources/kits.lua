@@ -115,8 +115,6 @@ local function download_http_by_curl(url,tout)
 	end 
 end
 
---编码url参数表
---例如app_id=2001&game_id=agcn3nanf&stage_id=2
 local function encode_str( s )
 	local length = string.len(s)
 	if length == 0 then
@@ -582,7 +580,7 @@ local function time_to_string( d,expet_sec )
 	end
 end
 
-local function time_abs_string( d ) --绝对时间,年月日分钟秒
+local function time_abs_string( d )
 	local t = os.date('*t',d)
 	return t.year..'.'..t.month..'.'..t.day..'  '..t.hour..':'..t.min
 end
@@ -772,15 +770,32 @@ local function isNeedUpade(appname,func)
 	
 	local function _isNeedUpade(appname)
 		if appname then
-			local s = read_local_file(tostring(appname).."_config.json")
-			if not s then return end
-			local t = decode_json(s)
-			if t and type(t)=='table' then
-				for i,v in pairs(t) do
-					if v then
-						return true
+			if type(appname)=="string" then
+				local s = read_local_file(tostring(appname).."_config.json")
+				if not s then return end
+				local t = decode_json(s)
+				if t and type(t)=='table' then
+					for i,v in pairs(t) do
+						if v then
+							return true
+						end
 					end
 				end
+			elseif type(appname)=="table" then
+				for i,v in pairs(appname) do
+					local s = read_local_file(tostring(v).."_config.json")
+					if not s then return end
+					local t = decode_json(s)
+					if t and type(t)=='table' then
+						for i,v in pairs(t) do
+							if v then
+								return true
+							end
+						end
+					end				
+				end
+			else
+				log("ERROR isNeedUpade failed,appname invalid type")
 			end
 		end
 	end
@@ -808,9 +823,20 @@ local function doUpdate(appname)
 	package.loaded["launcher"] = nil
 	for i,v in pairs(package.loaded) do
 		if i and type(i)=='string' then
-			local idx = string.find(i,appname)
-			if idx==1 then
-				package.loaded[i] = nil		
+			if type(appname)=="string" then
+				local idx = string.find(i,appname)
+				if idx==1 then
+					package.loaded[i] = nil		
+				end
+			elseif type(appname)=="table" then
+				for j,vv in pairs(appname) do
+					local idx = string.find(i,vv)
+					if idx==1 then
+						package.loaded[i] = nil		
+					end				
+				end
+			else
+				log("ERROR doUpdate failed,appname invalid type")
 			end
 		end
 	end
