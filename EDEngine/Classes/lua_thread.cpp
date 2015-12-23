@@ -87,6 +87,12 @@ static void lua_push_value(lua_State *dst, lua_State *src, int index)
 		case LUA_TTABLE:
 			lua_push_table(dst, src, index);
 			break;
+		case LUA_TLIGHTUSERDATA:
+			lua_pushlightuserdata(dst, (void *)lua_topointer(src, index));
+			break;
+		case LUA_TUSERDATA:
+			tolua_pushuserdata(dst, lua_touserdata(src,index)); 
+			break;
 		default:
 			lua_pushnil(dst);
 			break;

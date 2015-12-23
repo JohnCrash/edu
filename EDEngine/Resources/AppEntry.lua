@@ -142,7 +142,7 @@ local function keep_alive( url,func )
 end
 
 
-local function zmq_test()
+local function zmq_test_1()
 	local zmq = require"lzmq"
 
 	local context = zmq.init(1)
@@ -172,7 +172,22 @@ local function zmq_test()
 	socket:close(1)
 	context:term()
 end
+local zmq = require"lzmq"
 
+local context = zmq.init(1)
+local function zmq_test()
+
+	--  Socket to talk to server
+	local thread = require "thread"
+	local addr = "inproc://thread"
+	thread.new("zmqth",function(event,msg)
+	end,context:lightuserdata(),addr)
+	local socket = context:socket(zmq.PAIR)
+	socket:connect(addr)
+	socket:send("go")
+	socket:close()
+--	context:term()
+end
 --chat
 local function zmq_test2()
 end
