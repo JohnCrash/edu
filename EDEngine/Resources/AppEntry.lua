@@ -504,16 +504,18 @@ function AppEntry:init()
 		end}		
 	end}
 		
-	local tbutton = uikits.button{caption='新打地鼠(学生)',x=64*scale,y = 64*scale +4*item_h,
+	local tbutton = uikits.button{caption='学习乐园',x=64*scale,y = 64*scale +4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='hitmouse',updates={'hitmouse','luacore'},
-				run=function()
+			--update.create{name='qwxt',updates={'qwxt','luacore','topics','wuliu'},
+				--run=function()
 				login.set_uid_type(login.STUDENT)
-				login.set_selector(7)--学生
-				local hitmouse = require "hitmouse/loading"
-				return hitmouse.create()
-			end}			
+				--login.set_selector(7)--学生
+				login.set_selector(29) 
+				local qwxt = require "qwxt/main"
+				--return qwxt.create()
+				uikits.pushScene(qwxt.create())
+			--end}			
 		end}
 	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,

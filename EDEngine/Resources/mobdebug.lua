@@ -290,10 +290,12 @@ end
 
 local function has_breakpoint(file, line)
 	if breakpoints[line] then
+		
 		local filename = get_file_name(iscasepreserving and string.lower(file) or file)
 		if filename then
 			for f,v in pairs(breakpoints[line]) do
 				--仅仅比较文件名称
+				--print(tostring(line)..":"..(f).."=="..tostring(filename))
 				if get_file_name(f) == filename then
 					--print('TRUE '..tostring(filename)..'#'..tostring(get_file_name(f)))
 					return true

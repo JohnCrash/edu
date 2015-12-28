@@ -102,7 +102,7 @@ local SORT_SPACE = 0
 local SORT_BORDER = 0
 local SORT_STYLE = 1
 local DRAG_STYLE = 1
-local DRAG_BORDER = 16
+local DRAG_BORDER = 0
 local answer_abc = {}
 local answer_idx = {}
 local EditChildTag = 'answer_text'
@@ -136,7 +136,7 @@ local function set_EditChildTag( t )
 end
 
 local function init_answer_map()
-	for i = 1,24 do
+	for i = 1,26 do
 		answer_abc[i] = string.char( string.byte('A') + i - 1 )
 		answer_idx[answer_abc[i]] = i
 	end
@@ -206,6 +206,51 @@ local function item_ui( t )
 	end
 end
 
+local function item_ui2( t )
+	if t then
+		if t.type == 1 then --text
+			--kits.log('	#TEXT: '..t.text )
+			local item = uikits.text{caption=t.text,font=nil,fontSize=32,color=cc.c3b(0,0,0),anchorX=0.5,anchorY=0.5}			
+			local size = item:getContentSize()
+			local t = uikits.layout{width=size.width+2*ITEM_SPACE,height=size.height+2*ITEM_SPACE}
+			size = t:getContentSize()
+			item:setPosition(cc.p(size.width/2,size.height/2))
+			--t:setOpacity(12)			
+			t:addChild( item )
+		
+			return t
+			--return uikits.text{caption='Linux',fontSize=32,color=cc.c3b(0,0,0)}
+		elseif t.type == 2 then --image
+			--可能是.mp3
+			--png,jpg,gif
+			if t.image and type(t.image)=='string' and string.len(t.image)>4 then
+				local ex = string.lower( string.sub(t.image,-3) )
+				if ex == 'png' or ex == 'jpg' or ex == 'gif' then
+					local item = uikits.image{image=cache.get_name(t.image),anchorX=0,anchorY=0}
+					local size = item:getContentSize()
+					local t = uikits.layout{width=size.width,height=size.height,anchorX=0,anchorY=0}
+					size = t:getContentSize()
+					--item:setPosition(cc.p(size.width/2,size.height/2))
+					--t:setOpacity(12)
+					--t:addChild( uikits.rect{x1=0,x2=size.width,y1=0,y2=size.height,fillColor=cc.c4f(1,0,1,0.2),anchorX=0,anchorY=0} )
+					t:addChild( item )
+					return t
+				elseif ex == 'mp3' then
+					kits.log('ERROR MP3 '..t.image )
+				else
+					kits.log('error item_ui not support file format :'..t.image)
+				end
+			else
+				kits.log('error item_ui image='..tostring(t.image))	
+			end
+		else
+			kits.log('error item_ui type='..tostring(t.type))
+		end
+	else
+		kits.log('error item_ui t = nil')
+	end
+end
+
 local function read_topics_cache( pid )
 	local result = kits.read_cache( pid..tostring(login.uid()) )
 	if result then
@@ -244,7 +289,6 @@ end
 
 local function add_topics_image_resourec( e )
 	if e.item_id then
-	--http://imagecdn.lejiaolexue.com/item_preview/acc50ceeeb7e4d7fb3131cb6c2cb293d_0.jpg
 		local uri = "http://imagecdn.lejiaolexue.com/item_preview/"..e.item_id.."_0.jpg"
 		e.topics_image_name = e.item_id..'.jpg'
 		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})
@@ -313,6 +357,10 @@ local function parse_html( str )
 		if s then
 			--形如 A."",B."",去掉
 			local ss = string.match(s,'"(.-)"')
+			if ss==nil then
+				local _,ss1 = string.match(s,"(%u).(.+)")
+				if ss1 then ss=ss1 end
+			end
 			t.type = 1
 			if ss then
 				t.text = ss
@@ -421,14 +469,16 @@ local function load_attachment(s,e,info)
 	e.attachment = eattachment or {}
 	e.item_id = s.item_id
 	add_topics_image_resourec( e )
-	for i=1,10 do
+	local i=1
+	while true do
 		local res,msg = parse_attachment(s,i,info)
 		if res then
 			e.attachment[#e.attachment+1] = res
 			add_resource_cache( e.resource_cache.urls,res )
 		else
 			return res,msg
-		end	
+		end
+		i=i+1
 	end
 end
 --单,多拖拽转换
@@ -449,7 +499,18 @@ local function drag_conv(s,e)
 	e.drag_rects = t
 	e.drag_objs = t2
 	e.answer = parse_answer( s )
-
+	if s.options then
+		local t = kits.decode_json(s.options)
+		if t and t.drag_position then
+			e.drag_position=t.drag_position
+		else
+			e.drag_position=0
+			kits.log("WARNING drag_conv options.drag_position no define")
+		end
+	else
+		e.drag_position=0
+		kits.log("WARNING drag_conv options no define")
+	end
 	print_drag( e ) --for debug
 	
 	return res,msg
@@ -548,13 +609,16 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 		local n = 0
 		local rst = data.resource_cache
 		rst.loading = loadingbox.circle( layout )
-
+		local success=true
 		local r,msg = cache.request_resources( rst,
 				function(rs,i,b)
 					n = n+1
 					if b and rs.urls[i] and rs.urls[i].done and type(rs.urls[i].done)=='function' then
 						local data = cache.get_data( rs.urls[i].url )
 						rs.urls[i].done( data )
+					end
+					if not b then
+						success=false
 					end
 					if n >= #rs.urls then
 						--全部下载完毕
@@ -569,7 +633,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 							efunc(layout,data,param1,param2,param3)
 							--初始化完成
 							if data.eventInitComplate then
-								data.eventInitComplate(layout,data)
+								data.eventInitComplate(layout,data,success)
 							end
 						end
 					end
@@ -593,6 +657,7 @@ local function normal_rect( rc )
 		rc.y1 = rc.y2
 		rc.y2 = t	
 	end
+	return rc
 end
 
 local function expand_rect( rc,s )
@@ -623,6 +688,7 @@ local function attachment_ui_player( t )
 			if v and type(v)=='string' and string.len(v)>4 then
 				local ex = string.lower( string.sub(v,-3) )
 				if ex=='mp3' or ex=='wav' then
+					local ffplayer = require "ffplayer"
 					local pbox = uikits.fromJson{file=ui.PLAYBOX}
 					if pbox then
 						pbox:setAnchorPoint(cc.p(0.5,0))
@@ -630,24 +696,36 @@ local function attachment_ui_player( t )
 						local play_but = uikits.child(pbox,ui.PLAY)
 						local pause_but = uikits.child(pbox,ui.PAUSE)
 						local file = cache.get_name(v)
-						local snd_idx
 						play_but:setVisible(true)
 						pause_but:setVisible(false)
-						uikits.event(play_but,
-							function(sender)
-								snd_idx = uikits.playSound(file)
-						--		play_but:setVisible(false)
-						--		pause_but:setVisible(true)
-							end,'began' )
-							--[[ 目前声音不支持监听状态
-						uikits.event(pause_but,
-							function(sender)
-								if snd_idx then
+						local as = ffplayer.playSound("TOPICS",file,function(state,as)
+							if state==ffplayer.STATE_END then
+								if play_but and pause_but and cc_isobj(play_but) and cc_isobj(pause_but) then
 									play_but:setVisible(true)
-									pause_but:setVisible(false)
-									uikits.pauseSound(snd_idx)							
+									pause_but:setVisible(false)		
 								end
-							end,'began') --]]
+							end
+						end)	
+						uikits.event(play_but,function(sender)
+							if as and as.isOpen and (as.isEnd or not as.isPlaying) then
+								as:seek(0)
+								as:play()
+								play_but:setVisible(false)
+								pause_but:setVisible(true)
+							end
+						end,'began')
+						uikits.event(pause_but,function(sender)
+							if as and as.isOpen and as.isPlaying then
+								as:pause()
+								play_but:setVisible(true)
+								pause_but:setVisible(false)
+							end
+						end,'began')
+						pbox:registerScriptHandler(function(event)
+							if event=="cleanup" and as then
+								as:close()
+							end
+						end)
 					end
 					return pbox
 				end
@@ -676,15 +754,20 @@ local function set_topics_image( layout,data,x,y )
 		if data.topics_image_name then
 		--题目图片
 			local img = uikits.image{image=data.topics_image_name}
-			img:setScaleX(g_scale)
-			img:setScaleY(g_scale)
+			local scale=g_scale
+			--放大后不能让图片越过边界
+			if img:getContentSize().width*g_scale>layout:getContentSize().width then
+				scale=layout:getContentSize().width/img:getContentSize().width
+			end
+			img:setScaleX(scale)
+			img:setScaleY(scale)
 			layout:addChild(img)
 			local is = img:getContentSize()
-			if y < 4*TOPICS_SPACE and is.height*g_scale+y < size.height then --题干纵向居中放置
-				y = (size.height - y - is.height*g_scale)/2 + y
+			if y < 4*TOPICS_SPACE and is.height*scale+y < size.height then --题干纵向居中放置
+				y = (size.height - y - is.height*scale)/2 + y
 			end
-			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,g_scale)
-			height = height+img:getContentSize().height*g_scale 
+			uikits.relayout_h( {img},x,y+2*TOPICS_SPACE,layout:getContentSize().width,TOPICS_SPACE,scale)
+			height = height+img:getContentSize().height*scale 
 		end
 		if layout.setInnerContainerSize then
 			layout:setInnerContainerSize( cc.size(width,height) )
@@ -1428,7 +1511,39 @@ local function relayout_drag( layout,data,ismul )
 	local drags = {}
 	local draging_item
 	local scale = 1
+	local side = tonumber(data.drag_position)
 	
+	print("===")
+	print("side="..side)
+	print("===")
+	local function getPX(bw,w)
+		if side==4 or side==2 then
+			return 0
+		elseif side==1 then
+			return -5
+		elseif side==3 then
+			return -5
+		end
+	end
+	local function getPY(bh,h)
+		if side==4 then
+			return -(bh-h)/2
+		elseif side==2 then
+			return -5
+		elseif side==1 or side==3 then
+			return 0
+		end
+	end
+	local function getOffX(bw,w)
+		--return (bw-w*g_scale)/2-(getPX(bw/g_scale,w)+3)*g_scale
+		local v = (bw-w*g_scale)/2-3*g_scale
+		return v
+	end
+	local function getOffY(bh,h)
+		--return (bh-h*g_scale)/2-(getPY(bh/g_scale,h)+3)*g_scale
+		v = (bh-h*g_scale)/2+3*g_scale --(getPY(bh/g_scale,h)+3)*g_scale
+		return v
+	end
 	layout:addChild(bg)
 	local bgsize = bg:getContentSize()
 	bg:setScaleX(g_scale)
@@ -1438,8 +1553,9 @@ local function relayout_drag( layout,data,ismul )
 		v.x1 = v.x1-DRAG_BORDER
 		v.x2 = v.x2+DRAG_BORDER
 		v.y1 = v.y1-DRAG_BORDER
-		v.y2 = v.y2+DRAG_BORDER		
+		v.y2 = v.y2+DRAG_BORDER
 	end	
+	--DRAG_STYLE=0
 	if DRAG_STYLE == 0 then
 		for k,v in pairs( data.drag_rects ) do
 			--[[
@@ -1451,9 +1567,11 @@ local function relayout_drag( layout,data,ismul )
 			box:setScaleY(math.abs(v.y2-v.y1)/size.height)
 			--]]
 			--box:setOpacity (256)
-			bg:addChild( box )
-			bg:addChild( uikits.rect{x1=v.x1-DRAG_BORDER,y1=bgsize.height-v.y1-DRAG_BORDER,
-				x2=v.x2+DRAG_BORDER,y2=bgsize.height-v.y2+DRAG_BORDER,fillColor=cc.c4f(1,0,0,0.1)} )
+			--bg:addChild( box )
+--			bg:addChild( uikits.rect{x1=v.x1-DRAG_BORDER,y1=bgsize.height-v.y1-DRAG_BORDER,
+--				x2=v.x2+DRAG_BORDER,y2=bgsize.height-v.y2+DRAG_BORDER,fillColor=cc.c4f(1,0,0,0.1)} )
+			bg:addChild( uikits.rect{x1=v.x1,y1=bgsize.height-v.y1,
+				x2=v.x2,y2=bgsize.height-v.y2,fillColor=cc.c4f(1,0,0,0.1)} )
 		end
 	end
 	local function get_index( item )
@@ -1503,11 +1621,32 @@ local function relayout_drag( layout,data,ismul )
 			target = drags[i]
 			drags[i] = drags[j]
 			drags[j] = target
+			local function get_drag_rect(n)
+				local xx,yy = bg:getPosition()
+				xx = xx - bg:getContentSize().width*g_scale/2
+				local v = data.drag_rects[n]
+				return normal_rect{
+				x1 = xx + v.x1 * g_scale,
+				x2 = xx + v.x2 * g_scale,
+				y1 = yy + (bgsize.height-v.y1)*g_scale,
+				y2 = yy + (bgsize.height-v.y2)*g_scale
+				}
+			end
 			if drags[i] and drags[i].item then
-				drags[i] .item:setPosition(get_pt_center(drags[i].item,i))
+				local sz = drags[i].item:getContentSize()
+				local rc = get_drag_rect(i)
+				local offx = getOffX(rc.x2-rc.x1,sz.width)
+				local offy = getOffY(rc.y2-rc.y1,sz.height)				
+				local cp= {x = rc.x1 + offx,y = rc.y1+ offy }
+				drags[i].item:setPosition(cp)
 			end
 			if drags[j] and drags[j].item then
-				drags[j] .item:setPosition(get_pt_center(drags[j].item,j))
+				local sz = drags[j].item:getContentSize()
+				local rc = get_drag_rect(j)
+				local offx = getOffX(rc.x2-rc.x1,sz.width)
+				local offy = getOffY(rc.y2-rc.y1,sz.height)				
+				local cp= {x = rc.x1 + offx,y = rc.y1+ offy }
+				drags[j].item:setPosition(cp)
 			end
 		end
 	end	
@@ -1522,16 +1661,18 @@ local function relayout_drag( layout,data,ismul )
 				y2 = yy + (bgsize.height-v.y2)*g_scale
 			}
 			normal_rect( rc )
+				
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
 				local sz = sender:getContentSize()
-				local offx = ((rc.x2-rc.x1) - sz.width*g_scale)/2
-				local offy = ((rc.y2-rc.y1) - sz.height*g_scale)/2
+				local offx = getOffX(rc.x2-rc.x1,sz.width)
+				local offy = getOffY(rc.y2-rc.y1,sz.height)
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
 				sender:setPosition( cp )
+
 				local idx = get_index( sender )
 				if idx then
 					local it = search_drags( sender )
-					if it and i then
+					if it and i and i~=it then
 						xchange(i,it)
 					else
 						if it then
@@ -1565,8 +1706,8 @@ local function relayout_drag( layout,data,ismul )
 			normal_rect( rc )
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
 				local sz = draging_item:getContentSize()
-				local offx = ((rc.x2-rc.x1) - sz.width*g_scale)/2
-				local offy = ((rc.y2-rc.y1) - sz.height*g_scale)/2
+				local offx = getOffX(rc.x2-rc.x1,sz.width)
+				local offy = getOffY(rc.y2-rc.y1,sz.height)	
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
 				
 				local idx
@@ -1601,7 +1742,7 @@ local function relayout_drag( layout,data,ismul )
 	end
 	local ismoving --触点没有移动标志
 	for k,v in pairs( data.drag_objs ) do
-		local item = item_ui( v )
+		local item = item_ui2( v )
 		layout:addChild( item,100 )
 		table.insert(ui1,item)
 		item:setTouchEnabled(true)
@@ -1674,7 +1815,7 @@ local function relayout_drag( layout,data,ismul )
 							if k>1 then
 								data.my_answer[1] = data.my_answer[1]..';'
 							end
-							if drags[k] then
+							if drags[k] then									
 								data.my_answer[1] = data.my_answer[1]..answer_abc[k]..answer_abc[drags[k].idx]
 							else
 								data.my_answer[1] = data.my_answer[1]..answer_abc[k]..'0'
