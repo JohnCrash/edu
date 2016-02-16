@@ -795,7 +795,7 @@ local function isNeedUpade(appname,func)
 					end				
 				end
 			else
-				log("ERROR isNeedUpade failed,appname invalid type")
+				my_log("ERROR isNeedUpade failed,appname invalid type")
 			end
 		end
 	end
@@ -836,11 +836,46 @@ local function doUpdate(appname)
 					end				
 				end
 			else
-				log("ERROR doUpdate failed,appname invalid type")
+				my_log("ERROR doUpdate failed,appname invalid type")
 			end
 		end
 	end
 	require "launcher"
+end
+
+local function logTable(t, index)
+	---[====[
+	if index == nil then
+		my_log("TABLE:")
+	end
+
+	local space = "   "
+	local _space = " "
+	if index ~= nil then
+		for i = 1, index do
+			_space = _space .. space
+		end
+		index = index + 1
+	else
+		index = 1
+	end
+
+	if t == nil then 
+		my_log(_space .. "table is nil") 
+		return
+	end
+
+	for k,v in pairs(t) do
+		if type(v) ~= "table" then
+			my_log(string.format("%s%s[%s]      %s[%s]", 
+				_space, tostring(k), type(k), tostring(v), type(v)))
+		else
+			my_log(_space .. "T[".. tostring(k) .. "]------------------")
+			logTable(v, index)
+		end
+	end
+
+	--]====]
 end
 
 local exports = {
@@ -898,6 +933,7 @@ local exports = {
 	log_caller = log_caller,
 	isNeedUpade = isNeedUpade,
 	doUpdate = doUpdate,
+	logTable = logTable,
 }
 
 return exports

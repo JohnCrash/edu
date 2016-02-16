@@ -492,15 +492,15 @@ function AppEntry:init()
 	}
 	debugip:setText("192.168.2.157")
 	
-	local amouse = uikits.button{caption='打地鼠',x=64*scale,y = 64*scale +5*item_h,
+	local amouse = uikits.button{caption='二打一',x=64*scale,y = 64*scale +5*item_h,
 	width=128*scale,height=48*scale,
 	eventClick=function(sender)
-		update.create{name='amouse',updates={'amouse','luacore'},
+		update.create{name='v21',updates={'v21','luacore'},
 			run=function()
 			login.set_selector(5)
 			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-			local amouse = require "amouse/amouse_om"
-			return AMouseMain()
+			local v21 = require "v21/main"
+			uikits.pushScene(v21.create())
 		end}		
 	end}
 		
@@ -523,7 +523,7 @@ function AppEntry:init()
 			update.create{name='calc',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
-				login.set_selector(5)
+				login.set_selector(15)
 				local ss = require "calc/loading"
 				return ss.create()
 				end}
@@ -545,12 +545,12 @@ function AppEntry:init()
 				--login.set_selector(18) --额额
 				--login.set_selector(18) --杨艳波
 				--login.set_selector(20) --张泳
-				--login.set_selector(21)--李四
+				login.set_selector(21)--李四
 				--login.set_selector(22) --未来之星校长
 				--login.set_selector(23) --大小校长
 				--login.set_selector(24) --田老师
 				--login.set_selector(26) 
-				login.set_selector(25) 
+				--login.set_selector(25) 
 				local Loading = require "hitmouse2/loading"
 				return Loading.create()
 			end}

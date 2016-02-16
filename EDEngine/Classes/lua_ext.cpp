@@ -89,7 +89,7 @@ static void networkStateChange_progressFunc(void *p)
 		}
 	}
 }
-//网络发生改变是的回调。
+
 void networkStateChange(int state)
 {
 	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
