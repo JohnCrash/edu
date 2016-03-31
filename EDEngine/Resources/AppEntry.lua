@@ -510,8 +510,8 @@ function AppEntry:init()
 			--update.create{name='qwxt',updates={'qwxt','luacore','topics','wuliu'},
 				--run=function()
 				login.set_uid_type(login.STUDENT)
-				--login.set_selector(7)--学生
-				login.set_selector(29) 
+				login.set_selector(7)--学生
+				--login.set_selector(29) 
 				local qwxt = require "qwxt/main"
 				--return qwxt.create()
 				uikits.pushScene(qwxt.create())
@@ -523,7 +523,15 @@ function AppEntry:init()
 			update.create{name='calc',updates={'luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
-				login.set_selector(15)
+				--login.set_selector(15) --学生
+				--login.set_selector(24) --田老师(校长）
+				---login.set_selector(30) --张燕老师(校长）
+				login.set_selector(34) --张燕学生2
+				--login.set_selector(33) --张燕老师八
+				--login.set_selector(35) --胡老师
+				--login.set_selector(36) --李杰
+				--login.set_selector(37) --刘
+				--login.set_selector(38) --李杰老师
 				local ss = require "calc/loading"
 				return ss.create()
 				end}
@@ -571,12 +579,12 @@ function AppEntry:init()
 	local epbutton = uikits.button{caption='TEST',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='test',updates={'test','luacore'},
-				run=function()
-				login.set_selector(3) 
+			--update.create{name='test',updates={'test','luacore'},
+			--	run=function()
+			--	login.set_selector(3) 
 				local selstudent = require "test/test"
-				return selstudent.create()
-			end}
+				uikits.pushScene(selstudent.create())
+			--end}
 		end}
 	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,

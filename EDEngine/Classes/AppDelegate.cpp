@@ -6,6 +6,7 @@
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "win32/glfw3native.h"
+#include "CommCtrl.h"
 #endif
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC||CC_TARGET_PLATFORM == CC_PLATFORM_IOS
@@ -15,11 +16,16 @@
 MySpaceBegin
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include <string>
-
-extern std::wstring toUnicode(const std::string& s);
+extern bool g_Reset;
+extern int g_FrameWidth;
+extern int g_FrameHeight;
+extern std::string g_Orientation;
 extern std::wstring utf8ToUnicode(const std::string& s);
+extern std::wstring toUnicode(const std::string& s);
 
 HWND g_hMainWnd = NULL;
+COLORREF g_frameColor = RGB(2, 137, 130);
+COLORREF g_titleColor = RGB(255, 255, 255);
 
 std::string toUTF8( const std::wstring& wstr )
 {
@@ -48,11 +54,274 @@ AppDelegate_v3::~AppDelegate_v3()
 
 extern std::string g_Mode;
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-extern bool g_Reset;
-extern int g_FrameWidth;
-extern int g_FrameHeight;
-extern std::string g_Orientation;
+/*
+* 定义一个新的窗口过程
+*/
+static void ToggleGlass(HWND hwnd) {
+	SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+		SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+	RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+}
+
+static void GetNCInfo(HWND hwnd, int *pbroderWidth, int *ptitleHeight, 
+	LPRECT pcr, LPRECT pwr,LPRECT icon,LPRECT minb,LPRECT closeb)
+{
+	GetWindowRect(hwnd, pwr);
+	GetClientRect(hwnd, pcr);
+	
+	pwr->right = abs(pwr->right - pwr->left);
+	pwr->left = 0;
+	pwr->bottom = abs(pwr->bottom - pwr->top);
+	pwr->top = 0;
+
+	*pbroderWidth = (abs(pwr->right - pwr->left) - abs(pcr->right - pcr->left)) / 2;
+	*ptitleHeight = abs(pwr->bottom - pwr->top) - abs(pcr->bottom - pcr->top) - *pbroderWidth;
+
+	icon->left = 0;
+	icon->top = 0;
+	icon->right = *ptitleHeight;
+	icon->bottom = *ptitleHeight;
+
+	closeb->top = 0;
+	closeb->right = abs( pwr->right-pwr->left);
+	closeb->left = closeb->right-*ptitleHeight;
+	closeb->bottom = *ptitleHeight;
+
+	minb->top = 0;
+	minb->right = abs(pwr->right - pwr->left) - *ptitleHeight;
+	minb->left = minb->right - *ptitleHeight;
+	minb->bottom = *ptitleHeight;
+
+	pcr->left += *pbroderWidth;
+	pcr->right += *pbroderWidth;
+	pcr->top += *ptitleHeight;
+	pcr->bottom += *ptitleHeight;
+}
+#define BUTTON_MIN 1
+#define BUTTON_CLOSE 2
+#define BORDER_WIDTH 6
+static int g_cursorToButton = 0;
+
+static void DrawButton(HDC hdc, LPRECT prc,int type)
+{
+	if (type == g_cursorToButton){
+		COLORREF color = RGB(GetRValue(g_frameColor) / 2, GetGValue(g_frameColor) / 2, GetBValue(g_frameColor) / 2);
+		HBRUSH br = CreateSolidBrush(color);
+		FillRect(hdc, prc, br);
+		DeleteObject(br);
+	}
+	if (type == BUTTON_MIN){
+		HBRUSH br = CreateSolidBrush(g_titleColor);
+		RECT rc = *prc;
+		rc.left += BORDER_WIDTH;
+		rc.right -= BORDER_WIDTH;
+		rc.bottom -= BORDER_WIDTH;
+		rc.top = rc.bottom - 3;
+		FillRect(hdc, &rc,br);
+		DeleteObject(br);
+	}
+	else if (type == BUTTON_CLOSE){
+		HPEN pen = CreatePen(PS_SOLID, 2, g_titleColor);
+		HGDIOBJ op = SelectObject(hdc, pen);
+		MoveToEx(hdc, prc->left + BORDER_WIDTH, prc->top + BORDER_WIDTH,NULL);
+		LineTo(hdc, prc->right - BORDER_WIDTH, prc->bottom - BORDER_WIDTH);
+		MoveToEx(hdc, prc->left + BORDER_WIDTH, prc->bottom - BORDER_WIDTH, NULL);
+		LineTo(hdc, prc->right - BORDER_WIDTH, prc->top + BORDER_WIDTH);
+		SelectObject(hdc, op);
+	}
+}
+
+static void InvalidateButton(HWND hwnd,int type, LPRECT minb, LPRECT closeb)
+{
+	if (g_cursorToButton != type){
+		g_cursorToButton = type;
+		RECT rc;
+		rc.left = minb->left - BORDER_WIDTH;
+		rc.right = closeb->right;
+		rc.top = -minb->bottom;
+		rc.bottom = 0;
+		RedrawWindow(hwnd, &rc, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_FRAME);
+	}
+}
+
+static WNDPROC g_DefWndProc = NULL;
+static TRACKMOUSEEVENT g_TrackMouseEvent;
+static void MouseHover(HWND hwnd)
+{
+	g_TrackMouseEvent.cbSize = sizeof(g_TrackMouseEvent);
+	g_TrackMouseEvent.dwFlags = TME_HOVER | TME_NONCLIENT | TME_LEAVE;
+	g_TrackMouseEvent.hwndTrack = hwnd;
+	g_TrackMouseEvent.dwHoverTime = HOVER_DEFAULT;
+	_TrackMouseEvent(&g_TrackMouseEvent);
+}
+
+static LRESULT DefualtProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (g_DefWndProc){
+		return g_DefWndProc(hwnd, uMsg, wParam, lParam);
+	}
+	else{
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+}
+
+LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_NCPAINT:
+	{
+		TCHAR txt[256];
+		RECT cr, icon, minb, closeb,wr, dirty, dirty_box;
+		SIZE size;
+		int len = GetWindowText(hwnd, txt, 255);
+		int x, y, broderWidth, titleHeight;
+
+		GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
+		/*
+		GetWindowRect(hwnd, &wr);
+		if (!wParam || wParam == 1) {
+			dirty = wr;
+			dirty.left = dirty.top = 0;
+		}
+		else {
+			GetRgnBox(reinterpret_cast<HRGN>(wParam), &dirty_box);
+			if (!IntersectRect(&dirty, &dirty_box, &wr))
+				return 0;
+			OffsetRect(&dirty, -wr.left, -wr.top);
+		}
+		*/
+		HDC hdc = GetWindowDC(hwnd);
+		/*
+		 * 绘制背景
+		 */
+		HBRUSH br = CreateSolidBrush(g_frameColor);
+		{
+			RECT rc;
+			rc = wr;
+			rc.bottom = titleHeight;
+			FillRect(hdc, &rc, br);
+			rc.top = wr.bottom - broderWidth;
+			rc.bottom = wr.bottom;
+			FillRect(hdc, &rc, br);
+
+			rc.right = wr.left + broderWidth;
+			rc.top = wr.top + titleHeight;
+			rc.bottom = wr.bottom - broderWidth;
+			FillRect(hdc, &rc, br);
+
+			rc.left = wr.right - broderWidth;
+			rc.right = wr.right;
+			FillRect(hdc, &rc, br);
+		}
+		DeleteObject(br);
+		
+		/* 
+		 * 绘制标题
+		 */
+		GetTextExtentPoint32(hdc, txt, len, &size);
+		x = (abs(wr.right - wr.left)-size.cx)/2;
+		y = (titleHeight - size.cy) / 2;
+		SetTextColor(hdc, g_titleColor);
+		SetBkColor(hdc, g_frameColor);
+		HGDIOBJ hfont = GetStockObject(SYSTEM_FIXED_FONT);
+		HGDIOBJ of = SelectObject(hdc,hfont);
+		TextOut(hdc, x, y, txt, len);
+		SelectObject(hdc, of);
+		/*
+		 * 绘制图标
+		 */
+		//HICON hicon = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
+		//DrawIconEx(hdc, 0, 0, hicon, icon.right - icon.left, icon.bottom - icon.top, 0, NULL, DI_IMAGE | DI_MASK);
+		/*
+		 * 绘制最小化按钮和关闭按钮
+		 */
+		br = CreateSolidBrush(g_titleColor);
+		DrawButton(hdc, &minb,BUTTON_MIN);
+		DrawButton(hdc, &closeb,BUTTON_CLOSE);
+		DeleteObject(br);
+		ReleaseDC(hwnd, hdc);
+	}
+		break;
+	case WM_NCHITTEST:
+		{
+			POINT pt;
+			int broderWidth, titleHeight;
+			pt.x = (int)(short)LOWORD(lParam);
+			pt.y = (int)(short)HIWORD(lParam);
+			RECT cr, wr, icon, minb, closeb;
+			GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
+			ScreenToClient(hwnd, &pt);
+			pt.y += titleHeight;
+
+			if (PtInRect(&minb, pt)) //点击到最小化
+			{
+				InvalidateButton(hwnd,BUTTON_MIN, &minb,&closeb);
+				MouseHover(hwnd);
+			}
+			else if (PtInRect(&closeb, pt)) //点击到最关闭
+			{
+				InvalidateButton(hwnd,BUTTON_CLOSE, &minb, &closeb);
+				MouseHover(hwnd);
+			}
+			else
+			{
+				InvalidateButton(hwnd,0, &minb, &closeb);
+			}
+			return DefualtProc(hwnd, uMsg, wParam, lParam);
+		}
+		break;
+	case WM_NCLBUTTONDOWN:
+		{
+			POINT pt;
+			int broderWidth, titleHeight;
+			pt.x = (int)(short)LOWORD(lParam);
+			pt.y = (int)(short)HIWORD(lParam);
+			RECT cr, wr, icon, minb, closeb;
+			GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
+			ScreenToClient(hwnd, &pt);
+			pt.y += titleHeight;
+			if (PtInRect(&minb, pt)) //点击到最小化
+			{
+				CloseWindow(hwnd);
+			}
+			else if (PtInRect(&closeb, pt)) //点击到最关闭
+			{
+				DestroyWindow(hwnd);
+				PostQuitMessage(0);
+			}
+			else if (PtInRect(&icon, pt)) //图标
+			{
+				HMENU hmenu = GetSystemMenu(hwnd,TRUE);
+				TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, pt.x, pt.y, 0, hwnd, NULL);
+				PostMessage(hwnd, WM_NULL, 0, 0);
+			}
+			else
+			{
+				return DefualtProc(hwnd, uMsg, wParam, lParam);
+			}
+		}
+		break;
+	case WM_NCMOUSEHOVER:
+		MouseHover(hwnd);
+		break;
+	case WM_NCMOUSELEAVE:{
+		   RECT cr, wr, icon, minb, closeb;
+		   int broderWidth, titleHeight;
+		   GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
+		   InvalidateButton(hwnd, 0, &minb, &closeb);
+		}
+		break;
+	case WM_NCACTIVATE:
+		RedrawWindow(hwnd, NULL, NULL,RDW_UPDATENOW);
+		break;
+	default:
+		return DefualtProc(hwnd, uMsg, wParam, lParam);
+	}
+	return 0;
+}
 #endif
+
 bool AppDelegate_v3::applicationDidFinishLaunching()
 {
     // initialize director
@@ -74,6 +343,20 @@ bool AppDelegate_v3::applicationDidFinishLaunching()
 #else
 		glview = GLView::create("EDEngine");
 #endif
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+		/*
+		*调整窗口类型
+		*/
+		g_hMainWnd = glfwGetWin32Window(glview->getWindow());
+		//LONG ws = GetWindowLong(g_hMainWnd, GWL_STYLE);
+		SetWindowLong(g_hMainWnd, GWL_STYLE, WS_DLGFRAME | WS_CAPTION | WS_BORDER);
+		SetWindowPos(g_hMainWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE |SWP_NOMOVE| SWP_HIDEWINDOW);
+		g_DefWndProc = (WNDPROC)GetWindowLongPtr(g_hMainWnd, GWLP_WNDPROC);
+		SetWindowLongPtr(g_hMainWnd, GWLP_WNDPROC, (LONG_PTR)myWindowProcHook);
+		//ToggleGlass(g_hMainWnd);
+#endif
+
         director->setOpenGLView(glview);
     }
 
@@ -103,7 +386,6 @@ void AppDelegate_v3::initLuaEngine()
 	{
 		PAPPFILEMAPINFO pInfo = (PAPPFILEMAPINFO)MapViewOfFile(g_hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 		pInfo->size = sizeof(APPFILEMAPINFO);
-		g_hMainWnd = glfwGetWin32Window(glview->getWindow());
 		pInfo->hwnd = g_hMainWnd;
 		UnmapViewOfFile(pInfo);
 	}
@@ -184,6 +466,7 @@ void AppDelegate_v3::initLuaEngine()
 			x = (abs(rect.right-rect.left)-w)/2;
 			y = 0;//(abs(rect.bottom-rect.top)-h)/2;
 			SetWindowPos(g_hMainWnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+			ToggleGlass(g_hMainWnd);
 		}
 	}
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC

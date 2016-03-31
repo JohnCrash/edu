@@ -31,6 +31,15 @@ extern int g_FrameWidth;
 extern int g_FrameHeight;
 extern bool g_Reset;
 extern std::wstring utf8ToUnicode(const std::string& s);
+extern COLORREF g_frameColor;
+extern COLORREF g_titleColor;
+extern HWND g_hMainWnd;
+
+static void UpdateMainFrame(HWND hwnd) {
+	SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+		SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+	RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+}
 #endif
 
 static int g_callref=LUA_REFNIL;
@@ -767,6 +776,28 @@ int cc_acr_log(lua_State *L)
 	return 0;
 }
 
+int cc_setFrameColor(lua_State *L)
+{
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	if (lua_isnumber(L, 1) && lua_isnumber(L, 2) &&
+		lua_isnumber(L, 3) && lua_isnumber(L, 4) &&
+		lua_isnumber(L, 5) && lua_isnumber(L, 6) ){
+		g_frameColor = RGB(lua_tonumber(L,1),lua_tonumber(L,2),lua_tonumber(L,3));
+		g_titleColor = RGB(lua_tonumber(L, 4), lua_tonumber(L, 5), lua_tonumber(L, 6));
+		UpdateMainFrame(g_hMainWnd);
+		lua_pushboolean(L, true); 
+		lua_pushnil(L);
+	}
+	else{
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "invalid argument");
+	}
+	return 2;
+#else
+	return 0;
+#endif
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -801,6 +832,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_closeBaiduVoice",cc_closeBaiduVoice);
 	lua_register(L, "cc_showBaiduVoiceConfigure",cc_showBaiduVoiceConfigure);
 	lua_register(L, "cc_acr_log", cc_acr_log);
+	lua_register(L, "cc_setFrameColor", cc_setFrameColor);
 
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");

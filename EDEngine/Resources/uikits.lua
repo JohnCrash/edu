@@ -238,7 +238,7 @@ local function InitDesignResolutionMode(t)
 		design.width = t.width
 		design.height = t.height
 		design.mode = t.mode
-		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.SHOW_ALL)
+		glview:setDesignResolutionSize(t.width or ss.width,t.height or ss.height,t.mode or cc.ResolutionPolicy.EXACT_FIT)
 		scale = t.width/ss.width
 		return scale
 	end
@@ -2077,7 +2077,10 @@ local function SceneClass( name,ui )
 							end
 						else
 							if cc_getUIOrientation() ~= 2 then
-								cc_setUIOrientation(2)
+								local platform = CCApplication:getInstance():getTargetPlatform()
+								if platform == kTargetWindows then							
+									cc_setUIOrientation(2)
+								end
 							end
 							if get_factor() == FACTOR_9_16 then
 								layer._ss = cc.size(ui.designWidth,ui.designHeight)
@@ -2085,7 +2088,7 @@ local function SceneClass( name,ui )
 								layer._ss = cc.size(ui.designWidth,ui.designWidth*4/3)
 							end						
 						end
-						InitDesignResolutionMode{width=layer._ss.width,height=layer._ss.height,mode=ui.designMode}
+						InitDesignResolutionMode{width=layer._ss.width,height=layer._ss.height,mode=ui.designMode or cc.ResolutionPolicy.EXACT_FIT}
 					end
 					if not layer._root and ui.FILE and ui.FILE_3_4 then
 						layer._root = fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}

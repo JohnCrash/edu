@@ -49,6 +49,8 @@ void ParseCommand(LPTSTR lpCmdLine)
 	g_Userid = toUTF8(getParam(cmd,TEXT("userid=")));
 	g_Mode = toUTF8(getParam(cmd,TEXT("mode=")));
 	g_Orientation = toUTF8(getParam(cmd, TEXT("orientation=")));
+	g_FrameWidth = atoi (toUTF8(getParam(cmd, TEXT("width="))).c_str() );
+	g_FrameHeight = atoi( toUTF8(getParam(cmd, TEXT("height="))).c_str() );
 	if (g_Mode.length() == 0)
 	{
 		g_Mode = "window";

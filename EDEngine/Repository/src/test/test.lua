@@ -4,6 +4,7 @@ local portrait = require "test/portrait"
 
 local ui = {
 	FILE = 'test/TestApplet_1.json',
+	--FILE = 'test/NewUi_1.json',
 	BACK = 'Button_13',
 	NETWORK_SATE = 'Button_3',
 	ORIENTATION = 'Button_5',
@@ -68,7 +69,8 @@ function test:init()
 	self._ok = uikits.child(self._root,ui.OK)
 	uikits.event(self._ok,function()
 		--self._text:setString( self._input:getStringValue() )
-		cc_openURL( self._input:getStringValue() )
+		--cc_openURL( self._input:getStringValue() )
+		uikits.pushScene(require "test/test2".create())
 	end)
 end
 
