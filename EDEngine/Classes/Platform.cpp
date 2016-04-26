@@ -49,7 +49,10 @@ void cocos2dChangeOrientationBySize( int w,int h )
     if( pview )
     {
         cocos2d::Size resSize = pview->getDesignResolutionSize();
+		CCLOG("resSize w = %d, h = %d ",resSize.width,resSize.height);
         auto resPolicy=pview->getResolutionPolicy();
+		CCLOG("setFrameSize w = %d, h = %d ",w,h);
+		CCLOG("getResolutionPolicy %d ",(int)resPolicy);
         pview->setFrameSize(w,h);
         pview->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
         pDirector->setViewport();

@@ -526,12 +526,14 @@ function AppEntry:init()
 				--login.set_selector(15) --学生
 				--login.set_selector(24) --田老师(校长）
 				---login.set_selector(30) --张燕老师(校长）
-				login.set_selector(34) --张燕学生2
+				--login.set_selector(34) --张燕学生2
 				--login.set_selector(33) --张燕老师八
 				--login.set_selector(35) --胡老师
 				--login.set_selector(36) --李杰
 				--login.set_selector(37) --刘
-				--login.set_selector(38) --李杰老师
+				login.set_selector(38) --李杰老师
+				--login.set_selector(39) --家长
+				--login.set_selector(40)
 				local ss = require "calc/loading"
 				return ss.create()
 				end}
@@ -613,6 +615,29 @@ function AppEntry:init()
 				end)
 			end
 		end)	
+	local han =  uikits.button{caption='汉字',x=264*scale,y = 64*scale + 3*item_h,
+		width=128*scale,height=48*scale,
+	}
+	uikits.event( han,
+		function(sender,eventType)
+			update.create{name='han',updates={'luacore'},
+				run=function()
+				login.set_uid_type(login.TEACHER)
+				--login.set_selector(15) --学生
+				--login.set_selector(24) --田老师(校长）
+				---login.set_selector(30) --张燕老师(校长）
+				--login.set_selector(34) --张燕学生2
+				--login.set_selector(33) --张燕老师八
+				--login.set_selector(35) --胡老师
+				--login.set_selector(36) --李杰
+				login.set_selector(37) --刘
+				--login.set_selector(38) --李杰老师
+				--login.set_selector(39) --家长
+				--login.set_selector(40)
+				local ss = require "han/loading"
+				return ss.create()
+				end}			
+		end)			
 	local playsound = uikits.button{caption='Test Class',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
@@ -816,6 +841,7 @@ function AppEntry:init()
 	bg:addChild(record)
 	bg:addChild(cam)
 	bg:addChild(photo)
+	bg:addChild(han)
 	self:addChild(bg)
 	resume.clearflag("update") --update isok
 end

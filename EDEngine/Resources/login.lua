@@ -54,6 +54,8 @@ local test_login =
 	[36] = {name='李杰',uid=873175,cookie='sc1=093B716C63D4B3DC602EA8BD257E0B49B6EABB1FY0p8MwbqBZfMgW8KI1Nv7VErYQvwMxjjsUyJ18LP6FYoR1aIlWVyaDepq1uOq0z7EOHqwNsDmGbNiXMK%2fiBUYeZ3m7K42bjVqlJVLQU%3d; XXID=3DC55FF8E759A9'},
 	[37] = {name='刘',uid=145829,cookie='sc1=59E9FE42385DD9C8201BB049BDD64514BC2F3AAAakl6OgPmBcqQzDlOfAwis1cvYQvwMBji7UyIisLP61YoQVaIwXsmayP59U6N9kT7EuLokYJfkGeZ1SEPpXZZOrYjwOW7juvVpVYDelFdy2LXfKgNvA%3d%3d'},
 	[38] = {name='李杰老师',uid=883188,cookie='sc1=BCABD1B97F00B65AFB5051976EB867F6EBE1E7AFY0V8MwnnBZfMgW8KI1Ji61crYQvwMxjjsUyJ18LP6FYoR1aIlXsmayOjoE6N%2flqvHPaxmZwCmWzJinEHrHkGPOBwyb293uzUpwsDLQIKzDGIc%2fMH6HMTRGmkyjq4Tw%3d%3d'},
+	[39] = {name='家家父亲',uid=1267700,cookie='sc1=3E49FAB7A81A960646B969226C9B0821DBC715C4ak95NQbvDp3c3GsecgFyuFY%2fPxuwZFj%2ft1%2bU19CP5ks0QUXPwGpmMWe%2b8lmO6hr%2fDLK2hNsMhDLNlCNZuSBWfbIh3LzhyezWtlYHagRa3DCDf6EF63pCQj2qyT29GWTM'},
+	[40] = {name='梁洁父亲',uid=1587825,cookie='sc1=B508023B3A3978A99859E7137B67E534D586F3A0akh3NQntC53IjG4NKldj7lQiaBWwYAv%2ftFuUitaPu0U0QUfPnW9mNjG%2bqFOQrUnvTOf2w9gfw2XDgHkOp3JbOrFywLbsiu%2fYpQMLewRfyWGBdPZavHYWFj2knGvqFGY%3d'},
 }
 
 local selector = 2
@@ -209,6 +211,7 @@ local function load_name()
 	cache.request_json( url,function(t)
 		if t then
 			g_name = t.uig[1].uname
+			print("g_name = "..tostring(g_name))
 		end
 	end)
 end

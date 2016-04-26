@@ -74,8 +74,8 @@ include $(BUILD_SHARED_LIBRARY)
 #	$(LOCAL_PATH)/../../../../cocos2d-x/cocos/scripting/lua-bindings
 	
 #$(call import-module,cocos)
-#$(call import-module,audio/android)
-#$(call import-module,Box2D)
-#$(call import-module,scripting/lua-bindings)
-#$(call import-module,ffmpeg/prebuilt/android)
-#$(call import-module,zeromq/prebuilt/android)
+$(call import-module,audio/android)
+$(call import-module,Box2D)
+$(call import-module,scripting/lua-bindings)
+$(call import-module,ffmpeg/prebuilt/android)
+$(call import-module,zeromq/prebuilt/android)

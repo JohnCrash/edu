@@ -584,7 +584,16 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	//@Override
 	public void onSizeChanged( int width,int height )
 	{
-		if(_isSetUIOrientation == 1)
+	//	String msg;
+		
+	//	msg = String.format("onSizeChanged width = %d,height = %d",width,height);
+	//	Log.w("onSizeChanged",msg);
+	//	try{
+	//		Thread.currentThread().sleep(200);
+	//	}catch(InterruptedException e){
+	//		
+	//	}
+	//	if(_isSetUIOrientation == 1)
 		{
 			//·¢ÉúÆÁÄ»Ðý×ª
 			cocos2dChangeOrientation( 1,width,height );

@@ -288,7 +288,7 @@ local function post(url,form,func,content_type)
 					kits.log('	data= '..tostring(obj.data))
 				end
 			end
-		end,form,content_type )
+		end,form,content_type,1,60,60*5 )
 	if not ret then
 		kits.log('ERROR : cache.post failed url = '..tostring(url))
 		kits.log('	errmsg = '..tostring(msg))
