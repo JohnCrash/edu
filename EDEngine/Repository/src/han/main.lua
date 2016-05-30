@@ -57,7 +57,7 @@ function main:init(b)
 			self._switch_show = nil
 		else
 			http.messagebox(self._root,http.DIY_MSG,function(e)
-				if e==http.RETRY then
+				if e==http.OK then
 					uikits.delay_call( self._root,function(dt)
 						music.stop()
 						uikits.popScene()
@@ -86,10 +86,14 @@ function main:init(b)
 		uikits.event(uikits.child(self._root,ui.BACK),function(sender)
 			quit()
 		end)
-		uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)
-			local scene = require "han/tops"
-			uikits.pushScene(scene.create())
-		end)
+		if http.get_id_flag() == http.ID_FLAG_STU then
+			uikits.event(uikits.child(self._root,ui.TOP_BUT),function(sender)
+				local scene = require "han/tops"
+				uikits.pushScene(scene.create())
+			end)
+		else
+			uikits.child(self._root,ui.TOP_BUT):setVisible(false)
+		end
 		uikits.event(uikits.child(self._root,ui.MATCH_BUT),function(sender)
 			local scene = require "hitmouse2/matchview"
 			self._news.hasMatch = false
@@ -195,8 +199,8 @@ function main:init(b)
 				end)
 			end
 		end
+				--]]
 		self:checkUpdate()
-		--]]
 	end
 	--self:initBoboState()
 end
@@ -204,17 +208,17 @@ end
 function main:checkUpdate()
 	kits.log("main:checkUpdate")
 	if kits.isNeedUpade then
-		kits.isNeedUpade('hitmouse2',function(b)
+		kits.isNeedUpade('han',function(b)
 			if b then
 				http.messagebox(self._root,http.DIY_MSG,function(e)
-					if e==http.RETRY then
+					if e==http.OK then
 						uikits.delay_call( self._root,function(dt)
-							kits.doUpdate('hitmouse2')
+							kits.doUpdate('han')
 						end,0.1)
 					end
 				end,"有一个新的版本可用","马上升级","稍后再说")
 			else
-				kits.log("INFO:hitmouse2 not need update~")
+				kits.log("INFO:han not need update~")
 			end
 		end)
 	end

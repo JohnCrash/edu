@@ -4,28 +4,22 @@ local login=require("login")
 local json=require("json-c")
 local popup=require("qwxt/popup")
 
-local interface = "http://192.168.2.153:1764/qwxt.ashx"
-print(interface)
+local interface="http://app.lejiaolexue.com/qwxt/qwxt.ashx"
 local localDebug=cc.UserDefault:getInstance():getStringForKey("localDebug")
 if localDebug and localDebug~="" then
-	if cc_isdebug() then
-		interface = "http://192.168.2.153:1764/qwxt.ashx"
-	else
-		interface=localDebug			--http://localhost:1764/qwxt.ashx
-	end
+	interface=localDebug			--http://localhost:1764/qwxt.ashx
 end
 
 local function post(url,form,callback)
-	local ret,msg=mt.new("POST",url,login.cookie(),
-		function(obj)
-			if obj.state=="OK" or obj.state=="CANCEL" or obj.state=="FAILED"  then
-				if obj.state=="OK" and obj.data then
-					callback(true,json.decode(obj.data))
-				else
-					callback(false,obj.errmsg)
-				end
+	local ret,msg=mt.new("POST",url,login.cookie(),function(obj)
+		if obj.state=="OK" or obj.state=="CANCEL" or obj.state=="FAILED"  then
+			if obj.state=="OK" and obj.data then
+				callback(true,json.decode(obj.data))
+			else
+				callback(false,obj.errmsg)
 			end
-		end,form)
+		end
+	end,form)
 	if not ret then
 		callback(false,msg)
 	end
@@ -62,11 +56,14 @@ local function internalSendRequest(method,param,callback,waiting,retry,sameScene
 	if sameScene then
 		ss=cc.Director:getInstance():getRunningScene()
 	end
-	post(interface,json.encode(protocol),function(success,obj)
+	post(interface,kits.encode_url(json.encode(protocol)),function(success,obj)
 		if sameScene then
 			--不在同一场景里就把数据丢弃，回调函数可能找不到界面元素了
 			local rs=cc.Director:getInstance():getRunningScene()
-			if ss~=rs then return end
+			if ss~=rs then
+				waiting.flag=false
+				return
+			end
 		end
 
 		if success then

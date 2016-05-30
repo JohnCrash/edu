@@ -510,7 +510,7 @@ function AppEntry:init()
 			--update.create{name='qwxt',updates={'qwxt','luacore','topics','wuliu'},
 				--run=function()
 				login.set_uid_type(login.STUDENT)
-				login.set_selector(7)--学生
+				login.set_selector(36)--学生
 				--login.set_selector(29) 
 				local qwxt = require "qwxt/main"
 				--return qwxt.create()
@@ -530,8 +530,8 @@ function AppEntry:init()
 				--login.set_selector(33) --张燕老师八
 				--login.set_selector(35) --胡老师
 				--login.set_selector(36) --李杰
-				--login.set_selector(37) --刘
-				login.set_selector(38) --李杰老师
+				login.set_selector(37) --刘
+				--login.set_selector(38) --李杰老师
 				--login.set_selector(39) --家长
 				--login.set_selector(40)
 				local ss = require "calc/loading"
@@ -620,7 +620,7 @@ function AppEntry:init()
 	}
 	uikits.event( han,
 		function(sender,eventType)
-			update.create{name='han',updates={'luacore'},
+			update.create{name='han',updates={'luacore','han'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				--login.set_selector(15) --学生

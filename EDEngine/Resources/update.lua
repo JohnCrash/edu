@@ -18,9 +18,9 @@ local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
 local versionNUM = resume.getversion()
 --release
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+--local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
 --debug
---local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug/'
+local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug2/'
 
 local liexue_server_dl = liexue_server_sr
  
@@ -29,9 +29,9 @@ kits.log("INFO read ljshell setting")
 if lj_config and lj_config.setting then
 	if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
 		--release
-		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
+		--liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
 		--debug
-		--liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/debug/'
+		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/debug2/'
 		kits.log("read ljshell setting.FileServer = "..tostring(liexue_server_dl))
 	else
 		kits.log("WARNING lj_config.setting.FileServer = nil")
@@ -253,7 +253,7 @@ function UpdateProgram.create(t)
 			end		
 		end --]]
 		
-		--需要跟新,打开启动界面
+		--需要更新,打开启动界面
 		local scene = cc.Scene:create()
 		local layer = uikits.extend(cc.Layer:create(),UpdateProgram)
 		
@@ -352,7 +352,7 @@ local function compare_filelist(s,t,d)
 	return filelist
 end
 
---根据filelist.json来跟新文件
+--根据filelist.json来更新文件
 function UpdateProgram:update_directory(dir)
 	local n_dir
 	local l_dir = local_dir..dir
@@ -377,7 +377,7 @@ function UpdateProgram:update_directory(dir)
 		--self._try:setHighlighted(false)
 		--self._try:setEnabled(false)
 		kits.log("ERROR : update_directory request "..tostring(n_dir).." failed")
-		self:ErrorAndExit("跟新服务器暂时不可用请稍后再试."..tostring(dir),1)
+		self:ErrorAndExit("更新服务器暂时不可用请稍后再试."..tostring(dir),1)
 	else
 		--kits.log("INFO : data = "..tostring(nbuf))
 		local n_table = json.decode(nbuf)
@@ -396,13 +396,13 @@ function UpdateProgram:update_directory(dir)
 			for i,v in pairs(op_table) do
 				table.insert(self._oplist,v)
 			end
-			--最后将filelist.json和version.json跟新下
+			--最后将filelist.json和version.json更新下
 			table.insert(self._oplist,{writeto=l_dir..'/filelist.json',data=nbuf})
 			table.insert(self._oplist,{writeto=l_dir..'/version.json',data=_versions[dir..'/version.json'].file})
 		else
 			--self._try:setHighlighted(false)
 			--self._try:setEnabled(false)
-			self:ErrorAndExit('跟新服务器异常.'..tostring(dir),1)
+			self:ErrorAndExit('更新服务器异常.'..tostring(dir),1)
 		end
 	end
 end
@@ -462,7 +462,7 @@ function UpdateProgram:check_directory(dir,n)
 	local src_url = update_server..'src/'..dir..'/version.json'
 	local res_local = local_dir..'res/'..dir..'/version.json'
 	local src_local = local_dir..'src/'..dir..'/version.json'
-	--只有在确定下载成功的情况下才跟新
+	--只有在确定下载成功的情况下才更新
 	kits.log("check "..tostring(res_url))
 	local try_count = 0
 	local MAX_TRY_COUNT = 10
@@ -481,15 +481,15 @@ function UpdateProgram:check_directory(dir,n)
 					--比较本地和网络版本
 					local l_res_v = kits.read_file(res_local)
 					local l_src_v = kits.read_file(src_local)
-					if not l_res_v then return true end --没有本地版本文件，需要跟新
+					if not l_res_v then return true end --没有本地版本文件，需要更新
 					if not l_src_v then return true end
 					local j_res_v = json.decode(l_res_v)
 					local j_src_v = json.decode(l_src_v)
 					if j_res_v and j_src_v and j_res_v.version and j_src_v.version and
 					j_res_v.version==res_v.version and j_src_v.version==src_v.version then
-						return false --完全相同不需要跟新
+						return false --完全相同不需要更新
 					else
-						return true --需要跟新
+						return true --需要更新
 					end
 				else
 					kits.log('ERROR check_directory version file error!')
@@ -499,7 +499,7 @@ function UpdateProgram:check_directory(dir,n)
 					if n==2 then
 						self:NErrorCheckLocal(dir)
 					end
-					return false,1 --下传失败,本次不跟新
+					return false,1 --下传失败,本次不更新
 				end
 			else
 				if try_count > MAX_TRY_COUNT then
@@ -508,7 +508,7 @@ function UpdateProgram:check_directory(dir,n)
 					if n==2 then
 						self:NErrorCheckLocal(dir)
 					end
-					return false,1 --下传失败,本次不跟新
+					return false,1 --下传失败,本次不更新
 				else
 					try_count = try_count + 1
 				end
@@ -520,7 +520,7 @@ function UpdateProgram:check_directory(dir,n)
 				if n==2 then				
 					self:NErrorCheckLocal(dir)
 				end
-				return false,1 --下传失败,本次不跟新
+				return false,1 --下传失败,本次不更新
 			else
 				try_count = try_count + 1
 			end
@@ -534,7 +534,7 @@ function UpdateProgram:check_update(t)
 	kits.log("INFO check "..tostring(update_server))
 	for i,v in pairs(t.updates) do
 		local b,e = self:check_directory(v,2)
-		if e then --如果网络错误不在等待，直接不跟新
+		if e then --如果网络错误不在等待，直接不更新
 			--尝试使用外网的
 			outer = true
 			t.need_updates={}
@@ -543,7 +543,7 @@ function UpdateProgram:check_update(t)
 			if v == 'luacore' then
 				self._luacore_update = true
 			end
-			table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+			table.insert(t.need_updates,v) --将需要更新的都加入到，需要更新列表
 		end
 	end
 	if outer then
@@ -553,14 +553,14 @@ function UpdateProgram:check_update(t)
 		t.need_updates={}
 		for i,v in pairs(t.updates) do
 			local b,e = self:check_directory(v,2)
-			if e then --如果网络错误不在等待，直接不跟新
+			if e then --如果网络错误不在等待，直接不更新
 				t.need_updates={}
 				return false
 			elseif b then
 				if v == 'luacore' then
 					self._luacore_update = true
 				end			
-				table.insert(t.need_updates,v) --将需要跟新的都加入到，需要跟新列表
+				table.insert(t.need_updates,v) --将需要更新的都加入到，需要更新列表
 			end
 		end
 		self._text:setText("正在加载请稍等...")
@@ -577,11 +577,11 @@ function UpdateProgram:update()
 	if self._mode==TRY then
 		return
 	end
-	if self._step == 1 then --检查跟新
+	if self._step == 1 then --检查更新
 		self._count = 0
 		self._maxcount = 0
 		self._oplist = {}
-		--不需要跟新直接启动
+		--不需要更新直接启动
 		if not self:check_update(self._args) then
 			resume.clearflag("update") --update isok
 			if local_not_exist then return end --如果本地不存在
@@ -601,7 +601,7 @@ function UpdateProgram:update()
 			end
 			return
 		end
-		--收集目录中需要跟新个文件
+		--收集目录中需要更新个文件
 		for i,v in pairs(self._args.need_updates) do
 			self:update_directory(self:get_resource_suffix()..v)
 			self:update_directory('src/'..v)
@@ -672,7 +672,7 @@ function UpdateProgram:update()
 				elseif e==2 then --网络问题
 					self:ErrorAndExit('下载失败:'..tostring(t.download))
 				elseif e==3 then --算法问题
-					self:ErrorAndExit('跟新出现错误')
+					self:ErrorAndExit('更新出现错误')
 				else
 					self:ErrorAndExit('未知错误')
 				end
@@ -683,7 +683,7 @@ function UpdateProgram:update()
 		self._progress:setPercent(self._count*100/self._maxcount)
 		if self._count > self._maxcount then
 			if self._luacore_update then
-				--self:ErrorAndExit('本次跟新需要重新启动,请退出再启动程序!',2)
+				--self:ErrorAndExit('本次更新需要重新启动,请退出再启动程序!',2)
 				--要求重新加载这些文件
 				package.loaded['kits'] = nil
 				package.loaded['uikits'] = nil
@@ -723,7 +723,7 @@ function UpdateProgram:update()
 						self:ErrorAndExit('下载失败:'..tostring(t.download))
 						return
 					elseif e==3 then --算法问题
-						self:ErrorAndExit('跟新出现错误')
+						self:ErrorAndExit('更新出现错误')
 						return
 					else
 						self:ErrorAndExit('未知错误')

@@ -29,6 +29,10 @@ local ui = {
 	START_UI = 'guan',
 	
 	START_LEVEL = 'guan',
+	START_LOGO = 'touxiang',
+	START_NAME = 'touxiang/mz',
+	START_COUNT = 'tili',
+	START_SCORE = 'touxiang/defen',
 	
 	CHILD_PLANE = 'duo',
 	CHILD_NEXT = 'you',
@@ -59,6 +63,11 @@ local ui = {
 	SCORE_NAME = 'mz',
 	SCORE_SCORE = 'defen',
 	SCORE_ADD = 'tu',
+	
+	DIFF_PLANE = 'jibie',
+	DIFF1_BUT = 'xiaox',
+	DIFF2_BUT = 'chuz',
+	DIFF3_BUT = 'goaz',
 }
 
 local levelScene = uikits.SceneClass("levelScene")
@@ -109,7 +118,7 @@ function levelScene:add(m,n,b)
 	end
 	item:setVisible(true)
 	if n then
-		local stars = state.get_level_star()
+		local stars = level.get_level_star(self._diffictly)
 		local txt = uikits.child(item,'su')
 		if txt then
 			txt:setString(tostring(n))
@@ -153,7 +162,7 @@ function levelScene:add(m,n,b)
 end
 
 function levelScene:prepare_start( m,n,b )
-	local send_data = {V1=n}
+	local send_data = {V1=n,v2=self._diffictly or 1}
 	kits.log("do prepare_start launch battle...")
 	http.post_data(self._root,'get_road_block_info',send_data,function(t,v)
 		if t and t==200 and v then
@@ -199,8 +208,10 @@ function levelScene:open_eos(level)
 end
 
 function levelScene:start_state()
-	if self._start_ui and self._v4 then
-		if state.get_sp() < self._v4 then
+	--if self._start_ui and self._v4 then
+	if true then
+		--if state.get_sp() < self._v4 then
+		if false then
 			uikits.child(self._start_ui,ui.START_CAST):setColor(cc.c3b(255,0,0))
 			uikits.child(self._start_ui,ui.START_BUT):setBright(false)
 			uikits.child(self._start_ui,ui.START_BUT):setEnabled(false)
@@ -223,6 +234,18 @@ function levelScene:init_start_ui(v,m,n,b)
 	self._v4 = v.v4
 	self:start_state()
 	uikits.child(self._start_ui,ui.START_CAST):setString(v.v4 or '-')
+	--头像
+	http.load_logo_pic(uikits.child(self._start_ui,ui.START_LOGO),login.uid() or 0)
+	--名称
+	uikits.child(self._start_ui,ui.START_NAME):setString(state.get_name() or '')
+	--得分
+	local score
+	if v and v.v2 then
+		score = v.v2
+	else
+		score = '0'
+	end
+	uikits.child(self._start_ui,ui.START_SCORE):setString( score )
 	--[[
 	if state.get_sliver() < v.v5 then
 		uikits.child(self._start_ui,ui.START_CHEET_CAST):setColor(cc.c3b(255,0,0))
@@ -338,6 +361,7 @@ function levelScene:start_game2(v,m,n,b)
 				v.v5.condition = v.v6
 				v.v5.type = 1
 				v.v5.level = n
+				v.v5.diff = self._currentDiff
 				uikits.pushScene(battle.create(v.v5))
 				self._start_ui:setVisible(false)
 			else 
@@ -459,8 +483,15 @@ function levelScene:init()
 	if not self._root then
 		self._root = uikits.fromJson{file_9_16=ui.FILE,file_3_4=ui.FILE_3_4}
 		self:addChild(self._root)
+		self._popLevel = 1
 		uikits.event(uikits.child(self._root,ui.BACK),function(sender)
-			uikits.popScene()
+			if self._popLevel <= 1 then
+				uikits.popScene()
+			else
+				self._diff_ui:setVisible(true)
+				self._list:setVisible(false)
+				self._popLevel = 1
+			end
 		end)
 		self._list = uikits.child(self._root,ui.LIST)
 		uikits.enableMouseWheelIFWindows(self._list)
@@ -473,7 +504,7 @@ function levelScene:init()
 		self._item_size = self._item_number:getContentSize()
 		self._list_size = self._list:getContentSize()
 		if self._list_size.width == 1920 then
-			self._colume = 7
+			self._colume = 5
 			self._offset = 36
 			self._space = 12
 		else
@@ -528,6 +559,30 @@ function levelScene:init()
 		self._start_ui = uikits.child(self._root,ui.START_UI)
 		self._start_ui:setVisible(false)
 
+		self._diff_ui = uikits.child(self._root,ui.DIFF_PLANE)
+		self._diff_ui:setVisible(true)
+		self._list:setVisible(false)
+		uikits.event(uikits.child(self._diff_ui,ui.DIFF1_BUT),function()
+			self._diff_ui:setVisible(false)
+			self._list:setVisible(true)
+			self._currentDiff = 1
+			self._popLevel = 2
+			self:initLevelList2(1)
+		end)
+		uikits.event(uikits.child(self._diff_ui,ui.DIFF2_BUT),function()
+			self._diff_ui:setVisible(false)
+			self._list:setVisible(true)		
+			self._currentDiff = 2
+			self._popLevel = 2
+			self:initLevelList2(2)
+		end)
+		uikits.event(uikits.child(self._diff_ui,ui.DIFF3_BUT),function()
+			self._diff_ui:setVisible(false)
+			self._list:setVisible(true)		
+			self._currentDiff = 3
+			self._popLevel = 2
+			self:initLevelList2(3)
+		end)		
 		--[[
 		self._top10 = uikits.scrollex(self._start_ui,ui.LEVEL_TOP10,{ui.LEVEL_ITEM})
 		self._top10:clear()
@@ -546,12 +601,25 @@ function levelScene:init()
 	--elseif self._current and self._current==level.getCurrent()-1 then
 	--	self:initOpenNext()
 	--else
-		self:clear()
-		self._current = level.getCurrent()
-		self._count = level.getLevelCount()
-		self:initLevelList()
+	--	self:clear()
+	--	self._current = level.getCurrent()
+	--	self._count = level.getLevelCount()
+	--	self:initLevelList()
 	--end
+	self:initLevelList2(level.getDifficulty())
 	self:initBoboState()
+end
+
+function levelScene:initLevelList2(d)
+	self:clear()
+	self._list:jumpToTop()
+	self._diffictly = d
+	level.setDifficulty(d)
+	self._current = level.getCurrent(d)
+	self._count = level.getLevelCount(d)
+	print("=========levelScene:initLevelList2=========")
+	print("_current = "..tostring(self._current).." _count="..tostring(self._count).." _diffictly="..tostring(self._diffictly))
+	self:initLevelList()
 end
 
 function levelScene:initBoboState()
@@ -594,6 +662,7 @@ function levelScene:initLevelList()
 		end
 	end
 	self:relayout()
+	self._list:jumpToTop()
 	self:visibleCurrent()
 end
 

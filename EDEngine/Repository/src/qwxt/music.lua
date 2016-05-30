@@ -1,4 +1,5 @@
 require "Cocos2d"
+local kits = require "kits"
 local ffplayer=require("ffplayer")
 
 local resPath=require("kits").get_local_directory().."res/"
@@ -42,8 +43,10 @@ music=
 
 	background=nil,
 	playBackground=function()
+		kits.log("playBackground")
 		if music.zuoti~=nil and music.zuoti.isPlaying then music.zuoti:pause() end
 		if music.on then
+			kits.log("playBackground on")
 			local function onPlayerEvent(state,as)
 				if state==ffplayer.STATE_END then
 					as:close()
@@ -55,6 +58,7 @@ music=
 			end
 			if music.background==nil then
 				local index=math.random(1,#music.backgroundList)
+				kits.log("ffplayer.playSound "..resPath..music.backgroundList[index])
 				music.background=ffplayer.playSound("qwxt_background",resPath..music.backgroundList[index],onPlayerEvent)
 			else
 				if not music.background.isPlaying then music.background:play() end

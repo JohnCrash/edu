@@ -387,14 +387,6 @@ local function timer(time_label,time_total)
 	end,1)
 end
 
-local _star={}
-local function set_level_star(t)
-	_star = t
-end
-local function get_level_star()
-	return _star
-end
-
 local function messagebox(caption,text,button,func)
 	local factory = require "factory"
 	local base = require "base"

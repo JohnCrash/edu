@@ -464,7 +464,7 @@ function ZuotiScene:showProblem(data,retry)
 					--重试次数到了
 					popup.msgBox({title="温馨提示",text="获取题目资源失败\n\n点击确定按钮更换题目，点击取消按钮退出练习。"},function(ok)
 						if ok then
-							self:getProblem()
+							self:onNext()
 						else
 							cc.Director:getInstance():replaceScene(public.createScene("zuotijieshu"))
 						end

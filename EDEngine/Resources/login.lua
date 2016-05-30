@@ -56,6 +56,7 @@ local test_login =
 	[38] = {name='李杰老师',uid=883188,cookie='sc1=BCABD1B97F00B65AFB5051976EB867F6EBE1E7AFY0V8MwnnBZfMgW8KI1Ji61crYQvwMxjjsUyJ18LP6FYoR1aIlXsmayOjoE6N%2flqvHPaxmZwCmWzJinEHrHkGPOBwyb293uzUpwsDLQIKzDGIc%2fMH6HMTRGmkyjq4Tw%3d%3d'},
 	[39] = {name='家家父亲',uid=1267700,cookie='sc1=3E49FAB7A81A960646B969226C9B0821DBC715C4ak95NQbvDp3c3GsecgFyuFY%2fPxuwZFj%2ft1%2bU19CP5ks0QUXPwGpmMWe%2b8lmO6hr%2fDLK2hNsMhDLNlCNZuSBWfbIh3LzhyezWtlYHagRa3DCDf6EF63pCQj2qyT29GWTM'},
 	[40] = {name='梁洁父亲',uid=1587825,cookie='sc1=B508023B3A3978A99859E7137B67E534D586F3A0akh3NQntC53IjG4NKldj7lQiaBWwYAv%2ftFuUitaPu0U0QUfPnW9mNjG%2bqFOQrUnvTOf2w9gfw2XDgHkOp3JbOrFywLbsiu%2fYpQMLewRfyWGBdPZavHYWFj2knGvqFGY%3d'},
+	[41] = {name='小杰',uid=4441416,cookie='sc1=D6BC7D07156AD4C058071DA108FA5FFAB54EEE1Fb0l7MwXuCJ2KiGsCJ11u7lUoaBmuIFjv8AuBl9%2fM%2bxYnBkqOgDxzdmOutQrR6h78DLbkhIAOhG6einMHrXlQY7InyeW9j73ZpwpRLlMCmDDTIaUIvHFFRWujyGm2FWKf'},
 }
 
 local selector = 2
@@ -153,7 +154,7 @@ local function get_uid()
 	end
 end
 
-local logo_url = 'http://image.lejiaolexue.com/ulogo/'
+
 
 local function set_selector(idx)
 	selector = idx
@@ -162,16 +163,22 @@ end
 --返回logo cache文件名
 --如果不存在则先下载
 local function get_logo_url( uid,t )
-	local seg1 = math.floor(uid/10000)%100
-	local seg2 = math.floor(uid/100)%100
-	local logo_type = 2 --50x50
-	if t then
-		if t > 2 then
-			t = 99
+	local kits = require "kits"
+	if kits then
+		local logo_url = "http://"..kits.getImageDownloadServer().."/userlogo/"
+		
+		--local seg1 = math.floor(uid/10000)%100
+		--local seg2 = math.floor(uid/100)%100
+		local logo_type = 2 --50x50
+		if t then
+			if t > 2 then
+				t = 99
+			end
+			logo_type = t
 		end
-		logo_type = t
+		--return logo_url..tostring(seg1)..'/'..tostring(seg2)..'/'..tostring(uid)..'_'..logo_type..'.jpg'
+		return logo_url..tostring(uid)..'_'..logo_type..'.jpg'
 	end
-	return logo_url..tostring(seg1)..'/'..tostring(seg2)..'/'..tostring(uid)..'_'..logo_type..'.jpg'
 end
 
 local cache

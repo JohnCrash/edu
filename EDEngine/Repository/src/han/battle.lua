@@ -4,10 +4,10 @@ local uikits = require "uikits"
 local cache = require "cache"
 local lxp = require "lom"
 local json = require "json-c"
-local level = require "hitmouse2/game"
-local state = require "hitmouse2/state"
-local http = require "hitmouse2/hitconfig"
-local music = require "hitmouse2/music"
+local level = require "han/game"
+local state = require "han/state"
+local http = require "han/http"
+local music = require "han/music"
 
 local _platform = cc.Application:getInstance():getTargetPlatform()
 --本地支援缓冲区
@@ -23,8 +23,8 @@ local SND_PASS = 7
 local SND_GOLD = 8
 
 local ui = {
-	FILE = 'hitmouse2/zuoti.json',
-	FILE_3_4 = 'hitmouse2/zuoti43.json',
+	FILE = 'han/zuoti.json',
+	FILE_3_4 = 'han/zuoti43.json',
 	TOPBAR = 'ding',
 	BACK = 'ding/hui',
 	NUMBER = 'ding/tu/tishu',
@@ -43,17 +43,17 @@ local ui = {
 	SUCCESS_WINDOW = 'js2',
 	FAILED_WINDOW = 'js3',
 	
-	ANIMATION_1 = "hitmouse2/NewAnimation/NewAnimation.ExportJson",
-	ANIMATION_2 = "hitmouse2/chong_zi/chong_zi.ExportJson",
-	ANIMATION_3 = "hitmouse2/defen/defen.ExportJson",
+	ANIMATION_1 = "han/NewAnimation/NewAnimation.ExportJson",
+	ANIMATION_2 = "han/chong_zi/chong_zi.ExportJson",
+	ANIMATION_3 = "han/defen/defen.ExportJson",
 	
-	ANIMATION_JUDGE = "hitmouse2/success/success.ExportJson",
+	ANIMATION_JUDGE = "han/success/success.ExportJson",
 	
-	ANIMATION_BAOYA = "hitmouse2/baoya/baoya.ExportJson",
-	ANIMATION_BANGZI = "hitmouse2/bangzi/bangzi.ExportJson",
-	ANIMATION_TOUMU = "hitmouse2/toumu/toumu.ExportJson",
+	ANIMATION_BAOYA = "han/baoya/baoya.ExportJson",
+	ANIMATION_BANGZI = "han/bangzi/bangzi.ExportJson",
+	ANIMATION_TOUMU = "han/toumu/toumu.ExportJson",
 	
-	ANIMATION_RIGHT = "hitmouse2/gou/gou.ExportJson",
+	ANIMATION_RIGHT = "han/gou/gou.ExportJson",
 	
 	USE_TIME = 'js1/sj',
 	RIGHT_COUNT = 'js1/tisu',
@@ -125,23 +125,23 @@ end
 function battle:play_sound( idx )
 	local name
 	if idx == SND_UI_CLICK then
-		name = 'hitmouse2/snd/qiaoda.mp3'
+		name = 'han/snd/qiaoda.mp3'
 	elseif idx == SND_CLICK then
-		name = 'hitmouse2/snd/qiaoda.mp3'
+		name = 'han/snd/qiaoda.mp3'
 	elseif idx == SND_MISS then
-		name = 'hitmouse2/snd/shibai.MP3'
+		name = 'han/snd/shibai.MP3'
 	elseif idx == SND_HIT then
-		name = 'hitmouse2/snd/beida.MP3'
+		name = 'han/snd/beida.MP3'
 	elseif idx == SND_RIGHT then
-		name = 'hitmouse2/snd/zhengque.MP3'
+		name = 'han/snd/zhengque.MP3'
 	elseif idx == SND_FAIL then
-		name = 'hitmouse2/snd/shibai.mp3'
+		name = 'han/snd/shibai.mp3'
 	elseif idx == SND_NEXT_PROM then
-		name = 'hitmouse2/snd/guoguan.MP3'
+		name = 'han/snd/guoguan.MP3'
 	elseif idx == SND_PASS then
-		name = 'hitmouse2/snd/complete.mp3'
+		name = 'han/snd/complete.mp3'
 	elseif idx == SND_GOLD then
-		name = 'hitmouse2/snd/gold.mp3'
+		name = 'han/snd/gold.mp3'
 	else
 		return
 	end
@@ -296,8 +296,12 @@ function battle:init_role()
 	self._defenAnimation:setVisible(false)
 	self._defenAnimation:setAnchorPoint(cc.p(0,0))
 	self._score_rect = uikits.child(self._root,ui.SCORE_RECT)
-	local x,y = self._score_rect:getPosition()
-	self._defenAnimation:setPosition(cc.p(x,y))
+	if self._score_rect then
+		local x,y = self._score_rect:getPosition()
+		self._defenAnimation:setPosition(cc.p(x,y))
+	else
+		self._defenAnimation:setVisible(false)
+	end
 end
 
 function battle:showMouse(b)
@@ -437,13 +441,20 @@ end
 					7.释义填空成语
 --]]					
 local tst = {
-	35,
+	35, --1
 	60,
 	75,
 	110,
 	100,
 	40,
 	110,
+	35, --8
+	60,
+	75,
+	110,
+	100,
+	40,
+	110,	
 }
 
 function battle:clac_score(ttype)
@@ -697,15 +708,20 @@ function battle:init_event()
 						else
 							text = "你‘确定’要退出错题任务吗？"
 						end
+						
+						if not self._ismessagebox then
+						self._ismessagebox = true
 						http.messagebox(self._root,http.DIY_MSG,function(e)
-							if e==http.RETRY then
+							self._ismessagebox = false
+							if e==http.OK then
 								self._game_over_flag = true
 								uikits.popScene()
 							end
 						end,text,"确定")			
+						end
 					else
 						http.messagebox(self._root,http.DIY_MSG,function(e)
-							if e==http.RETRY then
+							if e==http.OK then
 								self:upload_scroe2(self._arg.level,math.floor(self._fen),self._game_time,self._right_num,-1)					
 							end
 						end,"退出比赛将浪费一次比赛机会\n你‘确定’要退出比赛吗？","确定")						
@@ -743,6 +759,8 @@ function battle:init_data()
 	local data
 	
 	if self._arg.type ~= 4 then
+		kits.log("battle:init_data")
+		--kits.logTable(self._arg)
 		data = level.get(self._arg)
 	else
 		--错题任务
@@ -891,17 +909,19 @@ function battle:game_over(mode)
 	self._game_over_flag = true
 	kits.log("Game Over~")
 	local fen100 = self:getIntegration()
-	local b = fen100 > self._arg.condition
+	local b = fen100 >= self._arg.condition
 	kits.log("分数:"..self:getIntegration())
 	
 	self._worm:setVisible(false)
 	local fen_text = tostring(math.floor(self._fen))
 	self._fen_label:setString(fen_text)
+	--[[
 	for i=1,4 do
 		self._amouse[i]:setVisible(false)
 		self._cn_label[i]:getParent():setVisible(false)
 	end
 	self:switchCharacter(1,false)
+	--]]
 	if self._current_plane then
 		self._current_plane:setVisible(false)
 	end
@@ -913,11 +933,14 @@ function battle:game_over(mode)
 			--播放成功过关的声音
 			self:play_sound(SND_NEXT_PROM)	
 			if mode == 2 then
-				self._timeover_ui:setVisible(true)
-				uikits.child(self._root,ui.USE_TIME):setString(tostring(self._game_time))
+				ok=uikits.child(self._failed_ui,ui.OK_BUT)
+				self._failed_ui:setVisible(true)			
+			--[[
+				--self._timeover_ui:setVisible(true)
+				--uikits.child(self._root,ui.USE_TIME):setString(tostring(self._game_time))
 				uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
 				uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
-				ok=uikits.child(self._timeover_ui,ui.OK_BUT)
+				--ok=uikits.child(self._timeover_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
 				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)
 				if http.get_id_flag()==http.ID_FLAG_PAR then
@@ -927,6 +950,7 @@ function battle:game_over(mode)
 					label:setVisible(false)
 					share_score:setVisible(false)
 				end
+				--]]
 			else
 				self._success_ui:setVisible(true)
 				uikits.child(self._root,ui.USE_TIME2):setString(tostring(self._game_time))
@@ -934,15 +958,17 @@ function battle:game_over(mode)
 				uikits.child(self._root,ui.SCORE_COUNT2):setString(fen_text)
 				ok=uikits.child(self._success_ui,ui.OK_BUT)
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL2)
-				local share_score = uikits.child(self._root,ui.SHARE_SCORE2)		
-				if http.get_id_flag()==http.ID_FLAG_PAR then
-				--if false then
-					label:setVisible(true)
-					share_score:setVisible(true)						
-					share_score:setString(tostring(l4p5(self._fen*0.1)))
-				else
-					label:setVisible(false)
-					share_score:setVisible(false)
+				local share_score = uikits.child(self._root,ui.SHARE_SCORE2)
+				if label then
+					if http.get_id_flag()==http.ID_FLAG_PAR then
+					--if false then
+						label:setVisible(true)
+						share_score:setVisible(true)						
+						share_score:setString(tostring(l4p5(self._fen*0.1)))
+					else
+						label:setVisible(false)
+						share_score:setVisible(false)
+					end
 				end
 			end
 		else
@@ -1003,7 +1029,7 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 			end
 		else
 			http.messagebox(self._root,http.DIY_MSG,function(e)
-			   if e==http.RETRY then
+			   if e==http.OK then
 					self:upload_scroe( level_id,score,use_time,right_num )
 				else
 					uikits.popScene()
@@ -1014,8 +1040,9 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 end
 --]]
 function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
-	local send_data = {v1=level_id,v2=self._arg.type,v3=use_time,v5=self._arg.subid,v6=score,v7=fen100}
+	local send_data = {v1=level_id,v2=self._arg.type,v3=use_time,v5=self._arg.subid,v6=score,v7=fen100,v8=self._arg.diff}
 	send_data.v4 = {}
+	--[[错题
 	for i,v in pairs(self._words) do
 		local en
 		if v.judge or self._arg.type~=1 then
@@ -1025,18 +1052,20 @@ function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 		end
 		table.insert(send_data.v4,{type=v.type,isright=v.judge,cy_id=en})
 	end
+	--]]
 	kits.log("do battle:upload_scroe2")
 	http.post_data(self._root,'submit_answer',send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v,1)
 			if v.v1 and self._arg.type==1 then
-				local current = level.getCurrent()
-				local count = level.getLevelCount()
+				local d=level.getDifficulty()
+				local current = level.getCurrent(d)
+				local count = level.getLevelCount(d)
 				if current<count and level_id == current then
-					level.setCurrent(current+1)
+					level.setCurrent2(current+1,d)
 				end
 				--重新设置星星数
-				local st = state.get_level_star()
+				local st = level.get_level_star(d)
 				if v.v2 and st and st[level_id] then
 					local sc = tonumber(st[level_id].star_count)
 					kits.log("INFO OLD STAR COUNT = "..tostring(sc))
@@ -1060,7 +1089,7 @@ function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 			end
 		else
 			http.messagebox(self._root,http.DIY_MSG,function(e)
-			   if e==http.RETRY then
+			   if e==http.OK then
 					self:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 				else
 					self._game_over_flag = true
@@ -1215,6 +1244,380 @@ function battle:next_select()
 	self._pause = false
 end
 
+function battle:init_problem( plane,topics,choose,q,label_name )
+	local isSelected = false
+	local selectedItem
+	--初始化题面
+	local prob_item 
+	for i,v in ipairs(topics) do
+		local item = uikits.child(plane,v)
+		if item and item.setString then
+			if type(q.name)=='table' and q.name[i] then
+				if q.name[i] == ' ' then
+					prob_item = item
+				end
+				item:setString( tostring(q.name[i]) )
+			elseif type(q.name)=='string' then
+				item:setString( q.name )
+			else
+				kits.log("Problem error q.name = "..tostring(q.name))
+			end
+		else
+			kits.log("Problem error item = nil or item not setString q.type = "..tostring(q.type))
+			kits.log("v = "..tostring(v))
+		end
+	end
+	--初始化选择
+	local right_location = nil
+	for i,v in ipairs(choose) do
+		local item = uikits.child(plane,v)
+		if item then
+			if label_name then
+				local text = uikits.child(item,label_name)
+				if text then
+					if q.answer and q.answer[i] then
+						--设置正确答案位置
+						if tostring(q.answer[i]) == tostring(q.correct) then
+							right_location = item
+						end
+						text:setString( tostring(q.answer[i]) )
+					else
+						kits.log("Problem error q.type = "..tostring(q.type))
+						kits.log("q.answer = "..tostring(q.answer))	
+						text:setString( "" )
+					end
+				else
+					kits.log("Problem error q.type = "..tostring(q.type))
+					kits.log("label_name = "..tostring(label_name))
+				end
+			else
+				--对错
+				--设置正确答案位置
+				if tostring(q.answer[i]) == tostring(q.correct) then
+					right_location = item
+				end	
+			end
+			if item.setSelectedState then
+				item:setSelectedState(false)
+			end
+			uikits.event(item,function(sender)
+				if isSelected then 
+					if sender and sender.setSelectedState then
+						if sender == selectedItem then
+							item:setSelectedState(true)
+						else
+							item:setSelectedState(false)
+						end
+					end
+					return 
+				end
+				isSelected = true
+				selectedItem = sender
+				if prob_item then
+					prob_item:setString(q.answer[i])
+				end				
+				
+				if tostring(q.answer[i]) == tostring(q.correct) then
+				--if true then
+					--选择正确
+					self:play_sound(SND_RIGHT)
+					q.judge = true
+					self:clac_score(q.type)
+					
+					self._right_num = self._right_num + 1
+					kits.log("INFO "..tostring(q.answer[i]).."=="..tostring(q.correct))
+					kits.log("INFO right_num = "..tostring(self._right_num))		
+					dt = self:playJudgeAnimation(JUDGE_RIGHT)	
+					uikits.delay_call(self._root,function(s)
+						self:next_select()
+					end,dt)						
+				else
+					--选择错误
+					self:play_sound(SND_FAIL)
+					q.judge = false
+					self._fen_mul = 1
+					self._error_num = self._error_num + 1				
+					dt = self:playJudgeAnimation(JUDGE_WRONG)		
+					uikits.delay_call(self._root,function(s)
+						--show right
+						if right_location then
+							if not self._right_animation then
+								self._right_animation = ccs.Armature:create("gou")
+								self:addChild(self._right_animation,10)
+							end
+							self._right_animation:setVisible(true)
+							local x,y = right_location:getPosition()
+							local size = right_location:getContentSize()
+							self._right_animation:setScaleX(0.6)
+							self._right_animation:setScaleY(0.6)
+							self._right_animation:setPosition(cc.p(x+size.width/2,y-size.height/2))
+							self._right_animation:getAnimation():playWithIndex(0)
+							uikits.delay_call(self._root,function(s)
+								self._right_animation:setVisible(false)
+								self:next_select()
+							end,3)
+						else
+							kits.log("right_location = nil")
+						end
+					end,dt)	
+				end
+			end)
+		else
+			kits.log("Problem error item = nil q.type = "..tostring(q.type))
+			kits.log("v = "..tostring(v))		
+		end
+	end
+end
+
+local fonts = {
+	"han/font/cao.ttf",
+	"han/font/xing.ttf",
+	"han/font/zhuan.ttf",
+}
+
+function battle:initType5Font()
+	if self._fontLabel then return end
+	self._fontLabel = {}
+	for i=1,3 do
+		self._fontLabel[i] = cc.Label.createWidthTTF("",fonts[i],32)
+	end
+end
+
+local function random_rang(rangs)
+	local count = #rangs
+	for i = 1,count do
+		local s = rangs[i]
+		local idx = math.random(1,count)
+		rangs[i] = rangs[idx]
+		rangs[idx] = s
+	end	
+end
+
+function battle:type5(plane,topics,word,choose,q)
+	local isSelected = false
+	local selectedItem
+	local st = math.random(1,3)
+	local cn
+	local right_location
+	local rm = {1,2,3}
+	random_rang(rm)
+	--self:initType5Font()
+	if st==1 then
+		cn = "草书"
+	elseif st==2 then
+		cn = "行书"
+	elseif st==3 then
+		cn = "篆书"
+	else
+		return
+	end
+	local top = uikits.child(plane,topics)
+	if top then
+		top:setString(string.format("请选择以下字所对应%s的是哪一个？",cn))
+	end
+	local wor = uikits.child(plane,word)
+	if wor then
+		wor:setString(q.name)
+	end
+	local cho = {}
+	--print( "cn="..cn)
+	for i=1,#choose do
+		cho[i] = uikits.child(plane,choose[i])
+		if cho[i] then
+			cho[i]:setString(q.name)
+			print("index = "..i)
+			print("setFontName : "..tostring(fonts[rm[i]]))
+			cho[i]:setFontName(fonts[rm[i]])
+		--	print(i..":"..rm[i]..":"..fonts[rm[i]])
+			if st == rm[i] then
+				right_location = cho[i]:getParent()
+			end
+			local item  = cho[i]:getParent()
+			if item.setSelectedState then
+				item:setSelectedState(false)
+			end			
+			uikits.event(item,function(sender)
+				if isSelected then 
+					if item and item.setSelectedState then
+						if sender == selectedItem then
+							item:setSelectedState(true)
+						else
+							item:setSelectedState(false)
+						end
+					end
+					return 
+				end
+				isSelected = true	
+				selectedItem = sender				
+				if st == rm[i] then
+				--if true then
+					--选择正确
+					self:play_sound(SND_RIGHT)
+					q.judge = true
+					self:clac_score(q.type)
+						
+					self._right_num = self._right_num + 1	
+					dt = self:playJudgeAnimation(JUDGE_RIGHT)	
+					uikits.delay_call(self._root,function(s)
+						self:next_select()
+					end,dt)		
+				else
+					--选择错误
+					self:play_sound(SND_FAIL)
+					q.judge = false
+					self._fen_mul = 1
+					self._error_num = self._error_num + 1				
+					dt = self:playJudgeAnimation(JUDGE_WRONG)		
+					uikits.delay_call(self._root,function(s)
+						--show right
+						if right_location then
+							if not self._right_animation then
+								self._right_animation = ccs.Armature:create("gou")
+								self:addChild(self._right_animation,10)
+							end
+							self._right_animation:setVisible(true)
+							local x,y = right_location:getPosition()
+							local size = right_location:getContentSize()
+							self._right_animation:setPosition(cc.p(x+size.width/2,y-size.height/2))
+							self._right_animation:getAnimation():playWithIndex(0)
+							uikits.delay_call(self._root,function(s)
+								self._right_animation:setVisible(false)
+								self:next_select()
+							end,3)
+						else
+							kits.log("right_location = nil")
+						end
+					end,dt)	
+				end
+			end)
+		end
+	end
+end
+
+function battle:type6(plane,topcis,words,choose,q)
+	local isSelected = false
+	local st = math.random(1,3)
+	local cn
+	local right_location
+	local rm = {1,2,3}
+	random_rang(rm)
+	--self:initType5Font()
+	if st==1 then
+		cn = "草书"
+	elseif st==2 then
+		cn = "行书"
+	elseif st==3 then
+		cn = "篆书"
+	else
+		return
+	end
+	local top = uikits.child(plane,topcis)
+	if top then
+		top:setString(string.format("请判断以下字是否是%s？",cn))
+	end
+	local correct = math.random(1,2) --1正确，2错误
+	local wor = uikits.child(plane,words[1])
+	if wor then
+		wor:setString(q.name)
+	end
+	local wor2 = uikits.child(plane,words[2])
+	if wor2 then
+		wor2:setString(q.name)
+		if correct == 1 then
+			wor2:setFontName(fonts[st])
+		else
+			local c = {}
+			for i=1,3 do
+				if i~=st then
+					table.insert(c,i)
+				end
+			end
+			wor2:setFontName(fonts[c[math.random(1,2)]])
+		end
+	end	
+	local function right(item)
+		if isSelected then 
+			if item and item.setSelectedState then
+				item:setSelectedState(false)
+			end
+			return 
+		end
+		isSelected = true	
+		--选择正确
+		self:play_sound(SND_RIGHT)
+		q.judge = true
+		self:clac_score(q.type)
+			
+		self._right_num = self._right_num + 1	
+		dt = self:playJudgeAnimation(JUDGE_RIGHT)	
+		uikits.delay_call(self._root,function(s)
+			self:next_select()
+		end,dt)	
+	end
+	
+	local function wrong(item)
+		if isSelected then 
+			if item and item.setSelectedState then
+				item:setSelectedState(false)
+			end
+			return 
+		end
+		isSelected = true		
+		--选择错误
+		self:play_sound(SND_FAIL)
+		q.judge = false
+		self._fen_mul = 1
+		self._error_num = self._error_num + 1				
+		dt = self:playJudgeAnimation(JUDGE_WRONG)		
+		uikits.delay_call(self._root,function(s)
+			--show right
+			if right_location then
+				if not self._right_animation then
+					self._right_animation = ccs.Armature:create("gou")
+					self:addChild(self._right_animation,10)
+				end
+				self._right_animation:setVisible(true)
+				local x,y = right_location:getPosition()
+				local size = right_location:getContentSize()
+				self._right_animation:setPosition(cc.p(x+size.width/2,y-size.height/2))
+				self._right_animation:getAnimation():playWithIndex(0)
+				uikits.delay_call(self._root,function(s)
+					self._right_animation:setVisible(false)
+					self:next_select()
+				end,3)
+			else
+				kits.log("right_location = nil")
+			end
+		end,dt)			
+	end
+	
+	local dui = uikits.child(plane,choose[1])
+	local chuo = uikits.child(plane,choose[2])
+	dui:setSelectedState(false)
+	chuo:setSelectedState(false)
+	if correct==1 then
+		right_location = dui
+	else
+		right_location = chuo
+	end
+	uikits.event(dui,function(sender)
+		if correct==1 then
+		--if true then
+			right(sender)
+		else
+			wrong(sender)
+		end
+	end)
+	uikits.event(chuo,function(sender)
+		if correct==2 then
+		--if true then
+			right(sender)
+		else
+			wrong(sender)
+		end
+	end)
+end
+
 function battle:init_current_question( q )
 	http.logTable(q,1)
 	if self._current_plane then
@@ -1228,9 +1631,85 @@ function battle:init_current_question( q )
 		self._current_plane:setVisible(true)
 	end
 	if q.type==1 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chengy'},
+			{'da1','da2','da3','da4'},
+			q ,"w1")
+	elseif q.type==2 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chucu','tu/kuang2/chucu'},
+			{'dui','cuo'},
+			q ,nil)	
+	elseif q.type==3 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/renw'},
+			{'da1','da2','da3','da4'},
+			q,"w1" )		
+	elseif q.type==4 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chengy'},
+			{'jies1','jies2','jies3'},
+			q,"wen")		
+	elseif q.type==5 then
+		self:type5(self._current_plane,
+			"tu/w2",
+			"tu/kuang/chengy",
+			{"da1/wen","da2/wen","da3/wen"},
+			q
+		)
+	elseif q.type==6 then
+		self:type6(self._current_plane,
+			"tu/w2",
+			{"tu/kuang/chucu","tu/kuang2/chucu"},
+			{"dui","cuo"},
+			q
+		)
+	elseif q.type==7 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chengy'},
+			{'da1','da2','da3'},
+			q,"w1")		
+	elseif q.type==8 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chucu','tu/kuang2/chucu'},
+			{'dui','cuo'},
+			q,nil )		
+	elseif q.type==9 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/renw'},
+			{'da1','da2','da3','da4'},
+			q ,"w1")		
+	elseif q.type==10 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chengy'},
+			{'jies1','jies2','jies3'},
+			q ,"wen")	
+	elseif q.type==11 then
+		self:init_problem(self._current_plane,
+			{'zi1/wen','zi2/wen','zi3/wen','zi4/wen'},
+			{'da1','da2','da3','da4'},
+			q,"w1" )		
+	elseif q.type==12 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chucu'},
+			{'dui','cuo'},
+			q,nil )		
+	elseif q.type==13 then
+		self:init_problem(self._current_plane,
+			{'tu/kuang/chengy','jies1/wen'},
+			{'dui','cuo'},
+			q,nil )		
+	else
+		kits.log("ERROR init_current_question q.type= "..tostring(q.type))
+	end
+	
+	--[[
+	--4选一
+	if q.type==1 then
 		self:showMouse(true)
 		self:showHummer(true)
 		self:select_word(self._word_index)
+	--2选一
 	elseif q.type==2 then
 		self:switchCharacter(math.random(1,3),true)
 		self:showHummer(true)
@@ -1369,6 +1848,7 @@ function battle:init_current_question( q )
 	else
 		kits.log("ERROR init_current_question q.type= "..tostring(q.type))
 	end
+	--]]
 end
 
 function battle:playJudgeAnimation(idx)
@@ -1492,15 +1972,19 @@ function battle:init()
 				else
 					text = "你‘确定’要退出错题任务吗？"
 				end
-				http.messagebox(self._root,http.DIY_MSG,function(e)
-					if e==http.RETRY then
-						self._game_over_flag = true
-						uikits.popScene()
-					end
-				end,text,"确定")			
+				if not self._ismessagebox then
+					self._ismessagebox = true
+					http.messagebox(self._root,http.DIY_MSG,function(e)
+						self._ismessagebox = false
+						if e==http.OK then
+							self._game_over_flag = true
+							uikits.popScene()
+						end
+					end,text,"确定")			
+				end
 			else
 				http.messagebox(self._root,http.DIY_MSG,function(e)
-					if e==http.RETRY then
+					if e==http.OK then
 						self:upload_scroe2(self._arg.level,math.floor(self._fen),self._game_time,self._right_num,-1)					
 					end
 				end,"退出比赛将浪费一次比赛机会\n你‘确定’要退出比赛吗？","确定")						
@@ -1516,7 +2000,7 @@ function battle:init()
 		table.insert(self._cn_label,uikits.child(self._root,ui.ZI2))
 		table.insert(self._cn_label,uikits.child(self._root,ui.ZI3))
 		table.insert(self._cn_label,uikits.child(self._root,ui.ZI4))
-		self._timeover_ui = uikits.child(self._root,ui.TIMEOVER_WINDOW)
+		--self._timeover_ui = uikits.child(self._root,ui.TIMEOVER_WINDOW)
 		self._success_ui = uikits.child(self._root,ui.SUCCESS_WINDOW)
 		self._failed_ui = uikits.child(self._root,ui.FAILED_WINDOW)
 		self:init_role()

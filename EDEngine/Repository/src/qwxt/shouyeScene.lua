@@ -58,6 +58,23 @@ function ShouyeScene:loadUi(uiFileName)
 		end)
 	end)
 
+	--天下第一榜
+	public.buttonEvent(ccui.Helper:seekWidgetByTag(layout,39987),function(sender,event)
+		cc.Director:getInstance():pushScene(public.createScene("txdyb"))
+	end)
+	--我的奖状
+	public.buttonEvent(ccui.Helper:seekWidgetByTag(layout,39983),function(sender,event)
+		cc.Director:getInstance():pushScene(public.createScene("jiangzhuang"))
+	end)
+	--我的宝藏
+	public.buttonEvent(ccui.Helper:seekWidgetByTag(layout,39985),function(sender,event)
+		cc.Director:getInstance():pushScene(public.createScene("baozang"))
+	end)
+	--趣味活动
+	public.buttonEvent(ccui.Helper:seekWidgetByTag(layout,39986),function(sender,event)
+		cc.Director:getInstance():pushScene(public.createScene("huodong"))
+	end)
+
 	return layout
 end
 
@@ -95,6 +112,10 @@ function ShouyeScene:showUserInfo()
 				music.on=obj.bgMusic.musicOn
 				music.zuotiOn=obj.bgMusic.zuotiOn
 				music.playBackground()
+				if userInfo.xueduan<0 then
+					userInfo.xueduan=2
+					popup.tip("获取班级信息失败，现在使用小学学科数据进入趣味学堂")
+				end
 				--显示科目列表
 				local layout=self.layout
 				local pageView=ccui.Helper:seekWidgetByTag(layout,906)
@@ -109,8 +130,8 @@ function ShouyeScene:showUserInfo()
 				end
 				--计算图标行列
 				local viewSize=pageView:getContentSize()
-				local line=math.modf(viewSize.height/settings.imgHeight)
-				local row=4
+				local row=((#subjectList<=6 and #subjectList>4) and 3) or math.min(4,#subjectList)
+				local line=((#subjectList>4) and 2) or 1
 				local lineSpace=(viewSize.height-settings.imgHeight*line)/(line+1)
 				local rowSpace=(viewSize.width-settings.imgWidth*row)/(row+1)
 				--插入页和科目图标
@@ -136,10 +157,10 @@ function ShouyeScene:showUserInfo()
 							x=x+rowSpace+settings.imgWidth
 						end
 						local btn=ccui.Button:create(fileName)
-						btn:setTag(v.id)
 						btn.data=v
 						public.buttonEvent(btn,function(sender,event)
-							self:onButton(sender:getTag(),sender.data)
+							userInfo.selectSubject(sender.data)
+							cc.Director:getInstance():pushScene(public.createScene("jinrukemu"))
 						end)
 						btn:setAnchorPoint(0,0)
 						btn:setPosition(x,y)
@@ -226,23 +247,6 @@ end
 
 --按钮响应
 function ShouyeScene:onButton(id,data)
-	if id==1 then
-		--我的奖状
-		cc.Director:getInstance():pushScene(public.createScene("jiangzhuang"))
-	elseif id==2 then
-		--我的宝藏
-		cc.Director:getInstance():pushScene(public.createScene("baozang"))
-	elseif id==3 then
-		--天下第一榜
-		cc.Director:getInstance():pushScene(public.createScene("txdyb"))
-	elseif id==4 then
-		---活动
-		cc.Director:getInstance():pushScene(public.createScene("huodong"))
-	else
-		--科目练习
-		userInfo.selectSubject(data)
-		cc.Director:getInstance():pushScene(public.createScene("jinrukemu"))
-	end
 end
 
 --菜单键和设置按钮

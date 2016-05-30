@@ -186,10 +186,6 @@ function HuodongScene:onEnterTransitionFinish()
 				end
 				self.main:setVisible(true)
 				item:release()
-
-				if userInfo.notStudent then
-					popup.msgBox({text="家长和老师无法参与，如想参加，请使用学生账号登录！",title="趣味活动只针对学生"},nil,true)
-				end
 			else
 				self.noActivity:setVisible(true)
 			end

@@ -289,7 +289,8 @@ end
 
 local function add_topics_image_resourec( e )
 	if e.item_id then
-		local uri = "http://imagecdn.lejiaolexue.com/item_preview/"..e.item_id.."_0.jpg"
+		local host = kits.getImageDownloadServer()
+		local uri = "http://"..host.."/item_preview/"..e.item_id.."_0.jpg"
 		e.topics_image_name = e.item_id..'.jpg'
 		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})
 	end
@@ -1661,6 +1662,9 @@ local function relayout_drag( layout,data,ismul )
 				y2 = yy + (bgsize.height-v.y2)*g_scale
 			}
 			normal_rect( rc )
+			
+		--	layout:addChild(uikits.rect{x1=rc.x1,y1=rc.y1,
+		--		x2=rc.x2,y2=rc.y2,fillColor=cc.c4f(0,1,0,0.2)})
 				
 			if x > rc.x1 and x < rc.x2 and y > rc.y1 and y < rc.y2 then
 				local sz = sender:getContentSize()
@@ -1668,7 +1672,11 @@ local function relayout_drag( layout,data,ismul )
 				local offy = getOffY(rc.y2-rc.y1,sz.height)
 				local cp = {x = rc.x1 + offx,y = rc.y1+ offy }
 				sender:setPosition( cp )
-
+				-- sender:setAnchorPoint(cc.p(0,0))
+				-- print("sx="..sender:getScaleX())
+			-- layout:addChild(uikits.rect{x1=cp.x,y1=cp.y,
+				-- x2=cp.x+sz.width,y2=cp.y+sz.height,fillColor=cc.c4f(0,0,1,0.2),anchorX=0,anchorY=0})			
+				
 				local idx = get_index( sender )
 				if idx then
 					local it = search_drags( sender )

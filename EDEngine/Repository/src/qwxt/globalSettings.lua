@@ -24,30 +24,11 @@ globalSettings.subjectSettings=
 	--学段的对应科目列表及设置
 	xueduan=
 	{
+		[1]=
 		{
-			name="小学",
+			name="幼儿园",
 			list=
 			{
-				{
-					id=1,
-					name="我的奖状",
-					img="qwxt/subject/jiangzhuang.png",
-				},
-				{
-					id=2,
-					name="我的宝藏",
-					img="qwxt/subject/baozang.png",
-				},
-				{
-					id=3,
-					name="榜单",
-					img="qwxt/subject/bangdan.png",
-				},
-				{
-					id=4,
-					name="活动",
-					img="qwxt/subject/huodong.png",
-				},
 				{
 					id=10001,
 					name="语文",
@@ -63,147 +44,166 @@ globalSettings.subjectSettings=
 					name="英语",
 					img="qwxt/subject/km_yingyu.png",
 				},
+				{
+					id=1001,
+					name="安全知识",
+					img="qwxt/subject/km_anquan.png",
+				},
 			},
 		},
+		[2]=
+		{
+			name="小学",
+			list=
+			{
+				{
+					id=10001,
+					name="语文",
+					img="qwxt/subject/km_yuwen.png",
+				},
+				{
+					id=10002,
+					name="数学",
+					img="qwxt/subject/km_shuxue.png",
+				},
+				{
+					id=10003,
+					name="英语",
+					img="qwxt/subject/km_yingyu.png",
+				},
+				{
+					id=10010,
+					name="安全知识",
+					img="qwxt/subject/km_anquan.png",
+				},
+				{
+					id=90001,
+					name="智力百科",
+					img="qwxt/subject/km_baike.png",
+				},
+			},
+		},
+		[4]=
 		{
 			name="初中",
 			list=
 			{
+--				{
+--					id=20001,
+--					name="语文",
+--					img="qwxt/subject/km_yuwen.png",
+--				},
+--				{
+--					id=20002,
+--					name="数学",
+--					img="qwxt/subject/km_shuxue.png",
+--				},
+--				{
+--					id=20003,
+--					name="英语",
+--					img="qwxt/subject/km_yingyu.png",
+--				},
+--				{
+--					id=20004,
+--					name="物理",
+--					img="qwxt/subject/km_wuli.png",
+--				},
+--				{
+--					id=20005,
+--					name="化学",
+--					img="qwxt/subject/km_huaxue.png",
+--				},
+--				{
+--					id=20006,
+--					name="政治",
+--					img="qwxt/subject/km_zhengzhi.png",
+--				},
+--				{
+--					id=20007,
+--					name="生物",
+--					img="qwxt/subject/km_shengwu.png",
+--				},
+--				{
+--					id=20008,
+--					name="地理",
+--					img="qwxt/subject/km_dili.png",
+--				},
+--				{
+--					id=20009,
+--					name="历史",
+--					img="qwxt/subject/km_lishi.png",
+--				},
 				{
-					id=1,
-					name="我的奖状",
-					img="qwxt/subject/jiangzhuang.png",
+					id=20010,
+					name="安全知识",
+					img="qwxt/subject/km_anquan.png",
 				},
 				{
-					id=2,
-					name="我的宝藏",
-					img="qwxt/subject/baozang.png",
-				},
-				{
-					id=3,
-					name="榜单",
-					img="qwxt/subject/bangdan.png",
-				},
-				{
-					id=4,
-					name="活动",
-					img="qwxt/subject/huodong.png",
-				},
-				{
-					id=20001,
-					name="语文",
-					img="qwxt/subject/km_yuwen.png",
-				},
-				{
-					id=20002,
-					name="数学",
-					img="qwxt/subject/km_shuxue.png",
-				},
-				{
-					id=20003,
-					name="英语",
-					img="qwxt/subject/km_yingyu.png",
-				},
-				{
-					id=20004,
-					name="物理",
-					img="qwxt/subject/km_wuli.png",
-				},
-				{
-					id=20005,
-					name="化学",
-					img="qwxt/subject/km_huaxue.png",
-				},
-				{
-					id=20006,
-					name="政治",
-					img="qwxt/subject/km_zhengzhi.png",
-				},
-				{
-					id=20007,
-					name="生物",
-					img="qwxt/subject/km_shengwu.png",
-				},
-				{
-					id=20008,
-					name="地理",
-					img="qwxt/subject/km_dili.png",
-				},
-				{
-					id=20009,
-					name="历史",
-					img="qwxt/subject/km_lishi.png",
+					id=90001,
+					name="智力百科",
+					img="qwxt/subject/km_baike.png",
 				},
 			},
 		},
+		[16]=
 		{
 			name="高中",
 			list=
 			{
+--				{
+--					id=30001,
+--					name="语文",
+--					img="qwxt/subject/km_yuwen.png",
+--				},
+--				{
+--					id=30002,
+--					name="数学",
+--					img="qwxt/subject/km_shuxue.png",
+--				},
+--				{
+--					id=30003,
+--					name="英语",
+--					img="qwxt/subject/km_yingyu.png",
+--				},
+--				{
+--					id=30004,
+--					name="物理",
+--					img="qwxt/subject/km_wuli.png",
+--				},
+--				{
+--					id=30005,
+--					name="化学",
+--					img="qwxt/subject/km_huaxue.png",
+--				},
+--				{
+--					id=30006,
+--					name="政治",
+--					img="qwxt/subject/km_zhengzhi.png",
+--				},
+--				{
+--					id=30007,
+--					name="生物",
+--					img="qwxt/subject/km_shengwu.png",
+--				},
+--				{
+--					id=30008,
+--					name="地理",
+--					img="qwxt/subject/km_dili.png",
+--				},
+--				{
+--					id=30009,
+--					name="历史",
+--					img="qwxt/subject/km_lishi.png",
+--				},
 				{
-					id=1,
-					name="我的奖状",
-					img="qwxt/subject/jiangzhuang.png",
+					id=30010,
+					name="安全知识",
+					img="qwxt/subject/km_anquan.png",
 				},
 				{
-					id=2,
-					name="我的宝藏",
-					img="qwxt/subject/baozang.png",
-				},
-				{
-					id=3,
-					name="榜单",
-					img="qwxt/subject/bangdan.png"
-				},
-				{
-					id=4,
-					name="活动",
-					img="qwxt/subject/huodong.png",
-				},
-				{
-					id=30001,
-					name="语文",
-					img="qwxt/subject/km_yuwen.png",
-				},
-				{
-					id=30002,
-					name="数学",
-					img="qwxt/subject/km_shuxue.png",
-				},
-				{
-					id=30003,
-					name="英语",
-					img="qwxt/subject/km_yingyu.png",
-				},
-				{
-					id=30004,
-					name="物理",
-					img="qwxt/subject/km_wuli.png",
-				},
-				{
-					id=30005,
-					name="化学",
-					img="qwxt/subject/km_huaxue.png",
-				},
-				{
-					id=30006,
-					name="政治",
-					img="qwxt/subject/km_zhengzhi.png",
-				},
-				{
-					id=30007,
-					name="生物",
-					img="qwxt/subject/km_shengwu.png",
-				},
-				{
-					id=30008,
-					name="地理",
-					img="qwxt/subject/km_dili.png",
-				},
-				{
-					id=30009,
-					name="历史",
-					img="qwxt/subject/km_lishi.png",
+					id=90001,
+					name="智力百科",
+					img="qwxt/subject/km_baike.png",
 				},
 			},
 		},
@@ -424,36 +424,36 @@ globalSettings.level=
 
 globalSettings.baozangList=
 {
-	["s1"]={name="红眼石",detail="被誉为“爱情之石”，象征着热情似火，爱情的美好、永恒与坚贞",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s2"]={name="黄玉石",detail="被誉为“希望之石”或“友爱之石”，代表着友情、友谊和希望。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s3"]={name="天蓝石",detail="被誉为“命运之石”，能保佑佩戴者平安，并让人交好运。象征忠诚、坚贞、慈爱和诚实。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s4"]={name="绿苍石",detail="被誉为“幸福之石”，它代表幸运、财富、信义和永生，象征尊贵、美好和丰收。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s5"]={name="黑晶石",detail="被誉为“神秘之石”，古代人们相信它具有一种神秘的力量，能让人心志坚定。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s6"]={name="飞灵石",detail="一种神奇而又美丽的宝石，宝石表面可见到淡紫色的闪光，犹如正在飞翔的精灵。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s7"]={name="火耀石",detail="在被光照射时，反射出金光闪闪的亮点，好似太阳四射的光芒，人们相信它能驱走暗黑思想及悲观情绪，带来正确积极观念和光明前景。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s8"]={name="龙王珠",detail="据说是东海龙宫的珍宝之一，诞生于千年以上的贝壳之中，能在深海中散发出淡淡的月光。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s9"]={name="青霜石",detail="据说这是一种深埋在万年冰山里的宝石，散发着淡淡的青色光芒，至今很少人可以得到它。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s10"]={name="深海石",detail="据说它深埋在海沟里，在大海里只有深水章鱼可以找到它。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s11"]={name="天晶石",detail="在坠落陨石中发现的一种宝石。由无数微小的晶体构成，在阳光的照射下，能绽放无比美丽的光芒。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s12"]={name="天香宝衣",detail="由天香蚕丝而打造的衣服，非常之轻，穿在身上都感觉不到任何重要，冬暖夏凉，非常神奇。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s13"]={name="天玉石",detail="在坠落陨石中发现的一种宝石，其形如玉，但比玉更珍贵。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s14"]={name="天罗石",detail="在坠落陨石中发现的一种宝石，呈黄绿色，里面含有一些微量的地球上没有和神秘物质。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s15"]={name="天舞石",detail="在坠落陨石中发现的一种宝石，宝石里面有神秘的流动液体，细细的观察，就好像有一位天仙在里面翩翩起舞。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s16"]={name="天皇石",detail="在坠落陨石中发现的一种宝石，呈现的非常美丽的黄色之光，比黄金更加绚丽。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s17"]={name="风灵之戒",detail="神话中的一种宝石，据说只要将它带在身上，身体就可以如风一样轻盈。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s18"]={name="天罚之戒",detail="神话中的一种宝石，据说只要得到它的人，就可以代表惩罚之神去惩罚那些充满罪恶之人。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s19"]={name="神火之戒",detail="神话中的一种宝石，据说得到它的人可以操控和创造世间一切火焰。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s20"]={name="大地之戒",detail="神话中的一种宝石，据说拥有它的人可以穿行于地下，通过它可以发现地下埋藏的无数珍宝。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s21"]={name="时空神叶",detail="传说只有在时间隧道中才能得到，它可以让拥有之人具有穿梭时空的能力，不管是过去，还是将来。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s22"]={name="凤灵之魂",detail="传说九天之外有一烈火天池，从开天以后，一直燃烧着大火，重来不会熄灭，在烈火的深处有一个沉睡的灵魂，人们称之为凤灵之魂。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s23"]={name="龙灵天藤",detail="传说在龙的诞生之地，一直存在着一株神奇的树藤，被所有龙族尊为守护天神。",yinbi="经验奖励",exp="银币奖励",day=15},
-	["s24"]={name="混沌奇物",detail="与盘古一同诞生于混沌之中，拥有无与伦比的力量，当盘古开天辟地之后，消失在混沌深处。",yinbi="经验奖励",exp="银币奖励",day=15},
+	["s1"]={name="红眼石",detail="被誉为“爱情之石”，象征着热情似火，爱情的美好、永恒与坚贞",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s2"]={name="黄玉石",detail="被誉为“希望之石”或“友爱之石”，代表着友情、友谊和希望。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s3"]={name="天蓝石",detail="被誉为“命运之石”，能保佑佩戴者平安，并让人交好运。象征忠诚、坚贞、慈爱和诚实。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s4"]={name="绿苍石",detail="被誉为“幸福之石”，它代表幸运、财富、信义和永生，象征尊贵、美好和丰收。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s5"]={name="黑晶石",detail="被誉为“神秘之石”，古代人们相信它具有一种神秘的力量，能让人心志坚定。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s6"]={name="飞灵石",detail="一种神奇而又美丽的宝石，宝石表面可见到淡紫色的闪光，犹如正在飞翔的精灵。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s7"]={name="火耀石",detail="在被光照射时，反射出金光闪闪的亮点，好似太阳四射的光芒，人们相信它能驱走暗黑思想及悲观情绪，带来正确积极观念和光明前景。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s8"]={name="龙王珠",detail="据说是东海龙宫的珍宝之一，诞生于千年以上的贝壳之中，能在深海中散发出淡淡的月光。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s9"]={name="青霜石",detail="据说这是一种深埋在万年冰山里的宝石，散发着淡淡的青色光芒，至今很少人可以得到它。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s10"]={name="深海石",detail="据说它深埋在海沟里，在大海里只有深水章鱼可以找到它。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s11"]={name="天晶石",detail="在坠落陨石中发现的一种宝石。由无数微小的晶体构成，在阳光的照射下，能绽放无比美丽的光芒。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s12"]={name="天香宝衣",detail="由天香蚕丝而打造的衣服，非常之轻，穿在身上都感觉不到任何重要，冬暖夏凉，非常神奇。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s13"]={name="天玉石",detail="在坠落陨石中发现的一种宝石，其形如玉，但比玉更珍贵。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s14"]={name="天罗石",detail="在坠落陨石中发现的一种宝石，呈黄绿色，里面含有一些微量的地球上没有和神秘物质。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s15"]={name="天舞石",detail="在坠落陨石中发现的一种宝石，宝石里面有神秘的流动液体，细细的观察，就好像有一位天仙在里面翩翩起舞。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s16"]={name="天皇石",detail="在坠落陨石中发现的一种宝石，呈现的非常美丽的黄色之光，比黄金更加绚丽。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s17"]={name="风灵之戒",detail="神话中的一种宝石，据说只要将它带在身上，身体就可以如风一样轻盈。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s18"]={name="天罚之戒",detail="神话中的一种宝石，据说只要得到它的人，就可以代表惩罚之神去惩罚那些充满罪恶之人。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s19"]={name="神火之戒",detail="神话中的一种宝石，据说得到它的人可以操控和创造世间一切火焰。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s20"]={name="大地之戒",detail="神话中的一种宝石，据说拥有它的人可以穿行于地下，通过它可以发现地下埋藏的无数珍宝。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s21"]={name="时空神叶",detail="传说只有在时间隧道中才能得到，它可以让拥有之人具有穿梭时空的能力，不管是过去，还是将来。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s22"]={name="凤灵之魂",detail="传说九天之外有一烈火天池，从开天以后，一直燃烧着大火，重来不会熄灭，在烈火的深处有一个沉睡的灵魂，人们称之为凤灵之魂。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s23"]={name="龙灵天藤",detail="传说在龙的诞生之地，一直存在着一株神奇的树藤，被所有龙族尊为守护天神。",yinbi="银币奖励",exp="经验奖励",day=15},
+	["s24"]={name="混沌奇物",detail="与盘古一同诞生于混沌之中，拥有无与伦比的力量，当盘古开天辟地之后，消失在混沌深处。",yinbi="银币奖励",exp="经验奖励",day=15},
 }
 
 globalSettings.jiangzhuangList=
 {
-	{id=1,name="崭露头角",condition="达到20级",image="qwxt/jiangzhuang/j20x.png",image1="qwxt/jiangzhuang/j20.png"},
-	{id=2,name="锋芒渐露",condition="达到40级",image="qwxt/jiangzhuang/j40x.png",image1="qwxt/jiangzhuang/j40.png"},
+	{id=1,name="崭露头角",condition="达到40级",image="qwxt/jiangzhuang/j20x.png",image1="qwxt/jiangzhuang/j20.png"},
+	{id=2,name="锋芒渐露",condition="达到50级",image="qwxt/jiangzhuang/j40x.png",image1="qwxt/jiangzhuang/j40.png"},
 	{id=3,name="小有名气",condition="达到60级",image="qwxt/jiangzhuang/j60x.png",image1="qwxt/jiangzhuang/j60.png"},
 	{id=4,name="颇具盛名",condition="达到80级",image="qwxt/jiangzhuang/j80x.png",image1="qwxt/jiangzhuang/j80.png"},
 	{id=5,name="富有美誉",condition="达到100级",image="qwxt/jiangzhuang/j100x.png",image1="qwxt/jiangzhuang/j100.png"},
@@ -462,8 +462,8 @@ globalSettings.jiangzhuangList=
 	{id=8,name="赫赫有名",condition="达到160级",image="qwxt/jiangzhuang/j160x.png",image1="qwxt/jiangzhuang/j160.png"},
 	{id=9,name="大名鼎鼎",condition="达到180级",image="qwxt/jiangzhuang/j180x.png",image1="qwxt/jiangzhuang/j180.png"},
 	{id=10,name="名扬天下",condition="达到200级",image="qwxt/jiangzhuang/j200x.png",image1="qwxt/jiangzhuang/j200.png"},
-	{id=11,name="初窥奥妙",condition="连对达到20题",image="qwxt/jiangzhuang/l100x.png",image1="qwxt/jiangzhuang/l100.png"},
-	{id=12,name="略有小成",condition="连对达到50题",image="qwxt/jiangzhuang/l200x.png",image1="qwxt/jiangzhuang/l200.png"},
+	{id=11,name="初窥奥妙",condition="连对达到40题",image="qwxt/jiangzhuang/l100x.png",image1="qwxt/jiangzhuang/l100.png"},
+	{id=12,name="略有小成",condition="连对达到70题",image="qwxt/jiangzhuang/l200x.png",image1="qwxt/jiangzhuang/l200.png"},
 	{id=13,name="渐入佳境",condition="连对达到100题",image="qwxt/jiangzhuang/l300x.png",image1="qwxt/jiangzhuang/l300.png"},
 	{id=14,name="一鸣惊人",condition="连对达到200题",image="qwxt/jiangzhuang/l400x.png",image1="qwxt/jiangzhuang/l400.png"},
 	{id=15,name="炉火纯青",condition="连对达到300题",image="qwxt/jiangzhuang/l500x.png",image1="qwxt/jiangzhuang/l500.png"},

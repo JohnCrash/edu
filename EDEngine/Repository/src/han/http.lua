@@ -104,7 +104,8 @@ local function put_circle( parent )
 	end
 end
 
-local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
+--local download_log_url = 'http://image.lejiaolexue.com/userlogo/'
+local download_log_url = 'http://'..kits.getImageDownloadServer()..'/userlogo/'
 local function load_logo_pic(handle,uid)
 
 	local function showLogoPic(logo_handle,logo_pic_path)
@@ -153,13 +154,13 @@ local ui = {
 }
 --]]
 local ui = {
-	MSGBOX = 'han/tishi.json',
-	CONTENT = 'Panel_attention/Label_35',
-	GIVEUP = 'Panel_attention/Button_38', --退出
-	OK = 'Panel_attention/Button_Close', --关闭
-	RETRY = 'Panel_attention/Button_36', --重试
-	CANCEL = 'Panel_attention/qux', --取消
-	KNOW = 'Panel_attention/zdl', --知道了
+	MSGBOX = 'han/tankuang.json',
+	CONTENT = 'tu/leir',
+	GIVEUP = 'tu/fangq', --退出
+	OK = 'tu/quer', --关闭
+	RETRY = 'tu/chongs', --重试
+	CANCEL = 'tu/qux', --取消
+	KNOW = 'tu/zdl', --知道了
 	LATER = 'Panel_attention/shen1',
 	UPGRADE = 'Panel_attention/shen2',
 }
@@ -191,6 +192,7 @@ local DIY_MSG = 15 --重试，退出
 local DIY_MSG2 = 16 --取消，退出
 local DIY_MSG3 = 17 --知道了
 local DIY_MSG4 = 18 --升级
+local OK_MSG = 19
 
 local flag_dictionary = {
 {title = '啊！上不了网了',content='少侠，你的网络突然中断了，\n请检查一下网络，然后重试一下！',button_type = 1,}, --网络中断
@@ -369,11 +371,11 @@ local function messagebox(parent,flag,func,txt_content)
 		else
 			content:setString(flag_dictionary[#flag_dictionary].content)
 		end
-		but_retry:setVisible(true)
+		but_retry:setVisible(false)
 		if but_ok then
 			but_ok:setVisible(true)
 		end
-		but_giveup:setVisible(true)
+		but_giveup:setVisible(false)
 		--but_cancel:setVisible(true)
 		--s:setAnchorPoint{x=0.5,y=0.5}
 		local size
@@ -449,7 +451,7 @@ local function messagebox(parent,flag,func,txt_content)
 				but_ok:setVisible(true) --close (X)
 			end
 			but_giveup:setVisible(true) --退出
-			but_retry:setVisible(true) --重试
+			but_retry:setVisible(false) --重试
 			
 			but_know:setVisible(false)		
 		end		
@@ -529,9 +531,10 @@ if cc_isdebug() then
 	--debug
 	--base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
 	--线上
-	base_url = 'http://app.lejiaolexue.com/newidiom/idiomclient.ashx'
+	base_url = 'http://app.chinese.lejiaolexue.com/ChineseClient.ashx'
 else
-	base_url = 'http://'..kits.getAppServer()..'/newidiom/idiomclient.ashx'
+	base_url = 'http://'..kits.getAppServer()..'/hanzi/ChineseClient.ashx'
+	--http://app.lejiaolexue.com/hanzi/ChineseClient.ashx
 end
 
 local base_rid = ''
@@ -983,6 +986,7 @@ return {
 	DIY_MSG3 = DIY_MSG3,
 	DIY_MSG4 = DIY_MSG4,
 	DEF_MSG = DEF_MSG,
+	OK_MSG = OK_MSG,
 	set_id_flag = set_id_flag,
 	get_id_flag = get_id_flag,
 	ID_FLAG_STU = ID_FLAG_STU,

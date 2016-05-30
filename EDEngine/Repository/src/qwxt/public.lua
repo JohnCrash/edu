@@ -173,11 +173,15 @@ local function showWaiting(node,doWaiting,callback,text)
 	id=cc.Director:getInstance():getScheduler():scheduleScriptFunc(tick,0,false)
 
 	local function eventHandler(event)
-		if event=="exitTransitionStart"  and id then
+		if event=="exitTransitionStart" and id then
 			--等待还没有结束，强行终止
 			cc.Director:getInstance():getEventDispatcher():resumeEventListenersForTarget(node,true)
 			cc.Director:getInstance():getScheduler():unscheduleScriptEntry(id)
 			id=nil
+		elseif event=="enterTransitionFinish" and id==nil then
+			performWithDelay(layout:getParent(),function()
+				layout:removeFromParent()
+			end,0)
 		end
 	end
 	layout:registerScriptHandler(eventHandler)
