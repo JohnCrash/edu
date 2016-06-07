@@ -798,6 +798,36 @@ int cc_setFrameColor(lua_State *L)
 #endif
 }
 
+static bool utf8_check_is_valid(const std::string& string)
+{
+	int c, i, ix, n, j;
+	for (i = 0, ix = string.length(); i < ix; i++)
+	{
+		c = (unsigned char)string[i];
+		//if (c==0x09 || c==0x0a || c==0x0d || (0x20 <= c && c <= 0x7e) ) n = 0; // is_printable_ascii
+		if (0x00 <= c && c <= 0x7f) n = 0; // 0bbbbbbb
+		else if ((c & 0xE0) == 0xC0) n = 1; // 110bbbbb
+		else if (c == 0xed && i<(ix - 1) && ((unsigned char)string[i + 1] & 0xa0) == 0xa0) return false; //U+d800 to U+dfff
+		else if ((c & 0xF0) == 0xE0) n = 2; // 1110bbbb
+		else if ((c & 0xF8) == 0xF0) n = 3; // 11110bbb
+		//else if (($c & 0xFC) == 0xF8) n=4; // 111110bb //byte 5, unnecessary in 4 byte UTF-8
+		//else if (($c & 0xFE) == 0xFC) n=5; // 1111110b //byte 6, unnecessary in 4 byte UTF-8
+		else return false;
+		for (j = 0; j<n && i<ix; j++) { // n bytes matching 10bbbbbb follow ?
+			if ((++i == ix) || (((unsigned char)string[i] & 0xC0) != 0x80))
+				return false;
+		}
+	}
+	return true;
+}
+
+static int lua_is_utf8(lua_State *L)
+{
+	const char * s = luaL_checkstring(L, 1);
+	lua_pushboolean(L, utf8_check_is_valid(s));
+	return 1;
+}
+
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
@@ -833,7 +863,7 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_showBaiduVoiceConfigure",cc_showBaiduVoiceConfigure);
 	lua_register(L, "cc_acr_log", cc_acr_log);
 	lua_register(L, "cc_setFrameColor", cc_setFrameColor);
-
+	lua_register(L, "cc_isutf8", lua_is_utf8);
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)
