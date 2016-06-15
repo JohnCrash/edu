@@ -21,6 +21,7 @@ local versionNUM = resume.getversion()
 local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
 --debug
 --local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug2/'
+--local liexue_server_sr = 'http://192.168.5.10:8080/update/webshare/'
 
 local liexue_server_dl = liexue_server_sr
  
@@ -32,6 +33,7 @@ if lj_config and lj_config.setting then
 		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
 		--debug
 		--liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/debug2/'
+		--liexue_server_dl = 'http://192.168.5.10:8080/update/webshare/'
 		kits.log("read ljshell setting.FileServer = "..tostring(liexue_server_dl))
 	else
 		kits.log("WARNING lj_config.setting.FileServer = nil")
