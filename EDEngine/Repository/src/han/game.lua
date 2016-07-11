@@ -126,7 +126,6 @@ end
 
 local _han = {}
 
-local _dy --多音字
 local _cy
 local _cyy ----成语列表
 local _gr --迷惑项,同音字表
@@ -241,28 +240,28 @@ local function init_data()
 	_cy = {} --全部打乱
 	_tongyin = {} --全部顺序
 	for i=1,3 do
-		local s = kits.read_local_file(filename..i..".json")
+		local s = kits.read_local_file(filename.."_"..i..".json")
 		local cy,errmsg
 		if s then
 			cy,errmsg = json.decode(s)
 			_han[i] = cy
-			
-			--random_rang(cy)
 			if not cy then
-				kits.log("ERROR decode failed "..filename..i..".json")
+				kits.log("ERROR decode failed "..filename.."_"..i..".json")
 				kits.log("	"..tostring(errmsg))
 			end
 		else
-			kits.log("ERROR can't read file "..filename..i..".json")
+			kits.log("ERROR can't read file "..filename.."_"..i..".json")
 		end
 		_cy[i] = {}
 		for j,v in ipairs(cy) do
 			v.diff = j
 			table.insert(_cy[i],v)
-			if v.pinyin then
-				local py = getpy(v.pinyin)
-				_tongyin[py] = _tongyin[py] or {}
-				table.insert(_tongyin[py],v)
+			if v.dict then
+				for i,vv in pairs(v.dict) do
+					local py = getpy(vv.pinyin)
+					_tongyin[py] = _tongyin[py] or {}
+					table.insert(_tongyin[py],vv)
+				end
 			end
 			--修复bug
 			if string.len(v.idiom)==5 or string.len(v.idiom)==4 then
@@ -274,25 +273,6 @@ local function init_data()
 			end
 		end
 	end
-	_dy = {}
-	filename = "res/han/data/dy.json"
-	local s = kits.read_local_file(filename)
-	if s then
-		local errmsg
-		local dy
-		dy,errmsg = json.decode(s)
-		if not dy then
-			kits.log("ERROR decode failed "..filename)
-			kits.log("	"..tostring(errmsg))
-		else
-			kits.log("初始化多音字，数据量:"..#dy)
-		end
-		for i,v in pairs(dy) do
-			_dy[v] = 1
-		end
-	else
-		kits.log("ERROR can't read file "..filename)
-	end	
 	
 	kits.log("初始化成功，数据量:"..#_cy[1].."/"..#_cy[2].."/"..#_cy[3])
 
@@ -937,7 +917,7 @@ for i,v in pairs(pingyin) do
 end
 --]]
 
-local function pingyin_confuse(pingyin,count)
+local function pingyin_confuse(pingyin,count,pingyins)
 	if not pingyin then return {} end
 	--先找模糊
 	local t = pingyin_approx(pingyin)
@@ -955,22 +935,37 @@ local function pingyin_confuse(pingyin,count)
 	random_rang(total)
 	local result = {}
 	--取得count-1个迷惑项
-	for i = 1,count do
-		if total[i] ~= pingyin then
-			table.insert(result,total[i])
+	for i,v in pairs(total) do
+		if not pingyins[v] then
+			table.insert(result,v)
+			if #result >= count then break end
 		end
+	end
+	--迷惑项数量不足
+	if #result < count then
+		--随机寻找一个拼音作为迷惑项
+		repeat
+			local sel = math.random(1,#_allrangs)
+			local dict = _allrangs[sel].dict
+			local idiom = _allrangs[sel].idiom
+			if idiom and cc.utf8.length(idiom)==1 then
+				if dict and dict[1] and dict[1].pinyin and not pingyins[dict[1].pinyin] then
+					table.insert(result,dict[1].pinyin)
+				end
+			end
+		until #result >= count
 	end
 	return result
 end
 
 --组合1,2,并且返回指定数量的
-local function pingyin_approx3(pingyin,count)
-	if not pingyin then return {} end
+local function pingyin_approx3(correct,count,pingyins)
+	if not correct then return {} end
 	
-	local result = pingyin_confuse(pingyin,count-1)
+	local result = pingyin_confuse(correct,count-1,pingyins)
 
 	--插入正确答案
-	table.insert(result,pingyin)
+	table.insert(result,correct)
 	--打乱
 	random_rang(result)
 	return result
@@ -978,22 +973,35 @@ end
 
 --cur.idiom="会" {"hui","hiu","hou","hui"}
 local function pingyin_answer(cur,count)
-	return pingyin_approx3(cur.pinyin,count)
+	local sel = math.random(1,#cur.dict)
+	local correct = cur.dict[sel].pinyin
+	local pinyins = {}
+	for i,v in pairs(cur.dict) do
+		pinyins[v.pinyin] = 1
+	end
+	return pingyin_approx3(correct,count,pinyins),correct
 end
 
 --已知正确答案返回一个可能错误的拼音，后面返回是否正确,1正确,2错误
 --如cur.pinyin="hui" ,返回hiu,2
 local function pingyin_answer2(cur)
+	local sel = math.random(1,#cur.dict)
+	local correct = cur.dict[sel].pinyin
+	local pinyins = {}
+	for i,v in pairs(cur.dict) do
+		pinyins[v.pinyin] = 1
+	end
+	
 	--先决定是否正确
 	local d = math.random(1,2)
 	if d==1 then
-		return cur.pinyin,1
+		return correct,1
 	else
-		local result = pingyin_confuse(cur.pinyin,1)
+		local result = pingyin_confuse(correct,1,pinyins)
 		if result and result[1] then
 			return result[1],2
 		else
-			return cur.pinyin,1 --找不到迷惑项就让此题正确
+			return correct,1 --找不到迷惑项就让此题正确
 		end
 	end
 end
@@ -1006,11 +1014,19 @@ end
 local function pingyin_answer3(cur,count)
 	local result = {}
 	local len = cc.utf8.length(cur.idiom)
+	
+	local sel = math.random(1,#cur.dict)
+	local correct = cur.dict[sel].pinyin
+	local pinyins = {}
+	for i,v in pairs(cur.dict) do
+		pinyins[v.pinyin] = 1
+	end
+	
 	--0 同音字查找
-	local py = getpy(cur.pinyin)
+	local py = getpy(correct)
 	if py and _tongyin and _tongyin[py] then
 		for i,v in pairs(_tongyin[py]) do
-			if v.pinyin ~= cur.pinyin then
+			if v.dict and v.dict[1].pinyin and v.dict[1].pinyin ~= correct and not pinyins[v.dict[1].pinyin]  then
 				table.insert(result,v.idiom)
 			end
 		end
@@ -1043,7 +1059,7 @@ local function pingyin_answer3(cur,count)
 				local item
 				for j = i,#_allrangs do
 					item = _allrangs[j]
-					if item and item.idiom and cc.utf8.length(item.idiom)==len and item.pinyin~=cur.pinyin and item.idiom~=cur.idiom then
+					if item and item.idiom and cc.utf8.length(item.idiom)==len and item.dict[1].pinyin~=correct and item.idiom~=cur.idiom then
 						table.insert(result,item.idiom)
 						if #result > count then
 							break
@@ -1053,7 +1069,7 @@ local function pingyin_answer3(cur,count)
 				if #result < count then --向前搜索
 					for j = i,1,-1 do
 						item = _allrangs[j]
-						if item and item.idiom and cc.utf8.length(item.idiom)==len and item.pinyin~=cur.pinyin and item.idiom~=cur.idiom then
+						if item and item.idiom and cc.utf8.length(item.idiom)==len and item.dict[1].pinyin~=correct and item.idiom~=cur.idiom then
 							table.insert(result,item.idiom)
 							if #result > count then
 								break
@@ -1081,11 +1097,11 @@ local function pingyin_answer3(cur,count)
 	end
 	--插入正确答案
 	if #total < count then
-		
+		kits.log("WARNING : pingyin_answer3 #total < count idiom = "..cur.idiom)
 	end
 	table.insert(total,cur.idiom)
 	random_rang(total)	
-	return total
+	return total,correct
 end
 
 --已知字返回几个不同的释义进行选择
@@ -1115,19 +1131,17 @@ local function get_toipics2(type,cur)
 	if type==1 then
 		--字选择拼音
 		if length ~= 1 then return nil end
-		if _dy[cur.idiom] then return nil end
 		
-		local answer = pingyin_answer(cur,4)
+		local answer,correct = pingyin_answer(cur,4)
 		if not answer then return nil end
 		return {type=type,count=1,
 			name=cur.idiom,
 			answer=answer,
-			correct=cur.pinyin,
+			correct=correct,
 			entry=cur}
 	elseif type==2 then
 		--字拼音是否正确
 		if length ~= 1 then return nil end
-		if _dy[cur.idiom] then return nil end
 		
 		local answer,correct = pingyin_answer2(cur)
 		if not answer then return nil end
@@ -1139,10 +1153,10 @@ local function get_toipics2(type,cur)
 	elseif type==3 then
 		--拼音选择正确的字
 		if length ~= 1 then return nil end
-		local answer = pingyin_answer3(cur,4)
+		local answer,correct_pingyin = pingyin_answer3(cur,4)
 		if not answer then return nil end
 		return {type=type,count=1,
-			name=cur.pinyin,
+			name=correct_pingyin,
 			answer=answer,
 			correct=cur.idiom,
 			entry=cur}
@@ -1185,12 +1199,12 @@ local function get_toipics2(type,cur)
 	elseif type==7 then
 		--词语选择拼音
 		if length ~= 2 then return nil end
-		local answer = pingyin_answer(cur,3)
+		local answer,correct = pingyin_answer(cur,3)
 		if not answer then return nil end
 		return {type=type,count=1,
 			name=cur.idiom,
 			answer=answer,
-			correct=cur.pinyin,
+			correct=correct,
 			entry=cur}
 	elseif type==8 then
 		--词语拼音是否正确
@@ -1205,10 +1219,10 @@ local function get_toipics2(type,cur)
 	elseif type==9 then
 		--拼音选择正确的词语
 		if length ~= 2 then return nil end
-		local answer = pingyin_answer3(cur,4)
+		local answer,correct_pingyin = pingyin_answer3(cur,4)
 		if not answer then return nil end
 		return {type=type,count=1,
-			name=cur.pinyin,
+			name=correct_pingyin,
 			answer=answer,
 			correct=cur.idiom,
 			entry=cur}
@@ -1485,7 +1499,8 @@ local function init_game(t)
         character={}
     }
 	--]]
-	for i=1,20 do
+	local i = 1
+	repeat
 		local v = rang[i]
 		if v then
 			local t = utf8_string_to_table(v.idiom)
@@ -1509,11 +1524,16 @@ local function init_game(t)
 				--kits.logTable(v)
 			end
 			--type = 4
-			print("type = "..type)
-			local t = get_toipics2(type,v)
-			table.insert(result.answers,t)
+			t = get_toipics2(type,v)
+			if t then
+				print("type = "..type)
+				table.insert(result.answers,t)
+			end
+			i=i+1
+		else
+			break
 		end
-	end
+	until #result.answers >= 20
 	return result
 end
 

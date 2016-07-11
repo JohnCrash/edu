@@ -690,9 +690,9 @@ function battle:init_event()
 					kits.log( 'self._where: nil')
 					--backMain()
 					--uikits.popScene()
-					if self._arg.type==1 or self._arg.type==4 then
+					if self._arg.type==1 or self._arg.type==4 or self._arg.type==9 then
 						local text
-						if self._arg.type==1 then
+						if self._arg.type==1 or self._arg.type==9 then
 							text = "你‘确定’要退出闯关吗？"
 						else
 							text = "你‘确定’要退出错题任务吗？"
@@ -742,7 +742,8 @@ function battle:init_data()
 	
 	local data
 	
-	if self._arg.type ~= 4 then
+	--4错题,9淄博
+	if self._arg.type ~= 4 and self._arg.type ~= 9 then
 		data = level.get(self._arg)
 	else
 		--错题任务
@@ -907,7 +908,7 @@ function battle:game_over(mode)
 	end
 	self:showHummer(false)
 	
-	if self._arg.type==1 or self._arg.type==4 then
+	if self._arg.type==1 or self._arg.type==4 or self._arg.type==9 then
 		local ok
 		if b then
 			--播放成功过关的声音
@@ -1014,6 +1015,12 @@ function battle:upload_scroe( level_id,score,use_time,right_num )
 end
 --]]
 function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
+	local interface
+	if self._arg.type==9 then
+		interfacce = 'submit_answer_zibo'
+	else
+		interfacce = 'submit_answer'
+	end
 	local send_data = {v1=level_id,v2=self._arg.type,v3=use_time,v5=self._arg.subid,v6=score,v7=fen100}
 	send_data.v4 = {}
 	for i,v in pairs(self._words) do
@@ -1026,10 +1033,10 @@ function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 		table.insert(send_data.v4,{type=v.type,isright=v.judge,cy_id=en})
 	end
 	kits.log("do battle:upload_scroe2")
-	http.post_data(self._root,'submit_answer',send_data,function(t,v)
+	http.post_data(self._root,interfacce,send_data,function(t,v)
 		if t and t==200 and v then
 			http.logTable(v,1)
-			if v.v1 and self._arg.type==1 then
+			if v.v1 and self._arg.type==1 or self._arg.type==9 then
 				local current = level.getCurrent()
 				local count = level.getLevelCount()
 				if current<count and level_id == current then
@@ -1485,9 +1492,9 @@ function battle:init()
 		self._scheduler = self:getScheduler()
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,function(sender)
-			if self._arg.type==1 or self._arg.type==4 then
+			if self._arg.type==1 or self._arg.type==4 or self._arg.type==9 then
 				local text
-				if self._arg.type==1 then
+				if self._arg.type==1 or self._arg.type==9 then
 					text = "你‘确定’要退出闯关吗？"
 				else
 					text = "你‘确定’要退出错题任务吗？"

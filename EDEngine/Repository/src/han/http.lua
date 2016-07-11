@@ -531,7 +531,8 @@ if cc_isdebug() then
 	--debug
 	--base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
 	--线上
-	base_url = 'http://app.chinese.lejiaolexue.com/ChineseClient.ashx'
+	--base_url = 'http://app.chinese.lejiaolexue.com/ChineseClient.ashx'
+	base_url = 'http://app.lejiaolexue.com/hanzi/ChineseClient.ashx'
 else
 	base_url = 'http://'..kits.getAppServer()..'/hanzi/ChineseClient.ashx'
 	--http://app.lejiaolexue.com/hanzi/ChineseClient.ashx

@@ -29,6 +29,7 @@ local ui = {
 	WORLD_MATCH_FLAG = 'sj/tix',
 	SWITCH_CHILD_BUT = 'gh',
 	SWITCH_CHILD_PLANE = 'duohz',
+	ZIBO_BUT = 'zibo',
 	CHILD_NAME = 'hz1/mz',
 	CHILD_BUT = 'hz1/an',
 	CHILD_LOGO = 'hz1',
@@ -127,7 +128,10 @@ function main:init(b)
 				local scene = require "hitmouse2/achievement_teacher"
 				uikits.pushScene(scene.create())			
 			end
-		end)			
+		end)		
+		uikits.event(uikits.child(self._root,ui.ZIBO_BUT),function(sender)
+			uikits.pushScene(require "hitmouse2/zibo".create())
+		end)
 		uikits.event(uikits.child(self._root,ui.MISSION_BUT),function(sender)
 			local scene = require "hitmouse2/mission"
 			--self._news.hasMission = false

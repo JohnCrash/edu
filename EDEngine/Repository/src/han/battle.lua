@@ -336,7 +336,7 @@ function battle:initAnswer(q)
 			end
 		else
 			kits.log("ERROR initAnswer q or q.answer = nil")
-			http.logTable(q,1)
+			--http.logTable(q,1)
 		end
 	else
 		kits.log("ERROR self._is_character_show = "..tostring(self._is_character_show))
@@ -775,6 +775,8 @@ function battle:init_data()
 			kits.log("ERROR data.answers = nil")
 		end
 	end
+	kits.log("data:")
+	--kits.logTable(data)
 	self._word_num = data.question_amount
 	self._words = data.answers
 	
@@ -1056,7 +1058,7 @@ function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 	kits.log("do battle:upload_scroe2")
 	http.post_data(self._root,'submit_answer',send_data,function(t,v)
 		if t and t==200 and v then
-			http.logTable(v,1)
+			--http.logTable(v,1)
 			if v.v1 and self._arg.type==1 then
 				local d=level.getDifficulty()
 				local current = level.getCurrent(d)
@@ -1619,7 +1621,7 @@ function battle:type6(plane,topcis,words,choose,q)
 end
 
 function battle:init_current_question( q )
-	http.logTable(q,1)
+	--http.logTable(q,1)
 	if self._current_plane then
 		self._current_plane:setVisible(false)
 	end

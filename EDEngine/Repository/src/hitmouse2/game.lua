@@ -25,7 +25,7 @@ local _gr --迷惑项
 local _characters --[{character,idiom:[]},]
 local _sources --[{source,idiom:[]},]
 
-local function init_data()
+local function init_data( o )
 	if _cy and _cy then return end
 	local filename = "res/hitmouse2/data/cy.json"
 	local s = kits.read_local_file(filename)
@@ -347,7 +347,7 @@ local function get_topics(rangs,type,count)
 				local s = utf8_string_to_table(rangs[i].idiom)
 				if s and #s >= 4 then
 					local qs = makeWord(s,1)
-					table.insert(result,{type=type,count=1,name=qs.name,answer=qs.answer,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=qs.name,answer=qs.answer,correct=cor,entry=rangs[i],inx=i})
 				else
 					kits.log("ERROR get_topics cy.json invaild "..tostring(s))
 				end
@@ -359,7 +359,7 @@ local function get_topics(rangs,type,count)
 			if rangs[i] then
 				if rangs[i].character and #rangs[i].character > 0 then
 					local qa,cor = make_answer_by_character(rangs,i)
-					table.insert(result,{type=type,count=1,name=rangs[i].idiom,answer=qa,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=rangs[i].idiom,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -375,7 +375,7 @@ local function get_topics(rangs,type,count)
 			if rangs[i] then
 				if rangs[i].character and #rangs[i].character > 0 then
 					local qa,cor,chara = make_answer_by_idiom_exclude_character(rangs,i)
-					table.insert(result,{type=type,count=1,name=chara,answer=qa,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=chara,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -391,7 +391,7 @@ local function get_topics(rangs,type,count)
 			if rangs[i] then
 				if rangs[i].source and string.len(rangs[i].source) > 0 then
 					local qa,cor = make_answer_by_idiom_exclude_source(rangs,i)
-					table.insert(result,{type=type,count=1,name=rangs[i].source,answer=qa,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=rangs[i].source,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -407,7 +407,7 @@ local function get_topics(rangs,type,count)
 			if rangs[i] then
 				if rangs[i].idiom and string.len(rangs[i].idiom) > 0 then
 					local qa,cor = make_answer_by_source(rangs,i)
-					table.insert(result,{type=type,count=1,name=rangs[i].idiom,answer=qa,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=rangs[i].idiom,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -423,7 +423,7 @@ local function get_topics(rangs,type,count)
 			if rangs[i] then
 				if rangs[i].explanation and string.len(rangs[i].explanation) > 0 then
 					local qa,cor = make_answer_by_idiom(rangs,i)
-					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer=qa,correct=cor,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -438,7 +438,7 @@ local function get_topics(rangs,type,count)
 		for i=1,#rangs do
 			if rangs[i] then
 				if rangs[i].explanation and string.len(rangs[i].explanation) > 0 then
-					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer={},correct=rangs[i].idiom,entry=rangs[i]})
+					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer={},correct=rangs[i].idiom,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then
 						break
@@ -557,5 +557,7 @@ return {
 	setLevelCount = setLevelCount,
 	getLevelCount = getLevelCount,
 	setCurrent = setCurrent,
-	getCurrent = getCurrent
+	getCurrent = getCurrent,
+	get_topics = get_topics,
+	random_rang = random_rang,
 }

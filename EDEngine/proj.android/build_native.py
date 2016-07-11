@@ -65,12 +65,12 @@ def select_toolchain_version():
     '''
 
     ndk_root = check_environment_variables()
-    if os.path.isdir(os.path.join(ndk_root,"toolchains/arm-linux-androideabi-4.8")):
+    if os.path.isdir(os.path.join(ndk_root,"toolchains/arm-linux-androideabi-4.9")):
+        os.environ['NDK_TOOLCHAIN_VERSION'] = '4.9'
+        print "The Selected NDK toolchain version was 4.9 !"
+    elif os.path.isdir(os.path.join(ndk_root,"toolchains/arm-linux-androideabi-4.8")):
         os.environ['NDK_TOOLCHAIN_VERSION'] = '4.8'
         print "The Selected NDK toolchain version was 4.8 !"
-    elif os.path.isdir(os.path.join(ndk_root,"toolchains/arm-linux-androideabi-4.7")):
-        os.environ['NDK_TOOLCHAIN_VERSION'] = '4.7'
-        print "The Selected NDK toolchain version was 4.7 !"
     else:
         print "Couldn't find the gcc toolchain."
         exit(1)
