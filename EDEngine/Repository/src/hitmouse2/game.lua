@@ -53,6 +53,24 @@ local function init_data( o )
 	else
 		kits.log("ERROR can't read file "..filename)
 	end	
+	filename = "res/hitmouse2/data/gr1.json"
+	s = kits.read_local_file(filename)
+	if s then
+		local errmsg
+		local gr = json.decode(s)
+		if not gr then
+			kits.log("ERROR decode failed "..filename)
+			kits.log("	"..tostring(errmsg))
+		end		
+		for i,v in pairs(gr) do
+			if i and v then
+				_gr[i] = v
+			end
+		end
+	else
+		kits.log("ERROR can't read file "..filename)
+	end	
+	
 	if not _cy then
 		kits.log("ERROR hitmouse2 initialization game data failed!")
 		return
@@ -420,8 +438,10 @@ local function get_topics(rangs,type,count)
 	elseif type==6 then
 		local c = 0
 		for i=1,#rangs do
-			if rangs[i] then
-				if rangs[i].explanation and string.len(rangs[i].explanation) > 0 then
+			if rangs[i] and rangs[i].explanation then
+				local ss = utf8_string_to_table(rangs[i].explanation)
+				local length = #ss
+				if  length > 4 and length < 25 then
 					local qa,cor = make_answer_by_idiom(rangs,i)
 					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer=qa,correct=cor,entry=rangs[i],inx=i})
 					c = c+1
@@ -436,8 +456,10 @@ local function get_topics(rangs,type,count)
 	elseif type==7 then
 		local c = 0
 		for i=1,#rangs do
-			if rangs[i] then
-				if rangs[i].explanation and string.len(rangs[i].explanation) > 0 then
+			if rangs[i] and rangs[i].explanation then
+				local ss = utf8_string_to_table(rangs[i].explanation)
+				local length = #ss			
+				if length > 4 and length < 25 then
 					table.insert(result,{type=type,count=1,name=rangs[i].explanation,answer={},correct=rangs[i].idiom,entry=rangs[i],inx=i})
 					c = c+1
 					if c >= count then

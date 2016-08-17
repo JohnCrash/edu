@@ -69,6 +69,9 @@ import android.net.NetworkInfo;
 import android.content.BroadcastReceiver;
 import android.os.Vibrator;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 import org.acra.*;
 import org.acra.annotation.*;
 
@@ -622,33 +625,36 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	    	Log.w("onConfigurationChanged","SCREEN_ORIENTATION_PORTRAIT");
 	    }
 	}
+	private static String _launch;
+	private static String _cookie;
+	private static String _orientation;
+	private static String _uid;
 	//========================
 	// 传递参数
 	//========================
 	public void getParameterByIntent() {
 		Intent mIntent = this.getIntent();  
-		String launch = mIntent.getStringExtra("launch");
-		String cookie = mIntent.getStringExtra("cookie");
-		String orientation = mIntent.getStringExtra("orientation");
+		_launch = mIntent.getStringExtra("launch");
+		_cookie = mIntent.getStringExtra("cookie");
+		_orientation = mIntent.getStringExtra("orientation");
 		int userid =  mIntent.getIntExtra("userid",0);
-		String uid;
-		uid = Integer.toString(userid);
+		_uid = Integer.toString(userid);
 		String path = Environment.getExternalStorageDirectory().getPath();
 		if( path.length()>0 && path.charAt(path.length()-1)!='/')
 			path += '/';
 		setExternalStorageDirectory( path );
-		launchParam(launch,cookie,uid,orientation);
+		launchParam(_launch,_cookie,_uid,_orientation);
 		/*
 		 * 根据启动参数来确定横屏还是竖屏，如果是orientation==landscape将设置横屏
 		 * lua代码同样需要取得方向参数来确定屏幕方向
 		 */
 		Log.w("orientation","=====================================\n");
-		if( orientation!=null )
-			Log.w("orientation","orientation:"+orientation.toString());
+		if( _orientation!=null )
+			Log.w("orientation","orientation:"+_orientation.toString());
 		else
 			Log.w("orientation","orientation:null");
 		Log.w("orientation","=====================================\n");
-		if(orientation!=null && orientation.equalsIgnoreCase("portrait")){
+		if(_orientation!=null && _orientation.equalsIgnoreCase("portrait")){
 			Log.w("orientation","SCREEN_ORIENTATION_PORTRAIT");
 			myActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
@@ -670,7 +676,142 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		intent.setComponent(componentName);  
 		startActivity(intent);
 	}*/
+    private void errorBox(String title,String info){
+		new AlertDialog.Builder(AppActivity.this).setTitle(title)
+		.setMessage(info)
+		.setNegativeButton("确定", new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which){
+				//settingListActivity.this.finish();
+				System.exit(0);
+			}
+		})
+		.show(); 
+    }
+    
+    //copy from ljshell
+	public static int StartApp(String strPackage,String strPath,String strParam)
+    {
+		int nRet=1;
+		boolean bSingleTop=true;
+		try
+		{
+			String strClassName="";
+			
+			Bundle bundle = new Bundle();  
+			if (strPackage.equalsIgnoreCase("com.edengine.luacore"))
+			{
+				//for lua
+				strClassName="org.cocos2dx.cpp.AppActivity";
+				
+				bundle.putString("launch",strPath);
+				String str = "";
+				/*
+				String str=FindParam(strParam, "userid");
+				if (!str.isEmpty())
+				{
+					bundle.putInt("userid",Integer.parseInt(str));
+				}
+				
+				str=FindParam(strParam, "token");
+				if (!str.isEmpty())
+				{
+					str="sc1="+str;
+					bundle.putString("cookie",str);
+				}
 
+				str=FindParam(strParam, "devicetype");
+				if (!str.isEmpty())
+				{
+					bundle.putInt("devicetype",Integer.parseInt(str));
+				}
+
+				str=FindParam(strParam, "deviceid");
+				if (!str.isEmpty())
+				{
+					bundle.putString("deviceid",str);
+				}
+				*/
+				int n=0;
+				while (n<strParam.length())
+				{
+					int m=strParam.indexOf('=', n);
+					if (m<0) break;
+					
+					String strParamName=strParam.substring(n,m);
+					m++;
+					n=strParam.indexOf('&',m);
+					String strParamValue;
+					if (n<0) strParamValue=strParam.substring(m);
+					else strParamValue=strParam.substring(m,n);
+
+					if (strParamName.equals("userid"))
+					{
+						bundle.putInt(strParamName,Integer.parseInt(strParamValue));
+					}
+					else if (strParamName.equals("token"))
+					{
+						str = "sc1="+strParamValue;
+						bundle.putString("cookie",str);
+					}
+					else if (strParamName.equals("devicetype"))
+					{
+						bundle.putInt("devicetype",Integer.parseInt(strParamValue));
+					}
+					else bundle.putString(strParamName,strParamValue);
+					if (n<0) break;
+					n++;
+				}
+			}
+			else
+			{
+				bSingleTop=false;
+				int n=0;
+				while (n<strParam.length())
+				{
+					int m=strParam.indexOf('=', n);
+					if (m<0) break;
+					
+					String strParamName=strParam.substring(n,m);
+					m++;
+					n=strParam.indexOf('&',m);
+					String strParamValue;
+					if (n<0) strParamValue=strParam.substring(m);
+					else strParamValue=strParam.substring(m,n);
+
+					if (strParamName.equals("class")) strClassName=strParamValue;
+					else if (strParamName.equals("singletop")) bSingleTop=Integer.parseInt(strParamValue)==1;
+					else bundle.putString(strParamName,strParamValue);
+
+					if (n<0) break;
+					n++;
+				}
+			}
+
+			Intent intent;
+			if (strClassName.isEmpty())
+			{
+				intent = getContext().getPackageManager().getLaunchIntentForPackage(strPackage);
+			}
+			else
+			{
+				intent=new Intent();  
+				ComponentName componentName = new ComponentName(strPackage,strClassName); 
+				intent.setComponent(componentName);
+			}
+			intent.putExtras(bundle);  
+			
+			if (bSingleTop) intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			getContext().startActivity(intent);
+		}
+		catch (Exception e)
+		{
+			Log.w("StartApp",strPackage);
+			nRet=0;
+		}
+		return nRet;
+	}
+	
     public Cocos2dxGLSurfaceView onCreateView() {
 		//CrashHandler crashHandler = CrashHandler.getInstance();  
         //crashHandler.init(getApplicationContext());
@@ -680,6 +821,13 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     	ACRA.getErrorReporter().setReportSender(mySender);
     	myActivity = this;
     	getParameterByIntent(); //取启动参数
+    	if(_launch==null || _cookie==null){
+    		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+    		if(StartApp("com.lj.ljshell","","")==0)
+    			errorBox("提示","请安装乐教乐学大厅");
+    		else
+    			System.exit(0);
+    	}
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         glSurfaceView.setActivityCallback( this );
         // TestCpp should create stencil buffer

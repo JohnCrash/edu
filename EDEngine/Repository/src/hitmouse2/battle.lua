@@ -92,6 +92,7 @@ local ui = {
 	
 	TYPE6_NAME = "tu/chengy",
 	
+	TYPE7_MSG = 'tu/w1',
 	TYPE7_EXPLANATION = 'tu/chengy',
 	TYPE7_INPUT = 'datiqu/shuru',
 	TYPE7_MK_BUT = 'datiqu/yuyin',
@@ -919,8 +920,13 @@ function battle:game_over(mode)
 				uikits.child(self._root,ui.RIGHT_COUNT):setString(tostring(self._right_num))
 				uikits.child(self._root,ui.SCORE_COUNT):setString(fen_text)		
 				ok=uikits.child(self._timeover_ui,ui.OK_BUT)
+				
 				local label = uikits.child(self._root,ui.SHARE_SCORE_LABEL1)
 				local share_score = uikits.child(self._root,ui.SHARE_SCORE1)
+				if self._arg.type==9 then
+					label:setVisible(false)
+					share_score:setVisible(false)
+				end
 				if http.get_id_flag()==http.ID_FLAG_PAR then
 				--if false then
 					share_score:setString(tostring(l4p5(self._fen*0.1)))
@@ -1119,10 +1125,11 @@ function battle:select_word(index)
 			self:set_word(yp,np)
 		else
 			--error?
-			kits.log("error?")
-			kits.log("flag="..flag)
-			kits.log("yp="..#yp)
-			kits.log("np="..#np)
+			--kits.log("error?")
+			--kits.log("flag="..flag)
+			--kits.log("yp="..#yp)
+			--kits.log("np="..#np)
+			self._word_index = self._word_index+1
 			self:next_select()
 		end
 	end
@@ -1319,6 +1326,7 @@ function battle:init_current_question( q )
 	elseif q.type==7 then
 		uikits.child(self._current_plane,ui.TYPE7_EXPLANATION):setString(q.name or "-")
 		local input = uikits.child(self._current_plane,ui.TYPE7_INPUT)
+		local msg = uikits.child(self._current_plane,ui.TYPE7_MSG)
 		input:setText("")
 		local baidu = uikits.child(self._current_plane,ui.TYPE7_MK_BUT)
 		if kTargetWindows ~= CCApplication:getInstance():getTargetPlatform() then
@@ -1340,6 +1348,7 @@ function battle:init_current_question( q )
 			end)
 		else
 			baidu:setVisible(false)
+			msg:setVisible(false)
 		end
 		local ok = uikits.child(self._current_plane,ui.TYPE7_OK)
 		uikits.event(ok,function(sender)

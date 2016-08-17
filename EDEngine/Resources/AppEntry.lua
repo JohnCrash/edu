@@ -9,6 +9,12 @@ local pay = require "pay"
 require "ljshellDeprecated"
 local RecordVoice = require "recordvoice"
 
+local app,cookie,uid = cc_launchparam()
+
+if not cc_isdebug() and app == "" then
+	return
+end
+
 hw_cur_child_id = 0
 local ui = {
 }
@@ -530,7 +536,7 @@ function AppEntry:init()
 				--login.set_selector(33) --张燕老师八
 				--login.set_selector(35) --胡老师
 				--login.set_selector(36) --李杰
-				login.set_selector(37) --刘
+				login.set_selector(42) --刘
 				--login.set_selector(38) --李杰老师
 				--login.set_selector(39) --家长
 				--login.set_selector(40)
@@ -555,7 +561,7 @@ function AppEntry:init()
 				--login.set_selector(18) --额额
 				--login.set_selector(18) --杨艳波
 				--login.set_selector(20) --张泳
-				login.set_selector(21)--李四
+				login.set_selector(43)--李四
 				--login.set_selector(22) --未来之星校长
 				--login.set_selector(23) --大小校长
 				--login.set_selector(24) --田老师
@@ -584,9 +590,13 @@ function AppEntry:init()
 			--update.create{name='test',updates={'test','luacore'},
 			--	run=function()
 			--	login.set_selector(3) 
-				local selstudent = require "test/test"
-				uikits.pushScene(selstudent.create())
+			--	local selstudent = require "test/test"
+			--	uikits.pushScene(selstudent.create())
 			--end}
+			local cache = require "cache"
+			cache.post("http://baidu.com/hello.a?hehe","from=a",function(b,data)
+				
+			end,"hello:0")
 		end}
 	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,

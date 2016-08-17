@@ -129,9 +129,24 @@ function main:init(b)
 				uikits.pushScene(scene.create())			
 			end
 		end)		
-		uikits.event(uikits.child(self._root,ui.ZIBO_BUT),function(sender)
-			uikits.pushScene(require "hitmouse2/zibo".create())
-		end)
+		local zibo = uikits.child(self._root,ui.ZIBO_BUT)
+		if zibo then
+			zibo:setVisible(false)
+			uikits.delay_call( self._root,function(dt)
+				local zone = state.get_zone()
+				kits.log( "zone :"..tostring(zone) )
+				if zone then
+					if tostring(zone) == "370300" then
+						zibo:setVisible(true)
+						uikits.event(zibo,function(sender)
+							uikits.pushScene(require "hitmouse2/zibo".create())
+						end)
+					end
+					return false
+				end
+				return true
+			end,0.1)
+		end
 		uikits.event(uikits.child(self._root,ui.MISSION_BUT),function(sender)
 			local scene = require "hitmouse2/mission"
 			--self._news.hasMission = false

@@ -6,6 +6,7 @@ local music = require "hitmouse2/music"
 local http = require "hitmouse2/hitconfig"
 local global = require "hitmouse2/global"
 local state = require "hitmouse2/state"
+local login = require "login"
 
 local ui = {
 	FILE = 'hitmouse2/load.json',
@@ -31,9 +32,20 @@ function loading:init()
 		self._progress = uikits.child(self._root,ui.PROGRESS)
 		self._progress:setPercent(0)
 		http.set_base_rid()
+		--self:get_user_zone()
 		self:get_user_info()
 		self:login()
 	end
+end
+
+function loading:get_user_zone()
+	local url = 'http://api.lejiaolexue.com/rest/userzone/zone.ashx?uid='..login.uid()
+	cache.request_json( url,function(t)
+		http.logTable(t,1)
+		if t and t.zone then
+			state.set_zone( t.zone )
+		end
+	end)
 end
 
 function loading:get_user_info()
@@ -201,6 +213,7 @@ function loading:initRegion()
 			kits.log("loading initRegion success!")
 			http.logTable(v,1)
 			state.set_region(v.v1,v.v2,v.v3,v.v4)
+			state.set_zone(v.v5)
 			self:initLevelStar()
 		else
 			http.messagebox(self._root,http.DIY_MSG,function(e)

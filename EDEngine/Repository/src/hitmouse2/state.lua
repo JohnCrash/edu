@@ -492,6 +492,16 @@ local function get_name()
 	return g_name
 end
 
+local _zone
+
+local function set_zone(z)
+	_zone = z
+end
+
+local function get_zone()
+	return _zone
+end
+
 return {
 	set_sp = set_sp,
 	get_sp = get_sp,
@@ -517,4 +527,6 @@ return {
 	next_stage = next_stage,
 	set_name = set_name,
 	get_name = get_name,
+	set_zone = set_zone,
+	get_zone = get_zone,
 }

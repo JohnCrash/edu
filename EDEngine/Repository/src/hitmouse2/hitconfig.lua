@@ -431,7 +431,8 @@ if cc_isdebug() then
 	--debug
 	--base_url = 'http://app.idiom.lejiaolexue.com/idiom/idiomclient.ashx'
 	--线上
-	base_url = 'http://app.lejiaolexue.com/newidiom/idiomclient.ashx'
+	--base_url = 'http://app.lejiaolexue.com/newidiom/idiomclient.ashx'
+	base_url = 'http://app.lejiaolexue.com/idiom_zibo/idiomclient.ashx'
 else
 --release
 --old local base_url = 'http://'..kits.getAppServer()..'/idiom/idiomclient.ashx'
