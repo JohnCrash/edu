@@ -657,7 +657,7 @@ local function child( root,path )
 				w = wt
 			end
 		end
-		if w == root then
+		if w == root or not w then
 			--打印调用者信息
 			kits.log('ERROR: uikits.child return nil, '..tostring(path))
 			log_caller()

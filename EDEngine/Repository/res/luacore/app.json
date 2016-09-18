@@ -25,21 +25,38 @@
 		"launch":"qwxt/main",
 		"updates":[
 			"qwxt",
-			"topics"
+			"topics",
+			"wuliu"
 		]
 	},
 	"lemall":{
 		"name":"lemall",
 		"launch":"lemall/Loading",
 		"updates":[
-			"lemall"
+			"lemall",
+			"wuliu"
 		]
 	},
 	"hitmouse":{
 		"name":"hitmouse2",
 		"launch":"hitmouse2/loading",
 		"updates":[
-			"hitmouse2"
+			"hitmouse2",
+			"wuliu"
+		]
+	},
+	"calc":{
+		"name":"calc",
+		"launch":"calc/loading",
+		"updates":[
+			"calc"
+		]
+	},
+	"han":{
+		"name":"han",
+		"launch":"han/loading",
+		"updates":[
+			"han"
 		]
 	}	
 }

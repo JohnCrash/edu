@@ -12,6 +12,7 @@ USING_NS_CC;
 
 #define LUA_FFMPEG_HANDLE "lua_ffmpeg_t"
 
+/*
 namespace ff
 {
 	int CCLog(const char* fmt, ...)
@@ -23,7 +24,7 @@ namespace ff
 		return 1;
 	}
 }
-
+*/
 MySpaceBegin
 
 #if __cplusplus

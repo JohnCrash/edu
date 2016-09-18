@@ -99,7 +99,7 @@ end
 
 function matchview:get_match_list()
 	local send_data = {}
-	if self.id_flag == hitconfig.ID_FLAG_PAR then
+	if self.id_flag == hitconfig.ID_FLAG_PAR and self.cur_school_info then
 		send_data.v1 = self.cur_school_info.school_id
 		send_data.v2 = self.cur_school_info.user_id
 	else
@@ -150,7 +150,7 @@ function matchview:init()
 		if self.id_flag == hitconfig.ID_FLAG_PAR then
 			self.child_info = global.getChildInfo()
 			if self.child_info and self.child_info.v2 and #self.child_info.v2 > 1 then
-				hitconfig.logTable(child_info)
+				hitconfig.logTable(self.child_info)
 				view_change_class:setVisible(true)
 				self.cur_school_info = hitconfig.get_school_info()
 				if self.cur_school_info then
@@ -170,8 +170,10 @@ function matchview:init()
 			else
 				kits.log("ERROR get_childinfo failed~")
 			end
-			txt_school_name:setString(self.cur_school_info.user_name)
-			hitconfig.set_school_info(self.cur_school_info)	
+			if self.cur_school_info then
+				txt_school_name:setString(self.cur_school_info.user_name)
+				hitconfig.set_school_info(self.cur_school_info)				
+			end
 		end	
 		
 		local but_left = uikits.child(self._matchview,ui.BUTTON_LEFT)
@@ -207,8 +209,13 @@ function matchview:init()
 	else
 		self._matchview = uikits.fromJson{file_9_16=ui.TEA_FILE,file_3_4=ui.TEA_FILE_3_4}		
 	end
+
 	self:addChild(self._matchview)
-	
+	if self.id_flag == hitconfig.ID_FLAG_PAR and not self.cur_school_info then
+		hitconfig.messagebox(self._matchview,hitconfig.OK_MSG,function(e)
+			uikits.popScene()
+		end,"该家长没有绑定孩子!")	
+	end
 	self:get_match_list()
 	
 --[[	hitconfig.set_base_rid()

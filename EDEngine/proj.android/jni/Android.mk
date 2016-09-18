@@ -24,6 +24,11 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/misc.cpp \
 				   ../../Classes/IDF.cpp \
 				   ../../Classes/ff.cpp \
+				   ../../Classes/cmdutils.cpp \
+				   ../../Classes/ffmpeg.cpp \
+				   ../../Classes/ffmpeg_cmd.cpp \
+				   ../../Classes/ffmpeg_filter.cpp \
+				   ../../Classes/ffmpeg_opt.cpp \
 				   ../../Classes/FFVideo.cpp \
 				   ../../Classes/lua_ffmpeg.cpp \
 				   ../../Classes/SDL.cpp \

@@ -602,6 +602,38 @@ local function link_conv(s,e)
 	return res,msg
 end
 
+local function isurl( url )
+	if url and type(url)=='string' and string.len(url) > 4 then
+		if string.lower( string.sub(url,1,4) ) == 'http' then
+			return true
+		end
+	end
+	return false
+end
+
+local function request_resources( rtable,efunc,priority )
+	if rtable and type(rtable)=='table' and rtable.urls and type(rtable.urls) == 'table' and 
+		efunc and type(efunc)=='function' then
+		local b = true
+		for i,v in pairs(rtable.urls) do
+			b = false
+			if type(v)=='table' and isurl(v.url) then
+				cache.request_nc(v.url,function(b)
+					efunc( rtable,i,b )
+				end,v.filename)
+			else
+				efunc( rtable,i,false )
+			end
+		end
+		if b then
+			efunc( rtable,0,b )
+		end
+	else
+		return false,"request_resources invalid argument"
+	end
+	return true
+end
+
 --下载完毕才能进行下一步的初始化
 local function cache_done(layout,data,efunc,param1,param2,param3)
 	if data and not data._isdone_ and data.resource_cache then
@@ -611,7 +643,7 @@ local function cache_done(layout,data,efunc,param1,param2,param3)
 		local rst = data.resource_cache
 		rst.loading = loadingbox.circle( layout )
 		local success=true
-		local r,msg = cache.request_resources( rst,
+		local r,msg = request_resources( rst,
 				function(rs,i,b)
 					n = n+1
 					if b and rs.urls[i] and rs.urls[i].done and type(rs.urls[i].done)=='function' then

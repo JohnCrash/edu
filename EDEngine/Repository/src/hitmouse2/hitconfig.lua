@@ -246,7 +246,7 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 				end,0)
 				func(OK)
 			end,'click')	
-			
+	
 	uikits.event( but_retry,function(sender)
 				uikits.delay_call(parent,function()
 					if sender.parent then
@@ -352,7 +352,8 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 		but_good.parent = parent
 		but_cancel.parent = parent
 		s:setEnabled(true)
-		s:setTouchEnabled(true)		
+		s:setTouchEnabled(true)	
+	
 		return
 	else
 		if txt_content and type(txt_content) == 'string' then
@@ -391,6 +392,7 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 		size = uikits.getDR()
 	end
 	s:setPosition{x=size.width/2,y=size.height/2}
+
 	local viewParent=parent:getParent()
 	viewParent:addChild( s,9999 )	
 --[[

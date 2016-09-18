@@ -109,7 +109,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\lua;$(EngineRoot)external\pthread\Pre-built.2\include;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\zeromq\include;$(EngineRoot)external\zeromq\prebuilt\win32</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_ZMQ;WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_ZMQ;WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;USE_WIN32_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -142,8 +142,13 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\acr.cpp" />
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\AssetsManager.cpp" />
+    <ClCompile Include="..\Classes\cmdutils.cpp" />
     <ClCompile Include="..\Classes\Console.cpp" />
     <ClCompile Include="..\Classes\ff.cpp" />
+    <ClCompile Include="..\Classes\ffmpeg.cpp" />
+    <ClCompile Include="..\Classes\ffmpeg_cmd.cpp" />
+    <ClCompile Include="..\Classes\ffmpeg_filter.cpp" />
+    <ClCompile Include="..\Classes\ffmpeg_opt.cpp" />
     <ClCompile Include="..\Classes\FFVideo.cpp" />
     <ClCompile Include="..\Classes\Files.cpp" />
     <ClCompile Include="..\Classes\IDF.cpp" />

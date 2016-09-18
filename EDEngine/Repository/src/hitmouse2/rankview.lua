@@ -59,7 +59,6 @@ function rankview:show_rank()
 	local viewParent=view_rank:getParent()
 	view_rank:setVisible(false)
 	if self.rank_data and type(self.rank_data) == 'table' then
-		kits.logTable(self.rank_data)
 		local view_rank = hitconfig.createRankView(viewParent,viewPosition,viewSize,view_person_src,function(item,data)
 				local txt_rank = uikits.child(item,ui.TXT_RANK)
 				local pic_user = uikits.child(item,ui.PIC_USER)

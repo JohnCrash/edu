@@ -1,12 +1,39 @@
 #include "ff.h"
 #include "ffdepends.h"
+#include "cocos2d.h"
 
 namespace ff
 {
+/*
+    static double cc_clock()
+    {
+        double clock;
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+        clock = (double)GetTickCount();
+#else
+        timeval tv;
+        gettimeofday(&tv,NULL);
+        clock = (double)tv.tv_sec*1000.0 + (double)(tv.tv_usec)/1000.0;
+#endif
+        return clock;
+    }
+*/
+    VideoPixelFormat FFVideo::getPixelFormat()
+    {
+        return VIDEO_PIX_YUV420P;
+    }
+
 	static bool isInitFF = false;
 
 	FFVideo::FFVideo() :_ctx(nullptr)
 	{
+#if _LGH_TEST_
+		_nb_min_threshold = 30;
+		_nb_max_threshold = 60;
+#else
+		_nb_min_threshold = 0;
+		_nb_max_threshold = 0;
+#endif
 		if (!isInitFF){
 			initFF();
 			isInitFF = true;
@@ -18,12 +45,58 @@ namespace ff
 		close();
 	}
 
+	//��ȡ�ڲ�״̬����
+	int		FFVideo::getState(void*	pobjData)
+	{
+		int nRes = sizeof(VideoState) + sizeof(AVFormatContext);
+		VideoState* _vs = (VideoState*)_ctx;
+		if (pobjData)
+		{
+			memcpy(pobjData, _vs, nRes);
+			AVFormatContext*	pobjIC = (AVFormatContext*)((char*)pobjData + sizeof(VideoState));
+			memcpy(pobjIC, _vs->ic, sizeof(AVFormatContext));
+			((VideoState*)pobjData)->ic = pobjIC;
+		}
+		return nRes;
+	}
+
+	//�����ڲ�״̬����
+	void	FFVideo::setState(void*	pobjData, int nLen)
+	{
+		if (_ctx)
+		{
+			free(_ctx);
+			_ctx = nullptr;
+		}
+		int nRes = sizeof(VideoState) + sizeof(AVFormatContext);
+		if (pobjData)
+		{
+			if (nLen == nRes)
+			{
+				_ctx = malloc(nRes);
+				memcpy(_ctx, pobjData, nRes);
+				AVFormatContext*	pobjIC = (AVFormatContext*)((char*)_ctx + sizeof(VideoState));
+				((VideoState*)_ctx)->ic = pobjIC;
+			}
+		}
+	}
+
 	bool FFVideo::open(const char *url)
 	{
 		_first = true;
 		close();
-		_ctx = stream_open(url, NULL);
+#if _LGH_TEST_
+		url = "rtmp://live.lexinedu.com/ljlx/ljlive?auth_key=1470399831-0-0-1f25acfe6f301c542e4258045f0d6dd2";
+	//	url = "rtmp://192.168.7.157/myapp?carg=1/mystream?sarg=2";
+#endif
+        _ctx = stream_open(url, NULL);
 		return _ctx != nullptr;
+	}
+
+	void FFVideo::set_live_lagnb(int mi,int ma)
+	{
+		_nb_min_threshold = mi;
+		_nb_max_threshold = ma;
 	}
 
 	void FFVideo::seek(double t)
@@ -49,7 +122,11 @@ namespace ff
 			VideoState* is = (VideoState*)_ctx;
 			if (is)
 			{
-				if ((!is->audio_st || (is->auddec.finished == is->audioq.serial && frame_queue_nb_remaining(&is->sampq) == 0)) &&
+				//ֱ��ʱ������������쳣����(eof=1),��ʾ��Ƶ�Ѿ�����
+				if (is->ic && is->eof && !strncmp(is->filename, "rtmp:", 5))
+					return true;
+
+				if (!is->paused && (!is->audio_st || (is->auddec.finished == is->audioq.serial && frame_queue_nb_remaining(&is->sampq) == 0)) &&
 					(!is->video_st || (is->viddec.finished == is->videoq.serial && frame_queue_nb_remaining(&is->pictq) == 0)))
 					return true;
 			}
@@ -71,8 +148,10 @@ namespace ff
 		VideoState* is = (VideoState*)_ctx;
 		if (is)
 		{
-			
-			return FFMAX(is->videoq.nb_packets,is->audioq.nb_packets);
+			if (hasVideo())
+				return is->videoq.nb_packets;
+			else if (hasAudio())
+				return is->audioq.nb_packets;
 		}
 		return -1;
 	}
@@ -107,8 +186,10 @@ namespace ff
 	double FFVideo::length() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs && _vs->ic)
+		if (_vs && _vs->ic && isOpen() )
 		{
+			if (_vs->ic->duration == AV_NOPTS_VALUE || _vs->ic->duration < 0 )
+				return 0;
 			return (double)_vs->ic->duration / 1000000LL;
 		}
 		return 0;
@@ -150,6 +231,7 @@ namespace ff
 
 	bool FFVideo::isPlaying() const
 	{
+		if (!hasVideo() || !isOpen()) return false;
 		return !isPause();
 	}
 
@@ -181,39 +263,71 @@ namespace ff
 	{
 		if (!isOpen())return -1;
 		VideoState* _vs = (VideoState*)_ctx;
-		if (!_vs->pscreen)return -1;
-		return _vs->pscreen->w;
+		return _vs->width;
 	}
 
 	int FFVideo::height() const
 	{
 		if (!isOpen())return -1;
 		VideoState* _vs = (VideoState*)_ctx;
-		if (!_vs->pscreen)return -1;
-		return _vs->pscreen->h;
+		return _vs->height;
 	}
 
+//    static double t0 = 0;
 	void *FFVideo::refresh()
 	{
+//        if(t0==0)
+//            t0=cc_clock();
+//        CCLOG("refresh == %f ",cc_clock()-t0);
+//        t0 = cc_clock();
+        
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs && _vs->pscreen2)
+		if (_vs)
 		{
+			/*
+			 * ��ֱ��ʱ�����������ڷ�ֵ��������ʱ����ʱ����ջ�����(���ܵ���ͬ������?)
+			 */
+#ifndef __APPLE__
+			if (_nb_min_threshold >0 && _nb_max_threshold >0 && hasVideo()){
+				if (preload_packet_nb() > _nb_max_threshold){
+					if (_vs->audio_stream >= 0) {
+						packet_queue_flush(&_vs->audioq);
+						packet_queue_put(&_vs->audioq, &flush_pkt);
+					}
+					if (_vs->video_stream >= 0) {
+						packet_queue_flush(&_vs->videoq);
+						packet_queue_put(&_vs->videoq, &flush_pkt);
+					}
+				}
+			}
+#endif
 			double r = 1.0 / 30.0;
 			if (!is_stream_pause((VideoState*)_ctx))
+			{
 				video_refresh(_vs, &r);
-			if (_vs->pscreen){
-				if (_first){
+			}
+			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0)
+			{
+				if (_first)
+				{
 					pause();
 					_first = false;
 				}
-				return _vs->pscreen->pixels;
+				return &_vs->pyuv420p;
 			}
-		}
-		else if (_vs){
-			_vs->step = 0;
 		}
 		return nullptr;
 	}
+
+    void *FFVideo::allocRgbBufferFormYuv420p(void *pyuv)
+    {
+		return yuv420pToRgb((yuv420p *)pyuv);
+    }
+    
+    void FFVideo::freeRgbBuffer(void * prgb)
+    {
+        freeRgb(prgb);
+    }
 
 	void FFVideo::pause()
 	{
@@ -261,16 +375,16 @@ namespace ff
 	}
 
 	/*
-	 * ������Ƶ����Ƶ����ƽ�����ʣ�ÿ����ٸ�����
+	 * º∆À„ ”∆µªÚ“Ù∆µ¡˜µƒ∆Ωæ˘∞¸¬ £®√ø√Î∂‡…Ÿ∏ˆ∞¸£�?
 	 */
 	static double calc_avg_pocket_rate(AVStream *st)
 	{
 		if (st){
 			if (st->avg_frame_rate.den>0 && st->avg_frame_rate.num>0) 
-				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;//����Ѿ���ƽ�����ʣ�ֱ�ӷ���
+				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;//»Áπ˚“—æ≠”–∆Ωæ˘∞¸¬ £¨÷±Ω”∑µªÿ
 
 			if (st->time_base.den > 0){
-				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den; //���ܵ�ʱ��
+				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den; //¡˜◊‹µƒ ±º�?
 				if ( tt > 0 )
 					return (double)st->nb_frames / tt;
 			}
@@ -286,7 +400,7 @@ namespace ff
 			}
 			else{
 				/* 
-				 * �����Ƶ�Ѿ��������һ���������ݲ�����pts��PacketQueue��һ����������ҳ��Դ�ͷ����ʼѰ�����һ����ȷ�İ�
+				 * »Áπ˚ ”∆µ“—æ≠Ω· ¯◊Ó∫Û“ª∏ˆ∞¸µƒ ˝æ›≤ª∞¸¿®pts£¨PacketQueue «“ª∏ˆµ•œÚ∂”¡–Œ“≥¢ ‘¥”Õ∑≤øø™ º—∞’“◊Ó∫Û“ª∏ˆ’˝»∑µƒ∞�?
 				 */
 				MyAVPacketList *last = NULL;
 				for (MyAVPacketList *it = pq->first_pkt; it != NULL; it = it->next){
@@ -297,12 +411,10 @@ namespace ff
 				}
 				if (last){
 					return (double)(last->pkt.pts - pq->first_pkt->pkt.pts) *(double)st->time_base.num / (double)st->time_base.den;
-				}else
-					return 0;
+				}
 			}
 		}
-		else
-			return 0;
+		return 0;
 	}
 
 	double FFVideo::preload_time()
@@ -310,11 +422,7 @@ namespace ff
 		VideoState* is = (VideoState*)_ctx;
 		if (is)
 		{
-			//return FFMAX(calc_stream_preload_time(&is->videoq,is->video_st),calc_stream_preload_time(&is->audioq,is->audio_st));
-			if (is->video_st)
-				return calc_stream_preload_time(&is->videoq, is->video_st);
-			else if (is->audio_st)
-				return calc_stream_preload_time(&is->audioq, is->audio_st);
+			return FFMAX(calc_stream_preload_time(&is->videoq,is->video_st),calc_stream_preload_time(&is->audioq,is->audio_st));
 		}
 		return -1;
 	}
@@ -324,6 +432,7 @@ namespace ff
 		VideoState* is = (VideoState*)_ctx;
 		if (is && t>=0 )
 		{
+			if (!is->video_st)return false;
 			double apr = calc_avg_pocket_rate(is->video_st);
 			if (apr > 0){
 				set_preload_nb((int)(apr*t));
@@ -334,8 +443,8 @@ namespace ff
 				set_preload_nb((int)(apr*t));
 				return true;
 			}
-			//���������ȷ����ƽ�����ʾͻָ�ΪĬ������
-			set_preload_nb(50);
+			//»Áπ˚≤ªƒ‹’˝»∑º∆À„∆Ωæ˘∞¸¬ æÕª÷∏¥Œ™ƒ¨»œ…Ë÷√
+			set_preload_nb(150);
 		}
 		return false;
 	}

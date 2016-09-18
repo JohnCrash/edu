@@ -3,6 +3,18 @@
 
 namespace ff
 {
+    enum VideoPixelFormat
+    {
+        VIDEO_PIX_RGB = 1,
+        VIDEO_PIX_YUV420P,
+    };
+    
+    typedef struct YUV420P{
+        int w,h;
+        unsigned char * data[3];
+        int linesize[3];
+    } YUV420P;
+    
 	class FFVideo
 	{
 	public:
@@ -39,8 +51,12 @@ namespace ff
 		 *	因此你可以直接用来作为材质使用
 		 */
 		void *refresh();
-
-		/*
+        
+        VideoPixelFormat getPixelFormat();
+        void *allocRgbBufferFormYuv420p(void *pyuv);
+        void freeRgbBuffer(void * prgb);
+        
+        /*
 		 *	网络预加载进度
 		 *	set_preload_nb,
 		 *	不设置使用默认值50
@@ -49,6 +65,13 @@ namespace ff
 		 */
 		void set_preload_nb(int n);
 		int preload_packet_nb() const;
+
+		/*
+		 * 设置直播丢弃阀值
+		 * 默认值为0表示不进行阀值处理（和以前的播放模式一样）
+		 * 当设置该值时，如果数据包大于该值将清空数据包缓存区。
+		 */
+		void set_live_lagnb(int mi, int ma);
 
 		/*
 		 *	set_preload_time 设置预加载时间单位秒
@@ -60,9 +83,34 @@ namespace ff
 		 *	函数失败返回-1
 		 */
 		double preload_time();
+		//获取内部状态对象
+		int		getState(void*	pobjData);
+		//设置内部状态对象
+		void	setState(void*	pobjData,int nLen);
 	private:
 		void* _ctx;
 		bool _first;
+		int _nb_max_threshold;
+		int _nb_min_threshold;
 	};
+	
+	/*
+	* 取得视频文件的流信息
+	*/
+	int getVideoInfo(const char * filename, int *w, int *h);
+
+	enum TranCode
+	{
+		TC_BEGIN = 1,	//开始转码
+		TC_END = 2,		//结束转码
+		TC_PROGRESS = 3,//转码进度
+		TC_ERROR = 4,	//转码错误
+	};
+	/*
+	 * 执行ffmpeg命令
+	 * 回调函数用来通知转码进度，tc表示状态，p是进度值0-1
+	 * 回调返回0继续转码，非0将终止转码
+	 */
+	int ffmpeg(const char *cmd,int (*)(TranCode tc,float p));
 }
 #endif

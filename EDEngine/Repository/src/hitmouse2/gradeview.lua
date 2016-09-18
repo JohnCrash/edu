@@ -84,7 +84,6 @@ function gradeview:show_history_list()
 				send_data.v5 = '0'
 			end		
 			hitconfig.post_data(self._gradeview,'road_block_rank',send_data,function(t,v)
-							kits.logTable(v)
 							if t and t == 200 then
 								uikits.pushScene( rankview.create(v.v1,sender.open_time,self.match_name) )
 							else

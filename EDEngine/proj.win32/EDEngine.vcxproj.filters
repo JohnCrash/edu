@@ -144,6 +144,21 @@
     <ClCompile Include="..\Classes\lzmq\ztimer.c">
       <Filter>Classes\lzmq</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\cmdutils.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg_cmd.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg_filter.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg_opt.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

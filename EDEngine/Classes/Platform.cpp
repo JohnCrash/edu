@@ -40,8 +40,14 @@ const char *policy_tostring(ResolutionPolicy rp)
 }
 */
 
-void cocos2dChangeOrientationBySize( int w,int h )
+static int s_width = 0;
+static int s_height = 0;
+static void cocos2dChangeOrientationBySize2() //int w,int h )
 {
+	int w = s_width;
+	int h = s_height;
+	
+	CCLOG("cocos2dChangeOrientationBySize2 w = %d, h = %d ",w,h);
     cocos2d::Director *pDirector = cocos2d::Director::getInstance();
     if( pDirector == nullptr )
         return;
@@ -58,6 +64,25 @@ void cocos2dChangeOrientationBySize( int w,int h )
         pDirector->setViewport();
 		pDirector->setProjection(pDirector->getProjection());
     }
+}
+
+void cocos2dChangeOrientationBySize( int w,int h )
+{
+	//call lua progress function
+	s_width = w;
+	s_height = h;
+	
+	CCLOG("cocos2dChangeOrientationBySize w = %d, h = %d ",w,h);
+	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+	if( pDirector )
+	{
+		auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+		if( scheduler )
+		{
+			CCLOG("scheduler->performFunctionInCocosThread cocos2dChangeOrientationBySize2 w = %d, h = %d ",w,h);
+			scheduler->performFunctionInCocosThread(cocos2dChangeOrientationBySize2);
+		}
+	}
 }
 
 void cocos2dChangeOrientation(int m)

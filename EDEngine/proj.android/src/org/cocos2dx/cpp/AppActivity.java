@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.provider.MediaStore;
+import android.view.KeyEvent;
 
 import java.io.File;
 import java.lang.System;
@@ -599,7 +600,9 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	//	if(_isSetUIOrientation == 1)
 		{
 			//发生屏幕旋转
+			Log.w("onSizeChanged",String.format("(%d , %d)",width,height));
 			cocos2dChangeOrientation( 1,width,height );
+			Log.w("onSizeChanged after",String.format("(%d , %d)",width,height));
 		}
 		_isSetUIOrientation = -1;
 	}
@@ -677,16 +680,36 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		startActivity(intent);
 	}*/
     private void errorBox(String title,String info){
-		new AlertDialog.Builder(AppActivity.this).setTitle(title)
-		.setMessage(info)
-		.setNegativeButton("确定", new DialogInterface.OnClickListener(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(AppActivity.this);
+		builder.setTitle(title);
+		builder.setMessage(info);
+		builder.setNegativeButton("确定", new DialogInterface.OnClickListener(){
 			@Override
 			public void onClick(DialogInterface dialog, int which){
 				//settingListActivity.this.finish();
 				System.exit(0);
 			}
-		})
-		.show(); 
+		});
+		AlertDialog alertDialog = builder.create();
+		alertDialog.setCancelable(false);
+		/*
+		 * 防止对话框被cancel  
+		 */
+		alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+			   @Override
+			   public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
+			   {
+			   if (keyCode == KeyEvent.KEYCODE_SEARCH)
+			    {
+			     return true;
+			    }
+			    else
+			    {
+			     return false; //默认返回 false
+			    }
+			   }
+		});		
+		alertDialog.show(); 
     }
     
     //copy from ljshell
@@ -824,7 +847,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     	if(_launch==null || _cookie==null){
     		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
     		if(StartApp("com.lj.ljshell","","")==0)
-    			errorBox("提示","请安装乐教乐学大厅");
+    			errorBox("提示","亲爱的用户，想要使用“乐学园地”，请先在步步高应用商店中，搜索并安装《乐教乐学》.在其他应用商店安装也可以哟！");
     		else
     			System.exit(0);
     	}
