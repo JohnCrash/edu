@@ -60,6 +60,7 @@ int autorotate = 1;
 int64_t audio_callback_time;
 
 AVPacket flush_pkt;
+static mutex_t *_audio_channel_mutex = NULL;
 
 //SwsContext *sws_opts;
 //AVDictionary *swr_opts, *sws_dict;
@@ -954,7 +955,6 @@ void stream_close(VideoState *is)
 //		is->pscreen2 = NULL;
 //		is->pscreen = NULL;
 //	}
-	destroyMutex( is->audio_channel_mutex );
 	av_free(is);
 }
 
@@ -1359,7 +1359,7 @@ struct AudioChanel
 static AudioChanel* mxAudioChanel[MAXCHANEL];
 static AudioChanel* OpenAudioChanel(VideoState *is, AudioCallBack pcallback)
 {
-	std::unique_lock<mutex_t> lk(*is->audio_channel_mutex);
+	std::unique_lock<mutex_t> lk(*_audio_channel_mutex);
 
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
@@ -1421,6 +1421,7 @@ static void MixAudioFormat(Sint16 *des, Sint16 *src, AudioFormat format,int len,
 
 static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 {
+	std::unique_lock<mutex_t> lk(*_audio_channel_mutex);
 
 	AudioFormat format = AUDIO_S16SYS;
 	memset(stream, 0, len);
@@ -1433,7 +1434,6 @@ static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 			pac->_callback(pac->_is, mixData, len);
 			//SDL_MixAudioFormat(stream, mixData, format,len, 128);
 			if (!(pac->_is->seek_req)){
-				std::unique_lock<mutex_t> lk(*pac->_is->audio_channel_mutex);
 				MixAudioFormat((Sint16*)stream, (Sint16*)mixData, format, len / 2, 128);
 			}
 		}
@@ -1468,7 +1468,7 @@ static int initAudio(AudioSpec *desired, AudioSpec *obtained)
 
 static void CloseAudioChanelByVideoState(VideoState *pvs)
 {
-	std::unique_lock<mutex_t> lk(*pvs->audio_channel_mutex);
+	std::unique_lock<mutex_t> lk(*_audio_channel_mutex);
 
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
@@ -3416,7 +3416,10 @@ VideoState *stream_open(const char *filename, AVInputFormat *iformat)
     is->isNewFrame = 0;
     is->pyuv420p.w = -10;
     is->pyuv420p.h = -10;
-	is->audio_channel_mutex = createMutex();
+	
+	if (!_audio_channel_mutex)
+		_audio_channel_mutex = createMutex();
+
 	do 
 	{
 		/* start video display */

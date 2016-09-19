@@ -231,7 +231,7 @@ namespace ff
 
 	bool FFVideo::isPlaying() const
 	{
-		if (!hasVideo() || !isOpen()) return false;
+		if (!isOpen()) return false;
 		return !isPause();
 	}
 

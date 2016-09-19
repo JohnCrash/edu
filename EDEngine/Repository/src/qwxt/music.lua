@@ -64,7 +64,12 @@ music=
 				if not music.background.isPlaying then music.background:play() end
 			end
 		else
+			print("music.background="..tostring(music.background))
+			if music.background then
+				print("music.background.isPlaying="..tostring(music.background.isPlaying))
+			end
 			if music.background~=nil and music.background.isPlaying then
+				print("pause")
 				music.background:pause()
 			end
 		end
@@ -91,6 +96,7 @@ music=
 			end
 		else
 			if music.zuoti~=nil and music.zuoti.isPlaying then
+				print("pause")
 				music.zuoti:pause()
 			end
 		end
