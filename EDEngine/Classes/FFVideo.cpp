@@ -84,7 +84,7 @@ namespace ff
 	bool FFVideo::open(const char *url)
 	{
 		_first = true;
-		close();
+	//	close();
 #if _LGH_TEST_
 		url = "rtmp://live.lexinedu.com/ljlx/ljlive?auth_key=1470399831-0-0-1f25acfe6f301c542e4258045f0d6dd2";
 	//	url = "rtmp://192.168.7.157/myapp?carg=1/mystream?sarg=2";

@@ -331,6 +331,7 @@ namespace ff{
 		const char *errmsg;
 		int errcode;
         
+		mutex_t *audio_channel_mutex;
 #if CONFIG_VIDEOTOOLBOX
         /* hwaccel options */
         enum HWAccelID hwaccel_id;

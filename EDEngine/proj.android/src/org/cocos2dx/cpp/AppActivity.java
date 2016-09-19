@@ -944,33 +944,51 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
         return 0;
     }
     
-    public static void audioWriteShortBuffer(short[] buffer) {
-        for (int i = 0; i < buffer.length; ) {
+    public static void audioWriteShortBuffer(short[] buffer)
+    {
+        for (int i = 0; i < buffer.length; )
+        {
             int result = mAudioTrack.write(buffer, i, buffer.length - i);
-            if (result > 0) {
+            if (result > 0)
+            {
                 i += result;
-            } else if (result == 0) {
-                try {
+            }
+            else if (result == 0)
+            {
+                try
+                {
                     Thread.sleep(1);
-                } catch(InterruptedException e) {
+                }
+                catch(InterruptedException e)
+                {
                     // Nom nom
                 }
-            } else {
+            }
+            else
+            {
                 Log.w("SDL", "SDL audio: error return from write(short)");
                 return;
             }
         }
     }
     
-    public static void audioWriteByteBuffer(byte[] buffer) {
-        for (int i = 0; i < buffer.length; ) {
+    public static void audioWriteByteBuffer(byte[] buffer)
+    {
+        for (int i = 0; i < buffer.length; )
+        {
             int result = mAudioTrack.write(buffer, i, buffer.length - i);
-            if (result > 0) {
+            if (result > 0)
+            {
                 i += result;
-            } else if (result == 0) {
-                try {
+            }
+            else if (result == 0)
+            {
+                try
+                {
                     Thread.sleep(1);
-                } catch(InterruptedException e) {
+                }
+                catch(InterruptedException e)
+                {
                     // Nom nom
                 }
             } else {
@@ -980,10 +998,12 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
         }
     }
 
-    public static void audioQuit() {
-        if (mAudioTrack != null) {
+    public static void audioQuit()
+    {
+        if (mAudioTrack != null)
+        {
             mAudioTrack.stop();
             mAudioTrack = null;
         }
-    }	    
+    }	   
 }

@@ -954,6 +954,7 @@ void stream_close(VideoState *is)
 //		is->pscreen2 = NULL;
 //		is->pscreen = NULL;
 //	}
+	destroyMutex( is->audio_channel_mutex );
 	av_free(is);
 }
 
@@ -1358,6 +1359,8 @@ struct AudioChanel
 static AudioChanel* mxAudioChanel[MAXCHANEL];
 static AudioChanel* OpenAudioChanel(VideoState *is, AudioCallBack pcallback)
 {
+	std::unique_lock<mutex_t> lk(*is->audio_channel_mutex);
+
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
 		if (!mxAudioChanel[i])
@@ -1386,6 +1389,7 @@ static void CloseAudioChanel(AudioChanel *pac)
 static int getAudioChanelCount()
 {
 	int count = 0;
+
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
 		if (mxAudioChanel[i])
@@ -1417,6 +1421,7 @@ static void MixAudioFormat(Sint16 *des, Sint16 *src, AudioFormat format,int len,
 
 static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 {
+
 	AudioFormat format = AUDIO_S16SYS;
 	memset(stream, 0, len);
 	Uint8 * mixData = new Uint8[len];
@@ -1427,8 +1432,10 @@ static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 		{
 			pac->_callback(pac->_is, mixData, len);
 			//SDL_MixAudioFormat(stream, mixData, format,len, 128);
-			if (!(pac->_is->seek_req))
+			if (!(pac->_is->seek_req)){
+				std::unique_lock<mutex_t> lk(*pac->_is->audio_channel_mutex);
 				MixAudioFormat((Sint16*)stream, (Sint16*)mixData, format, len / 2, 128);
+			}
 		}
 	}
 	delete [] mixData;
@@ -1461,7 +1468,7 @@ static int initAudio(AudioSpec *desired, AudioSpec *obtained)
 
 static void CloseAudioChanelByVideoState(VideoState *pvs)
 {
-	CloseAudio();
+	std::unique_lock<mutex_t> lk(*pvs->audio_channel_mutex);
 
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
@@ -1479,12 +1486,14 @@ static void CloseAudioChanelByVideoState(VideoState *pvs)
 	*/
 	for (int i = 0; i < MAXCHANEL; i++)
 	{
-		if (mxAudioChanel[i])
+		if (mxAudioChanel[i]){
 			return;
+		}
 	}
 	//all audio chanel is close.
 	
 	gInitAudio = false;
+	CloseAudio();
 }
 
 static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
@@ -3407,6 +3416,7 @@ VideoState *stream_open(const char *filename, AVInputFormat *iformat)
     is->isNewFrame = 0;
     is->pyuv420p.w = -10;
     is->pyuv420p.h = -10;
+	is->audio_channel_mutex = createMutex();
 	do 
 	{
 		/* start video display */
