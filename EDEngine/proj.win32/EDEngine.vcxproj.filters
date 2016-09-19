@@ -13,6 +13,9 @@
     <Filter Include="Classes\lzmq">
       <UniqueIdentifier>{8716b176-51ae-4677-92dd-3d7f7a22e2b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\ffmpeg">
+      <UniqueIdentifier>{caf26593-4007-44ae-babc-82c7c8a1dab7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -63,49 +66,10 @@
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
-    <ClCompile Include="..\Classes\ff.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\FFVideo.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\PlatformAndroid.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\PlatformApple.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDL.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLAudio.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLAudio_mm.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLAudioCVT.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLAudioTypeCVT.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLEvent.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLOverlay.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLSurface.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLThread.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLVideo.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\SDLWindow.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\lua_ffmpeg.cpp">
@@ -144,20 +108,59 @@
     <ClCompile Include="..\Classes\lzmq\ztimer.c">
       <Filter>Classes\lzmq</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cmdutils.cpp">
-      <Filter>Classes</Filter>
+    <ClCompile Include="..\Classes\ff.cpp">
+      <Filter>Classes\ffmpeg</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\ffmpeg.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\ffmpeg_cmd.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\ffmpeg_filter.cpp">
-      <Filter>Classes</Filter>
+      <Filter>Classes\ffmpeg</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\ffmpeg_opt.cpp">
-      <Filter>Classes</Filter>
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg_filter.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ffmpeg_cmd.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\FFVideo.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cmdutils.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDL.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLAudio.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLAudio_mm.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLAudioCVT.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLAudioTypeCVT.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLEvent.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLOverlay.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLSurface.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLThread.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLVideo.cpp">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\SDLWindow.cpp">
+      <Filter>Classes\ffmpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -203,16 +206,7 @@
     <ClInclude Include="..\Classes\IDF.h" />
     <ClInclude Include="..\Classes\RenderTextureEx.h" />
     <ClInclude Include="..\Classes\misc.h" />
-    <ClInclude Include="..\Classes\ff.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\ffdepends.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\PlatformApple.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\SDLImp.h">
       <Filter>Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\acr.h">
@@ -220,6 +214,15 @@
     </ClInclude>
     <ClInclude Include="..\Classes\lua_thread.h">
       <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ff.h">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ffdepends.h">
+      <Filter>Classes\ffmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\SDLImp.h">
+      <Filter>Classes\ffmpeg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

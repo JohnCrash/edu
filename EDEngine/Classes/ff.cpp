@@ -1427,7 +1427,7 @@ static void sdl_mx_audio_callback(void *pd, Uint8 *stream, int len)
 		{
 			pac->_callback(pac->_is, mixData, len);
 			//SDL_MixAudioFormat(stream, mixData, format,len, 128);
-			if (!(pac->_is->step || pac->_is->seek_req))
+			if (!(pac->_is->seek_req))
 				MixAudioFormat((Sint16*)stream, (Sint16*)mixData, format, len / 2, 128);
 		}
 	}

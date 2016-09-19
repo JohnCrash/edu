@@ -45,30 +45,34 @@ local function playStream( filename,event_func )
 			
 			if state == 1 then
 				if play_state ~= 2 and (as.isPlaying and not as.isEnd) then
-					play_state = 2
+					play_state = 2 --playing
 					return true
 				elseif play_state ~= 3 and (as.isPause and not as.isEnd) then
-					play_state = 3
+					play_state = 3 --paused
 					eventFunc(3)
 				elseif play_state ~= 4 and as.isEnd then
-					play_state = 4
+					play_state = 4 --end
+					state = 0
 					eventFunc(4)
 				end
 			end
 			if play_state == 2 then
 				eventFunc(5)
 			end
-			
+			--[[
 			if _texture and data then
+				print("updateWithData")
 				_texture:updateWithData(data,0,0,as.width,as.height)
 			elseif not _texture and data then
 				if as.hasVideo then
+					print("cc.Texture2D:new")
 					_texture = cc.Texture2D:new()
 					_texture:retain()
 					_texture:initWithData(data,as.width,as.height)		
 					eventFunc(6,_texture)
 				end				
-			end			
+			end	
+			--]]
 			return true
 		end,1/30)
 		_allStreams[as] = as
@@ -149,6 +153,10 @@ local onResume = cc.EventListenerCustom:create("event_come_to_foreground",
 directorEventDispatcher:addEventListenerWithFixedPriority(onPause,1)
 directorEventDispatcher:addEventListenerWithFixedPriority(onResume,1)
 
+local function version()
+	return 2
+end
+
 return {
 	STATE_CLOSE = 0,
 	STATE_OPEN = 1,
@@ -164,4 +172,5 @@ return {
 	stopAllGroup = stopAllGroup,
 	getSoundGroup = getSoundGroup,
 	isSupport = isSupport,
+	version = version,
 }

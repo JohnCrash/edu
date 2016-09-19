@@ -744,7 +744,7 @@ local function attachment_ui_player( t )
 								as:seek(0)
 								as:play()
 								play_but:setVisible(false)
-								pause_but:setVisible(true)
+								pause_but:setVisible(true)								
 							end
 						end,'began')
 						uikits.event(pause_but,function(sender)

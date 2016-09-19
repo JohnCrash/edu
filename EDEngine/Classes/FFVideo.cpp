@@ -226,7 +226,7 @@ namespace ff
 
 		VideoState* _vs = (VideoState*)_ctx;
 		if (_vs == NULL) return false;
-		return _vs->seek_req || _vs->step;
+		return _vs->seek_req;
 	}
 
 	bool FFVideo::isPlaying() const
