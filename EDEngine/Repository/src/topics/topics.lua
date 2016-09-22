@@ -289,7 +289,8 @@ end
 
 local function add_topics_image_resourec( e )
 	if e.item_id then
-		local host = kits.getImageDownloadServer()
+		--local host = kits.getImageDownloadServer()
+		local host = 'lx-image.oss-cn-beijing.aliyuncs.com'
 		local uri = "http://"..host.."/item_preview/"..e.item_id.."_0.jpg"
 		e.topics_image_name = e.item_id..'.jpg'
 		table.insert(e.resource_cache.urls,{url=uri,filename=e.item_id..'.jpg'})

@@ -78,6 +78,8 @@ function enableDebug( b )
 		mode = 0
 	end
 end
+print("######config debug######")
+print( kits.config("debug","get") )
 enableDebug( kits.config("debug","get") )
 --enableDebug( 1 )
 --android 返回键
@@ -245,7 +247,7 @@ elseif app and string.len(app)>0 then
 	}
 else
 	local ae = require "AppEntry"
-	mode = 2
+	--mode = 2
 	cc.Director:getInstance():runWithScene( ae.create() )
 end
 
