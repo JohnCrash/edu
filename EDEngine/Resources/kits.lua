@@ -29,7 +29,7 @@ local function my_log( a )
 	local msg = tostring(a)
 	if table.maxn(logs) > MAX_LOG then
 		for i=1,LOW_LOG do
-			table.remove(logs,i)
+			table.remove(logs,1)
 		end
 	end
 	table.insert(logs,msg)

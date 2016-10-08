@@ -66,12 +66,6 @@
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
-    <ClCompile Include="..\Classes\PlatformAndroid.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\PlatformApple.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\lua_ffmpeg.cpp">
       <Filter>Classes</Filter>
     </ClCompile>

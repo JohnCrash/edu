@@ -171,8 +171,6 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\MD5.cpp" />
     <ClCompile Include="..\Classes\misc.cpp" />
     <ClCompile Include="..\Classes\Platform.cpp" />
-    <ClCompile Include="..\Classes\PlatformAndroid.cpp" />
-    <ClCompile Include="..\Classes\PlatformApple.cpp" />
     <ClCompile Include="..\Classes\PlatformWnd32.cpp" />
     <ClCompile Include="..\Classes\RenderTextureEx.cpp" />
     <ClCompile Include="..\Classes\SDL.cpp" />

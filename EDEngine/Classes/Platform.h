@@ -32,6 +32,7 @@ extern std::string g_ExternalStorageDirectory;
 extern std::string g_RecordFile;
 extern std::string g_Orientation;
 
+void buy(const char * str);
 void showBaiduVoice();
 void closeBaiduVoice();
 void showBaiduVoiceConfigure();

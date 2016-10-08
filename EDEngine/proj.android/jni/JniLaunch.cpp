@@ -303,6 +303,21 @@ bool VoiceIsPlaying(const char *pszPathName)
 	return nRet ? true : false;
 }
 
+void buy(const char * str)
+{
+	JniMethodInfo jmi;
+
+	if (str==NULL) str="";
+
+	int nRet=0;
+	if (JniHelper::getStaticMethodInfo(jmi,CLASS_NAME,"Buy","(Ljava/lang/String;)V"))
+	{
+		jstring itemName=jmi.env->NewStringUTF(str);
+		jmi.env->CallStaticVoidMethod(jmi.classID,jmi.methodID,itemName);
+		jmi.env->DeleteLocalRef(jmi.classID);
+		jmi.env->DeleteLocalRef(itemName);
+    }
+}
 MySpaceEnd
 
 extern "C" {

@@ -139,6 +139,7 @@ namespace ff
 			{
 					int i, left;
 
+					if (!_this->hidden)return;
 					do {
 						left = NUM_BUFFERS;
 						for (i = 0; i < NUM_BUFFERS; ++i) {

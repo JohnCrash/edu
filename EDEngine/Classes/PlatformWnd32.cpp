@@ -955,5 +955,10 @@ bool VoiceIsPlaying(const char *pszPathName)
 	if (s_pVoicePlay == NULL) return false;
 	return s_pVoicePlay->IsPlaying(pszPathName);
 }
+
+void buy(const char * str)
+{
+
+}
 MySpaceEnd
 #endif

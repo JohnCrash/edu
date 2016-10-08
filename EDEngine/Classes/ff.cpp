@@ -3094,8 +3094,8 @@ static int read_thread(void *arg)
 
    // My_log(0,0,"ic=%X , metadata=%X ",ic,ic->metadata);
 
-	if (!window_title && (t = av_dict_get(ic->metadata, "title", NULL, 0)))
-		window_title = av_asprintf("%s - %s", t->value, is->filename);
+	//if (!window_title && (t = av_dict_get(ic->metadata, "title", NULL, 0)))
+	//	window_title = av_asprintf("%s - %s", t->value, is->filename);
 
 	/* if seeking requested, we execute it */
 	if (start_time != AV_NOPTS_VALUE) {

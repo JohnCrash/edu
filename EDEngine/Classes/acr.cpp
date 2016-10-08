@@ -1,6 +1,6 @@
 #ifdef WIN32
 	#include <Windows.h>
-	//#include <dbghelp.h>  
+	#include <dbghelp.h>  
 	#include <shellapi.h>  
 	#include <shlobj.h>  
 #elif __ANDROID__
@@ -142,6 +142,51 @@ static int mem2str(void *ptr, int count, char *str, int strlen){
 	}
 	return s - str;
 }
+
+void make_minidump(EXCEPTION_POINTERS* e,char *path)
+{
+	auto hDbgHelp = LoadLibraryA("dbghelp");
+	if (hDbgHelp == nullptr)
+		return;
+	auto pMiniDumpWriteDump = (decltype(&MiniDumpWriteDump))GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
+	if (pMiniDumpWriteDump == nullptr)
+		return;
+
+	char name[MAX_PATH];
+	{
+	//	auto nameEnd = name + GetModuleFileNameA(GetModuleHandleA(0), name, MAX_PATH);
+		SYSTEMTIME t;
+		GetSystemTime(&t);
+	//	wsprintfA(nameEnd - strlen(".exe"),
+	//		"_%4d%02d%02d_%02d%02d%02d.dmp",
+	//	t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+		sprintf(name, "%s\\ljdata\\EDEngine\\crash_%4d%02d%02d_%02d%02d%02d.dmp",
+			path, t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+	}
+
+	auto hFile = CreateFileA(name, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if (hFile == INVALID_HANDLE_VALUE)
+		return;
+
+	MINIDUMP_EXCEPTION_INFORMATION exceptionInfo;
+	exceptionInfo.ThreadId = GetCurrentThreadId();
+	exceptionInfo.ExceptionPointers = e;
+	exceptionInfo.ClientPointers = FALSE;
+
+	auto dumped = pMiniDumpWriteDump(
+		GetCurrentProcess(),
+		GetCurrentProcessId(),
+		hFile,
+		MINIDUMP_TYPE(MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory),
+		e ? &exceptionInfo : nullptr,
+		nullptr,
+		nullptr);
+
+	CloseHandle(hFile);
+
+	return;
+}
+
 /*
  * windows 结构化异常处理函数
  */
@@ -224,54 +269,8 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *pExceptionPoi
 	 * 产生一个mini crash dump 文件，但是这需要dbghelp.dll的支持
 	 * 并且mini dump文件一般都140k目前暂时去掉
 	 */
-	//生成 mini crash dump  
-	/*
-	BOOL bMiniDumpSuccessful;
-	WCHAR szDocPath[MAX_PATH];
-	WCHAR szPath[MAX_PATH];
-	WCHAR szFileName[MAX_PATH];
-	WCHAR* szAppName = L"AppName";
-	WCHAR* szVersion = L"v1.0";
-	DWORD dwBufferSize = MAX_PATH;
-	HANDLE hDumpFile;
-	SYSTEMTIME stLocalTime;
-	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
-	GetLocalTime(&stLocalTime);
-	GetTempPath(dwBufferSize, szPath);
-	wsprintf(szFileName, L"%s%s", szPath, szAppName);
-	CreateDirectory(szFileName, NULL);
-	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, szDocPath);
-	wsprintf(szFileName,L"%s\\ljdata\\EDEngine\\crash.dump",
-		szDocPath);
-	hDumpFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
-
-	MINIDUMP_USER_STREAM UserStream[2];
-	MINIDUMP_USER_STREAM_INFORMATION UserInfo;
-	UserInfo.UserStreamCount = 1;
-	UserInfo.UserStreamArray = UserStream;
-	UserStream[0].Type = CommentStreamW;
-	UserStream[0].BufferSize = lstrlenW(strBuild)*sizeof(WCHAR);
-	UserStream[0].Buffer = strBuild;
-	UserStream[1].Type = CommentStreamW;
-	UserStream[1].BufferSize = lstrlenW(strError)*sizeof(WCHAR);
-	UserStream[1].Buffer = strError;
-
-	ExpParam.ThreadId = GetCurrentThreadId();
-	ExpParam.ExceptionPointers = pExceptionPointers;
-	ExpParam.ClientPointers = TRUE;
-
-	MINIDUMP_TYPE MiniDumpWithDataSegs = (MINIDUMP_TYPE)(MiniDumpNormal
-		| MiniDumpWithHandleData
-		| MiniDumpWithUnloadedModules
-		| MiniDumpWithIndirectlyReferencedMemory
-		| MiniDumpScanMemory
-		| MiniDumpWithProcessThreadData
-		| MiniDumpWithThreadInfo);
-	bMiniDumpSuccessful = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
-		hDumpFile, MiniDumpWithDataSegs, &ExpParam, NULL, NULL);
-	*/
-		return EXCEPTION_CONTINUE_SEARCH; //或者 EXCEPTION_EXECUTE_HANDLER 关闭程序  
+	make_minidump(pExceptionPointers, szDocPath);
+	return EXCEPTION_CONTINUE_SEARCH; //或者 EXCEPTION_EXECUTE_HANDLER 关闭程序  
 }
 #elif __ANDROID__
 void _makeNativeCrashReport(const char *reason, struct siginfo *siginfo, void *sigcontext) {

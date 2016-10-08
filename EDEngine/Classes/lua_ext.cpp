@@ -798,6 +798,14 @@ int cc_setFrameColor(lua_State *L)
 #endif
 }
 
+int lua_buy(lua_State *L)
+{
+	if (lua_isstring(L, 1)){
+		buy(luaL_checkstring(L, 1));
+	}
+	return 0;
+}
+
 static bool utf8_check_is_valid(const std::string& string)
 {
 	int c, i, ix, n, j;
@@ -864,7 +872,9 @@ void luaopen_lua_exts(lua_State *L)
 	lua_register(L, "cc_acr_log", cc_acr_log);
 	lua_register(L, "cc_setFrameColor", cc_setFrameColor);
 	lua_register(L, "cc_isutf8", lua_is_utf8);
+	lua_register(L, "cc_buy", lua_buy);
     lua_getglobal(L, "package");
+
     lua_getfield(L, -1, "preload");
     for (; lib->func; lib++)
     {

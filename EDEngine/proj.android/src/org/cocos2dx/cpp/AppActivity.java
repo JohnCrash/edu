@@ -435,6 +435,11 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		return 0;
 	}
 	
+	public static void Buy(String itemName)
+	{
+		
+	}
+	
 	public static int VoiceStopPlay()
 	{
 		if (s_bPlaying)
