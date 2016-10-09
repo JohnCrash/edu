@@ -544,8 +544,8 @@ function AppEntry:init()
 				--login.set_selector(48) --省局长
 				--login.set_selector(49) --李杰家长
 				--login.set_selector(50) 
-				--login.set_selector(52) 
-				login.set_selector(53) 
+				login.set_selector(54) 
+				--login.set_selector(53) 
 				local ss = require "calc/loading"
 				return ss.create()
 				end}

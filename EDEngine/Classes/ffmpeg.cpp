@@ -34,6 +34,8 @@
 #include "ffmpeg_cxx.h"
 #include "cmdutils_cxx.h"
 
+#define  HAVE_GETPROCESSMEMORYINFO 0
+
 #if HAVE_IO_H
 #include <io.h>
 #endif

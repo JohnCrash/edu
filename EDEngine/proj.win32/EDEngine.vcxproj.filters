@@ -16,6 +16,9 @@
     <Filter Include="Classes\ffmpeg">
       <UniqueIdentifier>{caf26593-4007-44ae-babc-82c7c8a1dab7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\live">
+      <UniqueIdentifier>{94c4fcd5-2558-4fde-a1a9-471578cc4390}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -155,6 +158,27 @@
     </ClCompile>
     <ClCompile Include="..\Classes\SDLWindow.cpp">
       <Filter>Classes\ffmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\cap_vfw.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\dec.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\ffdec.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\ffenc.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\ffraw.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\live.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\transcode.cpp">
+      <Filter>Classes\live</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
