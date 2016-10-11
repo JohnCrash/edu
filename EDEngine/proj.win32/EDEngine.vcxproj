@@ -71,7 +71,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\pthread\Pre-built.2\include;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)external\zeromq\prebuilt\win32;$(EngineRoot)external\zeromq\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\lua</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\pthread\Pre-built.2\include;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)external\zeromq\prebuilt\win32;$(EngineRoot)external\zeromq\include;$(EngineRoot)extensions;..\Classes;..\Classes\live;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\lua</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>USE_ZMQ;WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;COCOS2D_DEBUG=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;USE_WIN32_CONSOLE;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -111,7 +111,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\lua;$(EngineRoot)external\pthread\Pre-built.2\include;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\zeromq\include;$(EngineRoot)external\zeromq\prebuilt\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\chipmunk\include\chipmunk;$(EngineRoot)cocos\audio\include;$(EngineRoot)external;$(EngineRoot)external\lua;$(EngineRoot)external\pthread\Pre-built.2\include;$(EngineRoot)external\ffmpeg\prebuilt\win32;$(EngineRoot)external\ffmpeg\include;$(EngineRoot)extensions;..\Classes;..\Classes\live;..;%(AdditionalIncludeDirectories);$(EngineRoot)cocos\scripting\lua-bindings\manual;$(EngineRoot)external\lua\lua;$(EngineRoot)external\lua\tolua;$(EngineRoot)cocos\editor-support;$(EngineRoot)cocos\base;$(EngineRoot);$(ProjectDir)\..\..\pthread\Pre-built.2\include;$(EngineRoot)external\glfw3\include;$(EngineRoot)external\zeromq\include;$(EngineRoot)external\zeromq\prebuilt\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>USE_ZMQ;WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLFW_EXPOSE_NATIVE_WIN32;GLFW_EXPOSE_NATIVE_WGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -210,6 +210,14 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\ffdepends.h" />
     <ClInclude Include="..\Classes\Files.h" />
     <ClInclude Include="..\Classes\IDF.h" />
+    <ClInclude Include="..\Classes\live\cap.h" />
+    <ClInclude Include="..\Classes\live\ffcommon.h" />
+    <ClInclude Include="..\Classes\live\ffdec.h" />
+    <ClInclude Include="..\Classes\live\ffenc.h" />
+    <ClInclude Include="..\Classes\live\ffmpeg_jni.h" />
+    <ClInclude Include="..\Classes\live\ffraw.h" />
+    <ClInclude Include="..\Classes\live\live.h" />
+    <ClInclude Include="..\Classes\live\transcode.h" />
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
     <ClInclude Include="..\Classes\lua_ljshell.h" />

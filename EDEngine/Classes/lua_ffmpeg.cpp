@@ -1,6 +1,11 @@
 #include "lua_ffmpeg.h"
 #include "cocos2d.h"
 #include "ff.h"
+#include "ffdec.h"
+#include "ffenc.h"
+#include "live.h"
+#include "CCLuaStack.h"
+#include "CCLuaEngine.h"
 
 USING_NS_CC;
 
@@ -288,6 +293,337 @@ extern "C" {
 		{ "new", new_ffmpeg },
 		{ NULL, NULL }
 	};
+	
+	static int _currentRef = LUA_REFNIL;
+	static int _prevResult = 0;
+	struct tcf{
+		ff::TranCode tc;
+		float p;
+		tcf(ff::TranCode _tc, float _p) :tc(_tc), p(_p){}
+	};
+	static void mainThreadProc(void *ptr)
+	{
+		cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+		if (pEngine&&_currentRef != LUA_REFNIL&&ptr)
+		{
+			cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+			if (pLuaStack)
+			{
+				lua_State *L = pLuaStack->getLuaState();
+				if (L){
+					tcf * pcf = (tcf*)ptr;
+					lua_rawgeti(L, LUA_REGISTRYINDEX, _currentRef);
+					lua_pushinteger(L, pcf->tc);
+					lua_pushnumber(L, pcf->p);
+					delete pcf;
+					_prevResult = pLuaStack->executeFunction(2);
+				}
+			}
+		}
+	}
+	
+	static int tcbc(ff::TranCode tc, float p)
+	{
+		cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+		if (pDirector)
+		{
+			auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+			if (scheduler)
+			{
+				if (pDirector == cocos2d::Director::getInstance()){
+					tcf * pcf = new tcf(tc, p);
+
+					scheduler->performFunctionInCocosThread_ext(mainThreadProc, (void *)pcf);
+				}
+				return _prevResult;
+			}
+		}
+		return _prevResult;
+	}
+
+	//lua调用ffmpeg命令行,注意：函数每次只能调用一个
+	static int cc_ffmpeg(lua_State *L)
+	{
+		const char * cmd = luaL_checkstring(L, 1);
+		
+		if (_currentRef != LUA_REFNIL){
+			lua_unref(L, _currentRef);
+			_currentRef = LUA_REFNIL;
+		}
+		if (lua_isfunction(L, 2)){
+			lua_pushvalue(L, 2);
+			_currentRef = lua_ref(L, 1);
+		}
+		_prevResult = 0;
+		lua_pushinteger(L, ff::ffmpeg(cmd, tcbc));
+		
+		return 1;
+	}
+	
+	static int cc_camdevices(lua_State *L)
+	{
+		ff::AVDevice caps[8];
+		av_ff_init();
+		int count = ffCapDevicesList(caps, 8);
+		lua_newtable(L);
+		for (int m = 0; m < count; m++){
+			lua_newtable(L);
+			for (int i = 0; i < caps[m].capability_count; i++){
+				lua_pushstring(L, "show_name");
+				lua_pushstring(L, caps[m].name);
+				lua_settable(L, -3);
+				lua_pushstring(L, "name");
+				lua_pushstring(L, caps[m].alternative_name);
+				lua_settable(L, -3);
+				lua_pushstring(L, "type");
+				if (caps[m].type == ff::AV_DEVICE_VIDEO){
+					lua_pushstring(L, "video");
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_w");
+					lua_pushinteger(L, caps[m].capability[i].video.min_w);
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_h");
+					lua_pushinteger(L, caps[m].capability[i].video.min_h);
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_fps");
+					lua_pushinteger(L, caps[m].capability[i].video.min_fps);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_w");
+					lua_pushinteger(L, caps[m].capability[i].video.max_w);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_h");
+					lua_pushinteger(L, caps[m].capability[i].video.max_h);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_fps");
+					lua_pushinteger(L, caps[m].capability[i].video.max_fps);
+					lua_settable(L, -3);
+					lua_pushstring(L, "pix_format");
+					lua_pushstring(L, caps[m].capability[i].video.pix_format);
+					lua_settable(L, -3);
+					lua_pushstring(L, "codec_name");
+					lua_pushstring(L, caps[m].capability[i].video.codec_name);
+					lua_settable(L, -3);
+				}
+				else{
+					lua_pushstring(L, "audio");
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_ch");
+					lua_pushinteger(L, caps[m].capability[i].audio.min_ch);
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_bit");
+					lua_pushinteger(L, caps[m].capability[i].audio.min_bit);
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_rate");
+					lua_pushinteger(L, caps[m].capability[i].audio.min_rate);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_ch");
+					lua_pushinteger(L, caps[m].capability[i].audio.max_ch);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_bit");
+					lua_pushinteger(L, caps[m].capability[i].audio.max_bit);
+					lua_settable(L, -3);
+					lua_pushstring(L, "max_rate");
+					lua_pushinteger(L, caps[m].capability[i].audio.max_rate);
+					lua_settable(L, -3);
+					lua_pushstring(L, "sample_format");
+					lua_pushstring(L, caps[m].capability[i].audio.sample_format);
+					lua_settable(L, -3);
+					lua_pushstring(L, "codec_name");
+					lua_pushstring(L, caps[m].capability[i].audio.codec_name);
+					lua_settable(L, -3);
+				}
+			}
+			lua_rawseti(L,-2,m+1);
+		}
+		return 1;
+	}
+
+	static int _liveRef = LUA_REFNIL;
+	static std::thread * _liveThread = NULL;
+	static void liveProc(void *ptr)
+	{
+		cocos2d::LuaEngine *pEngine = cocos2d::LuaEngine::getInstance();
+		if (pEngine&&_liveRef != LUA_REFNIL&&ptr)
+		{
+			cocos2d::LuaStack *pLuaStack = pEngine->getLuaStack();
+			if (pLuaStack)
+			{
+				lua_State *L = pLuaStack->getLuaState();
+				if (L){
+					ff::liveState * pls = (ff::liveState *)ptr;
+					lua_rawgeti(L, LUA_REGISTRYINDEX, _liveRef);
+					lua_pushinteger(L, pls->state);
+					lua_pushnumber(L, (double)pls->nframes);
+					lua_pushnumber(L, (double)pls->ntimes);
+					if (pls->nerror > 0){
+						lua_newtable(L);
+						for (int i = 0; i < pls->nerror; i++){
+							lua_pushstring(L, pls->errorMsg[i]);
+							lua_rawseti(L, -2, i + 1);
+						}
+						_prevResult = pLuaStack->executeFunction(4);
+					}
+					else{
+						_prevResult = pLuaStack->executeFunction(3);
+					}
+					
+					if (pls->state == ff::LIVE_END){
+						lua_unref(L, _liveRef);
+						_liveRef = LUA_REFNIL;
+						if (_liveThread){
+							_liveThread->join();
+							delete _liveThread;
+							_liveThread = NULL;
+						}
+					}
+					delete pls;
+				}
+			}
+		}
+	}
+
+	static int liveCallback(ff::liveState *pls)
+	{
+		cocos2d::Director *pDirector = cocos2d::Director::getInstance();
+		if (pDirector && pls)
+		{
+			auto scheduler = cocos2d::Director::getInstance()->getScheduler();
+			if (scheduler)
+			{
+				if (pDirector == cocos2d::Director::getInstance()){
+					ff::liveState * pc = new ff::liveState();
+					*pc = *pls;
+					scheduler->performFunctionInCocosThread_ext(liveProc, (void *)pc);
+				}
+				return _prevResult;
+			}
+		}
+		return _prevResult;
+	}
+
+	static int cc_live(lua_State *L)
+	{
+		int ret = 0;
+		av_ff_init();
+		if (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
+			const char * file;
+			const char * video_name;
+			const char * audio_name;
+			const char * pix_fmt;
+			const char * sample_fmt;
+			int w, h, fps,videoBitRate;
+			int freq, audioBitRate;
+			int ow, oh, ofps;
+
+			lua_pushstring(L, "address");
+			lua_gettable(L, 1);
+			file = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "cam_name");
+			lua_gettable(L, 1);
+			video_name = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "phone_name");
+			lua_gettable(L, 1);
+			audio_name = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "pix_fmt");
+			lua_gettable(L, 1);
+			pix_fmt = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "sample_fmt");
+			lua_gettable(L, 1);
+			sample_fmt = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "cam_w");
+			lua_gettable(L, 1);
+			w = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "cam_h");
+			lua_gettable(L, 1);
+			h = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "cam_fps");
+			lua_gettable(L, 1);
+			fps = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "video_bitrate");
+			lua_gettable(L, 1);
+			videoBitRate = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "audio_bitrate");
+			lua_gettable(L, 1);
+			audioBitRate = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "sample_freq");
+			lua_gettable(L, 1);
+			freq = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_w");
+			lua_gettable(L, 1);
+			ow = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_h");
+			lua_gettable(L, 1);
+			oh = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_fps");
+			lua_gettable(L, 1);
+			ofps = luaL_checkint(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushvalue(L, 2);
+			_liveRef = lua_ref(L, 1);
+			_prevResult = 0;
+
+			_liveThread = new std::thread([](const char *file, const char *video_name, 
+				int w, int h, int fps, const char *pix_fmt,int videoBitRate,
+				const char *audio_name,int freq,const char* sample_fmt,int audioBitRate,
+				int ow,int oh,int ofps){
+				ff::liveOnRtmp(file,
+					video_name, w, h, fps, pix_fmt, videoBitRate,
+					audio_name, freq, sample_fmt, audioBitRate,
+					ow, oh, ofps,
+					liveCallback);
+			}, file, video_name, w, h, fps, pix_fmt, videoBitRate,
+				audio_name, freq, sample_fmt, audioBitRate,
+				ow, oh, ofps);
+		}
+		else{
+			lua_unref(L, _liveRef);
+			_liveRef = LUA_REFNIL;
+		}
+		lua_pushboolean(L, ret);
+		return 1;
+	}
+
+	static int cc_camopen(lua_State *L)
+	{
+		return 0;
+	}
+
+	static int cc_camclose(lua_State *L)
+	{
+		return 0;
+	}
+
+	static int cc_camrefresh(lua_State *L)
+	{
+		return 0;
+	}
 
 	static void set_info(lua_State *L)
 	{
@@ -304,6 +640,14 @@ extern "C" {
 
 	int luaopen_ffmpeg(lua_State *L)
 	{
+		//全局函数
+		lua_register(L, "cc_ffmpeg", cc_ffmpeg);
+		lua_register(L, "cc_camdevices", cc_camdevices);
+		lua_register(L, "cc_live", cc_live);
+		lua_register(L, "cc_camopen", cc_camopen);
+		lua_register(L, "cc_camclose", cc_camclose);
+		lua_register(L, "cc_camrefresh", cc_camrefresh);
+
 		createmeta(L);
 		luaL_openlib(L, 0, lua_ffmpeg_methods, 0);
 		lua_newtable(L);

@@ -226,6 +226,54 @@ local function recv( socket )
 	end
 	return nil,err
 end
+
+local function cap_devices()
+	require  "ff"
+	local t = cc_camdevices()
+	kits.logTable(t)
+	
+	local video_w,video_h,video_fps,video_name,video_fmt,phone_name,phone_freq
+	for i,v in pairs(t) do
+		if v.type=='video' and not video_name then
+			video_name = v.name
+			video_w = v.max_w
+			video_h = v.max_h
+			video_fps = v.max_fps
+			video_fmt = v.pix_format
+		elseif not phone_name then
+			phone_name = v.name
+			phone_freq = v.max_rate
+		end
+	end
+
+	cc_live(
+		{
+			address='rtmp://192.168.7.157/myapp/mystream',
+			cam_name=video_name,
+			cam_w=video_w,
+			cam_h=video_h,
+			cam_fps = video_fps,
+			video_bitrate=1024*1024,
+			pix_fmt=video_fmt,
+			phone_name=phone_name,
+			sample_freq=phone_freq,
+			sample_fmt='s16',
+			audio_bitrate=64*1024,
+			live_w = 640,
+			live_h = 480,
+			live_fps = 30,
+		},
+		function(state,nframes,ntimes,errors)
+			if not errors then
+				print(string.format("%d - %d - %d",state,nframes,ntimes))
+			else
+				kits.logTable(errors)
+			end
+			return 0
+		end
+	)
+end
+
 --[[
 local socket = require "socket"
 local http = require "socket.http"
@@ -679,10 +727,10 @@ function AppEntry:init()
 							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
 						end)
 			end}
-	local resetwindow = uikits.button{caption='zmq test',x=264*scale,y = 164*scale + 4*item_h,
+	local resetwindow = uikits.button{caption='Cap devices',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			zmq_test()
+			cap_devices()
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
