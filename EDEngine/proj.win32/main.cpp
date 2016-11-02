@@ -60,6 +60,7 @@ void ParseCommand(LPTSTR lpCmdLine)
 	CCLOG("launch=%s", g_Launch.c_str());
 	CCLOG("orientation=%s", g_Orientation.c_str());
 }
+extern "C" void release_ffmpeg();
 MySpaceEnd
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -94,6 +95,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		CCLOG("EDEngine is launch...");
 		ret = Application::getInstance()->run();
 
+		release_ffmpeg();
 		//reload lua engine
 		LuaEngine * pEngine = LuaEngine::getInstance();
 		ScriptEngineManager::getInstance()->setScriptEngine(nullptr);

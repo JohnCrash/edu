@@ -10,7 +10,6 @@ extern "C" {
 #include <lauxlib.h>
 
 	int luaopen_ffmpeg(lua_State *L);
-
 #if __cplusplus
 }
 #endif

@@ -226,7 +226,7 @@ local function recv( socket )
 	end
 	return nil,err
 end
-
+local _stopCap = false
 local function cap_devices()
 	require  "ff"
 	local t = cc_camdevices()
@@ -269,6 +269,7 @@ local function cap_devices()
 			else
 				kits.logTable(errors)
 			end
+			if _stopCap then return 1 end
 			return 0
 		end
 	)
@@ -586,13 +587,13 @@ function AppEntry:init()
 				--login.set_selector(36) --李杰
 				--login.set_selector(42) --刘
 				--login.set_selector(37) --刘
-				--login.set_selector(38) --李杰老师
+				login.set_selector(56) --李杰老师
 				--login.set_selector(39) --家长
 				--login.set_selector(40)
 				--login.set_selector(48) --省局长
 				--login.set_selector(49) --李杰家长
 				--login.set_selector(50) 
-				login.set_selector(54) 
+				--login.set_selector(55) 
 				--login.set_selector(53) 
 				local ss = require "calc/loading"
 				return ss.create()
@@ -616,7 +617,7 @@ function AppEntry:init()
 				--login.set_selector(18) --杨艳波
 				--login.set_selector(20) --张泳
 				--login.set_selector(43)--李四
-				login.set_selector(47)--
+				login.set_selector(56)--
 				--login.set_selector(22) --未来之星校长
 				--login.set_selector(23) --大小校长
 				--login.set_selector(24) --田老师
@@ -703,33 +704,15 @@ function AppEntry:init()
 				return ss.create()
 				end}			
 		end)			
-	local playsound = uikits.button{caption='Test Class',x=464*scale,y = 164*scale + 4*item_h,
+	local playsound = uikits.button{caption='Stop cap',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				local factory = require "factory"
-				local base = require "base"
-				local uuidClassSearcher = '621d7bfe3db93cbdcdb4c1f47a79f336'
-				local progressbox = factory.create(base.ProgressBox)
-				progressbox:open()
-				progressbox:setProgress(0)	
-				factory.import({uuidClassSearcher},
-						function(b,err)
-							progressbox:close()
-							if b then
-								local searcher = factory.create(uuidClassSearcher)
-								searcher:push()
-							else
-									kits.log("")
-							end
-						end,
-						function(d,txt)
-							progressbox:setProgress(d)
-							progressbox:setText(tostring(math.floor(d*100))..'% '..tostring(txt))						
-						end)
+				_stopCap = true
 			end}
 	local resetwindow = uikits.button{caption='Cap devices',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
+			_stopCap = false
 			cap_devices()
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,

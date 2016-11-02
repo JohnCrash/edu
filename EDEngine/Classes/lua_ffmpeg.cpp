@@ -293,7 +293,7 @@ extern "C" {
 		{ "new", new_ffmpeg },
 		{ NULL, NULL }
 	};
-	
+
 	static int _currentRef = LUA_REFNIL;
 	static int _prevResult = 0;
 	struct tcf{
@@ -355,7 +355,10 @@ extern "C" {
 			_currentRef = lua_ref(L, 1);
 		}
 		_prevResult = 0;
-		lua_pushinteger(L, ff::ffmpeg(cmd, tcbc));
+
+		int ret = ff::ffmpeg(cmd, tcbc);
+
+		lua_pushinteger(L,ret);
 		
 		return 1;
 	}
@@ -481,11 +484,11 @@ extern "C" {
 			}
 		}
 	}
-
+	static cocos2d::Director *_pDirector = NULL;
 	static int liveCallback(ff::liveState *pls)
 	{
 		cocos2d::Director *pDirector = cocos2d::Director::getInstance();
-		if (pDirector && pls)
+		if (pDirector && pls && pDirector == _pDirector)
 		{
 			auto scheduler = cocos2d::Director::getInstance()->getScheduler();
 			if (scheduler)
@@ -493,10 +496,17 @@ extern "C" {
 				if (pDirector == cocos2d::Director::getInstance()){
 					ff::liveState * pc = new ff::liveState();
 					*pc = *pls;
+					pls->nerror = 0;
 					scheduler->performFunctionInCocosThread_ext(liveProc, (void *)pc);
 				}
 				return _prevResult;
 			}
+		}
+		else{
+			_prevResult = 0;
+			_liveThread = NULL;
+			_liveRef = LUA_REFNIL;
+			return 1;
 		}
 		return _prevResult;
 	}
@@ -589,6 +599,7 @@ extern "C" {
 			_liveRef = lua_ref(L, 1);
 			_prevResult = 0;
 
+			_pDirector = cocos2d::Director::getInstance();
 			_liveThread = new std::thread([](const char *file, const char *video_name, 
 				int w, int h, int fps, const char *pix_fmt,int videoBitRate,
 				const char *audio_name,int freq,const char* sample_fmt,int audioBitRate,
@@ -601,6 +612,7 @@ extern "C" {
 			}, file, video_name, w, h, fps, pix_fmt, videoBitRate,
 				audio_name, freq, sample_fmt, audioBitRate,
 				ow, oh, ofps);
+
 		}
 		else{
 			lua_unref(L, _liveRef);
@@ -623,6 +635,14 @@ extern "C" {
 	static int cc_camrefresh(lua_State *L)
 	{
 		return 0;
+	}
+
+	void release_ffmpeg()
+	{
+		_prevResult = 0;
+		_liveThread = NULL;
+		_liveRef = LUA_REFNIL;
+		_currentRef = LUA_REFNIL;
 	}
 
 	static void set_info(lua_State *L)

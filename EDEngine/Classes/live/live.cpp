@@ -170,6 +170,15 @@ namespace ff
 		}
 		release_raw(praw);
 	}
+	static liveState state;
+	static void log_callback(void * acl, int level, const char *format, va_list arg)
+	{
+		if (level == AV_LOG_ERROR || level == AV_LOG_FATAL){
+			if (state.nerror<4)
+				snprintf(state.errorMsg[state.nerror++], 256, format, arg);
+		}
+		av_log_default_callback(acl, level, format, arg);
+	}
 
 	void liveOnRtmp(
 		const char * rtmp_publisher,
@@ -184,30 +193,17 @@ namespace ff
 		AVCodecID vid, aid;
 		AVPixelFormat pixFmt = av_get_pix_fmt(pix_fmt_name);
 		AVSampleFormat sampleFmt = av_get_sample_fmt(sample_fmt_name);
-		liveState state;
+		
 		const char *outFmt;
 
 		memset(&state, 0, sizeof(state));
-		static auto log_cb = [&](void * acl, int level, const char *format, va_list arg)->void
-		{
-			if (level == AV_LOG_ERROR || level == AV_LOG_FATAL){
-				if (state.nerror<4)
-					snprintf(state.errorMsg[state.nerror++], 256, format, arg);
-			}
-			av_log_default_callback(acl,level,format,arg);
-		};
 
 		if (cb){
 			state.state = LIVE_BEGIN;
 			cb(&state);
 		}
 
-		av_log_set_callback(
-			[](void * acl, int level, const char *format, va_list arg)->void
-				{
-					log_cb(acl, level, format, arg);
-				}
-			);
+		av_log_set_callback(log_callback);
 
 		av_dict_set(&opt, "strict", "-2", 0);
 		av_dict_set(&opt, "threads", "4", 0);
