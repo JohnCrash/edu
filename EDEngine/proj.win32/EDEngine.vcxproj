@@ -87,7 +87,7 @@
     <Link>
       <AdditionalDependencies>libzmq-5.lib;libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;websockets.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;jsonD.lib;armnb.lib;Wininet.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;libx264.lib;pthreadVC2.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);$(EngineRoot)external\giflib\Debug;$(EngineRoot)external\json-c\Debug;$(EngineRoot)external\amrnb\armnb\Debug;$(EngineRoot)external\pthread\Pre-built.2\lib\x86;..\..\..\zeromq-4.1.3\.libs;..\..\..\ffmpeg\build\win32;..\..\..\ffmpeg\build\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EngineRoot)build\Debug.win32;$(OutDir);$(EngineRoot)external\giflib\Debug;$(EngineRoot)external\json-c\Debug;$(EngineRoot)external\amrnb\armnb\Debug;$(EngineRoot)external\pthread\Pre-built.2\lib\x86;..\..\..\zeromq-4.1.3\.libs;..\..\..\ffmpeg-lf\build\win32;..\..\..\ffmpeg-lf\build\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -125,7 +125,7 @@
     <Link>
       <AdditionalDependencies>libzmq-5.lib;libAudio.lib;lua51.lib;libNetwork.lib;libGUI.lib;libExtensions.lib;libchipmunk.lib;libcocos2d.lib;liblua.lib;libCocosBuilder.lib;libCocosStudio.lib;libSpine.lib;libwebp.lib;libcurl_imp.lib;json.lib;armnb.lib;websockets.lib;Wininet.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;pthreadVC2.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EngineRoot)build\Release.win32;$(OutDir);$(EngineRoot)external\giflib\Release;$(EngineRoot)external\json-c\Release;$(EngineRoot)external\amrnb\armnb\Release;$(EngineRoot)external\zeromq\prebuilt\win32\share;$(EngineRoot)external\pthread\Pre-built.2\lib\x86;..\..\..\ffmpeg\build\win32;..\..\..\ffmpeg\build\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EngineRoot)build\Release.win32;$(OutDir);$(EngineRoot)external\giflib\Release;$(EngineRoot)external\json-c\Release;$(EngineRoot)external\amrnb\armnb\Release;$(EngineRoot)external\zeromq\prebuilt\win32\share;$(EngineRoot)external\pthread\Pre-built.2\lib\x86;..\..\..\ffmpeg-lf\build\win32;..\..\..\ffmpeg-lf\build\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

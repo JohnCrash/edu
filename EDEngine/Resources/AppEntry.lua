@@ -11,9 +11,9 @@ local RecordVoice = require "recordvoice"
 
 local app,cookie,uid = cc_launchparam()
 
-if not cc_isdebug() and app == "" then
-	return
-end
+--if not cc_isdebug() and app == "" then
+--	return
+--end
 
 hw_cur_child_id = 0
 local ui = {

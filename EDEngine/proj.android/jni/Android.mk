@@ -42,6 +42,10 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/SDLThread.cpp \
 				   ../../Classes/SDLVideo.cpp \
 				   ../../Classes/SDLWindow.cpp \
+				   ../../Classes/live/ffdec.cpp \
+				   ../../Classes/live/ffenc.cpp \
+				   ../../Classes/live/ffraw.cpp \
+				   ../../Classes/live/live.cpp \
 				   ../../Classes/acr.cpp \
 				   ../../Classes/lua_thread.cpp \
 				   ../../Classes/lzmq/lzmq.c \
@@ -57,6 +61,7 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   SDLAudioJNI.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes \
+					$(LOCAL_PATH)/../../Classes/live \
 					$(LOCAL_PATH)/../../Classes/lzmq \
 					$(LOCAL_PATH)/../../../../cocos2d-x/cocos/base \
 					$(LOCAL_PATH)/../../../../cocos2d-x/external/lua \

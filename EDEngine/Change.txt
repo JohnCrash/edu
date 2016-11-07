@@ -1,0 +1,3 @@
+改变：
+1.AppActivity.java 853
+2.AppEntry.lua 14
