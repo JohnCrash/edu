@@ -203,6 +203,8 @@ namespace ff
 			cb(&state);
 		}
 
+		ffInit();
+		
 		av_log_set_callback(log_callback);
 
 		av_dict_set(&opt, "strict", "-2", 0);

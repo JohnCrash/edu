@@ -1,5 +1,23 @@
 #include "ffenc.h"
 
+#ifdef __ANDROID__
+	#include <jni.h>
+	#include "JniHelper.h"
+	
+	typedef int (*JniGetStaticMethodInfo_t)(cocos2d::JniMethodInfo *pmethodinfo,
+			const char *className,
+			const char *methodName,
+			const char *paramCode);
+	extern JniGetStaticMethodInfo_t jniGetStaticMethodInfo;
+    int JniHelper_GetStaticMethodInfo(cocos2d::JniMethodInfo *pmethodinfo,
+                                            const char *className,
+                                            const char *methodName,
+                                            const char *paramCode)
+    {
+        return cocos2d::JniHelper::getStaticMethodInfo(*pmethodinfo,className,methodName,paramCode);
+    }	
+#endif
+
 namespace ff
 {
 	/*
@@ -943,6 +961,8 @@ namespace ff
 		AVOutputFormat *ofmt;
 		int ret;
 
+		ffInit();
+		
 		pec = (AVEncodeContext *)malloc(sizeof(AVEncodeContext));
 		if (!pec)
 		{
@@ -1170,13 +1190,9 @@ namespace ff
 
 	void ffInit()
 	{
-#if CONFIG_AVDEVICE
-		avdevice_register_all();
-#endif
-#if CONFIG_AVFILTER
-		avfilter_register_all();
-#endif
-		av_register_all();
-		avformat_network_init();
+#ifdef __ANDROID__
+		jniGetStaticMethodInfo = (JniGetStaticMethodInfo_t)JniHelper_GetStaticMethodInfo;
+#endif		
+		av_ff_init();
 	}
 }

@@ -240,7 +240,7 @@ local function cap_devices()
 			video_h = v.max_h
 			video_fps = v.max_fps
 			video_fmt = v.pix_format
-		elseif not phone_name then
+		elseif v.type=='audio' and not phone_name then
 			phone_name = v.name
 			phone_freq = v.max_rate
 		end

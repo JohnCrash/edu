@@ -75,6 +75,7 @@ import android.content.DialogInterface;
 
 import org.acra.*;
 import org.acra.annotation.*;
+import org.ffmpeg.device.AndroidDemuxer;
 
 //import org.cocos2dx.cpp.CrashHandler;
 @ReportsCrashes()
@@ -611,6 +612,12 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 		}
 		_isSetUIOrientation = -1;
 	}
+	
+	public void onDrawFrame()
+	{
+		AndroidDemuxer.requestGLThreadProcess();
+	}
+	
 	public static int getUIOrientation()
 	{
 		int orientation = myActivity.getRequestedOrientation();

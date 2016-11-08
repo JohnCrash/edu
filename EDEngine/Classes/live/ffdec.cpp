@@ -88,6 +88,8 @@ namespace ff
 		AVDecodeCtx * pdc;
 		AVDictionary * opt = NULL;
 
+		ffInit();
+		
 		pdc = (AVDecodeCtx *)malloc(sizeof(AVDecodeCtx));
 		while (pdc)
 		{
@@ -296,6 +298,91 @@ namespace ff
 		return NULL;
 	}
 
+	static AVDevice * s_pdevices = NULL;
+	static int s_i = 0;
+	AVDeviceType s_type = AV_DEVICE_NONE;
+	static int s_nmax = 0;
+	static void log_callback(void * acl, int level, const char *format, va_list arg)
+	{
+		AVDevice * pdevices = s_pdevices;
+		
+		if (pdevices && level == AV_LOG_INFO && s_i < s_nmax){
+			if (strstr(format, "DirectShow video devices") == format ||
+				strstr(format, "Android camera devices") == format ){
+				s_type = AV_DEVICE_VIDEO;
+			}
+			else if (strstr(format, "DirectShow audio devices") == format ||
+					 strstr(format, "Android audio devices") == format ){
+				s_type = AV_DEVICE_AUDIO;
+			}
+			else if (strstr(format, " \"%s\"\n") == format){
+				strcpy(pdevices[s_i].name, va_arg(arg, char*));
+				pdevices[s_i].type = s_type;
+			}
+			else if (strstr(format, "    Alternative name \"%s\"\n") == format){
+				strcpy(pdevices[s_i].alternative_name, va_arg(arg, char*));
+				s_i++;
+			}
+			else if (strstr(format, "  min s=") == format){
+				//min %ldx%ld,%g, max %ldx%ld,fps %g
+				int index = pdevices[s_i].capability_count;
+				if (index < MAX_CAPABILITY_COUNT && index >= 0){
+					pdevices[s_i].capability[index].video.min_w = va_arg(arg, int);
+					pdevices[s_i].capability[index].video.min_h = va_arg(arg, int);
+					pdevices[s_i].capability[index].video.min_fps = va_arg(arg, double);
+					pdevices[s_i].capability[index].video.max_w = va_arg(arg, int);
+					pdevices[s_i].capability[index].video.max_h = va_arg(arg, int);
+					pdevices[s_i].capability[index].video.max_fps = va_arg(arg, double);
+					pdevices[s_i].capability_count++;
+				}
+			}
+			else if (strstr(format, "  min ch=") == format){
+				//"  min ch=%lu bits=%lu rate=%6lu max ch=%lu bits=%lu rate=%6lu\n"
+				int index = pdevices[s_i].capability_count;
+				if (index < MAX_CAPABILITY_COUNT && index >= 0){
+					pdevices[s_i].capability[index].audio.min_ch = va_arg(arg, int);
+					pdevices[s_i].capability[index].audio.min_bit = va_arg(arg, int);
+					pdevices[s_i].capability[index].audio.min_rate = va_arg(arg, int);
+					pdevices[s_i].capability[index].audio.max_ch = va_arg(arg, int);
+					pdevices[s_i].capability[index].audio.max_bit = va_arg(arg, int);
+					pdevices[s_i].capability[index].audio.max_rate = va_arg(arg, int);
+					pdevices[s_i].capability_count++;
+				}
+			}
+			else if (strstr(format, "  pixel_format=") == format){
+				int index = pdevices[s_i].capability_count;
+				if (index < MAX_CAPABILITY_COUNT && index >= 0){
+					char * pf = va_arg(arg, char*);
+					if (strlen(pf) < MAX_FORMAT_LENGTH)
+						strcpy(pdevices[s_i].capability[index].video.pix_format, pf);
+					else
+						strcpy(pdevices[s_i].capability[index].video.pix_format, "overflow");
+				}
+			}
+			else if (strstr(format, "  vcodec=") == format){
+				//%s
+				int index = pdevices[s_i].capability_count;
+				if (index < MAX_CAPABILITY_COUNT && index >= 0){
+					char * pf = va_arg(arg, char*);
+					if (strlen(pf) < MAX_FORMAT_LENGTH)
+						strcpy(pdevices[s_i].capability[index].video.codec_name, pf);
+					else
+						strcpy(pdevices[s_i].capability[index].video.codec_name, "overflow");
+				}
+			}
+			else if (strstr(format, "  unknown compression type") == format){
+				//%X
+				//printf("vcodec=%X\n", va_arg(arg, int));
+			}
+			else if (strstr(format, "DirectShow %s device options (from %s devices)\n") == format){
+				//printf("DirectShow %s device options (from %s devices)\n", arg);
+			}
+			else if (strstr(format, " Pin \"%s\" (alternative pin name \"%s\")\n") == format){
+				//printf(" Pin \"%s\" (alternative pin name \"%s\")\n", arg);
+			}
+		}
+	}
+	
 	int ffCapDevicesList(AVDevice *pdevices, int nmax)
 	{
 		int i, count, ret;
@@ -304,7 +391,8 @@ namespace ff
 		const char * filename = "dummy";
 		AVFormatContext * ctx = NULL;
 		char buf[256];
-		AVDeviceType type = AV_DEVICE_NONE;
+		
+		ffInit();
 		while (true)
 		{
 			/*
@@ -330,96 +418,17 @@ namespace ff
 			av_dict_set(&opt, "list_devices", "true", 0);
 
 			i = 0;
-			static auto cb = [&](void * acl, int level, const char *format, va_list arg)->void
-			{
-				if (level == AV_LOG_INFO && i < nmax){
-					if (strstr(format, "DirectShow video devices") == format ||
-						strstr(format, "Android camera devices") == format ){
-						type = AV_DEVICE_VIDEO;
-					}
-					else if (strstr(format, "DirectShow audio devices") == format ||
-							 strstr(format, "Android audio devices") == format ){
-						type = AV_DEVICE_AUDIO;
-					}
-					else if (strstr(format, " \"%s\"\n") == format){
-						strcpy(pdevices[i].name, va_arg(arg, char*));
-						pdevices[i].type = type;
-					}
-					else if (strstr(format, "    Alternative name \"%s\"\n") == format){
-						strcpy(pdevices[i].alternative_name, va_arg(arg, char*));
-						i++;
-					}
-					else if (strstr(format, "  min s=") == format){
-						//min %ldx%ld,%g, max %ldx%ld,fps %g
-						int index = pdevices[i].capability_count;
-						if (index < MAX_CAPABILITY_COUNT && index >= 0){
-							pdevices[i].capability[index].video.min_w = va_arg(arg, int);
-							pdevices[i].capability[index].video.min_h = va_arg(arg, int);
-							pdevices[i].capability[index].video.min_fps = va_arg(arg, double);
-							pdevices[i].capability[index].video.max_w = va_arg(arg, int);
-							pdevices[i].capability[index].video.max_h = va_arg(arg, int);
-							pdevices[i].capability[index].video.max_fps = va_arg(arg, double);
-							pdevices[i].capability_count++;
-						}
-					}
-					else if (strstr(format, "  min ch=") == format){
-						//"  min ch=%lu bits=%lu rate=%6lu max ch=%lu bits=%lu rate=%6lu\n"
-						int index = pdevices[i].capability_count;
-						if (index < MAX_CAPABILITY_COUNT && index >= 0){
-							pdevices[i].capability[index].audio.min_ch = va_arg(arg, int);
-							pdevices[i].capability[index].audio.min_bit = va_arg(arg, int);
-							pdevices[i].capability[index].audio.min_rate = va_arg(arg, int);
-							pdevices[i].capability[index].audio.max_ch = va_arg(arg, int);
-							pdevices[i].capability[index].audio.max_bit = va_arg(arg, int);
-							pdevices[i].capability[index].audio.max_rate = va_arg(arg, int);
-							pdevices[i].capability_count++;
-						}
-					}
-					else if (strstr(format, "  pixel_format=") == format){
-						int index = pdevices[i].capability_count;
-						if (index < MAX_CAPABILITY_COUNT && index >= 0){
-							char * pf = va_arg(arg, char*);
-							if (strlen(pf) < MAX_FORMAT_LENGTH)
-								strcpy(pdevices[i].capability[index].video.pix_format, pf);
-							else
-								strcpy(pdevices[i].capability[index].video.pix_format, "overflow");
-						}
-					}
-					else if (strstr(format, "  vcodec=") == format){
-						//%s
-						int index = pdevices[i].capability_count;
-						if (index < MAX_CAPABILITY_COUNT && index >= 0){
-							char * pf = va_arg(arg, char*);
-							if (strlen(pf) < MAX_FORMAT_LENGTH)
-								strcpy(pdevices[i].capability[index].video.codec_name, pf);
-							else
-								strcpy(pdevices[i].capability[index].video.codec_name, "overflow");
-						}
-					}
-					else if (strstr(format, "  unknown compression type") == format){
-						//%X
-						//printf("vcodec=%X\n", va_arg(arg, int));
-					}
-					else if (strstr(format, "DirectShow %s device options (from %s devices)\n") == format){
-						//printf("DirectShow %s device options (from %s devices)\n", arg);
-					}
-					else if (strstr(format, " Pin \"%s\" (alternative pin name \"%s\")\n") == format){
-						//printf(" Pin \"%s\" (alternative pin name \"%s\")\n", arg);
-					}
-				}
-			};
-			av_log_set_callback(
-				[](void * acl, int level, const char *format, va_list arg)->void
-			{
-				cb(acl, level, format, arg);
-			}
-			);
-
+			s_i = 0;
+			s_type = AV_DEVICE_NONE;
+			s_nmax = nmax;
+			s_pdevices = pdevices;
+			av_log_set_callback( log_callback );
+			
 			ret = avformat_open_input(&ctx, filename, file_iformat, &opt);
 
 			av_dict_set(&opt, "list_devices", "false", 0);
 			av_dict_set(&opt, "list_options", "true", 0);
-			count = i;
+			count = s_i;
 			for (i = 0; i < count; i++){
 				char filename[512];
 				if (pdevices[i].type == AV_DEVICE_VIDEO)
@@ -430,12 +439,14 @@ namespace ff
 					printf("Unknow device type\n");
 					continue;
 				}
-
+				s_i = i;
 				ret = avformat_open_input(&ctx, filename, file_iformat, &opt);
 			}
 
 			av_log_set_callback(av_log_default_callback);
-
+			s_pdevices = NULL;
+			s_nmax = 0;
+			s_type = AV_DEVICE_NONE;
 			av_dict_free(&opt);
 			avformat_close_input(&ctx);
 
@@ -454,6 +465,8 @@ namespace ff
 		char buf[32];
 		char filename[2 * MAX_DEVICE_NAME_LENGTH];
 
+		ffInit();
+		
 		if (video_device){
 
 			strcpy(filename, "video=");

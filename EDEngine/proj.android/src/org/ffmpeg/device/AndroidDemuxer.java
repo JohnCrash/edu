@@ -14,7 +14,9 @@ import java.util.Deque;
 import java.util.List;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-
+import android.opengl.GLES11Ext;
+import android.opengl.GLES20;
+import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by john on 2016/7/15.
  */
@@ -69,7 +71,7 @@ public class AndroidDemuxer{
     private static int nMaxFrame = 3;
     private static int _bufferSize;
     public static int _width,_height,_targetFps;
-    public static int _pixFmt;
+    public static int _pixFmt,_tex;
     private static AudioRecord _audioRecord = null;
     private static Thread _audioRecordThread = null;
     private static boolean _audioRecordLoop = false;
@@ -81,7 +83,8 @@ public class AndroidDemuxer{
     private static long _nGrabFrame = 0;
     private static long _timeStrampBegin = 0;
     public static byte[] _currentBuf = null;
-
+    private static boolean _RequestMakeOESTexture = false;
+    
     public static SurfaceTexture getSurfaceTexture(){
         return _textrue;
     }
@@ -250,28 +253,56 @@ public class AndroidDemuxer{
                     }
                 }
             });
-
-            try {
-                _nGrabFrame = 0;
-                _textrue = new SurfaceTexture(tex);
-                _textrue.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener(){
-                    @Override
-                    public void onFrameAvailable(SurfaceTexture surfaceTexture){
-                        //Log.w(TAG,"openDemuxer onFrameAvailable");
-                        ratainBuffer(3, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
-                        _nGrabFrame++;
-                    }
-                });
-                _cam.setPreviewTexture(_textrue);
-            }catch(Exception e){
-                Log.e(TAG,e.getMessage());
-                return -11;
-            }
-
+            _tex = tex;
+            _textrue = null;
             _timeStrampBegin = System.nanoTime();
             _preivewThread = new Thread(new Runnable(){
                 @Override
                 public void run(){
+                    if(_tex==-1){
+                        _RequestMakeOESTexture = true;
+                        int count = 0;
+                        Log.e(TAG,"previewThread 3");
+                        while(_RequestMakeOESTexture){
+                            try{
+                                Thread.sleep(20);
+                            }catch(Exception e){
+                                Log.e(TAG,"openDemuxer _RequestMakeOESTexture Thread.sleep");
+                                Log.e(TAG,e.getMessage());
+                                _RequestMakeOESTexture = false;
+                            }
+                            count++;
+                            if( count >= 10000){
+                                Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
+                                Log.w(TAG,"please call requestGLThreadProcess");
+                                closeDemuxer();
+                                return;
+                            }
+                        }
+                    }
+                    Log.e(TAG,"previewThread 6");
+                    if(_tex==-1){
+                        Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
+                        closeDemuxer();
+                        return;
+                    }                	
+                    try {
+                        _nGrabFrame = 0;
+                        _textrue = new SurfaceTexture(_tex);
+                        _textrue.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener(){
+                            @Override
+                            public void onFrameAvailable(SurfaceTexture surfaceTexture){
+                                //Log.w(TAG,"openDemuxer onFrameAvailable");
+                                ratainBuffer(3, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
+                                _nGrabFrame++;
+                            }
+                        });
+                        _cam.setPreviewTexture(_textrue);
+                    }catch(Exception e){
+                        Log.e(TAG,e.getMessage());
+                        closeDemuxer();
+                        return;
+                    }                	
                     _cam.startPreview();
                     autoFocus(true);
                 }
@@ -350,6 +381,7 @@ public class AndroidDemuxer{
             _cam = null;
             _nGrabFrame = 0;
             isrelease = true;
+            _RequestMakeOESTexture = true;
         }
         if(_audioRecord!=null) {
             _audioRecordLoop = false;
@@ -373,4 +405,33 @@ public class AndroidDemuxer{
             ratainBuffer(5, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
         Log.e(TAG, "closeDemuxer  end");
     }
+    
+    /*
+     * 我需要在GL渲染线上插入一个回调，这样我可以调用GL函数
+     */
+    public static void requestGLThreadProcess()
+    {
+        if(_RequestMakeOESTexture){
+            int [] textures = new int[1];
+            if( _tex==-1 ){
+                GLES20.glGenTextures(1,textures,0);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
+                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_MIN_FILTER,
+                        GL10.GL_LINEAR);
+                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+                _tex = textures[0];
+            }else{
+            	 textures[0] = _tex;
+                GLES20.glDeleteTextures(1,textures,0);
+                _tex = -1;
+            }
+            _RequestMakeOESTexture = false;
+        }
+    }    
 }

@@ -366,75 +366,114 @@ extern "C" {
 	static int cc_camdevices(lua_State *L)
 	{
 		ff::AVDevice caps[8];
-		av_ff_init();
-		int count = ffCapDevicesList(caps, 8);
+
+		int count = ff::ffCapDevicesList(caps, 8);
 		lua_newtable(L);
 		for (int m = 0; m < count; m++){
 			lua_newtable(L);
-			for (int i = 0; i < caps[m].capability_count; i++){
-				lua_pushstring(L, "show_name");
-				lua_pushstring(L, caps[m].name);
+			lua_pushstring(L, "show_name");
+			lua_pushstring(L, caps[m].name);
+			lua_settable(L, -3);
+			lua_pushstring(L, "name");
+			lua_pushstring(L, caps[m].alternative_name);
+			lua_settable(L, -3);
+			lua_pushstring(L, "type");			
+			if (caps[m].type == ff::AV_DEVICE_VIDEO){
+				lua_pushstring(L, "video");
 				lua_settable(L, -3);
-				lua_pushstring(L, "name");
-				lua_pushstring(L, caps[m].alternative_name);
-				lua_settable(L, -3);
-				lua_pushstring(L, "type");
-				if (caps[m].type == ff::AV_DEVICE_VIDEO){
-					lua_pushstring(L, "video");
-					lua_settable(L, -3);
+				int min_w, min_h, max_w, max_h, min_fps, max_fps;
+				const char * pix_format = NULL;
+				const char * codec_name = NULL;
+				min_w = 1024*32;
+				max_w = 0;
+				for(int i = 0; i < caps[m].capability_count; i++){
+					if( min_w > caps[m].capability[i].video.min_w){
+						min_w = caps[m].capability[i].video.min_w;
+						min_h = caps[m].capability[i].video.min_h;
+						min_fps = caps[m].capability[i].video.min_fps;
+					}
+					if( max_w < caps[m].capability[i].video.max_w ){
+						max_w = caps[m].capability[i].video.max_w;
+						max_h = caps[m].capability[i].video.max_h;
+						max_fps = caps[m].capability[i].video.max_fps;
+						pix_format = caps[m].capability[i].video.pix_format;
+						codec_name = caps[m].capability[i].video.codec_name;
+					}
+				}
+				if( pix_format && codec_name ){
 					lua_pushstring(L, "min_w");
-					lua_pushinteger(L, caps[m].capability[i].video.min_w);
+					lua_pushinteger(L, min_w);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_h");
-					lua_pushinteger(L, caps[m].capability[i].video.min_h);
+					lua_pushinteger(L, min_h);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_fps");
-					lua_pushinteger(L, caps[m].capability[i].video.min_fps);
+					lua_pushinteger(L, min_fps);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_w");
-					lua_pushinteger(L, caps[m].capability[i].video.max_w);
+					lua_pushinteger(L, max_w);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_h");
-					lua_pushinteger(L, caps[m].capability[i].video.max_h);
+					lua_pushinteger(L, max_h);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_fps");
-					lua_pushinteger(L, caps[m].capability[i].video.max_fps);
+					lua_pushinteger(L, max_fps);
 					lua_settable(L, -3);
 					lua_pushstring(L, "pix_format");
-					lua_pushstring(L, caps[m].capability[i].video.pix_format);
+					lua_pushstring(L, pix_format);
 					lua_settable(L, -3);
 					lua_pushstring(L, "codec_name");
-					lua_pushstring(L, caps[m].capability[i].video.codec_name);
-					lua_settable(L, -3);
+					lua_pushstring(L, codec_name);
+					lua_settable(L, -3);			
+				}				
+			}else{
+				lua_pushstring(L, "audio");
+				lua_settable(L, -3);		
+				int min_ch,min_bit,min_rate,max_ch,max_bit,max_rate;
+				const char * sample_format = NULL;
+				const char * codec_name = NULL;
+				min_ch = 32;
+				max_ch = 0;
+				for(int i = 0; i < caps[m].capability_count; i++){
+					if( min_ch > caps[m].capability[i].audio.min_ch ){
+						min_ch = caps[m].capability[i].audio.min_ch;
+						min_bit = caps[m].capability[i].audio.min_bit;
+						min_rate = caps[m].capability[i].audio.min_rate;
+					}
+					if( max_ch < caps[m].capability[i].audio.max_ch){
+						max_ch = caps[m].capability[i].audio.max_ch;
+						max_bit = caps[m].capability[i].audio.max_bit;
+						max_rate = caps[m].capability[i].audio.max_rate;
+						sample_format = caps[m].capability[i].audio.sample_format;
+						codec_name = caps[m].capability[i].audio.codec_name;
+					}
 				}
-				else{
-					lua_pushstring(L, "audio");
-					lua_settable(L, -3);
+				if(sample_format && codec_name){
 					lua_pushstring(L, "min_ch");
-					lua_pushinteger(L, caps[m].capability[i].audio.min_ch);
+					lua_pushinteger(L, min_ch);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_bit");
-					lua_pushinteger(L, caps[m].capability[i].audio.min_bit);
+					lua_pushinteger(L, min_bit);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_rate");
-					lua_pushinteger(L, caps[m].capability[i].audio.min_rate);
+					lua_pushinteger(L, min_rate);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_ch");
-					lua_pushinteger(L, caps[m].capability[i].audio.max_ch);
+					lua_pushinteger(L, max_ch);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_bit");
-					lua_pushinteger(L, caps[m].capability[i].audio.max_bit);
+					lua_pushinteger(L, max_bit);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_rate");
-					lua_pushinteger(L, caps[m].capability[i].audio.max_rate);
+					lua_pushinteger(L, max_rate);
 					lua_settable(L, -3);
 					lua_pushstring(L, "sample_format");
-					lua_pushstring(L, caps[m].capability[i].audio.sample_format);
+					lua_pushstring(L, sample_format);
 					lua_settable(L, -3);
 					lua_pushstring(L, "codec_name");
-					lua_pushstring(L, caps[m].capability[i].audio.codec_name);
-					lua_settable(L, -3);
-				}
+					lua_pushstring(L, codec_name);
+					lua_settable(L, -3);		
+				}				
 			}
 			lua_rawseti(L,-2,m+1);
 		}
@@ -514,9 +553,7 @@ extern "C" {
 	static int cc_live(lua_State *L)
 	{
 		int ret = 0;
-		CCLOG("cc_live av_ff_init1");
-		av_ff_init();
-		CCLOG("cc_live av_ff_init2");
+	
 		if (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
 			const char * file;
 			const char * video_name;
@@ -607,13 +644,11 @@ extern "C" {
 				int w, int h, int fps, const char *pix_fmt,int videoBitRate,
 				const char *audio_name,int freq,const char* sample_fmt,int audioBitRate,
 				int ow,int oh,int ofps){
-				CCLOG("cc_live liveOnRtmp1");
 				ff::liveOnRtmp(file,
 					video_name, w, h, fps, pix_fmt, videoBitRate,
 					audio_name, freq, sample_fmt, audioBitRate,
 					ow, oh, ofps,
 					liveCallback);
-				CCLOG("cc_live liveOnRtmp2");
 			}, file, video_name, w, h, fps, pix_fmt, videoBitRate,
 				audio_name, freq, sample_fmt, audioBitRate,
 				ow, oh, ofps);

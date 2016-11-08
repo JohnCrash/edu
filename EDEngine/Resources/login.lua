@@ -173,6 +173,8 @@ end
 
 local function set_selector(idx)
 	selector = idx
+	set_cookie(test_login[selector].cookie)
+	set_userid(test_login[selector].uid)
 	print('登陆用户:'..tostring(get_name()))
 end
 --返回logo cache文件名
