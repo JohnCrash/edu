@@ -514,7 +514,9 @@ extern "C" {
 	static int cc_live(lua_State *L)
 	{
 		int ret = 0;
+		CCLOG("cc_live av_ff_init1");
 		av_ff_init();
+		CCLOG("cc_live av_ff_init2");
 		if (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
 			const char * file;
 			const char * video_name;
@@ -600,15 +602,18 @@ extern "C" {
 			_prevResult = 0;
 
 			_pDirector = cocos2d::Director::getInstance();
+			
 			_liveThread = new std::thread([](const char *file, const char *video_name, 
 				int w, int h, int fps, const char *pix_fmt,int videoBitRate,
 				const char *audio_name,int freq,const char* sample_fmt,int audioBitRate,
 				int ow,int oh,int ofps){
+				CCLOG("cc_live liveOnRtmp1");
 				ff::liveOnRtmp(file,
 					video_name, w, h, fps, pix_fmt, videoBitRate,
 					audio_name, freq, sample_fmt, audioBitRate,
 					ow, oh, ofps,
 					liveCallback);
+				CCLOG("cc_live liveOnRtmp2");
 			}, file, video_name, w, h, fps, pix_fmt, videoBitRate,
 				audio_name, freq, sample_fmt, audioBitRate,
 				ow, oh, ofps);

@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+environment/project/0.756827735.1969496387/NDK_TOOLCHAIN_VERSION/delimiter=;
+environment/project/0.756827735.1969496387/NDK_TOOLCHAIN_VERSION/operation=replace
+environment/project/0.756827735.1969496387/NDK_TOOLCHAIN_VERSION/value=4.8
+environment/project/0.756827735.1969496387/append=true
+environment/project/0.756827735.1969496387/appendContributed=true
+environment/project/0.756827735/NDK_MODULE_PATH/delimiter=;
+environment/project/0.756827735/NDK_MODULE_PATH/operation=append
+environment/project/0.756827735/NDK_MODULE_PATH/value=../../../cocos2d-x\:../../../cocos2d-x/external\:../../../cocos2d-x/cocos\:../../../cocos2d-x/cocos/scripting/lua-bindings
+environment/project/0.756827735/append=true
+environment/project/0.756827735/appendContributed=true
