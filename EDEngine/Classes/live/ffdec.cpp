@@ -457,7 +457,41 @@ namespace ff
 			avformat_close_input(&ctx);
 		return -1;
 	}
+#ifdef __ANDROID__
+	static int _oesTex = -1;
+	void ffSetOESTexture(int txt)
+	{
+		_oesTex = txt;
+	}
+#else
+	void ffSetOESTexture(int txt)
+	{
+	}
+#endif
+	/*
+	//在android操作系统下需要先创建一个OES材质
+	//你需要要在OpenGL线程调用下面的函数用来创建或者删除OES材质
+	//然后在开始调用视频库前调用ffSetOESTexture设置OES材质
+	//当然也可以使用AndroidDemuxer.java中的函数requestGLThreadProcess
+	int createOESTexture(){
+		int textures[1];
+		glGenTextures(1,textures);
+		glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
+		glTexParameterf(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+		return glGetError() == GL_NO_ERROR ? textures[0]: -1;
+	}
+	void ffReleaseAndroidOESTexture(int txt){
+		if (txt>=0){
+			int textures[1];
+			textures[0] = txt;
+			glDeleteTextures(1,textures);
+		}
+	}
+	*/
 	AVDecodeCtx *ffCreateCapDeviceDecodeContext(
 		const char *video_device, int w, int h, int fps,AVPixelFormat fmt,
 		const char *audio_device, int chancel, int bit, int rate, AVDictionary * opt)
@@ -491,6 +525,12 @@ namespace ff
 			//���񻺳�����С
 			//	snprintf(buf, 32, "%d", 8*1024*1024);
 			//	av_dict_set(&opt, "rtbufsize", buf, 0);
+		#ifdef __ANDROID__
+			snprintf(buf, 32, "%d", _oesTex);
+			av_dict_set(&opt, "oes_texture", buf, -1);
+			//open debug info
+			//av_dict_set(&opt, "debug", "1", 0);
+		#endif
 		}
 		if (audio_device){
 			snprintf(buf, 32, "%d", chancel);

@@ -233,27 +233,41 @@ local function cap_devices()
 	kits.logTable(t)
 	
 	local video_w,video_h,video_fps,video_name,video_fmt,phone_name,phone_freq
+	video_w = 1024
 	for i,v in pairs(t) do
-		if v.type=='video' and not video_name then
-			video_name = v.name
-			video_w = v.max_w
-			video_h = v.max_h
-			video_fps = v.max_fps
-			video_fmt = v.pix_format
+		if v.type=='video' then
+			for k,vv in pairs(v.capability) do
+				if vv.max_w > 500 and vv.max_w < 1000 and vv.max_w < video_w then
+					video_name = v.name
+					video_w = vv.max_w
+					video_h = vv.max_h
+					video_fps = vv.max_fps
+					video_fmt = vv.pix_format
+				end
+			end
 		elseif v.type=='audio' and not phone_name then
-			phone_name = v.name
-			phone_freq = v.max_rate
+			for k,vv in pairs(v.capability) do
+				phone_name = v.name
+				phone_freq = vv.max_rate
+			end			
 		end
 	end
-
-	cc_live(
+	video_fps = 12
+	print("video device:"..tostring(video_name))
+	print(string.format("	size:%dx%d fps:%d fmt:%s",video_w,video_h,video_fps,video_fmt))
+	print("audio device:"..tostring(phone_name))
+	print(string.format("	samples:%d ",phone_freq))
+	--video_w = 640
+	--video_h = 480
+	--video_fps = 12
+	local b,errmsg = cc_live(
 		{
 			address='rtmp://192.168.7.157/myapp/mystream',
 			cam_name=video_name,
 			cam_w=video_w,
 			cam_h=video_h,
 			cam_fps = video_fps,
-			video_bitrate=1024*1024,
+			video_bitrate=512*1024,
 			pix_fmt=video_fmt,
 			phone_name=phone_name,
 			sample_freq=phone_freq,
@@ -261,7 +275,7 @@ local function cap_devices()
 			audio_bitrate=64*1024,
 			live_w = 640,
 			live_h = 480,
-			live_fps = 30,
+			live_fps = 12,
 		},
 		function(state,nframes,ntimes,errors)
 			if not errors then
@@ -273,6 +287,11 @@ local function cap_devices()
 			return 0
 		end
 	)
+	if not b then
+		print("live failed: "..tostring(errmsg))
+	else
+		print("live start...")
+	end
 end
 
 --[[

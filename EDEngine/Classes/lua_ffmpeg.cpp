@@ -377,104 +377,79 @@ extern "C" {
 			lua_pushstring(L, "name");
 			lua_pushstring(L, caps[m].alternative_name);
 			lua_settable(L, -3);
-			lua_pushstring(L, "type");			
+			lua_pushstring(L, "type");
 			if (caps[m].type == ff::AV_DEVICE_VIDEO){
 				lua_pushstring(L, "video");
 				lua_settable(L, -3);
-				int min_w, min_h, max_w, max_h, min_fps, max_fps;
-				const char * pix_format = NULL;
-				const char * codec_name = NULL;
-				min_w = 1024*32;
-				max_w = 0;
+				lua_newtable(L);
+				lua_pushstring(L,"capability");
+				lua_pushvalue(L, -2);
+				lua_settable(L, -4);
 				for(int i = 0; i < caps[m].capability_count; i++){
-					if( min_w > caps[m].capability[i].video.min_w){
-						min_w = caps[m].capability[i].video.min_w;
-						min_h = caps[m].capability[i].video.min_h;
-						min_fps = caps[m].capability[i].video.min_fps;
-					}
-					if( max_w < caps[m].capability[i].video.max_w ){
-						max_w = caps[m].capability[i].video.max_w;
-						max_h = caps[m].capability[i].video.max_h;
-						max_fps = caps[m].capability[i].video.max_fps;
-						pix_format = caps[m].capability[i].video.pix_format;
-						codec_name = caps[m].capability[i].video.codec_name;
-					}
-				}
-				if( pix_format && codec_name ){
+					lua_newtable(L);
 					lua_pushstring(L, "min_w");
-					lua_pushinteger(L, min_w);
+					lua_pushinteger(L, caps[m].capability[i].video.min_w);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_h");
-					lua_pushinteger(L, min_h);
-					lua_settable(L, -3);
-					lua_pushstring(L, "min_fps");
-					lua_pushinteger(L, min_fps);
+					lua_pushinteger(L, caps[m].capability[i].video.min_h);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_w");
-					lua_pushinteger(L, max_w);
+					lua_pushinteger(L, caps[m].capability[i].video.max_w);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_h");
-					lua_pushinteger(L, max_h);
+					lua_pushinteger(L, caps[m].capability[i].video.max_h);
+					lua_settable(L, -3);
+					lua_pushstring(L, "min_fps");
+					lua_pushinteger(L, caps[m].capability[i].video.min_fps);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_fps");
-					lua_pushinteger(L, max_fps);
+					lua_pushinteger(L, caps[m].capability[i].video.max_fps);
 					lua_settable(L, -3);
 					lua_pushstring(L, "pix_format");
-					lua_pushstring(L, pix_format);
+					lua_pushstring(L, caps[m].capability[i].video.pix_format);
 					lua_settable(L, -3);
 					lua_pushstring(L, "codec_name");
-					lua_pushstring(L, codec_name);
-					lua_settable(L, -3);			
-				}				
+					lua_pushstring(L, caps[m].capability[i].video.codec_name);
+					lua_settable(L, -3);
+					lua_rawseti(L, -2, i + 1);
+				}	
 			}else{
 				lua_pushstring(L, "audio");
-				lua_settable(L, -3);		
-				int min_ch,min_bit,min_rate,max_ch,max_bit,max_rate;
-				const char * sample_format = NULL;
-				const char * codec_name = NULL;
-				min_ch = 32;
-				max_ch = 0;
+				lua_settable(L, -3);
+				lua_newtable(L);
+				lua_pushstring(L, "capability");
+				lua_pushvalue(L, -2);
+				lua_settable(L, -4);
 				for(int i = 0; i < caps[m].capability_count; i++){
-					if( min_ch > caps[m].capability[i].audio.min_ch ){
-						min_ch = caps[m].capability[i].audio.min_ch;
-						min_bit = caps[m].capability[i].audio.min_bit;
-						min_rate = caps[m].capability[i].audio.min_rate;
-					}
-					if( max_ch < caps[m].capability[i].audio.max_ch){
-						max_ch = caps[m].capability[i].audio.max_ch;
-						max_bit = caps[m].capability[i].audio.max_bit;
-						max_rate = caps[m].capability[i].audio.max_rate;
-						sample_format = caps[m].capability[i].audio.sample_format;
-						codec_name = caps[m].capability[i].audio.codec_name;
-					}
-				}
-				if(sample_format && codec_name){
+					lua_newtable(L);
 					lua_pushstring(L, "min_ch");
-					lua_pushinteger(L, min_ch);
+					lua_pushinteger(L, caps[m].capability[i].audio.min_ch);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_bit");
-					lua_pushinteger(L, min_bit);
+					lua_pushinteger(L, caps[m].capability[i].audio.min_bit);
 					lua_settable(L, -3);
 					lua_pushstring(L, "min_rate");
-					lua_pushinteger(L, min_rate);
+					lua_pushinteger(L, caps[m].capability[i].audio.min_rate);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_ch");
-					lua_pushinteger(L, max_ch);
+					lua_pushinteger(L, caps[m].capability[i].audio.max_ch);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_bit");
-					lua_pushinteger(L, max_bit);
+					lua_pushinteger(L, caps[m].capability[i].audio.max_bit);
 					lua_settable(L, -3);
 					lua_pushstring(L, "max_rate");
-					lua_pushinteger(L, max_rate);
+					lua_pushinteger(L, caps[m].capability[i].audio.max_rate);
 					lua_settable(L, -3);
 					lua_pushstring(L, "sample_format");
-					lua_pushstring(L, sample_format);
+					lua_pushstring(L, caps[m].capability[i].audio.sample_format);
 					lua_settable(L, -3);
 					lua_pushstring(L, "codec_name");
-					lua_pushstring(L, codec_name);
-					lua_settable(L, -3);		
-				}				
+					lua_pushstring(L, caps[m].capability[i].audio.codec_name);
+					lua_settable(L, -3);
+					lua_rawseti(L, -2, i + 1);
+				}
 			}
+			lua_pop(L, 1); //pop capability table
 			lua_rawseti(L,-2,m+1);
 		}
 		return 1;
@@ -497,11 +472,24 @@ extern "C" {
 					lua_pushinteger(L, pls->state);
 					lua_pushnumber(L, (double)pls->nframes);
 					lua_pushnumber(L, (double)pls->ntimes);
-					if (pls->nerror > 0){
+					if (pls->nerror > 0 && pls->nerror < MAX_ERRORMSG_COUNT){
 						lua_newtable(L);
-						for (int i = 0; i < pls->nerror; i++){
-							lua_pushstring(L, pls->errorMsg[i]);
-							lua_rawseti(L, -2, i + 1);
+						int b = 0;
+						int e = pls->nerror;
+						if (e != MAX_ERRORMSG_COUNT - 1){
+							if (!pls->errorMsg[e+1][0]){
+								b = e + 1;
+								e = MAX_ERRORMSG_COUNT;
+							}
+						}
+						int idx = 0;
+						for (int i = b; i < e; i++){
+							lua_pushstring(L, pls->errorMsg[idx++]);
+							lua_rawseti(L, -2, idx);
+						}
+						for (int i = 0; i < b; i++){
+							lua_pushstring(L, pls->errorMsg[idx++]);
+							lua_rawseti(L, -2, idx);
 						}
 						_prevResult = pLuaStack->executeFunction(4);
 					}
@@ -553,85 +541,150 @@ extern "C" {
 	static int cc_live(lua_State *L)
 	{
 		int ret = 0;
-	
-		if (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
-			const char * file;
-			const char * video_name;
-			const char * audio_name;
-			const char * pix_fmt;
-			const char * sample_fmt;
+		const char * errMsg = NULL;
+		while (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
+			const char * file = NULL;
+			const char * video_name = NULL;
+			const char * audio_name = NULL;
+			const char * pix_fmt = NULL;
+			const char * sample_fmt = NULL;
 			int w, h, fps,videoBitRate;
 			int freq, audioBitRate;
 			int ow, oh, ofps;
 
 			lua_pushstring(L, "address");
 			lua_gettable(L, 1);
-			file = luaL_checkstring(L, -1);
+			if (lua_isstring(L, -1))
+				file = luaL_checkstring(L, -1);
+			else{
+				errMsg = "missing address";
+				break;
+			}
 			lua_pop(L, 1);
 
 			lua_pushstring(L, "cam_name");
 			lua_gettable(L, 1);
-			video_name = luaL_checkstring(L, -1);
+			if (lua_isstring(L,-1))
+				video_name = luaL_checkstring(L, -1);
 			lua_pop(L, 1);
 
 			lua_pushstring(L, "phone_name");
 			lua_gettable(L, 1);
-			audio_name = luaL_checkstring(L, -1);
+			if (lua_isstring(L, -1))
+				audio_name = luaL_checkstring(L, -1);
 			lua_pop(L, 1);
+			if (video_name){
+				lua_pushstring(L, "pix_fmt");
+				lua_gettable(L, 1);
+				if (lua_isstring(L, -1))
+					pix_fmt = luaL_checkstring(L, -1);
+				else{
+					errMsg = "missing pix_fmt";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "pix_fmt");
-			lua_gettable(L, 1);
-			pix_fmt = luaL_checkstring(L, -1);
-			lua_pop(L, 1);
+				lua_pushstring(L, "cam_w");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					w = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_w";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "sample_fmt");
-			lua_gettable(L, 1);
-			sample_fmt = luaL_checkstring(L, -1);
-			lua_pop(L, 1);
+				lua_pushstring(L, "cam_h");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					h = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_h";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "cam_w");
-			lua_gettable(L, 1);
-			w = luaL_checkint(L, -1);
-			lua_pop(L, 1);
+				lua_pushstring(L, "cam_fps");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					fps = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_fps";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "cam_h");
-			lua_gettable(L, 1);
-			h = luaL_checkint(L, -1);
-			lua_pop(L, 1);
+				lua_pushstring(L, "video_bitrate");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					videoBitRate = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing video_bitrate";
+					break;
+				}
+				lua_pop(L, 1);
+			}
 
-			lua_pushstring(L, "cam_fps");
-			lua_gettable(L, 1);
-			fps = luaL_checkint(L, -1);
-			lua_pop(L, 1);
+			if (audio_name){
+				lua_pushstring(L, "audio_bitrate");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					audioBitRate = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing audio_bitrate";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "video_bitrate");
-			lua_gettable(L, 1);
-			videoBitRate = luaL_checkint(L, -1);
-			lua_pop(L, 1);
+				lua_pushstring(L, "sample_freq");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					freq = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing sample_freq";
+					break;
+				}
+				lua_pop(L, 1);
 
-			lua_pushstring(L, "audio_bitrate");
-			lua_gettable(L, 1);
-			audioBitRate = luaL_checkint(L, -1);
-			lua_pop(L, 1);
-
-			lua_pushstring(L, "sample_freq");
-			lua_gettable(L, 1);
-			freq = luaL_checkint(L, -1);
-			lua_pop(L, 1);
-
+				lua_pushstring(L, "sample_fmt");
+				lua_gettable(L, 1);
+				if (lua_isstring(L, -1))
+					sample_fmt = luaL_checkstring(L, -1);
+				else{
+					errMsg = "missing sample_fmt";
+					break;
+				}
+				lua_pop(L, 1);
+			}
 			lua_pushstring(L, "live_w");
 			lua_gettable(L, 1);
-			ow = luaL_checkint(L, -1);
+			if (lua_isnumber(L, -1))
+				ow = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_w";
+				break;
+			}
 			lua_pop(L, 1);
 
 			lua_pushstring(L, "live_h");
 			lua_gettable(L, 1);
-			oh = luaL_checkint(L, -1);
+			if (lua_isnumber(L, -1))
+				oh = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_h";
+				break;
+			}
 			lua_pop(L, 1);
 
 			lua_pushstring(L, "live_fps");
 			lua_gettable(L, 1);
-			ofps = luaL_checkint(L, -1);
+			if (lua_isnumber(L, -1))
+				ofps = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_fps";
+				break;
+			}
+
 			lua_pop(L, 1);
 
 			lua_pushvalue(L, 2);
@@ -652,14 +705,18 @@ extern "C" {
 			}, file, video_name, w, h, fps, pix_fmt, videoBitRate,
 				audio_name, freq, sample_fmt, audioBitRate,
 				ow, oh, ofps);
+			ret = 1;
+			break;
+		}
 
+		lua_pushboolean(L, ret);
+		if (errMsg){
+			lua_pushstring(L, errMsg);
+			return 2;
 		}
 		else{
-			lua_unref(L, _liveRef);
-			_liveRef = LUA_REFNIL;
+			return 1;
 		}
-		lua_pushboolean(L, ret);
-		return 1;
 	}
 
 	static int cc_camopen(lua_State *L)

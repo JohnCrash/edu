@@ -4,6 +4,8 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
+import android.opengl.GLES11Ext;
+import android.opengl.GLES20;
 import android.os.Build;
 import android.util.Log;
 
@@ -14,9 +16,9 @@ import java.util.Deque;
 import java.util.List;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
+
 import javax.microedition.khronos.opengles.GL10;
+
 /**
  * Created by john on 2016/7/15.
  */
@@ -70,21 +72,21 @@ public class AndroidDemuxer{
     private static Deque<byte []> _buffers = null;
     private static int nMaxFrame = 3;
     private static int _bufferSize;
-    public static int _width,_height,_targetFps;
-    public static int _pixFmt,_tex;
+    private static int _width,_height,_targetFps;
+    private static int _pixFmt,_tex;
     private static AudioRecord _audioRecord = null;
     private static Thread _audioRecordThread = null;
     private static boolean _audioRecordLoop = false;
     private static boolean _audioRecordStop = true;
+    private static boolean _isopened = false;
     private static SurfaceTexture _textrue = null;
     private static Thread _preivewThread = null;
     private static int _sampleFmt,_channel;
     private static int _sampleRate = 0;
     private static long _nGrabFrame = 0;
     private static long _timeStrampBegin = 0;
-    public static byte[] _currentBuf = null;
-    private static boolean _RequestMakeOESTexture = false;
-    
+    //public static byte[] _currentBuf = null;
+
     public static SurfaceTexture getSurfaceTexture(){
         return _textrue;
     }
@@ -104,11 +106,23 @@ public class AndroidDemuxer{
         return false;
     }
 
+    private static int _totalFrameSize = 0;
+    
     public static void releaseBuffer(byte [] data){
         if(_buffers!=null) {
             synchronized (_buffers) {
-                if (_bufferSize == data.length)
-                    _buffers.push(data);
+                if (_bufferSize == data.length) {
+                	if(_buffers.size()<=nMaxFrame)
+                		_buffers.push(data);
+                	else{
+                		//释放峰值内存
+                		_totalFrameSize--;
+                		Log.e(TAG,String.format("releaseBuffer %d x %d",_totalFrameSize,_bufferSize));
+                	}
+                    //Log.e(TAG,String.format("releaseBuffer %d x %d",_totalFrameSize,_bufferSize));
+                }else{
+                	Log.e(TAG,String.format("leak releaseBuffer %d x %d",_totalFrameSize,_bufferSize));
+                }
             }
         }
     }
@@ -116,11 +130,20 @@ public class AndroidDemuxer{
     private static native void ratainBuffer(int type,byte [] data,int len,
                                             int fmt,int p0,int p1,
                                             long timestramp);
-    public static native void testLiveRtmp(int tex);
-    public static native void testLiveRtmpEnd();
 
     public static byte [] newFrame(){
-        return new byte[_bufferSize];
+        byte [] buf;
+        try {
+            buf = new byte[_bufferSize];
+            _totalFrameSize++;
+            Log.e(TAG,String.format("newFrame new %d x %d",_totalFrameSize,_bufferSize));
+        }catch(Exception e){
+            Log.e(TAG,String.format("newFrame new byte %d",_bufferSize));
+            Log.e(TAG,String.format("totalFrameSize %d",_totalFrameSize));
+            Log.e(TAG,e.getMessage());
+            return null;
+        }
+        return buf;
     }
 
     public static boolean autoFocus(boolean b){
@@ -158,6 +181,8 @@ public class AndroidDemuxer{
     public static int openDemuxer(int tex,int nDevice,int w,int h,int fmt,int fps,
                                   int nChannel,int sampleFmt,int sampleRate ){
         Camera.Parameters config;
+        _isopened = false;
+
         if(Build.VERSION.SDK_INT < 11){
             Log.e(TAG,"openDemuxer need API level 11 or later");
             return -11;
@@ -166,7 +191,7 @@ public class AndroidDemuxer{
             Log.e(TAG,"openDemuxer already opened");
             return -10;
         }
-        if( nDevice>=0 ) {
+        if( nDevice>=0 && tex >= -1 ) {
             int bitsPrePixel = ImageFormat.getBitsPerPixel(fmt);
             if (bitsPrePixel <= 0 || w <= 0 || h <= 0) {
                 Log.e(TAG,"openDemuxer invalid argument");
@@ -205,7 +230,7 @@ public class AndroidDemuxer{
                 {
                     _cam.setDisplayOrientation(90);
 
-                // 华为前置摄像头导致setParameters异常
+                // 鍗庝负鍓嶇疆鎽勫儚澶村鑷磗etParameters寮傚父
                 //    try {
                 //        config.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                 //    }catch(Exception e){
@@ -242,8 +267,13 @@ public class AndroidDemuxer{
                 @Override
                 public void onPreviewFrame(byte[] data, Camera camera) {
                     //Log.w(TAG, String.format("onPreviewFrame 0 %d",data.length));
-                    _currentBuf = Arrays.copyOf(data,data.length);
-                    ratainBuffer(0, data,data.length,_pixFmt,_width,_height,System.nanoTime()-_timeStrampBegin);
+                    //_currentBuf = Arrays.copyOf(data,data.length);
+                    if(_isopened) {
+                        //Log.e(TAG, String.format("PreviewCallbackWithBuffer 0 %d",data.length));
+                        ratainBuffer(0, data, data.length, _pixFmt, _width, _height, System.nanoTime() - _timeStrampBegin);
+                    }else{
+                        releaseBuffer(data);
+                    }
                     synchronized (_buffers) {
                         if (_buffers.isEmpty()) {
                             _cam.addCallbackBuffer(newFrame());
@@ -259,55 +289,61 @@ public class AndroidDemuxer{
             _preivewThread = new Thread(new Runnable(){
                 @Override
                 public void run(){
-                    if(_tex==-1){
-                        _RequestMakeOESTexture = true;
-                        int count = 0;
-                        Log.e(TAG,"previewThread 3");
-                        while(_RequestMakeOESTexture){
-                            try{
-                                Thread.sleep(20);
-                            }catch(Exception e){
-                                Log.e(TAG,"openDemuxer _RequestMakeOESTexture Thread.sleep");
-                                Log.e(TAG,e.getMessage());
-                                _RequestMakeOESTexture = false;
-                            }
-                            count++;
-                            if( count >= 10000){
-                                Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
-                                Log.w(TAG,"please call requestGLThreadProcess");
-                                closeDemuxer();
-                                return;
+                    try {
+                        Log.e(TAG,"previewThread 1");
+                        _nGrabFrame = 0;
+                        Log.e(TAG,"previewThread 2");
+                        if(_tex==-1){
+                            _RequestMakeOESTexture = true;
+                            int count = 0;
+                            Log.e(TAG,"previewThread 3");
+                            while(_RequestMakeOESTexture){
+                                try{
+                                    Thread.sleep(20);
+                                    Log.e(TAG,"previewThread 4");
+                                }catch(Exception e){
+                                    Log.e(TAG,"openDemuxer _RequestMakeOESTexture Thread.sleep");
+                                    Log.e(TAG,e.getMessage());
+                                    _RequestMakeOESTexture = false;
+                                }
+                                count++;
+                                if( count >= 100){
+                                    Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
+                                    Log.w(TAG,"please call mainGL");
+                                    closeDemuxer();
+                                    return;
+                                }
                             }
                         }
-                    }
-                    Log.e(TAG,"previewThread 6");
-                    if(_tex==-1){
-                        Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
-                        closeDemuxer();
-                        return;
-                    }                	
-                    try {
-                        _nGrabFrame = 0;
+                        Log.e(TAG,"previewThread 6");
+                        if(_tex==-1){
+                            Log.e(TAG,"openDemuxer RequestMakeOESTexture failed!");
+                            closeDemuxer();
+                            return;
+                        }
                         _textrue = new SurfaceTexture(_tex);
                         _textrue.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener(){
                             @Override
                             public void onFrameAvailable(SurfaceTexture surfaceTexture){
-                                //Log.w(TAG,"openDemuxer onFrameAvailable");
-                                ratainBuffer(3, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
+                                if(_isopened) {
+                                    //Log.e(TAG, "openDemuxer onFrameAvailable");
+                                    ratainBuffer(3, null, 0, 0, 0, 0, System.nanoTime() - _timeStrampBegin);
+                                }
                                 _nGrabFrame++;
                             }
                         });
                         _cam.setPreviewTexture(_textrue);
                     }catch(Exception e){
                         Log.e(TAG,e.getMessage());
-                        closeDemuxer();
-                        return;
-                    }                	
+                    }
+                    Log.e(TAG,"previewThread startPreview");
                     _cam.startPreview();
+                    Log.e(TAG,"previewThread autoFocus");
                     autoFocus(true);
+                    Log.e(TAG,"previewThread done");
                 }
             });
-            ratainBuffer(4, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
+             //ratainBuffer(4, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
             _preivewThread.start();
         }
 
@@ -337,12 +373,15 @@ public class AndroidDemuxer{
                 return -7;
             }
             _audioRecordLoop = true;
+            Log.e(TAG,"startRecording ");
             _audioRecord.startRecording();
+            Log.e(TAG,"startRecording done. ");
             _audioRecordThread = new Thread(new Runnable(){
                 @Override
                 public void run(){
                     byte[] buffer = new byte[bufferSize];
                     _audioRecordStop = false;
+                    Log.e(TAG,"_audioRecordThread 1");
                     while(_audioRecordLoop){
                         int result = _audioRecord.read(buffer,0,bufferSize);
                         if(result<0){
@@ -352,35 +391,98 @@ public class AndroidDemuxer{
                             _audioRecord = null;
                             break;
                         }
-                     //   Log.e(TAG, String.format("onPreviewFrame 1 %d",result));
-                        ratainBuffer(1,buffer,result,_sampleFmt,_channel,0,System.nanoTime()-_timeStrampBegin);
+                        if(_isopened) {
+                           // Log.e(TAG, String.format("onPreviewFrame 1 %d", result));
+                            ratainBuffer(1, buffer, result, _sampleFmt, _channel, 0, System.nanoTime() - _timeStrampBegin);
+                        }
                     }
+                    Log.e(TAG,"_audioRecordThread done");
                     _audioRecordStop = true;
                 }
             });
-
+            Log.e(TAG,"_audioRecordThread start ");
             _audioRecordThread.start();
         }
+        /*
+         * 绛夊緟鍚姩绾跨▼閮芥纭惎鍔ㄤ簡鍦ㄨ繑鍥�
+         */
+        Log.e(TAG,"wait done 1");
+        while( _audioRecordStop || _textrue==null ){
+            if( _audioRecord == null ){
+                Log.e(TAG,"openDemuxer audioRecord thread stop");
+                return -20;
+            }
+            if( _cam == null ){
+                Log.e(TAG,"openDemuxer preivew thread stop");
+                return -21;
+            }
+            try{
+                Log.e(TAG,"waiting done ...");
+                Thread.sleep(20);
+            }catch(Exception e){
+                return -22;
+            }
+        }
+        _isopened = true;
+        Log.e(TAG,"wait done!");
         return 0;
+    }
+
+    private static boolean _RequestMakeOESTexture = false;
+    /*
+     * 鎴戦渶瑕佸湪GL娓叉煋绾夸笂鎻掑叆涓�涓洖璋冿紝杩欐牱鎴戝彲浠ヨ皟鐢℅L鍑芥暟
+     */
+    public static void requestGLThreadProcess()
+    {
+        if(_RequestMakeOESTexture){
+            int [] textures = new int[1];
+            if( _tex==-1 ){
+                GLES20.glGenTextures(1,textures,0);
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
+                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_MIN_FILTER,
+                        GL10.GL_LINEAR);
+                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                        GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+                _tex = textures[0];
+            }else{
+				textures[0] = _tex;
+                GLES20.glDeleteTextures(1,textures,0);
+                _tex = -1;
+            }
+            _RequestMakeOESTexture = false;
+        }
     }
 
     public static long getGrabFrameCount(){
         return _nGrabFrame;
     }
 
+    public static boolean isClosed(){
+        if(_cam==null && _audioRecord==null)
+            return true;
+        return false;
+    }
+
+
+
     public static void closeDemuxer(){
-        boolean isrelease = false;
+    	Log.e(TAG, "closeDemuxer begin");
         if(_cam!=null){
             _cam.stopPreview();
 
             _cam.setPreviewCallback(null);
 
-            _textrue.release();
+            if(_textrue!=null)
+                _textrue.release();
             _cam.release();
             _textrue = null;
             _cam = null;
             _nGrabFrame = 0;
-            isrelease = true;
             _RequestMakeOESTexture = true;
         }
         if(_audioRecord!=null) {
@@ -401,37 +503,8 @@ public class AndroidDemuxer{
             _buffers.clear();
             _buffers = null;
         }
-        if(isrelease)
-            ratainBuffer(5, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
+        //ratainBuffer(5, null,0,0,0,0,System.nanoTime()-_timeStrampBegin);
+        _isopened = false;
         Log.e(TAG, "closeDemuxer  end");
     }
-    
-    /*
-     * ����Ҫ��GL��Ⱦ���ϲ���һ���ص��������ҿ��Ե���GL����
-     */
-    public static void requestGLThreadProcess()
-    {
-        if(_RequestMakeOESTexture){
-            int [] textures = new int[1];
-            if( _tex==-1 ){
-                GLES20.glGenTextures(1,textures,0);
-                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
-                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                        GL10.GL_TEXTURE_MIN_FILTER,
-                        GL10.GL_LINEAR);
-                GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                        GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                        GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-                GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                        GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-                _tex = textures[0];
-            }else{
-            	 textures[0] = _tex;
-                GLES20.glDeleteTextures(1,textures,0);
-                _tex = -1;
-            }
-            _RequestMakeOESTexture = false;
-        }
-    }    
 }
