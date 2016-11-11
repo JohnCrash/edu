@@ -484,12 +484,12 @@ extern "C" {
 						}
 						int idx = 0;
 						for (int i = b; i < e; i++){
-							lua_pushstring(L, pls->errorMsg[idx++]);
-							lua_rawseti(L, -2, idx);
+							lua_pushstring(L, pls->errorMsg[i]);
+							lua_rawseti(L, -2, ++idx);
 						}
 						for (int i = 0; i < b; i++){
-							lua_pushstring(L, pls->errorMsg[idx++]);
-							lua_rawseti(L, -2, idx);
+							lua_pushstring(L, pls->errorMsg[i]);
+							lua_rawseti(L, -2, ++idx);
 						}
 						_prevResult = pLuaStack->executeFunction(4);
 					}
@@ -718,6 +718,16 @@ extern "C" {
 			return 1;
 		}
 	}
+	
+	static int cc_autofocus(lua_State *L)
+	{
+		if (lua_isboolean(L, 1)){
+			int b = lua_toboolean(L, 1);
+			lua_pushboolean(L,ff::ffAutoFocus(b));
+			return 1;
+		}
+		return 0;
+	}
 
 	static int cc_camopen(lua_State *L)
 	{
@@ -761,6 +771,7 @@ extern "C" {
 		lua_register(L, "cc_ffmpeg", cc_ffmpeg);
 		lua_register(L, "cc_camdevices", cc_camdevices);
 		lua_register(L, "cc_live", cc_live);
+		lua_register(L, "cc_autofocus", cc_autofocus);
 		lua_register(L, "cc_camopen", cc_camopen);
 		lua_register(L, "cc_camclose", cc_camclose);
 		lua_register(L, "cc_camrefresh", cc_camrefresh);

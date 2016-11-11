@@ -213,7 +213,17 @@ namespace ff
 		AVSampleFormat sampleFmt = sample_fmt_name ? av_get_sample_fmt(sample_fmt_name) : AV_SAMPLE_FMT_NONE;
 		
 		const char *outFmt;
-
+#ifdef __ANDROID__
+		/*
+		 * android 系统的相机系统有一个独特的格式'yv12',数据和AV_PIX_FMT_YUV420P都相同
+		 * 但是要交换u和v的数据区,AV_PIX_FMT_YVU420P是自定义的图像类型
+		 */
+		if (pixFmt == AV_PIX_FMT_NONE && pix_fmt_name){
+			if (strcmp(pix_fmt_name, "yv12") == 0){
+				pixFmt = AV_PIX_FMT_YVU420P;
+			}
+		}
+#endif
 		cocos2d::CCLog("liveOnRtmp rtmp_publisher:%s\ncamera_name = %s,w=%d h=%d fps=%d,pix_fmt_name=%s,vbitRate=%d,\n\
 						phone_name = %s , rate=%d sample_fmt_name=%s abitRate=%d\n\
 						ow = %d,oh = %d,ofps = %d",

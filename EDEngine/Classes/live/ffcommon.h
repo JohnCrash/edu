@@ -46,6 +46,8 @@ extern "C"
 
 #include "libavutil/timestamp.h"
 
+#define AV_PIX_FMT_YVU420P AV_PIX_FMT_VIDEOTOOLBOX
+
 struct SwrContext * av_swr_alloc(int in_ch,int in_rate,enum AVSampleFormat in_fmt,
 						  int out_ch,int out_rate,enum AVSampleFormat out_fmt);
 struct SwsContext * av_sws_alloc(int in_w,int in_h,enum AVPixelFormat in_fmt,
@@ -89,6 +91,9 @@ namespace ff
 		condition_t * cond;
 		int isflush;
 		int encode_waiting;
+	#ifdef __ANDROID__
+		int isyv12;
+	#endif
 	};
 
 	/*

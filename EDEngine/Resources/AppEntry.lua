@@ -804,6 +804,8 @@ function AppEntry:init()
 	local ff = uikits.button{caption='KEEP-ALIVE',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
+			cc_autofocus(true)
+			--[[
 			local mt = require "mt"
 			local url = "http://app.lejiaolexue.com/poems_test/poems.ashx"
 			local handle,msg
@@ -839,6 +841,7 @@ function AppEntry:init()
 				end
 				return true
 			end,1)
+							--]]
 		end}		
 	bg:addChild(ff)
 	local as

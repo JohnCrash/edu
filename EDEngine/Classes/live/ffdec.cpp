@@ -1,6 +1,13 @@
 #include "ffdec.h"
 #include "live.h"
 
+#ifdef __ANDROID__
+extern "C"
+{
+	int android_autoFoucs(int b);
+}
+#endif
+
 namespace ff
 {
 #ifdef WIN32
@@ -529,7 +536,7 @@ namespace ff
 			snprintf(buf, 32, "%d", _oesTex);
 			av_dict_set(&opt, "oes_texture", buf, -1);
 			//open debug info
-			//av_dict_set(&opt, "debug", "1", 0);
+			av_dict_set(&opt, "debug", "1", 0);
 		#endif
 		}
 		if (audio_device){
@@ -544,5 +551,14 @@ namespace ff
 		av_dict_set(&opt, "pixel_format", buf, 0);
 
 		return ffCreateDecodeContext(filename, opt);
+	}
+
+	int ffAutoFocus(int b)
+	{
+#ifdef __ANDROID__
+		return android_autoFoucs(b);
+#else
+		return 0;
+#endif
 	}
 }

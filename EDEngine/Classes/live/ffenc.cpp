@@ -181,12 +181,22 @@ namespace ff
 		}
 
 		if (c->width != in_w || c->height != in_h || in_fmt != c->pix_fmt){
-			pec->_vctx.sws_ctx = av_sws_alloc(in_w, in_h, in_fmt,
+			AVPixelFormat infmt;
+#
+			if (in_fmt == AV_PIX_FMT_YVU420P){
+				infmt = AV_PIX_FMT_YUV420P;
+#ifdef __ANDROID__
+				pec->_vctx.isyv12 = 1;
+#endif
+			}
+			else
+				infmt = in_fmt;
+			pec->_vctx.sws_ctx = av_sws_alloc(in_w, in_h, infmt,
 				c->width, c->height, c->pix_fmt);
 			av_log(NULL,AV_LOG_INFO,"av_sws_alloc in_w:%d in_h:%d in_fmt:%d(%s) codec_w:%d codec_h:%d codec_fmt:%d(%s)\n",
-				in_w, in_h, in_fmt, av_get_pix_fmt_name(in_fmt), c->width, c->height, c->pix_fmt, av_get_pix_fmt_name(c->pix_fmt));
+				in_w, in_h, infmt, av_get_pix_fmt_name(infmt), c->width, c->height, c->pix_fmt, av_get_pix_fmt_name(c->pix_fmt));
 			if (!pec->_vctx.sws_ctx){
-				av_log(NULL, AV_LOG_FATAL, "Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", in_w, in_h, in_fmt);
+				av_log(NULL, AV_LOG_FATAL, "Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", in_w, in_h, infmt);
 				return -1;
 			}
 		}
@@ -499,10 +509,28 @@ namespace ff
 		}
 		else
 		{
+#ifdef __ANDROID__
+			/*
+			 * android下对yv12进行特殊的调整操作
+			 */
+			if(ctx->isyv12){
+				uint8_t * data[NUM_DATA_POINTERS];
+				data[0] = praw->data[0];
+				data[1] = praw->data[2];
+				data[2] = praw->data[1];
+				sws_scale(ctx->sws_ctx,
+					(const uint8_t * const *)data, praw->linesize,
+					0, praw->height, frame->data, frame->linesize);
+			}else{
+				sws_scale(ctx->sws_ctx,
+					(const uint8_t * const *)praw->data, praw->linesize,
+					0, praw->height, frame->data, frame->linesize);
+			}
+#else
 			sws_scale(ctx->sws_ctx,
 				(const uint8_t * const *)praw->data, praw->linesize,
 				0, praw->height, frame->data, frame->linesize);
-
+#endif
 			frame->pts = ctx->next_pts++;
 			return frame;
 		}

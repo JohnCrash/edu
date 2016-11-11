@@ -44,6 +44,7 @@ namespace ff
 		AVDictionary * opt);
 
 	void ffSetOESTexture(int txt);
+	int ffAutoFocus(int b);
 	/*
 	 * 取得视频的帧率，宽度，高度
 	 */
