@@ -71,7 +71,7 @@ int CCLog(const char *pszFmt, ...)
 	char szLine[1024 * 10];
 	va_list	va;
 	va_start(va, pszFmt);
-	vsprintf(szLine, pszFmt, va);
+	vsnprintf(szLine,sizeof(szLine),pszFmt, va);
 	va_end(va);
 
 	cocos2d::CCLog(szLine,"");

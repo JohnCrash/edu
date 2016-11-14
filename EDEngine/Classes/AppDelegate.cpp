@@ -13,6 +13,9 @@
 #include "AppleBundle.h"
 #endif
 
+#ifdef __ANDROID__
+#undef _DEBUG
+#endif
 MySpaceBegin
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include <string>

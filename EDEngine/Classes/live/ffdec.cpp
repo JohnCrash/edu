@@ -536,7 +536,9 @@ namespace ff
 			snprintf(buf, 32, "%d", _oesTex);
 			av_dict_set(&opt, "oes_texture", buf, -1);
 			//open debug info
-			av_dict_set(&opt, "debug", "1", 0);
+			#ifdef _DEBUG
+				av_dict_set(&opt, "debug", "1", 0);
+			#endif
 		#endif
 		}
 		if (audio_device){

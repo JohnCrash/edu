@@ -227,13 +227,18 @@ local function recv( socket )
 	return nil,err
 end
 local _stopCap = false
-local function cap_devices()
+local function cap_devices(args)
 	require  "ff"
 	local t = cc_camdevices()
 	kits.logTable(t)
 	
 	local video_w,video_h,video_fps,video_name,video_fmt,phone_name,phone_freq
 	video_w = 1024
+	
+	print("================")
+	print(tostring(args))
+	print("================")
+	
 	for i,v in pairs(t) do
 		if v.type=='video' then
 			for k,vv in pairs(v.capability) do
@@ -253,6 +258,19 @@ local function cap_devices()
 		end
 	end
 	video_fps = 12
+	if string.len(args)>0 then
+		video_name,video_w,video_h,video_fps,video_fmt = string.match(args,"(%w+)%s+(%d+)x(%d+)%s+(%d+)%s+(%w+)")
+		if video_name then
+			video_name = "camera_"..video_name
+			video_w = tonumber(video_w)
+			video_h = tonumber(video_h)
+			video_fps = tonumber(video_fps)
+		else
+			print("error parse : ",tostring(args))
+			print("(%w+)%s+(%d+)x(%d+)%s+(%d+)%s+(%w+)")
+			return
+		end
+	end
 	print("video device:"..tostring(video_name))
 	print(string.format("	size:%dx%d fps:%d fmt:%s",video_w,video_h,video_fps,video_fmt))
 	print("audio device:"..tostring(phone_name))
@@ -728,11 +746,19 @@ function AppEntry:init()
 		eventClick=function(sender)
 				_stopCap = true
 			end}
+	local capedit = uikits.editbox{
+		caption = 'camer wxh fps pix_format',
+		fontSize = 64,
+		x=264*scale,y = 164*scale + (3+1/2)*item_h,
+		width=128*scale,height=48*scale
+	}
+	capedit:setText("")
+	self:addChild(capedit)
 	local resetwindow = uikits.button{caption='Cap devices',x=264*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			_stopCap = false
-			cap_devices()
+			cap_devices(capedit:getStringValue())
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,

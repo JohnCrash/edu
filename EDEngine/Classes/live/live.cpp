@@ -2,7 +2,12 @@
 #include "live.h"
 #include "ffenc.h"
 #include "ffdec.h"
-#include "cocos2d.h"
+#ifdef _DEBUG
+	#include "cocos2d.h"
+	#define DEBUG(format,...) cocos2d::log(format,##__VA_ARGS__);
+#else
+	#define DEBUG(format,...)
+#endif
 
 namespace ff
 {
@@ -99,10 +104,8 @@ namespace ff
 						av_log(NULL, AV_LOG_ERROR, "liveLoop break : ret < 0 , ret = %d\n",ret);
 						break;
 					}
-#ifdef _DEBUG
-		//					av_log(NULL, AV_LOG_INFO, "[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
-		//						ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
-#endif
+					DEBUG(NULL, AV_LOG_INFO, "[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
+								ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 				}
 				else if (ncsyn > MAX_NSYN){
 					av_log(NULL, AV_LOG_ERROR, "liveLoop break : video frame make up error, nsyn > MAX_NSYN , ncsyn = %d\n", ncsyn);
@@ -110,12 +113,10 @@ namespace ff
 				}
 				else{
 					//���������֡
-		//			av_log(NULL, AV_LOG_INFO, "discard video frame\n");
+					DEBUG("discard video frame\n");
 				}
-#ifdef _DEBUG
-		//		av_log(NULL, AV_LOG_INFO, "[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
-		//			ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
-#endif
+				DEBUG("[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
+					ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 			}
 			else if (praw->type == RAW_AUDIO && pdc->has_audio){
 				if (begin_pts == 0){
@@ -154,11 +155,7 @@ namespace ff
 					}
 					break;
 				}
-#ifdef _DEBUG
-				av_log(NULL, AV_LOG_INFO, "[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:%I64d time: %.4fs bs:%.2fmb\n",
-					nsyn, dsyn, nsynacc,praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE, (double)ffGetBufferSizeKB(pec) / 1024.0);
-#endif
-				cocos2d::CCLog("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:%I64d time: %.4fs bs:%.2fmb\n",
+				DEBUG("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:%I64d time: %.4fs bs:%.2fmb\n",
 					nsyn, dsyn, nsynacc, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE, (double)ffGetBufferSizeKB(pec) / 1024.0);
 
 				nsynacc = 0;
@@ -184,7 +181,7 @@ namespace ff
 	static void to_cclog(const char *format, va_list arg)
 	{
 		char szLine[1024 * 8];
-		vsprintf(szLine, format, arg);
+		vsnprintf(szLine, sizeof(szLine), format, arg);
 		cocos2d::CCLog(szLine, "");
 	}
 	static void log_callback(void * acl, int level, const char *format, va_list arg)
@@ -195,7 +192,9 @@ namespace ff
 			snprintf(state.errorMsg[state.nerror++], MAX_ERRORMSG_LENGTH, format, arg);
 		}
 		av_log_default_callback(acl, level, format, arg);
-		to_cclog(format,arg);
+	#ifdef _DEBUG
+	//	to_cclog(format,arg);
+	#endif
 	}
 
 	void liveOnRtmp(
@@ -224,7 +223,7 @@ namespace ff
 			}
 		}
 #endif
-		cocos2d::CCLog("liveOnRtmp rtmp_publisher:%s\ncamera_name = %s,w=%d h=%d fps=%d,pix_fmt_name=%s,vbitRate=%d,\n\
+		DEBUG("liveOnRtmp rtmp_publisher:%s\ncamera_name = %s,w=%d h=%d fps=%d,pix_fmt_name=%s,vbitRate=%d,\n\
 						phone_name = %s , rate=%d sample_fmt_name=%s abitRate=%d\n\
 						ow = %d,oh = %d,ofps = %d",
 						rtmp_publisher ? rtmp_publisher:"", camera_name ? camera_name : "", 
@@ -239,9 +238,9 @@ namespace ff
 			cb(&state);
 		}
 
-		ffInit();
-		
 		av_log_set_callback(log_callback);
+
+		ffInit();
 
 		av_dict_set(&opt, "strict", "-2", 0);
 		av_dict_set(&opt, "threads", "4", 0);
@@ -300,7 +299,7 @@ namespace ff
 			break;
 		}
 
-		cocos2d::CCLog("=================liveOnRtmp be close==================");
+		DEBUG("=================liveOnRtmp be close==================");
 		//马上把俘获设备关闭
 		if (pdc){
 			ffCloseDecodeContext(pdc);
@@ -319,10 +318,10 @@ namespace ff
 			state.state = LIVE_END;
 			cb(&state);
 		}
-		cocos2d::CCLog("=================liveOnRtmp closed==================");
+		DEBUG("=================liveOnRtmp closed==================");
 		av_log_set_callback(av_log_default_callback);
-		//cocos2d::CCLog("=================liveOnRtmp free opt==================");
+		//DEBUG("=================liveOnRtmp free opt==================");
 		//av_dict_free(&opt);
-		//cocos2d::CCLog("=================liveOnRtmp end==================");
+		DEBUG("=================liveOnRtmp end==================");
 	}
 }
