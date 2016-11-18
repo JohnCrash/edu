@@ -280,6 +280,7 @@ namespace ff
 					praw->time_base = ctx->pkt_timebase;
 					av_image_copy(praw->data, praw->linesize, (const uint8_t **)frame->data, frame->linesize, ctx->pix_fmt, ctx->width, ctx->height);
 					av_packet_unref(&pkt);
+					av_frame_unref(frame);
 					return praw;
 				}
 			}
@@ -296,6 +297,7 @@ namespace ff
 					praw->time_base = ctx->pkt_timebase;
 					av_samples_copy(praw->data, frame->data, 0, 0, frame->nb_samples, frame->channels, ctx->sample_fmt);
 					av_packet_unref(&pkt);
+					av_frame_unref(frame);
 					return praw;
 				}
 			}

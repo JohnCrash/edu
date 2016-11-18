@@ -104,7 +104,7 @@ namespace ff
 						av_log(NULL, AV_LOG_ERROR, "liveLoop break : ret < 0 , ret = %d\n",ret);
 						break;
 					}
-					DEBUG(NULL, AV_LOG_INFO, "[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
+					DEBUG("[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
 								ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 				}
 				else if (ncsyn > MAX_NSYN){
@@ -178,12 +178,14 @@ namespace ff
 		release_raw(praw);
 	}
 	static liveState state;
+    #ifdef _DEBUG
 	static void to_cclog(const char *format, va_list arg)
 	{
 		char szLine[1024 * 8];
 		vsnprintf(szLine, sizeof(szLine), format, arg);
 		cocos2d::CCLog(szLine, "");
 	}
+    #endif
 	static void log_callback(void * acl, int level, const char *format, va_list arg)
 	{
 		if (level == AV_LOG_ERROR || level == AV_LOG_FATAL){

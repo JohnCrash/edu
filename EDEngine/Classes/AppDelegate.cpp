@@ -656,7 +656,11 @@ void AppDelegate_v3::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-    CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+#ifdef __APPLE__
+    CocosDenshion3::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+#else
+	CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+#endif
 }
 
 // this function will be called when the app is active again
@@ -664,7 +668,11 @@ void AppDelegate_v3::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
-    CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+#ifdef __APPLE__
+    CocosDenshion3::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+#else
+	CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+#endif
 }
 
 MySpaceEnd

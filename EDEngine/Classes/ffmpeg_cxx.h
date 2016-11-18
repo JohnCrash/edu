@@ -553,7 +553,7 @@ namespace ff
 	extern int frame_bits_per_raw_sample;
 	extern AVIOContext *progress_avio;
 	extern float max_error_rate;
-	extern char *videotoolbox_pixfmt;
+	extern char *videotoolbox_pixfmt2;
 
 	extern const AVIOInterruptCB int_cb;
 
@@ -590,7 +590,7 @@ namespace ff
 	int vdpau_init(AVCodecContext *s);
 	int dxva2_init(AVCodecContext *s);
 	int vda_init(AVCodecContext *s);
-	int videotoolbox_init(AVCodecContext *s);
+	int videotoolbox_init2(AVCodecContext *s);
 	int qsv_init(AVCodecContext *s);
 	int qsv_transcode_init(OutputStream *ost);
 	int vaapi_decode_init(AVCodecContext *avctx);

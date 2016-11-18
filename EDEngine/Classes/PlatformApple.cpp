@@ -7,3 +7,12 @@
 //
 
 #include "Platform.h"
+
+MySpaceBegin
+
+void buy(const char *str)
+{
+    
+}
+
+MySpaceEnd

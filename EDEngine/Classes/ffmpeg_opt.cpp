@@ -75,18 +75,18 @@ namespace ff{
     }\
 }
 
-const HWAccel hwaccels[] = {
+    const HWAccel hwaccels[] = {
 #if HAVE_VDPAU_X11
     { "vdpau", vdpau_init, HWACCEL_VDPAU, AV_PIX_FMT_VDPAU },
 #endif
 #if HAVE_DXVA2_LIB
-    { "dxva2", dxva2_init, HWACCEL_DXVA2, AV_PIX_FMT_DXVA2_VLD },
+   // { "dxva2", dxva2_init, HWACCEL_DXVA2, AV_PIX_FMT_DXVA2_VLD },
 #endif
 #if CONFIG_VDA
-    { "vda",   videotoolbox_init,   HWACCEL_VDA,   AV_PIX_FMT_VDA },
+    { "vda",   videotoolbox_init2,   HWACCEL_VDA,   AV_PIX_FMT_VDA },
 #endif
 #if CONFIG_VIDEOTOOLBOX
-    { "videotoolbox",   videotoolbox_init,   HWACCEL_VIDEOTOOLBOX,   AV_PIX_FMT_VIDEOTOOLBOX },
+    { "videotoolbox",   videotoolbox_init2,   HWACCEL_VIDEOTOOLBOX,   AV_PIX_FMT_VIDEOTOOLBOX },
 #endif
 #if CONFIG_LIBMFX
     { "qsv",   qsv_init,   HWACCEL_QSV,   AV_PIX_FMT_QSV },
@@ -3472,7 +3472,7 @@ const OptionDef options[] = {
                           OPT_SPEC | OPT_INPUT,                                  {  OFFSET(hwaccel_output_formats) },
         "select output format used with HW accelerated decoding", "format" },
 #if CONFIG_VDA || CONFIG_VIDEOTOOLBOX
-    { "videotoolbox_pixfmt", HAS_ARG | OPT_STRING | OPT_EXPERT, { &videotoolbox_pixfmt}, "" },
+    { "videotoolbox_pixfmt", HAS_ARG | OPT_STRING | OPT_EXPERT, { &videotoolbox_pixfmt2}, "" },
 #endif
 	{ "hwaccels", OPT_EXIT, { (void*)show_hwaccels },
         "show available HW acceleration methods" },

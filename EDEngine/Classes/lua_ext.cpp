@@ -294,14 +294,17 @@ extern "C" {
 	extern int luaopen_lzmq_timer(lua_State *L);
 #endif
 extern int luaopen_json( lua_State *L );
+#ifndef __APPLE__ //ios arm64 not support luajit
 extern int luaopen_bit(lua_State *L);
-
+#endif
 static luaL_Reg luax_exts[] = {
     {"mt", luaopen_threadcurl},
 	{"json-c",luaopen_json},
 	{"ff",luaopen_ffmpeg},
 	{ "thread", luaopen_thread },
+#ifndef __APPLE__
 	{ "bit", luaopen_bit },
+#endif
 	//{ "multithread", luaopen_multithread },
 #ifdef USE_ZMQ
 	{ "lzmq", luaopen_lzmq },
@@ -770,8 +773,10 @@ int cc_acr_log(lua_State *L)
 {
 	if (lua_isstring(L, 1))
 	{
+#ifndef __APPLE__        //apple not support acr
 		const char * msg = lua_tostring(L, 1);
 		acr_add_log(msg);
+#endif
 	}
 	return 0;
 }

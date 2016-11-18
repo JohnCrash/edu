@@ -14,12 +14,11 @@
 USING_NS_CC;
 UsingMySpace;
 
-static AppDelegate sAppInstance;
+static AppDelegate_v3 sAppInstance;
 
 int launchEdengine( void *eaglview )
 {
     GLView *glview = GLView::createWithEAGLView(eaglview);
     Director::getInstance()->setOpenGLView(glview);
-    Application::getInstance()->run();
-    
+    return Application::getInstance()->run();
 }
