@@ -807,6 +807,19 @@ int lua_buy(lua_State *L)
 {
 	if (lua_isstring(L, 1)){
 		buy(luaL_checkstring(L, 1));
+		if (lua_isfunction(L, 2))
+		{
+			lua_pushvalue(L, -1);
+			if (g_callref != LUA_REFNIL)
+				lua_unref(L, g_callref);
+			g_callref = luaL_ref(L, LUA_REGISTRYINDEX);
+			lua_pushboolean(L, 1);
+			return 1;
+		}
+		else
+		{
+			g_callref = LUA_REFNIL;
+		}
 	}
 	return 0;
 }

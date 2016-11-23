@@ -702,13 +702,18 @@ function AppEntry:init()
 			end}
 		end}
 	local g_last
-	local record =  uikits.button{caption='show BaiduVoice',x=264*scale,y = 64*scale + 4*item_h,
+	local record =  uikits.button{caption='Buy',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
 	local box = debugip
 	uikits.event( record,
 		function(sender,eventType)
-			if cc_showBaiduVoice then
+			
+			local b = cc_buy("",function(t,result,res)
+					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+				end)	
+			print("call buy return  : "..tostring(b))
+	--[[	if cc_showBaiduVoice then
 				cc_showBaiduVoice( function(text)
 					if cc_isobj(box) then
 						box:setText(text)
@@ -716,7 +721,8 @@ function AppEntry:init()
 						print(text)
 					end
 				end)
-			end
+			end 	
+	--]]
 		end)	
 	local han =  uikits.button{caption='汉字',x=264*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
@@ -827,7 +833,7 @@ function AppEntry:init()
 	local idx = 4
 	local ffmpeg_as
 	local sp,sp2
-	local ff = uikits.button{caption='KEEP-ALIVE',x=664*scale,y = 164*scale + 4*item_h,
+	local ff = uikits.button{caption='AutoFocus',x=664*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			cc_autofocus(true)

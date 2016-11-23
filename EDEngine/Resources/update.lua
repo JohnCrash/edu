@@ -631,11 +631,11 @@ function UpdateProgram:update()
 				--检查错误列表，看看是否有没有下载的数据
 				if #download_error_table > 0 then
 					--有错误，将其重新加载到_oplist，然后继续下载
-					if try_count > 3 and try_count <=6 then --总是重试，次数太多
+					if try_count > 10 and try_count <=13 then --总是重试，次数太多
 						--尝试使用原服务器再尝试3次
 						liexue_server_dl = liexue_server_sr
-					elseif try_count > 6 then
-						self:ErrorAndExit('下载失败，重试次数太多。',2)
+					elseif try_count > 13 then
+						self:ErrorAndExit('网络连接失败，文件无法下载。请确保网络通畅！',2)
 						return
 					end
 					kits.log("INFO : Try download again!")

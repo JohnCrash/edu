@@ -97,6 +97,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	private static final int RETURN_TYPE_RECORDDATA = 10;
 	private static final int TAKE_PICTURE = 1;
 	private static final int PICK_PICTURE = 2;
+	private static final int TAKE_BUYRESULT = 100;
 	private static AppActivity myActivity;
 	private static String _resourceName;
 	public static void takeResource(int from)
@@ -170,6 +171,9 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 				}
 			}
 			sendTakeResourceResult( requestCode,resultCode,_resourceName);
+			return;
+		}else if(requestCode == TAKE_BUYRESULT){
+			sendTakeResourceResult( requestCode,data.getIntExtra("Result",0),data.getStringExtra("Param"));
 			return;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -438,7 +442,13 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 	
 	public static void Buy(String itemName)
 	{
-		
+		Intent mIntent = new Intent( );   
+        ComponentName comp = new ComponentName("com.lj.ljshell", "com.lj.ljshell.ljshell");
+        mIntent.setComponent(comp);
+        String url;
+        url= String.format("ljshell://ljPay?action=paylecoin&userid=%s&ResCode=100&%s", _uid,itemName);
+        mIntent.putExtra("CmdLine",url);
+        myActivity.startActivityForResult(mIntent,TAKE_BUYRESULT);		
 	}
 	
 	public static int VoiceStopPlay()

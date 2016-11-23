@@ -19,7 +19,7 @@ RESULT_CANCEL = 0
 RESULT_ERROR = -2
 TAKE_PICTURE = 1
 PICK_PICTURE = 2
-
+BUY_ITEM = 100
 --[[
 ]]--
 if cc_clock then
