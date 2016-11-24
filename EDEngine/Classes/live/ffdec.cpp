@@ -15,7 +15,7 @@ namespace ff
 #elif __ANDROID__
 	#define CAP_DEVICE_NAME "android_camera"
 #elif __APPLE__
-	#define CAP_DEVICE_NAME "ios_camera"
+	#define CAP_DEVICE_NAME "avfoundation2"
 #endif
 	/*
 	* ����Ƶ������
@@ -311,6 +311,75 @@ namespace ff
 	static int s_i = 0;
 	AVDeviceType s_type = AV_DEVICE_NONE;
 	static int s_nmax = 0;
+#ifdef __APPLE__
+    static void log_callback(void * acl, int level, const char *format, va_list arg)
+    {
+        AVDevice * pdevices = s_pdevices;
+        
+        if (pdevices && level == AV_LOG_INFO && s_i < s_nmax){
+            if (strstr(format, "AVFoundation video devices:\n") == format){
+                s_type = AV_DEVICE_VIDEO;
+            }
+            else if (strstr(format, "AVFoundation audio devices:\n") == format){
+                s_type = AV_DEVICE_AUDIO;
+            }
+            else if(strstr(format,"[%d] %s\n") == format ){
+                if(pdevices[s_i].capability_count>0)
+                    s_i++;
+                snprintf(pdevices[s_i].alternative_name,MAX_DEVICE_NAME_LENGTH,"%d",va_arg(arg,int));
+                strcpy(pdevices[s_i].name, va_arg(arg, char*));
+                pdevices[s_i].type = s_type;
+            }
+            else if(strstr(format,"AVFoundation list_devices end") == format ){
+                s_i++;
+            }
+            else if(strstr(format,"%s %dx%d %f-%f\n") == format ){
+                int index = pdevices[s_i].capability_count;
+                if (index < MAX_CAPABILITY_COUNT && index >= 0){
+                    char * pixfmt = va_arg(arg,char *);
+                    int w = va_arg(arg,int);
+                    int h = va_arg(arg,int);
+                    double min_framerate = va_arg(arg,double);
+                    double max_framerate = va_arg(arg,double);
+                    pdevices[s_i].capability[index].video.min_w = w;
+                    pdevices[s_i].capability[index].video.min_h = h;
+                    pdevices[s_i].capability[index].video.min_fps = min_framerate;
+                    pdevices[s_i].capability[index].video.max_w = w;
+                    pdevices[s_i].capability[index].video.max_h = h;
+                    pdevices[s_i].capability[index].video.max_fps = max_framerate;
+                    strcpy(pdevices[s_i].capability[index].video.pix_format,pixfmt);
+                    pdevices[s_i].capability_count++;
+                }
+            }
+            else if(strstr(format,"format:%s chanel:%d bits:%d samples:(%d-%d)\n")== format ){
+                int index = pdevices[s_i].capability_count;
+                if (index < MAX_CAPABILITY_COUNT && index >= 0){
+                    char * fmt = va_arg(arg,char *);
+                    int ch = va_arg(arg,int);
+                    int bits = va_arg(arg,int);
+                    int min_samples = va_arg(arg,int);
+                    int max_samples = va_arg(arg,int);
+                    pdevices[s_i].capability[index].audio.min_ch = ch;
+                    pdevices[s_i].capability[index].audio.min_bit = bits;
+                    pdevices[s_i].capability[index].audio.min_rate = min_samples;
+                    pdevices[s_i].capability[index].audio.max_ch = ch;
+                    pdevices[s_i].capability[index].audio.max_bit = bits;
+                    pdevices[s_i].capability[index].audio.max_rate = max_samples;
+                    strcpy(pdevices[s_i].capability[index].audio.sample_format,fmt);
+                    pdevices[s_i].capability_count++;
+                }
+            }
+        }
+    }
+    static int _initAVFoundation = 0;
+    extern "C" AVInputFormat ff_avfoundation_demuxer2;
+    static void initAVFoundation(){
+        if(!_initAVFoundation){
+            av_register_input_format(&ff_avfoundation_demuxer2);
+            _initAVFoundation = 1;
+        }
+    }
+#else
 	static void log_callback(void * acl, int level, const char *format, va_list arg)
 	{
 		AVDevice * pdevices = s_pdevices;
@@ -391,7 +460,8 @@ namespace ff
 			}
 		}
 	}
-	
+#endif
+    
 	int ffCapDevicesList(AVDevice *pdevices, int nmax)
 	{
 		int i, count, ret;
@@ -402,6 +472,7 @@ namespace ff
 		char buf[256];
 		
 		ffInit();
+        initAVFoundation();
 		while (true)
 		{
 			/*
@@ -436,10 +507,13 @@ namespace ff
 			ret = avformat_open_input(&ctx, filename, file_iformat, &opt);
 
 			av_dict_set(&opt, "list_devices", "false", 0);
+            
+            count = s_i;
+#ifndef __APPLE__
 			av_dict_set(&opt, "list_options", "true", 0);
-			count = s_i;
 			for (i = 0; i < count; i++){
-				char filename[512];
+                char filename[512];
+
 				if (pdevices[i].type == AV_DEVICE_VIDEO)
 					snprintf(filename, 512, "video=%s", pdevices[i].alternative_name);
 				else if (pdevices[i].type == AV_DEVICE_AUDIO)
@@ -451,7 +525,7 @@ namespace ff
 				s_i = i;
 				ret = avformat_open_input(&ctx, filename, file_iformat, &opt);
 			}
-
+#endif
 			av_log_set_callback(av_log_default_callback);
 			s_pdevices = NULL;
 			s_nmax = 0;
@@ -509,7 +583,7 @@ namespace ff
 		char filename[2 * MAX_DEVICE_NAME_LENGTH];
 
 		ffInit();
-		
+        initAVFoundation();
 		if (video_device){
 
 			strcpy(filename, "video=");
@@ -534,14 +608,18 @@ namespace ff
 			//���񻺳�����С
 			//	snprintf(buf, 32, "%d", 8*1024*1024);
 			//	av_dict_set(&opt, "rtbufsize", buf, 0);
-		#ifdef __ANDROID__
+#ifdef __ANDROID__
 			snprintf(buf, 32, "%d", _oesTex);
 			av_dict_set(&opt, "oes_texture", buf, -1);
 			//open debug info
 			#ifdef _DEBUG
 				av_dict_set(&opt, "debug", "1", 0);
 			#endif
-		#endif
+#endif
+            
+#ifdef __APPLE__
+            av_dict_set(&opt,"video_device_index",video_device,-1);
+#endif            
 		}
 		if (audio_device){
 			snprintf(buf, 32, "%d", chancel);
@@ -550,6 +628,9 @@ namespace ff
 			av_dict_set(&opt, "sample_size", buf, 0);
 			snprintf(buf, 32, "%d", rate);
 			av_dict_set(&opt, "sample_rate", buf, 0);
+#ifdef __APPLE__
+            av_dict_set(&opt,"audio_device_index",audio_device,-1);
+#endif            
 		}
 		snprintf(buf, 32, "%d", fmt);
 		av_dict_set(&opt, "pixel_format", buf, 0);

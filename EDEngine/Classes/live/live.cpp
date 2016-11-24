@@ -2,7 +2,7 @@
 #include "live.h"
 #include "ffenc.h"
 #include "ffdec.h"
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(_LIVE_DEBUG)
 	#include "cocos2d.h"
 	#define DEBUG(format,...) cocos2d::log(format,##__VA_ARGS__);
 #else
@@ -257,19 +257,6 @@ namespace ff
 
 		while (1){
 			/*
-			 * ��ʼ��������
-			 */
-			pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt, phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
-			if (!pdc || !pdc->_video_st || !pdc->_video_st->codec){
-				if (cb){
-					state.state = LIVE_ERROR;
-					cb(&state);
-				}
-				break;
-			}
-			AVCodecContext *ctx = pdc->_video_st->codec;
-
-			/*
 			 * 直播,FIXME:忽略直播的独立帧率，目前和输入帧率相同
 			 */
 			vid = camera_name ? AV_CODEC_ID_H264 : AV_CODEC_ID_NONE;
@@ -284,7 +271,7 @@ namespace ff
 				outFmt = "mp4";
 			}
 			pec = ffCreateEncodeContext(rtmp_publisher, outFmt, ow, oh, AVRational{ fps, 1 }, vbitRate, vid,
-				ctx->width, ctx->height, ctx->pix_fmt,
+				w, h, pixFmt,
 				rate, abitRate, aid,
 				AUDIO_CHANNEL, rate, sampleFmt,
 				opt);
@@ -295,8 +282,18 @@ namespace ff
 				}
 				break;
 			}
-
-			state.state = LIVE_FRAME;
+            /*
+             * 这里打开捕获设备，并马上进入直播循环
+             */
+            pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt, phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
+            if (!pdc || !pdc->_video_st || !pdc->_video_st->codec){
+                if (cb){
+                    state.state = LIVE_ERROR;
+                    cb(&state);
+                }
+                break;
+            }
+            state.state = LIVE_FRAME;
 			liveLoop(pdc,pec,cb,&state);
 			break;
 		}
@@ -306,11 +303,12 @@ namespace ff
 		if (pdc){
 			ffCloseDecodeContext(pdc);
 		}
-		//将为发送的数据发送出去然后关闭
+		//将未发送的数据发送出去然后关闭
 		if (pec){
 			ffFlush(pec);
 			ffCloseEncodeContext(pec);
 		}
+        DEBUG("=================liveOnRtmp closed==================");
 		//通知回调，直播结束
 		if (cb){
 			if (state.nerror){
@@ -320,7 +318,6 @@ namespace ff
 			state.state = LIVE_END;
 			cb(&state);
 		}
-		DEBUG("=================liveOnRtmp closed==================");
 		av_log_set_callback(av_log_default_callback);
 		//DEBUG("=================liveOnRtmp free opt==================");
 		//av_dict_free(&opt);
