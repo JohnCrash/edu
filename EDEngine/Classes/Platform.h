@@ -175,6 +175,19 @@ public:
 #include "mmsystem.h"
 #include "vfw.h"
 
+#define WM_LJSHELL_URIFLAG    0xEFBF8B62
+#define WM_LJSHELL_CLASSNAME  "ljShellWin32"
+typedef struct tagljRunParam
+{
+	HWND  hWnd;
+	char  szURI[1024];
+}LJRUNPARAM, *PLJRUNPARAM;
+typedef struct tagljRunResParam
+{
+	int    nRes;
+	char  szParam[1024];
+}LJRUNRESPARAM, *PLJRUNRESPARAM;
+
 class CCameraWin
 {
 public:

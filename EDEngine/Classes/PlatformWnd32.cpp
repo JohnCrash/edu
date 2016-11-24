@@ -958,7 +958,22 @@ bool VoiceIsPlaying(const char *pszPathName)
 
 void buy(const char * str)
 {
-
+	HWND hLjShellWnd = ::FindWindowA(WM_LJSHELL_CLASSNAME, nullptr);
+	if (hLjShellWnd)
+	{
+		LJRUNPARAM    objParam;
+		memset(&objParam, 0, sizeof(LJRUNPARAM));
+		objParam.hWnd = g_hMainWnd;
+		sprintf_s(objParam.szURI, "ljshell://ljPay?action=paylecoin&userid=%s&%s", g_Userid.c_str(),str);
+		COPYDATASTRUCT objCopyData;
+		objCopyData.dwData = 0;
+		objCopyData.cbData = sizeof(LJRUNPARAM);
+		objCopyData.lpData = &objParam;
+		::SendMessageA(hLjShellWnd, WM_COPYDATA, WM_LJSHELL_URIFLAG, (LPARAM)&objCopyData);
+	}
+	else{
+		CCLOG("Can not found ljshell window");
+	}
 }
 MySpaceEnd
 #endif

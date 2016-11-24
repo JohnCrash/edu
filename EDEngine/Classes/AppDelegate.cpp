@@ -3,6 +3,7 @@
 #include "lua_ext.h"
 #include "lua_ljshell.h"
 #include "luaDebug.h"
+#include "Platform.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 #include "win32/glfw3native.h"
@@ -317,6 +318,19 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		break;
 	case WM_NCACTIVATE:
 		RedrawWindow(hwnd, NULL, NULL,RDW_UPDATENOW);
+		break;
+	case WM_LJSHELL_URIFLAG:
+		{
+			BringWindowToTop(hwnd);
+			COPYDATASTRUCT* pobjCopyData = (COPYDATASTRUCT*)lParam;
+			if (pobjCopyData->cbData == sizeof(LJRUNRESPARAM)){
+				PLJRUNRESPARAM  pobjRes = (PLJRUNRESPARAM)pobjCopyData->lpData;
+				if (pobjRes){
+					takeResource_callback(pobjRes->szParam, 100, pobjRes->nRes);
+					break;
+				}
+			}
+		}
 		break;
 	default:
 		return DefualtProc(hwnd, uMsg, wParam, lParam);
