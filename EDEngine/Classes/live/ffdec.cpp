@@ -262,13 +262,15 @@ namespace ff
 							data[1] = praw->data[2];
 							data[2] = praw->data[1];
 							sws_scale(avctx->sws_ctx,
-								(const uint8_t * const *)data, praw->linesize,
-								0, praw->height, frame->data, frame->linesize);
+								(const uint8_t * const *)frame->data, frame->linesize,
+								0, frame->height,
+								praw->data, praw->linesize);
 						}
 						else{
 							sws_scale(avctx->sws_ctx,
-								(const uint8_t * const *)praw->data, praw->linesize,
-								0, praw->height, frame->data, frame->linesize);
+								(const uint8_t * const *)frame->data, frame->linesize,
+								0, frame->height,
+								praw->data, praw->linesize);
 						}
 					}
 					else{
@@ -646,20 +648,18 @@ namespace ff
 				}
 				if (pdc->_vctx.sws_ctx)
 					sws_freeContext(pdc->_vctx.sws_ctx);
-				pdc->_vctx.sws_ctx = av_sws_alloc(w, h, infmt,
-					c->width, c->height, c->pix_fmt);
-				DEBUG("ffReadFrameFormat @av_sws_alloc in_w:%d in_h:%d in_fmt:%d(%s) codec_w:%d codec_h:%d codec_fmt:%d(%s)\n",
-					in_w, in_h, infmt, av_get_pix_fmt_name(infmt), c->width, c->height, c->pix_fmt, av_get_pix_fmt_name(c->pix_fmt));
+				pdc->_vctx.sws_ctx = av_sws_alloc(c->width, c->height, c->pix_fmt,
+					w, h, infmt);
 				if (!pdc->_vctx.sws_ctx){
 					av_log(NULL, AV_LOG_FATAL, "@ffReadFrameFormat : Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", w, h, infmt);
 					return -1;
 				}
-				pdc->_vctx.sws_in_w = w;
-				pdc->_vctx.sws_in_h = h;
-				pdc->_vctx.sws_in_fmt = infmt;
-				pdc->_vctx.sws_out_w = c->width;
-				pdc->_vctx.sws_out_h = c->height;
-				pdc->_vctx.sws_out_fmt = c->pix_fmt;
+				pdc->_vctx.sws_in_w = c->width;
+				pdc->_vctx.sws_in_h = c->height;
+				pdc->_vctx.sws_in_fmt = c->pix_fmt;
+				pdc->_vctx.sws_out_w = w;
+				pdc->_vctx.sws_out_h = h;
+				pdc->_vctx.sws_out_fmt = infmt;
 			}
 			else{
 				if (pdc->_vctx.sws_ctx)
@@ -675,18 +675,18 @@ namespace ff
 				if (pdc->_actx.swr_ctx)
 					swr_free(&pdc->_actx.swr_ctx);
 				/* create resampler context */
-				pdc->_actx.swr_ctx = av_swr_alloc(ch, sample_rate, sample_fmt,
-					c->channels, c->sample_rate, c->sample_fmt);
+				pdc->_actx.swr_ctx = av_swr_alloc(c->channels, c->sample_rate, c->sample_fmt,
+					ch, sample_rate, sample_fmt);
 				if (!pdc->_actx.swr_ctx){
 					av_log(NULL, AV_LOG_FATAL, "@ffReadFrameFormat Failed to initialize the resampling context\n");
 					return -1;
 				}
-				pdc->_actx.swr_in_channel = ch;
-				pdc->_actx.swr_in_sample_rate = sample_rate;
-				pdc->_actx.swr_in_sample_fmt = sample_fmt;
-				pdc->_actx.swr_out_channel = c->channels;
-				pdc->_actx.swr_out_sample_rate = c->sample_rate;
-				pdc->_actx.swr_out_sample_fmt = c->sample_fmt;
+				pdc->_actx.swr_in_channel = c->channels;
+				pdc->_actx.swr_in_sample_rate = c->sample_rate;
+				pdc->_actx.swr_in_sample_fmt = c->sample_fmt;
+				pdc->_actx.swr_out_channel = ch;
+				pdc->_actx.swr_out_sample_rate = sample_rate;
+				pdc->_actx.swr_out_sample_fmt = sample_fmt;
 			}
 			else{
 				if (pdc->_actx.swr_ctx)

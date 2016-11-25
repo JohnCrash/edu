@@ -528,7 +528,6 @@ namespace ff
 	/*
 	 * encode one video frame and send it to the muxer
 	 * return 1 when encoding is finished, 0 otherwise
-	 * 锟斤拷锟斤拷锟斤拷-1
 	 */
 	static int write_video_frame(AVEncodeContext * pec, AVRaw *praw)
 	{
