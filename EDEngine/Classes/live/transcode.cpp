@@ -200,7 +200,7 @@ namespace ff
 							{ /* 第一次进来来，将数据重新组织 */
 								rebuffer_sample(praw2, &head, &tail, enc_fmt, enc_channel, enc_samples);
 								/* 需要释放 */
-								release_raw(praw2);
+								free_raw(praw2);
 							}
 							praw2 = rebuffer_pop_raw(&head, &tail);
 							if (!praw2)

@@ -159,7 +159,6 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\Files.cpp" />
     <ClCompile Include="..\Classes\IDF.cpp" />
     <ClCompile Include="..\Classes\live\cap_vfw.cpp" />
-    <ClCompile Include="..\Classes\live\dec.cpp" />
     <ClCompile Include="..\Classes\live\ffdec.cpp" />
     <ClCompile Include="..\Classes\live\ffenc.cpp" />
     <ClCompile Include="..\Classes\live\ffraw.cpp" />

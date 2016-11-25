@@ -9,7 +9,6 @@
 #include "ffconfig.h"
 
 #ifdef _WIN32
-#define HAVE_STRUCT_POLLFD 1
 #define snprintf _snprintf
 #endif
 
@@ -57,6 +56,13 @@ int av_encode_init(AVCodecContext *c,enum AVCodecID codec_id, AVDictionary *opt_
 void av_ff_init();
 }
 
+#if defined(_LIVE_DEBUG)
+#include "cocos2d.h"
+#define DEBUG(format,...) cocos2d::log(format,##__VA_ARGS__);
+#else
+#define DEBUG(format,...)
+#endif
+
 namespace ff
 {
 #define ERROR_BUFFER_SIZE 1024
@@ -91,14 +97,9 @@ namespace ff
 		condition_t * cond;
 		int isflush;
 		int encode_waiting;
-	#ifdef __ANDROID__
 		int isyv12;
-	#endif
 	};
 
-	/*
-	* ��ʼ��ff��,ע���豸����ʼ���硣
-	*/
 	void ffInit();
 
 	AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,

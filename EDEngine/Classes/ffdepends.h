@@ -389,4 +389,11 @@ namespace ff{
     void My_log(void* p,int inval,const char* fmt,...);
 }
 
+#if defined(_FF_DEBUG)
+#include "cocos2d.h"
+#define DEBUG(format,...) cocos2d::log(format,##__VA_ARGS__);
+#else
+#define DEBUG(format,...)
+#endif
+
 #endif

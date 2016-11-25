@@ -141,9 +141,6 @@
     <ClCompile Include="..\Classes\live\cap_vfw.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\live\dec.cpp">
-      <Filter>Classes\live</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\live\ffdec.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>

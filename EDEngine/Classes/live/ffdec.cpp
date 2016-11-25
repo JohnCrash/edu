@@ -17,16 +17,12 @@ namespace ff
 #elif __APPLE__
 	#define CAP_DEVICE_NAME "avfoundation2"
 #endif
-	/*
-	* ����Ƶ������
-	*/
+
 	static int open_audio(AVDecodeCtx *pec, AVCodecID audio_codec_id, AVDictionary *opt_arg)
 	{
 		AVCodecContext *c;
 		int nb_samples;
-		int ret;
 		AVDictionary *opt = NULL;
-		AVCodec * codec;
 
 		c = pec->_audio_st->codec;
 
@@ -57,15 +53,10 @@ namespace ff
 		return 0;
 	}
 
-	/*
-	* ����Ƶ������
-	*/
 	static int open_video(AVDecodeCtx *pec, AVCodecID video_codec_id, AVDictionary *opt_arg)
 	{
-		int ret;
 		AVCodecContext *c = pec->_video_st->codec;
 		AVDictionary *opt = NULL;
-		AVCodec *codec;
 
 		if(av_decode_init(c,video_codec_id,opt_arg)!=0){
 			av_log(NULL, AV_LOG_FATAL, "Could not init decoder '%s'\n", avcodec_get_name(video_codec_id));
@@ -83,14 +74,11 @@ namespace ff
 		return 0;
 	}
 
-	/*
-	* ����һ�������������ģ�����Ƶ�ļ����н������
-	*/
 	AVDecodeCtx *ffCreateDecodeContext(
 		const char * filename, AVDictionary *opt_arg
 		)
 	{
-		int i, ret;
+		int ret;
 		AVInputFormat *file_iformat = NULL;
 		AVDecodeCtx * pdc;
 		AVDictionary * opt = NULL;
@@ -108,7 +96,7 @@ namespace ff
 				av_log(NULL, AV_LOG_FATAL, "ffCreateDecodeContext : could not allocate context.\n");
 				break;
 			}
-			//filename = "video=.." ,open dshow device
+
 			if (filename && strstr(filename, "video=") == filename){
 				file_iformat = av_find_input_format(CAP_DEVICE_NAME);
 				if (!file_iformat){
@@ -140,9 +128,7 @@ namespace ff
 				av_log(NULL, AV_LOG_FATAL, "ffCreateDecodeContext %s.\n", errmsg);
 				break;
 			}
-			/*
-			 * ������Ƶ������Ƶ��
-			 */
+
 			ret = av_find_best_stream(pdc->_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 			if (ret >= 0)
 			{
@@ -179,9 +165,6 @@ namespace ff
 			return pdc;
 		}
 
-		/*
-		 * ʧ������
-		 */
 		ffCloseDecodeContext(pdc);
 		return NULL;
 	}
@@ -214,9 +197,6 @@ namespace ff
 		}
 	}
 
-	/*
-	* ȡ����Ƶ��֡�ʣ���ȣ��߶�
-	*/
 	AVRational ffGetFrameRate(AVDecodeCtx *pdc)
 	{
 		if (pdc && pdc->_video_st&&pdc->_video_st->codec)
@@ -248,8 +228,8 @@ namespace ff
 	}
 
 	/*
-	* ����Ƶ�ļ���ȡ��һ֡��������ͼ��֡��Ҳ������һ����Ƶ��
-	*/
+	 * 从文件或者设备中解码帧数据 
+	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc)
 	{
 		int ret, got_frame;
@@ -275,10 +255,8 @@ namespace ff
 
 				if (got_frame)
 				{
-					AVRaw * praw = make_image_raw(ctx->pix_fmt, ctx->width, ctx->height);
-					praw->pts = frame->pkt_pts;
+					AVRaw * praw = make_image_from_frame(frame);
 					praw->time_base = ctx->pkt_timebase;
-					av_image_copy(praw->data, praw->linesize, (const uint8_t **)frame->data, frame->linesize, ctx->pix_fmt, ctx->width, ctx->height);
 					av_packet_unref(&pkt);
 					av_frame_unref(frame);
 					return praw;
@@ -292,10 +270,8 @@ namespace ff
 
 				if (got_frame)
 				{
-					AVRaw * praw = make_audio_raw(ctx->sample_fmt, frame->channels, frame->nb_samples);
-					praw->pts = frame->pkt_pts;
+					AVRaw * praw = make_audio_from_frame(frame);
 					praw->time_base = ctx->pkt_timebase;
-					av_samples_copy(praw->data, frame->data, 0, 0, frame->nb_samples, frame->channels, ctx->sample_fmt);
 					av_packet_unref(&pkt);
 					av_frame_unref(frame);
 					return praw;
@@ -394,7 +370,6 @@ namespace ff
 				s_i++;
 			}
 			else if (strstr(format, "  min s=") == format){
-				//min %ldx%ld,%g, max %ldx%ld,fps %g
 				int index = pdevices[s_i].capability_count;
 				if (index < MAX_CAPABILITY_COUNT && index >= 0){
 					pdevices[s_i].capability[index].video.min_w = va_arg(arg, int);
@@ -407,7 +382,6 @@ namespace ff
 				}
 			}
 			else if (strstr(format, "  min ch=") == format){
-				//"  min ch=%lu bits=%lu rate=%6lu max ch=%lu bits=%lu rate=%6lu\n"
 				int index = pdevices[s_i].capability_count;
 				if (index < MAX_CAPABILITY_COUNT && index >= 0){
 					pdevices[s_i].capability[index].audio.min_ch = va_arg(arg, int);
@@ -430,7 +404,6 @@ namespace ff
 				}
 			}
 			else if (strstr(format, "  vcodec=") == format){
-				//%s
 				int index = pdevices[s_i].capability_count;
 				if (index < MAX_CAPABILITY_COUNT && index >= 0){
 					char * pf = va_arg(arg, char*);
@@ -439,16 +412,6 @@ namespace ff
 					else
 						strcpy(pdevices[s_i].capability[index].video.codec_name, "overflow");
 				}
-			}
-			else if (strstr(format, "  unknown compression type") == format){
-				//%X
-				//printf("vcodec=%X\n", va_arg(arg, int));
-			}
-			else if (strstr(format, "DirectShow %s device options (from %s devices)\n") == format){
-				//printf("DirectShow %s device options (from %s devices)\n", arg);
-			}
-			else if (strstr(format, " Pin \"%s\" (alternative pin name \"%s\")\n") == format){
-				//printf(" Pin \"%s\" (alternative pin name \"%s\")\n", arg);
 			}
 		}
 	}
@@ -461,15 +424,12 @@ namespace ff
 		AVDictionary *opt = NULL;
 		const char * filename = "dummy";
 		AVFormatContext * ctx = NULL;
-		char buf[256];
 		
 		ffInit();
  
 		while (true)
 		{
-			/*
-			 * ��ʼ�ṹ
-			 */
+
 			memset(pdevices, 0, nmax*sizeof(AVDevice));
 
 			ctx = avformat_alloc_context();
@@ -484,9 +444,6 @@ namespace ff
 				break;
 			}
 
-			/*
-			 * ʹ����־�ص�������ȡ�÷����豸����Ϣ
-			 */
 			av_dict_set(&opt, "list_devices", "true", 0);
 
 			i = 0;
@@ -597,9 +554,7 @@ namespace ff
 			av_dict_set(&opt, "video_size", buf, 0);
 			snprintf(buf, 32, "%d", fps);
 			av_dict_set(&opt, "framerate", buf, 0);
-			//���񻺳�����С
-			//	snprintf(buf, 32, "%d", 8*1024*1024);
-			//	av_dict_set(&opt, "rtbufsize", buf, 0);
+
 #ifdef __ANDROID__
 			snprintf(buf, 32, "%d", _oesTex);
 			av_dict_set(&opt, "oes_texture", buf, -1);

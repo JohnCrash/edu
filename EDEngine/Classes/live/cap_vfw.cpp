@@ -181,7 +181,7 @@ namespace cv
 			closeHIC();
 		}
 
-		release_raw(frame);
+		free_raw(frame);
 
 		init();
 	}
@@ -231,13 +231,13 @@ namespace cv
 		if (!hdr || hdr->lpData == 0 || sz == 0)
 			return 0;
 
-		release_raw(frame);
+		free_raw(frame);
 		frame = make_image_raw((int)AV_PIX_FMT_BGR24, vfmt0.biWidth, vfmt0.biHeight);
 		if (!frame)
 		{
 			return 0;
 		}
-		retain_raw(frame);
+		free_raw(frame);
 		/*
 			FIXME: µœ÷YUV420P±‡¬Î
 		if (vfmt0.biCompression == MAKEFOURCC('N', 'V', '1', '2'))

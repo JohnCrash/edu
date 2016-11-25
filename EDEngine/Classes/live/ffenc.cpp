@@ -20,9 +20,6 @@
 
 namespace ff
 {
-	/*
-	 * 锟斤拷AVFormatContext锟斤拷锟斤拷锟铰碉拷锟斤拷
-	 */
 	static int add_stream(AVEncodeContext *pec, AVCodecID codec_id,
 		int w, int h, AVRational stream_frame_rate, int stream_bit_rate)
 	{
@@ -81,7 +78,7 @@ namespace ff
 
 			c->codec_id = codec_id;
 			c->bit_rate = stream_bit_rate;
-			/* 锟街憋拷锟绞憋拷锟斤拷锟斤拷2锟侥憋拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟� */
+
 			c->width = w;
 			c->height = h;
 			//st->time_base.den = stream_frame_rate.num;
@@ -118,9 +115,6 @@ namespace ff
 		return 0;
 	}
 
-	/*
-	 * 锟截憋拷锟斤拷
-	 */
 	static void close_stream(AVStream *st)
 	{
 		avcodec_close(st->codec);
@@ -154,18 +148,12 @@ namespace ff
 		return picture;
 	}
 
-	/*
-	 * 锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷
-	 */
 	static int open_video(AVEncodeContext *pec, AVCodecID video_codec_id,
-		int in_w,int in_h,AVPixelFormat in_fmt, //FIXME: 锟斤拷硬锟酵拷叽锟酵革拷式锟斤拷锟斤拷转锟斤拷锟侥达拷锟斤拷
+		int in_w,int in_h,AVPixelFormat in_fmt,
 		AVDictionary *opt_arg)
 	{
-		int ret;
 		AVCodecContext *c = pec->_video_st->codec;
 		AVDictionary *opt = NULL;
-		AVCodec *codec;
-		int w, h, fmt;
 
 		if(av_encode_init(c,video_codec_id,opt_arg)!=0){
 			av_log(NULL, AV_LOG_FATAL, "Could not init encoder '%s'\n", avcodec_get_name(video_codec_id));
@@ -185,15 +173,15 @@ namespace ff
 #
 			if (in_fmt == AV_PIX_FMT_YVU420P){
 				infmt = AV_PIX_FMT_YUV420P;
-#ifdef __ANDROID__
 				pec->_vctx.isyv12 = 1;
-#endif
 			}
-			else
+			else{
 				infmt = in_fmt;
+				pec->_vctx.isyv12 = 0;
+			}
 			pec->_vctx.sws_ctx = av_sws_alloc(in_w, in_h, infmt,
 				c->width, c->height, c->pix_fmt);
-			av_log(NULL,AV_LOG_INFO,"av_sws_alloc in_w:%d in_h:%d in_fmt:%d(%s) codec_w:%d codec_h:%d codec_fmt:%d(%s)\n",
+			DEBUG("av_sws_alloc in_w:%d in_h:%d in_fmt:%d(%s) codec_w:%d codec_h:%d codec_fmt:%d(%s)\n",
 				in_w, in_h, infmt, av_get_pix_fmt_name(infmt), c->width, c->height, c->pix_fmt, av_get_pix_fmt_name(c->pix_fmt));
 			if (!pec->_vctx.sws_ctx){
 				av_log(NULL, AV_LOG_FATAL, "Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", in_w, in_h, infmt);
@@ -203,9 +191,6 @@ namespace ff
 		return 0;
 	}
 
-	/*
-	 * 锟斤拷锟斤拷锟斤拷频帧
-	 */
 	AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
 		uint64_t channel_layout,
 		int sample_rate, int nb_samples)
@@ -234,9 +219,6 @@ namespace ff
 		return frame;
 	}
 
-	/*
-	 * 锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷
-	 */
 	static int open_audio(AVEncodeContext *pec, AVCodecID audio_codec_id, 
 		int in_ch,int in_rate,AVSampleFormat in_fmt,
 		AVDictionary *opt_arg)
@@ -340,15 +322,12 @@ namespace ff
 		{
 			return praw->size / 1024;
 		}
-		/*
-		* 未知锟侥革拷式锟斤拷锟斤拷锟斤拷锟诫到统锟斤拷锟斤拷
-		*/
+
 		return 0;
 	}
 
 	void list_push_raw(AVRaw ** head, AVRaw ** tail, AVRaw *praw)
 	{
-		retain_raw(praw);
 		if (!*head)
 		{
 			*head = praw;
@@ -402,17 +381,9 @@ namespace ff
 		if (pec->encode_audio && pec->encode_video)
 		{
 #if 0
-			/*
-			 * 锟斤拷频锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷写锟诫到锟斤拷锟侥硷拷
-			 */
 			if (av_compare_ts(pec->_actx.next_pts, pec->_audio_st->codec->time_base,
 				pec->_vctx.next_pts, pec->_video_st->codec->time_base) >= 0)
 			{
-				/*
-				 * 锟斤拷锟斤拷取一锟斤拷锟斤拷频帧锟斤拷锟斤拷锟矫伙拷锟斤拷锟狡抵★拷偷锟斤拷锟斤拷锟斤拷铩Ｖ憋拷锟斤拷锟揭伙拷锟斤拷锟狡抵★拷锟斤拷锟�
-				 * 锟斤拷锟斤拷通锟斤拷isflush锟斤拷知锟窖撅拷没锟叫革拷锟斤拷锟斤拷锟斤拷锟剿★拷锟斤拷锟斤拷锟絯hile循锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷没锟斤拷锟斤拷锟斤拷
-				 * list_pop_raw锟斤拷锟斤拷锟斤拷一锟斤拷NULL指锟诫，锟斤拷锟斤拷锟斤拷压锟斤拷锟竭筹拷锟斤拷止锟斤拷
-				 */
 				pec->_encode_waiting = 1;
 				while (!pec->_video_head && !pec->_isflush)
 					pec->_cond->wait(lock);
@@ -429,7 +400,7 @@ namespace ff
 			}
 #endif
 			pec->_encode_waiting = 1;
-			//锟斤拷锟絧ec->_video_head == NULL && pec->_video_head == NULL
+
 			while (!(pec->_video_head || pec->_audio_head) && !pec->_isflush)
 				pec->_cond->wait(lock);
 			pec->_encode_waiting = 0;
@@ -478,15 +449,8 @@ namespace ff
 		AVCodecContext *c = ctx->st->codec;
 		AVFrame * frame = ctx->frame;
 
-		/*
-		 * 锟斤拷锟斤拷锟斤拷要锟斤拷母锟绞斤拷锟斤拷锟斤拷锟斤拷式锟斤拷同锟斤拷锟斤拷锟斤不锟斤拷要锟斤拷锟叫革拷锟斤拷转锟斤拷锟斤拷
-		 */
 		if (!ctx->sws_ctx)
 		{
-			/*
-			 * 锟斤拷锟斤拷锟绞斤拷锟酵拷锟斤拷越锟饺ワ拷虻サ目锟斤拷锟�
-			 * FIXME: 锟斤拷锟斤拷虻サ锟绞癸拷锟絧raw锟叫碉拷指锟诫传锟捷革拷frame锟斤拷压锟斤拷锟斤拷锟斤拷诨指锟斤拷锟斤拷越锟绞opy锟斤拷锟斤拷
-			 */
 			/* when we pass a frame to the encoder, it may keep a reference to it
 			* internally;
 			* make sure we do not overwrite it here
@@ -499,9 +463,7 @@ namespace ff
 				av_log(NULL, AV_LOG_FATAL, "make_video_frame av_frame_make_writable : %s\n", errmsg);
 				return NULL;
 			}
-			/*
-			 * 锟斤拷锟斤拷锟斤拷锟斤拷锟捷革拷锟斤拷
-			 */
+
 			av_image_copy(frame->data, frame->linesize, (const uint8_t **)praw->data, praw->linesize, c->pix_fmt, praw->width, praw->height);
 
 			frame->pts = ctx->next_pts++;
@@ -509,7 +471,6 @@ namespace ff
 		}
 		else
 		{
-#ifdef __ANDROID__
 			/*
 			 * android下对yv12进行特殊的调整操作
 			 */
@@ -526,11 +487,7 @@ namespace ff
 					(const uint8_t * const *)praw->data, praw->linesize,
 					0, praw->height, frame->data, frame->linesize);
 			}
-#else
-			sws_scale(ctx->sws_ctx,
-				(const uint8_t * const *)praw->data, praw->linesize,
-				0, praw->height, frame->data, frame->linesize);
-#endif
+
 			frame->pts = ctx->next_pts++;
 			return frame;
 		}
@@ -584,8 +541,6 @@ namespace ff
 
 			if (!frame)
 				return -1;
-
-			//		printf("video pts = %I64d, %I64d\n", praw->pts, frame->pts);
 
 			if (pec->_ctx->oformat->flags & AVFMT_RAWPICTURE) {
 				/* a hack to avoid data copy with some raw video muxers */
@@ -715,7 +670,6 @@ namespace ff
 	/*
 	* encode one audio frame and send it to the muxer
 	* return 1 when encoding is finished, 0 otherwise
-	* 锟斤拷锟斤拷锟斤拷-1
 	*/
 	static int write_audio_frame(AVEncodeContext * pec, AVRaw *praw)
 	{
@@ -735,9 +689,7 @@ namespace ff
 
 
 		frame = NULL;
-		/*
-		 * 锟斤拷锟斤拷频锟斤拷锟捷凤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟叫成癸拷取锟斤拷锟斤拷锟街★拷锟斤拷图锟斤拷锟叫达拷锟�
-		 */
+
 		result = resample_audio_frame(&pec->_actx, praw, &frame);
 
 		while (result >= 0 && frame){
@@ -767,9 +719,6 @@ namespace ff
 				}
 			}
 
-			/*
-			 * 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷谢锟斤拷锟斤拷愎伙拷锟斤拷锟斤拷荩锟斤拷图锟斤拷锟斤拷锟饺★拷锟揭伙拷锟街�
-			 */
 			result = flush_audio_frame(&pec->_actx, &frame);
 		}
 
@@ -859,16 +808,12 @@ namespace ff
 				pec->_buffer_size -= getAVRawSizeKB(praw);
 				ret = write_video_frame(pec, praw);
 				if (ret < 0){
-					release_raw(praw);
+					free_raw(praw);
 					break;
 				}
-				release_raw(praw);
+				free_raw(praw);
 			}
 			else {
-				/*
-				* 锟斤拷锟斤拷锟斤拷锟絅ULL锟斤拷示锟窖撅拷没锟斤拷锟斤拷锟斤拷锟剿★拷
-				* 写锟斤拷锟斤拷时帧
-				*/
 				write_delay_video_frame(pec);
 				break;
 			}
@@ -892,16 +837,12 @@ namespace ff
 				pec->_buffer_size -= getAVRawSizeKB(praw);
 				ret = write_audio_frame(pec, praw);
 				if (ret < 0){
-					release_raw(praw);
+					free_raw(praw);
 					break;
 				}
-				release_raw(praw);
+				free_raw(praw);
 			}
 			else {
-				/*
-				* 锟斤拷锟斤拷锟斤拷锟絅ULL锟斤拷示锟窖撅拷没锟斤拷锟斤拷锟斤拷锟剿★拷
-				* 写锟斤拷锟斤拷时帧
-				*/
 				write_delay_audio_frame(pec);
 				break;
 			}
@@ -909,9 +850,6 @@ namespace ff
 		pctx->stop_thread = 1;
 		return 0;
 	}
-	/*
-	 * 锟斤拷锟斤拷写锟斤拷锟竭筹拷
-	 */
 #if 0
 	int encode_thread_proc(AVEncodeContext * pec)
 	{
@@ -921,9 +859,7 @@ namespace ff
 		while (!pec->_stop_thread)
 		{
 			praw = ffPopFrame(pec);
-			/*
-			 * 压锟斤拷原锟斤拷锟斤拷锟捷诧拷写锟诫到锟侥硷拷锟斤拷
-			 */
+
 			if (praw)
 			{
 				if (praw->type == RAW_IMAGE)
@@ -957,10 +893,6 @@ namespace ff
 			}
 			else
 			{
-				/*
-				 * 锟斤拷锟斤拷锟斤拷锟絅ULL锟斤拷示锟窖撅拷没锟斤拷锟斤拷锟斤拷锟剿★拷
-				 * 写锟斤拷锟斤拷时帧
-				 */
 				write_delay_frame(pec);
 				break;
 			}
@@ -976,9 +908,6 @@ namespace ff
 		pctx->encode_thread = new std::thread(encode_thread_proc, pec);
 	}
 
-	/**
-	 * 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
-	 */
 	AVEncodeContext* ffCreateEncodeContext(const char* filename, const char *fmt,
 		int w, int h, AVRational frameRate, int videoBitRate, AVCodecID video_codec_id,
 		int in_w, int in_h, AVPixelFormat in_fmt,
@@ -1003,9 +932,7 @@ namespace ff
 		pec->_width = w;
 		pec->_height = h;
 		pec->_fileName = strdup(filename);
-		/*
-		 * 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
-		 */
+
 		avformat_alloc_output_context2(&ofmt_ctx, NULL, fmt, filename);
 		if (!ofmt_ctx){
 			av_log(NULL, AV_LOG_ERROR, "avformat_alloc_output_context2 return failed.");
@@ -1013,9 +940,7 @@ namespace ff
 			return NULL;
 		}
 		pec->_ctx = ofmt_ctx;
-		/*
-		 * 锟斤拷锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷频锟斤拷
-		 */
+
 		if (AV_CODEC_ID_NONE != video_codec_id)
 		{
 			if (add_stream(pec, video_codec_id, w, h, frameRate, videoBitRate) < 0)
@@ -1039,9 +964,7 @@ namespace ff
 			}
 			pec->has_audio = 1;
 		}
-		/*
-		 * 锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷频锟斤拷锟斤拷锟斤拷
-		 */
+
 		if (pec->has_video)
 		{
 			if (open_video(pec, video_codec_id, 
@@ -1064,9 +987,7 @@ namespace ff
 			}
 			pec->encode_audio = 1;
 		}
-		/*
-		 * 锟斤拷锟斤拷斜锟揭拷锟揭伙拷锟斤拷募锟斤拷锟斤拷锟斤拷
-		 */
+
 		ofmt = ofmt_ctx->oformat;
 		if (!(ofmt->flags & AVFMT_NOFILE)) {
 			ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
@@ -1076,9 +997,7 @@ namespace ff
 				return NULL;
 			}
 		}
-		/*
-		 * 写锟斤拷媒锟斤拷头锟侥硷拷
-		 */
+
 		ret = avformat_write_header(ofmt_ctx, NULL);
 		if (ret < 0) {
 			av_log(NULL, AV_LOG_ERROR, "Error occurred when opening output file \n");
@@ -1089,9 +1008,6 @@ namespace ff
 
 		av_dump_format(ofmt_ctx, 0, filename, 1);
 
-		/*
-		 * 锟斤拷锟斤拷压锟斤拷压锟斤拷锟竭筹拷
-		 */
 		pec->write_mutex = new mutex_t();
 
 		if (pec->has_audio)
@@ -1124,16 +1040,10 @@ namespace ff
 		}
 	}
 
-	/**
-	* 锟截闭憋拷锟斤拷锟斤拷锟斤拷锟斤拷
-	*/
 	void ffCloseEncodeContext(AVEncodeContext *pec)
 	{
 		if (pec)
 		{
-			/*
-			 * 停止压锟斤拷锟竭筹拷,压锟斤拷锟斤拷没锟斤拷锟斤拷锟捷可达拷锟斤拷锟斤拷_encode_thread=1锟斤拷锟剿筹拷
-			 */
 			ffStopThreadAVCtx(&pec->_actx);
 			ffStopThreadAVCtx(&pec->_vctx);
 
@@ -1147,17 +1057,13 @@ namespace ff
 					* av_codec_close().
 					*/
 					av_write_trailer(pec->_ctx);
-					/*
-					 * 锟斤拷锟斤拷斜锟揭拷乇锟斤拷募锟斤拷锟�
-					 */
+
 					if (pec->_ctx->oformat && !(pec->_ctx->oformat->flags & AVFMT_NOFILE))
 					{
 						avio_closep(&pec->_ctx->pb);
 					}
 				}
-				/*
-				* 锟截闭憋拷锟斤拷锟斤拷
-				*/
+
 				if (pec->_video_st)
 					close_stream(pec->_video_st);
 				if (pec->_audio_st)
@@ -1211,7 +1117,7 @@ namespace ff
 		}
 
 		mutex_lock_t lk(*pctx->mutex);
-		list_push_raw(&pctx->head, &pctx->tail, praw);
+		list_push_raw(&pctx->head, &pctx->tail, raw_ref(praw));
 		pec->_nb_raws++;
 		pec->_buffer_size += getAVRawSizeKB(praw);
 		pctx->cond->notify_one();

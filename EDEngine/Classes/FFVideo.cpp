@@ -23,8 +23,6 @@ namespace ff
         return VIDEO_PIX_YUV420P;
     }
 
-	static bool isInitFF = false;
-
 	FFVideo::FFVideo() :_ctx(nullptr)
 	{
 #if _LGH_TEST_
@@ -34,10 +32,8 @@ namespace ff
 		_nb_min_threshold = 0;
 		_nb_max_threshold = 0;
 #endif
-		if (!isInitFF){
-			initFF();
-			isInitFF = true;
-		}
+			
+		initFF();
 	}
 
 	FFVideo::~FFVideo()
@@ -84,11 +80,7 @@ namespace ff
 	bool FFVideo::open(const char *url)
 	{
 		_first = true;
-	//	close();
-#if _LGH_TEST_
-		url = "rtmp://live.lexinedu.com/ljlx/ljlive?auth_key=1470399831-0-0-1f25acfe6f301c542e4258045f0d6dd2";
-	//	url = "rtmp://192.168.7.157/myapp?carg=1/mystream?sarg=2";
-#endif
+
         _ctx = stream_open(url, NULL);
 		return _ctx != nullptr;
 	}
@@ -226,7 +218,7 @@ namespace ff
 
 		VideoState* _vs = (VideoState*)_ctx;
 		if (_vs == NULL) return false;
-		return _vs->seek_req;
+		return _vs->seek_req?true:false;
 	}
 
 	bool FFVideo::isPlaying() const
@@ -273,14 +265,8 @@ namespace ff
 		return _vs->height;
 	}
 
-//    static double t0 = 0;
 	void *FFVideo::refresh()
 	{
-//        if(t0==0)
-//            t0=cc_clock();
-//        CCLOG("refresh == %f ",cc_clock()-t0);
-//        t0 = cc_clock();
-        
 		VideoState* _vs = (VideoState*)_ctx;
 		if (_vs)
 		{
@@ -374,17 +360,14 @@ namespace ff
 		return nullptr;
 	}
 
-	/*
-	 * º∆À„ ”∆µªÚ“Ù∆µ¡˜µƒ∆Ωæ˘∞¸¬ £®√ø√Î∂‡…Ÿ∏ˆ∞¸£�?
-	 */
 	static double calc_avg_pocket_rate(AVStream *st)
 	{
 		if (st){
 			if (st->avg_frame_rate.den>0 && st->avg_frame_rate.num>0) 
-				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;//»Áπ˚“—æ≠”–∆Ωæ˘∞¸¬ £¨÷±Ω”∑µªÿ
+				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;
 
 			if (st->time_base.den > 0){
-				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den; //¡˜◊‹µƒ ±º�?
+				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den;
 				if ( tt > 0 )
 					return (double)st->nb_frames / tt;
 			}
@@ -399,9 +382,6 @@ namespace ff
 				return (double)(pq->last_pkt->pkt.pts - pq->first_pkt->pkt.pts) *(double)st->time_base.num / (double)st->time_base.den;
 			}
 			else{
-				/* 
-				 * »Áπ˚ ”∆µ“—æ≠Ω· ¯◊Ó∫Û“ª∏ˆ∞¸µƒ ˝æ›≤ª∞¸¿®pts£¨PacketQueue «“ª∏ˆµ•œÚ∂”¡–Œ“≥¢ ‘¥”Õ∑≤øø™ º—∞’“◊Ó∫Û“ª∏ˆ’˝»∑µƒ∞�?
-				 */
 				MyAVPacketList *last = NULL;
 				for (MyAVPacketList *it = pq->first_pkt; it != NULL; it = it->next){
 					if (it->pkt.buf != NULL)
@@ -443,7 +423,6 @@ namespace ff
 				set_preload_nb((int)(apr*t));
 				return true;
 			}
-			//»Áπ˚≤ªƒ‹’˝»∑º∆À„∆Ωæ˘∞¸¬ æÕª÷∏¥Œ™ƒ¨»œ…Ë÷√
 			set_preload_nb(150);
 		}
 		return false;

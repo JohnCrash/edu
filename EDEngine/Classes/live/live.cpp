@@ -2,12 +2,6 @@
 #include "live.h"
 #include "ffenc.h"
 #include "ffdec.h"
-#if defined(_DEBUG) || defined(_LIVE_DEBUG)
-	#include "cocos2d.h"
-	#define DEBUG(format,...) cocos2d::log(format,##__VA_ARGS__);
-#else
-	#define DEBUG(format,...)
-#endif
 
 namespace ff
 {
@@ -45,13 +39,13 @@ namespace ff
 		int ret, nsyn,ncsyn,nsynacc;
 		AVRational audio_time_base, video_time_base;
 		AVRaw * praw = NULL;
-		int64_t ctimer; //��Ȼʱ��
-		int64_t nsamples = 0; //��Ƶ��������
-		int64_t nframe = 0; //��Ƶ֡����
-		int64_t begin_pts = 0; //��һ֡���豸pts
+		int64_t ctimer; 
+		int64_t nsamples = 0; 
+		int64_t nframe = 0; 
+		int64_t begin_pts = 0; 
 		int64_t nsyndt = 0;
 		int64_t nsynbt = 0;
-		int64_t stimer = av_gettime_relative(); //��Ȼʱ����ʼ��
+		int64_t stimer = av_gettime_relative(); 
 		nsyn = 0;
 		ncsyn = 0;
 		nsynacc = 0;
@@ -67,8 +61,6 @@ namespace ff
 				av_log(NULL, AV_LOG_ERROR, "liveLoop break : praw = NULL\n");
 				break;
 			}
-
-			retain_raw(praw);
 			if (!pdc->has_audio && begin_pts == 0){
 				begin_pts = praw->pts;
 				stimer = av_gettime_relative();
@@ -76,7 +68,6 @@ namespace ff
 
 			if (praw->type == RAW_IMAGE && pdc->has_video){
 				if (!pdc->has_audio){
-					//���û����Ƶ�豸����Ƶ֡����Ȼʱ�䱣��ͬ��
 					int64_t bf = av_rescale_q(ctimer - stimer, AVRational{1,AV_TIME_BASE},video_time_base);
 					ncsyn = bf - nframe;
 					if (abs(ncsyn) > MAX_NSYN){
@@ -85,9 +76,6 @@ namespace ff
 					}
 				}
 				else if ( nsyndt>0 && nsynbt!=0 ){
-					/*
-					 * ƽ������,��ʼʱ��nsynbt,��nsyndtʱ���ﲹ��nsyn֡����
-					 */
 					int nsynp = (int)(nsyn*(ctimer - nsynbt) / nsyndt);
 					
 					ncsyn = nsynp - nsynacc;
@@ -97,7 +85,6 @@ namespace ff
 					ncsyn = 0;
 
 				if (ncsyn >= 0 && ncsyn < MAX_NSYN ){
-				//	av_log(NULL, AV_LOG_INFO, "ncsyn = %d\n",ncsyn );
 					praw->recount += ncsyn;
 					nframe += praw->recount;
 					if (ret = ffAddFrame(pec, praw) < 0){
@@ -112,7 +99,6 @@ namespace ff
 					break;
 				}
 				else{
-					//���������֡
 					DEBUG("discard video frame\n");
 				}
 				DEBUG("[V] ncsyn:%d timestrap:" PRId64" time: %.4fs\n",
@@ -126,9 +112,7 @@ namespace ff
 				nsamples += praw->samples;
 				if( ret=ffAddFrame(pec, praw) < 0 )
 					break;
-				/*
-				 * ������Ƶ֡����
-				 */
+
 				int64_t at = av_rescale_q(nsamples, audio_time_base, AVRational{ 1, AV_TIME_BASE });
 				int64_t vt = av_rescale_q(nframe, video_time_base, AVRational{ 1, AV_TIME_BASE });
 				nsyndt = av_rescale_q(praw->samples, audio_time_base, AVRational{ 1, AV_TIME_BASE });
@@ -143,9 +127,7 @@ namespace ff
 					}
 					break;
 				}
-				/*
-				 * ��Ȼʱ����
-				 */
+
 				double dsyn = (double)abs(ctimer - stimer - at)/(double)AV_TIME_BASE;
 				if (dsyn > MAX_ASYN){
 					av_log(NULL, AV_LOG_ERROR, "liveLoop break : audio frame synchronize error, dsyn > MAX_ASYN , nsyn = %.4f\n", dsyn);
@@ -160,9 +142,7 @@ namespace ff
 
 				nsynacc = 0;
 			}
-			/*
-			 * �ص�
-			 */
+
 			if (nframe % 2 == 0){
 				if (cb && pls){
 					pls->nframes = nframe;
@@ -173,12 +153,12 @@ namespace ff
 					}
 				}
 			}
-			release_raw(praw);
-		}
-		release_raw(praw);
+			free_raw(praw);
+		} //while
+		free_raw(praw);
 	}
 	static liveState state;
-    #if defined(_DEBUG) || defined(_LIVE_DEBUG)
+    #if defined(_LIVE_DEBUG)
 	static void to_cclog(const char *format, va_list arg)
 	{
         //simple fix x264_close log format error
@@ -197,7 +177,7 @@ namespace ff
 			snprintf(state.errorMsg[state.nerror++], MAX_ERRORMSG_LENGTH, format, arg);
 		}
 		av_log_default_callback(acl, level, format, arg);
-    #if defined(_DEBUG) || defined(_LIVE_DEBUG)
+    #if defined(_LIVE_DEBUG)
 		to_cclog(format,arg);
 	#endif
 	}
