@@ -56,5 +56,12 @@ namespace ff
 	 * 从视频文件中取得一帧，可以是图像帧，也可以是一个音频包
 	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc);
+
+	/*
+	 * 设置俘获输出图像大小和格式
+	 */
+	int ffReadFrameFormat(AVDecodeCtx *pdc, 
+		int w, int h, AVPixelFormat fmt,
+		int ch, int sample_rate, AVSampleFormat sample_fmt);
 }
 #endif

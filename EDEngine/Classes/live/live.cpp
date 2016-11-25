@@ -254,7 +254,7 @@ namespace ff
 				outFmt = "mp4";
 			}
 			pec = ffCreateEncodeContext(rtmp_publisher, outFmt, ow, oh, AVRational{ fps, 1 }, vbitRate, vid,
-				w, h, pixFmt,
+				ow, oh, AV_PIX_FMT_YUV420P,
 				rate, abitRate, aid,
 				AUDIO_CHANNEL, rate, sampleFmt,
 				opt);
@@ -268,7 +268,8 @@ namespace ff
             /*
              * 这里打开捕获设备，并马上进入直播循环
              */
-            pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt, phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
+            pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt,
+				phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
             if (!pdc || !pdc->_video_st || !pdc->_video_st->codec){
                 if (cb){
                     state.state = LIVE_ERROR;
@@ -276,6 +277,15 @@ namespace ff
                 }
                 break;
             }
+			
+			if (ffReadFrameFormat(pdc, ow, oh, AV_PIX_FMT_YUV420P,
+				AUDIO_CHANNEL, rate, sampleFmt) < 0){
+				if (cb){
+					state.state = LIVE_ERROR;
+					cb(&state);
+				}
+				break;
+			}
             state.state = LIVE_FRAME;
 			liveLoop(pdc,pec,cb,&state);
 			break;

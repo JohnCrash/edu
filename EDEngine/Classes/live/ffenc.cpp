@@ -187,6 +187,12 @@ namespace ff
 				av_log(NULL, AV_LOG_FATAL, "Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", in_w, in_h, infmt);
 				return -1;
 			}
+			pec->_vctx.sws_in_w = in_w;
+			pec->_vctx.sws_in_h = in_h;
+			pec->_vctx.sws_in_fmt = infmt;
+			pec->_vctx.sws_out_w = c->width;
+			pec->_vctx.sws_out_h = c->height;
+			pec->_vctx.sws_out_fmt = c->pix_fmt;
 		}
 		return 0;
 	}
@@ -263,17 +269,19 @@ namespace ff
 			return -1;
 
 		/* create resampler context */
-		pec->_actx.swr_ctx = swr_alloc();
-		if (!pec->_actx.swr_ctx) {
-			av_log(NULL, AV_LOG_FATAL, "Could not allocate resampler context.\n");
-			return -1;
-		}
-
-		pec->_actx.swr_ctx = av_swr_alloc(in_ch,in_rate,in_fmt,
-										  c->channels,c->sample_rate,c->sample_fmt);
-		if(!pec->_actx.swr_ctx){
-			av_log(NULL, AV_LOG_FATAL, "Failed to initialize the resampling context\n");
-			return -1;
+		if (in_ch != c->channels || in_rate != c->sample_rate || in_fmt != c->sample_fmt){
+			pec->_actx.swr_ctx = av_swr_alloc(in_ch, in_rate, in_fmt,
+				c->channels, c->sample_rate, c->sample_fmt);
+			if (!pec->_actx.swr_ctx){
+				av_log(NULL, AV_LOG_FATAL, "Failed to initialize the resampling context\n");
+				return -1;
+			}
+			pec->_actx.swr_in_channel = in_ch;
+			pec->_actx.swr_in_sample_rate = in_rate;
+			pec->_actx.swr_in_sample_fmt = in_fmt;
+			pec->_actx.swr_out_channel = c->channels;
+			pec->_actx.swr_out_sample_rate = c->sample_rate;
+			pec->_actx.swr_out_sample_fmt = c->sample_fmt;
 		}
 		return 0;
 	}
@@ -653,13 +661,15 @@ namespace ff
 			av_log(NULL, AV_LOG_FATAL, "get_audio_frame av_frame_make_writable return <0\n");
 			return -1;
 		}
-		/* convert to destination format */
-		ret = swr_convert(ctx->swr_ctx,
-			frame->data, frame->nb_samples,
-			NULL, 0);
-		if (ret < 0) {
-			av_log(NULL, AV_LOG_FATAL, "get_audio_frame error while converting\n");
-			return -1;
+		if (ctx->swr_ctx){
+			/* convert to destination format */
+			ret = swr_convert(ctx->swr_ctx,
+				frame->data, frame->nb_samples,
+				NULL, 0);
+			if (ret < 0) {
+				av_log(NULL, AV_LOG_FATAL, "get_audio_frame error while converting\n");
+				return -1;
+			}
 		}
 
 		frame->pts = ctx->next_pts;

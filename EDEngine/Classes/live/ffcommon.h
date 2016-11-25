@@ -98,6 +98,11 @@ namespace ff
 		int isflush;
 		int encode_waiting;
 		int isyv12;
+
+		int sws_in_w,sws_in_h,sws_out_w,sws_out_h;
+		AVPixelFormat sws_in_fmt, sws_out_fmt;
+		int swr_in_channel, swr_out_channel, swr_in_sample_rate, swr_out_sample_rate;
+		AVSampleFormat swr_in_sample_fmt, swr_out_sample_fmt;
 	};
 
 	void ffInit();
