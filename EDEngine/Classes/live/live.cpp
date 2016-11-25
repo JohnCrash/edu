@@ -104,7 +104,7 @@ namespace ff
 						av_log(NULL, AV_LOG_ERROR, "liveLoop break : ret < 0 , ret = %d\n",ret);
 						break;
 					}
-					DEBUG("[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
+					DEBUG("[V] ncsyn:%d timestrap:" PRId64" time: %.4fs\n",
 								ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 				}
 				else if (ncsyn > MAX_NSYN){
@@ -115,7 +115,7 @@ namespace ff
 					//���������֡
 					DEBUG("discard video frame\n");
 				}
-				DEBUG("[V] ncsyn:%d timestrap:%I64d time: %.4fs\n",
+				DEBUG("[V] ncsyn:%d timestrap:" PRId64" time: %.4fs\n",
 					ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 			}
 			else if (praw->type == RAW_AUDIO && pdc->has_audio){
@@ -155,7 +155,7 @@ namespace ff
 					}
 					break;
 				}
-				DEBUG("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:%I64d time: %.4fs bs:%.2fmb\n",
+				DEBUG("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:" PRId64" time: %.4fs bs:%.2fmb\n",
 					nsyn, dsyn, nsynacc, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE, (double)ffGetBufferSizeKB(pec) / 1024.0);
 
 				nsynacc = 0;
@@ -178,9 +178,12 @@ namespace ff
 		release_raw(praw);
 	}
 	static liveState state;
-    #ifdef _DEBUG
+    #if defined(_DEBUG) || defined(_LIVE_DEBUG)
 	static void to_cclog(const char *format, va_list arg)
 	{
+        //simple fix x264_close log format error
+        if(format[0]=='m'&&format[1]=='b'&&format[2]==' '&&format[3]=='B')
+            return;
 		char szLine[1024 * 8];
 		vsnprintf(szLine, sizeof(szLine), format, arg);
 		cocos2d::CCLog(szLine, "");
@@ -194,8 +197,8 @@ namespace ff
 			snprintf(state.errorMsg[state.nerror++], MAX_ERRORMSG_LENGTH, format, arg);
 		}
 		av_log_default_callback(acl, level, format, arg);
-	#ifdef _DEBUG
-	//	to_cclog(format,arg);
+    #if defined(_DEBUG) || defined(_LIVE_DEBUG)
+		to_cclog(format,arg);
 	#endif
 	}
 

@@ -371,14 +371,6 @@ namespace ff
             }
         }
     }
-    static int _initAVFoundation = 0;
-    extern "C" AVInputFormat ff_avfoundation_demuxer2;
-    static void initAVFoundation(){
-        if(!_initAVFoundation){
-            av_register_input_format(&ff_avfoundation_demuxer2);
-            _initAVFoundation = 1;
-        }
-    }
 #else
 	static void log_callback(void * acl, int level, const char *format, va_list arg)
 	{
@@ -472,7 +464,7 @@ namespace ff
 		char buf[256];
 		
 		ffInit();
-        initAVFoundation();
+ 
 		while (true)
 		{
 			/*
@@ -583,7 +575,7 @@ namespace ff
 		char filename[2 * MAX_DEVICE_NAME_LENGTH];
 
 		ffInit();
-        initAVFoundation();
+        
 		if (video_device){
 
 			strcpy(filename, "video=");
