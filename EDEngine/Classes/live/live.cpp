@@ -5,7 +5,7 @@
 
 namespace ff
 {
-#define AUDIO_CHANNEL 1
+#define AUDIO_CHANNEL 2
 #define AUDIO_CHANNELBIT 16
 #define MAX_NSYN 120
 #define MAX_ASYN 5
@@ -178,10 +178,16 @@ namespace ff
 		}
 		av_log_default_callback(acl, level, format, arg);
     #if defined(_LIVE_DEBUG)
-		to_cclog(format,arg);
+	//	to_cclog(format,arg);
 	#endif
 	}
 
+	static void callbc(liveCB cb, cbType t,const char *errMsg){
+		if (cb){
+			state.state = t;
+			cb(&state);
+		}
+	}
 	void liveOnRtmp(
 		const char * rtmp_publisher,
 		const char * camera_name, int w, int h, int fps, const char * pix_fmt_name, int vbitRate,
@@ -197,7 +203,7 @@ namespace ff
 		AVSampleFormat sampleFmt = sample_fmt_name ? av_get_sample_fmt(sample_fmt_name) : AV_SAMPLE_FMT_NONE;
 		
 		const char *outFmt;
-#ifdef __ANDROID__
+
 		/*
 		 * android 系统的相机系统有一个独特的格式'yv12',数据和AV_PIX_FMT_YUV420P都相同
 		 * 但是要交换u和v的数据区,AV_PIX_FMT_YVU420P是自定义的图像类型
@@ -207,7 +213,7 @@ namespace ff
 				pixFmt = AV_PIX_FMT_YVU420P;
 			}
 		}
-#endif
+
 		DEBUG("liveOnRtmp rtmp_publisher:%s\ncamera_name = %s,w=%d h=%d fps=%d,pix_fmt_name=%s,vbitRate=%d,\n\
 						phone_name = %s , rate=%d sample_fmt_name=%s abitRate=%d\n\
 						ow = %d,oh = %d,ofps = %d",
@@ -218,10 +224,7 @@ namespace ff
 
 		memset(&state, 0, sizeof(state));
 
-		if (cb){
-			state.state = LIVE_BEGIN;
-			cb(&state);
-		}
+		callbc(cb, LIVE_BEGIN, NULL);
 
 		av_log_set_callback(log_callback);
 
@@ -254,36 +257,30 @@ namespace ff
 				outFmt = "mp4";
 			}
 			pec = ffCreateEncodeContext(rtmp_publisher, outFmt, ow, oh, AVRational{ fps, 1 }, vbitRate, vid,
-				ow, oh, AV_PIX_FMT_YUV420P,
-				rate, abitRate, aid,
-				AUDIO_CHANNEL, rate, sampleFmt,
-				opt);
+				rate, abitRate, aid,opt);
 			if (!pec){
-				if (cb){
-					state.state = LIVE_ERROR;
-					cb(&state);
-				}
+				callbc(cb, LIVE_ERROR, "ffCreateEncodeContext failed");
 				break;
 			}
+
             /*
              * 这里打开捕获设备，并马上进入直播循环
              */
             pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt,
 				phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
             if (!pdc || !pdc->_video_st || !pdc->_video_st->codec){
-                if (cb){
-                    state.state = LIVE_ERROR;
-                    cb(&state);
-                }
+				callbc(cb, LIVE_ERROR, "ffCreateCapDeviceDecodeContext failed");
                 break;
             }
 			
 			if (ffReadFrameFormat(pdc, ow, oh, AV_PIX_FMT_YUV420P,
 				AUDIO_CHANNEL, rate, sampleFmt) < 0){
-				if (cb){
-					state.state = LIVE_ERROR;
-					cb(&state);
-				}
+				callbc(cb, LIVE_ERROR, "ffReadFrameFormat failed");
+				break;
+			}
+			if (ffAddFrameFormat(pec, ow, oh, AV_PIX_FMT_YUV420P,
+				AUDIO_CHANNEL, rate, sampleFmt) < 0){
+				callbc(cb, LIVE_ERROR, "ffAddFrameFormat failed");
 				break;
 			}
             state.state = LIVE_FRAME;
@@ -303,14 +300,11 @@ namespace ff
 		}
         DEBUG("=================liveOnRtmp closed==================");
 		//通知回调，直播结束
-		if (cb){
-			if (state.nerror){
-				state.state = LIVE_ERROR;
-				cb(&state);
-			}
-			state.state = LIVE_END;
-			cb(&state);
-		}
+		if (state.nerror)
+			callbc(cb, LIVE_ERROR, NULL);
+			
+		callbc(cb, LIVE_END, NULL);
+
 		av_log_set_callback(av_log_default_callback);
 		//DEBUG("=================liveOnRtmp free opt==================");
 		//av_dict_free(&opt);

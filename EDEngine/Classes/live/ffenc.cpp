@@ -148,9 +148,7 @@ namespace ff
 		return picture;
 	}
 
-	static int open_video(AVEncodeContext *pec, AVCodecID video_codec_id,
-		int in_w,int in_h,AVPixelFormat in_fmt,
-		AVDictionary *opt_arg)
+	static int open_video(AVEncodeContext *pec, AVCodecID video_codec_id,AVDictionary *opt_arg)
 	{
 		AVCodecContext *c = pec->_video_st->codec;
 		AVDictionary *opt = NULL;
@@ -161,39 +159,13 @@ namespace ff
 		}
 
 		pec->_vctx.st = pec->_video_st;
-		/* allocate and init a re-usable frame */
-		pec->_vctx.frame = alloc_picture(c->pix_fmt, c->width, c->height);
-		if (!pec->_vctx.frame) {
-			av_log(NULL, AV_LOG_FATAL, "Could not allocate video frame\n");
+
+		pec->_vctx.frame = alloc_picture(c->pix_fmt,c->width,c->height);
+		if (!pec->_vctx.frame){
+			av_log(NULL, AV_LOG_FATAL, "Could not alloc frame @alloc_picture\n");
 			return -1;
 		}
-
-		if (c->width != in_w || c->height != in_h || in_fmt != c->pix_fmt){
-			AVPixelFormat infmt;
-#
-			if (in_fmt == AV_PIX_FMT_YVU420P){
-				infmt = AV_PIX_FMT_YUV420P;
-				pec->_vctx.isyv12 = 1;
-			}
-			else{
-				infmt = in_fmt;
-				pec->_vctx.isyv12 = 0;
-			}
-			pec->_vctx.sws_ctx = av_sws_alloc(in_w, in_h, infmt,
-				c->width, c->height, c->pix_fmt);
-			DEBUG("av_sws_alloc in_w:%d in_h:%d in_fmt:%d(%s) codec_w:%d codec_h:%d codec_fmt:%d(%s)\n",
-				in_w, in_h, infmt, av_get_pix_fmt_name(infmt), c->width, c->height, c->pix_fmt, av_get_pix_fmt_name(c->pix_fmt));
-			if (!pec->_vctx.sws_ctx){
-				av_log(NULL, AV_LOG_FATAL, "Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", in_w, in_h, infmt);
-				return -1;
-			}
-			pec->_vctx.sws_in_w = in_w;
-			pec->_vctx.sws_in_h = in_h;
-			pec->_vctx.sws_in_fmt = infmt;
-			pec->_vctx.sws_out_w = c->width;
-			pec->_vctx.sws_out_h = c->height;
-			pec->_vctx.sws_out_fmt = c->pix_fmt;
-		}
+		av_frame_make_writable(pec->_vctx.frame);
 		return 0;
 	}
 
@@ -225,9 +197,7 @@ namespace ff
 		return frame;
 	}
 
-	static int open_audio(AVEncodeContext *pec, AVCodecID audio_codec_id, 
-		int in_ch,int in_rate,AVSampleFormat in_fmt,
-		AVDictionary *opt_arg)
+	static int open_audio(AVEncodeContext *pec, AVCodecID audio_codec_id,AVDictionary *opt_arg)
 	{
 		AVCodecContext *c;
 		int nb_samples;
@@ -268,21 +238,7 @@ namespace ff
 		if (!pec->_actx.frame)
 			return -1;
 
-		/* create resampler context */
-		if (in_ch != c->channels || in_rate != c->sample_rate || in_fmt != c->sample_fmt){
-			pec->_actx.swr_ctx = av_swr_alloc(in_ch, in_rate, in_fmt,
-				c->channels, c->sample_rate, c->sample_fmt);
-			if (!pec->_actx.swr_ctx){
-				av_log(NULL, AV_LOG_FATAL, "Failed to initialize the resampling context\n");
-				return -1;
-			}
-			pec->_actx.swr_in_channel = in_ch;
-			pec->_actx.swr_in_sample_rate = in_rate;
-			pec->_actx.swr_in_sample_fmt = in_fmt;
-			pec->_actx.swr_out_channel = c->channels;
-			pec->_actx.swr_out_sample_rate = c->sample_rate;
-			pec->_actx.swr_out_sample_fmt = c->sample_fmt;
-		}
+		av_frame_make_writable(pec->_actx.frame);
 		return 0;
 	}
 
@@ -459,21 +415,7 @@ namespace ff
 
 		if (!ctx->sws_ctx)
 		{
-			/* when we pass a frame to the encoder, it may keep a reference to it
-			* internally;
-			* make sure we do not overwrite it here
-			*/
-			int ret = av_frame_make_writable(frame);
-			if (ret < 0)
-			{
-				char errmsg[ERROR_BUFFER_SIZE];
-				av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
-				av_log(NULL, AV_LOG_FATAL, "make_video_frame av_frame_make_writable : %s\n", errmsg);
-				return NULL;
-			}
-
-			av_image_copy(frame->data, frame->linesize, (const uint8_t **)praw->data, praw->linesize, c->pix_fmt, praw->width, praw->height);
-
+			frame_ref_raw(praw, frame);
 			frame->pts = ctx->next_pts++;
 			return frame;
 		}
@@ -605,28 +547,20 @@ namespace ff
 
 		c = ctx->st->codec;
 		frame = ctx->frame;
-
 		*pframe = NULL;
-
-		/* when we pass a frame to the encoder, it may keep a reference to it
-		* internally;
-		* make sure we do not overwrite it here
-		*/
-		ret = av_frame_make_writable(ctx->frame);
-		if (ret < 0)
-		{
-			av_log(NULL, AV_LOG_FATAL, "get_audio_frame av_frame_make_writable return <0\n");
-			return -1;
+		if (ctx->swr_ctx){
+			/* convert to destination format */
+			ret = swr_convert(ctx->swr_ctx,
+				frame->data, frame->nb_samples,
+				(const uint8_t**)praw->data, praw->samples);
+			if (ret < 0) {
+				av_log(NULL, AV_LOG_FATAL, "get_audio_frame error while converting\n");
+				return -1;
+			}
 		}
-		/* convert to destination format */
-		ret = swr_convert(ctx->swr_ctx,
-			frame->data, frame->nb_samples,
-			(const uint8_t**)praw->data, praw->samples);
-		if (ret < 0) {
-			av_log(NULL, AV_LOG_FATAL, "get_audio_frame error while converting\n");
-			return -1;
+		else{
+			frame_ref_raw(praw, frame);
 		}
-
 		frame->pts = ctx->next_pts;
 		ctx->next_pts += frame->nb_samples;
 		*pframe = frame;
@@ -639,27 +573,19 @@ namespace ff
 		AVCodecContext * c;
 		int ret;
 
+		*pframe = NULL;
+
+		if (!ctx->swr_ctx){
+			return 0;
+		}
+
 		c = ctx->st->codec;
 		frame = ctx->frame;
 
-		*pframe = NULL;
-		/*
-		 * 锟斤拷锟斤拷锟斤拷锟斤拷没锟斤拷锟姐够锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷一帧
-		 */
 		int nd = swr_get_delay(ctx->swr_ctx, c->sample_rate);
 		if (nd < frame->nb_samples)
 			return 1;
 
-		/* when we pass a frame to the encoder, it may keep a reference to it
-		* internally;
-		* make sure we do not overwrite it here
-		*/
-		ret = av_frame_make_writable(ctx->frame);
-		if (ret < 0)
-		{
-			av_log(NULL, AV_LOG_FATAL, "get_audio_frame av_frame_make_writable return <0\n");
-			return -1;
-		}
 		if (ctx->swr_ctx){
 			/* convert to destination format */
 			ret = swr_convert(ctx->swr_ctx,
@@ -705,7 +631,6 @@ namespace ff
 			avrat.den = c->sample_rate;
 			avrat.num = 1;
 			frame->pts = av_rescale_q(ctx->samples_count, avrat, c->time_base);
-			//		printf("audio pts = %I64d , %I64d\n", praw->pts,frame->pts);
 
 			ctx->samples_count += frame->nb_samples;
 
@@ -917,11 +842,71 @@ namespace ff
 		pctx->encode_thread = new std::thread(encode_thread_proc, pec);
 	}
 
+	int ffAddFrameFormat(AVEncodeContext * penc,
+		int w, int h, AVPixelFormat fmt,
+		int ch, int sample_rate, AVSampleFormat sample_fmt)
+	{
+		if (penc && penc->_video_st && penc->_video_st->codec){
+			AVCodecContext *c = penc->_video_st->codec;
+			if (c->width != w || c->height != h || fmt != c->pix_fmt){
+				AVPixelFormat infmt;
+
+				if (fmt == AV_PIX_FMT_YVU420P){
+					infmt = AV_PIX_FMT_YUV420P;
+					penc->_vctx.isyv12 = 1;
+				}
+				else{
+					infmt = fmt;
+					penc->_vctx.isyv12 = 0;
+				}
+				if (penc->_vctx.sws_ctx)
+					sws_freeContext(penc->_vctx.sws_ctx);
+				penc->_vctx.sws_ctx = av_sws_alloc(w, h, infmt,c->width, c->height, c->pix_fmt);
+				if (!penc->_vctx.sws_ctx){
+					av_log(NULL, AV_LOG_FATAL, "@ffReadFrameFormat : Could not initialize the conversion context,in_w=%d,in_h=%d,in_fmt=%d\n", w, h, infmt);
+					return -1;
+				}
+				penc->_vctx.sws_in_w = w;
+				penc->_vctx.sws_in_h = h;
+				penc->_vctx.sws_in_fmt = infmt;
+				penc->_vctx.sws_out_w = c->width;
+				penc->_vctx.sws_out_h = c->height;
+				penc->_vctx.sws_out_fmt = c->pix_fmt;
+				DEBUG("AddFrameFormat video scale:(%dx%d %s)->(%dx%d %s)\n",
+					w, h, av_get_pix_fmt_name(infmt),
+					c->width, c->height, av_get_pix_fmt_name(c->pix_fmt));
+			}
+			else{
+				if (penc->_vctx.sws_ctx)
+					sws_freeContext(penc->_vctx.sws_ctx);
+				penc->_vctx.sws_ctx = NULL;
+			}
+		}
+
+		if (penc && penc->_audio_st && penc->_audio_st->codec){
+			AVCodecContext *c = penc->_audio_st->codec;
+
+			if (penc->_actx.swr_ctx)
+				swr_free(&penc->_actx.swr_ctx);
+			/* create resampler context */
+			penc->_actx.swr_ctx = av_swr_alloc(ch, sample_rate, sample_fmt, c->channels, c->sample_rate, c->sample_fmt);
+			if (!penc->_actx.swr_ctx){
+				av_log(NULL, AV_LOG_FATAL, "@ffReadFrameFormat Failed to initialize the resampling context\n");
+				return -1;
+			}
+			penc->_actx.swr_in_channel = ch;
+			penc->_actx.swr_in_sample_rate = sample_rate;
+			penc->_actx.swr_in_sample_fmt = sample_fmt;
+			penc->_actx.swr_out_channel = c->channels;
+			penc->_actx.swr_out_sample_rate = c->sample_rate;
+			penc->_actx.swr_out_sample_fmt = c->sample_fmt;
+		}
+		return 0;
+	}
+
 	AVEncodeContext* ffCreateEncodeContext(const char* filename, const char *fmt,
 		int w, int h, AVRational frameRate, int videoBitRate, AVCodecID video_codec_id,
-		int in_w, int in_h, AVPixelFormat in_fmt,
 		int sampleRate, int audioBitRate, AVCodecID audio_codec_id,
-		int in_ch, int in_sampleRate, AVSampleFormat in_sampleFmt,
 		AVDictionary * opt_arg)
 	{
 		AVEncodeContext * pec;
@@ -976,9 +961,7 @@ namespace ff
 
 		if (pec->has_video)
 		{
-			if (open_video(pec, video_codec_id, 
-				in_w,in_h,in_fmt,
-				NULL) < 0)
+			if (open_video(pec, video_codec_id,NULL) < 0)
 			{
 				ffCloseEncodeContext(pec);
 				return NULL;
@@ -987,9 +970,7 @@ namespace ff
 		}
 		if (pec->has_audio)
 		{
-			if (open_audio(pec, audio_codec_id, 
-				in_ch,in_sampleRate,in_sampleFmt,
-				NULL) < 0)
+			if (open_audio(pec, audio_codec_id,NULL) < 0)
 			{
 				ffCloseEncodeContext(pec);
 				return NULL;

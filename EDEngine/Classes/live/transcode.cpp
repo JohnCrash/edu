@@ -155,9 +155,7 @@ namespace ff
 			i = 1;
 
 			pec = ffCreateEncodeContext(output, fmt, w, h, ffGetFrameRate(pdc), bitRate, video_id,
-				w, h, AV_PIX_FMT_YUV420P,
 				sampleRate, audioBitRate, audio_id, 
-				2, 44100,AV_SAMPLE_FMT_S16, 
 				opt);
 			if (pec)
 			{

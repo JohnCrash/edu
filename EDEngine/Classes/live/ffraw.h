@@ -41,7 +41,8 @@ namespace ff
 	AVRaw *make_audio_from_frame(AVFrame * frame);
 	AVRaw *raw_ref(AVRaw * praw);
 	void free_raw(AVRaw * praw);
-
+	int frame_ref_raw(AVRaw * praw, AVFrame * frame);
+	
 	void list_push_raw(AVRaw ** head, AVRaw ** tail, AVRaw *praw);
 	AVRaw * list_pop_raw(AVRaw ** head, AVRaw **tail);
 }

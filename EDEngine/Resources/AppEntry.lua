@@ -291,13 +291,13 @@ local function cap_devices(args)
 			sample_freq=phone_freq,
 			sample_fmt='s16',
 			audio_bitrate=64*1024,
-			live_w = 640,
-			live_h = 480,
-			live_fps = 12,
+			live_w = video_w,
+			live_h = video_h,
+			live_fps = video_fps,
 		},
 		function(state,nframes,ntimes,errors)
 			if not errors then
-				print(string.format("%d - %d - %d",state,nframes,ntimes))
+				--print(string.format("%d - %d - %d",state,nframes,ntimes))
 			else
 				kits.logTable(errors)
 			end

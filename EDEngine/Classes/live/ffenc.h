@@ -43,10 +43,12 @@ namespace ff
 	AVEncodeContext* ffCreateEncodeContext(
 		const char* filename, const char *fmt,
 		int w, int h, AVRational frameRate, int videoBitRate, AVCodecID video_codec_id,
-		int in_w,int in_h,AVPixelFormat in_fmt,
 		int sampleRate, int audioBitRate, AVCodecID audio_codec_id, 
-		int in_ch, int in_sampleRate, AVSampleFormat in_sampleFmt,
 		AVDictionary * opt_arg);
+
+	int ffAddFrameFormat(AVEncodeContext * penc,
+		int w,int h,AVPixelFormat infmt,
+		int ch,int sample_rate,AVSampleFormat sample_fmt);
 
 	/*
 	 * 返回音频每个帧的采样数量,和通道数

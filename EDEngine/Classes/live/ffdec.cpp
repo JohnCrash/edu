@@ -43,7 +43,7 @@ namespace ff
 
 		if (!pec->_actx.frame)
 			return -1;
-
+		av_frame_make_writable(pec->_actx.frame);
 		return 0;
 	}
 
@@ -64,7 +64,7 @@ namespace ff
 			av_log(NULL, AV_LOG_FATAL, "Could not allocate video frame\n");
 			return -1;
 		}
-
+		av_frame_make_writable(pec->_vctx.frame);
 		return 0;
 	}
 
@@ -660,6 +660,9 @@ namespace ff
 				pdc->_vctx.sws_out_w = w;
 				pdc->_vctx.sws_out_h = h;
 				pdc->_vctx.sws_out_fmt = infmt;
+				DEBUG("ReadFrameFormat video scale:(%dx%d %s)->(%dx%d %s)\n", 
+					c->width, c->height, av_get_pix_fmt_name(c->pix_fmt),
+					w, h, av_get_pix_fmt_name(infmt));
 			}
 			else{
 				if (pdc->_vctx.sws_ctx)
@@ -687,6 +690,10 @@ namespace ff
 				pdc->_actx.swr_out_channel = ch;
 				pdc->_actx.swr_out_sample_rate = sample_rate;
 				pdc->_actx.swr_out_sample_fmt = sample_fmt;
+
+				DEBUG("ReadFrameFormat audio convert:(%d %d %s)->(%d %d %s)\n",
+					c->channels, c->sample_rate, av_get_sample_fmt_name(c->sample_fmt),
+					ch, sample_rate, av_get_sample_fmt_name(sample_fmt));
 			}
 			else{
 				if (pdc->_actx.swr_ctx)

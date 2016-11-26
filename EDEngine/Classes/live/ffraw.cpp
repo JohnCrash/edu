@@ -7,7 +7,10 @@ namespace ff
 	{
 		av_free(data);
 	}
-
+	static void buffer_freep(void * opaque, uint8_t *data)
+	{
+		av_freep(data);
+	}
 	static AVRaw *make_from_frame(AVFrame * frame, AVRawType type)
 	{
 		AVRaw * praw = (AVRaw*)malloc(sizeof(AVRaw));
@@ -26,49 +29,39 @@ namespace ff
 
 			praw->ref = 1;
 
-			for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
-				if ( frame->buf[i] && frame->data[i] ){
-					praw->buf[i] = av_buffer_ref(frame->buf[i]);
-					if (!praw->buf[i]){
-						av_log(NULL, AV_LOG_FATAL, "make_from_frame av_buffer_ref return NULL\n");
-						free(praw);
-						return NULL;
-					}
+			if (av_frame_is_writable(frame)){
+				for (int i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++){
 					praw->data[i] = frame->data[i];
 					praw->linesize[i] = frame->linesize[i];
-					praw->size += praw->buf[i]->size;
+					if (frame->buf[i]){
+						praw->buf[i] = av_buffer_ref(frame->buf[i]);
+						praw->size += praw->buf[i]->size;
+					}
 				}
-				else if (frame->data[i]){
-					int ret;
-					//没有使用缓冲区对象，这里创建缓冲区对象并做(复制操作)
-					if (type == RAW_IMAGE){
-						ret = av_image_alloc(praw->data, praw->linesize, praw->width, praw->height, (AVPixelFormat)praw->format, 32);
-						if (ret < 0){
-							free(praw);
-							av_log(NULL, AV_LOG_FATAL, "make_from_frame out of memory. @av_image_alloc\n");
-							return NULL;
-						}
-						praw->size = ret;
-						for (int i = 0; i < NUM_DATA_POINTERS; i++){
-							if (praw->data[i])
-								praw->buf[i] = av_buffer_create(praw->data[i], praw->linesize[i]*praw->height, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
-						}
-						av_image_copy(praw->data, praw->linesize, (const uint8_t **)frame->data, frame->linesize, (AVPixelFormat)praw->format, praw->width, praw->height);
+			}
+			else{
+				int ret;
+				if (type == RAW_IMAGE){
+					ret = av_image_alloc(praw->data, praw->linesize, praw->width, praw->height, (AVPixelFormat)praw->format, 32);
+					if (ret < 0){
+						free(praw);
+						av_log(NULL, AV_LOG_FATAL, "make_from_frame out of memory. @av_image_alloc\n");
+						return NULL;
 					}
-					else if (type == RAW_AUDIO){
-						ret = av_samples_alloc(praw->data, praw->linesize, praw->channels, praw->samples, (AVSampleFormat)praw->format, 0);
-						if (ret < 0){
-							free(praw);
-							av_log(NULL, AV_LOG_FATAL, "make_from_frame out of memory. @av_samples_alloc\n");
-							return NULL;
-						}
-						praw->size = ret;
-						for (int i = 0; i < NUM_DATA_POINTERS; i++){
-							if (praw->data[i])
-								praw->buf[i] = av_buffer_create(praw->data[i], praw->linesize[i], buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
-						}
-						av_samples_copy(praw->data, frame->data, 0, 0, praw->samples, praw->channels,(AVSampleFormat)praw->format);
+					praw->size = ret;
+					praw->buf[0] = av_buffer_create(praw->data[0], ret, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
+					av_image_copy(praw->data, praw->linesize, (const uint8_t **)frame->data, frame->linesize, (AVPixelFormat)praw->format, praw->width, praw->height);
+				}
+				else if (type == RAW_AUDIO){
+					ret = av_samples_alloc(praw->data, praw->linesize, praw->channels, praw->samples, (AVSampleFormat)praw->format, 0);
+					if (ret < 0){
+						free(praw);
+						av_log(NULL, AV_LOG_FATAL, "make_from_frame out of memory. @av_samples_alloc\n");
+						return NULL;
 					}
+					praw->size = ret;
+					praw->buf[0] = av_buffer_create(praw->data[0], ret, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
+					av_samples_copy(praw->data, frame->data, 0, 0, praw->samples, praw->channels, (AVSampleFormat)praw->format);
 				}
 			}
 			return praw;
@@ -133,11 +126,7 @@ namespace ff
 				break;
 			}
 			praw->size = ret;
-			for (int i = 0; i < NUM_DATA_POINTERS; i++){
-				if (praw->data[i]){
-					praw->buf[i] = av_buffer_create(praw->data[i], praw->linesize[i]*h, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
-				}
-			}
+			praw->buf[0] = av_buffer_create(praw->data[0], ret, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
 			return praw;
 		}
 
@@ -173,11 +162,7 @@ namespace ff
 				break;
 			}
 			praw->size = ret;
-			for (int i = 0; i < NUM_DATA_POINTERS; i++){
-				if (praw->data[i]){
-					praw->buf[i] = av_buffer_create(praw->data[i], praw->linesize[i], buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
-				}
-			}
+			praw->buf[0] = av_buffer_create(praw->data[0], ret, buffer_free, NULL, AV_BUFFER_FLAG_READONLY);
 			return praw;
 		}
 
@@ -191,5 +176,40 @@ namespace ff
 		}
 		praw = NULL;
 		return praw;
+	}
+
+	int frame_ref_raw(AVRaw * praw, AVFrame * frame)
+	{
+		if (praw->type == RAW_IMAGE){
+			av_frame_unref(frame);
+
+			frame->width = praw->width;
+			frame->height = praw->height;
+			frame->format = praw->format;
+
+			for (int i = 0; i < NUM_DATA_POINTERS; i++){
+				frame->data[i] = praw->data[i];
+				frame->linesize[i] = praw->linesize[i];
+				if (praw->buf[i]){
+					frame->buf[i] = av_buffer_ref(praw->buf[i]);
+				}
+			}
+		}
+		else{
+			av_frame_unref(frame);
+
+			frame->sample_rate = praw->samples;
+			frame->channels = praw->channels;
+			frame->format = praw->format;
+
+			for (int i = 0; i < NUM_DATA_POINTERS; i++){
+				frame->data[i] = praw->data[i];
+				frame->linesize[i] = praw->linesize[i];
+				if (praw->buf[i]){
+					frame->buf[i] = av_buffer_ref(praw->buf[i]);
+				}
+			}
+		}
+		return 0;
 	}
 }
