@@ -226,7 +226,7 @@ namespace ff
 	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc)
 	{
-		int ret, got_frame;
+		int ret;
 		AVPacket pkt;
 		AVCodecContext *ctx;
 		AVFrame * frame;
@@ -245,15 +245,17 @@ namespace ff
 			{
 				ctx = pdc->_video_st->codec;
 				frame = pdc->_vctx.frame;
-				ret = avcodec_decode_video2(ctx, frame, &got_frame, &pkt);
 
-				if (got_frame)
+				ret = avcodec_send_packet(ctx, &pkt);
+				if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
+					return NULL;
+				}
+				ret = avcodec_receive_frame(ctx, frame);
+				if (ret==0)
 				{
 					AVRaw * praw;
 					AVCtx * avctx = &pdc->_vctx;
-					/*
-					 * 如果转换不可避免，在读取端进行转换可以节约一次帧复制操作
-					 */
+
 					if (avctx->sws_ctx){
 						praw = make_image_raw(avctx->sws_out_fmt, avctx->sws_out_w, avctx->sws_out_h);
 						if (avctx->isyv12){
@@ -281,15 +283,20 @@ namespace ff
 					av_frame_unref(frame);
 					return praw;
 				}
+				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
+					return NULL;
+				}
 			}
 			else if (pkt.stream_index == pdc->_audio_st_index)
 			{
 				ctx = pdc->_audio_st->codec;
 				frame = pdc->_actx.frame;
-				ret = avcodec_decode_audio4(ctx, frame, &got_frame, &pkt);
-
-				if (got_frame)
-				{
+				ret = avcodec_send_packet(ctx, &pkt);
+				if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
+					return NULL;
+				}
+				ret = avcodec_receive_frame(ctx, frame);
+				if (ret == 0){
 					AVRaw * praw;
 					AVCtx * avctx = &pdc->_actx;
 					//设置了输出格式转换
@@ -311,10 +318,13 @@ namespace ff
 					av_frame_unref(frame);
 					return praw;
 				}
+				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
+					return NULL;
+				}
 			}
 
 			av_packet_unref(&pkt);
-		}
+		} //while
 		return NULL;
 	}
 

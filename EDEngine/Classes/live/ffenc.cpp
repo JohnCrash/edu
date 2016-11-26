@@ -477,7 +477,6 @@ namespace ff
 		AVCodecContext *c;
 		AVStream * st;
 		AVFrame *frame = NULL;
-		int got_packet = 0;
 
 		c = pec->_video_st->codec;
 		st = pec->_video_st;
@@ -488,16 +487,12 @@ namespace ff
 			else
 				frame->pts = pec->_vctx.next_pts++;
 
-			if (!frame)
-				return -1;
+			if (!frame)return -1;
 
 			if (pec->_ctx->oformat->flags & AVFMT_RAWPICTURE) {
 				/* a hack to avoid data copy with some raw video muxers */
 				AVPacket pkt;
 				av_init_packet(&pkt);
-
-				if (!frame)
-					return -1;
 
 				pkt.flags |= AV_PKT_FLAG_KEY;
 				pkt.stream_index = st->index;
@@ -512,31 +507,20 @@ namespace ff
 				AVPacket pkt = { 0 };
 				av_init_packet(&pkt);
 
-				/* encode the image */
-				ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
-				if (ret < 0) {
-					char errmsg[ERROR_BUFFER_SIZE];
-					av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
-					av_log(NULL, AV_LOG_FATAL, "Error encoding video frame: %s\n", errmsg);
+				ret = avcodec_send_frame(c, frame);
+				if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
 					return -1;
-				}
+
+				ret = avcodec_receive_packet(c, &pkt);
 				
-				if (got_packet) {
+				if (ret==0) {
 					ret = write_frame(pec,pec->_ctx, &c->time_base, st, &pkt);
 				}
-				else {
-					ret = 0;
-				}
-			}
-
-			if (ret < 0) {
-				char errmsg[ERROR_BUFFER_SIZE];
-				av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
-				av_log(NULL, AV_LOG_FATAL, "Error while writing video frame: %s\n", errmsg);
-				return -1;
+				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
+					return -1;
 			}
 		}
-		return (frame || got_packet) ? 0 : 1;
+		return frame ? 0 : 1;
 	}
 
 	static int resample_audio_frame(AVCtx * ctx, AVRaw *praw, AVFrame ** pframe)
@@ -615,7 +599,6 @@ namespace ff
 		AVCtx * ctx;
 		AVRational avrat;
 		int ret, result;
-		int got_packet;
 
 		ctx = &pec->_actx;
 		st = pec->_audio_st;
@@ -634,16 +617,14 @@ namespace ff
 
 			ctx->samples_count += frame->nb_samples;
 
-			ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
-			if (ret < 0) {
-				char errmsg[ERROR_BUFFER_SIZE];
-				av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
-				av_log(NULL, AV_LOG_FATAL, "Error encoding audio frame: %s\n", errmsg);
+			ret = avcodec_send_frame(c, frame);
+			if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
 				return -1;
-			}
 
-			if (got_packet) {
-				ret = write_frame(pec,pec->_ctx, &c->time_base, st, &pkt);
+			ret = avcodec_receive_packet(c, &pkt);
+
+			if (ret == 0) {
+				ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
 				if (ret < 0) {
 					char errmsg[ERROR_BUFFER_SIZE];
 					av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
@@ -652,11 +633,14 @@ namespace ff
 					return -1;
 				}
 			}
+			else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
+				return -1;
+
 
 			result = flush_audio_frame(&pec->_actx, &frame);
 		}
 
-		return (frame || got_packet) ? 0 : 1;
+		return frame ? 0 : 1;
 	}
 
 	static void write_delay_audio_frame(AVEncodeContext *pec)
@@ -664,22 +648,20 @@ namespace ff
 		int ret;
 		AVCodecContext *c;
 		AVStream * st;
-		int got_packet = 1;
 
 		if (pec->has_audio && pec->_audio_st){
 			c = pec->_audio_st->codec;
 			st = pec->_audio_st;
-			while (got_packet){
+			while (1){
 				AVPacket pkt = { 0 };
 				av_init_packet(&pkt);
 
-				ret = avcodec_encode_audio2(c, &pkt, NULL, &got_packet);
-				if (ret < 0){
-					break;
+				ret = avcodec_receive_packet(c, &pkt);
+
+				if (ret == 0) {
+					ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
-				if (got_packet){
-					ret = write_frame(pec,pec->_ctx, &c->time_base, st, &pkt);
-				}
+				else break;
 			}
 		}
 	}
@@ -689,22 +671,20 @@ namespace ff
 		int ret;
 		AVCodecContext *c;
 		AVStream * st;
-		int got_packet = 1;
 
 		if (pec->has_video && pec->_video_st){
 			c = pec->_video_st->codec;
 			st = pec->_video_st;
-			while (got_packet){
+			while (1){
 				AVPacket pkt = { 0 };
 				av_init_packet(&pkt);
 
-				ret = avcodec_encode_video2(c, &pkt, NULL, &got_packet);
-				if (ret < 0){
-					break;
+				ret = avcodec_receive_packet(c, &pkt);
+
+				if (ret == 0) {
+					ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
-				if (got_packet){
-					ret = write_frame(pec,pec->_ctx, &c->time_base, st, &pkt);
-				}
+				else break;
 			}
 		}
 	}
