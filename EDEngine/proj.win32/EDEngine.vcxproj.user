@@ -7,7 +7,8 @@
     </LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>launch=hitmouse userid=6641207 cookie="sc1=A83770944332485B097E5FFC968ECD55D18978B2bUt7MwPvCZ2KiGgOI1Rn6lMqah2uIFjs8AuEl9%2fI%2bxYpBhKMgGd2dmOutQrR6h78GOjimogBkWydgHJd%2bCFTYeMvm%2bXs1e%2bC8VYGeQML"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>

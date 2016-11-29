@@ -4,6 +4,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <deque>
 
 #define inline __inline
 #include "ffconfig.h"
@@ -112,6 +113,8 @@ namespace ff
 		int sample_rate, int nb_samples);
 
 	AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height);
+
+	double clock();
 }
 
 #endif

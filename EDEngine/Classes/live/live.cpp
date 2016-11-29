@@ -33,6 +33,12 @@ namespace ff
 		AV_PIX_FMT_NV16,
 		AV_PIX_FMT_NV21
 	};
+	
+#ifdef _NSY_DEBUG
+	#define	NSY_DEBUG DEBUG
+#else
+	#define	NSY_DEBUG
+#endif
 
 	static void liveLoop(AVDecodeCtx * pdc, AVEncodeContext * pec, liveCB cb, liveState* pls)
 	{
@@ -91,7 +97,7 @@ namespace ff
 						av_log(NULL, AV_LOG_ERROR, "liveLoop break : ret < 0 , ret = %d\n",ret);
 						break;
 					}
-					DEBUG("[V] ncsyn:%d timestrap:" PRId64" time: %.4fs\n",
+					NSY_DEBUG("[V] ncsyn:%d timestrap:%" PRId64" time: %.4fs\n",
 								ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 				}
 				else if (ncsyn > MAX_NSYN){
@@ -99,9 +105,9 @@ namespace ff
 					break;
 				}
 				else{
-					DEBUG("discard video frame\n");
+					NSY_DEBUG("discard video frame\n");
 				}
-				DEBUG("[V] ncsyn:%d timestrap:" PRId64" time: %.4fs\n",
+				NSY_DEBUG("[V] ncsyn:%d timestrap:%" PRId64" time: %.4fs\n",
 					ncsyn, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE);
 			}
 			else if (praw->type == RAW_AUDIO && pdc->has_audio){
@@ -137,7 +143,7 @@ namespace ff
 					}
 					break;
 				}
-				DEBUG("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:" PRId64" time: %.4fs bs:%.2fmb\n",
+				NSY_DEBUG("[A] nsyn:%d dsyn:%.4fs acc=%d timestrap:%" PRId64" time: %.4fs bs:%.2fmb\n",
 					nsyn, dsyn, nsynacc, praw->pts, (double)(ctimer - stimer) / (double)AV_TIME_BASE, (double)ffGetBufferSizeKB(pec) / 1024.0);
 
 				nsynacc = 0;
@@ -147,6 +153,8 @@ namespace ff
 				if (cb && pls){
 					pls->nframes = nframe;
 					pls->ntimes = ctimer - stimer;
+					pls->encodeBufferSize = ffGetBufferSizeKB(pec);
+					pls->writeBufferSize = ffGetWriteBufferSizeKB(pec);
 					if (cb(pls)){
 						av_log(NULL, AV_LOG_ERROR, "liveLoop break : nframe % 2 == 0 ,nframe = %d\n",nframe);
 						break;
@@ -174,7 +182,7 @@ namespace ff
 		if (level == AV_LOG_ERROR || level == AV_LOG_FATAL){
 			if (state.nerror > MAX_ERRORMSG_COUNT)
 				state.nerror = 0;
-			snprintf(state.errorMsg[state.nerror++], MAX_ERRORMSG_LENGTH, format, arg);
+			vsnprintf(state.errorMsg[state.nerror++], MAX_ERRORMSG_LENGTH, format, arg);
 		}
 		av_log_default_callback(acl, level, format, arg);
     #if defined(_LIVE_DEBUG)

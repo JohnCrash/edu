@@ -221,6 +221,13 @@ namespace ff
 		return -1;
 	}
 
+	static void put_tp(AVRaw * praw, double pt0, double pt1, double pt2)
+	{
+		PUT_TPS_BY_VALUE(praw, TP_CAPTURE,pt0);
+		PUT_TPS_BY_VALUE(praw, TP_DECODE, pt1);
+		PUT_TPS_BY_VALUE(praw, TP_SWS1, pt2);
+		PUT_TPS(praw, TP_READFRAME_RETURN);
+	}
 	/*
 	 * 从文件或者设备中解码帧数据 
 	 */
@@ -230,8 +237,10 @@ namespace ff
 		AVPacket pkt;
 		AVCodecContext *ctx;
 		AVFrame * frame;
+		double pt0, pt1,pt2;
 		while (true)
 		{
+			pt0 = clock();
 			ret = av_read_frame(pdc->_ctx, &pkt);
 
 			if (ret < 0)
@@ -246,6 +255,7 @@ namespace ff
 				ctx = pdc->_video_st->codec;
 				frame = pdc->_vctx.frame;
 
+				pt1 = clock();
 				ret = avcodec_send_packet(ctx, &pkt);
 				if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
 					return NULL;
@@ -255,7 +265,7 @@ namespace ff
 				{
 					AVRaw * praw;
 					AVCtx * avctx = &pdc->_vctx;
-
+					pt2 = clock();
 					if (avctx->sws_ctx){
 						praw = make_image_raw(avctx->sws_out_fmt, avctx->sws_out_w, avctx->sws_out_h);
 						if (avctx->isyv12){
@@ -281,6 +291,8 @@ namespace ff
 					praw->time_base = ctx->pkt_timebase;
 					av_packet_unref(&pkt);
 					av_frame_unref(frame);
+					
+					put_tp(praw, pt0, pt1, pt2);
 					return praw;
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
@@ -291,6 +303,9 @@ namespace ff
 			{
 				ctx = pdc->_audio_st->codec;
 				frame = pdc->_actx.frame;
+
+				pt1 = clock();
+
 				ret = avcodec_send_packet(ctx, &pkt);
 				if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){
 					return NULL;
@@ -299,6 +314,8 @@ namespace ff
 				if (ret == 0){
 					AVRaw * praw;
 					AVCtx * avctx = &pdc->_actx;
+
+					pt2 = clock();
 					//设置了输出格式转换
 					if (avctx->swr_ctx){
 						praw = make_audio_raw(avctx->swr_out_sample_fmt, avctx->swr_out_channel, avctx->swr_out_sample_rate);
@@ -316,6 +333,8 @@ namespace ff
 					praw->time_base = ctx->pkt_timebase;
 					av_packet_unref(&pkt);
 					av_frame_unref(frame);
+
+					put_tp(praw, pt0, pt1, pt2);
 					return praw;
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){

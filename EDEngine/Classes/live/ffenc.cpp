@@ -20,6 +20,8 @@
 
 namespace ff
 {
+	static int write_packet(AVEncodeContext *pec, AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt);
+
 	static int add_stream(AVEncodeContext *pec, AVCodecID codec_id,
 		int w, int h, AVRational stream_frame_rate, int stream_bit_rate)
 	{
@@ -334,6 +336,11 @@ namespace ff
 			pctx->isflush = 1;
 			pctx->cond->notify_one();
 		}
+		if (pec->write_thread){
+			mutex_lock_t lock(*pec->write_mutex);
+			pec->isflush = 1;
+			pec->write_cond->notify_one();
+		}
 	}
 
 #if 0
@@ -413,6 +420,7 @@ namespace ff
 		AVCodecContext *c = ctx->st->codec;
 		AVFrame * frame = ctx->frame;
 
+		PUT_TPS(praw, TP_SWS2);
 		if (!ctx->sws_ctx)
 		{
 			frame_ref_raw(praw, frame);
@@ -456,17 +464,6 @@ namespace ff
 		return 0;
 	}
 
-	static int write_frame(AVEncodeContext *pec,AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt)
-	{
-		mutex_lock_t lock(*pec->write_mutex);
-		/* rescale output packet timestamp values from codec to stream timebase */
-		av_packet_rescale_ts(pkt, *time_base, st->time_base);
-		pkt->stream_index = st->index;
-
-		/* Write the compressed frame to the media file. */
-		return av_interleaved_write_frame(fmt_ctx, pkt);
-	}
-
 	/*
 	 * encode one video frame and send it to the muxer
 	 * return 1 when encoding is finished, 0 otherwise
@@ -489,6 +486,8 @@ namespace ff
 
 			if (!frame)return -1;
 
+			PUT_TPS(praw, TP_ENCODE);
+
 			if (pec->_ctx->oformat->flags & AVFMT_RAWPICTURE) {
 				/* a hack to avoid data copy with some raw video muxers */
 				AVPacket pkt;
@@ -501,7 +500,7 @@ namespace ff
 
 				pkt.pts = pkt.dts = frame->pts;
 
-				ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
+				ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 			}
 			else {
 				AVPacket pkt = { 0 };
@@ -514,7 +513,7 @@ namespace ff
 				ret = avcodec_receive_packet(c, &pkt);
 				
 				if (ret==0) {
-					ret = write_frame(pec,pec->_ctx, &c->time_base, st, &pkt);
+					ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
 					return -1;
@@ -613,9 +612,14 @@ namespace ff
 		while (result >= 0 && frame){
 			avrat.den = c->sample_rate;
 			avrat.num = 1;
+
+			PUT_TPS(praw, TP_SWS2);
+
 			frame->pts = av_rescale_q(ctx->samples_count, avrat, c->time_base);
 
 			ctx->samples_count += frame->nb_samples;
+
+			PUT_TPS(praw, TP_ENCODE);
 
 			ret = avcodec_send_frame(c, frame);
 			if (ret == AVERROR_EOF || ret == AVERROR(EINVAL))
@@ -624,7 +628,7 @@ namespace ff
 			ret = avcodec_receive_packet(c, &pkt);
 
 			if (ret == 0) {
-				ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
+				ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 				if (ret < 0) {
 					char errmsg[ERROR_BUFFER_SIZE];
 					av_strerror(ret, errmsg, ERROR_BUFFER_SIZE);
@@ -659,7 +663,7 @@ namespace ff
 				ret = avcodec_receive_packet(c, &pkt);
 
 				if (ret == 0) {
-					ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
+					ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
 				else break;
 			}
@@ -682,7 +686,7 @@ namespace ff
 				ret = avcodec_receive_packet(c, &pkt);
 
 				if (ret == 0) {
-					ret = write_frame(pec, pec->_ctx, &c->time_base, st, &pkt);
+					ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
 				else break;
 			}
@@ -704,7 +708,51 @@ namespace ff
 
 		praw = list_pop_raw(&pctx->head, &pctx->tail);
 		
+		PUT_TPS(praw, TP_POPFRAME);
 		return praw;
+	}
+
+	static AVPacket * popPacket(AVEncodeContext * pec)
+	{
+		mutex_lock_t lock(*pec->write_mutex);
+
+		while (!pec->isflush && pec->pkts->empty()){
+			pec->write_cond->wait(lock);
+		}
+
+		if (pec->pkts->empty())
+			return NULL;
+
+		AVPacket * pkt = pec->pkts->back();
+		pec->pkts->pop_back();
+		return pkt;
+	}
+
+	static int write_packet(AVEncodeContext *pec, AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt)
+	{
+		mutex_lock_t lock(*pec->write_mutex);
+		/* rescale output packet timestamp values from codec to stream timebase */
+		av_packet_rescale_ts(pkt, *time_base, st->time_base);
+		pkt->stream_index = st->index;
+
+		pec->nb_pkt++;
+		pec->pkt_size += pkt->size;
+		pec->pkts->push_front(av_packet_clone(pkt));
+		pec->write_cond->notify_one();
+		return 0;
+	}
+
+	static int write_thread_proc(AVEncodeContext * pec)
+	{
+		AVPacket * pkt;
+		while (pkt = popPacket(pec)){
+			pec->pkt_size -= pkt->size;
+			pec->nb_pkt--;
+			/* Write the compressed frame to the media file. */
+			av_interleaved_write_frame(pec->_ctx, pkt);
+			av_packet_free(&pkt);
+		}
+		return 0;
 	}
 
 	static int video_encode_thread_proc(AVEncodeContext * pec)
@@ -978,14 +1026,16 @@ namespace ff
 
 		av_dump_format(ofmt_ctx, 0, filename, 1);
 
-		pec->write_mutex = new mutex_t();
-
 		if (pec->has_audio)
 			initAVCtx(pec, &pec->_actx, audio_encode_thread_proc);
 
 		if (pec->has_video)
 			initAVCtx(pec, &pec->_vctx, video_encode_thread_proc);
 
+		pec->pkts = new std::deque<AVPacket *>();
+		pec->write_mutex = new mutex_t();
+		pec->write_cond = new condition_t();
+		pec->write_thread = new std::thread(write_thread_proc, pec);
 		return pec;
 	}
 
@@ -1002,6 +1052,7 @@ namespace ff
 	static void ffStopThreadAVCtx(AVCtx *ctx)
 	{
 		if (ctx->encode_thread){
+			ctx->isflush = 1;
 			ctx->cond->notify_one();
 			ctx->encode_thread->join();
 			delete ctx->mutex;
@@ -1016,6 +1067,15 @@ namespace ff
 		{
 			ffStopThreadAVCtx(&pec->_actx);
 			ffStopThreadAVCtx(&pec->_vctx);
+
+			if (pec->write_thread){
+				pec->isflush = 1;
+				pec->write_cond->notify_one();
+				pec->write_thread->join();
+				delete pec->write_mutex;
+				delete pec->write_cond;
+				delete pec->write_thread;
+			}
 
 			if (pec->_ctx)
 			{
@@ -1044,8 +1104,8 @@ namespace ff
 
 			ffFreeAVCtx(&pec->_vctx);
 			ffFreeAVCtx(&pec->_actx);
-			
-			delete pec->write_mutex;
+
+			delete pec->pkts;
 
 			free((void*)pec->_fileName);
 			free(pec);
@@ -1060,6 +1120,11 @@ namespace ff
 	int ffGetBufferSize(AVEncodeContext *pec)
 	{
 		return pec->_nb_raws;
+	}
+
+	int ffGetWriteBufferSizeKB(AVEncodeContext *pec)
+	{
+		return pec->pkt_size/1024;
 	}
 
 	int ffAddFrame(AVEncodeContext *pec, AVRaw *praw)
@@ -1087,6 +1152,8 @@ namespace ff
 		}
 
 		mutex_lock_t lk(*pctx->mutex);
+
+		PUT_TPS(praw, TP_ADDFRAME);
 		list_push_raw(&pctx->head, &pctx->tail, raw_ref(praw));
 		pec->_nb_raws++;
 		pec->_buffer_size += getAVRawSizeKB(praw);

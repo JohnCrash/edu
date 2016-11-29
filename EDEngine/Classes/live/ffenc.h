@@ -26,6 +26,12 @@ namespace ff
 		int _nb_raws; //原生数据帧个数
 
 		mutex_t * write_mutex;
+		condition_t * write_cond;
+		std::thread * write_thread;
+		std::deque<AVPacket *> * pkts;
+		int isflush;
+		int pkt_size;
+		int nb_pkt;
 	};
 
 	/**
@@ -82,6 +88,8 @@ namespace ff
 	 * 取缓冲区大小
 	 */
 	int ffGetBufferSize(AVEncodeContext *pec);
+
+	int ffGetWriteBufferSizeKB(AVEncodeContext *pec);
 
 	int ffIsWaitingOrStop(AVEncodeContext *pec);
 }

@@ -18,6 +18,8 @@ namespace ff
 		cbType state; 
 		int64_t nframes; //发送的帧数
 		int64_t ntimes; //直播的时间单位ns
+		int encodeBufferSize; //压缩缓冲区单位kb
+		int writeBufferSize; //发送缓冲区单位kb
 		int nerror; //错误数量
 		char errorMsg[MAX_ERRORMSG_COUNT][MAX_ERRORMSG_LENGTH]; //错误信息
 	};

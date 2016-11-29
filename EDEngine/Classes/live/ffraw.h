@@ -12,6 +12,20 @@ namespace ff
 		RAW_IMAGE,
 		RAW_AUDIO,
 	};
+	enum TimePts
+	{
+		TP_CAPTURE = 0,
+		TP_DECODE,
+		TP_SWS1,
+		TP_READFRAME_RETURN,
+		TP_ADDFRAME,
+		TP_POPFRAME,
+		TP_SWS2,
+		TP_ENCODE,
+		TP_FREE,
+		TP_TYPE,
+		TP_COUNT,
+	};
 	struct AVRaw
 	{
 		uint8_t *data[NUM_DATA_POINTERS];
@@ -30,8 +44,19 @@ namespace ff
 		AVRational time_base;
 		AVRawType type;
 		AVRaw *next;
+#ifdef _LIVE_DEBUG
+		double *timePts;
+#endif
 	};
-
+#ifdef _LIVE_DEBUG
+#define PUT_TPS(raw,tps) raw->timePts[tps] = clock()
+#define PUT_TPS_BY_VALUE(raw,tps,v) raw->timePts[tps] = v
+#define PUT_TPS_TYPE(raw,type) raw->timePts[TP_TYPE] = (double)type
+#else
+#define PUT_TPS
+#define PUT_TPS_BY_VALUE
+#define PUT_TPS_TYPE
+#endif
 	/*
 	* 分配或者释放图像和音频数据
 	*/

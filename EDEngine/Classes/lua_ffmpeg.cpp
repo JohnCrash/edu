@@ -472,12 +472,14 @@ extern "C" {
 					lua_pushinteger(L, pls->state);
 					lua_pushnumber(L, (double)pls->nframes);
 					lua_pushnumber(L, (double)pls->ntimes);
+					lua_pushinteger(L, pls->encodeBufferSize);
+					lua_pushinteger(L, pls->writeBufferSize);
 					if (pls->nerror > 0 && pls->nerror < MAX_ERRORMSG_COUNT){
 						lua_newtable(L);
 						int b = 0;
 						int e = pls->nerror;
 						if (e != MAX_ERRORMSG_COUNT - 1){
-							if (!pls->errorMsg[e+1][0]){
+							if (pls->errorMsg[e][0]){
 								b = e + 1;
 								e = MAX_ERRORMSG_COUNT;
 							}
@@ -491,10 +493,10 @@ extern "C" {
 							lua_pushstring(L, pls->errorMsg[i]);
 							lua_rawseti(L, -2, ++idx);
 						}
-						_prevResult = pLuaStack->executeFunction(4);
+						_prevResult = pLuaStack->executeFunction(6);
 					}
 					else{
-						_prevResult = pLuaStack->executeFunction(3);
+						_prevResult = pLuaStack->executeFunction(5);
 					}
 					
 					if (pls->state == ff::LIVE_END){

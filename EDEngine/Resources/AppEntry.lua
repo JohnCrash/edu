@@ -257,7 +257,10 @@ local function cap_devices(args)
 			end			
 		end
 	end
-	video_fps = 12
+	video_w = 1280
+	video_h = 960
+	video_fps = 30
+	video_fmt = 'yuv420p'
 	if string.len(args)>0 then
 		video_name,video_w,video_h,video_fps,video_fmt = string.match(args,"(%w+)%s+(%d+)x(%d+)%s+(%d+)%s+(%w+)")
 		if video_name then
@@ -295,9 +298,10 @@ local function cap_devices(args)
 			live_h = video_h,
 			live_fps = video_fps,
 		},
-		function(state,nframes,ntimes,errors)
+		function(state,nframes,ntimes,encodeBufferSize,writerBufferSize,errors)
 			if not errors then
 				--print(string.format("%d - %d - %d",state,nframes,ntimes))
+				print(string.format("%d - %d ",encodeBufferSize,writerBufferSize))
 			else
 				kits.logTable(errors)
 			end

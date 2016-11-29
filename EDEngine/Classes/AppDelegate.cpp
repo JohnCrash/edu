@@ -319,7 +319,7 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	case WM_NCACTIVATE:
 		RedrawWindow(hwnd, NULL, NULL,RDW_UPDATENOW);
 		break;
-	case WM_LJSHELL_URIFLAG:
+	case WM_COPYDATA:
 		{
 			BringWindowToTop(hwnd);
 			COPYDATASTRUCT* pobjCopyData = (COPYDATASTRUCT*)lParam;
