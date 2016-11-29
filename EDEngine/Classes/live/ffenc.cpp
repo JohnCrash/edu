@@ -1,4 +1,5 @@
 #include "ffenc.h"
+#include "sharegl.h"
 
 #ifdef __ANDROID__
 	#include <jni.h>
@@ -1170,5 +1171,6 @@ namespace ff
 		jniGetStaticMethodInfo = (JniGetStaticMethodInfo_t)JniHelper_GetStaticMethodInfo;
 #endif		
 		av_ff_init();
+		ffInitShare();
 	}
 }

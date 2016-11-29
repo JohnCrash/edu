@@ -1,6 +1,6 @@
 #ifndef __FFDEC__H__
 #define __FFDEC__H__
-
+#include <deque>
 #include "ffcommon.h"
 #include "ffraw.h"
 
@@ -24,9 +24,17 @@ namespace ff
 		AVCtx _actx;
 
 		int has_audio, has_video, encode_video, encode_audio, isopen;
+
+		std::deque<AVRaw *> * perview_frames;
+		mutex_t * preview_mutex;
+		condition_t * preview_cond;
+		std::thread * preview_thread;
+		int preview_stop;
+
+		unsigned int preview_textures[3];
 	};
 
-	/*
+	/**
 	 * 创建一个解码器上下文，对视频文件进行解码操作
 	 */
 	AVDecodeCtx *ffCreateDecodeContext(
@@ -45,19 +53,25 @@ namespace ff
 
 	void ffSetOESTexture(int txt);
 	int ffAutoFocus(int b);
-	/*
+	/**
 	 * 取得视频的帧率，宽度，高度
 	 */
 	AVRational ffGetFrameRate(AVDecodeCtx *pdc);
 	int ffGetFrameWidth(AVDecodeCtx *pdc);
 	int ffGetFrameHeight(AVDecodeCtx *pdc);
 
-	/*
+	/**
 	 * 从视频文件中取得一帧，可以是图像帧，也可以是一个音频包
 	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc);
 
-	/*
+	/**
+	 * 开始或者停止解码帧预视，调用返回一个gl texture id
+	 */
+	int ffStartPreview(AVDecodeCtx *pdc);
+	void ffStopPreview(AVDecodeCtx *pdc);
+
+	/**
 	 * 设置俘获输出图像大小和格式
 	 */
 	int ffReadFrameFormat(AVDecodeCtx *pdc, 

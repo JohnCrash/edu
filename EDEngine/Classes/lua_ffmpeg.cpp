@@ -4,6 +4,7 @@
 #include "ffdec.h"
 #include "ffenc.h"
 #include "live.h"
+#include "sharegl.h"
 #include "CCLuaStack.h"
 #include "CCLuaEngine.h"
 
@@ -544,6 +545,7 @@ extern "C" {
 	{
 		int ret = 0;
 		const char * errMsg = NULL;
+		
 		while (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef==LUA_REFNIL){
 			const char * file = NULL;
 			const char * video_name = NULL;
@@ -692,6 +694,8 @@ extern "C" {
 			lua_pushvalue(L, 2);
 			_liveRef = lua_ref(L, 1);
 			_prevResult = 0;
+
+			ff::ffInit();
 
 			_pDirector = cocos2d::Director::getInstance();
 			

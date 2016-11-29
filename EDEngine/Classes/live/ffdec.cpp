@@ -187,6 +187,8 @@ namespace ff
 			ffFreeAVCtx(&pdc->_vctx);
 			ffFreeAVCtx(&pdc->_actx);
 
+			ffStopPreview(pdc);
+
 			free(pdc);
 		}
 	}
