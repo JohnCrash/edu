@@ -186,6 +186,9 @@
     <ClCompile Include="..\Classes\live\lua_campreview.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\live\YUVSprite3.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -276,6 +279,9 @@
       <Filter>Classes\live</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\live\lua_campreview.h">
+      <Filter>Classes\live</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\live\YUVSprit3.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>

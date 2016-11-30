@@ -27,7 +27,7 @@ namespace ff
 	typedef int(*liveCB)(liveState * pls);
 
 	/**
-	 * 选择视频和音频俘获设备进行在线直播
+	 * 选择视频和音频俘获设备进行直播
 	 */
 	void liveOnRtmp(
 		const char * rtmp_publisher,
@@ -35,6 +35,22 @@ namespace ff
 		const char * phone_name, int rate, const char * sample_fmt_name, int abitRate,
 		int ow, int oh, int ofps,
 		liveCB cb);
+
+	/**
+	 * 打开视频音频俘获设备
+	 */
+	int liveOpenCapDevices(
+		const char * camera_name, int w, int h, int fps, const char * pix_fmt_name, 
+		const char * phone_name, int rate, const char * sample_fmt_name);
+	/**
+	 * 开始停止直播
+	 */
+	int liveStart(const char * filename, int w, int h, int fps, int vbitRate, int abitRate);
+	int liveStop();
+	/**
+	* 关闭视频音频俘获设备
+	*/
+	int liveCloseCapDevices();
 
 #define MAX_DEVICE_NAME_LENGTH 256
 #define MAX_FORMAT_LENGTH 32

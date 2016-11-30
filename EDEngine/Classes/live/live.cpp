@@ -318,4 +318,26 @@ namespace ff
 		//av_dict_free(&opt);
 		DEBUG("=================liveOnRtmp end==================");
 	}
+
+	int liveOpenCapDevices(
+		const char * camera_name, int w, int h, int fps, const char * pix_fmt_name,
+		const char * phone_name, int rate, const char * sample_fmt_name)
+	{
+		return 0;
+	}
+
+	int liveStart(const char * filename, int w, int h, int fps, int vbitRate, int abitRate)
+	{
+		return 0;
+	}
+
+	int liveStop()
+	{
+		return 0;
+	}
+
+	int liveCloseCapDevices()
+	{
+		return 0;
+	}
 }
