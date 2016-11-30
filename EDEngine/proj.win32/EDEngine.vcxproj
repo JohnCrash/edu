@@ -158,12 +158,14 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\FFVideo.cpp" />
     <ClCompile Include="..\Classes\Files.cpp" />
     <ClCompile Include="..\Classes\IDF.cpp" />
+    <ClCompile Include="..\Classes\live\campreview.cpp" />
     <ClCompile Include="..\Classes\live\cap_vfw.cpp" />
     <ClCompile Include="..\Classes\live\ffdec.cpp" />
     <ClCompile Include="..\Classes\live\ffenc.cpp" />
     <ClCompile Include="..\Classes\live\ffpreview.cpp" />
     <ClCompile Include="..\Classes\live\ffraw.cpp" />
     <ClCompile Include="..\Classes\live\live.cpp" />
+    <ClCompile Include="..\Classes\live\lua_campreview.cpp" />
     <ClCompile Include="..\Classes\luaDebug.cpp" />
     <ClCompile Include="..\Classes\lua_ext.cpp" />
     <ClCompile Include="..\Classes\lua_ffmpeg.cpp" />
@@ -209,6 +211,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\ffdepends.h" />
     <ClInclude Include="..\Classes\Files.h" />
     <ClInclude Include="..\Classes\IDF.h" />
+    <ClInclude Include="..\Classes\live\campreview.h" />
     <ClInclude Include="..\Classes\live\cap.h" />
     <ClInclude Include="..\Classes\live\ffcommon.h" />
     <ClInclude Include="..\Classes\live\ffdec.h" />
@@ -217,6 +220,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\live\ffpreview.h" />
     <ClInclude Include="..\Classes\live\ffraw.h" />
     <ClInclude Include="..\Classes\live\live.h" />
+    <ClInclude Include="..\Classes\live\lua_campreview.h" />
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
     <ClInclude Include="..\Classes\lua_ljshell.h" />

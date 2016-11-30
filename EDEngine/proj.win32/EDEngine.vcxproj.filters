@@ -180,6 +180,12 @@
     <ClCompile Include="..\Classes\live\ffpreview.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\live\campreview.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\lua_campreview.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -264,6 +270,12 @@
       <Filter>Classes\live</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\live\ffpreview.h">
+      <Filter>Classes\live</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\live\campreview.h">
+      <Filter>Classes\live</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\live\lua_campreview.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>

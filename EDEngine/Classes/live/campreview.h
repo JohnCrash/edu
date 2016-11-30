@@ -14,6 +14,7 @@ namespace ui {
 		CamPreview();
 
 		virtual ~CamPreview();
+		virtual std::string getDescription() const override;
 
 		static CamPreview * create();
 
