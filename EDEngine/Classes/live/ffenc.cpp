@@ -1,5 +1,4 @@
 #include "ffenc.h"
-#include "sharegl.h"
 
 #ifdef __ANDROID__
 	#include <jni.h>
@@ -736,13 +735,13 @@ namespace ff
 		av_packet_rescale_ts(pkt, *time_base, st->time_base);
 		pkt->stream_index = st->index;
 
-		av_interleaved_write_frame(fmt_ctx, pkt);
-		/*
+		//av_interleaved_write_frame(fmt_ctx, pkt);
+		
 		pec->nb_pkt++;
 		pec->pkt_size += pkt->size;
 		pec->pkts->push_front(av_packet_clone(pkt));
 		pec->write_cond->notify_one();
-		*/
+		
 		return 0;
 	}
 
@@ -1171,6 +1170,5 @@ namespace ff
 		jniGetStaticMethodInfo = (JniGetStaticMethodInfo_t)JniHelper_GetStaticMethodInfo;
 #endif		
 		av_ff_init();
-		ffInitShare();
 	}
 }

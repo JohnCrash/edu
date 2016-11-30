@@ -187,8 +187,6 @@ namespace ff
 			ffFreeAVCtx(&pdc->_vctx);
 			ffFreeAVCtx(&pdc->_actx);
 
-			ffStopPreview(pdc);
-
 			free(pdc);
 		}
 	}
@@ -229,13 +227,6 @@ namespace ff
 		PUT_TPS_BY_VALUE(praw, TP_DECODE, pt1);
 		PUT_TPS_BY_VALUE(praw, TP_SWS1, pt2);
 		PUT_TPS(praw, TP_READFRAME_RETURN);
-	}
-	static void AddPreview(AVDecodeCtx *pdc,AVRaw *raw){
-		if (pdc->preview_thread){
-			mutex_lock_t lock(*pdc->preview_mutex);
-			pdc->perview_frames->push_front(raw_ref(raw));
-			pdc->preview_cond->notify_one();
-		}
 	}
 	/*
 	 * 从文件或者设备中解码帧数据 
@@ -302,7 +293,6 @@ namespace ff
 					av_frame_unref(frame);
 					
 					put_tp(praw, pt0, pt1, pt2);
-					AddPreview(pdc,praw);
 					return praw;
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){

@@ -286,10 +286,6 @@ namespace ff
 				callbc(cb, LIVE_ERROR, "ffReadFrameFormat failed");
 				break;
 			}
-			if (ffStartPreview(pdc) < 0){
-				callbc(cb, LIVE_ERROR, "ffStartPreview failed");
-				break;
-			}
 			if (ffAddFrameFormat(pec, ow, oh, AV_PIX_FMT_YUV420P,
 				AUDIO_CHANNEL, rate, sampleFmt) < 0){
 				callbc(cb, LIVE_ERROR, "ffAddFrameFormat failed");

@@ -180,12 +180,6 @@
     <ClCompile Include="..\Classes\thread_curl.cpp">
       <Filter>Classes\lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\live\sharegl.cpp">
-      <Filter>Classes\live</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\live\ffpreview.cpp">
-      <Filter>Classes\live</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -270,9 +264,6 @@
       <Filter>Classes\live</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\live\cap.h">
-      <Filter>Classes\live</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\live\sharegl.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>
