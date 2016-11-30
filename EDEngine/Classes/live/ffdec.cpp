@@ -155,7 +155,7 @@ namespace ff
 				}
 				pdc->encode_audio = 1;
 			}
-
+			pdc->preview_mutex = new mutex_t();
 			return pdc;
 		}
 
@@ -186,6 +186,12 @@ namespace ff
 
 			ffFreeAVCtx(&pdc->_vctx);
 			ffFreeAVCtx(&pdc->_actx);
+
+			{
+				mutex_lock_t lk(*pdc->preview_mutex);
+
+			}
+			delete pdc->preview_mutex;
 
 			free(pdc);
 		}
@@ -293,6 +299,7 @@ namespace ff
 					av_frame_unref(frame);
 					
 					put_tp(praw, pt0, pt1, pt2);
+					addPreviewFrame(praw);
 					return praw;
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){

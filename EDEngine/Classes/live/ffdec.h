@@ -24,6 +24,8 @@ namespace ff
 		AVCtx _actx;
 
 		int has_audio, has_video, encode_video, encode_audio, isopen;
+
+		mutex_t * preview_mutex;
 	};
 
 	/*
@@ -57,6 +59,7 @@ namespace ff
 	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc);
 
+	void addPreviewFrame(AVRaw * praw);
 	/*
 	 * 设置俘获输出图像大小和格式
 	 */

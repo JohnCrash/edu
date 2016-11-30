@@ -153,9 +153,6 @@
     <ClCompile Include="..\Classes\live\live.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\live\transcode.cpp">
-      <Filter>Classes\live</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\lua_ext.cpp">
       <Filter>Classes\lua</Filter>
     </ClCompile>
@@ -179,6 +176,9 @@
     </ClCompile>
     <ClCompile Include="..\Classes\thread_curl.cpp">
       <Filter>Classes\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\live\ffpreview.cpp">
+      <Filter>Classes\live</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -242,9 +242,6 @@
     <ClInclude Include="..\Classes\thread_curl.h">
       <Filter>Classes\lua</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\live\transcode.h">
-      <Filter>Classes\live</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\live\live.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
@@ -264,6 +261,9 @@
       <Filter>Classes\live</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\live\cap.h">
+      <Filter>Classes\live</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\live\ffpreview.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>
