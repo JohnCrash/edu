@@ -222,7 +222,7 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\live\ffraw.h" />
     <ClInclude Include="..\Classes\live\live.h" />
     <ClInclude Include="..\Classes\live\lua_campreview.h" />
-    <ClInclude Include="..\Classes\live\YUVSprit3.h" />
+    <ClInclude Include="..\Classes\live\YUVSprite3.h" />
     <ClInclude Include="..\Classes\luaDebug.h" />
     <ClInclude Include="..\Classes\lua_ext.h" />
     <ClInclude Include="..\Classes\lua_ljshell.h" />

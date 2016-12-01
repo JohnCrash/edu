@@ -44,6 +44,12 @@ namespace ui {
 	{
 		return "CamPreview";
 	}
+
+	void CamPreview::initRenderer()
+	{
+		_sprite = YUVSprite::create();
+		addProtectedChild(_sprite, -1, -1);
+	}
 }
 
 NS_CC_END

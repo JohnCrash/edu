@@ -281,7 +281,7 @@
     <ClInclude Include="..\Classes\live\lua_campreview.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\live\YUVSprit3.h">
+    <ClInclude Include="..\Classes\live\YUVSprite3.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>

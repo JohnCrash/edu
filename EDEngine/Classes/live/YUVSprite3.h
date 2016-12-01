@@ -25,6 +25,8 @@ CC_CONSTRUCTOR_ACCESS:
 	virtual std::string getDescription() const override;
 
 	virtual void draw(Renderer* renderer, const Mat4 &transform, uint32_t flags) override;
+
+	void render();
 protected:
 private:
 	CC_DISALLOW_COPY_AND_ASSIGN(YUVSprite);
@@ -38,6 +40,7 @@ private:
 	GLuint borderUniformY;
 	GLuint borderUniformU;
 	GLuint borderUniformV;
+	CustomCommand _customDrawCommand;
 };
 
 NS_CC_END

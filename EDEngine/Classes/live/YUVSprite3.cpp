@@ -82,6 +82,7 @@ static GLProgram * getYUV420pShader()
 
 YUVSprite::YUVSprite(void)
 {
+	_customDrawCommand.func = std::bind(&YUVSprite::render, this);
 }
 
 YUVSprite::~YUVSprite(void)
@@ -162,29 +163,60 @@ std::string YUVSprite::getDescription() const
 	return "YUVSprite";
 }
 
+void YUVSprite::render()
+{
+	GLfloat square[8];
+	GLProgram * prog = getYUV420pShader();
+	if (!prog)return;
+
+	prog->use();
+	prog->setUniformsForBuiltins();
+
+	ccGLBindTexture2DN(0, _yuv[0]);
+	glUniform1i(textureUniformY, 0);
+
+	ccGLBindTexture2DN(1, _yuv[1]);
+	glUniform1i(textureUniformU, 1);
+
+	ccGLBindTexture2DN(2, _yuv[2]);
+	glUniform1i(textureUniformV, 2);
+
+	glUniform1f(borderUniformY, _border[0]);
+	glUniform1f(borderUniformU, _border[1]);
+	glUniform1f(borderUniformV, _border[2]);
+
+	CCSize s = getContentSize();
+	CCPoint offsetPix;
+
+	getPosition(&offsetPix.x, &offsetPix.y);
+	
+	square[0] = offsetPix.x;
+	square[1] = offsetPix.y;
+
+	square[2] = offsetPix.x + s.width;
+	square[3] = offsetPix.y;
+
+	square[6] = offsetPix.x + s.width;
+	square[7] = offsetPix.y + s.height;
+
+	square[4] = offsetPix.x;
+	square[5] = offsetPix.y + s.height;
+
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, square);
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+
+	glVertexAttribPointer(ATTRIB_TEXTURE, 2, GL_FLOAT, 0, 0, coordVertices);
+	glEnableVertexAttribArray(ATTRIB_TEXTURE);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	CHECK_GL_ERROR_DEBUG();
+}
+
 void YUVSprite::draw(Renderer* renderer, const Mat4 &transform, uint32_t flags)
 {
 	if (width > 0 && height > 0){
-		GLProgram * prog = getYUV420pShader();
-		if (!prog)return;
-
-		prog->use();
-		prog->setUniformsForBuiltins();
-
-		ccGLBindTexture2DN(0, _yuv[0]);
-		glUniform1i(textureUniformY, 0);
-
-		ccGLBindTexture2DN(1, _yuv[1]);
-		glUniform1i(textureUniformU, 1);
-
-		ccGLBindTexture2DN(2, _yuv[2]);
-		glUniform1i(textureUniformV, 2);
-
-		glUniform1f(borderUniformY, _border[0]);
-		glUniform1f(borderUniformU, _border[1]);
-		glUniform1f(borderUniformV, _border[2]);
-
-
+		_customDrawCommand.init(_globalZOrder);
+		renderer->addCommand(&_customDrawCommand);
 	}
 }
 
