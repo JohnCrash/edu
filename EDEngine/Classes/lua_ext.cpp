@@ -10,6 +10,7 @@
 #include "RenderTextureEx.h"
 #include "Files.h"
 #include "acr.h"
+#include "lua_campreview.h"
 //#include "lua_multithread.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
@@ -857,6 +858,8 @@ static int lua_is_utf8(lua_State *L)
 void luaopen_lua_exts(lua_State *L)
 {
     luaL_Reg* lib = luax_exts;
+	
+	lua_register_CamPreview(L);
 
 	lua_register( L,"cc_type",cc_gettype);
 	lua_register( L,"cc_istype",cc_istype);

@@ -119,8 +119,6 @@ void YUVSprite::update(GLuint yuv[3], int linesize[3],int w, int h)
 
 			width = w;
 			height = h;
-
-			setContentSize(CCSize(w, h));
 			return;
 		}
 	}
@@ -130,6 +128,10 @@ void YUVSprite::update(GLuint yuv[3], int linesize[3],int w, int h)
 
 bool YUVSprite::initWithTexture(GLuint yuv[3], int linesize[3], int w, int h)
 {
+	GLProgram * prog = getYUV420pShader();
+	if (prog){
+		setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_yuv420pShaderName));
+	}
 	update(yuv, linesize,w, h);
 	return true;
 }
@@ -166,11 +168,8 @@ std::string YUVSprite::getDescription() const
 void YUVSprite::render()
 {
 	GLfloat square[8];
-	GLProgram * prog = getYUV420pShader();
-	if (!prog)return;
-
-	prog->use();
-	prog->setUniformsForBuiltins();
+	if(_glProgramState)
+		_glProgramState->apply(_modelViewTransform);
 
 	ccGLBindTexture2DN(0, _yuv[0]);
 	glUniform1i(textureUniformY, 0);
@@ -188,7 +187,7 @@ void YUVSprite::render()
 	CCSize s = getContentSize();
 	CCPoint offsetPix;
 
-	getPosition(&offsetPix.x, &offsetPix.y);
+	//getPosition(&offsetPix.x, &offsetPix.y);
 	
 	square[0] = offsetPix.x;
 	square[1] = offsetPix.y;

@@ -227,8 +227,17 @@ local function recv( socket )
 	return nil,err
 end
 local _stopCap = false
-local function cap_devices(args)
+local _camPreview
+local function cap_devices(args,bg)
 	require  "ff"
+	
+	if not _camPreview then
+		size = uikits.getDR()
+		print("bg size : "..size.width..","..size.height)
+		_camPreview = uikits.camPreview{x=size.width-320,y=size.height-200,width=320,height=200}
+		bg:addChild(_camPreview)
+	end
+	
 	local t = cc_camdevices()
 	kits.logTable(t)
 	
@@ -305,7 +314,13 @@ local function cap_devices(args)
 			else
 				kits.logTable(errors)
 			end
-			if _stopCap then return 1 end
+			if _stopCap then 
+				if _camPreview then
+					_camPreview:removeFromParent()
+					_camPreview = nil
+				end
+				return 1 
+			end
 			return 0
 		end
 	)
@@ -768,7 +783,7 @@ function AppEntry:init()
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
 			_stopCap = false
-			cap_devices(capedit:getStringValue())
+			cap_devices(capedit:getStringValue(),bg)
 			end}				
 	local cam =   uikits.button{caption='拍照',x=464*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,

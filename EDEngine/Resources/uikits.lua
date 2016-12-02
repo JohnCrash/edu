@@ -381,6 +381,28 @@ local function checkbox( t )
 	return cb
 end
 
+local function camPreview( t )
+	local cb
+	if t and type(t)=='table' then
+		cb = ccui.CamPreview:create()
+
+		init_node(cb,t)
+		cb:setContentSize{width = t.width or 64,height = t.height or 32}
+	end
+	return cb
+end
+
+local function movieView( t )
+	local cb
+	if t and type(t)=='table' then
+		cb = ccui.MovieView:create()
+
+		init_node(cb,t)
+		cb:setContentSize{width = t.width or 64,height = t.height or 32}
+	end
+	return cb
+end
+
 local function button( t )
 	local cb
 	if t and type(t)=='table' then
@@ -2111,6 +2133,8 @@ return {
 	text = text,
 	textbmfont = textbmfont,
 	checkbox = checkbox,
+	camPreview = camPreview,
+	movieView = movieView,
 	button = button,
 	slider = slider,
 	progress = progress,

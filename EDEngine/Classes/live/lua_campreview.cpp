@@ -46,7 +46,7 @@ int lua_cocos2dx_ui_CamPreview_create(lua_State* tolua_S)
 #endif
 
 #if COCOS2D_DEBUG >= 1
-	if (!tolua_isusertable(tolua_S, 1, "ccui.ImageView", 0, &tolua_err)) goto tolua_lerror;
+	if (!tolua_isusertable(tolua_S, 1, "ccui.CamPreview", 0, &tolua_err)) goto tolua_lerror;
 #endif
 
 	argc = lua_gettop(tolua_S) - 1;
@@ -101,24 +101,115 @@ tolua_lerror:
 	return 0;
 }
 
+int lua_cocos2dx_ui_CamPreview_startPreview(lua_State* tolua_S)
+{
+	int argc = 0;
+	cocos2d::ui::CamPreview* cobj = nullptr;
+	bool ok = true;
+
+#if COCOS2D_DEBUG >= 1
+	tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+	if (!tolua_isusertype(tolua_S, 1, "ccui.CamPreview", 0, &tolua_err)) goto tolua_lerror;
+#endif
+
+	cobj = (cocos2d::ui::CamPreview*)tolua_tousertype(tolua_S, 1, 0);
+
+#if COCOS2D_DEBUG >= 1
+	if (!cobj)
+	{
+		tolua_error(tolua_S, "invalid 'cobj' in function 'lua_cocos2dx_ui_CamPreview_startPreview'", nullptr);
+		return 0;
+	}
+#endif
+
+	argc = lua_gettop(tolua_S) - 1;
+	if (argc == 0)
+	{
+		cobj->startPreview();
+		return 0;
+	}
+	CCLOG("%s has wrong number of arguments: %d, was expecting %d \n", "loadTexture", argc, 1);
+	return 0;
+
+#if COCOS2D_DEBUG >= 1
+tolua_lerror:
+	tolua_error(tolua_S, "#ferror in function 'lua_cocos2dx_ui_ImageView_loadTexture'.", &tolua_err);
+#endif
+
+	return 0;
+}
+
+int lua_cocos2dx_ui_CamPreview_stopPreview(lua_State* tolua_S)
+{
+	int argc = 0;
+	cocos2d::ui::CamPreview* cobj = nullptr;
+	bool ok = true;
+
+#if COCOS2D_DEBUG >= 1
+	tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+	if (!tolua_isusertype(tolua_S, 1, "ccui.CamPreview", 0, &tolua_err)) goto tolua_lerror;
+#endif
+
+	cobj = (cocos2d::ui::CamPreview*)tolua_tousertype(tolua_S, 1, 0);
+
+#if COCOS2D_DEBUG >= 1
+	if (!cobj)
+	{
+		tolua_error(tolua_S, "invalid 'cobj' in function 'lua_cocos2dx_ui_CamPreview_startPreview'", nullptr);
+		return 0;
+	}
+#endif
+
+	argc = lua_gettop(tolua_S) - 1;
+	if (argc == 0)
+	{
+		cobj->stopPreview();
+		return 0;
+	}
+	CCLOG("%s has wrong number of arguments: %d, was expecting %d \n", "loadTexture", argc, 1);
+	return 0;
+
+#if COCOS2D_DEBUG >= 1
+tolua_lerror:
+	tolua_error(tolua_S, "#ferror in function 'lua_cocos2dx_ui_ImageView_loadTexture'.", &tolua_err);
+#endif
+
+	return 0;
+}
+
 int lua_register_cocos2dx_ui_CamPreview(lua_State* tolua_S)
 {
 	tolua_usertype(tolua_S, "ccui.CamPreview");
 	tolua_cclass(tolua_S, "CamPreview", "ccui.CamPreview", "ccui.Widget", nullptr);
 
-	tolua_beginmodule(tolua_S, "ImageView");
+	tolua_beginmodule(tolua_S, "CamPreview");
 	tolua_function(tolua_S, "new", lua_cocos2dx_ui_CamPreview_constructor);
 	tolua_function(tolua_S, "create", lua_cocos2dx_ui_CamPreview_create);
 	tolua_function(tolua_S, "createInstance", lua_cocos2dx_ui_CamPreview_createInstance);
+	tolua_function(tolua_S, "startPreview", lua_cocos2dx_ui_CamPreview_startPreview);
+	tolua_function(tolua_S, "stopPreview", lua_cocos2dx_ui_CamPreview_stopPreview);
 	tolua_endmodule(tolua_S);
 	std::string typeName = typeid(cocos2d::ui::CamPreview).name();
-	g_luaType[typeName] = "ccui.ImageView";
-	g_typeCast["ImageView"] = "ccui.ImageView";
+	g_luaType[typeName] = "ccui.CamPreview";
+	g_typeCast["CamPreview"] = "ccui.CamPreview";
 	return 1;
 }
 
 int lua_register_CamPreview(lua_State* tolua_S)
 {
+	const luaL_reg global_functions[] = {
+		{ NULL, NULL }
+	};
+	luaL_register(tolua_S, "_G", global_functions);
+
 	tolua_open(tolua_S);
 
 	tolua_module(tolua_S, "ccui", 0);
