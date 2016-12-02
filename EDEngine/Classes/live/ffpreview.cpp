@@ -35,7 +35,6 @@ namespace ff{
 	static mutex_t *_preview_mutex = NULL;
 	static AVRaw * _preview_frame = NULL;
 	static GLuint _preview_textures[3];
-	static AVRaw * _prev_frame = NULL;
 	static int _prev_w = 0;
 	static int _prev_h = 0;
 	static int _prev_linesize[3];
@@ -83,7 +82,6 @@ namespace ff{
 			if (check_gl_state()){
 				_preview_mutex = new mutex_t();
 				_preview_frame = NULL;
-				_prev_frame = NULL;
 				return 1;
 			}
 		}
@@ -101,15 +99,13 @@ namespace ff{
 			yuv[1] = _preview_textures[1];
 			yuv[2] = _preview_textures[2];
 
-			if (!raw || raw == _prev_frame){
+			if (!raw){
 				*pw = _prev_w;
 				*ph = _prev_h;
 				linesize[0] = _prev_linesize[0];
 				linesize[1] = _prev_linesize[1];
 				linesize[2] = _prev_linesize[2];
-				if (raw)
-					free_raw(raw);
-				return _prev_frame?1:0;
+				return 0;
 			}
 
 			linesize[0] = raw->linesize[0];
@@ -142,7 +138,6 @@ namespace ff{
 					return 0;
 				}
 
-				_prev_frame = raw;
 				_prev_w = raw->width;
 				_prev_h = raw->height;
 				_prev_linesize[0] = raw->linesize[0];
@@ -174,7 +169,6 @@ namespace ff{
 			}
 			_preview_mutex = NULL;
 			_preview_frame = NULL;
-			_prev_frame = NULL;
 		}
 	}
 }

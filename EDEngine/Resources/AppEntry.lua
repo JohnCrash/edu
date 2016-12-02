@@ -287,8 +287,8 @@ local function cap_devices(args,bg)
 	print(string.format("	size:%dx%d fps:%d fmt:%s",video_w,video_h,video_fps,video_fmt))
 	print("audio device:"..tostring(phone_name))
 	print(string.format("	samples:%d ",phone_freq))
-	--video_w = 640
-	--video_h = 480
+	video_w = 640
+	video_h = 480
 	--video_fps = 12
 	local b,errmsg = cc_live(
 		{
