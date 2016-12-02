@@ -170,6 +170,7 @@ namespace ff{
 					free_raw(_preview_frame);
 				delete _preview_mutex;
 				glDeleteTextures(3, _preview_textures);
+				check_gl_state();
 			}
 			_preview_mutex = NULL;
 			_preview_frame = NULL;

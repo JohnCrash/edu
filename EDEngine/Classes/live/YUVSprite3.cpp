@@ -208,6 +208,9 @@ void YUVSprite::render()
 	glEnableVertexAttribArray(ATTRIB_TEXTURE);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	ccGLBindTexture2DN(1, 0);
+	ccGLBindTexture2DN(2, 0);
 	CHECK_GL_ERROR_DEBUG();
 }
 
