@@ -16,8 +16,6 @@ namespace ff
 		return clock;
 	}
 
-	static int n_images = 0;
-	static int n_audios = 0;
 /* 这里显示帧的全生存周期的时间分布情况 */
 #define _FRAME_LOG 0
 
@@ -80,7 +78,6 @@ namespace ff
 						praw->size += praw->buf[i]->size;
 					}
 				}
-				n_images++;
 			}
 			else{
 				int ret;

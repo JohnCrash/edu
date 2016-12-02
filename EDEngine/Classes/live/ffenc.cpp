@@ -735,11 +735,12 @@ namespace ff
 		av_packet_rescale_ts(pkt, *time_base, st->time_base);
 		pkt->stream_index = st->index;
 
-//		av_interleaved_write_frame(fmt_ctx, pkt);
+		//av_interleaved_write_frame(fmt_ctx, pkt);
 		
 		pec->nb_pkt++;
 		pec->pkt_size += pkt->size;
 		pec->pkts->push_front(av_packet_clone(pkt));
+		av_packet_unref(pkt);
 		pec->write_cond->notify_one();
 		
 		return 0;
@@ -753,6 +754,7 @@ namespace ff
 			pec->nb_pkt--;
 			/* Write the compressed frame to the media file. */
 			av_interleaved_write_frame(pec->_ctx, pkt);
+
 			av_packet_free(&pkt);
 		}
 		return 0;
