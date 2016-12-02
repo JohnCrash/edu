@@ -297,9 +297,9 @@ namespace ff
 					praw->time_base = ctx->pkt_timebase;
 					av_packet_unref(&pkt);
 					av_frame_unref(frame);
-					
-					put_tp(praw, pt0, pt1, pt2);
 					addPreviewFrame(praw);
+					put_tp(praw, pt0, pt1, pt2);
+					
 					return praw;
 				}
 				else if (ret == AVERROR_EOF || ret == AVERROR(EINVAL)){

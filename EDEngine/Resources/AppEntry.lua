@@ -234,7 +234,7 @@ local function cap_devices(args,bg)
 	if not _camPreview then
 		size = uikits.getDR()
 		print("bg size : "..size.width..","..size.height)
-		_camPreview = uikits.camPreview{x=size.width-320,y=size.height-200,width=320,height=200}
+		_camPreview = uikits.camPreview{x=size.width-640,y=size.height-480,width=640,height=480}
 		bg:addChild(_camPreview)
 	end
 	
@@ -310,7 +310,7 @@ local function cap_devices(args,bg)
 		function(state,nframes,ntimes,encodeBufferSize,writerBufferSize,errors)
 			if not errors then
 				--print(string.format("%d - %d - %d",state,nframes,ntimes))
-				print(string.format("%d - %d ",encodeBufferSize,writerBufferSize))
+				--print(string.format("%d - %d ",encodeBufferSize,writerBufferSize))
 			else
 				kits.logTable(errors)
 			end
