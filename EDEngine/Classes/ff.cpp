@@ -1408,7 +1408,6 @@ static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb
 			if (!wanted_spec.freq) {
 				My_log(NULL, AV_LOG_ERROR,
 					"No more combinations to try, audio open failed\n");
-				CloseAudio();
 				return -1;
 			}
 		}
@@ -3268,17 +3267,14 @@ void seek_chapter(VideoState *is, int incr)
 		AV_TIME_BASE_q), 0, 0);
 }
 
+extern "C" void av_ff_init();
+static int _initFF = 0;
 void initFF()
 {
+	if (_initFF)return;
+
 	/* register all codecs, demux and protocols */
-#if CONFIG_AVDEVICE
-	avdevice_register_all();
-#endif
-#if CONFIG_AVFILTER
-	avfilter_register_all();
-#endif
-	av_register_all();
-	avformat_network_init();
+	av_ff_init();
 
 	if (av_lockmgr_register(lockmgr)) {
 		My_log(NULL, AV_LOG_FATAL, "Could not initialize lock manager!\n");
@@ -3288,6 +3284,7 @@ void initFF()
 	av_init_packet(&flush_pkt);
 	flush_pkt.data = (uint8_t *)&flush_pkt;
 
+	_initFF = 1;
 	//av_log_set_callback(avlog);
 }
 

@@ -928,6 +928,47 @@ tolua_lerror:
 	return 0;
 }
 
+int lua_cocos2dx_ui_MovieView_play(lua_State* tolua_S)
+{
+	int argc = 0;
+	cocos2d::ui::MovieView* cobj = nullptr;
+
+#if COCOS2D_DEBUG >= 1
+	tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+	if (!tolua_isusertype(tolua_S, 1, "ccui.MovieView", 0, &tolua_err)) goto tolua_lerror;
+#endif
+
+	cobj = (cocos2d::ui::MovieView*)tolua_tousertype(tolua_S, 1, 0);
+
+#if COCOS2D_DEBUG >= 1
+	if (!cobj)
+	{
+		tolua_error(tolua_S, "invalid 'cobj' in function 'lua_cocos2dx_ui_MovieView_play'", nullptr);
+		return 0;
+	}
+#endif
+
+	argc = lua_gettop(tolua_S) - 1;
+	if (argc == 0)
+	{
+		tolua_pushboolean(tolua_S, cobj->play());
+		return 1;
+	}
+	CCLOG("%s has wrong number of arguments: %d, was expecting %d \n", "open", argc, 0);
+	return 0;
+
+#if COCOS2D_DEBUG >= 1
+tolua_lerror:
+	tolua_error(tolua_S, "#ferror in function 'lua_cocos2dx_ui_MovieView_play'.", &tolua_err);
+#endif
+
+	return 0;
+}
+
 int lua_register_cocos2dx_ui_MovieView(lua_State* tolua_S)
 {
 	tolua_usertype(tolua_S, "ccui.MovieView");
@@ -943,6 +984,7 @@ int lua_register_cocos2dx_ui_MovieView(lua_State* tolua_S)
 	tolua_function(tolua_S, "length", lua_cocos2dx_ui_MovieView_length);
 	tolua_function(tolua_S, "cur", lua_cocos2dx_ui_MovieView_cur);
 	tolua_function(tolua_S, "seek", lua_cocos2dx_ui_MovieView_seek);
+	tolua_function(tolua_S, "play", lua_cocos2dx_ui_MovieView_play);
 	tolua_function(tolua_S, "pause", lua_cocos2dx_ui_MovieView_pause);
 	tolua_function(tolua_S, "isOpen", lua_cocos2dx_ui_MovieView_isOpen);
 	tolua_function(tolua_S, "isEnd", lua_cocos2dx_ui_MovieView_isEnd);

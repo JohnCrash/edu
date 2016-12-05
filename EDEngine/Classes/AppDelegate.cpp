@@ -174,79 +174,67 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	switch (uMsg)
 	{
 	case WM_NCPAINT:
-	{
-		TCHAR txt[256];
-		RECT cr, icon, minb, closeb,wr, dirty, dirty_box;
-		SIZE size;
-		int len = GetWindowText(hwnd, txt, 255);
-		int x, y, broderWidth, titleHeight;
-
-		GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
-		/*
-		GetWindowRect(hwnd, &wr);
-		if (!wParam || wParam == 1) {
-			dirty = wr;
-			dirty.left = dirty.top = 0;
-		}
-		else {
-			GetRgnBox(reinterpret_cast<HRGN>(wParam), &dirty_box);
-			if (!IntersectRect(&dirty, &dirty_box, &wr))
-				return 0;
-			OffsetRect(&dirty, -wr.left, -wr.top);
-		}
-		*/
-		HDC hdc = GetWindowDC(hwnd);
-		/*
-		 * 绘制背景
-		 */
-		HBRUSH br = CreateSolidBrush(g_frameColor);
 		{
-			RECT rc;
-			rc = wr;
-			rc.bottom = titleHeight;
-			FillRect(hdc, &rc, br);
-			rc.top = wr.bottom - broderWidth;
-			rc.bottom = wr.bottom;
-			FillRect(hdc, &rc, br);
+			TCHAR txt[256];
+			RECT cr, icon, minb, closeb,wr, dirty, dirty_box;
+			SIZE size;
+			int len = GetWindowText(hwnd, txt, 255);
+			int x, y, broderWidth, titleHeight;
 
-			rc.right = wr.left + broderWidth;
-			rc.top = wr.top + titleHeight;
-			rc.bottom = wr.bottom - broderWidth;
-			FillRect(hdc, &rc, br);
+			GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
 
-			rc.left = wr.right - broderWidth;
-			rc.right = wr.right;
-			FillRect(hdc, &rc, br);
-		}
-		DeleteObject(br);
+			HDC hdc = GetWindowDC(hwnd);
+			/*
+			 * 绘制背景
+			 */
+			HBRUSH br = CreateSolidBrush(g_frameColor);
+			{
+				RECT rc;
+				rc = wr;
+				rc.bottom = titleHeight;
+				FillRect(hdc, &rc, br);
+				rc.top = wr.bottom - broderWidth;
+				rc.bottom = wr.bottom;
+				FillRect(hdc, &rc, br);
+
+				rc.right = wr.left + broderWidth;
+				rc.top = wr.top + titleHeight;
+				rc.bottom = wr.bottom - broderWidth;
+				FillRect(hdc, &rc, br);
+
+				rc.left = wr.right - broderWidth;
+				rc.right = wr.right;
+				FillRect(hdc, &rc, br);
+			}
+			DeleteObject(br);
 		
-		/* 
-		 * 绘制标题
-		 */
-		GetTextExtentPoint32(hdc, txt, len, &size);
-		x = (abs(wr.right - wr.left)-size.cx)/2;
-		y = (titleHeight - size.cy) / 2;
-		SetTextColor(hdc, g_titleColor);
-		SetBkColor(hdc, g_frameColor);
-		HGDIOBJ hfont = GetStockObject(SYSTEM_FIXED_FONT);
-		HGDIOBJ of = SelectObject(hdc,hfont);
-		TextOut(hdc, x, y, txt, len);
-		SelectObject(hdc, of);
-		/*
-		 * 绘制图标
-		 */
-		//HICON hicon = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
-		//DrawIconEx(hdc, 0, 0, hicon, icon.right - icon.left, icon.bottom - icon.top, 0, NULL, DI_IMAGE | DI_MASK);
-		/*
-		 * 绘制最小化按钮和关闭按钮
-		 */
-		br = CreateSolidBrush(g_titleColor);
-		DrawButton(hdc, &minb,BUTTON_MIN);
-		DrawButton(hdc, &closeb,BUTTON_CLOSE);
-		DeleteObject(br);
-		ReleaseDC(hwnd, hdc);
-	}
-		break;
+			/* 
+			 * 绘制标题
+			 */
+			GetTextExtentPoint32(hdc, txt, len, &size);
+			x = (abs(wr.right - wr.left)-size.cx)/2;
+			y = (titleHeight - size.cy) / 2;
+			SetTextColor(hdc, g_titleColor);
+			SetBkColor(hdc, g_frameColor);
+			HGDIOBJ hfont = GetStockObject(SYSTEM_FIXED_FONT);
+			HGDIOBJ of = SelectObject(hdc,hfont);
+			TextOut(hdc, x, y, txt, len);
+			SelectObject(hdc, of);
+			/*
+			 * 绘制图标
+			 */
+			//HICON hicon = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
+			//DrawIconEx(hdc, 0, 0, hicon, icon.right - icon.left, icon.bottom - icon.top, 0, NULL, DI_IMAGE | DI_MASK);
+			/*
+			 * 绘制最小化按钮和关闭按钮
+			 */
+			br = CreateSolidBrush(g_titleColor);
+			DrawButton(hdc, &minb,BUTTON_MIN);
+			DrawButton(hdc, &closeb,BUTTON_CLOSE);
+			DeleteObject(br);
+			ReleaseDC(hwnd, hdc);
+		}
+		return 0;
 	case WM_NCHITTEST:
 		{
 			POINT pt;
@@ -272,7 +260,6 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				InvalidateButton(hwnd,0, &minb, &closeb);
 			}
-			return DefualtProc(hwnd, uMsg, wParam, lParam);
 		}
 		break;
 	case WM_NCLBUTTONDOWN:
@@ -300,10 +287,6 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, pt.x, pt.y, 0, hwnd, NULL);
 				PostMessage(hwnd, WM_NULL, 0, 0);
 			}
-			else
-			{
-				return DefualtProc(hwnd, uMsg, wParam, lParam);
-			}
 		}
 		break;
 	case WM_NCMOUSEHOVER:
@@ -316,9 +299,14 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		   InvalidateButton(hwnd, 0, &minb, &closeb);
 		}
 		break;
-	case WM_NCACTIVATE:
-		RedrawWindow(hwnd, NULL, NULL,RDW_UPDATENOW);
-		break;
+	case WM_NCACTIVATE:{
+		LRESULT r = DefWindowProc(hwnd, uMsg, wParam, lParam);
+		int broderWidth, titleHeight;
+		RECT cr, wr, icon, minb, closeb;
+		GetNCInfo(hwnd, &broderWidth, &titleHeight, &cr, &wr, &icon, &minb, &closeb);
+		RedrawWindow(hwnd, &cr, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_FRAME);
+		return r;
+	}
 	case WM_COPYDATA:
 		{
 			BringWindowToTop(hwnd);
@@ -332,10 +320,8 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 		}
 		break;
-	default:
-		return DefualtProc(hwnd, uMsg, wParam, lParam);
 	}
-	return 0;
+	return DefualtProc(hwnd, uMsg, wParam, lParam);
 }
 #endif
 

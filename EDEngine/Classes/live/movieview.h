@@ -22,6 +22,7 @@ namespace ui {
 
 		bool open(const char * name);
 		void close();
+		bool play();
 		double length();
 		double cur();
 		bool seek(double t);

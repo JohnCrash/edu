@@ -721,17 +721,44 @@ function AppEntry:init()
 			end}
 		end}
 	local g_last
-	local record =  uikits.button{caption='Buy',x=264*scale,y = 64*scale + 4*item_h,
+	local record =  uikits.button{caption='Movie',x=264*scale,y = 64*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 	}
 	local box = debugip
+	local movie = nil
 	uikits.event( record,
 		function(sender,eventType)
-			
+			if movie then movie:removeFromParent() end
+			movie = uikits.movieView{width=640,height=480}
+			movie:open("e:/test_video/2.mp4")
+			uikits.delay_call(movie,function(dt)
+				if not movie then return false end
+				if movie:isError() then
+					print(movie:getErrMsg())
+					return false
+				end
+				if movie:isOpen() and not movie:isPlaying() and not movie:isSeeking() then
+					--if movie:cur()<30 then
+					--	movie:seek(30)
+					--end
+					movie:play()
+				end
+				if movie:isEnd() then
+					print("END")
+					movie:removeFromParent()
+					movie = nil
+					return false
+				end
+				return true
+			end,0.1)
+			movie:play()
+			bg:addChild(movie)
+		--[[
 			local b = cc_buy("",function(t,result,res)
 					kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
 				end)	
 			print("call buy return  : "..tostring(b))
+--]]			
 	--[[	if cc_showBaiduVoice then
 				cc_showBaiduVoice( function(text)
 					if cc_isobj(box) then
@@ -743,28 +770,45 @@ function AppEntry:init()
 			end 	
 	--]]
 		end)	
-	local han =  uikits.button{caption='汉字',x=264*scale,y = 64*scale + 3*item_h,
+	local han =  uikits.button{caption='playSound',x=264*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 	}
 	uikits.event( han,
 		function(sender,eventType)
+			local ffplayer = require "ffplayer"
+			local as
+			if as then as:close() end
+			uikits.muteClickSound(true)
+			local filename = "e:/test_video/click.mp3"
+			as = ffplayer.playStream(filename,
+				function(state,as)
+					print("STATE:"..state)
+					if state == ffplayer.STATE_OPEN then
+						as:play()
+					elseif state == ffplayer.STATE_END then
+						as:close()
+						as = nil
+					end
+				end)		
+			--[[
 			update.create{name='han',updates={'luacore','han'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
-				--login.set_selector(15) --学生
-				--login.set_selector(24) --田老师(校长）
-				---login.set_selector(30) --张燕老师(校长）
-				--login.set_selector(34) --张燕学生2
-				--login.set_selector(33) --张燕老师八
-				--login.set_selector(35) --胡老师
-				--login.set_selector(36) --李杰
+				-- login.set_selector(15) --学生
+				-- login.set_selector(24) --田老师(校长）
+				-- -login.set_selector(30) --张燕老师(校长）
+				-- login.set_selector(34) --张燕学生2
+				-- login.set_selector(33) --张燕老师八
+				-- login.set_selector(35) --胡老师
+				-- login.set_selector(36) --李杰
 				login.set_selector(37) --刘
-				--login.set_selector(38) --李杰老师
-				--login.set_selector(39) --家长
-				--login.set_selector(40)
+				-- login.set_selector(38) --李杰老师
+				-- login.set_selector(39) --家长
+				-- login.set_selector(40)
 				local ss = require "han/loading"
 				return ss.create()
 				end}			
+				--]]
 		end)			
 	local playsound = uikits.button{caption='Stop cap',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
@@ -901,15 +945,15 @@ function AppEntry:init()
 		eventClick=function(sender)
 			local ffplayer = require "ffplayer"
 			if as then as:close() end
-			local filename = "G:/Maps.mp3"
+			local filename = "e:/test_video/Maps.mp3"
 			as = ffplayer.playStream(filename,
 				function(state,as)
-					print("STATE:"..state)
+					--print("STATE:"..state)
 					if state == ffplayer.STATE_PROGRESS then
 						--print( "progress "..math.floor(10000*as.current/as.length)/100)
-						print( "progress "..as.current)
+						--print( "progress "..as.current)
 					else
-						print( "CURRENT STATE : "..state )
+						--print( "CURRENT STATE : "..state )
 					end
 				end)
 		end}

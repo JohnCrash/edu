@@ -17,7 +17,6 @@ namespace ui {
 		virtual ~CamPreview();
 		virtual std::string getDescription() const override;
 
-		CCSize getPreviewSize();
 		bool startPreview();
 		void stopPreview();
 		static CamPreview * create();

@@ -200,6 +200,12 @@ namespace ui {
 	{
 		return _video ? _video->isSeeking() : false;
 	}
+
+	bool MovieView::play()
+	{
+		if (_video)_video->play();
+		return true;
+	}
 }
 
 NS_CC_END
