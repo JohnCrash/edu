@@ -332,6 +332,7 @@ namespace ff
 	static void live_loop_proc()
 	{
 		AVRaw * praw;
+		callbc(_liveCB, LIVE_OPEN, NULL);
 		while (!_liveLoopStop){
 			_liveLoopState = 0;
 			if (_openingDC){
@@ -344,6 +345,7 @@ namespace ff
 				}
 				else{
 					_liveLoopState = 1;
+					callbc(_liveCB, LIVE_BEGIN, NULL);
 					liveLoop(_openingDC, _openingEC, _liveCB, &state);
 					ffFlush(_openingEC);
 					ffCloseEncodeContext(_openingEC);
@@ -428,7 +430,6 @@ namespace ff
 			break;
 		}
 		_openingDC = pdc;
-		callbc(_liveCB, LIVE_OPEN, NULL);
 		_liveLoopThread = new std::thread(live_loop_proc);
 		return 1;
 	}
@@ -498,7 +499,6 @@ namespace ff
 			break;
 		}
 		_openingEC = pec;
-		callbc(_liveCB, LIVE_BEGIN, NULL);
 		return 1;
 	}
 

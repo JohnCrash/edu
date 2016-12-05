@@ -330,6 +330,16 @@ local function cap_devices(args,bg)
 	else
 		print("live start...")
 	end
+	
+	b,errmsg = cc_liveStart
+		{
+			address='rtmp://192.168.7.157/myapp/mystream',
+			live_w = video_w,
+			live_h = video_h,
+			live_fps = video_fps,			
+			video_bitrate=512*1024,
+			audio_bitrate=64*1024,
+		}	
 end
 
 --[[

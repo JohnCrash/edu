@@ -848,7 +848,7 @@ extern "C" {
 	{
 		int ret = 0;
 		const char * errMsg = NULL;
-		while (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef == LUA_REFNIL){
+		while (lua_istable(L, 1)){
 			const char * file = NULL;
 			int videoBitRate;
 			int audioBitRate;
@@ -916,6 +916,11 @@ extern "C" {
 			lua_pop(L, 1);
 			_pDirector = cocos2d::Director::getInstance();
 			ret = ff::liveStart(file, ow, oh, ofps, videoBitRate, audioBitRate);
+
+			_liveThread = new std::thread([](const char * file, int ow, int oh, int ofps, int videoBitRate, int audioBitRate){
+				ff::liveStart(file, ow, oh, ofps, videoBitRate, audioBitRate);
+			}, file, ow, oh, ofps, videoBitRate, audioBitRate);
+			ret = 1;
 			break;
 		}
 
