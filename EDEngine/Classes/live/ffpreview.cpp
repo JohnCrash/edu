@@ -171,4 +171,21 @@ namespace ff{
 			_preview_frame = NULL;
 		}
 	}
+
+	void ffReBuildPreviewTexture()
+	{
+		if (_preview_mutex){
+			glDeleteTextures(3, _preview_textures);
+
+			glGenTextures(3, _preview_textures);
+
+			for (int i = 0; i < 3; i++){
+				glBindTexture(GL_TEXTURE_2D, _preview_textures[i]);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			}
+		}
+	}
 }

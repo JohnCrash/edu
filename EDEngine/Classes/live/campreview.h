@@ -23,7 +23,6 @@ namespace ui {
 		static CamPreview * create();
 
 		CCSize getPreviewSize() const;
-		virtual void setPosition(const Vec2 &pos) override;
 		virtual void setContentSize(const Size& contentSize) override;
 		virtual void draw(Renderer* renderer, const Mat4 &transform, uint32_t flags) override;
 	CC_CONSTRUCTOR_ACCESS:

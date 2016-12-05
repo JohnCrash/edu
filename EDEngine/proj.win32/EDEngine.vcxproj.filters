@@ -189,6 +189,9 @@
     <ClCompile Include="..\Classes\live\YUVSprite3.cpp">
       <Filter>Classes\live</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\live\movieview.cpp">
+      <Filter>Classes\live</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -282,6 +285,9 @@
       <Filter>Classes\live</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\live\YUVSprite3.h">
+      <Filter>Classes\live</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\live\movieview.h">
       <Filter>Classes\live</Filter>
     </ClInclude>
   </ItemGroup>

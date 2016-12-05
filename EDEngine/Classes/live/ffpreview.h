@@ -6,5 +6,6 @@ namespace ff{
 	int ffStartPreview();
 	int ffGetPreviewFrame(GLuint yuv[3], int linesize[3],int *pw, int *ph);
 	void ffStopPreview();
+	void ffReBuildPreviewTexture();
 }
 #endif

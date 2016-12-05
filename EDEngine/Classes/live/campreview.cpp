@@ -76,11 +76,6 @@ namespace ui {
 		_sprite->setContentSize(contentSize);
 	}
 
-	void CamPreview::setPosition(const Vec2 &pos)
-	{
-		Widget::setPosition(pos);
-	}
-
 	void CamPreview::draw(Renderer* renderer, const Mat4 &transform, uint32_t flags)
 	{
 		if (_sprite){
@@ -91,6 +86,10 @@ namespace ui {
 				width = w;
 				height = h;
 				_sprite->update(yuv, linesize, w, h);
+			}
+			else{
+				width = 0;
+				height = 0;
 			}
 		}
 	}
