@@ -292,7 +292,7 @@ namespace ff
 			{
 				video_refresh(_vs, &r);
 			}
-			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0)
+			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0 )
 			{
 				if (_first)
 				{

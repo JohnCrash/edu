@@ -149,6 +149,7 @@ namespace ff
 				nsynacc = 0;
 			}
 
+			if (pls && pls->quit)break;
 			if (nframe % 2 == 0){
 				if (cb && pls){
 					pls->nframes = nframe;
@@ -319,25 +320,205 @@ namespace ff
 		DEBUG("=================liveOnRtmp end==================");
 	}
 
+	/*
+	 * 新的直播接口
+	 */
+	static AVDecodeCtx * _openingDC = NULL;
+	static AVEncodeContext * _openingEC = NULL;
+	static std::thread * _liveLoopThread = NULL;
+	static liveCB _liveCB = NULL;
+	static int _liveLoopStop = 0;
+	static int _liveLoopState = 0;
+	static void live_loop_proc()
+	{
+		AVRaw * praw;
+		while (!_liveLoopStop){
+			_liveLoopState = 0;
+			if (_openingDC){
+				if (!_openingEC){
+					praw = ffReadFrame(_openingDC);
+					if (praw){
+						free_raw(praw);
+					}
+					else break;
+				}
+				else{
+					_liveLoopState = 1;
+					liveLoop(_openingDC, _openingEC, _liveCB, &state);
+					ffFlush(_openingEC);
+					ffCloseEncodeContext(_openingEC);
+					callbc(_liveCB, LIVE_END, NULL);
+					_openingEC = NULL;
+				}
+			}
+			else break;
+		}
+
+		callbc(_liveCB, LIVE_CLOSE, NULL);
+		if (_openingDC){
+			ffCloseDecodeContext(_openingDC);
+			_openingDC = NULL;
+		}
+		av_log_set_callback(av_log_default_callback);
+		
+		_liveLoopState = 2;
+	}
+	void setLiveCB(liveCB cb)
+	{
+		_liveCB = cb;
+	}
 	int liveOpenCapDevices(
 		const char * camera_name, int w, int h, int fps, const char * pix_fmt_name,
 		const char * phone_name, int rate, const char * sample_fmt_name)
 	{
-		return 0;
+		AVDecodeCtx * pdc = NULL;
+		AVDictionary *opt = NULL;
+		AVCodecID vid, aid;
+		AVPixelFormat pixFmt = pix_fmt_name ? av_get_pix_fmt(pix_fmt_name) : AV_PIX_FMT_NONE;
+		AVSampleFormat sampleFmt = sample_fmt_name ? av_get_sample_fmt(sample_fmt_name) : AV_SAMPLE_FMT_NONE;
+
+		const char *outFmt;
+
+		if (_openingDC || _liveLoopThread)return 1;
+
+		_liveLoopStop = 0;
+		_liveLoopState = 0;
+		/*
+		* android 系统的相机系统有一个独特的格式'yv12',数据和AV_PIX_FMT_YUV420P都相同
+		* 但是要交换u和v的数据区,AV_PIX_FMT_YVU420P是自定义的图像类型
+		*/
+		if (pixFmt == AV_PIX_FMT_NONE && pix_fmt_name){
+			if (strcmp(pix_fmt_name, "yv12") == 0){
+				pixFmt = AV_PIX_FMT_YVU420P;
+			}
+		}
+
+		memset(&state, 0, sizeof(state));
+
+		av_log_set_callback(log_callback);
+
+		ffInit();
+
+		av_dict_set(&opt, "strict", "-2", 0);
+		av_dict_set(&opt, "threads", "4", 0);
+
+		av_dict_set(&opt, "crf", "22", 0);
+
+		av_dict_set(&opt, "preset", preset[9], 0);
+
+		while (1){
+			/*
+			* 这里打开捕获设备，并马上进入直播循环
+			*/
+			pdc = ffCreateCapDeviceDecodeContext(camera_name, w, h, fps, pixFmt,
+				phone_name, AUDIO_CHANNEL, AUDIO_CHANNELBIT, rate, opt);
+			if (!pdc || !pdc->_video_st || !pdc->_video_st->codec){
+				callbc(_liveCB, LIVE_ERROR, "ffCreateCapDeviceDecodeContext failed");
+				if (pdc){
+					ffCloseDecodeContext(pdc);
+				}
+				return 0;
+			}
+			if (ffReadFrameFormat(pdc, w, h, AV_PIX_FMT_YUV420P,
+				AUDIO_CHANNEL, rate, sampleFmt) < 0){
+				callbc(_liveCB, LIVE_ERROR, "ffReadFrameFormat failed");
+				ffCloseDecodeContext(pdc);
+				return 0;
+			}
+			break;
+		}
+		_openingDC = pdc;
+		callbc(_liveCB, LIVE_OPEN, NULL);
+		_liveLoopThread = new std::thread(live_loop_proc);
+		return 1;
 	}
 
-	int liveStart(const char * filename, int w, int h, int fps, int vbitRate, int abitRate)
+	int liveStart(const char * rtmp_publisher, int w, int h, int fps, int vbitRate, int abitRate)
 	{
-		return 0;
+		if (!_openingDC)return 0;
+		if (_openingEC)return 1;
+
+		AVEncodeContext * pec = NULL;
+		AVDictionary *opt = NULL;
+		AVCodecID vid, aid;
+		int rate;
+		AVSampleFormat sampleFmt;
+		const char *outFmt;
+
+		memset(&state, 0, sizeof(state));
+
+		if (_openingDC->_audio_st && _openingDC->_audio_st->codecpar){
+			rate = _openingDC->_audio_st->codecpar->sample_rate;
+			sampleFmt = (AVSampleFormat)_openingDC->_audio_st->codecpar->format;
+		}
+		else{
+			rate = _openingDC->_actx.swr_out_sample_rate;
+			sampleFmt = _openingDC->_actx.swr_out_sample_fmt;
+		}
+		callbc(_liveCB, LIVE_BEGIN, NULL);
+
+		av_dict_set(&opt, "strict", "-2", 0);
+		av_dict_set(&opt, "threads", "4", 0);
+
+		av_dict_set(&opt, "crf", "22", 0);
+
+		av_dict_set(&opt, "preset", preset[9], 0);
+
+		while (1){
+			if ((rtmp_publisher[0] == 'R' || rtmp_publisher[0] == 'r') &&
+				(rtmp_publisher[1] == 'T' || rtmp_publisher[1] == 't') &&
+				(rtmp_publisher[2] == 'M' || rtmp_publisher[2] == 'm') &&
+				(rtmp_publisher[3] == 'P' || rtmp_publisher[3] == 'p')){
+				outFmt = "flv";
+			}
+			else{
+				outFmt = "mp4";
+			}
+			vid = AV_CODEC_ID_H264;
+			aid = AV_CODEC_ID_AAC;
+			pec = ffCreateEncodeContext(rtmp_publisher, outFmt, w, h, AVRational{ fps, 1 }, vbitRate, vid,
+				rate, abitRate, aid, opt);
+			if (!pec){
+				callbc(_liveCB, LIVE_ERROR, "ffCreateEncodeContext failed");
+				return 0;
+			}
+
+			if (ffReadFrameFormat(_openingDC, w, h, AV_PIX_FMT_YUV420P,
+				AUDIO_CHANNEL, rate, sampleFmt) < 0){
+				callbc(_liveCB, LIVE_ERROR, "ffReadFrameFormat failed");
+				ffCloseEncodeContext(pec);
+				return 0;
+			}
+			if (ffAddFrameFormat(pec, w, h, AV_PIX_FMT_YUV420P,
+				AUDIO_CHANNEL, rate, sampleFmt) < 0){
+				callbc(_liveCB, LIVE_ERROR, "ffAddFrameFormat failed");
+				ffCloseEncodeContext(pec);
+				return 0;
+			}
+			break;
+		}
+		_openingEC = pec;
+		callbc(_liveCB, LIVE_BEGIN, NULL);
+		return 1;
 	}
 
 	int liveStop()
 	{
-		return 0;
+		if (_openingEC){
+			state.quit = 1;
+		}
+		return 1;
 	}
 
 	int liveCloseCapDevices()
 	{
-		return 0;
+		if (_liveLoopThread){
+			liveStop();
+			_liveLoopStop = 1; //结束直播循环
+			_liveLoopThread->join();
+			delete _liveLoopThread;
+			_liveLoopThread = NULL;
+		}
+		return 1;
 	}
 }

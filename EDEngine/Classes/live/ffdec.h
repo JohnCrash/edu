@@ -25,7 +25,7 @@ namespace ff
 
 		int has_audio, has_video, encode_video, encode_audio, isopen;
 
-		mutex_t * preview_mutex;
+		mutex_t * read_mutex;
 	};
 
 	/*

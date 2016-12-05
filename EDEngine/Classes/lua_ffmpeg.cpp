@@ -731,23 +731,227 @@ extern "C" {
 		return 0;
 	}
 
+	//打开照相机和录音设备
 	static int cc_camopen(lua_State *L)
 	{
-		return 0;
-	}
+		int ret = 0;
+		const char * errMsg = NULL;
+		while (lua_istable(L, 1)){
+			const char * video_name = NULL;
+			const char * audio_name = NULL;
+			const char * pix_fmt = NULL;
+			const char * sample_fmt = NULL;
+			int w, h, fps;
+			int freq;
 
+			lua_pushstring(L, "cam_name");
+			lua_gettable(L, 1);
+			if (lua_isstring(L, -1))
+				video_name = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "phone_name");
+			lua_gettable(L, 1);
+			if (lua_isstring(L, -1))
+				audio_name = luaL_checkstring(L, -1);
+			lua_pop(L, 1);
+
+			if (video_name){
+				lua_pushstring(L, "pix_fmt");
+				lua_gettable(L, 1);
+				if (lua_isstring(L, -1))
+					pix_fmt = luaL_checkstring(L, -1);
+				else{
+					errMsg = "missing pix_fmt";
+					break;
+				}
+				lua_pop(L, 1);
+
+				lua_pushstring(L, "cam_w");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					w = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_w";
+					break;
+				}
+				lua_pop(L, 1);
+
+				lua_pushstring(L, "cam_h");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					h = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_h";
+					break;
+				}
+				lua_pop(L, 1);
+
+				lua_pushstring(L, "cam_fps");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					fps = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing cam_fps";
+					break;
+				}
+				lua_pop(L, 1);
+			}
+
+			if (audio_name){
+				lua_pushstring(L, "sample_freq");
+				lua_gettable(L, 1);
+				if (lua_isnumber(L, -1))
+					freq = luaL_checkint(L, -1);
+				else{
+					errMsg = "missing sample_freq";
+					break;
+				}
+				lua_pop(L, 1);
+
+				lua_pushstring(L, "sample_fmt");
+				lua_gettable(L, 1);
+				if (lua_isstring(L, -1))
+					sample_fmt = luaL_checkstring(L, -1);
+				else{
+					errMsg = "missing sample_fmt";
+					break;
+				}
+				lua_pop(L, 1);
+			}
+			_pDirector = cocos2d::Director::getInstance();
+			_prevResult = 0;
+			ret = ff::liveOpenCapDevices(
+				video_name, w, h, fps, pix_fmt,
+				audio_name, freq, sample_fmt
+				);
+			break;
+		}
+
+		lua_pushboolean(L, ret);
+		if (errMsg){
+			lua_pushstring(L, errMsg);
+			return 2;
+		}
+		else{
+			return 1;
+		}
+	}
+	//关闭照相机和录音设备
 	static int cc_camclose(lua_State *L)
 	{
-		return 0;
+		lua_pushboolean(L,ff::liveCloseCapDevices()?1:0);
+		return 1;
 	}
-
-	static int cc_camrefresh(lua_State *L)
+	//开始直播或者录制视频文件
+	static int cc_liveStart(lua_State *L)
 	{
+		int ret = 0;
+		const char * errMsg = NULL;
+		while (lua_istable(L, 1) && lua_isfunction(L, 2) && _liveRef == LUA_REFNIL){
+			const char * file = NULL;
+			int videoBitRate;
+			int audioBitRate;
+			int ow, oh, ofps;
+
+			lua_pushstring(L, "address");
+			lua_gettable(L, 1);
+			if (lua_isstring(L, -1))
+				file = luaL_checkstring(L, -1);
+			else{
+				errMsg = "missing address";
+				break;
+			}
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "video_bitrate");
+			lua_gettable(L, 1);
+			if (lua_isnumber(L, -1))
+				videoBitRate = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing video_bitrate";
+				break;
+			}
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "audio_bitrate");
+			lua_gettable(L, 1);
+			if (lua_isnumber(L, -1))
+				audioBitRate = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing audio_bitrate";
+				break;
+			}
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_w");
+			lua_gettable(L, 1);
+			if (lua_isnumber(L, -1))
+				ow = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_w";
+				break;
+			}
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_h");
+			lua_gettable(L, 1);
+			if (lua_isnumber(L, -1))
+				oh = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_h";
+				break;
+			}
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "live_fps");
+			lua_gettable(L, 1);
+			if (lua_isnumber(L, -1))
+				ofps = luaL_checkint(L, -1);
+			else{
+				errMsg = "missing live_fps";
+				break;
+			}
+
+			lua_pop(L, 1);
+			_pDirector = cocos2d::Director::getInstance();
+			ret = ff::liveStart(file, ow, oh, ofps, videoBitRate, audioBitRate);
+			break;
+		}
+
+		lua_pushboolean(L, ret?1:0);
+		if (errMsg){
+			lua_pushstring(L, errMsg);
+			return 2;
+		}
+		else{
+			return 1;
+		}
+	}
+	//停止直播或者录制文件
+	static int cc_liveStop(lua_State *L)
+	{
+		lua_pushboolean(L, ff::liveStop() ? 1 : 0);
+		return 1;
+	}
+	//设置一个直播事件回调函数
+	static int cc_liveSetCB(lua_State *L)
+	{
+		if (lua_isfunction(L, 1)){
+			if (_liveRef != LUA_REFNIL){
+				lua_unref(L, _liveRef);
+				_liveRef = LUA_REFNIL;
+			}
+			lua_pushvalue(L, 1);
+			_liveRef = lua_ref(L, 1);
+			ff::setLiveCB(liveCallback);
+		}
 		return 0;
 	}
 
 	void release_ffmpeg()
 	{
+		ff::liveCloseCapDevices();
 		_prevResult = 0;
 		_liveThread = NULL;
 		_liveRef = LUA_REFNIL;
@@ -776,7 +980,9 @@ extern "C" {
 		lua_register(L, "cc_autofocus", cc_autofocus);
 		lua_register(L, "cc_camopen", cc_camopen);
 		lua_register(L, "cc_camclose", cc_camclose);
-		lua_register(L, "cc_camrefresh", cc_camrefresh);
+		lua_register(L, "cc_liveStart", cc_liveStart);
+		lua_register(L, "cc_liveStop", cc_liveStop);
+		lua_register(L, "cc_liveSetCB", cc_liveSetCB);
 
 		createmeta(L);
 		luaL_openlib(L, 0, lua_ffmpeg_methods, 0);

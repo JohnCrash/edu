@@ -16,7 +16,7 @@ local function playStream( filename,event_func )
 	local play_state = 3
 	local _texture
 	local layer
-	
+	local _isfristFrame = 1
 	local function eventFunc(state,param)
 		if event_func then
 			event_func(state,as,param)
@@ -29,8 +29,15 @@ local function playStream( filename,event_func )
 				as:close()
 				_allStreams[as] = nil
 				return false
-			end		
+			end	
+			local isplaying = as.isPlaying
 			local data = as:refresh()
+			if data and _isfristFrame then
+				if isplaying ~= as.isPlaying then
+					as:play()
+				end
+				_isfristFrame = nil
+			end
 			if state == 0 and as.isOpen and not as.isSeeking then
 				state = 1
 				as:pause()

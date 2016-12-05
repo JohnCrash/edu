@@ -4,11 +4,13 @@
 namespace ff
 {
 	enum cbType{
-		LIVE_BEGIN,
-		LIVE_END,
-		LIVE_ERROR,
-		LIVE_FRAME,
-		LIVE_INFO,
+		LIVE_BEGIN, //开始直播或者录制
+		LIVE_END,   //停止直播或者录制
+		LIVE_ERROR, //错误
+		LIVE_FRAME, //帧信息
+		LIVE_INFO, 
+		LIVE_OPEN, //打开视频设备
+		LIVE_CLOSE, //关闭视频设备
 	};
 #define MAX_ERRORMSG_COUNT 8
 #define MAX_ERRORMSG_LENGTH 256
@@ -21,6 +23,7 @@ namespace ff
 		int encodeBufferSize; //压缩缓冲区单位kb
 		int writeBufferSize; //发送缓冲区单位kb
 		int nerror; //错误数量
+		int quit;
 		char errorMsg[MAX_ERRORMSG_COUNT][MAX_ERRORMSG_LENGTH]; //错误信息
 	};
 
@@ -37,7 +40,7 @@ namespace ff
 		liveCB cb);
 
 	/**
-	 * 打开视频音频俘获设备
+	 * 打开视频音频俘获设备,成功返回1失败返回0
 	 */
 	int liveOpenCapDevices(
 		const char * camera_name, int w, int h, int fps, const char * pix_fmt_name, 
@@ -51,6 +54,7 @@ namespace ff
 	* 关闭视频音频俘获设备
 	*/
 	int liveCloseCapDevices();
+	void setLiveCB(liveCB cb);
 
 #define MAX_DEVICE_NAME_LENGTH 256
 #define MAX_FORMAT_LENGTH 32

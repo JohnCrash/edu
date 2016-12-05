@@ -290,7 +290,25 @@ local function cap_devices(args,bg)
 	--video_w = 640
 	--video_h = 480
 	--video_fps = 12
-	local b,errmsg = cc_live(
+	cc_liveSetCB(
+	function(state,nframes,ntimes,encodeBufferSize,writerBufferSize,errors)
+			if not errors then
+				print(string.format("%d - %d - %d",state,nframes,ntimes))
+				--print(string.format("%d - %d ",encodeBufferSize,writerBufferSize))
+			else
+				kits.logTable(errors)
+			end
+			if _stopCap then 
+				if _camPreview then
+					_camPreview:removeFromParent()
+					_camPreview = nil
+				end
+				return 1 
+			end
+			return 0
+		end)
+		
+	local b,errmsg = cc_camopen
 		{
 			address='rtmp://192.168.7.157/myapp/mystream',
 			cam_name=video_name,
@@ -306,24 +324,7 @@ local function cap_devices(args,bg)
 			live_w = video_w,
 			live_h = video_h,
 			live_fps = video_fps,
-		},
-		function(state,nframes,ntimes,encodeBufferSize,writerBufferSize,errors)
-			if not errors then
-				--print(string.format("%d - %d - %d",state,nframes,ntimes))
-				--print(string.format("%d - %d ",encodeBufferSize,writerBufferSize))
-			else
-				kits.logTable(errors)
-			end
-			if _stopCap then 
-				if _camPreview then
-					_camPreview:removeFromParent()
-					_camPreview = nil
-				end
-				return 1 
-			end
-			return 0
-		end
-	)
+		}
 	if not b then
 		print("live failed: "..tostring(errmsg))
 	else
@@ -813,7 +814,7 @@ function AppEntry:init()
 	local playsound = uikits.button{caption='Stop cap',x=464*scale,y = 164*scale + 4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-				_stopCap = true
+				cc_camclose()
 			end}
 	local capedit = uikits.editbox{
 		caption = 'camer wxh fps pix_format',
@@ -949,11 +950,11 @@ function AppEntry:init()
 			as = ffplayer.playStream(filename,
 				function(state,as)
 					--print("STATE:"..state)
-					if state == ffplayer.STATE_PROGRESS then
-						--print( "progress "..math.floor(10000*as.current/as.length)/100)
-						--print( "progress "..as.current)
-					else
-						--print( "CURRENT STATE : "..state )
+					if state == ffplayer.STATE_OPEN then
+						as:play()
+					elseif state == ffplayer.STATE_END then
+						as:close()
+						as = nil
 					end
 				end)
 		end}

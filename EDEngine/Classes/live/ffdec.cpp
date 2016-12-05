@@ -155,7 +155,7 @@ namespace ff
 				}
 				pdc->encode_audio = 1;
 			}
-			pdc->preview_mutex = new mutex_t();
+			pdc->read_mutex = new mutex_t();
 			return pdc;
 		}
 
@@ -188,10 +188,10 @@ namespace ff
 			ffFreeAVCtx(&pdc->_actx);
 
 			{
-				mutex_lock_t lk(*pdc->preview_mutex);
+				mutex_lock_t lk(*pdc->read_mutex);
 
 			}
-			delete pdc->preview_mutex;
+			delete pdc->read_mutex;
 
 			free(pdc);
 		}
@@ -239,11 +239,13 @@ namespace ff
 	 */
 	AVRaw * ffReadFrame(AVDecodeCtx *pdc)
 	{
+		mutex_lock_t lk(*pdc->read_mutex);
 		int ret;
 		AVPacket pkt;
 		AVCodecContext *ctx;
 		AVFrame * frame;
 		double pt0, pt1,pt2;
+
 		while (true)
 		{
 			pt0 = clock();
@@ -669,6 +671,8 @@ namespace ff
 		int w, int h, AVPixelFormat fmt,
 		int ch, int sample_rate,AVSampleFormat sample_fmt)
 	{
+		mutex_lock_t lk(*pdc->read_mutex);
+
 		if (pdc && pdc->_video_st && pdc->_video_st->codec){
 			AVCodecContext *c = pdc->_video_st->codec;
 			if (c->width != w || c->height != h || fmt != c->pix_fmt){
