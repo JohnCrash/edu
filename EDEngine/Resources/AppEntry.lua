@@ -310,20 +310,14 @@ local function cap_devices(args,bg)
 		
 	local b,errmsg = cc_camopen
 		{
-			address='rtmp://192.168.7.157/myapp/mystream',
 			cam_name=video_name,
 			cam_w=video_w,
 			cam_h=video_h,
 			cam_fps = video_fps,
-			video_bitrate=512*1024,
 			pix_fmt=video_fmt,
 			phone_name=phone_name,
 			sample_freq=phone_freq,
 			sample_fmt='s16',
-			audio_bitrate=64*1024,
-			live_w = video_w,
-			live_h = video_h,
-			live_fps = video_fps,
 		}
 	if not b then
 		print("live failed: "..tostring(errmsg))
@@ -741,7 +735,7 @@ function AppEntry:init()
 		function(sender,eventType)
 			if movie then movie:removeFromParent() end
 			movie = uikits.movieView{width=640,height=480}
-			movie:open("e:/test_video/2.mp4")
+			movie:open("rtmp://192.168.7.157/myapp/mystream")
 			uikits.delay_call(movie,function(dt)
 				if not movie then return false end
 				if movie:isError() then
