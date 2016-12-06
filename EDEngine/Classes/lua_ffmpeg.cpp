@@ -510,7 +510,7 @@ extern "C" {
 						_prevResult = pLuaStack->executeFunction(5);
 					}
 					
-					if (pls->state == ff::LIVE_END){
+					if (pls->state == ff::LIVE_CLOSE){
 						lua_unref(L, _liveRef);
 						_liveRef = LUA_REFNIL;
 						if (_liveThread){
