@@ -46,6 +46,11 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/live/ffenc.cpp \
 				   ../../Classes/live/ffraw.cpp \
 				   ../../Classes/live/live.cpp \
+				   ../../Classes/live/campreview.cpp \
+				   ../../Classes/live/ffpreview.cpp \
+				   ../../Classes/live/lua_campreview.cpp \
+				   ../../Classes/live/movieview.cpp \
+				   ../../Classes/live/YUVSprite3.cpp \
 				   ../../Classes/acr.cpp \
 				   ../../Classes/lua_thread.cpp \
 				   ../../Classes/lzmq/lzmq.c \

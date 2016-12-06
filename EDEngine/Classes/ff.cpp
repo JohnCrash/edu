@@ -3297,6 +3297,7 @@ int getVideoInfo(const char * filename, int *w, int *h)
 	err = avformat_open_input(&ic, filename, NULL, &format_opts);
 	if (err < 0) 
 	{
+		avformat_close_input(&ic);
 		char errmsg[1024];
 		av_strerror(err, errmsg, 1024);
 		My_log(NULL, AV_LOG_ERROR, "ffmpeg error msg:%s", errmsg);

@@ -442,6 +442,16 @@ namespace ff
 				strcpy(pdevices[s_i].alternative_name, va_arg(arg, char*));
 				s_i++;
 			}
+			else if (strstr(format, "face : %s\n") == format){
+				const char * face = va_arg(arg, char*);
+				if (strstr(face, "front") == face)
+					pdevices[s_i].face = AV_FACE_FRONT;
+				else if (strstr(face, "back") == face)
+					pdevices[s_i].face = AV_FACE_BACK;
+			}
+			else if (strstr(format, "orientation : %d\n") == format){
+				pdevices[s_i].orientation = va_arg(arg, int);
+			}
 			else if (strstr(format, "  min s=") == format){
 				int index = pdevices[s_i].capability_count;
 				if (index < MAX_CAPABILITY_COUNT && index >= 0){

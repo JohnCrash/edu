@@ -266,10 +266,10 @@ local function cap_devices(args,bg)
 			end			
 		end
 	end
-	video_w = 1280
-	video_h = 960
-	video_fps = 30
-	video_fmt = 'yuv420p'
+	--video_w = 1280
+	--video_h = 960
+	--video_fps = 30
+	--video_fmt = 'yuv420p'
 	if string.len(args)>0 then
 		video_name,video_w,video_h,video_fps,video_fmt = string.match(args,"(%w+)%s+(%d+)x(%d+)%s+(%d+)%s+(%w+)")
 		if video_name then
@@ -331,8 +331,8 @@ local function cap_devices(args,bg)
 			live_w = video_w,
 			live_h = video_h,
 			live_fps = video_fps,			
-			video_bitrate=512*1024,
-			audio_bitrate=64*1024,
+			video_bitrate=256*1024,
+			audio_bitrate=32*1024,
 		}	
 end
 
@@ -608,16 +608,16 @@ function AppEntry:init()
 	}
 	debugip:setText("192.168.2.157")
 	
-	local amouse = uikits.button{caption='二打一',x=64*scale,y = 64*scale +5*item_h,
+	local amouse = uikits.button{caption='视频测试',x=64*scale,y = 64*scale +5*item_h,
 	width=128*scale,height=48*scale,
 	eventClick=function(sender)
-		update.create{name='v21',updates={'v21','luacore'},
+		update.create{name='video',updates={'video','luacore'},
 			run=function()
 			login.set_selector(5)
 			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
-			local v21 = require "v21/main"
-			uikits.pushScene(v21.create())
-		end}		
+			local video = require "video/test"
+			uikits.pushScene(video.create())
+		end}
 	end}
 		
 	local tbutton = uikits.button{caption='学习乐园',x=64*scale,y = 64*scale +4*item_h,
@@ -701,19 +701,16 @@ function AppEntry:init()
 			end}
 		end}
 		--]]
-	local epbutton = uikits.button{caption='TEST',x=64*scale,y = 64*scale + 6*item_h,
+	local epbutton = uikits.button{caption='TEST Orientation',x=64*scale,y = 64*scale + 6*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			--update.create{name='test',updates={'test','luacore'},
-			--	run=function()
-			--	login.set_selector(3) 
-			--	local selstudent = require "test/test"
-			--	uikits.pushScene(selstudent.create())
-			--end}
-			local cache = require "cache"
-			cache.post("http://baidu.com/hello.a?hehe","from=a",function(b,data)
-				
-			end,"hello:0")
+		update.create{name='test',updates={'test','luacore'},
+			run=function()
+			login.set_selector(5)
+			uikits.initDR{width=1024,height=768,mode=cc.ResolutionPolicy.NO_BORDER}
+			local video = require "test/test"
+			uikits.pushScene(video.create())
+		end}
 		end}
 	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,

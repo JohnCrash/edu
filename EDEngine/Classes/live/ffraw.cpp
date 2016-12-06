@@ -6,7 +6,7 @@ namespace ff
 	double clock()
 	{
 		double clock;
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if _WIN32
 		clock = (double)GetTickCount()/1000.0;
 #else
 		timeval tv;

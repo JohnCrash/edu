@@ -18,12 +18,6 @@ namespace ff{
 		case GL_INVALID_OPERATION:
 			errmsg = "The specified operation is not allowed in the current state.";
 			break;
-		case GL_STACK_OVERFLOW:
-			errmsg = "This function would cause a stack overflow. ";
-			break;
-		case GL_STACK_UNDERFLOW:
-			errmsg = "This function would cause a stack underflow. ";
-			break;
 		case GL_OUT_OF_MEMORY:
 			errmsg = "The specified operation is not allowed in the current state. ";
 			break;

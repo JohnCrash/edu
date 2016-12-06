@@ -377,6 +377,17 @@ extern "C" {
 			lua_pushstring(L, "name");
 			lua_pushstring(L, caps[m].alternative_name);
 			lua_settable(L, -3);
+			lua_pushstring(L, "face");
+			if (caps[m].face == ff::AV_FACE_FRONT)
+				lua_pushstring(L, "front");
+			else if (caps[m].face == ff::AV_FACE_BACK)
+				lua_pushstring(L, "back");
+			else
+				lua_pushstring(L, "unknow");
+			lua_settable(L, -3);
+			lua_pushstring(L, "orientation");
+			lua_pushinteger(L, caps[m].orientation);
+			lua_settable(L, -3);
 			lua_pushstring(L, "type");
 			if (caps[m].type == ff::AV_DEVICE_VIDEO){
 				lua_pushstring(L, "video");
@@ -915,7 +926,6 @@ extern "C" {
 
 			lua_pop(L, 1);
 			_pDirector = cocos2d::Director::getInstance();
-			ret = ff::liveStart(file, ow, oh, ofps, videoBitRate, audioBitRate);
 
 			_liveThread = new std::thread([](const char * file, int ow, int oh, int ofps, int videoBitRate, int audioBitRate){
 				ff::liveStart(file, ow, oh, ofps, videoBitRate, audioBitRate);

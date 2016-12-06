@@ -65,7 +65,11 @@ namespace ff
 		AV_DEVICE_VIDEO = 1,
 		AV_DEVICE_AUDIO = 2,
 	};
-
+	enum AVDeviceFace{
+		AV_FACE_UNKNOW = 0,
+		AV_FACE_FRONT = 1,
+		AV_FACE_BACK = 2,
+	};
 	union AVDeviceCap{
 		struct {
 			int min_w, min_h;
@@ -86,6 +90,8 @@ namespace ff
 		char name[MAX_DEVICE_NAME_LENGTH];
 		char alternative_name[MAX_DEVICE_NAME_LENGTH];
 		AVDeviceType type;
+		AVDeviceFace face;
+		int orientation;
 		AVDeviceCap capability[MAX_CAPABILITY_COUNT];
 		int capability_count;
 	};
