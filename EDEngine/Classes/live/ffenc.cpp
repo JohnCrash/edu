@@ -660,6 +660,9 @@ namespace ff
 				if (ret == 0) {
 					ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
 				}
+				else if (ret == AVERROR(EAGAIN)){
+					avcodec_send_frame(c, NULL);
+				}
 				else break;
 			}
 		}
@@ -682,6 +685,9 @@ namespace ff
 
 				if (ret == 0) {
 					ret = write_packet(pec, pec->_ctx, &c->time_base, st, &pkt);
+				}
+				else if (ret == AVERROR(EAGAIN)){
+					avcodec_send_frame(c, NULL);
 				}
 				else break;
 			}
