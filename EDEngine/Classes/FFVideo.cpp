@@ -273,20 +273,6 @@ namespace ff
 			/*
 			 * 在直播时当缓冲区大于阀值，导致延时明显时。清空缓冲区(可能导致同步问题?)
 			 */
-#ifndef __APPLE__
-			if (_nb_min_threshold >0 && _nb_max_threshold >0 && hasVideo()){
-				if (preload_packet_nb() > _nb_max_threshold){
-					if (_vs->audio_stream >= 0) {
-						packet_queue_flush(&_vs->audioq);
-						packet_queue_put(&_vs->audioq, &flush_pkt);
-					}
-					if (_vs->video_stream >= 0) {
-						packet_queue_flush(&_vs->videoq);
-						packet_queue_put(&_vs->videoq, &flush_pkt);
-					}
-				}
-			}
-#endif
 			double r = 1.0 / 30.0;
 			if (!is_stream_pause((VideoState*)_ctx))
 			{

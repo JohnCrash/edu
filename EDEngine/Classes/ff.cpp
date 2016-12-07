@@ -695,6 +695,7 @@ static int is_realtime(AVFormatContext *s)
 
 	if (s->pb && (!strncmp(s->filename, "rtp:", 4)
 		|| !strncmp(s->filename, "udp:", 4)
+		|| !strncmp(s->filename, "rtmp", 4)
 		)
 		)
 		return 1;
