@@ -830,6 +830,10 @@ extern "C" {
 				}
 				lua_pop(L, 1);
 			}
+			else{
+				freq = 0;
+				sample_fmt = NULL;
+			}
 			_pDirector = cocos2d::Director::getInstance();
 			_prevResult = 0;
 			ret = ff::liveOpenCapDevices(

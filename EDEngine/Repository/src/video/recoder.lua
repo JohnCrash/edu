@@ -54,7 +54,7 @@ function recoder:init(b)
 					live_w = video_param.max_w,
 					live_h = video_param.max_h,
 					live_fps = video_param.max_fps,
-					video_bitrate=256*1024,
+					video_bitrate=2560*1024,
 					audio_bitrate=32*1024,
 				}	
 			end		
@@ -74,7 +74,7 @@ function recoder:init(b)
 					live_h = video_param.max_h,
 					live_fps = video_param.max_fps,
 					video_bitrate=256*1024,
-					audio_bitrate=32*1024,
+					audio_bitrate=16*1024,
 				}	
 			end
 		end)
@@ -131,6 +131,8 @@ function recoder:init(b)
 			print("live failed: "..tostring(errmsg))
 			uikits.popScene()
 		end
+		
+		uikits.event(self._root,function(sender)cc_autofocus(true)end)
 	end
 end
 

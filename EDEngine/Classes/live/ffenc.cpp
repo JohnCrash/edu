@@ -336,11 +336,6 @@ namespace ff
 			pctx->isflush = 1;
 			pctx->cond->notify_one();
 		}
-		if (pec->write_thread){
-			mutex_lock_t lock(*pec->write_mutex);
-			pec->isflush = 1;
-			pec->write_cond->notify_one();
-		}
 	}
 
 #if 0
@@ -704,7 +699,9 @@ namespace ff
 		}
 		pctx->encode_waiting = 0;
 		
-		if (pctx->isflush)return NULL;
+		if (pctx->isflush && !pctx->head){
+			return NULL;
+		}
 
 		praw = list_pop_raw(&pctx->head, &pctx->tail);
 		

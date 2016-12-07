@@ -1,5 +1,6 @@
 local uikits = require "uikits"
 local kits = require "kits"
+local ljshell = require "ljshell"
 require  "ff"
 
 local ui = {
@@ -7,6 +8,7 @@ local ui = {
 	FILE_3_4 = 'video/VideoPlayer_1.json',
 	designWidth = 1024,
 	designHeight = 576,
+	BACK = 'Button_127',
 	OPEN = 'opencam',
 	DEVICES_LIST = 'devices',
 	FORMATS_LIST = 'formats',
@@ -18,6 +20,11 @@ local video = uikits.SceneClass("video",ui)
 
 function video:init(b)
 	if b then
+		local back = uikits.child(self._root,ui.BACK)
+		uikits.event(back,function(sender)
+			cc_camclose()
+			uikits.popScene()
+		end)
 		local openbut = uikits.child(self._root,ui.OPEN)
 		local devices = uikits.scroll(self._root,ui.DEVICES_LIST,ui.DEVICES_ITEM)
 		local formats = uikits.scroll(self._root,ui.FORMATS_LIST,ui.FORMATS_ITEM)
@@ -28,8 +35,15 @@ function video:init(b)
 		local audio_param
 		local last_video_check
 		local last_audio_check
+		local default_name
 		uikits.event(openbut,function(sender)
-			if video_param and audio_param then
+			if video_param then
+				if not audio_param then
+					audio_param = {
+						name = default_name,
+						max_rate = 22050,
+					}
+				end
 				uikits.pushScene(require "video/recoder".create{video=video_param,audio=audio_param})
 			end
 		end)
@@ -97,6 +111,9 @@ function video:init(b)
 			local item = devices:additem()
 			local text = uikits.child(item,'text')
 			text:setString(v.show_name)
+			if v.type == 'audio' then
+				default_name = default_name or v.name
+			end
 			local check = uikits.child(item,'check')
 			uikits.event(check,function(sender)
 				if check:getSelectedState() then
@@ -108,6 +125,13 @@ function video:init(b)
 			end)
 		end
 		devices:relayout()
+		
+		uikits.event(uikits.child(self._root,'play'),function(sender)
+			uikits.pushScene(require "video/player".create{filename=ljshell.getDirectory(ljshell.AppDir).."/test.mp4"})
+		end)
+		uikits.event(uikits.child(self._root,'live'),function(sender)
+			uikits.pushScene(require "video/player".create{filename="rtmp://192.168.7.157/myapp/mystream"})
+		end)		
 	end
 end
 
