@@ -344,6 +344,8 @@ namespace ff{
         enum AVPixelFormat hwaccel_pix_fmt;
         enum AVPixelFormat hwaccel_retrieved_pix_fmt;
 #endif
+		int64_t _firstPktTime;
+		double _firstLocalTime;
 	};
 	extern AVPacket flush_pkt;
 	/*

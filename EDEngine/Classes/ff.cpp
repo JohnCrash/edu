@@ -1,6 +1,7 @@
 ﻿/*
  *	改进于ffmpeg的播放器ffplay
  */
+#define _FF_DEBUG 1
 #include "ffdepends.h"
 #include "cmdutils_cxx.h"
 #include "ff.h"
@@ -639,27 +640,29 @@ static double get_clock(Clock *c)
 	else {
 		double time = av_gettime_relative() / 1000000.0;
 		double clock_value = c->pts_drift + time - (time - c->last_updated) * (1.0 - c->speed);
-        DEBUG("pts_drift = %f  ,  last_updated = %f ,  speed = %f  ,  time = %f ,%f\n",
-               c->pts_drift,c->last_updated,c->speed,time,clock_value);
 		return clock_value;
 	}
 }
 
+static int _show = 1;
 static void set_clock_at(Clock *c, double pts, int serial, double time)
 {
 	c->pts = pts;
 	c->last_updated = time;
 	c->pts_drift = c->pts - time;
 	c->serial = serial;
-	DEBUG("set_clock_at c->pts_drift = %f c->last_updated = %f c->pts = %f", c->pts_drift, c->last_updated, c->pts);
+
+	if (_show)
+	DEBUG("pts = %f time = %f serial = %d",pts,time,serial);
 }
 
 static void set_clock(Clock *c, double pts, int serial)
 {
 	double time = av_gettime_relative() / 1000000.0;
 
-	DEBUG("set_clock pts = %f ", pts);
+	_show = 0;
 	set_clock_at(c, pts, serial, time);
+	_show = 1;
 }
 
 static void set_clock_speed(Clock *c, double speed)
@@ -1633,6 +1636,7 @@ void video_refresh(VideoState *is, double *remaining_time)
 				delay = compute_target_delay(last_duration, is);
 
 			time = av_gettime_relative() / 1000000.0;
+			
 			if (time < is->frame_timer + delay && !redisplay) {
 				*remaining_time = FFMIN(is->frame_timer + delay - time, *remaining_time);
 				return;
@@ -1781,7 +1785,7 @@ static int queue_picture(VideoState *is, AVFrame *src_frame, double pts, double 
 	return 0;
 }
 
-static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub) {
+static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub, VideoState *is) {
 	int got_frame = 0;
 
 	do {
@@ -1838,7 +1842,8 @@ static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub) {
 				tb.den = frame->sample_rate;
 
 				if (frame->pts != AV_NOPTS_VALUE){
-					frame->pts = av_rescale_q(frame->pts, d->avctx->time_base, tb);
+					if (!is->realtime)
+						frame->pts = av_rescale_q(frame->pts, d->avctx->time_base, tb);
 				}
 				else if (frame->pkt_pts != AV_NOPTS_VALUE){
 					frame->pts = av_rescale_q(frame->pkt_pts, av_codec_get_pkt_timebase(d->avctx), tb);
@@ -1887,14 +1892,19 @@ static int get_video_frame(VideoState *is, AVFrame *frame)
 {
 	int got_picture;
 
-	if ((got_picture = decoder_decode_frame(&is->viddec, frame, NULL)) < 0)
+	if ((got_picture = decoder_decode_frame(&is->viddec, frame, NULL,is)) < 0)
 		return -1;
 
 	if (got_picture) {
 		double dpts = NAN;
 
         if (frame->pts != AV_NOPTS_VALUE){
-			dpts = av_q2d(is->video_st->time_base) * frame->pts;
+			if (!is->realtime)
+				dpts = av_q2d(is->video_st->time_base) * frame->pts;
+			else
+			{
+				dpts = frame->pts / 1000.0;
+			}
         }
 
 		frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
@@ -2172,7 +2182,7 @@ static int audio_thread(void *arg){
 		return AVERROR(ENOMEM);
 
 	do {
-		if ((got_frame = decoder_decode_frame(&is->auddec, frame, NULL)) < 0)
+		if ((got_frame = decoder_decode_frame(&is->auddec, frame, NULL,is)) < 0)
 		{
 			if (is->audioq.eof)
 			{
@@ -2227,8 +2237,19 @@ static int audio_thread(void *arg){
 #endif
 				if (!(af = frame_queue_peek_writable(&is->sampq,is)))
 					goto the_end;
-
-				af->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+				if (!is->realtime)
+					af->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+				else{
+					/*
+					* Timestamps in RTMP are given as an integer number of milliseconds
+					* relative to an unspecified epoch. Typically, each stream will start
+					* with a timestamp of 0, but this is not required, as long as the two
+					* endpoints agree on the epoch. Note that this means that any
+					* synchronization across multiple streams (especially from separate
+					* hosts) requires some additional mechanism outside of RTMP.
+					*/
+					af->pts = frame->pts/1000.0;
+				}
 
 				af->pos = av_frame_get_pkt_pos(frame);
 				af->serial = is->auddec.pkt_serial;
@@ -2361,7 +2382,10 @@ static int video_thread(void *arg){
 			}
 			else
 				duration = 0;
-			pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+			if (!is->realtime)
+				pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+			else
+				pts = frame->pts / 1000.0;
 
 			ret = queue_picture(is, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
 
@@ -2393,7 +2417,7 @@ static int subtitle_thread(void *arg){
 		if (!(sp = frame_queue_peek_writable(&is->subpq,is)))
 			return 0;
 
-		if ((got_subtitle = decoder_decode_frame(&is->subdec, NULL, &sp->sub)) < 0)
+		if ((got_subtitle = decoder_decode_frame(&is->subdec, NULL, &sp->sub,is)) < 0)
 			break;
 
 		pts = 0;

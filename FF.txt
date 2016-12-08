@@ -54,5 +54,77 @@ FrameQueue 函数
 		frame_queue_peek_writable
 		frame_queue_push
 		
-PacketQueue 包队列		
+PacketQueue 包队列
 ==================
+	struct PacketQueue {
+		MyAVPacketList *first_pkt, *last_pkt;
+		int nb_packets;		//包的个数
+		int size;			//空间占用尺寸
+		int abort_request;	//请求终止，默认1
+		int serial;			//队列序数，初始值为0，每当向队列中加入一个flush_pkt就加1
+							//代表队列的批次，由seek操作分割的批次。
+							//每次seek操作将向队列中加入flush_pkt并增加serial，这样使用该值可以知道是不是这个批次的
+		int eof;			//默认值0
+		mutex_t *mutex;
+		cond_t *cond;
+	};
+	
+	int packet_queue_put(PacketQueue *q, AVPacket *pkt)
+		向队列中追加一个包，通知等待点，有数据可读了。
+		加入flush_pkt将导致队列serial增加1。
+		(如果abort_request=1，将不增加包到队列中。)
+		
+	int packet_queue_put_nullpacket(PacketQueue *q, int stream_index)
+		先队列中加入一个空包，通知等待点，有数据可读了。
+	
+	void packet_queue_init(PacketQueue *q)
+		初始化队列。
+		
+	void packet_queue_flush(PacketQueue *q)
+		释放队列中的全部包，清空队列。
+	
+	void packet_queue_destroy(PacketQueue *q)
+		调用packet_queue_flush，并删除同步变量mutex,cond。
+
+	void packet_queue_start(PacketQueue *q)
+		开始队列，abort_request=0并放入第一个包flush_pkt
+		
+	void packet_queue_abort(PacketQueue *q)
+		abort_request=1，停止队列
+	
+	int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial)
+		从头部取出一个包，如果空就等待。
+		
+使用：
+	用来管理从读入线程分出来的视频包，音频包。视频包被放入队列videoq，音频包放入audioq。
+	做seek操作的时候调用avformat_seek_file，并清空队列packet_queue_flush，然后放入一个flush_pkt
+	
+Clock
+======
+	typedef struct Clock {
+		double pts;           	//单位秒
+		double pts_drift;     	//pts-last_updated
+		double last_updated;	//最后更新时间单位秒
+		double speed;			//默认1.0
+		int serial;           	
+		int paused;				//默认0
+		int *queue_serial;		//指向PacketQueue队列的serial
+	} Clock;
+	
+	void init_clock(Clock *c, int *queue_serial);
+		初始化
+		
+	void set_clock(Clock *c, double pts, int serial)
+		设置时钟
+		
+	void set_clock_speed(Clock *c, double speed)
+		设置速度
+		
+	double get_clock(Clock *c)
+		取时钟值，如果不是同批次的就返回NAN，暂停返回当前时钟的pts。
+		
+使用：
+	ffplay有3个时钟分别是音频audclk，视频vidclk，扩展extclk
+	audclk在SDL播放声音时更新
+	
+double vp_duration(VideoState *is, Frame *vp, Frame *nextvp)
