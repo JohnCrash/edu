@@ -3,6 +3,7 @@
  */
 #include "campreview.h"
 #include "ffpreview.h"
+#include "AppDelegate.h"
 
 NS_CC_BEGIN
 
@@ -11,13 +12,26 @@ namespace ui {
 
 	CamPreview::CamPreview() :_sprite(nullptr)
 	{
+		MySpace::AppDelegate_v3 * myapp = (MySpace::AppDelegate_v3 *)(CCApplication::getInstance());
+		if (myapp)
+			myapp->registerApphook(this);
 		width = 0;
 		height = 0;
 		ff::ffStartPreview();
 	}
-
+	void CamPreview::applicationWillEnterForeground()
+	{
+		ff::ffStartPreview();
+	}
+	void CamPreview::applicationDidEnterBackground()
+	{
+		ff::ffStopPreview();
+	}
 	CamPreview::~CamPreview()
 	{
+		MySpace::AppDelegate_v3 * myapp = (MySpace::AppDelegate_v3 *)(CCApplication::getInstance());
+		if (myapp)
+			myapp->unresgisterApphook(this);
 		ff::ffStopPreview();
 	}
 

@@ -2,6 +2,7 @@
 * cocos2d 3.2+ÊÓÆµ²¥·Å¿Ø¼þ
 */
 #include "movieview.h"
+#include "AppDelegate.h"
 
 NS_CC_BEGIN
 
@@ -13,6 +14,9 @@ namespace ui {
 		width(0), height(0)
 	{
 		buildTexture();
+		MySpace::AppDelegate_v3 * myapp = (MySpace::AppDelegate_v3 *)(CCApplication::getInstance());
+		if (myapp)
+			myapp->registerApphook(this);
 	}
 
 	void MovieView::buildTexture()
@@ -29,8 +33,25 @@ namespace ui {
 		CHECK_GL_ERROR_DEBUG();
 	}
 
+	void MovieView::applicationWillEnterForeground()
+	{
+		glDeleteTextures(3, _textures);
+		buildTexture();
+		if (_prevPlayState)
+			play();
+	}
+	
+	void MovieView::applicationDidEnterBackground()
+	{
+		_prevPlayState = isPlaying();
+		pause();
+	}
+
 	MovieView::~MovieView()
 	{
+		MySpace::AppDelegate_v3 * myapp = (MySpace::AppDelegate_v3 *)(CCApplication::getInstance());
+		if (myapp)
+			myapp->unresgisterApphook(this);
 		close();
 		glDeleteTextures(3, _textures);
 		CHECK_GL_ERROR_DEBUG();

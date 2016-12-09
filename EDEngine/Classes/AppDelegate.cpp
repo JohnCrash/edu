@@ -654,6 +654,9 @@ void AppDelegate_v3::onKeyReleased(cocos2d::EventKeyboard::KeyCode code,cocos2d:
 // This function will be called when the app is inactive. When comes a phone call,it's be invoked too
 void AppDelegate_v3::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
+	for (auto i = _appHooks.begin(); i != _appHooks.end(); i++){
+		(*i)->applicationDidEnterBackground();
+	}
 
     // if you use SimpleAudioEngine, it must be pause
 #ifdef __APPLE__
@@ -667,6 +670,9 @@ void AppDelegate_v3::applicationDidEnterBackground() {
 void AppDelegate_v3::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
+	for (auto i = _appHooks.begin(); i != _appHooks.end(); i++){
+		(*i)->applicationWillEnterForeground();
+	}
     // if you use SimpleAudioEngine, it must resume here
 #ifdef __APPLE__
     CocosDenshion3::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
@@ -675,4 +681,21 @@ void AppDelegate_v3::applicationWillEnterForeground() {
 #endif
 }
 
+void AppDelegate_v3::registerApphook(Apphook * hook)
+{
+	if (hook)
+		_appHooks.push_back(hook);
+}
+
+void AppDelegate_v3::unresgisterApphook(Apphook * hook)
+{
+	if (hook){
+		for (auto i = _appHooks.begin(); i != _appHooks.end();i++){
+			if (*i == hook){
+				_appHooks.erase(i);
+				return;
+			}
+		}
+	}
+}
 MySpaceEnd

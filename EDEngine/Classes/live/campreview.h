@@ -3,12 +3,13 @@
 #include "cocos2d.h"
 #include "ui/UIWidget.h"
 #include "YUVSprite3.h"
+#include "AppDelegate.h"
 
 NS_CC_BEGIN
 
 namespace ui {
 
-	class CamPreview : public Widget
+	class CamPreview : public Widget, public MySpace::Apphook
 	{
 		DECLARE_CLASS_GUI_INFO
 	public:
@@ -24,6 +25,9 @@ namespace ui {
 		CCSize getPreviewSize() const;
 		virtual void setContentSize(const Size& contentSize) override;
 		virtual void draw(Renderer* renderer, const Mat4 &transform, uint32_t flags) override;
+
+		virtual void applicationDidEnterBackground();
+		virtual void applicationWillEnterForeground();
 	CC_CONSTRUCTOR_ACCESS:
 		virtual bool init() override;
 	protected:

@@ -17,7 +17,6 @@ function video:init(b)
 		local size = uikits.getDR()
 		local back = uikits.child(self._root,ui.BACK)
 		uikits.event(back,function(sender)
-			cc_camclose()
 			uikits.popScene()
 		end)
 		

@@ -13,6 +13,12 @@ USING_NS_CC;
 
 extern bool g_Quit;
 
+class Apphook
+{
+public:
+	virtual void applicationDidEnterBackground() = 0;
+	virtual void applicationWillEnterForeground() = 0;
+};
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 typedef struct
 {
@@ -56,7 +62,11 @@ public:
 
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode,cocos2d::Event *);
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode,cocos2d::Event *);
+
+	void registerApphook(Apphook * hook);
+	void unresgisterApphook(Apphook * hook);
 private:
+	std::vector<Apphook *> _appHooks;
 	void registerHotkey();
 	void initLuaEngine();
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32

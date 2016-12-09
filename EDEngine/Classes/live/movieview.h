@@ -4,14 +4,16 @@
 #include "ui/UIWidget.h"
 #include "YUVSprite3.h"
 #include "ff.h"
+#include "AppDelegate.h"
 
 NS_CC_BEGIN
 
 namespace ui {
-	class MovieView : public Widget
+	class MovieView : public Widget ,public MySpace::Apphook
 	{
 		DECLARE_CLASS_GUI_INFO
 	public:
+
 		MovieView();
 
 		virtual ~MovieView();
@@ -37,6 +39,9 @@ namespace ui {
 
 		virtual void setContentSize(const Size& contentSize) override;
 		virtual void draw(Renderer* renderer, const Mat4 &transform, uint32_t flags) override;
+
+		virtual void applicationDidEnterBackground();
+		virtual void applicationWillEnterForeground();
 	CC_CONSTRUCTOR_ACCESS:
 		virtual bool init() override;
 	protected:
@@ -50,6 +55,7 @@ namespace ui {
 		int linesize[3];
 		bool updateTexture(ff::YUV420P * yuv);
 		GLuint _textures[3];
+		bool _prevPlayState;
 	};
 }
 
