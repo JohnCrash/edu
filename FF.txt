@@ -127,4 +127,14 @@ Clock
 	ffplay有3个时钟分别是音频audclk，视频vidclk，扩展extclk
 	audclk在SDL播放声音时更新
 	
-double vp_duration(VideoState *is, Frame *vp, Frame *nextvp)
+REALTIME
+========
+		int64_t stream_start_time;			//流起点
+		int64_t stream_start_local_time;	//起点对应的本地时间
+		double playDelay;					//播放点延时
+		double transportDelay;				//下传点延时
+		double playThreshold;				//播放阀值，当大于该值时跳到小于该值（丢弃声音帧）
+		double seekThreshold;				//跳转阀值，当大于该值时开始向前seek
+		
+		seekThreshold - transportDelay 是播放缓冲区还能播放的时间
+		

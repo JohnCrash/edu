@@ -268,7 +268,7 @@ namespace ff
 	void *FFVideo::refresh()
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs)
+		if (_vs && !_vs->stream_resetting)
 		{
 			/*
 			 * 在直播时当缓冲区大于阀值，导致延时明显时。清空缓冲区(可能导致同步问题?)
