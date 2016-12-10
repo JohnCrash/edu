@@ -290,7 +290,7 @@ namespace ff
 			}
 			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0 )
 			{
-				if (_first)
+				if (_first && !_vs->realtime)
 				{
 					pause();
 					_first = false;
