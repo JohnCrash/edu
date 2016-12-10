@@ -24,20 +24,26 @@ function video:init(b)
 		movie:open(self._arg.filename)
 		
 		self._root:addChild(movie)
-		
+		local binit = false
 		uikits.delay_call(movie,function(dt)
-			local s = movie:getMovieSize()
-			if s.width > 0 and s.height > 0 then
-				local w = s.width * size.height / s.height
-				local x = (size.width - w)/2
-				movie:setContentSize(cc.size(w,size.height))
-				movie:setPosition(cc.p(x,0))
-				
-				movie:play()		
-				return false
+			if cc_isobj(movie) then
+				local s = movie:getMovieSize()
+				if not binit and s.width > 0 and s.height > 0 then
+					local w = s.width * size.height / s.height
+					local x = (size.width - w)/2
+					movie:setContentSize(cc.size(w,size.height))
+					movie:setPosition(cc.p(x,0))
+					
+					movie:play()		
+					binit = true
+				end
+				print(string.format("isOpen:%s isEnd:%s isSeeking:%s isPlaying:%s isError:%s",
+				movie:isOpen(),movie:isEnd(),movie:isSeeking(),movie:isPlaying(),movie:isError()))
+				if movie:isOpen() then
+					return true		
+				end
 			end
-			return true		
-		end,0.1)
+		end,0.01)
 	end
 end
 

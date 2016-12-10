@@ -114,6 +114,8 @@ namespace ff
 			VideoState* is = (VideoState*)_ctx;
 			if (is)
 			{
+				if (is && is->stream_resetting)return false;
+
 				//直播时如果发生网络异常结束(eof=1),表示视频已经结束
 				if (is->ic && is->eof && !strncmp(is->filename, "rtmp:", 5))
 					return true;
@@ -217,6 +219,9 @@ namespace ff
 		if (!isOpen()) return false;
 
 		VideoState* _vs = (VideoState*)_ctx;
+		
+		if (_vs && _vs->stream_resetting)return true;
+
 		if (_vs == NULL) return false;
 		return _vs->seek_req?true:false;
 	}
@@ -230,7 +235,12 @@ namespace ff
 	bool FFVideo::isOpen() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		return  (_vs && (_vs->audio_st || _vs->video_st));
+		if (_vs && !_vs->stream_resetting)
+			return  (_vs && (_vs->audio_st || _vs->video_st));
+		else if (_vs && _vs->stream_resetting)
+			return true;
+		else
+			return false;
 	}
 
 	int FFVideo::codec_width() const
@@ -329,7 +339,7 @@ namespace ff
 	bool FFVideo::isError() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs)
+		if (_vs && !_vs->stream_resetting)
 		{
 			return _vs->errcode != 0;
 		}

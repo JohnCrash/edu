@@ -1,7 +1,6 @@
 ﻿/*
  *	改进于ffmpeg的播放器ffplay
  */
-#define _FF_DEBUG 1
 #include "ffdepends.h"
 #include "cmdutils_cxx.h"
 #include "ff.h"
@@ -1195,7 +1194,9 @@ static void sdl_audio_callback_imp(void *opaque, Uint8 *stream, int len)
 
 	while (len > 0) {
 		if (is->audio_buf_index >= (int)is->audio_buf_size) {
+			is->isInAudioDecode = 1;
 			audio_size = audio_decode_frame(is);
+			is->isInAudioDecode = 0;
 			if (audio_size < 0) {
 				/* if error, just output silence */
 				is->audio_buf = is->silence_buf;
@@ -1231,6 +1232,8 @@ static void sdl_audio_callback_imp(void *opaque, Uint8 *stream, int len)
 static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 {
 	VideoState *is = (VideoState *)opaque;
+	if (is->stream_resetting)return;
+
 	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting){
 		int n = (int)((is->playDelay - is->transportDelay)/0.1);
 		if (is->transportDelay > is->seekThreshold){
@@ -1595,10 +1598,8 @@ void stream_toggle_pause(VideoState *is)
 		if (is->read_pause_return != AVERROR(ENOSYS)) {
 		is->vidclk.paused = 0;
 		}
-		DEBUG("stream_toggle_pause");
 		set_clock(&is->vidclk, get_clock(&is->vidclk), is->vidclk.serial);
 	}
-	DEBUG("stream_toggle_pause 2");
 	set_clock(&is->extclk, get_clock(&is->extclk), is->extclk.serial);
 	is->paused = is->audclk.paused = is->vidclk.paused = is->extclk.paused = !is->paused;
 }
@@ -2752,7 +2753,6 @@ static int read_thread(void *arg)
 	mutex_t *wait_mutex = createMutex();
 	int scan_all_pmts_set = 0;
 	int64_t pkt_ts;
-	int ms = 1;
 
 	memset(st_index, -1, sizeof(st_index));
 	is->last_video_stream = is->video_stream = -1;
@@ -3051,8 +3051,6 @@ static int read_thread(void *arg)
 			is->audioq.eof = 0;
 		}
 
-		Delay(ms);
-
 		/* check if packet is in play range specified by user, then queue, otherwise discard */
 		stream_start_time = ic->streams[pkt->stream_index]->start_time;
 		pkt_ts = pkt->pts == AV_NOPTS_VALUE ? pkt->dts : pkt->pts;
@@ -3064,6 +3062,7 @@ static int read_thread(void *arg)
 
 		if (pkt_in_play_range && is->realtime && !is->stream_start_local_time){
 			is->stream_start_time = stream_start_time;
+			is->stream_resetting = 0;
 			is->stream_start_local_time = av_gettime_relative();
 		}
 
@@ -3165,13 +3164,28 @@ static int reset_thread(void * handle)
 	char filename[1024];
 
 	av_strlcpy(filename, is->filename, sizeof(is->filename));
-	while (is->isInRefrash){
+	while (is->isInRefrash)
 		Delay(1);
+	
+	int n = 3;
+	while ( n-- ){
+		stream_close(is);
+		while (is->isInAudioDecode)
+			Delay(1);
+		memset(is, 0, sizeof(VideoState));
+		is->stream_resetting = 1;
+		av_strlcpy(is->filename, filename, sizeof(is->filename));
+		stream_open_imp(is);
+		int i = 1000;
+		while (!is->audio_st&&!is->audio_st){
+			if (is->errcode)
+				break;
+			Delay(10);
+			if (!(i--))return 0;
+		}
+		if (is->audio_st || is->audio_st)
+			return 0;
 	}
-	stream_close(is);
-	memset(is, 0, sizeof(is));
-	av_strlcpy(is->filename, filename, sizeof(is->filename));
-	stream_open_imp(is);
 	return 0;
 }
 
@@ -3403,7 +3417,7 @@ void initFF()
 
 	_initFF = 1;
 #ifdef _FF_DEBUG
-	av_log_set_callback(log_callback);
+	//av_log_set_callback(log_callback);
 #endif
 }
 

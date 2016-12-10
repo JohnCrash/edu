@@ -344,14 +344,17 @@ namespace ff{
         enum AVPixelFormat hwaccel_pix_fmt;
         enum AVPixelFormat hwaccel_retrieved_pix_fmt;
 #endif
-		int stream_resetting;
 		int isInRefrash;
+		int isInAudioDecode;
 		int64_t stream_start_time;
 		int64_t stream_start_local_time;
 		double playDelay;
 		double transportDelay;
 		double playThreshold;
 		double seekThreshold;
+	
+
+		int stream_resetting;
 	};
 	extern AVPacket flush_pkt;
 	/*
