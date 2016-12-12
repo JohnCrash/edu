@@ -37,11 +37,7 @@ function video:init(b)
 					movie:play()		
 					binit = true
 				end
-				print(string.format("isOpen:%s isEnd:%s isSeeking:%s isPlaying:%s isError:%s",
-				movie:isOpen(),movie:isEnd(),movie:isSeeking(),movie:isPlaying(),movie:isError()))
-				if movie:isOpen() then
-					return true		
-				end
+				return true
 			end
 		end,0.01)
 	end

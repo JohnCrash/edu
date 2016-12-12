@@ -1232,7 +1232,10 @@ static void sdl_audio_callback_imp(void *opaque, Uint8 *stream, int len)
 static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 {
 	VideoState *is = (VideoState *)opaque;
-	if (is->stream_resetting)return;
+	if (is->stream_resetting){
+		memset(stream, 0, len);
+		return;
+	}
 
 	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting){
 		int n = (int)((is->playDelay - is->transportDelay)/0.1);
@@ -1243,6 +1246,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 			//int64_t ref = 0;
 			//stream_seek(is, ts, ref, 0);
 			//DEBUG(" seek : %llu %llu",ts,ref);
+			memset(stream, 0, len);
 			stream_reset(is);
 			return;
 		}
@@ -1251,6 +1255,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 			sdl_audio_callback_imp(opaque, stream, len);
 			DEBUG(" discard audio : %f  %f", is->playDelay, is->transportDelay);
 		}
+		memset(stream, 0, len);
 	}
 	sdl_audio_callback_imp(opaque, stream, len);
 	DEBUG("%f  %f", is->playDelay, is->transportDelay);

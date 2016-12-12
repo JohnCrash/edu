@@ -124,7 +124,7 @@ namespace ui {
 		}
 		return false;
 	}
-
+	static int64_t dd = 0;
 	void MovieView::draw(Renderer* renderer, const Mat4 &transform, uint32_t flags)
 	{
 		if (_sprite && _video){
@@ -134,6 +134,12 @@ namespace ui {
 				height = _yuv->h;
 				_sprite->update(_textures, _yuv->linesize, width, height);
 				return;
+			}
+			else if( dd++ % 60 == 0){
+				if (_yuv)
+					CCLOG("MovieView::draw refresh return %dx%d",_yuv->w,_yuv->h);
+				else
+					CCLOG("MovieView::draw refresh return null");
 			}
 		}
 		width = 0;

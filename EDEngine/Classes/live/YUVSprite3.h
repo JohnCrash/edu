@@ -14,6 +14,7 @@ public:
 
 	void update(GLuint yuv[3],int linesize[3],int w, int h);
 
+	void reloadGLProgram();
 CC_CONSTRUCTOR_ACCESS:
 	YUVSprite(void);
 	virtual ~YUVSprite(void);

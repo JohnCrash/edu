@@ -50,6 +50,24 @@ void main(void)\n\
 }";
 static const char * _yuv420pShaderName = "yuv420p_shader";
 
+static int reloadYUV420pShader(GLProgram * prog, GLProgramCache * glp,bool isAdd)
+{
+	if (prog->initWithVertexShaderByteArray(_vshader, _fshader)){
+		prog->addAttribute("position", ATTRIB_VERTEX);
+		prog->addAttribute("TexCoordIn", ATTRIB_TEXTURE);
+		if (prog->link()){
+			prog->updateUniforms();
+			if (isAdd){
+				glp->addGLProgram(prog, _yuv420pShaderName);
+				prog->release();
+			}
+			CHECK_GL_ERROR_DEBUG();
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static GLProgram * getYUV420pShader()
 {
 	GLProgram * prog;
@@ -63,17 +81,8 @@ static GLProgram * getYUV420pShader()
 			prog = new GLProgram();
 		else
 			prog->reset();
-		if (prog->initWithVertexShaderByteArray(_vshader, _fshader)){
-			prog->addAttribute("position", ATTRIB_VERTEX);
-			prog->addAttribute("TexCoordIn", ATTRIB_TEXTURE);
-			if (prog->link()){
-				prog->updateUniforms();
-				glp->addGLProgram(prog, _yuv420pShaderName);
-				prog->release();
-				CHECK_GL_ERROR_DEBUG();
-				return prog;
-			}
-		}
+
+		if (reloadYUV420pShader(prog, glp,true))return prog;
 	}
 	CCLOG("yuv420p shader program init failed");
 	CHECK_GL_ERROR_DEBUG();
@@ -87,6 +96,21 @@ YUVSprite::YUVSprite(void)
 
 YUVSprite::~YUVSprite(void)
 {
+}
+
+void YUVSprite::reloadGLProgram()
+{
+	GLProgramCache * glp = GLProgramCache::getInstance();
+	if (glp){
+		GLProgram * prog = getYUV420pShader();
+		if (!prog)
+			prog = new GLProgram();
+		else
+			prog->reset();
+
+		if( reloadYUV420pShader(prog, glp,false) )
+			setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_yuv420pShaderName));
+	}
 }
 
 bool YUVSprite::init(void)
@@ -164,13 +188,23 @@ std::string YUVSprite::getDescription() const
 {
 	return "YUVSprite";
 }
-
+static int64_t dd = 0;
 void YUVSprite::render()
 {
 	GLfloat square[8];
-	if(_glProgramState)
+	if (_glProgramState){
 		_glProgramState->apply(_modelViewTransform);
 
+		if (glGetError() != GL_NO_ERROR){
+			CCLOG("YUVSprite reloadGLProgram");
+			reloadGLProgram();
+			return;
+		}
+	}
+
+	if (dd++ % 60 == 0){
+		CCLOG("YUVSprite::render (%d x %d) %llu",width,height,dd);
+	}
 	ccGLBindTexture2DN(0, _yuv[0]);
 	glUniform1i(textureUniformY, 0);
 
@@ -183,6 +217,8 @@ void YUVSprite::render()
 	glUniform1f(borderUniformY, _border[0]);
 	glUniform1f(borderUniformU, _border[1]);
 	glUniform1f(borderUniformV, _border[2]);
+
+	CHECK_GL_ERROR_DEBUG();
 
 	CCSize s = getContentSize();
 	CCPoint offsetPix;
@@ -208,9 +244,12 @@ void YUVSprite::render()
 	glEnableVertexAttribArray(ATTRIB_TEXTURE);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	
+	CHECK_GL_ERROR_DEBUG();
 
 	ccGLBindTexture2DN(1, 0);
 	ccGLBindTexture2DN(2, 0);
+
 	CHECK_GL_ERROR_DEBUG();
 }
 

@@ -22,6 +22,9 @@ namespace ui {
 	void CamPreview::applicationWillEnterForeground()
 	{
 		ff::ffStartPreview();
+		CHECK_GL_ERROR_DEBUG();
+		if (_sprite)_sprite->reloadGLProgram();
+		CHECK_GL_ERROR_DEBUG();
 	}
 	void CamPreview::applicationDidEnterBackground()
 	{
