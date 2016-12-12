@@ -154,12 +154,7 @@ namespace ui {
 				width = _yuv->w;
 				height = _yuv->h;
 				_sprite->update(_textures, _yuv->linesize, width, height);
-				if (!_sprite->isVisible())
-					_sprite->setVisible(true);
 				return;
-			}
-			else{
-				_sprite->setVisible(false);
 			}
 		}
 		width = 0;
