@@ -301,6 +301,15 @@ namespace ff
 		return nullptr;
 	}
 
+	bool FFVideo::isReconnect() const
+	{
+		VideoState* _vs = (VideoState*)_ctx;
+		if (_vs){
+			return _vs->stream_resetting ? true : false;
+		}
+		return false;
+	}
+
     void *FFVideo::allocRgbBufferFormYuv420p(void *pyuv)
     {
 		return yuv420pToRgb((yuv420p *)pyuv);

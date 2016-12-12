@@ -19,7 +19,8 @@ function video:init(b)
 		uikits.event(back,function(sender)
 			uikits.popScene()
 		end)
-		
+		local status = uikits.child(self._root,"Image_3")
+		local sn = -1
 		local movie = uikits.movieView{width=size.width,height=size.height}
 		movie:open(self._arg.filename)
 		
@@ -36,6 +37,42 @@ function video:init(b)
 					
 					movie:play()		
 					binit = true
+				end
+				if movie:isError() then
+					if sn ~= 0 then
+						status:setVisible(true)
+						status:loadTexture("video/warning.png")
+						sn = 0
+					end
+				elseif movie:isReconnect() then
+					if sn ~= 1 then
+						status:setVisible(true)
+						status:loadTexture("video/reconnect.png")
+						sn = 1
+					end
+				elseif movie:isSeeking() then
+					if sn ~= 2 then
+						status:setVisible(true)
+						status:loadTexture("video/seeking.jpg")
+						sn = 2
+					end
+				elseif not movie:isOpen() then
+					if sn ~= 3 then
+						status:setVisible(true)
+						status:loadTexture("video/loading.png")
+						sn = 3
+					end
+				elseif movie:isPause() then
+					if sn ~= 4 then
+						status:setVisible(true)
+						status:loadTexture("video/th.jpg")
+						sn = 4
+					end				
+				else
+					if sn ~= -1 then
+						status:setVisible(false)
+						sn = -1
+					end
 				end
 				return true
 			end

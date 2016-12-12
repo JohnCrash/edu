@@ -35,6 +35,7 @@ namespace ui {
 		bool isPause();
 		bool isPlaying();
 		bool isSeeking();
+		bool isReconnect();
 		const char * getErrMsg();
 
 		virtual void setContentSize(const Size& contentSize) override;
@@ -56,6 +57,7 @@ namespace ui {
 		bool updateTexture(ff::YUV420P * yuv);
 		GLuint _textures[3];
 		bool _prevPlayState;
+		bool bTextureInit;
 	};
 }
 

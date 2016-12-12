@@ -13,6 +13,7 @@ namespace ui {
 		_sprite(nullptr), _video(nullptr),
 		width(0), height(0)
 	{
+		bTextureInit = false;
 		buildTexture();
 		MySpace::AppDelegate_v3 * myapp = (MySpace::AppDelegate_v3 *)(CCApplication::getInstance());
 		if (myapp)
@@ -21,7 +22,22 @@ namespace ui {
 
 	void MovieView::buildTexture()
 	{
+		memset(_textures, 0, sizeof(_textures));
 		glGenTextures(3, _textures);
+		if (glGetError() == GL_NO_ERROR){
+			if (_textures[0] == _textures[1] || _textures[0] == _textures[2] ||
+				_textures[1] == _textures[2]){
+				CCLOG("MovieView::buildTexture glGenTextures return failed");
+				bTextureInit = false;
+				return;
+			}
+		}
+		else{
+			CCLOG("MovieView::buildTexture glGenTextures failed");
+			bTextureInit = false;
+			return;
+		}
+
 		CHECK_GL_ERROR_DEBUG();
 		for (int i = 0; i < 3; i++){
 			glBindTexture(GL_TEXTURE_2D, _textures[i]);
@@ -31,6 +47,7 @@ namespace ui {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
 		CHECK_GL_ERROR_DEBUG();
+		bTextureInit = true;
 	}
 
 	void MovieView::applicationWillEnterForeground()
@@ -124,22 +141,25 @@ namespace ui {
 		}
 		return false;
 	}
-	static int64_t dd = 0;
+
 	void MovieView::draw(Renderer* renderer, const Mat4 &transform, uint32_t flags)
 	{
+		if (!bTextureInit){
+			buildTexture();
+			return;
+		}
 		if (_sprite && _video){
 			ff::YUV420P * _yuv = (ff::YUV420P *)_video->refresh();
 			if (_yuv && _yuv->w>0 && _yuv->h>0 && updateTexture(_yuv)){
 				width = _yuv->w;
 				height = _yuv->h;
 				_sprite->update(_textures, _yuv->linesize, width, height);
+				if (!_sprite->isVisible())
+					_sprite->setVisible(true);
 				return;
 			}
-			else if( dd++ % 60 == 0){
-				if (_yuv)
-					CCLOG("MovieView::draw refresh return %dx%d",_yuv->w,_yuv->h);
-				else
-					CCLOG("MovieView::draw refresh return null");
+			else{
+				_sprite->setVisible(false);
 			}
 		}
 		width = 0;
@@ -226,6 +246,11 @@ namespace ui {
 	bool MovieView::isSeeking()
 	{
 		return _video ? _video->isSeeking() : false;
+	}
+	
+	bool MovieView::isReconnect()
+	{
+		return _video ? _video->isReconnect() : false;
 	}
 
 	bool MovieView::play()

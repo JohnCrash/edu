@@ -29,6 +29,7 @@ namespace ff
 		bool isOpen() const; //视频是否打开
 		bool isPlaying() const; //视频是否在播放
 		bool isSeeking() const; //是否正在seek中
+		bool isReconnect() const; //正在重新连接
 		bool hasVideo() const; //是否有视频流
 		bool hasAudio() const; //是否有音频流
 

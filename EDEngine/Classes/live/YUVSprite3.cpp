@@ -188,7 +188,7 @@ std::string YUVSprite::getDescription() const
 {
 	return "YUVSprite";
 }
-static int64_t dd = 0;
+
 void YUVSprite::render()
 {
 	GLfloat square[8];
@@ -202,9 +202,6 @@ void YUVSprite::render()
 		}
 	}
 
-	if (dd++ % 60 == 0){
-		CCLOG("YUVSprite::render (%d x %d) %llu",width,height,dd);
-	}
 	ccGLBindTexture2DN(0, _yuv[0]);
 	glUniform1i(textureUniformY, 0);
 

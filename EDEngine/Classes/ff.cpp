@@ -3087,7 +3087,41 @@ static int read_thread(void *arg)
 			packet_queue_put(&is->subtitleq, pkt);
 		}
 		else {
-			av_free_packet(pkt);
+			if (is->video_stream < 0 && ic && pkt->stream_index < ic->nb_streams){
+				if (ic->streams[pkt->stream_index] && 
+					ic->streams[pkt->stream_index]->codecpar &&
+					ic->streams[pkt->stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
+					st_index[AVMEDIA_TYPE_VIDEO] =
+						av_find_best_stream(ic, AVMEDIA_TYPE_VIDEO,
+						st_index[AVMEDIA_TYPE_VIDEO], -1, NULL, 0);
+					if (st_index[AVMEDIA_TYPE_VIDEO] >= 0) {
+						ret = stream_component_open(is, st_index[AVMEDIA_TYPE_VIDEO]);
+						if (ret == 0 && pkt->stream_index == is->video_stream && pkt_in_play_range
+							&& !(is->video_st->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
+							packet_queue_put(&is->videoq, pkt);
+						}
+					}
+				}
+			}else if (is->audio_stream < 0 && ic && pkt->stream_index < ic->nb_streams){
+				if (ic->streams[pkt->stream_index] &&
+					ic->streams[pkt->stream_index]->codecpar &&
+					ic->streams[pkt->stream_index]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+					st_index[AVMEDIA_TYPE_AUDIO] =
+						av_find_best_stream(ic, AVMEDIA_TYPE_AUDIO,
+						st_index[AVMEDIA_TYPE_AUDIO], -1, NULL, 0);
+					if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
+						ret = stream_component_open(is, st_index[AVMEDIA_TYPE_AUDIO]);
+						if (ret == 0 && pkt->stream_index == is->audio_stream && pkt_in_play_range) {
+							packet_queue_put(&is->audioq, pkt);
+							is->transportDelay = get_realtime_delay(is, pkt->pts);
+							if (is->transportDelay < 0){
+								is->stream_start_local_time += is->transportDelay * 1000000.0;
+							}
+						}
+					}
+				}
+			}else
+				av_free_packet(pkt);
 		}
 	}
 	/* wait until the end */
