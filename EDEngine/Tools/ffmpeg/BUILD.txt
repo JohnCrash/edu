@@ -1,0 +1,42 @@
+编译说明
+ffmpeg版本release/3.2
+
+WINDOWS
+	设置WINDOWS环境变量SHELLOPTS=igncr
+	
+	为cygwin设置msvc编译环境,在cygwin/home/.bashrc中加入下列行
+	export MSVC=C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0/VC
+	export MSKITS=C:/Program\ Files\ \(x86\)/Windows\ Kits/8\.1
+	export INCLUDE="${MSVC}/include;${MSKITS}/Include/um;${MSKITS}/Include/shared"
+	export LIB="${MSVC}/lib;${MSKITS}/lib/winv6.3/um/x86"
+	export CYG_MSVC=/cygdrive/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0/VC
+	export PATH=${NDK_TOOLCHAINS}/bin:${CYG_MSVC}/bin:$PATH
+
+	cygwin64下执行build_win32.sh
+	1 ./build_win32.sh config 配置
+	2 ./build_win32.sh make 编译
+	3 ./build_win32.sh install 安装
+	4 ./build_win32.sh setup 将编译好的头文件和库文件复制到cocos2d-x,和ljshell的cocos2d-x 2.2.x下
+	（不复制include目录，另外obs-studio和EDEngine直接和ffmpeg关联）
+	
+	问题:
+		1.pollfd重复定义问题
+			在ffconfig.h 中加入 #define HAVE_STRUCT_POLLFD 1
+ANDROID
+	为cygwin加入脚本调试行号:
+		export PS4='+{$LINENO:${FUNCNAME[0]}}'
+	
+	cygwin64下执行build_android.sh
+	1 ./build_android.sh config 配置
+	2 ./build_android.sh make 编译
+	3 ./build_android.sh install 安装
+	4 ./build_android.sh setup 将编译好的头文件和库文件复制到cocos2d-x,和ljshell的cocos2d-x 2.2.x下
+	（不复制include目录）
+	问题：
+IOS
+	执行:build_ios.sh
+	如果发生libavutil.a连接错误，执行fix_avutil.sh
+	
+如果ffmpeg头文件发生变化需要执行build_include.sh
+使用build_include.sh建造新的头文件，该脚本将收集全部.h文件，并且将它们复制到include目录下。
+同时将头文件中的#include "config.h" 替换为#include "ffconfig.h"
