@@ -34,10 +34,10 @@ local ui = {
 	ANIMATION_RGN = "ding/donghua",
 	OK_BUT = 'quer',
 	
-	ZI1 = "tix1/zi1/wen",
-	ZI2 = "tix1/zi2/wen",
-	ZI3 = "tix1/zi3/wen",
-	ZI4 = "tix1/zi4/wen",
+	ZI1 = "tix1/da1/w1",
+	ZI2 = "tix1/da2/w1",
+	ZI3 = "tix1/da3/w1",
+	ZI4 = "tix1/da4/w1",
 	
 	TIMEOVER_WINDOW = 'js1',
 	SUCCESS_WINDOW = 'js2',
@@ -336,7 +336,7 @@ function battle:initAnswer(q)
 			end
 		else
 			kits.log("ERROR initAnswer q or q.answer = nil")
-			--http.logTable(q,1)
+			http.logTable(q,1)
 		end
 	else
 		kits.log("ERROR self._is_character_show = "..tostring(self._is_character_show))
@@ -776,7 +776,7 @@ function battle:init_data()
 		end
 	end
 	kits.log("data:")
-	--kits.logTable(data)
+	kits.logTable(data)
 	self._word_num = data.question_amount
 	self._words = data.answers
 	
@@ -1058,7 +1058,7 @@ function battle:upload_scroe2( level_id,score,use_time,right_num,fen100 )
 	kits.log("do battle:upload_scroe2")
 	http.post_data(self._root,'submit_answer',send_data,function(t,v)
 		if t and t==200 and v then
-			--http.logTable(v,1)
+			http.logTable(v,1)
 			if v.v1 and self._arg.type==1 then
 				local d=level.getDifficulty()
 				local current = level.getCurrent(d)
@@ -1621,7 +1621,7 @@ function battle:type6(plane,topcis,words,choose,q)
 end
 
 function battle:init_current_question( q )
-	--http.logTable(q,1)
+	http.logTable(q,1)
 	if self._current_plane then
 		self._current_plane:setVisible(false)
 	end
@@ -1914,10 +1914,12 @@ function battle:startStage()
 	kits.log("New game...")
 	self._pause = false
 	self._hummer:setVisible(true)
-	
-	for i=1,7 do
+
+	for i=1,13 do
 		local item = uikits.child(self._root,ui.TYPE_BASE..tostring(i))
-		item:setVisible(false)
+		if item then
+			item:setVisible(false)
+		end
 	end
 	
 	--初始化游戏数据

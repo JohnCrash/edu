@@ -352,7 +352,7 @@ namespace ff{
 		double transportDelay;
 		double playThreshold;
 		double seekThreshold;
-	
+		double lastTransportDelay;
 
 		int stream_resetting;
 	};

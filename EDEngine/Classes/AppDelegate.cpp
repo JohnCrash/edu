@@ -309,6 +309,12 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	}
 	case WM_COPYDATA:
 		{
+
+			/*
+				nRes = 0  取消 != 0  成功处理
+				szParam 返回一个json串{ result:0 / 1, lecoin：100, msg：显示串 }    
+				result = 0失败  msg失败原因  result = 1成功, lecoin返回当前乐币
+			*/
 			BringWindowToTop(hwnd);
 			COPYDATASTRUCT* pobjCopyData = (COPYDATASTRUCT*)lParam;
 			if (pobjCopyData->cbData == sizeof(LJRUNRESPARAM)){

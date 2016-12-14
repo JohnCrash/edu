@@ -126,6 +126,7 @@ local ui = {
 	RETRY = 'tu/chongs',
 	GOOD = 'tu/tbl',
 	CANCEL = 'tu/qux',
+	BUY = 'tu/congzi',
 }
 
 local RETRY = 1
@@ -150,6 +151,7 @@ local DEF_MSG = 14
 local OK_MSG = 15
 local BUY_SP = 16
 local DIY_MSG = 200
+local BUY_LB = 201
 
 local flag_dictionary = {
 {title = '啊！上不了网了',content='少侠，你的网络突然中断了，请检查一下网络，然后重试一下！',button_type = 3,}, --网络中断
@@ -181,7 +183,7 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 	local but_retry = uikits.child(s,ui.RETRY)
 	local but_good = uikits.child(s,ui.GOOD)
 	local but_cancel = uikits.child(s,ui.CANCEL)
-	
+	local but_buy = uikits.child(s,ui.BUY)
 
 	uikits.event( but_confirm,function(sender)
 				uikits.delay_call(parent,function()
@@ -297,7 +299,24 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 				end,0)
 				func(CANCEL)
 			end,'click')	
-
+			
+	uikits.event( but_buy,function(sender)
+				uikits.delay_call(parent,function()
+					if sender.parent then
+						if sender.parent.setEnabled then
+							sender.parent:setEnabled(true)
+						end
+						if sender.parent.setTouchEnabled then
+							sender.parent:setTouchEnabled(true)	
+						end			
+					end				
+					if s and cc_isobj(s) then
+						s:removeFromParent()
+					end
+				end,0)
+				func(BUY_LB)
+			end,'click')
+			
 	but_confirm:setVisible(false)
 	but_giveup:setVisible(false)
 	but_know:setVisible(false)
@@ -305,7 +324,8 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 	but_retry:setVisible(false)
 	but_good:setVisible(false)
 	but_cancel:setVisible(false)
-
+	but_buy:setVisible(false)
+	
 	if flag > #flag_dictionary then
 --[[		if txt_title and type(txt_title) == 'string' then
 			title:setString(txt_title)
@@ -354,6 +374,10 @@ local function messagebox(parent,flag,func,txt_content,but1_text,but2_text)
 		s:setEnabled(true)
 		s:setTouchEnabled(true)	
 	
+		if flag == BUY_LB then
+			but_giveup:setVisible(true)
+			but_buy:setVisible(true)
+		end
 		return
 	else
 		if txt_content and type(txt_content) == 'string' then
@@ -796,6 +820,7 @@ return {
 	OK_MSG = OK_MSG,
 	BUY_SP = BUY_SP,
 	DEF_MSG = DEF_MSG,
+	BUY_LB = BUY_LB,
 	set_id_flag = set_id_flag,
 	get_id_flag = get_id_flag,
 	ID_FLAG_STU = ID_FLAG_STU,

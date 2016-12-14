@@ -712,13 +712,13 @@ function AppEntry:init()
 			uikits.pushScene(video.create())
 		end}
 		end}
-	local pbutton = uikits.button{caption='市场',x=64*scale,y = 64*scale + 7*item_h,
+	local pbutton = uikits.button{caption='汉字',x=64*scale,y = 64*scale + 7*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='test',updates={'lemall','luacore'},
+			update.create{name='han',updates={'han','luacore'},
 				run=function()
 				login.set_selector(9) 
-				local selstudent = require "lemall/Loading"
+				local selstudent = require "han/loading"
 				return selstudent.create()
 			end}
 		end}

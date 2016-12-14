@@ -1,6 +1,7 @@
 ﻿/*
  *	改进于ffmpeg的播放器ffplay
  */
+#define _FF_DEBUG 1
 #include "ffdepends.h"
 #include "cmdutils_cxx.h"
 #include "ff.h"
@@ -1239,7 +1240,9 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 
 	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting){
 		int n = (int)((is->playDelay - is->transportDelay)/0.1);
-		if (is->transportDelay > is->seekThreshold){
+		double cur = av_gettime_relative() / 1000000.0;
+		if (is->transportDelay > is->seekThreshold ||
+			cur - is->lastTransportDelay > is->seekThreshold){
 			//int64_t ts = (int64_t)((is->audclk.pts + is->transportDelay) * 1000000.0);
 			//int64_t ref = (int64_t)(is->playDelay * 1000000.0);
 			//int64_t ts = (int64_t)(is->transportDelay * 1000000.0);
@@ -1401,8 +1404,11 @@ static void CloseAudioChanelByVideoState(VideoState *pvs)
 			return;
 		}
 	}
+
+	if (pvs->realtime || pvs->stream_resetting)
+		return;
+
 	//all audio chanel is close.
-	
 	gInitAudio = false;
 	CloseAudio();
 }
@@ -2924,6 +2930,8 @@ static int read_thread(void *arg)
 	if (infinite_buffer < 0 && is->realtime)
 		infinite_buffer = 1;
 
+	is->lastTransportDelay = av_gettime_relative() / 1000000.0;
+
 	for (;;) {
 		if (is->abort_request)
 			break;
@@ -3074,6 +3082,7 @@ static int read_thread(void *arg)
 		if (pkt->stream_index == is->audio_stream && pkt_in_play_range) {
 			packet_queue_put(&is->audioq, pkt);
 			is->transportDelay = get_realtime_delay(is, pkt->pts);
+			is->lastTransportDelay = av_gettime_relative() / 1000000.0;
 			//DEBUG(" last PTS : %llu", pkt->pts);
 			if (is->transportDelay < 0){
 				is->stream_start_local_time += is->transportDelay * 1000000.0;
@@ -3215,16 +3224,18 @@ static int reset_thread(void * handle)
 		is->stream_resetting = 1;
 		av_strlcpy(is->filename, filename, sizeof(is->filename));
 		stream_open_imp(is);
-		int i = 1000;
+		int i = 3000;
 		while (!is->audio_st&&!is->audio_st){
 			if (is->errcode)
 				break;
 			Delay(10);
-			if (!(i--))return 0;
+			if (!(i--))break;
 		}
 		if (is->audio_st || is->audio_st)
 			return 0;
 	}
+	is->errcode = -19;
+	is->errmsg = "Connection timeout";
 	return 0;
 }
 

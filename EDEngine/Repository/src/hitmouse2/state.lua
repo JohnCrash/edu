@@ -280,7 +280,17 @@ local function pay2(parent,item_id,notify,cb)
 					end,"购买接口没有返回预期结果!")
 				end
 			else
-				http.messagebox(parent,http.OK_MSG,function(e)
+				http.messagebox(parent,http.BUY_LB,function(e)
+					if e == http.BUY_LB then
+						cc_buy("",function(t,result,res)
+							if t == 100 then
+								kits.log('type ='..tostring(t)..' result='..tostring(result)..' res='..tostring(res))
+								if result ~= 0 then
+									--成功充值
+								end
+							end
+						end)
+					end
 				end,tostring(v.v2 or 'buy_item return v.v2 = nil'))			
 			end
 		else
