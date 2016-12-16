@@ -1,7 +1,6 @@
 ﻿/*
  *	改进于ffmpeg的播放器ffplay
  */
-#define _FF_DEBUG 1
 #include "ffdepends.h"
 #include "cmdutils_cxx.h"
 #include "ff.h"
