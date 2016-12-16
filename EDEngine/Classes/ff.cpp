@@ -1883,16 +1883,16 @@ static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub, Vid
 				AVRational tb;
 				tb.num = 1;
 				tb.den = frame->sample_rate;
-
-				if (frame->pts != AV_NOPTS_VALUE){
+				if (frame->pkt_pts != AV_NOPTS_VALUE){
+					if (!is->realtime)
+						frame->pts = av_rescale_q(frame->pkt_pts, av_codec_get_pkt_timebase(d->avctx), tb);
+				}else if (frame->pts != AV_NOPTS_VALUE){
 					if (!is->realtime)
 						frame->pts = av_rescale_q(frame->pts, d->avctx->time_base, tb);
 				}
-				else if (frame->pkt_pts != AV_NOPTS_VALUE){
-					frame->pts = av_rescale_q(frame->pkt_pts, av_codec_get_pkt_timebase(d->avctx), tb);
-				}
 				else if (d->next_pts != AV_NOPTS_VALUE){
-					frame->pts = av_rescale_q(d->next_pts, d->next_pts_tb, tb);
+					if (!is->realtime)
+						frame->pts = av_rescale_q(d->next_pts, d->next_pts_tb, tb);
 				}
 				if (frame->pts != AV_NOPTS_VALUE) {
 					d->next_pts = frame->pts + frame->nb_samples;
