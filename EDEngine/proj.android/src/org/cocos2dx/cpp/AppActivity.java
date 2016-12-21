@@ -866,7 +866,6 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     	ACRA.getErrorReporter().setReportSender(mySender);
     	myActivity = this;
     	getParameterByIntent(); //取启动参数
-    	/*
     	if(_launch==null || _cookie==null){
     		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
     		if(StartApp("com.lj.ljshell","","")==0)
@@ -874,7 +873,6 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     		else
     			System.exit(0);
     	}
-    	*/
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         glSurfaceView.setActivityCallback( this );
         // TestCpp should create stencil buffer

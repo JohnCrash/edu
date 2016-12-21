@@ -81,6 +81,8 @@ LOCAL_WHOLE_STATIC_LIBRARIES += box2d_static
 LOCAL_WHOLE_STATIC_LIBRARIES += ffmpeg_static
 LOCAL_WHOLE_STATIC_LIBRARIES += zeromq_static
 
+LOCAL_SHARED_LIBRARIES := baidvoice-prebuilt
+
 include $(BUILD_SHARED_LIBRARY)
 
 #
@@ -94,3 +96,4 @@ $(call import-module,Box2D)
 $(call import-module,scripting/lua-bindings)
 $(call import-module,ffmpeg/prebuilt/android)
 $(call import-module,zeromq/prebuilt/android)
+$(call import-module,baidu)
