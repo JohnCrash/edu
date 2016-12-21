@@ -5,8 +5,8 @@ import json
 import string
 import shutil
 
-tar_directory = 'z:/debug'
-src_directory = 'g:/source/Edu/EDEngine/proj.win32/Debug.win32'
+tar_directory = 'z:/v13'
+src_directory = 'd:/source/Edu/EDEngine/proj.win32/Debug.win32'
 recursive_error = 0
 cpfile_count = 0
 
@@ -56,24 +56,24 @@ if __name__ == "__main__":
 		td_src = '/src/'+sys.argv[1]
 		td_res = '/res/'+sys.argv[1]
 		print "==========COPY FILE============="
-		if len(sys.argv)>3 and sys.argv[3] == '-onlysrc':
+		if len(sys.argv)>2 and sys.argv[2] == '-onlysrc':
 			copy_dir(tar_directory+td_src,src_directory+td_src)				
-		elif len(sys.argv)>3 and sys.argv[3] == '-onlyres':
+		elif len(sys.argv)>2 and sys.argv[2] == '-onlyres':
 			copy_dir(tar_directory+td_res,src_directory+td_res)							
 		else:
 			copy_dir(tar_directory+td_src,src_directory+td_src)
 			copy_dir(tar_directory+td_res,src_directory+td_res)	
 		if recursive_error==0 and cpfile_count!=0:
 			print "==========UPDATE============="
-			if len(sys.argv)>3:
-				if os.system('update.py '+sys.argv[1]+' '+sys.argv[3])==0:
+			if len(sys.argv)>2:
+				if os.system('update.py '+sys.argv[1]+' '+sys.argv[2])==0:
 					print "==========UPLOAD============="
-					if os.system('upload.py '+sys.argv[1]+' '+sys.argv[2]+' '+sys.argv[3])==0:
+					if os.system('upload.py '+sys.argv[1]+' '+sys.argv[2])==0:
 						print "==========DONE============="
 			else:
 				if os.system('update.py '+sys.argv[1])==0:
 					print "==========UPLOAD============="
-					if os.system('upload.py '+sys.argv[1]+' '+sys.argv[2])==0:
+					if os.system('upload.py '+sys.argv[1])==0:
 						print "==========DONE============="				
 	else:
 		print "Please input project name,example :release homework ftp_password [-onlysrc]"

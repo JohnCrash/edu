@@ -9,23 +9,28 @@ import ftplib
 
 ftp = ftplib.FTP()
 
-ftp_directory='luaapp/debug'
+ftp_directory='upgrade/luaapp/v13'
 local_output = 'output'
 
-def open_ftp(host,port,pwd):
+def open_ftp(host,port):
 	try:		
 		ftp.connect(host,port)
-		print ftp.login('upgrade_ftp',pwd)
+		print ftp.login('LTAIGeMIpdKAUIaE/lx-file','9yKfQiecOUjJbTdzndUJTNL4P4hkQn')
 		print ftp.getwelcome()
 		print "connect "+host+":"+str(port)+" success"
 		return True
 	except ftplib.all_errors as e:
 		print "fpt connect "+host+":"+str(port)+" failed!"
+		print e
 		return False
 		
 def close_ftp():
 	try:
 		ftp.quit()
+	except ftplib.all_errors as e:
+		print e
+		
+	try:
 		ftp.close()
 		print "close success"
 	except ftplib.all_errors as e:
@@ -40,18 +45,66 @@ def download_file(sf,lf):
 	except IOError as e:
 		return False
 		
+def mmd5(name,bstr):
+	global has_error
+	if bstr == True:
+		md5ret = hashlib.md5(name.encode('utf-8')).hexdigest()
+	else:
+		if os.path.isdir(name) == True:
+			print name, "is a dir, can not make md5"
+			has_error = has_error+1
+			return 0;
+		md5file = open(name,'rb')
+		if(md5file):
+			md5ret = hashlib.md5(md5file.read()).hexdigest()
+			md5file.close()
+		else:
+			md5ret = 'error'
+	return md5ret
+	
+def checksum_file_md5_and_delete(sf):
+	try:
+		if mmd5(sf,False) == mmd5(sf+'_',False):
+			os.remove(sf+'_')
+			return True
+		else:
+			os.remove(sf+'_')
+			return False
+	except OSError as e:
+		print e
+		return False
+		
+def checksum_file(sf,lf):
+	if download_file(sf,lf+'_')==True:
+		if checksum_file_md5_and_delete(lf)==True:
+			return True
+		else:
+			return False
+	else:
+		return False
+	
 def upload_file(sf,lf):
 	try:
-		ftp.storbinary('STOR '+sf,open(lf,'rb'))
+		ftp.delete(sf)
+	except ftplib.all_errors as e:
+		pass
+		
+	try:
+		file = open(lf,'rb')
+		ftp.storbinary('STOR '+sf,file)
+		file.close()
 		return True
 	except ftplib.all_errors as e:
 		return False
 	except IOError as e:
 		return False
 		
+#Note that the SIZE command is not standardized, but is supported by many common server implementations.
 def size_file(sf):
 	try:
-		return ftp.size(sf)
+		ftp.voidcmd('TYPE I')
+		len = ftp.size(sf)
+		return len
 	except ftplib.all_errors as e:
 		return -1
 		
@@ -85,6 +138,7 @@ def mkdir2(sf):
 			if checkdir(i)!=True:
 				ftp.mkd(i)
 		except ftplib.all_errors as e:
+			print e
 			return True
 	return True
 		
@@ -98,7 +152,9 @@ def size_local_file(lf):
 	try:
 		fp = open(lf,'rb')
 		fp.seek(0,os.SEEK_END)
-		return fp.tell()
+		len = fp.tell()
+		fp.close()
+		return len
 	except IOError as e:
 		return -1
 
@@ -110,15 +166,15 @@ def upload_file2(sf,lf):
 	if upload_file(sf,lf)!=True:
 		if mkdir2(sf)==True:
 			if upload_file(sf,lf)==True:
-				fs = size_file(sf)
+				#fs = size_file(sf)
 				ls = size_local_file(lf)			
-				if fs!=-1 and fs==ls :
-					print "upload file : "+str(lf)+" success"
+				if ls!=-1 and checksum_file(sf,lf)==True :
+					print "UPLOAD:"+str(lf)+" SUCCESS"
 					upload_count = upload_count+1
 					return True
 				else:
-					print "upload file : "+str(sf)+" form "+str(lf)+" failed!"
-					print "	server file length : "+str(fs)
+					print "upload file : "+str(sf)+" form "+str(lf)+" checksum failed!"
+					#print "	server file length : "+str(fs)
 					print "	local file length : "+str(ls)
 					return False
 			else:
@@ -129,34 +185,32 @@ def upload_file2(sf,lf):
 			print "	can not create directory "+str(sf)
 			return False
 	else:
-		fs = size_file(sf)
-		ls = size_local_file(lf)			
-		if fs!=-1 and fs==ls :
-			print "upload file : "+str(lf)+" success"
+		#fs = size_file(sf)
+		ls = size_local_file(lf)
+		if ls!=-1 and checksum_file(sf,lf)==True :
+			print "UPLOAD:"+str(lf)+" SUCCESS"
 			upload_count = upload_count+1
 			return True
 		else:
-			print "upload file : "+str(sf)+" form "+str(lf)+" failed!"
-			print "	server file length : "+str(fs)
+			print "upload file : "+str(sf)+" form "+str(lf)+" checksum failed!"
+			#print "	server file length : "+str(fs)
 			print "	local file length : "+str(ls)
 			return False
 	
 def synchronize_file(sf,lf):
 	global recursive_error
-	fs = size_file(sf)
 	ls = size_local_file(lf)
-	if ls!=-1 and fs!=-1 and fs==ls :
+	
+	if ls!=-1 and checksum_file(sf,lf)==True:
+		print "PASS:" + str(lf)
 		return True
-	elif ls!=-1 and fs!=-1 and fs!=ls:
+		
+	elif ls!=-1:
 		if upload_file2(sf,lf)==True:
+			print "UPLOAD:"+str(lf)+" SUCCESS"
 			return True
 		else:
-			recursive_error = 1
-			return False
-	elif fs==-1 and ls!=-1:
-		if upload_file2(sf,lf)==True:
-			return True
-		else:
+			print "upload file : "+str(sf)+" form "+str(lf)+" upload failed!"
 			recursive_error = 1
 			return False
 	else:
@@ -202,16 +256,16 @@ def synchronize_dir(sf,lf):
 		print "synchronize_dir local directory "+str(lf)+" is not exist"
 
 if __name__ == "__main__":
-	if(len(sys.argv)>1):
-		if open_ftp('211.154.173.152',2121,sys.argv[2]) == True :
+	if(len(sys.argv)>0):
+		if open_ftp('192.168.2.25',2048) == True :
 			td_src = '/src/'+sys.argv[1]
 			td_res = '/res/'+sys.argv[1]
 			check_rootdir(ftp_directory)
 			check_rootdir(ftp_directory+"/src")
 			check_rootdir(ftp_directory+"/res")
-			if len(sys.argv)>3 and sys.argv[3] == '-onlysrc':
+			if len(sys.argv)>2 and sys.argv[2] == '-onlysrc':
 				synchronize_dir(ftp_directory,local_output+td_src)			
-			elif len(sys.argv)>3 and sys.argv[3] == '-onlyres':
+			elif len(sys.argv)>2 and sys.argv[2] == '-onlyres':
 				synchronize_dir(ftp_directory,local_output+td_res)							
 			else:
 				synchronize_dir(ftp_directory,local_output+td_src)

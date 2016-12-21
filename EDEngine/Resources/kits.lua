@@ -19,7 +19,7 @@ local LOW_LOG = 256
 local logs = {}
 
 local function get_version()
-	return 5
+	return 6
 end
 
 local function get_logs()

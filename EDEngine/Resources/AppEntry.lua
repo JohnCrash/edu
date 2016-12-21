@@ -623,15 +623,15 @@ function AppEntry:init()
 	local tbutton = uikits.button{caption='学习乐园',x=64*scale,y = 64*scale +4*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			--update.create{name='qwxt',updates={'qwxt','luacore','topics','wuliu'},
-				--run=function()
+			update.create{name='qwxt',updates={'qwxt','luacore','topics','wuliu'},
+				run=function()
 				login.set_uid_type(login.STUDENT)
 				login.set_selector(36)--学生
 				--login.set_selector(29) 
 				local qwxt = require "qwxt/main"
 				--return qwxt.create()
 				uikits.pushScene(qwxt.create())
-			--end}			
+			end}			
 		end}
 	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,

@@ -1953,6 +1953,18 @@ function battle:init_player_data()
 	self._player_data = self._player_data or { sound = true,music = true,stage = 1,scroce=0 }
 end
 
+local function open_console()
+	local console = require "console"
+	if console.isopen() then
+		cc.Director:getInstance():popScene()
+	else
+		local scene = console.create()
+		if scene then
+			cc.Director:getInstance():pushScene( scene )
+		end
+	end	
+end
+	
 function battle:init()
 	if uikits.get_factor() == uikits.FACTOR_9_16 then
 		self._ss = cc.size(1920,1080)
@@ -1983,6 +1995,8 @@ function battle:init()
 						if e==http.OK then
 							self._game_over_flag = true
 							uikits.popScene()
+						else
+							open_console()
 						end
 					end,text,"确定")			
 				end

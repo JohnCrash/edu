@@ -17,10 +17,11 @@ end
 local local_dir = kits.get_local_directory()
 local platform = CCApplication:getInstance():getTargetPlatform()
 local versionNUM = resume.getversion()
+
 --release
---local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
+local liexue_server_sr = 'http://fileoss.lejiaolexue.com/upgrade/luaapp/v'..versionNUM..'/'
 --debug
-local liexue_server_sr = 'http://file.lejiaolexue.com/upgrade/luaapp/debug2/'
+--local liexue_server_sr = 'http://fileoss.lejiaolexue.com/upgrade/luaapp/debug2/'
 
 local liexue_server_dl = liexue_server_sr
  
@@ -29,9 +30,9 @@ kits.log("INFO read ljshell setting")
 if lj_config and lj_config.setting then
 	if type(lj_config.setting)=='table' and lj_config.setting.FileServer then
 		--release
-		--liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
+		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/v'..versionNUM..'/'
 		--debug
-		liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/debug2/'
+		--liexue_server_dl = 'http://'..tostring(lj_config.setting.FileServer)..'/upgrade/luaapp/debug2/'
 		kits.log("read ljshell setting.FileServer = "..tostring(liexue_server_dl))
 	else
 		kits.log("WARNING lj_config.setting.FileServer = nil")
@@ -42,10 +43,7 @@ else
 		kits.log("WARNING lj_config.setting = "..tostring(lj_config.setting))
 	end
 end
---local liexue_server_dl = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
---local liexue_server_sr = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/output/'
---local local_server = 'http://192.168.2.211:81/lgh/v'..versionNUM..'/'
---local local_server = 'http://192.168.2.182/v'..versionNUM..'/'
+
 local update_server
 local config_server = kits.config("update_server","get")
 if config_server and string.len(config_server)>10 then
