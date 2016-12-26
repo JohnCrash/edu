@@ -721,7 +721,7 @@ local function getApiServer()
 end
 
 local function getAppServer()
-	local server = 'api.lejiaolexue.com'
+	local server = 'app.lejiaolexue.com'
 	local lj_config = get_ljconfig()
 	if lj_config and lj_config.setting then
 		if type(lj_config.setting)=='table' and lj_config.setting.AppServer then
@@ -732,7 +732,7 @@ local function getAppServer()
 end
 
 local function getUpdateServer()
-	local server = 'api.lejiaolexue.com'
+	local server = 'fileoss.lejiaolexue.com'
 	local lj_config = get_ljconfig()
 	if lj_config and lj_config.setting then
 		if type(lj_config.setting)=='table' and lj_config.setting.FileServer then

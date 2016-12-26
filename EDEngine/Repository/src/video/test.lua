@@ -128,7 +128,9 @@ function video:init(b)
 		
 		uikits.event(uikits.child(self._root,'play'),function(sender)
 			--uikits.pushScene(require "video/player".create{filename=ljshell.getDirectory(ljshell.AppDir).."/test.mp4"})
-			uikits.pushScene(require "video/player".create{filename="http://videobjcdn.lejiaolexue.com/mts/571c1cba58e836256d5d3c16fa501a9aed30fb9d.m3u8"})
+			local name =  '5ffefd8dfc6b8a378ee667a3156300b20d700847'
+			--local name = '571c1cba58e836256d5d3c16fa501a9aed30fb9d'
+			uikits.pushScene(require "video/player".create{filename="http://videobjcdn.lejiaolexue.com/mts/"..name..".m3u8"})
 		end)
 		uikits.event(uikits.child(self._root,'live'),function(sender)
 			uikits.pushScene(require "video/player".create{filename="rtmp://192.168.7.157/myapp/mystream"})
