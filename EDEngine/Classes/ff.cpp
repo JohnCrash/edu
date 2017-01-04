@@ -3225,7 +3225,6 @@ VideoState *stream_open_imp(VideoState * is)
 			break;
 		return is;
 	} while (false);
-	is->stream_resetting = 1;
 	stream_close(is);
 	return NULL;
 }
@@ -3258,6 +3257,7 @@ static int reset_thread(void * handle)
 		if (is->audio_st || is->audio_st)
 			return 0;
 	}
+	is->stream_resetting = 0;
 	is->errcode = -19;
 	is->errmsg = "Connection timeout";
 	return 0;
