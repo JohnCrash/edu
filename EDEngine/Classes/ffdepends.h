@@ -355,6 +355,7 @@ namespace ff{
 		double lastTransportDelay;
 
 		int stream_resetting;
+		std::thread * reset_thread;
 	};
 	extern AVPacket flush_pkt;
 	/*

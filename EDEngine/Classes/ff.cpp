@@ -60,6 +60,7 @@ int64_t audio_callback_time;
 
 AVPacket flush_pkt;
 static mutex_t *_audio_channel_mutex = NULL;
+static mutex_t * _stream_close_mutex = NULL;
 
 static void stream_reset(VideoState * is);
 
@@ -137,6 +138,7 @@ void print_error(const char *filename, int err)
 void do_exit(VideoState *is)
 {
 	if (is) {
+		is->stream_resetting = 1;
 		stream_close(is);
 	}
 	av_lockmgr_register(NULL);
@@ -831,14 +833,20 @@ static void frame_queue_destory(FrameQueue *f)
 	destroyCond(f->cond);
 }
 
-void stream_close(VideoState *is)
+void stream_close_imp(VideoState *is)
 {
+	if(!_stream_close_mutex) return;
+	std::unique_lock<mutex_t> lk(*_stream_close_mutex);
+	
 	/* XXX: use a special url_shutdown call to abort parse cleanly */
+	if (!is->read_tid)return;
+
     if(is->_currentFrame){
         av_frame_free(&is->_currentFrame);
     }
 	is->abort_request = 1;
 	waitThread(is->read_tid, NULL);
+	is->read_tid = NULL;
 	packet_queue_destroy(&is->videoq);
 	packet_queue_destroy(&is->audioq);
 	packet_queue_destroy(&is->subtitleq);
@@ -854,6 +862,20 @@ void stream_close(VideoState *is)
 #endif
 	if (!is->stream_resetting)
 		av_free(is);
+}
+
+void stream_close(VideoState *is)
+{
+	if (is && _stream_close_mutex){
+		is->abort_request = 1;
+		if (is->reset_thread){
+			std::thread * t = is->reset_thread;
+			is->reset_thread = NULL;
+			t->join();
+			delete t;
+		}
+		stream_close_imp(is);
+	}
 }
 
 static int decode_interrupt_cb(void *ctx)
@@ -3175,6 +3197,8 @@ VideoState *stream_open_imp(VideoState * is)
 
 	if (!_audio_channel_mutex)
 		_audio_channel_mutex = createMutex();
+	if (!_stream_close_mutex)
+		_stream_close_mutex = createMutex();
 
 	do
 	{
@@ -3201,6 +3225,7 @@ VideoState *stream_open_imp(VideoState * is)
 			break;
 		return is;
 	} while (false);
+	is->stream_resetting = 1;
 	stream_close(is);
 	return NULL;
 }
@@ -3215,8 +3240,8 @@ static int reset_thread(void * handle)
 		Delay(1);
 	
 	int n = 3;
-	while ( n-- ){
-		stream_close(is);
+	while ( n-- && is->reset_thread){
+		stream_close_imp(is);
 		while (is->isInAudioDecode)
 			Delay(1);
 		memset(is, 0, sizeof(VideoState));
@@ -3224,7 +3249,7 @@ static int reset_thread(void * handle)
 		av_strlcpy(is->filename, filename, sizeof(is->filename));
 		stream_open_imp(is);
 		int i = 3000;
-		while (!is->audio_st&&!is->audio_st){
+		while (!is->audio_st&&!is->audio_st && is->reset_thread){
 			if (is->errcode)
 				break;
 			Delay(10);
@@ -3240,9 +3265,9 @@ static int reset_thread(void * handle)
 
 static void stream_reset(VideoState * is)
 {
-	if (!is->stream_resetting){
+	if (!is->reset_thread){
 		is->stream_resetting = 1;
-		createThread(reset_thread, is);
+		is->reset_thread = createThread(reset_thread, is);
 	}
 }
 
