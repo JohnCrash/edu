@@ -1237,7 +1237,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 		return;
 	}
 
-	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting){
+	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting && !is->abort_request){
 		int n = (int)((is->playDelay - is->transportDelay)/0.1);
 		double cur = av_gettime_relative() / 1000000.0;
 		if (is->transportDelay > is->seekThreshold ||

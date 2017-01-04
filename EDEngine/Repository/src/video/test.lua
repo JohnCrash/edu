@@ -133,8 +133,10 @@ function video:init(b)
 			uikits.pushScene(require "video/player".create{filename="http://videobjcdn.lejiaolexue.com/mts/"..name..".m3u8"})
 		end)
 		uikits.event(uikits.child(self._root,'live'),function(sender)
-			uikits.pushScene(require "video/player".create{filename="rtmp://192.168.7.157/myapp/mystream"})
-			print("rtmp://192.168.7.157/myapp/mystream")
+			--local live_url = 'rtmp://live.lexinedu.com/ljlxvideo/2a8683d552d549a4a90085882e0ae4ea?auth_key=1483486380-0-0-b31ccf98caadfa09686469b9b78f0075'
+			local live_url = 'rtmp://192.168.7.157/myapp/mystream'
+			uikits.pushScene(require "video/player".create{filename=live_url})
+			print(live_url)
 			--uikits.pushScene(require "video/player".create{filename="rtmp://live.lexinedu.com/ljlxvideo/video1?auth_key=1481749826-0-0-2b728db360cc8ee121858b1ac58996cd"})
 		end)		
 	end
