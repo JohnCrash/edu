@@ -250,11 +250,13 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				InvalidateButton(hwnd,BUTTON_MIN, &minb,&closeb);
 				MouseHover(hwnd);
+				return HTBORDER;
 			}
 			else if (PtInRect(&closeb, pt)) //点击到最关闭
 			{
 				InvalidateButton(hwnd,BUTTON_CLOSE, &minb, &closeb);
 				MouseHover(hwnd);
+				return HTBORDER;
 			}
 			else
 			{
@@ -262,7 +264,7 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 		}
 		break;
-	case WM_NCLBUTTONDOWN:
+	case WM_NCLBUTTONUP://WM_NCLBUTTONDOWN:
 		{
 			POINT pt;
 			int broderWidth, titleHeight;
