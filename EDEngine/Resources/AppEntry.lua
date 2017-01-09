@@ -636,7 +636,7 @@ function AppEntry:init()
 	local sbutton = uikits.button{caption='速算',x=64*scale,y = 64*scale + 3*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='calc',updates={'luacore'},
+			update.create{name='calc',updates={'calc','luacore'},
 				run=function()
 				login.set_uid_type(login.TEACHER)
 				--login.set_selector(15) --学生
@@ -663,7 +663,7 @@ function AppEntry:init()
 	local ebutton = uikits.button{caption='新打地鼠2',x=64*scale,y = 64*scale + 2*item_h,
 		width=128*scale,height=48*scale,
 		eventClick=function(sender)
-			update.create{name='hitmouse2',updates={'luacore'},
+			update.create{name='hitmouse2',updates={'hitmouse2','luacore'},
 				run=function()
 				--login.set_selector(25) --李杰
 				--login.set_uid_type(login.TEACHER)

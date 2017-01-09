@@ -1,4 +1,4 @@
-package org.cocos2dx.cpp;
+package com.lj.game;
 
 import com.baidu.voicerecognition.android.VoiceRecognitionConfig;
 import com.baidu.voicerecognition.android.ui.BaiduASRDigitalDialog;

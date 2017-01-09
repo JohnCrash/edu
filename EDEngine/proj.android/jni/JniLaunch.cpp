@@ -8,7 +8,7 @@
 using namespace cocos2d;
 UsingMySpace;
 
-#define  CLASS_NAME "org/cocos2dx/cpp/AppActivity"
+#define  CLASS_NAME "com/lj/game/AppActivity"
 MySpaceBegin
 
 std::string g_Launch;
@@ -69,7 +69,7 @@ void setUIOrientation( int m )
 /*
 	android 特有的问题
 		调用java 的 setUIOrientation，然后方向被改变(android旋转视图)
-		旋转完视图另一个线程调用Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation
+		旋转完视图另一个线程调用Java_com_lj_game_AppActivity_cocos2dChangeOrientation
 		如果不等调用结束就返回，可能发生线程冲突调用setDesignResolutionSize
 		比如你这么调用
 		setUIOrientation(1)
@@ -321,7 +321,7 @@ void buy(const char * str)
 MySpaceEnd
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid,jstring orientation) 
+    JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_launchParam(JNIEnv* env,jobject thiz,jstring launch,jstring cookie,jstring uid,jstring orientation) 
 	{
 		g_Launch = cocos2d::JniHelper::jstring2string(launch);
 		g_Cookie = cocos2d::JniHelper::jstring2string(cookie);
@@ -329,18 +329,18 @@ extern "C" {
 		g_Orientation = cocos2d::JniHelper::jstring2string(orientation);
     }
 
-    JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_setExternalStorageDirectory(JNIEnv* env,jobject thiz,jstring dir) 
+    JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_setExternalStorageDirectory(JNIEnv* env,jobject thiz,jstring dir) 
 	{
 		g_ExternalStorageDirectory = cocos2d::JniHelper::jstring2string(dir);
     }	
 
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_sendTakeResourceResult(JNIEnv* env,jobject thiz,int t,int r,jstring res)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_sendTakeResourceResult(JNIEnv* env,jobject thiz,int t,int r,jstring res)
 	{
 		std::string df = JniHelper::jstring2string(res);
 		takeResource_callback(df,t,r);
 	}
 		
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_sendVoiceRecordData(JNIEnv *env,jobject thiz,jint nType,jint nID,jint nParam1,jint nParam2,jint len,jbyteArray buf)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_sendVoiceRecordData(JNIEnv *env,jobject thiz,jint nType,jint nID,jint nParam1,jint nParam2,jint len,jbyteArray buf)
 	{
 		int lenBuf=len;
 		if (lenBuf==0)
@@ -365,27 +365,27 @@ extern "C" {
     		env->ReleaseByteArrayElements(buf,(signed char *)pBuf,0);
     	}
 	}	
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_networkStateChangeEvent(JNIEnv *env,jobject thiz,int state)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_networkStateChangeEvent(JNIEnv *env,jobject thiz,int state)
 	{
 		networkStateChange(state);
 	}
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation(JNIEnv *env,jobject thiz,int state,int w,int h)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_cocos2dChangeOrientation(JNIEnv *env,jobject thiz,int state,int w,int h)
 	{
-		CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 1");
+		CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 1");
 		if( state == 1 )
 		{
 			cocos2dChangeOrientationBySize(w,h);
-			CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 2");
+			CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 2");
 		}
-		CCLOG("Java_org_cocos2dx_cpp_AppActivity_cocos2dChangeOrientation 3");
+		CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 3");
 		sWaitChangeEnd = true;
 	}	
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_setBaiduResult(JNIEnv *env,jobject thiz,jstring text)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_setBaiduResult(JNIEnv *env,jobject thiz,jstring text)
 	{
 		std::string str = cocos2d::JniHelper::jstring2string(text);
 		baiduVoiceResult( str );
 	}		
-	JNIEXPORT void JNICALL Java_org_cocos2dx_cpp_AppActivity_writeACRLog(JNIEnv *env,jobject thiz,jstring dir)
+	JNIEXPORT void JNICALL Java_com_lj_game_AppActivity_writeACRLog(JNIEnv *env,jobject thiz,jstring dir)
 	{
 		std::string str = cocos2d::JniHelper::jstring2string(dir);
 		acr_write_log(str.c_str());

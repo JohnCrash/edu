@@ -1,4 +1,4 @@
-package org.cocos2dx.cpp;
+package com.lj.game;
 
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;

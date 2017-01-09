@@ -6,7 +6,7 @@ using namespace cocos2d;
 
 namespace ff
 {
-	#define  CLASS_NAME "org/cocos2dx/cpp/AppActivity"
+	#define  CLASS_NAME "com/lj/game/AppActivity"
 	/* Main activity */
 	static jclass mActivityClass;
 	

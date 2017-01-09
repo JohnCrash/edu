@@ -24,7 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-package org.cocos2dx.cpp;
+package com.lj.game;
 
 import java.security.Provider;
 
@@ -744,10 +744,10 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
 			String strClassName="";
 			
 			Bundle bundle = new Bundle();  
-			if (strPackage.equalsIgnoreCase("com.edengine.luacore"))
+			if (strPackage.equalsIgnoreCase("com.lj.game"))
 			{
 				//for lua
-				strClassName="org.cocos2dx.cpp.AppActivity";
+				strClassName="com.lj.game.AppActivity";
 				
 				bundle.putString("launch",strPath);
 				String str = "";
@@ -866,7 +866,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     	ACRA.getErrorReporter().setReportSender(mySender);
     	myActivity = this;
     	getParameterByIntent(); //取启动参数
-    	/*
+
     	if(_launch==null || _cookie==null){
     		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
     		if(StartApp("com.lj.ljshell","","")==0)
@@ -874,7 +874,7 @@ public class AppActivity extends Cocos2dxActivity  implements Cocos2dxCallback{
     		else
     			System.exit(0);
     	}
-    	*/
+
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         glSurfaceView.setActivityCallback( this );
         // TestCpp should create stencil buffer
