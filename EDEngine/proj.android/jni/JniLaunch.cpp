@@ -374,7 +374,7 @@ extern "C" {
 		CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 1");
 		if( state == 1 )
 		{
-			cocos2dChangeOrientationBySize(w,h);
+		//	cocos2dChangeOrientationBySize(w,h);
 			CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 2");
 		}
 		CCLOG("Java_com_lj_game_AppActivity_cocos2dChangeOrientation 3");

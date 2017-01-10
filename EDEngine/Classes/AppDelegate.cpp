@@ -317,7 +317,9 @@ LRESULT CALLBACK myWindowProcHook(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				szParam 返回一个json串{ result:0 / 1, lecoin：100, msg：显示串 }    
 				result = 0失败  msg失败原因  result = 1成功, lecoin返回当前乐币
 			*/
-			BringWindowToTop(hwnd);
+			SetForegroundWindow(g_hMainWnd);
+			BringWindowToTop(g_hMainWnd);
+			
 			COPYDATASTRUCT* pobjCopyData = (COPYDATASTRUCT*)lParam;
 			if (pobjCopyData->cbData == sizeof(LJRUNRESPARAM)){
 				PLJRUNRESPARAM  pobjRes = (PLJRUNRESPARAM)pobjCopyData->lpData;

@@ -88,6 +88,9 @@ void cocos2dChangeOrientationBySize( int w,int h )
 void cocos2dChangeOrientation(int m)
 {
 	int w, h;
+	
+	CCLOG("cocos2dChangeOrientation m = %d ",m);
+	
 	cocos2d::Director *pDirector = cocos2d::Director::getInstance();
 	if (pDirector == nullptr)
 		return;
