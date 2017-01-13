@@ -134,7 +134,8 @@ function video:init(b)
 		end)
 		uikits.event(uikits.child(self._root,'live'),function(sender)
 			--local live_url = 'rtmp://live.lexinedu.com/ljlxvideo/2a8683d552d549a4a90085882e0ae4ea?auth_key=1483486380-0-0-b31ccf98caadfa09686469b9b78f0075'
-			local live_url = 'rtmp://192.168.7.157/myapp/mystream'
+			--local live_url = 'rtmp://192.168.7.157/myapp/mystream'
+			local live_url = "rtmp://live.lexinedu.com/ljlxvideo/2a8683d552d549a4a90085882e0ae4ea?auth_key=1485819180-0-0-805436e7de13cb375a9b54a0892e7cb8"
 			uikits.pushScene(require "video/player".create{filename=live_url})
 			print(live_url)
 			--uikits.pushScene(require "video/player".create{filename="rtmp://live.lexinedu.com/ljlxvideo/video1?auth_key=1481749826-0-0-2b728db360cc8ee121858b1ac58996cd"})

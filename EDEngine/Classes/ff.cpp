@@ -1259,7 +1259,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 		return;
 	}
 
-	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting && !is->abort_request){
+	if (is->realtime && !is->seek_req && !is->paused && !is->stream_resetting && !is->abort_request && is->lastTransportDelay!=0){
 		int n = (int)((is->playDelay - is->transportDelay)/0.1);
 		double cur = av_gettime_relative() / 1000000.0;
 		if (is->transportDelay > is->seekThreshold ||
@@ -3239,11 +3239,13 @@ static int reset_thread(void * handle)
 		Delay(1);
 	
 	int n = 3;
+	std::thread * tmp = is->reset_thread;
 	while ( n-- && is->reset_thread){
 		stream_close_imp(is);
 		while (is->isInAudioDecode)
 			Delay(1);
 		memset(is, 0, sizeof(VideoState));
+		is->reset_thread = tmp;
 		is->stream_resetting = 1;
 		av_strlcpy(is->filename, filename, sizeof(is->filename));
 		stream_open_imp(is);

@@ -4,6 +4,30 @@
 		<cconfiguration id="0.756827735">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="0.756827735" moduleId="org.eclipse.cdt.core.settings" name="Default">
 				<macros>
+					<stringListMacro name="Path" type="VALUE_TEXT_LIST">
+						<value name="C:\cygwin64\bin"/>
+						<value name="C:\android-ndk-r9d"/>
+						<value name="C:/Program Files/Java/jdk1.8.0_91/bin/../jre/bin/server"/>
+						<value name="C:/Program Files/Java/jdk1.8.0_91/bin/../jre/bin"/>
+						<value name="C:/Program Files/Java/jdk1.8.0_91/bin/../jre/lib/amd64"/>
+						<value name="C:\Program Files\Java\jdk1.8.0_91\bin"/>
+						<value name="C:\ProgramData\Oracle\Java\javapath"/>
+						<value name="C:\Python27\"/>
+						<value name="C:\Python27\Scripts"/>
+						<value name="C:\Windows\system32"/>
+						<value name="C:\Windows"/>
+						<value name="C:\Windows\System32\Wbem"/>
+						<value name="C:\Windows\System32\WindowsPowerShell\v1.0\"/>
+						<value name="C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\"/>
+						<value name="C:\Program Files\Microsoft SQL Server\110\Tools\Binn\"/>
+						<value name="C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.0\"/>
+						<value name="C:\Program Files\Microsoft SQL Server\120\Tools\Binn\"/>
+						<value name="C:\Program Files\doxygen\bin"/>
+						<value name="g:\adt-bundle-windows-x86_64-20140702\sdk\platform-tools"/>
+						<value name="e:\SocketeQ\windowsandroid_root\system\bin"/>
+						<value name="e:\SocketeQ\windowsandroid_root\system\lib"/>
+						<value name="G:\adt-bundle-windows-x86_64-20140702\eclipse"/>
+					</stringListMacro>
 					<stringMacro name="NDK_MODULE_PATH" type="VALUE_TEXT" value="../../../cocos2d-x:../../../cocos2d-x/external:../../../cocos2d-x/cocos:../../../cocos2d-x/cocos/scripting/lua-bindings"/>
 				</macros>
 				<externalSettings/>
@@ -21,7 +45,7 @@
 					<folderInfo id="0.756827735." name="/" resourcePath="">
 						<toolChain errorParsers="" id="org.eclipse.cdt.build.core.prefbase.toolchain.294545719" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.294545719.993860072" name=""/>
-							<builder arguments="NDK_MODULE_PATH=D:/source/cocos2d-x;D:/source/cocos2d-x/external;D:/source/cocos2d-x/cocos;D:/source/cocos2d-x/cocos/scripting/lua-bindings" buildPath="${workspace_loc:/EDEngine}" command="ndk-build" id="com.android.builder.484809448" keepEnvironmentInBuildfile="false" name="Android Builder" superClass="com.android.builder"/>
+							<builder arguments="-j4 NDK_MODULE_PATH=D:/source/cocos2d-x;D:/source/cocos2d-x/external;D:/source/cocos2d-x/cocos;D:/source/cocos2d-x/cocos/scripting/lua-bindings" buildPath="${workspace_loc:/EDEngine}" command="ndk-build" id="com.android.builder.484809448" keepEnvironmentInBuildfile="false" name="Android Builder"/>
 							<tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="org.eclipse.cdt.build.core.settings.holder.libs.1844369373" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs">
 								<option id="org.eclipse.cdt.build.core.settings.holder.libfiles.628519629" name="Library Files" superClass="org.eclipse.cdt.build.core.settings.holder.libfiles"/>
 								<option id="org.eclipse.cdt.build.core.settings.holder.libpaths.1705781501" name="Library Paths" superClass="org.eclipse.cdt.build.core.settings.holder.libpaths"/>
@@ -82,7 +106,7 @@
 					<folderInfo id="0.756827735.1969496387." name="/" resourcePath="">
 						<toolChain errorParsers="" id="org.eclipse.cdt.build.core.prefbase.toolchain.1939950407" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1939950407.1786331077" name=""/>
-							<builder arguments="NDK_DEBUG=1 -j4 NDK_MODULE_PATH=D:/source/cocos2d-x;D:/source/cocos2d-x/external;D:/source/cocos2d-x/cocos;D:/source/cocos2d-x/cocos/scripting/lua-bindings NDK_APPLICATION_MK=${ProjDirPath}/jni/Application_DEBUG.mk" buildPath="${workspace_loc:/EDEngine}" command="ndk-build" id="com.android.builder.844910316" keepEnvironmentInBuildfile="false" name="Android Builder" superClass="com.android.builder"/>
+							<builder arguments="NDK_DEBUG=1 -j4 NDK_MODULE_PATH=D:/source/cocos2d-x;D:/source/cocos2d-x/external;D:/source/cocos2d-x/cocos;D:/source/cocos2d-x/cocos/scripting/lua-bindings NDK_APPLICATION_MK=${ProjDirPath}/jni/Application_DEBUG.mk" buildPath="${workspace_loc:/EDEngine}" command="ndk-build" id="com.android.builder.844910316" keepEnvironmentInBuildfile="false" name="Android Builder"/>
 							<tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="org.eclipse.cdt.build.core.settings.holder.libs.2077652671" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs">
 								<option id="org.eclipse.cdt.build.core.settings.holder.libfiles.1906595539" name="Library Files" superClass="org.eclipse.cdt.build.core.settings.holder.libfiles"/>
 								<option id="org.eclipse.cdt.build.core.settings.holder.libpaths.826620240" name="Library Paths" superClass="org.eclipse.cdt.build.core.settings.holder.libpaths"/>
@@ -141,5 +165,10 @@
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="scannerConfiguration"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="0.756827735">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>

@@ -4,24 +4,24 @@
 
 namespace ff
 {
-/*
-    static double cc_clock()
-    {
-        double clock;
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-        clock = (double)GetTickCount();
-#else
-        timeval tv;
-        gettimeofday(&tv,NULL);
-        clock = (double)tv.tv_sec*1000.0 + (double)(tv.tv_usec)/1000.0;
-#endif
-        return clock;
-    }
-*/
-    VideoPixelFormat FFVideo::getPixelFormat()
-    {
-        return VIDEO_PIX_YUV420P;
-    }
+	/*
+	static double cc_clock()
+	{
+	double clock;
+	#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	clock = (double)GetTickCount();
+	#else
+	timeval tv;
+	gettimeofday(&tv,NULL);
+	clock = (double)tv.tv_sec*1000.0 + (double)(tv.tv_usec)/1000.0;
+	#endif
+	return clock;
+	}
+	*/
+	VideoPixelFormat FFVideo::getPixelFormat()
+	{
+		return VIDEO_PIX_YUV420P;
+	}
 
 	FFVideo::FFVideo() :_ctx(nullptr)
 	{
@@ -32,7 +32,7 @@ namespace ff
 		_nb_min_threshold = 0;
 		_nb_max_threshold = 0;
 #endif
-			
+
 		initFF();
 	}
 
@@ -81,11 +81,11 @@ namespace ff
 	{
 		_first = true;
 
-        _ctx = stream_open(url, NULL);
+		_ctx = stream_open(url, NULL);
 		return _ctx != nullptr;
 	}
 
-	void FFVideo::set_live_lagnb(int mi,int ma)
+	void FFVideo::set_live_lagnb(int mi, int ma)
 	{
 		_nb_min_threshold = mi;
 		_nb_max_threshold = ma;
@@ -117,8 +117,9 @@ namespace ff
 				if (is && is->stream_resetting)return false;
 
 				//直播时如果发生网络异常结束(eof=1),表示视频已经结束
-				if (is->ic && is->eof && !strncmp(is->filename, "rtmp:", 5))
-					return true;
+				if (is->ic && is->eof && is->realtime){
+					return false;
+				}
 
 				if (!is->paused && (!is->audio_st || (is->auddec.finished == is->audioq.serial && frame_queue_nb_remaining(&is->sampq) == 0)) &&
 					(!is->video_st || (is->viddec.finished == is->videoq.serial && frame_queue_nb_remaining(&is->pictq) == 0)))
@@ -180,9 +181,9 @@ namespace ff
 	double FFVideo::length() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
-		if (_vs && _vs->ic && isOpen() )
+		if (_vs && _vs->ic && isOpen())
 		{
-			if (_vs->ic->duration == AV_NOPTS_VALUE || _vs->ic->duration < 0 )
+			if (_vs->ic->duration == AV_NOPTS_VALUE || _vs->ic->duration < 0)
 				return 0;
 			return (double)_vs->ic->duration / 1000000LL;
 		}
@@ -219,11 +220,11 @@ namespace ff
 		if (!isOpen()) return false;
 
 		VideoState* _vs = (VideoState*)_ctx;
-		
+
 		if (_vs && _vs->stream_resetting)return true;
 
 		if (_vs == NULL) return false;
-		return _vs->seek_req?true:false;
+		return _vs->seek_req ? true : false;
 	}
 
 	bool FFVideo::isPlaying() const
@@ -235,6 +236,15 @@ namespace ff
 	bool FFVideo::isOpen() const
 	{
 		VideoState* _vs = (VideoState*)_ctx;
+
+		//直播时如果发生网络异常结束(eof=1),表示推流已经结束
+		if (_vs && _vs->ic && _vs->eof && _vs->realtime){
+			//明确已经出错
+			_vs->errcode == -20;
+			_vs->errmsg = "Live stream has stopped";
+			return false;
+		}
+
 		if (_vs && !_vs->stream_resetting)
 			return  (_vs && (_vs->audio_st || _vs->video_st));
 		else if (_vs && _vs->stream_resetting)
@@ -281,14 +291,14 @@ namespace ff
 		if (_vs && !_vs->stream_resetting)
 		{
 			/*
-			 * 在直播时当缓冲区大于阀值，导致延时明显时。清空缓冲区(可能导致同步问题?)
-			 */
+			* 在直播时当缓冲区大于阀值，导致延时明显时。清空缓冲区(可能导致同步问题?)
+			*/
 			double r = 1.0 / 30.0;
 			if (!is_stream_pause((VideoState*)_ctx))
 			{
 				video_refresh(_vs, &r);
 			}
-			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0 )
+			if (_vs->pyuv420p.w > 0 && _vs->pyuv420p.h > 0)
 			{
 				if (_first && !_vs->realtime)
 				{
@@ -310,15 +320,15 @@ namespace ff
 		return false;
 	}
 
-    void *FFVideo::allocRgbBufferFormYuv420p(void *pyuv)
-    {
+	void *FFVideo::allocRgbBufferFormYuv420p(void *pyuv)
+	{
 		return yuv420pToRgb((yuv420p *)pyuv);
-    }
-    
-    void FFVideo::freeRgbBuffer(void * prgb)
-    {
-        freeRgb(prgb);
-    }
+	}
+
+	void FFVideo::freeRgbBuffer(void * prgb)
+	{
+		freeRgb(prgb);
+	}
 
 	void FFVideo::pause()
 	{
@@ -368,12 +378,12 @@ namespace ff
 	static double calc_avg_pocket_rate(AVStream *st)
 	{
 		if (st){
-			if (st->avg_frame_rate.den>0 && st->avg_frame_rate.num>0) 
+			if (st->avg_frame_rate.den>0 && st->avg_frame_rate.num>0)
 				return (double)st->avg_frame_rate.num / (double)st->avg_frame_rate.den;
 
 			if (st->time_base.den > 0){
 				double tt = st->duration* (double)st->time_base.num / (double)st->time_base.den;
-				if ( tt > 0 )
+				if (tt > 0)
 					return (double)st->nb_frames / tt;
 			}
 		}
@@ -407,7 +417,7 @@ namespace ff
 		VideoState* is = (VideoState*)_ctx;
 		if (is)
 		{
-			return FFMAX(calc_stream_preload_time(&is->videoq,is->video_st),calc_stream_preload_time(&is->audioq,is->audio_st));
+			return FFMAX(calc_stream_preload_time(&is->videoq, is->video_st), calc_stream_preload_time(&is->audioq, is->audio_st));
 		}
 		return -1;
 	}
@@ -415,7 +425,7 @@ namespace ff
 	bool FFVideo::set_preload_time(double t)
 	{
 		VideoState* is = (VideoState*)_ctx;
-		if (is && t>=0 )
+		if (is && t >= 0)
 		{
 			if (!is->video_st)return false;
 			double apr = calc_avg_pocket_rate(is->video_st);
