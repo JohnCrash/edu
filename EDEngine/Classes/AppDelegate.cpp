@@ -592,8 +592,11 @@ void AppDelegate_v3::initLuaEngine()
     ScriptEngineManager::getInstance()->setScriptEngine(pEngine);
 	LuaStack* stack = pEngine->getLuaStack();
     //pEngine->executeScriptFile("bootstrap.lua");
+	CCLOG("execute script resume.lua");
 	pEngine->executeScriptFile("resume.lua");
+	CCLOG("execute script crash.lua");
 	pEngine->executeScriptFile("crash.lua");
+	CCLOG("execute script launcher.lua");
 	pEngine->executeScriptFile("launcher.lua");
 }
 
