@@ -4,7 +4,8 @@ require "Opengl"
 require "OpenglConstants"
 require "StudioConstants"
 require "GuiConstants"
-require "AudioEngine" 
+require "AudioEngine"
+
 local kits = require "kits"
 
 local Director = cc.Director:getInstance()
@@ -89,7 +90,7 @@ local function log_caller()
 	end
 end
 
-local function playSound( file,ismusic )
+local function playSound2( file,ismusic )
 	if ismute then return end
 	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
 		local suffix = string.sub(file,-4)
@@ -104,6 +105,47 @@ local function playSound( file,ismusic )
 				return AudioEngine.playMusic( file ,true)
 			else
 				return AudioEngine.playEffect( file )
+			end
+		end
+	else
+		kits.log('ERROR playSound file not exist '..tostring(file))
+	end
+end
+
+local function playSound( file,ismusic )
+	if ismute then return end
+	if kits.exist_file(file) or kits.exist_cache(file) or FileUtils:isFileExist(file) then
+		local suffix = string.sub(file,-4)
+		if string.lower(suffix) == '.amr' then
+			if kits.exist_cache(file) then
+				return cc_playVoice(kits.get_cache_path()..file)
+			else
+				return cc_playVoice(file)
+			end
+		else
+			if not FileUtils:isAbsolutePath(file) then
+				file = FileUtils:fullPathForFilename(file)
+			end
+			local player = require "ffplayer"
+			if player.version() >= 3 then
+				local function cb(stats,as,param)
+					if stats == player.STATE_OPEN then
+						as:play()
+					elseif as and stats == player.STATE_END then
+						as:close()
+					end
+				end
+				if ismusic then
+					player.playSound("music",file,cb)
+				else
+					player.playSound("ui",file,cb)
+				end
+			else
+				if ismusic then
+					return AudioEngine.playMusic( file ,true)
+				else
+					return AudioEngine.playEffect( file )
+				end			
 			end
 		end
 	else
@@ -128,15 +170,20 @@ local function voiceLength( file )
 end
 
 local function pauseBGSound( )
-	AudioEngine.pauseMusic()
+	local player = require "ffplayer"
+	if player.version() >= 3 then
+		player.stopSoundGroup("music")
+	else
+		AudioEngine.pauseMusic()
+	end
 end
 
 local function resumeBGSound( )
-	AudioEngine.resumeMusic()
+	--AudioEngine.resumeMusic()
 end
 
 local function pauseSound( id )
-	AudioEngine.pauseEffect( id )
+	--AudioEngine.pauseEffect( id )
 end
 
 local function isSoundPlaying( id )
@@ -144,16 +191,31 @@ local function isSoundPlaying( id )
 end
 
 local function stopMusic()
-	AudioEngine.stopMusic()
+	local player = require "ffplayer"
+	if player.version() >= 3 then
+		player.stopSoundGroup("music")
+	else
+		AudioEngine.stopMusic()
+	end
 end
 
 local function stopAllEffects()
-	AudioEngine.stopAllEffects()
+	local player = require "ffplayer"
+	if player.version() >= 3 then
+		player.stopSoundGroup("ui")
+	else
+		AudioEngine.stopAllEffects()
+	end
 end
 
 local function stopAllSound()
-	AudioEngine.stopAllEffects()
-	AudioEngine.stopMusic()
+	local player = require "ffplayer"
+	if player.version() >= 3 then
+		player.stopAllGroup()
+	else
+		AudioEngine.stopAllEffects()
+		AudioEngine.stopMusic()	
+	end
 	cc_stopVoice()
 end
 

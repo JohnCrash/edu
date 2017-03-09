@@ -20,7 +20,15 @@ local ui = {
 }
 
 ----------------------------------
-
+--ffi demo
+--[[
+--local ffi = require("ffi")
+--ffi.cdef[[
+--int MessageBoxA(void *w, const char *txt, const char *cap, int type);
+--]]
+--ffi.C.MessageBoxA(nil, "Hello world!", "Test", 0)
+--]]
+--require "debugger"('192.168.2.83')
 -----------------------------------
 
 local ljshell = require "ljshell"

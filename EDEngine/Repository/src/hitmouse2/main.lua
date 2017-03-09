@@ -164,7 +164,7 @@ function main:init(b)
 				state.set_sliver(o+as)
 				local name = 'hitmouse2/snd/gold.mp3'
 				local local_dir = kits.get_local_directory()..'res/'
-				AudioEngine.playEffect(local_dir..name)
+				uikits.playSound(local_dir..name)
 				uikits.delay_call(self._root,function(dt)
 					uikits.child(self._root,ui.SLIVER):setString(math.floor(o+as*count/10))
 					if count <= 10 then

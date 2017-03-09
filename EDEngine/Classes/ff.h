@@ -1,5 +1,7 @@
 #ifndef __FFMPEG_H__
 #define __FFMPEG_H__
+#include <functional>
+#include <string>
 
 namespace ff
 {
@@ -21,6 +23,7 @@ namespace ff
 		FFVideo();
 		virtual ~FFVideo();
 		bool open(const char *url);
+		std::string currentOpen() const;
 		void seek(double t); //跳的指定位置进行播放，单位秒
 		double cur() const; //视频当前播放位置,单位秒
 		double cur_clock() const; //视频内部时钟
@@ -93,6 +96,7 @@ namespace ff
 		bool _first;
 		int _nb_max_threshold;
 		int _nb_min_threshold;
+		std::string _cur;
 	};
 	
 	/*
@@ -112,6 +116,6 @@ namespace ff
 	 * 回调函数用来通知转码进度，tc表示状态，p是进度值0-1
 	 * 回调返回0继续转码，非0将终止转码
 	 */
-	int ffmpeg(const char *cmd,int (*)(TranCode tc,float p));
+	int ffmpeg(const char *cmd,std::function<int(TranCode, float)> tpc);
 }
 #endif

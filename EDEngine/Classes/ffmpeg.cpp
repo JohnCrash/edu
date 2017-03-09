@@ -617,6 +617,7 @@ static void ffmpeg_cleanup(int ret)
     ffmpeg_exited = 1;
 }
 
+    
 void remove_avoptions(AVDictionary **a, AVDictionary *b)
 {
     AVDictionaryEntry *t = NULL;
@@ -4340,11 +4341,16 @@ static int transcode(void)
 			double len = FFABS(input_files[0]->ctx->duration) / AV_TIME_BASE;
 			OutputStream *ost;
 			int64_t pts = INT64_MIN + 1;
+			int vid = 0;
+			AVCodecContext *enc;
 			for (int i = 0; i < nb_output_streams; i++) {
 				ost = output_streams[i];
-				if (av_stream_get_end_pts(ost->st) != AV_NOPTS_VALUE)
-					pts = FFMAX(pts, av_rescale_q(av_stream_get_end_pts(ost->st),
-					ost->st->time_base, AV_TIME_BASE_Q2));
+				enc = ost->enc_ctx;
+				if (!vid && enc->codec_type == AVMEDIA_TYPE_VIDEO) {
+					if (av_stream_get_end_pts(ost->st) != AV_NOPTS_VALUE)
+						pts = FFMAX(pts, av_rescale_q(av_stream_get_end_pts(ost->st),
+						ost->st->time_base, AV_TIME_BASE_Q2));
+				}
 			}
 			double cur = FFABS(pts) / AV_TIME_BASE;
 			c = (float)cur/len;
@@ -4482,7 +4488,7 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
 {
 }
 
-static void init_static()
+static void init_golbal_var(void)
 {
 	vstats_file = 0;
 	run_as_daemon = 0;
@@ -4514,7 +4520,31 @@ int ffmpeg_main(int argc, char **argv)
 	int ret;
 	int64_t ti;
 
-	init_static();
+    vstats_file = 0;
+    run_as_daemon = 0;
+    nb_frames_dup = 0;
+    nb_frames_drop = 0;
+    
+    current_time = 0;
+    progress_avio = NULL;
+    
+    subtitle_out = 0;
+    
+    input_streams = NULL;
+    nb_input_streams = 0;
+    input_files = NULL;
+    nb_input_files = 0;
+    
+    output_streams = NULL;
+    nb_output_streams = 0;
+    output_files = NULL;
+    nb_output_files = 0;
+    
+    
+    filtergraphs = NULL;
+    nb_filtergraphs = 0;
+    
+ //   init_golbal_var();
 	register_exit(ffmpeg_cleanup);
 
 	setvbuf(stderr, NULL, _IONBF, 0); /* win32 runtime needs this */

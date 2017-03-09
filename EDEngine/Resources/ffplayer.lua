@@ -161,7 +161,29 @@ directorEventDispatcher:addEventListenerWithFixedPriority(onPause,1)
 directorEventDispatcher:addEventListenerWithFixedPriority(onResume,1)
 
 local function version()
-	return 2
+	return 3
+end
+
+local function pauseSoundGroup( group )
+	if _soundGroup[group] then
+		for k,v in pairs(_soundGroup[group]) do
+			if v and v.isOpen then
+				v:pause()
+			end
+		end
+		_soundGroup[group] = {}
+	end
+end
+
+local function resumeSoundGroup( group )
+	if _soundGroup[group] then
+		for k,v in pairs(_soundGroup[group]) do
+			if v and v.isOpen then
+				v:play()
+			end
+		end
+		_soundGroup[group] = {}
+	end
 end
 
 return {
@@ -175,6 +197,8 @@ return {
 	STATE_OPEN_VIDEO = 6,
 	playStream = playStream,
 	playSound = playSound,
+	pauseSoundGroup = pauseSoundGroup,
+	resumeSoundGroup = resumeSoundGroup,
 	stopSoundGroup = stopSoundGroup,
 	stopAllGroup = stopAllGroup,
 	getSoundGroup = getSoundGroup,

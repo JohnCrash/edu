@@ -1,13 +1,15 @@
 #include "ff.h"
 #include "ffmpeg_cxx.h"
+#include <functional>
 #include <thread>
 #include "cocos2d.h"
+
 namespace ff
 {
 	static std::thread * _thread = NULL;
 	static std::thread * _thread2 = NULL;
 	static char * _cmd = NULL;
-	static int (*_tpc)(TranCode tc, float p) = NULL;
+	static std::function<int(TranCode, float)> _tpc;
 
 	static int stpc(int tc, float p)
 	{
@@ -25,7 +27,6 @@ namespace ff
 		_thread = NULL;
 		free(_cmd);
 		_cmd = NULL;
-		_tpc = NULL;
 	}
 
 	void ffmpeg_cmd_proc()
@@ -69,7 +70,7 @@ namespace ff
 		}
 	 * ffmpeg("ffmpeg -i 1.mpg -b 1048k o2.mpg", sptc);
 	 */
-	int ffmpeg(const char *cmd, int (* tpc)(TranCode tc, float p))
+	int ffmpeg(const char *cmd, std::function<int (TranCode, float)> tpc)
 	{
 		if (!cmd)return -1;
 		if (_thread)return -2;
@@ -82,6 +83,11 @@ namespace ff
 		_tpc = tpc;
 		_cmd = strdup(cmd);
 		_thread = new std::thread(ffmpeg_cmd_proc);
+
+		if (_thread && _thread->joinable()){
+			_thread->join();
+			return 0;
+		}
 		return _thread ? 0 : -3;
 	}
 }

@@ -104,8 +104,9 @@ music=
 
 	playEffect=function(name,isLoop)
 --		if not music.on then return end
+		uikits = require "uikits"
 		isLoop=isLoop or false
 		local fileName="qwxt/audio/"..name..".mp3"
-		AudioEngine.playEffect(fileName,isLoop)
+		uikits.playSound(fileName,isLoop)
 	end,
 }

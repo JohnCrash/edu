@@ -17,6 +17,9 @@ namespace ff{
 AVInputFormat *file_iformat;
 const char *input_filename;
 */
+#if CONFIG_VIDEOTOOLBOX
+static int disableVideoToolBox = 0;
+#endif
 const char *window_title;
 int fs_screen_width;
 int fs_screen_height;
@@ -67,6 +70,8 @@ static void stream_reset(VideoState * is);
 //SwsContext *sws_opts;
 //AVDictionary *swr_opts, *sws_dict;
 //AVDictionary *format_opts, *codec_opts, *resample_opts;
+
+//#define DEBUG(format,...) CCLog(format,##__VA_ARGS__);
 
 int CCLog(const char *pszFmt, ...)
 {
@@ -643,6 +648,7 @@ static double get_clock(Clock *c)
 	else {
 		double time = av_gettime_relative() / 1000000.0;
 		double clock_value = c->pts_drift + time - (time - c->last_updated) * (1.0 - c->speed);
+		//DEBUG("get_clock pts_drift:%f time:%f last_updated:%f\n", c->pts_drift, time, c->last_updated);
 		return clock_value;
 	}
 }
@@ -1091,6 +1097,7 @@ static int audio_decode_frame(VideoState *is)
 	do {
 #if defined(_WIN32)
 		while (frame_queue_nb_remaining(&is->sampq) == 0) {
+			if (is->audio_tgt.bytes_per_sec == 0)return -1;
 			if ((av_gettime_relative() - audio_callback_time) > 1000000LL * is->audio_hw_buf_size / is->audio_tgt.bytes_per_sec / 2)
 				return -1;
 			av_usleep(1000);
@@ -1224,9 +1231,10 @@ static void sdl_audio_callback_imp(void *opaque, Uint8 *stream, int len)
 				is->audio_buf = is->silence_buf;
 				if (is->audio_tgt.frame_size != 0)
 					is->audio_buf_size = sizeof(is->silence_buf) / is->audio_tgt.frame_size * is->audio_tgt.frame_size;
-				else
-					//FIXME: is->audio_tgt.frame_size = 0?
+				else{
 					is->audio_buf_size = 0;
+					break;
+				}
 			}
 			else {
 				if (is->show_mode != SHOW_MODE_VIDEO)
@@ -1282,7 +1290,7 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 		memset(stream, 0, len);
 	}
 	sdl_audio_callback_imp(opaque, stream, len);
-	DEBUG("%f  %f", is->playDelay, is->transportDelay);
+	//DEBUG("%f  %f", is->playDelay, is->transportDelay);
 }
 
 typedef void(*AudioCallBack)(void *opaque, Uint8 *stream, int len);
@@ -1430,8 +1438,8 @@ static void CloseAudioChanelByVideoState(VideoState *pvs)
 		return;
 
 	//all audio chanel is close.
-	gInitAudio = false;
-	CloseAudio();
+	//gInitAudio = false;
+	//CloseAudio();
 }
 
 static int audio_open(void *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
@@ -1884,7 +1892,7 @@ static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub, Vid
 			if (got_frame) {
 #if CONFIG_VIDEOTOOLBOX
                 is = (VideoState *)d->avctx->opaque;
-                if(is && is->hwaccel_retrieve_data){
+                if(is && !disableVideoToolBox && is->hwaccel_retrieve_data){
                     is->hwaccel_retrieve_data(d->avctx,frame);
                 }
 #endif
@@ -1929,6 +1937,9 @@ static int decoder_decode_frame(Decoder *d, AVFrame *frame, AVSubtitle *sub, Vid
 
 		if (ret < 0) {
 			d->packet_pending = 0;
+            if(d->avctx->codec_type==AVMEDIA_TYPE_VIDEO){
+                My_log(NULL, AV_LOG_TRACE, "avcodec_decode_video2 return error : %d\n",ret);
+            }
 		}
 		else {
 			d->pkt_temp.dts =
@@ -2579,6 +2590,10 @@ static enum AVPixelFormat get_format(struct AVCodecContext *s, const enum AVPixe
         ret = hwaccel->init(s);
         if (ret < 0) {
             if (ist->hwaccel_id == hwaccel->id) {
+                if(!disableVideoToolBox){
+                    disableVideoToolBox = 1;
+                    stream_reset(ist);
+                }
                 av_log(NULL, AV_LOG_FATAL,
                        "%s hwaccel requested for input stream #?:?, "
                        "but cannot be initialized.\n", hwaccel->name);
@@ -2653,7 +2668,7 @@ static int stream_component_open(VideoState *is, int stream_index)
 		av_dict_set(&opts, "refcounted_frames", "1", 0);
     
 #if CONFIG_VIDEOTOOLBOX
-    if(avctx->codec_type==AVMEDIA_TYPE_VIDEO){
+    if(!disableVideoToolBox && avctx->codec_type==AVMEDIA_TYPE_VIDEO){
         avctx->opaque = is;
         avctx->get_buffer2 = get_buffer;
         avctx->get_format = get_format;
@@ -2661,7 +2676,7 @@ static int stream_component_open(VideoState *is, int stream_index)
     }
 #endif
 	if ((ret = avcodec_open2(avctx, codec, &opts)) < 0) {
-		goto fail;
+        goto fail;
 	}
     
 	if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
@@ -2792,6 +2807,7 @@ static int read_thread(void *arg)
 	is->last_subtitle_stream = is->subtitle_stream = -1;
 	is->eof = 0;
 
+	stream_start_time = AV_NOPTS_VALUE;
 	ic = avformat_alloc_context();
 
 	if (!ic) {
@@ -2990,9 +3006,16 @@ static int read_thread(void *arg)
 			//      of the seek_pos/seek_rel variables
 			DEBUG("SEEK TO %llu  %llu %llu", seek_target, seek_min, seek_max)
 			ret = avformat_seek_file(is->ic, -1, seek_min, seek_target, seek_max, is->seek_flags);
+			if (ret < 0){ //&& is->audio_stream >= 0 && stream_start_time != AV_NOPTS_VALUE){
+				if (is->audio_st && is->audio_stream >= 0)
+					ret = av_seek_frame(ic, is->audio_stream, is->audio_st->start_time, 0);
+				if (is->video_st && is->video_stream >= 0)
+					ret = av_seek_frame(ic, is->video_stream, is->video_st->start_time, 0);
+			}
 			if (ret < 0) {
+				/* add the stream start time */				
 				My_log(NULL, AV_LOG_ERROR,
-					"%s: error while seeking\n", is->ic->filename);
+						"%s: error while seeking\n", is->ic->filename);
 			}
 			else {
 				if (is->audio_stream >= 0) {
@@ -3085,6 +3108,7 @@ static int read_thread(void *arg)
 			is->audioq.eof = 0;
 		}
 
+		DEBUG("%s:%llu",pkt->stream_index==is->video_stream?"VIDEO":"AUDIO",pkt->pts);
 		/* check if packet is in play range specified by user, then queue, otherwise discard */
 		stream_start_time = ic->streams[pkt->stream_index]->start_time;
 		pkt_ts = pkt->pts == AV_NOPTS_VALUE ? pkt->dts : pkt->pts;

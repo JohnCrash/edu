@@ -148,7 +148,7 @@ function battle:play_sound( idx )
 	end
 	kits.log( "Play sound: "..name )
 	--print("kits.get_local_directory() = "..kits.get_local_directory())
-	AudioEngine.playEffect(local_dir..name)
+	uikits.playSound(local_dir..name)
 end
 
 function battle:initGame( arg )

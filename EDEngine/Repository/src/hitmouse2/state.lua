@@ -453,7 +453,7 @@ end
 local function playSound( name )
 	local file = 'hitmouse2/snd/'..name
 	kits.log( "Play sound: "..file )
-	AudioEngine.playEffect(local_dir..file)
+	uikits.playSound(local_dir..file)
 end
 
 local function uploads( files,func )
